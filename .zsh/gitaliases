@@ -1,0 +1,125 @@
+# vim: set filetype=zsh : ""
+function loadGitAliases(){
+GITK=$(which gitk)
+gitk(){ $GITK "$@" & }
+gitkg(){
+  gitk `gb -a | sed 's/*//' | grep "$1"`
+}
+_git # for completion
+compdef _git-checkout k=gitk
+
+alias gka="gitk --all &"
+alias gitkl="gitk \$(git branch | sed 's/*//' | sed 's@\<@heads/@' )"
+
+alias gg="git gui &"
+alias gx="gitx"
+alias gi="git init"
+alias gs="git status"
+alias gd="git diff"
+compdef _git-diff k=gd
+alias gdc="git diff --cached"
+
+alias gc="git commit"
+compdef _git-commit k=gd
+# ammend commit keep last message and author
+alias gcA='git commit --amend -C `git rev-parse --verify HEAD`'
+
+alias gca='git commit --amend'
+alias gco="git checkout"
+compdef _git-checkout k=gco
+alias ga="git add"
+compdef _git-add k=ga
+alias gap="git add --patch"
+compdef _git-add k=ga
+alias gb="git branch"
+compdef _git-branch k=gb
+
+
+function glh(){ git rev-parse --verify ${1:-HEAD}; }
+alias gCc='cat .git/config'
+alias gCv='vim .git/config'
+alias gtm="git-test-merge"
+alias gl="git log"
+compdef _git-log k=gl
+alias Gr="git remote"
+compdef _git-remote k=gr
+alias gpsh="git push"
+compdef _git-push k=gpsh
+alias gp="git pull"
+compdef _git-pull k=gp
+alias gshw="git show"
+compdef _git-show k=gshw
+alias gf="git fetch"
+compdef _git-fetch k=gf
+alias gt="git reset"
+compdef _git-reset k=gt
+alias gsh="git stash"
+compdef _git-stash k=gsh
+alias gshDropLast="git stash drop 'stash@{0}'"
+alias glol="git log --pretty=oneline"
+alias grc="git rebase --continue"
+alias gra="git rebase --abort"
+alias gri="git rebase -i"
+alias gcp="git cherry-pick"
+compdef _git-cherry_pick k=gcp
+alias gshDropLast="git stash drop 'stash@{0}'"
+alias gm="git merge"
+compdef _git-merge k=gm
+alias gmt="git mergetool"
+alias lostfoundgitk='gitk $(cd .git/lost-found/commit && echo ??*)'
+
+# git svn
+alias gsfr="git svn fetch && git-svn rebase"
+gitSvnDcommit(){
+  echo 'updating (git svn rebase)'  && \
+    git svn rebase && \
+    echo '(git stash)'  && \
+    git stash && \
+    echo comitting ..  && \
+    git svn dcommit && \
+    echo '(gsh apply)' && \
+    git stash apply
+}
+
+# stg helpers
+alias str="stg refresh"
+alias sts="stg series"
+alias sth="stg push"
+alias stp="stg pop"
+
+alias stc="stg commit"
+alias stuc="stg uncommit"
+
+alias gitFormatPatch="git format-patch --thread -n"
+alias gitSendPatches="git send-email --compose --from 'marco-oweber@gmx.de' --smtp-server=mail.gmx.net --smtp-user=9006132"
+r=remotes
+or=origin
+
+# tg helpers
+alias tgDot="tg summary --graphviz | dot -Txlib"
+
+stashesToFiles(){
+  local d=${1:-.stashes}
+  [ -d .stashes ] && { echo "remove $d first, pelase"; return 1; }
+  git stash list | while read l; do
+  mkdir -p "$d"
+  IFS=' :' read -a stash <<< "$l"
+  git stash show -U3 ${stash[0]} > "$d/${stash[0]}"
+  done
+}
+
+stashesToVim(){
+    { git stash list | while read l; do
+      IFS=' :' read -a stash <<< "$l"
+      echo "stash : ${stash[0]}  ======================================================="
+      git stash show -U3 ${stash[0]}
+    done
+  } | vim -
+}
+gitClean(){
+  for n in BASE LOCAL REMOTE BACKUP; do
+    find -name "*.$n.*" | xargs -r rm
+  done
+}
+}
+alias lG=loadGitAliases

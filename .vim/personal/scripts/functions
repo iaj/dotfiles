@@ -1,0 +1,221 @@
+"" vim: set filetype=vim : ""
+" Use \sq to squeeze blank lines with :Squeeze, defined below
+" Squeeze blank lines with :Squeeze
+command! -nargs=0 Squeeze g/^\s*$/,/\S/-j
+nnoremap <leader>sq :Squeeze<CR>
+
+function! s:BoxIn()
+    let mode = visualmode()
+    if mode == ""
+	return
+    endif
+    let vesave = &ve
+    let &ve = "all"
+    exe "norm! ix\<BS>\<ESC>"
+    if line("'<") > line("'>")
+	undoj | exe "norm! gvo\<ESC>"
+    endif
+    if mode != "\<C-v>"
+	let len = max(map(range(line("'<"), line("'>")), "virtcol([v:val, '$'])"))
+	undoj | exe "norm! gv\<C-v>o0o0" . (len-2?string(len-2):'') . "l\<esc>"
+    endif
+    let diff = virtcol("'>") - virtcol("'<")
+    if diff < 0
+	let diff = -diff
+    endif
+    let horizm = "+" . repeat('-', diff+1) . "+"
+    if mode == "\<C-v>"
+	undoj | exe "norm! `<O".horizm."\<ESC>"
+    else
+	undoj | exe line("'<")."put! ='".horizm."'" | norm! `<k
+    endif
+    undoj | exe "norm! yygvA|\<ESC>gvI|\<ESC>`>p"
+    let &ve = vesave
+endfunction
+" In visual mode, \box draws a box around the highlighted text.
+vnoremap \box <ESC>:call<SID>BoxIn()<CR>gvlolo
+
+" Replace tabs with spaces in a string, preserving alignment.
+function! Retab(string)
+    let rv = ''
+    let i = 0
+    for char in split(a:string, '\zs')
+	if char == "\t"
+	    let rv .= repeat(' ', &ts - i)
+	    let i = 0
+	else
+	    let rv .= char
+	    let i = (i + 1) % &ts
+	endif
+    endfor
+    return rv
+endfunction
+
+function! CleanScript()
+    :%s///g
+    :%s///g
+    :%s/\//g
+    :%s/^H//g
+endfunction
+
+function! s:VSetSearch()
+    let temp = @@
+    norm! gvy
+    let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
+    " Use this line instead of the above to match matches spanning across lines
+    "let @/ = '\V' . substitute(escape(@@, '\'), '\_s\+', '\\_s\\+', 'g')
+    call histadd('/', substitute(@/, '[?/]', '\="\\%d".char2nr(submatch(0))', 'g'))
+    let @@ = temp
+endfunction
+
+function! EatChar(pat)
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
+endfunc
+
+""" Cute functions
+
+function! s:VSetSearch()
+    let temp = @@
+    norm! gvy
+    let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
+    " Use this line instead of the above to match matches spanning across lines
+    "let @/ = '\V' . substitute(escape(@@, '\'), '\_s\+', '\\_s\\+', 'g')
+    call histadd('/', substitute(@/, '[?/]', '\="\\%d".char2nr(submatch(0))', 'g'))
+    let @@ = temp
+endfunction
+vnoremap * :<C-u>call <SID>VSetSearch()<CR>/<CR>
+vnoremap # :<C-u>call <SID>VSetSearch()<CR>?<CR>
+
+function! s:ToggleTooLongHL()
+    if exists('*matchadd')
+	if ! exists("w:TooLongMatchNr")
+	    let last = (&tw <= 0 ? 80 : &tw)
+	    let w:TooLongMatchNr = matchadd('ErrorMsg', '.\%>' . (last+1) . 'v', 0)
+	    echo "   Long Line Highlight"
+	else
+	    call matchdelete(w:TooLongMatchNr)
+	    unlet w:TooLongMatchNr
+	    echo "No Long Line Highlight"
+	endif
+    endif
+endfunction
+
+function! Version()
+    let i=1
+    while has("patch" . i)
+	let i+=1
+    endwhile
+    return v:version / 100 . "." . v:version % 100 . "." . (i-1)
+endfunction
+command! Version :echo Version()
+
+" Execute current line 
+function! ExecuteLine() 
+    let save_reg = @@
+    normal ^y$
+    exe @@
+    let @@ = save_reg
+endfunction 
+nnoremap <silent> <leader>i :call ExecuteLine()<CR>
+
+command! -nargs=? -complete=custom,g:FType T set ft=<args>
+fun! g:FType(A,L,P)
+    let tl = split(globpath(&rtp, 'syntax/*.vim'), "\n")
+    return join(map(tl, 'fnamemodify(v:val,'':t:r'')'), "\n")
+endfun
+
+" Right align the portion of the current line to the right of the cursor.
+" If an optional argument is given, it is used as the width to align to,
+" otherwise textwidth is used if set, otherwise 80 is used.
+function! AlignRight(...)
+    if getline('.') =~ '^\s*$'
+	call setline('.', '')
+    else
+	let line = Retab(getline('.'))
+	let prefix = matchstr(line, '.*\%' . virtcol('.') . 'v')
+	let suffix = matchstr(line, '\%' . virtcol('.') . 'v.*')
+	let prefix = substitute(prefix, '\s*$', '', '')
+	let suffix = substitute(suffix, '^\s*', '', '')
+	let len  = len(substitute(prefix, '.', 'x', 'g'))
+	let len += len(substitute(suffix, '.', 'x', 'g'))
+	let width  = (a:0 == 1 ? a:1 : (&tw <= 0 ? 80 : &tw))
+	let spaces = width - len
+	call setline('.', prefix . repeat(' ', spaces) . suffix)
+    endif
+endfunction
+com! -nargs=? AlignRight :call AlignRight(<f-args>)
+
+"}}}
+function! HandleTS() " {{{
+    let l:ticket = matchstr(getline("."), 'TS#[0-9]\+')
+    let l:number = matchstr(l:ticket, '[0-9]\+')
+    if l:ticket != "<Esc>:"
+	let l:tsuri = 'http://trackstudio.nimblefish.com/task/' . l:number . '?thisframe=true'
+	exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:tsuri
+	echo "Opened Ticket: " . l:number
+    else
+	echo "No TS ticket found in line."
+    endif
+endfunction
+
+" }}}
+function! HandleURI() " {{{
+    let l:uri = matchstr(getline("."), '[a-z]*:\/\/[^ >,;]*')
+    if l:uri != ""
+	if has("win32")
+	    exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:uri
+	else
+	    exec "silent !open \"" . l:uri . "\""
+	endif
+	echo "Opened URI: " . l:uri
+    else
+	echo "No URI found in line."
+    endif
+endfunction
+" Open URIs:
+"nmap <silent> <Leader>/ :call HandleURI()<CR>
+nmap <silent> <F1> :call HandleURI()<CR>
+"nmap <silent> <Leader>t :call HandleTS()<CR>
+
+" }}}
+function! ScratchBuffer(title) " {{{
+    exec "tabe " . a:title . " | setlocal buftype=nofile | setlocal bufhidden=hide | setlocal noswapfile"
+endfunction
+" Toggle textwidth
+"nmap <Leader>/ :call TextwidthToggle()<CR>
+"PromptFT(): Prompt for a new filetype to set
+function! PromptFT(show)
+    let def = ""
+    if a:show == 1
+	let def = &ft
+    endif
+    let ft = input("Filetype: ", def)
+    if ft != ""
+	exec "setlocal ft=".ft
+	Rainbow
+    end
+endfunction
+
+" CSV Functions
+" Function for dividing the whole CSV in a more readable table
+function! ColumniseCSV()
+    let width=20
+    let fill=' ' | while strlen(fill) < width | let fill=fill.fill | endwhile
+    " replace each COLUMN \= means 0 or 1 times....
+    %s/\([^;]*\);\=/\=strpart(submatch(1).fill, 0, width)/ge
+    " remove empty lines
+    %s/\s\+$//ge
+endfunction
+command! -nargs=0 ColumniseCSV :call ColumniseCSV()<CR>
+
+" Function for highlighting a certain column in a csv file (seperated by ;)
+function! CSVH(colno)
+    execute 'match Keyword /^\([^;]*;\)\{' . a:colno . '}\zs[^;]*/'
+    " move cursor to the a:colno. position which is to be observed
+    execute 'normal ^' . a:colno . 'f;'
+endfunction
+command! -nargs=1 CSVH :call CSVH(<f-args>)<CR>
+
+" how many occurrences of the current search pattern?           {{{2
+command! CountMatches %s///n

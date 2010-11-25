@@ -1,0 +1,9 @@
+"setlocal makeprg=tidy\ -quiet\ -errors\ %
+"setlocal makeprg=tidy\ -m\  %
+"setlocal errorformat=line\ %l\ column\ %v\ -\ %m
+"setlocal equalprg=tidy\ -quiet\ -m\ -utf8\ %
+"setlocal makeprg=tidy\ -quiet\ -m\ -utf8\ %
+"setlocal makeprg=tidy\ -utf8\ -indent\ -q\ -f\ /tmp/err
+"setlocal equalprg=tidy\ -utf8\ -indent\ --show-body-only yes\ -q\ -f\ /tmp/err
+setlocal makeprg=tidy\ -quiet\ -errors\ %
+setlocal errorformat=line\ %l\ column\ %v\ -\ %m
