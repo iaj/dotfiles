@@ -7,27 +7,27 @@ nnoremap <leader>sq :Squeeze<CR>
 function! s:BoxIn()
     let mode = visualmode()
     if mode == ""
-	return
+        return
     endif
     let vesave = &ve
     let &ve = "all"
     exe "norm! ix\<BS>\<ESC>"
     if line("'<") > line("'>")
-	undoj | exe "norm! gvo\<ESC>"
+        undoj | exe "norm! gvo\<ESC>"
     endif
     if mode != "\<C-v>"
-	let len = max(map(range(line("'<"), line("'>")), "virtcol([v:val, '$'])"))
-	undoj | exe "norm! gv\<C-v>o0o0" . (len-2?string(len-2):'') . "l\<esc>"
+        let len = max(map(range(line("'<"), line("'>")), "virtcol([v:val, '$'])"))
+        undoj | exe "norm! gv\<C-v>o0o0" . (len-2?string(len-2):'') . "l\<esc>"
     endif
     let diff = virtcol("'>") - virtcol("'<")
     if diff < 0
-	let diff = -diff
+        let diff = -diff
     endif
     let horizm = "+" . repeat('-', diff+1) . "+"
     if mode == "\<C-v>"
-	undoj | exe "norm! `<O".horizm."\<ESC>"
+        undoj | exe "norm! `<O".horizm."\<ESC>"
     else
-	undoj | exe line("'<")."put! ='".horizm."'" | norm! `<k
+        undoj | exe line("'<")."put! ='".horizm."'" | norm! `<k
     endif
     undoj | exe "norm! yygvA|\<ESC>gvI|\<ESC>`>p"
     let &ve = vesave
@@ -35,18 +35,35 @@ endfunction
 " In visual mode, \box draws a box around the highlighted text.
 vnoremap \box <ESC>:call<SID>BoxIn()<CR>gvlolo
 
+function! MyFoldText()
+    let line = getline(v:foldstart)
+
+    let nucolwidth = &fdc + &number * &numberwidth
+    let windowwidth = winwidth(0) - nucolwidth - 3
+    let foldedlinecount = v:foldend - v:foldstart
+
+    " expand tabs into spaces
+    let onetab = strpart('          ', 0, &tabstop)
+    let line = substitute(line, '\t', onetab, 'g')
+
+    let line = strpart(line, 0, windowwidth - 2 -len(foldedlinecount))
+    let fillcharcount = windowwidth - len(line) - len(foldedlinecount) - 4
+    return line . '…' . repeat(" ",fillcharcount) . foldedlinecount . '…' . ' '
+endfunction
+set foldtext=MyFoldText()
+
 " Replace tabs with spaces in a string, preserving alignment.
 function! Retab(string)
     let rv = ''
     let i = 0
     for char in split(a:string, '\zs')
-	if char == "\t"
-	    let rv .= repeat(' ', &ts - i)
-	    let i = 0
-	else
-	    let rv .= char
-	    let i = (i + 1) % &ts
-	endif
+        if char == "\t"
+            let rv .= repeat(' ', &ts - i)
+            let i = 0
+        else
+            let rv .= char
+            let i = (i + 1) % &ts
+        endif
     endfor
     return rv
 endfunction
@@ -89,22 +106,22 @@ vnoremap # :<C-u>call <SID>VSetSearch()<CR>?<CR>
 
 function! s:ToggleTooLongHL()
     if exists('*matchadd')
-	if ! exists("w:TooLongMatchNr")
-	    let last = (&tw <= 0 ? 80 : &tw)
-	    let w:TooLongMatchNr = matchadd('ErrorMsg', '.\%>' . (last+1) . 'v', 0)
-	    echo "   Long Line Highlight"
-	else
-	    call matchdelete(w:TooLongMatchNr)
-	    unlet w:TooLongMatchNr
-	    echo "No Long Line Highlight"
-	endif
+        if ! exists("w:TooLongMatchNr")
+            let last = (&tw <= 0 ? 80 : &tw)
+            let w:TooLongMatchNr = matchadd('ErrorMsg', '.\%>' . (last+1) . 'v', 0)
+            echo "   Long Line Highlight"
+        else
+            call matchdelete(w:TooLongMatchNr)
+            unlet w:TooLongMatchNr
+            echo "No Long Line Highlight"
+        endif
     endif
 endfunction
 
 function! Version()
     let i=1
     while has("patch" . i)
-	let i+=1
+        let i+=1
     endwhile
     return v:version / 100 . "." . v:version % 100 . "." . (i-1)
 endfunction
@@ -130,18 +147,18 @@ endfun
 " otherwise textwidth is used if set, otherwise 80 is used.
 function! AlignRight(...)
     if getline('.') =~ '^\s*$'
-	call setline('.', '')
+        call setline('.', '')
     else
-	let line = Retab(getline('.'))
-	let prefix = matchstr(line, '.*\%' . virtcol('.') . 'v')
-	let suffix = matchstr(line, '\%' . virtcol('.') . 'v.*')
-	let prefix = substitute(prefix, '\s*$', '', '')
-	let suffix = substitute(suffix, '^\s*', '', '')
-	let len  = len(substitute(prefix, '.', 'x', 'g'))
-	let len += len(substitute(suffix, '.', 'x', 'g'))
-	let width  = (a:0 == 1 ? a:1 : (&tw <= 0 ? 80 : &tw))
-	let spaces = width - len
-	call setline('.', prefix . repeat(' ', spaces) . suffix)
+        let line = Retab(getline('.'))
+        let prefix = matchstr(line, '.*\%' . virtcol('.') . 'v')
+        let suffix = matchstr(line, '\%' . virtcol('.') . 'v.*')
+        let prefix = substitute(prefix, '\s*$', '', '')
+        let suffix = substitute(suffix, '^\s*', '', '')
+        let len  = len(substitute(prefix, '.', 'x', 'g'))
+        let len += len(substitute(suffix, '.', 'x', 'g'))
+        let width  = (a:0 == 1 ? a:1 : (&tw <= 0 ? 80 : &tw))
+        let spaces = width - len
+        call setline('.', prefix . repeat(' ', spaces) . suffix)
     endif
 endfunction
 com! -nargs=? AlignRight :call AlignRight(<f-args>)
@@ -151,11 +168,11 @@ function! HandleTS() " {{{
     let l:ticket = matchstr(getline("."), 'TS#[0-9]\+')
     let l:number = matchstr(l:ticket, '[0-9]\+')
     if l:ticket != "<Esc>:"
-	let l:tsuri = 'http://trackstudio.nimblefish.com/task/' . l:number . '?thisframe=true'
-	exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:tsuri
-	echo "Opened Ticket: " . l:number
+        let l:tsuri = 'http://trackstudio.nimblefish.com/task/' . l:number . '?thisframe=true'
+        exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:tsuri
+        echo "Opened Ticket: " . l:number
     else
-	echo "No TS ticket found in line."
+        echo "No TS ticket found in line."
     endif
 endfunction
 
@@ -163,14 +180,14 @@ endfunction
 function! HandleURI() " {{{
     let l:uri = matchstr(getline("."), '[a-z]*:\/\/[^ >,;]*')
     if l:uri != ""
-	if has("win32")
-	    exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:uri
-	else
-	    exec "silent !open \"" . l:uri . "\""
-	endif
-	echo "Opened URI: " . l:uri
+        if has("win32")
+            exec "silent !start rundll32.exe url.dll,FileProtocolHandler " . l:uri
+        else
+            exec "silent !open \"" . l:uri . "\""
+        endif
+        echo "Opened URI: " . l:uri
     else
-	echo "No URI found in line."
+        echo "No URI found in line."
     endif
 endfunction
 " Open URIs:
@@ -188,12 +205,12 @@ endfunction
 function! PromptFT(show)
     let def = ""
     if a:show == 1
-	let def = &ft
+        let def = &ft
     endif
     let ft = input("Filetype: ", def)
     if ft != ""
-	exec "setlocal ft=".ft
-	Rainbow
+        exec "setlocal ft=".ft
+        Rainbow
     end
 endfunction
 
@@ -219,3 +236,31 @@ command! -nargs=1 CSVH :call CSVH(<f-args>)<CR>
 
 " how many occurrences of the current search pattern?           {{{2
 command! CountMatches %s///n
+
+" Set tabstop, softtabstop and shiftwidth to the same value
+command! -nargs=* Stab call Stab()
+function! Stab()
+    let l:tabstop = 1 * input('set tabstop = softtabstop = shiftwidth = ')
+    if l:tabstop > 0
+        let &l:sts = l:tabstop
+        let &l:ts = l:tabstop
+        let &l:sw = l:tabstop
+    endif
+    call SummarizeTabs()
+endfunction
+
+function! SummarizeTabs()
+    try
+        echohl ModeMsg
+        echon 'tabstop='.&l:ts
+        echon ' shiftwidth='.&l:sw
+        echon ' softtabstop='.&l:sts
+        if &l:et
+            echon ' expandtab'
+        else
+            echon ' noexpandtab'
+        endif
+    finally
+        echohl None
+    endtry
+endfunction
