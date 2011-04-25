@@ -1,1 +1,0 @@
-/Users/iaj/svn/vimperator-plugins/trunk/bitly.js

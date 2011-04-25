@@ -24,8 +24,6 @@
 export PAGER=less
 export EDITOR=vim
 export LIBXCB_ALLOW_SLOPPY_LOCK=true
-export MPD_PORT=1337
-export MPD_HOST=127.0.0.1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export PYTHONPATH=/usr/local/lib/python2.6/site-packages:"${PYTHONPATH}"
@@ -49,8 +47,8 @@ if [ -d ~/bin ]; then
 fi
 
 # Fast directory-pathing
-#bp=/Users/iaj/java/VeriDebug/Documents
-#bps=/Users/iaj/java/VeriDebug/src
+#bp=$HOME/java/VeriDebug/Documents
+#bps=$HOME/java/VeriDebug/src
 #w=$HOME/Documents/work
 #ba=$HOME/ba
 #logs=$HOME/Documents/textual\ logs/irc.freenode.net/Channels
@@ -87,7 +85,7 @@ done &)
 [[ -o nointeractive ]] && return
 
 # Disable flow control, since it really just annoys me.
-stty -ixon &>/dev/null
+#stty -ixon &>/dev/null
 
 #### Functions for VCS-INFO
 # Load the git-completion functions
@@ -98,20 +96,20 @@ fi
 if [ -d ~/git/zsh/Functions/VCS_Info/ ]; then
     fpath=(~/git/zsh/Functions/VCS_Info/ ~/git/zsh/Functions/VCS_Info/Backends $fpath)
 fi
+
 # Set correct fpath to allow loading my functions (including completion
 # functions). in this case: my own functions
 #if [[ -d ~/git/zsh/Functions ]]; then
-#fpath=(~/.zsh/functions $fpath)
-#autoload ${fpath[1]}/^_*(^/:t)
+    #fpath=(~/.zsh/functions $fpath)
+    #autoload ${fpath[1]}/^_*(^/:t)
 #fi
 
 # Originally from Jonathan Penn, with modifications by Gary Bernhardt
-function whodoneit() {
-(set -e &&
-    for x in $(git grep -I --name-only $1); do
-        git blame -f -- $x | grep $1;
-    done
-    )
+whodoneit() {
+    (set -e &&
+        for x in $(git grep -I --name-only $1); do
+            git blame -f -- $x | grep $1;
+        done)
 }
 
 # Autoload add-zsh-hook to add/remove zsh hook functions easily.
@@ -136,42 +134,38 @@ shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
 #### Helper Functions
 # Checks if a file can be autoloaded by trying to load it in a subshell.
 # If we find it, return 0, else 1
-function autoloadable {
-( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
+autoloadable() {
+    ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
 }
 # Returns whether its argument should be considered "true"
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
-function booleancheck {
-[[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]]
+booleancheck() {
+    [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]]
 }
-function dl {
-cd /Users/iaj/Downloads
-}
-function w {
-cd /Users/iaj/Documents/work
-}
+if [ -d $HOME/Downloads ]; then
+    dl() { cd $HOME/Downloads }
+fi
+if [ -d $HOME/Documents/work ]; then 
+    w() { cd $HOME/Documents/work }
+fi
 
-ba() {
-    if [[ $1 -eq 1 ]]; then
-        cd /Users/iaj/Documents/workspace/Animal
-    elif [[ $1 -eq 2 ]]; then
-        cd /Users/iaj/Documents/workspace/AnimalScript2
-    else
-        cd /Users/iaj/ba/tex
-    fi
-}
+if [ -d $HOME/Documents/work ]; then 
+    ba() {
+        if [[ $1 -eq 1 ]]; then
+            cd $HOME/Documents/workspace/Animal
+        elif [[ $1 -eq 2 ]]; then
+            cd $HOME/Documents/workspace/AnimalScript2
+        else
+            cd $HOME/ba/tex
+        fi
+    }
+fi
 
-db() { cd /Users/iaj/Dropbox/ }
-logs() { cd /Users/iaj/.irssi/logs/FreeNode }
-logsb() { cd /Users/iaj/.irssi/logs/bitlbee/ }
-# Performs the same job as pidof, using only zsh capabilities
-pids() {
-    local i
-    for i in /proc/<->/stat
-    do
-        [[ "$(< $i)" = *\((${(j:|:)~@})\)* ]] && echo $i:h:t
-    done
-}
+if [ -d $HOME/Dropbox ]; then 
+    db() { cd $HOME/Dropbox/ }
+fi
+logs() { cd $HOME/.irssi/logs/FreeNode }
+logsb() { cd $HOME/.irssi/logs/bitlbee/ }
 
 # Replaces the current window title in Gnu Screen with its positional parameters
 set-screen-title() { echo -n "\ek$*\e\\" }
@@ -278,18 +272,42 @@ typeset -T LS_COLORS          ls_colors
 alias :q='echo "This is not Vim!" >&2'
 alias sudo="sudo "
 alias l='ls -CF'
-alias df='gdf'
-alias sort='gsort'
-alias find='gfind'
-alias du='gdu'
 alias c=clear
 alias d=cd
 alias s="sudo "
 alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
-alias ls='gls --color=auto -B'
-alias dircolors='gdircolors'
+
+# on mac the gnutls are wicked...
+# hidden in the clouds!
+if [[ $OSTYPE == darwin* ]]; then
+    alias df='gdf'
+    alias sort='gsort'
+    #alias find='gfind'
+    alias du='gdu'
+    alias ls='gls --color=auto -B'
+    alias dircolors='gdircolors'
+    alias g='mvim --remote-silent'
+    alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
+    alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
+    alias -s pdf='/Applications/Skim.app'
+    alias m='/Applications/VLC.app'
+
+    #### Man and Info options
+    # Make vim the manpage viewer or info viewer
+    # Requires manpageview.vim from
+    # http://vim.sourceforge.net/scripts/script.php?script_id=489
+    man() { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
+    pledit() {
+        plutil -convert xml1 ${1}
+        $EDITOR -w ${1}
+        plutil -convert binary1 ${1}
+    }
+else
+    alias ls='ls --color=auto -B'
+fi
+
 alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 alias grep='grep --color=auto'
 alias pu='pushd'
@@ -298,31 +316,31 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias cd..='cd ..'
 alias cd/='cd /'
-alias g='mvim --remote-silent'
+
+#alias pl='pdflatex'
 alias vi=vim
 alias v=vim
-alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
-alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
-source /Users/iaj/.zsh/gitaliases
-source /Users/iaj/.zsh/functions/git.zsh
+source $HOME/.zsh/gitaliases
+source $HOME/.zsh/functions/git.zsh
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
 alias -g C='|pbcopy'
+alias -g E='2>&1'
+alias -g N='>/dev/null'
+alias -g L='E | less'
+alias -g G='| grep'
+alias -g D='E | colordiff L'
+alias -g S='| sort'
 #alias -g V='|vim -'
 #alias -g B='&>/dev/null &'
 #alias -g D='&>/dev/null &|'
 booleancheck "$shellopts[utf8]" && alias screen="screen -U"
 #alias m='mplayer -fs'
-alias m='/Applications/VLC.app'
-
 alias history='history -EfdD'
 alias h='history'
 alias gh='h 1 | grep'
 
-#alias x='apvlv'
-#alias pl='pdflatex'
-alias -s pdf='/Applications/Skim.app'
 ### Options
 #### Shell Options
 # I don't want to be told if the zsh version I'm using is missing some of these.
@@ -385,7 +403,6 @@ if booleancheck "$shellopts[utf8]" ; then
     export LANG=en_US.UTF-8                 # Use a unicode english locale
     #export LC_CTYPE=C                      # but fix stupid not-unicode man pages
 fi
-
 export HISTSIZE=500000                      # Lines of history to save in mem
 export SAVEHIST=500000                      # Lines of history to write out
 export HISTFILE="$HOME/.zsh/.zsh_history"   # File to which history will be saved
@@ -566,10 +583,10 @@ bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
 bindkey " "       magic-space                    # Space expands history subst's
 bindkey "^@"	  _history-complete-older        # C-Space to complete from hist
 bindkey "^]."	  insert-last-word
-bindkey 'jj'	  vi-cmd-mode
+bindkey 'jk'	  vi-cmd-mode
 bindkey '^T' _most_recent_file
 # No Delays please, we want flashy SPEEDZ
-#KEYTIMEOUT=50
+KEYTIMEOUT=50
 
 # Vim like completions of previous executed commands (also enter Vi-mode). If
 # called at the beginning it just recalls old commands (like cursor up), if
@@ -613,22 +630,6 @@ zle -N edit-command-line
 # so expansion can be handled
 # by a completer.
 
-#export HQUICKFILE=$HOME/bin/hquickfile
-#pd() { num=${1:-1}; C $num-; }
-#C(){
-#	cd "$( echo -n `$HQUICKFILE $@ `)"
-#}
-#pd() { num=${1:-1}; C $num-; }
-#C(){
-#cd "$( $HQUICKFILE -n $@  )"
-#}
-#G(){
-#gvim "$( $HQUICKFILE -n "$@")"
-#}
-#V(){
-#vim "$( $HQUICKFILE -n "$@")"
-#}
-
 # Allow substitutions and expansions in the prompt, necessary for
 # vcs_info.
 setopt promptsubst
@@ -640,13 +641,15 @@ zstyle ':vcs_info:*' enable git hg svn
 # Set style of vcs_info display. The current branch (green) and VCS (blue)
 # is displayed. If there is an special action going on (merge, rebase)
 # it's also displayed (red).
-zstyle ':vcs_info:*' formats \ "($green%b$default:$blue%s$default)"
-zstyle ':vcs_info:*' actionformats \ "($green%b$default/$red%a$default:$blue%s$default)"
+zstyle ':vcs_info:*' formats "($green%b%u%c$default:$blue%s$default)"
+zstyle ':vcs_info:*' actionformats "($green%b%u%c$default/$red%a$default:$blue%s$default)"
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' unstagedstr '?'
+zstyle ':vcs_info:*' stagedstr   '!'
+
 zstyle ':completion:*' special-dirs ..
 # Call vcs_info as precmd before every prompt.
-prompt_precmd() {
-    vcs_info
-}
+prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
 
 # Display the VCS information in the right prompt.
@@ -660,7 +663,7 @@ else
 fi
 
 #### Function to hide prompts on the line - Will be replaced eventually
-function TogglePrompt {
+TogglePrompt() {
 if [[ -n "$PS1" && -n "$RPS1" ]]; then
     OLDRPS1=$RPS1; OLDPS1=$PS1
     unset RPS1 PS1
@@ -670,14 +673,13 @@ fi
 zle reset-prompt
 }
 zle -N TogglePrompt
-
 bindkey "^X^X" TogglePrompt
 
 #### Function to allow Ctrl-z to toggle between suspend and resume
-function Resume {
-zle push-input
-BUFFER="fg"
-zle accept-line
+Resume() {
+    zle push-input
+    BUFFER="fg"
+    zle accept-line
 }
 zle -N Resume
 bindkey "^Z" Resume
@@ -690,33 +692,32 @@ if autoloadable edit-command-line; then
 fi
 
 ### Misc
+#### batterycharge function
+#PROMPT='$(battery_charge)'
+function battery_charge {
+    echo `$BAT_CHARGE` 2>/dev/null
+}
+
 #### Some minicom options:
 # linewrap use-status-line capture-file=/dev/null color=off
 export MINICOM='-w -z  -C /dev/null -c off'
 
-#### Man and Info options
-# Make vim the manpage viewer or info viewer
-# Requires manpageview.vim from
-# http://vim.sourceforge.net/scripts/script.php?script_id=489
-#function man { mvim -R -c "Man $*" -c "silent! only" }
-function man { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
-#function man { mvim --remote-silent -c "Man $*"}
 
 if [[ -f $HOME/.vim/plugin/manpageviewPlugin.vim ]]; then
-    function manx {
-    [[ $# -eq 0 ]] && return 1
-    #vim -R -c "Man $*" -c "silent! only"
-    mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate'
-    #g -R -c "Man $*" -c "silent! only"
-}
-function info {
-[[ $# -eq 1 ]] || return 1
-vim -R -c "Man $1.i" -c "silent! only"
-  }
-  function perldoc {
-  [[ $# -eq 1 ]] || return 1
-  vim -R -c "Man $1.pl" -c "silent! only"
-  }
+    man() {
+        [[ $# -eq 0 ]] && return 1
+        #vim -R -c "Man $*" -c "silent! only"
+        mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate'
+        #g -R -c "Man $*" -c "silent! only"
+    }
+    info() {
+        [[ $# -eq 1 ]] || return 1
+        vim -R -c "Man $1.i" -c "silent! only"
+    }
+    perldoc() {
+        [[ $# -eq 1 ]] || return 1
+        vim -R -c "Man $1.pl" -c "silent! only"
+    }
 fi
 
 #### Less and ls options
@@ -730,33 +731,32 @@ which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
 
 # Edit the command line using your usual editor.
 # Binding this to 'v' in the vi command mode map,
-#   autoload edit-command-line
-#   zle -N edit-command-line
-#   bindkey -M vicmd v edit-command-line
-# will give ksh-like behaviour for that key,
-# except that it will handle multi-line buffers properly.
-function collapse_pwd {
-echo $(pwd | sed -e "s,^$HOME,~,")
-}
+#autoload edit-command-line
+#zle -N edit-command-line
+#bindkey -M vicmd v edit-command-line
+#will give ksh-like behaviour for that key,
+#except that it will handle multi-line buffers properly.
 
-function mkcd() {
-[[ -z $1 ]] && printf "usage: mkcd NEW-DIRECTORY" && return 1
-[[ -d $1 ]] && printf "mkcd: Directory %s already exists; cd-ing" $1
-command mkdir -p -- $1
-builtin cd -- $1
+collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
+
+mkcd() {
+    [[ -z $1 ]] && printf "usage: mkcd NEW-DIRECTORY" && return 1
+    [[ -d $1 ]] && printf "mkcd: Directory %s already exists; cd-ing" $1
+    command mkdir -p -- $1
+    builtin cd -- $1
 }
 
 MAILDIR_ROOT=~/mail
-function mkmaildir() {
-### Uses $MAILDIR_ROOT
-local root subdir
-root=${MAILDIR_ROOT:-${HOME}/Mail}
-if [[ -z ${1} ]] ; then
-    print "Usage\n $0 <dirname>"
-    return 1
-fi
-subdir=${1}
-mkdir -p ${root}/${subdir}/{cur,new,tmp}
+mkmaildir() {
+    ### Uses $MAILDIR_ROOT
+    local root subdir
+    root=${MAILDIR_ROOT:-${HOME}/Mail}
+    if [[ -z ${1} ]] ; then
+        print "Usage\n $0 <dirname>"
+        return 1
+    fi
+    subdir=${1}
+    mkdir -p ${root}/${subdir}/{cur,new,tmp}
 }
 
 # Prompt to <<insert>> <<normal>> Modes on the right
@@ -845,43 +845,53 @@ fi
 autoload -U loadGitAliases
 loadGitAliases
 
+
 ### Prompt
 typeset +x PS1     # Don't export PS1 - Other shells just mangle it.
 
-function leo () { elinks "http://dict.leo.org/?search=$1"; }
-function dict () { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
-function psg {
-# using a perlre lookahead 'trick' to prevent grep from
-# greping it's own process
-# grep with --enable-pcre needed!
-ps ax | grep -i -P "$1"'(?!\(\?\!)'
+leo() { elinks "http://dict.leo.org/?search=$1"; }
+dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
+psg() {
+    # using a perlre lookahead 'trick' to prevent grep from
+    # greping it's own process
+    # grep with --enable-pcre needed!
+    ps ax | grep -i -P "$1"'(?!\(\?\!)'
 }
 
-function hg_prompt_info {
-hg prompt --angle-brackets "\
-    < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
-    < at %{$fg[yellow]%}<tags|%{$reset_color%}, %{$fg[yellow]%}>%{$reset_color%}>\
-    %{$fg[green]%}<status|modified|unknown><update>%{$reset_color%}<
-patches: <patches|join( → )|pre_applied(%{$fg[yellow]%})|post_applied(%{$reset_color%})|pre_unapplied(%{$fg_bold[black]%})|post_unapplied(%{$reset_color%})>>" 2>/dev/null
+hg_prompt_info() {
+    hg prompt --angle-brackets "\
+        < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
+        < at %{$fg[yellow]%}<tags|%{$reset_color%}, %{$fg[yellow]%}>%{$reset_color%}>\
+        %{$fg[green]%}<status|modified|unknown><update>%{$reset_color%}<
+    patches: <patches|join( → )|pre_applied(%{$fg[yellow]%})|post_applied(%{$reset_color%})|pre_unapplied(%{$fg_bold[black]%})|post_unapplied(%{$reset_color%})>>" 2>/dev/null
 }
-function prompt_char {
-git branch >/dev/null 2>/dev/null && echo '±' && return
-hg root >/dev/null 2>/dev/null && echo '☿' && return
-#echo '○'
-echo '⤴'
+prompt_char() {
+    #git branch >/dev/null 2>/dev/null && echo '±' && return
+    #hg root >/dev/null 2>/dev/null && echo '☿' && return
+    #echo '○'
+    echo '>'
+    #echo '⤴'
 }
+
 #### Prompt setup functions
 # Global color variable
 #PROMPT_COLOR_NUM=$(((${#${HOST#*.}}+11)%12)) #PROMPT_COLOR_NUM=10
-function prompt-setup {
-#local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
-if booleancheck "$shellopts[titlebar]" ; then
-    # <blue bright=1><truncate side=right len=20 string="..">
-    PROMPT="${default}%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
-else
-    # <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
-    PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
-fi
+export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
+prompt-setup() {
+    #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
+    if booleancheck "$shellopts[titlebar]" ; then
+        # <blue bright=1><truncate side=right len=20 string="..">
+        #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}in %b${green}%35<..<%~%<<$(prompt_char)  ${default}%b"
+        # Prompt with history set
+        PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
+        # basic prompt
+        #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
+    else
+        # <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
+        PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
+    fi
 }
 prompt-setup
 
@@ -892,7 +902,6 @@ SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]
 ### Attaching to a possibly running screen session
 # If not already in screen reattach to a running session or create a new one.
 # This also starts screen one a remote server when connecting through ssh.
-export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
 if [[ $TERM != dumb && -z $STY ]]; then
     # Get running detached sessions.
     session=$(screen -list | grep 'Detached' | awk '{ print $1; exit }')
@@ -900,12 +909,15 @@ if [[ $TERM != dumb && -z $STY ]]; then
     #window_preexec "screen"
     # Create a new session if none is running.
     if [[ -z $session ]]; then
-        exec screen
+        # exec screen
         # Reattach to a running session.
     else
         exec screen -r $session
     fi
 fi
-eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
+
+if [ -d $HOME/perl5/lib/perl5 ]; then
+    eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
+fi
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='

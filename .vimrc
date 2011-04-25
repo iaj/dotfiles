@@ -23,19 +23,13 @@ set lazyredraw                          " Avoid redrawing the screen mid-command
 set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
+let maplocalleader = "\\"
 set guioptions=Aci
 set antialias
 set guifont=Monaco:h12
 set title
 set isfname-=\=
-set macmeta
-
-"set guicursor=n-v-c:block-Cursor-blinkon0
-"set guicursor+=ve:ver35-Cursor
-"set guicursor+=o:hor50-Cursor
-"set guicursor+=i-ci:ver25-Cursor
-"set guicursor+=r-cr:hor20-Cursor
-"set guicursor+=sm:block-Cursor-blinkwait175-blinkoff150-blinkon175
+"set macmeta
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -62,11 +56,12 @@ if !has("gui")
 endif
 
 """ Sourcing ~/.vimrc
-source /Users/iaj/.vim/personal/scripts/remappings
-source /Users/iaj/.vim/personal/scripts/mappings
-source /Users/iaj/.vim/personal/scripts/functions
-source /Users/iaj/.vim/personal/scripts/autocommands
-source /Users/iaj/.vim/personal/scripts/galal
+"source $HOME/.vim/personal/scripts/error_handling
+source $HOME/.vim/personal/scripts/remappings
+source $HOME/.vim/personal/scripts/mappings
+source $HOME/.vim/personal/scripts/functions
+source $HOME/.vim/personal/scripts/autocommands
+source $HOME/.vim/personal/scripts/galal
 
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
@@ -106,21 +101,31 @@ set matchpairs+=<:>             " show matching <> (html mainly) as well
 "set completeopt-=preview        " Don't show preview menu for tags.
 set completeopt=longest,menuone
 set complete=.,w,b,t
-set infercase                   " Try to adjust insert completions for case.
+"set infercase                   " Try to adjust insert completions for case.
 
 " Folding
 set foldmethod=syntax           " By default, use syntax to determine folds
-set foldlevelstart=0           " All folds open by default
+set foldlevelstart=0            " All folds open by default
 set foldopen=block,insert,jump,mark,percent,quickfix,search,tag,undo
 
 " Text Formatting
 set formatoptions=q             " Format text with gq, but don't format as I type.
 set formatoptions+=n            " gq recognizes numbered lists, and will try to
+set formatoptions+=r            " break before, not after, a 1 letter word
 set formatoptions+=1            " break before, not after, a 1 letter word
+"sjl: set formatoptions=qrn1
 
 " Display
 "set number                     " Display line numbers
-set relativenumber
+" features only up since 7.03
+if (v:version == 703) 
+    set relativenumber
+    set undofile
+    set undodir=~/.vim/undo
+else
+    set number
+endif
+
 set numberwidth=1               " using only 1 column (and 1 space) while possible
 set nowrap
 
@@ -129,13 +134,14 @@ if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
     let s:arr = nr2char(9655) " using U+25B7 (▷) for an arrow, and
     let s:dot = nr2char(8901) " using U+22C5 (⋅) for a very light dot,
     " display tabs as an arrow followed by some dots (▷⋅⋅⋅⋅⋅⋅⋅),
-    exe "set listchars=tab:"      . s:arr . s:dot
+    exe "set listchars=tab:" . s:arr . s:dot
     " and display trailing and non-breaking spaces as U+22C5 (⋅).
     exe "set listchars+=trail:" . s:dot
-    exe "set listchars+=nbsp:"    . s:dot
+    exe "set listchars+=nbsp:"  . s:dot
     " Also show an arrow+space (↪ ) at the beginning of any wrapped long lines?
     " I don't like this, but I probably would if I didn't use line numbers.
     let &sbr=nr2char(8618).' '
+    set listchars+=eol:¬
 endif
 
 set confirm                     " Y-N-C prompt if closing with unsaved changes.
@@ -147,6 +153,10 @@ set shortmess+=A                " Don't show message on existing swapfile
 set ruler                       " Show some info, even without statuslines.
 "set laststatus=2                " Always show statusline, even if only 1 window.
 set autoindent
+"typoscript indent fix?
+set cink-=0#
+"set cindent
+"set smartindent
 set notimeout ttimeout ttimeoutlen=200
 
 function! SlSpace()
@@ -158,7 +168,7 @@ function! SlSpace()
 endfunc
 
 " Tabs/Indent Levels
-set tabstop=4                   " keep tabspaces at 8 by default if there
+set tabstop=8                   " keep tabspaces at 8 by default if there
 set shiftwidth=4                " shiftwidth ~ indentaion to the right
 set softtabstop=4               " indendation to the left (bs key)
 set expandtab                   " Use spaces, not tabs, for autoindent/tab key.
@@ -166,11 +176,10 @@ set smarttab
 "set noexpandtab
 set mousehide
 set mousem=popup
-set undofile
-set undodir=~/.vim/undo
 
 "Print options
 set printoptions+=syntax:n      " Print syntax highlighting.
+set printoptions+=header:0
 "set printoptions+=number:y     " Print line numbers.
 
 " Tags
@@ -212,9 +221,9 @@ set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 " Per-Filetype Scripts
 " NOTE: These define autocmds, so they should come before any other autocmds.
 "       That way, a later autocmd can override the result of one defined here.
-filetype on                     " Enable filetype detection,
-filetype indent on              " use filetype-specific indenting where available,
-filetype plugin on              " also allow for filetype-specific plugins,
+"filetype on                     " Enable filetype detection,
+"filetype indent on              " use filetype-specific indenting where available,
+filetype plugin indent on              " also allow for filetype-specific plugins,
 syntax on                       " and turn on per-filetype syntax highlighting.
 set grepprg=grep\ -nH\ $*
 """ Plugin Settings
@@ -263,7 +272,7 @@ let g:Tlist_Show_One_File = 1
 "let Tlist_Max_Tag_Length = 200
 let Tlist_WinWidth=50
 let Tlist_GainFocus_On_ToggleOpen = 1
-"let g:Tlist_Ctags_Cmd = "~/bin/ctags" "user defined ctags command
+let g:Tlist_Ctags_Cmd = "~/bin/ctags" "user defined ctags command
 "let g:SuperTabLongestHighlight = 1
 let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
@@ -278,8 +287,11 @@ let g:sparkupExecuteMapping = '<D-e>'
 " disable warnings from NERDCommenter:
 let g:NERDShutUp = 1
 let NERDTreeIgnore = ['\.pyc$', '\.pyo$']
+let NERDChristmasTree=1
+let NERDTreeWinSize=50
+let NERDTreeChDirMode=2
 
-let g:loaded_delimitMate = 1
+let g:loaded_delimitMate = 0
 let g:delimitMate_expand_space = 1
 let g:delimitMate_expand_cr = 1
 let g:delimitMate_smart_quotes = 0
@@ -288,11 +300,7 @@ let delimitMate_excluded_ft = "mail html"
 let g:yankring_history_dir = '~/.vim/'
 let g:tex_flavor='latex'
 
-" Fuzzy Finder Settings
-let g:fuf_modesDisable = []
-let g:fuf_mrucmd_maxItem = 2000
-
-"let g:CommandTCancelMap = ['<C-c>']
+let g:CommandTCancelMap = ['<C-c>']
 let g:CommandTMaxHeight = 20
 let g:CommandTMaxFiles=3000
 "let g:CommandTAlwaysShowDotFiles=1
@@ -308,6 +316,20 @@ let g:netrw_retmap        = 1
 let g:netrw_silent        = 1
 let g:netrw_special_syntax= 1
 
+""" FuzzyFinder Settings
+" Fix for the foldopen=search setting
+let g:returning_from_fuzzy = 0
+let g:fuf_modesDisable = [ 'mrucmd' ]
+let g:fuf_mrufile_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
+let g:fuf_mrufile_maxItem = 300
+"let g:fuf_mrucmd_maxItem = 400
+"shuddid lusty - for now that is
+let g:loaded_lustyexplorer = 1
+let g:loaded_lustyjuggler = 1
+let g:space_loaded = 1
+"let g:fuf_dir_exclude = '\v\-Tmp\-|\.svn/$|\.git/$|((^|[/\\])\.{1,2}[/\\]$)'
+"let g:fuf_mrucmd_maxItem = 2000
+
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
     "colorscheme zenburn                  "tha best fricken fucken theme on earth
@@ -318,20 +340,34 @@ if has('gui_running')
     set columns=300
     "colorscheme darktango
     "colorscheme slate
-    "colorscheme herald
     set fuoptions=maxvert,maxhorz
+    "colorscheme clouds_jay "IMPROVED!
+    "colorscheme vitamins "IMPROVED!
+    "colorscheme herald_modded
+
+    " this one is actually decent too!!(herald)
+    "colorscheme herald
     "colorscheme cloudsmidnight         "pretty dark but nice theme
     "colorscheme twilight
     "colorscheme twilight2
 
     "Molokai Settings
     let g:molokai_original = 1
-    "colorscheme molokai
-    colorscheme molokai_jay
+    colorscheme sjl
+    
+    "colorscheme molokai2
+    "colorscheme molokai_jay
+    "colorscheme neverland2
+    "colorscheme twilight256
     "colorscheme mustang
     "hi Visual guibg=#999999
     "let g:obviousModeInsertHi = "guibg=Black guifg=White"
     "hi Visual term=reverse cterm=reverse guifg=#ce5c00 guibg=#fcaf3e
+
+    "a whity ;)
+    "set background=light
+    "colorscheme solarized
+
 
     highlight SpellBad term=underline gui=undercurl guisp=Orange
     " a little tweaking to get that zenburn better for my lazy eyes ;)
@@ -341,57 +377,111 @@ if has('gui_running')
     "hi incsearch ctermbg=216 ctermfg=242
     "hi search ctermbg=223 ctermfg=238
 else
-    colorscheme delek
+    "colorscheme molokai
+    colorscheme kellys
+    "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
 endif
 
 """ Statusline
 set ls=2
-if has('statusline')
-    function! SetStatusLineStyle()
-        "if &stl == '' || &stl =~ 'synID'
-
-        "define 3 custom highlight groups
-        hi User1 guifg=#A6E22E guibg=#455354
-        "hi User2 ctermbg=red   ctermfg=blue  guibg=red   guifg=blue
-        "hi User3 ctermbg=blue  ctermfg=green guibg=blue  guifg=green
-
-        if !(&stl =~ 'synID')
-            "set statusline=%t[%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r%y%=%c,%l/%L\ %P
-            "set statusline=[%n]\  
-            set statusline=%f       "tail of the filename
-            set statusline+=\ %y    "filetype
-            set statusline+=%h      "help file flag
-            set statusline+=%r      "read only flag
-            "set statusline+=%m      "modified flag
-            set statusline+=%([%R%M]%)      "modified flag
-
-            set statusline+=%{'$'[!&list]} 
-            "set statusline+=[%{strlen(&fenc)?&fenc:'none'}, "file encoding
-            "set statusline+=%{&ff}] "file format
-            "set statusline+=%{'!'[&ff=='".&ff."']}
-            set statusline+=\ (%{synIDattr(synID(line('.'),col('.'),0),'name')})
-            "%{'$'[!&list]}
-            set statusline+=%=      "left/right separator
-            set statusline+=%1*     "switch to User1 highlight
-            set statusline+=%{fugitive#statusline()}
-            set statusline+=%*
-            set statusline+=\ #%n 
-            set statusline+=\ %c,     "cursor column
-            set statusline+=%l/%L   "cursor line/total lines
-            set statusline+=\ %P    "percent through file
+if has('statusline') && has('gui_running')
+    " Function used to display syntax group.
+    function! SyntaxItem()
+        return synIDattr(synID(line("."),col("."),1),"name")
+    endfunction 
+    "set statusline=......%{FileSize()}.....
+    function! BA_StatusLine()
+        if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')
+            return "[AnimalScript2] "
+        elseif expand('%:p') =~ expand('~/Documents/workspace/Animal/')
+            return "[Animal] "
         else
-            let &stl="%f %y%([%R%M]%)%{'!'[&ff=='".&ff."']}%{'$'[!&list]} (%{synIDattr(synID(line('.'),col('.'),0),'name')})%=#%n %l/%L,%c%V "
-            "set statusline=%f %m[%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%r %y%= %{fugitive#statusline()}%c,%l/%L %P%{XPMautoUpdate("statusline")}
+            return ""
         endif
     endfunction
-    " Switch between the normal and vim-debug modes in the status line
-    nmap \ds :call SetStatusLineStyle()<CR>
-    call SetStatusLineStyle()
+
+    "on some colorschemes (kw: reversing) its necessary to s/fg/bg
+    fun! UpdateStatuslineColorCodes() "{{{
+        " themes differ here - replace bg with fg or the other way around ;)
+        let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
+        let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+    endfunction "}}}
+    function! SetMyStatusLine()
+        " TODO fix that stuff
+        if (!has('gui_running'))
+            return
+        endif
+        call UpdateStatuslineColorCodes()
+        " First of all, my USER defined Colors
+        "buffnum
+        exec 'hi User1 guifg=#A6E22E guibg=' . g:status_active_bg
+        "filetype      (currently magenta - too bright = not used)
+        exec 'hi User2 guifg=#66D9EF guibg=' . g:status_active_bg
+        "highlighting group
+        exec 'hi User3 guifg=orange guibg=' . g:status_active_bg
+        "git
+        exec 'hi User4 guifg=green guibg=' . g:status_active_bg
+        "magenta
+        exec 'hi User9 guifg=#F92672 guibg=' . g:status_active_bg
+        "exec 'hi User4 guifg=#F92672 guibg=' . g:status_active_bg
+        "hi link User5 StatusLineNC
+        " INAKTIVE STATUSBARSETTING
+        exec 'hi User5 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User6 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User7 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User8 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User10 guifg=#111111 guibg=' . g:status_inactive_bg
+
+        "if (&stl =~ 'SyntaxItem')
+        if (1 == 1) "crazed uh?
+            " Here comes the status line
+            set laststatus=2                                                    " Always show status.
+            "sjl set statusline=%F%m%r%h%w%=(%{&ff}/%Y)\ (line\ %l\/%L,\ col\ %c)
+            set statusline=%1*%-2.2n%*                                          " Buffer number.
+            set statusline+=\ %f                                                " Filename.%F  orig:%t
+            set statusline+=\ (%9*%{strlen(&ft)?&ft:'none'}%*::
+            "set statusline+=\ (%9*%{(&ft==\"\"?&"":&ft)}%*)                    " Encoding.
+            set statusline+=\%2*%{(&fenc==\"\"?&enc:&fenc)}%*)                  " Encoding.
+            set statusline+=%(\ [%4*%H%R%M%*]%)                                 " Flags.
+            "set statusline+=\ %{exists('actual_curbuf')&&bufnr('%%')==actual_curbuf?CountMatches(1):''}
+            set statusline+=%=                                                  " Left-right alignment.
+            set statusline+=%(%3*%{SyntaxItem()}%*%)                            " Highlighting group.
+            set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
+            set statusline+=\ %P                                                        " % through file.
+            set statusline+=\ %4*%{fugitive#statusline()}%*
+
+            "" This trick is so I can better control the colors of the non-current
+            "" statusline. By default it flips the bold attribute flag in all cases,
+            "" which I don't like. See the %* field in :help 'statusline'
+            "%5*%-2.2n%* %t (%10*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%=%(%7*%{SyntaxItem()}%*%) %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*
+            let g:c_statusline = &g:statusline
+            " Quadro Substitution in a strange manner
+            let g:nc_statusline =
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(g:c_statusline, '%1', '%5', 'g'),
+                        \ '%2', '%6', 'g'),
+                        \ '%3', '%7', 'g'),
+                        \ '%4', '%8', 'g'),
+                        \ '%9', '%8', 'g')
+        else
+            let g:c_statusline="%1*%-2.2n%* %t (%9*%{strlen(&ft)?&ft:'none'}%*::%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %4*%{fugitive#statusline()}%*"
+            let g:nc_statusline="%5*%-2.2n%* %t (%8*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*"
+            "set statusline="%1*%-2.2n%* %t (%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%=%(%3*%{SyntaxItem()}%*%) %-14.(/,%v%) %4*%{fugitive#statusline()}%*%{XPMautoUpdate("statusline")}"
+        endif
+    endfunction
+    nmap <silent> \ds :call SetMyStatusLine()<CR>
+    au VimEnter * call UpdateStatuslineColorCodes()
+    au VimEnter * call SetMyStatusLine()
     " Window title
     if has('title')
-        set titlestring=%t%(\ [%R%M]%)
+        "set titlestring=%f%(\ [%R%M]%)
+        let &titlestring=expand("%:p:h")
+        let &titlestring=$PWD
     endif
 endif
 """ Miscellaneous - to check out
@@ -403,55 +493,96 @@ if has("eval")
     let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
     let g:netrw_use_noswf = 1
 endif
+
+
 """ Remapping the <TAB> key to something useful
 function! MyTabComplete()
+    " complType=1 = invoked by keyword from buffers matching only
     if pumvisible()
+        " keyword completion - invokes a 1
         if (b:complType==1)
-            return "\<c-p>"
+            return "\<C-P>"
         else
-            return "\<c-n>"
+            " else just crawl normally
+            return "\<C-N>"
         endif
     endif
-    " complType=1 = invoked by keyword from buffers matching only
+    
+    "echom getline('.')[col('.')-1]
+    "if getline('.')[col('.')-1] == ' '
+        "return "\<tab>"
+    "endif
     let b:complType=0
-    let line = getline('.')                         " curline
-    let substr = strpart(line, -1, col('.')+1)      " from start to cursor
-    let substr = matchstr(substr, "[^ \t]*$")       " word till cursor
-    if (strlen(substr)==0)                          " nothing to match on empty string
+    "let line = getline('.')                         " curline
+    "let substr = strpart(line, -1, col('.')+1)      " from start to cursor
+    "let substr = matchstr(substr, "[^ \t]*$")       " word till cursor
+
+    " locate the start of the word
+    let line = getline('.')
+    let col = col('.')
+    let start = col - 1
+    "if start == 0; return "\<tab>"
+    while start > 0 && line[start - 1] =~ '\S'
+        let start -= 1
+    endwhile
+    "return substr
+
+    " debugging...
+    echom 'Indexes: '.start.':'.col
+    let substr = substitute(line[(start-1):(col-1)], '^\s*', '', '')
+    echom 'Substring before the cursor: '.string(substr)
+
+    if substr =~ '^\s*$'                          " nothing to match on empty string
         return "\<tab>"
     endif
+
     let has_period = match(substr, '\.') != -1      " position of period, if any
     let has_slash = match(substr, '\/') != -1       " position of slash, if any
-    if (&dictionary != '' && !has_slash)
-        return "\<C-X>\<C-K>"
-    endif
+
+    "if (&dictionary != '' && !has_slash)
+        "return "\<C-X>\<C-K>"
+    "endif
     if (!has_period && !has_slash)
         let b:complType=1
-        return "\<c-p>"                                " existing text matching
+        return "\<C-P>"                             " existing text matching
     elseif ( has_slash )
-        return "\<C-X>\<C-F>"                          " file matching
+        return "\<C-X>\<C-F>"                       " file matching
     else " we got a period somewhere in here...
         if (&filetype == 'java')
-            return "\<C-X>\<C-U>"                       " ECLIM completion
-        elseif (&omnifunc != '')
-            return "\<C-X>\<C-O>"                       " plugin matching
+            return "\<C-P>"
+            "return "\<C-X>\<C-U>"                   " ECLIM completion
+        "elseif (&omnifunc != '')
+            "return "\<C-X>\<C-O>"                  " plugin matching
         else
-            return "\<c-p>"
+            let b:complType=1
+            return "\<C-P>"
         endif
     endif
 endfunction
 
 function! MyShiftTabComplete()
     if (pumvisible() && b:complType==1)
-        return "\<c-n>"
+        return "\<C-N>"
+    else
+        return "\<C-P>"
+    endif
+endfunction
+inoremap <tab> <c-r>=MyTabComplete()<cr>
+inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+
+" Remap the tab key to do autocompletion or indentation depending on the
+" context (from http://www.vim.org/tips/tip.php?tip_id=102)
+" by Gary Bernard
+function! InsertTabWrapper()
+    let col = col('.') - 1
+    if !col || getline('.')[col - 1] !~ '\k'
+        return "\<tab>"
     else
         return "\<c-p>"
     endif
 endfunction
-
 "inoremap <tab> <c-r>=InsertTabWrapper()<cr>
-inoremap <tab> <c-r>=MyTabComplete()<cr>
 "inoremap <s-tab> <c-n>
-inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='

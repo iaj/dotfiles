@@ -1,0 +1,42 @@
+"" vim: set filetype=vim : ""
+function! RunAllTests(args)
+    silent ! echo
+    silent ! echo -e "\033[1;36mRunning all unit tests\033[0m"
+    silent w
+    exec "make!" . a:args
+endfunction
+
+function! JumpToError()
+    if getqflist() != []
+        for error in getqflist()
+            if error['valid']
+                break
+            endif
+        endfor
+        "let error_message = substitute(error['text'], '^ *', '', 'g')
+        silent cc!
+        exec ":sbuffer " . error['bufnr']
+        call RedBar()
+        echo error_message
+    else
+        call GreenBar()
+        echo "All tests passed"
+    endif
+endfunction
+
+function! RedBar()
+    hi RedBar ctermfg=white ctermbg=red guibg=red
+    echohl RedBar
+    echon repeat(" ",&columns - 1)
+    echohl
+endfunction
+
+function! GreenBar()
+    hi GreenBar ctermfg=white ctermbg=green guibg=green
+    echohl GreenBar
+    echon repeat(" ",&columns - 1)
+    echohl
+endfunction
+
+nnoremap <leader>t :call RunAllTests('')<cr>:redraw<cr>:call JumpToError()<cr>
+nnoremap <leader>T :call RunAllTests('')<cr>

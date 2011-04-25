@@ -1,10 +1,13 @@
-## vim: set filetype=zsh : ""
+if [ "x$OH_MY_ZSH_HG" = "x" ]; then
+    OH_MY_ZSH_HG="hg"
+fi
+
 function virtualenv_info {
     [ $VIRTUAL_ENV ] && echo '('`basename $VIRTUAL_ENV`') '
 }
 
 function hg_prompt_info {
-    hg prompt --angle-brackets "\
+    $OH_MY_ZSH_HG prompt --angle-brackets "\
 < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
 < at %{$fg[yellow]%}<tags|%{$reset_color%}, %{$fg[yellow]%}>%{$reset_color%}>\
 %{$fg[green]%}<status|modified|unknown><update>%{$reset_color%}<
@@ -17,7 +20,7 @@ function box_name {
 
 PROMPT='
 %{$fg[magenta]%}%n%{$reset_color%} at %{$fg[yellow]%}$(box_name)%{$reset_color%} in %{$fg_bold[green]%}${PWD/#$HOME/~}%{$reset_color%}$(hg_prompt_info)$(git_prompt_info)
-$(virtualenv_info) $(prompt_char)'
+$(virtualenv_info)$ '
 
 ZSH_THEME_GIT_PROMPT_PREFIX=" on %{$fg[magenta]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
