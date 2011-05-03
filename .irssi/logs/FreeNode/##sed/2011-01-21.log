@@ -1,0 +1,116 @@
+--- Log opened Fri Jan 21 19:14:09 2011
+19:14 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+19:16 --- Channel ##sed was synced in 113 seconds
+19:31  Lantizia: Hey can anyone telling me where I'm going wrong?  I'm trying to deal with this output... http://pastebin.com/raw.php?i=tSPmUnsn
+19:32  Lantizia: Trying to just pull the word 'orion' out of the line that mentions 'root' (but 'orion' can be anything which is why I'm doing this :P)
+19:32  Lantizia: lvs | sed -n '/root/s/.* //p'
+19:32  Lantizia: that's what I have so far but it gives me blank :(
+19:36  cthuluh: 4# { read -r a; while read -r a b c; do echo "$b"; done; } <<< $'LV     VG    Attr   LSize  Origin Snap%  Move Log Copy%  Convert\n  root   orion -wi-ao 28.49G\n   swap_1 orion -wi-ao  1.27G'
+19:36  shbot: cthuluh: orion
+19:36  shbot: cthuluh: orion
+19:37  Lantizia: oh dear lord it belongs in hell
+19:37  Lantizia: it's not even sed and it's way too long
+19:37  cthuluh: the point is that it's probably easier to let your shell do it
+19:37  cthuluh: wait, you're not happy with that?
+19:38  Lantizia: what if all \n and spaces are delimiters in an array and pull out the thing after root?
+19:38  cthuluh: if you want to put "orion" in a shell variable, that's the best thing to do
+19:38  cthuluh: I don't see what you mean, sorry
+19:38  cthuluh: which array?
+19:39  Lantizia: a new array
+19:39  Lantizia: I'm effectively after the word -after- the word 'root'
+19:39  cthuluh: and the word 'root' is always the first word of the line, right?
+19:39  Lantizia: so if all "words" were put in an array ... then i'm after the next entry in the array?
+19:39  Lantizia: cthuluh, indeed
+19:39  cthuluh: so why not just use what I suggested?
+19:40  cthuluh: of course your idea would be usable too
+19:40  Lantizia: it's gigantic and presumes the top row won't change
+19:40  cthuluh: ok. good luck
+19:40  Lantizia: hey you asked!
+19:40  cthuluh: no, *you* asked
+19:40  Lantizia: but I was after a sed answer really
+19:41  cthuluh: fine. let us know when you have your solution :)
+19:41  Lantizia: so you can't think of anything else?
+19:42  cthuluh: dear, I can't think at all 8)
+19:42  Lantizia: what do you want from me? a hug and a kiss?
+19:43  Lantizia: perhaps I could tell you that I think your most important person in my life
+19:43  Lantizia: I'll buy you some roses!
+19:43  cthuluh: Lantizia: ok, mind if you calm down a bit?
+19:43  Lantizia: do you like chocolates?
+19:43  Lantizia: well it seems your getting insulted and pissy for no reason :P
+19:44  cthuluh: looks like you think you're wiser than me. but I didn't ask for help, and didn't rejected help when someone gave me advices
+19:44  Lantizia: were just working through a problem... why is it a crime for me to suggest another avenue for us to look at?
+19:45  cthuluh: let's discuss about your array solution, how would you implement it?
+19:45  Lantizia: i like to explore all avenues for an elegant solution
+19:45  Lantizia: well first of all do you think that'd be the easiest/best way
+19:46  cthuluh: it could, if one was careful with problems you can get when using a shell (hint)
+19:46  cthuluh: I wouldn't say it's the best solution, no, but it could be used
+19:46  Lantizia: ok so have another idea?
+19:47  cthuluh: did you read what I wrote?
+19:47  Lantizia: <cthuluh> 4# { read -r a; while read -r a b c; do echo "$b"; done; } <<< $'LV     VG    Attr   LSize  Origin Snap%  Move Log Copy%  Convert\n  root   orion -wi-ao 28.49G\n   swap_1 orion -wi-ao  1.27G'
+19:47  Lantizia: my eyes hurt
+19:47  Lantizia: that?
+19:47  cthuluh: you only need a simple test to only get the word after 'root'
+19:49  Lantizia: also did you even read my attempt at doing this in sed?
+19:49  Lantizia: <Lantizia> lvs | sed -n '/root/s/.* //p'
+19:50  cthuluh: obviously, you won't search how to adapt my (unfinished) solution until I tell you how to do it with sed, right? ;)
+19:50  Lantizia: I am in #sed you know
+19:51  Lantizia: ##sed rather
+19:54  cthuluh: I suggest reading about the "greediness" of sed's regex and also about inverted character range. I would start with "how can I print only the first field of each line", then adapt it to print only the second field, then use brackets to limit this action to cases where the line matches /^[[:space:]]*root/ and use 'q' to stop at the first occurrence
+21:50  cthuluh: so, Lantizia, did you manage to use sed to achieve your goal?
+21:50  Lantizia: lvs | sed -n '/^  root/p' | tr -s \  \\t | cut -f3
+21:51  Lantizia: went with my array idea
+21:51  Lantizia: decided your cryptic bullshit was giving me a headache
+21:52  cthuluh: { read -r a; while read -r a b c; do echo "$b"; done; } <- this?
+21:52  cthuluh: how cryptic...
+21:52  cthuluh: compared to sed | tr | cut
+21:52  Lantizia: that doesn't even do the job
+21:54  cthuluh: of course, if you don't know how to do an "if" in bash, then the solution must look far far away...
+21:54  Lantizia: i know how if works in bash
+21:54  Lantizia: but your solution is not complete
+21:54  cthuluh: I've never said it was complete
+21:54  cthuluh: sometimes I try to avoid spoonfeeding
+21:54  Lantizia: so by the time it is complete it'd be even longer
+21:55  e36freak: oh no!
+21:55  e36freak: a slightly longer correct version that probably runs faster!
+21:55  Lantizia: it's correct when he can prove it works :P
+21:56  e36freak: i do not doubt cthuluh
+21:56  Lantizia: i do
+21:56  vkues: haha
+21:56  vkues: you come for help, you get it, and then you demand proof? :)
+21:56  cthuluh: Lantizia: I do not have to prove anything. though you have to, now
+21:56  vkues: hilarious :)
+21:57  Lantizia: no i don't you've said nothing but nonsense since I got here
+21:57  Lantizia: i have my answer and it works and I thought of it
+21:57  Lantizia: your the one who had to bring all this up again
+21:57  vkues: no, cthuluh is perfectly right
+21:57  Lantizia: remember your first answer was...
+21:57  Lantizia: <cthuluh> 4# { read -r a; while read -r a b c; do echo "$b"; done; } <<< $'LV     VG    Attr   LSize  Origin Snap%  Move Log Copy%  Convert\n  root   orion -wi-ao 28.49G\n   swap_1 orion -wi-ao  1.27G
+21:57  cthuluh: Lantizia: so, not able to achieve this using only sed? how sad...
+21:57  Lantizia: which looks like it came out of a dino's backside
+21:57  vkues: and you don't know shit about anything, you're worthless in judging cthuluh's statements.
+21:58  vkues: yes, for your eyes
+21:58  Lantizia: cthuluh, says he who has also proposed non-sed methods
+21:58  vkues: the eyes of shit see shit
+21:58  dualbus: vkues +1
+21:59  cthuluh: Lantizia: actually I had worked out a sed method before giving you a bash method, 'cause I think the bash method is more helpful
+21:59  cthuluh: Lantizia: the point is that I try to avoid spoonfeeding
+21:59  Lantizia: whatever
+21:59  cthuluh: in your case, I was perfectly right
+21:59  Lantizia: lovely - you were perfectly right but can not say how
+21:59  Lantizia: how convient
+21:59  Lantizia: I'm off bye
+21:59  cthuluh: :)
+22:00  e36freak: *sigh*
+22:01  e36freak: cthuluh: see, this is what happens when you try to lead someone to their own solution :)
+22:02  vkues: no, it's not cthuluh's fault.
+22:02  vkues: :)
+22:03  e36freak: never said it was
+22:04  e36freak: we just had this discussion yesterday
+22:04  vkues: I'm sure you did not mean it, but how does "this is what happens when you try" not imply it's cthuluh's fault?
+22:04  cthuluh: there's a french singer that I love that has said: "Se faire traiter d'imbécile par un abruti est un plaisir de fin gourmet", which ~ means "It's a pleasure to be qualified of stupid by an asshole"
+22:05  e36freak: haha
+22:05  cthuluh: that's why I don't always dislike trolls :>
+22:05  e36freak: haha
+22:05  vkues: well, that's a silly thing to say
+22:21  cthuluh: and sorry for the noise, btw
+--- Log closed Sat Jan 22 00:00:47 2011

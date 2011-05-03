@@ -1,0 +1,507 @@
+--- Log opened Thu Dec 02 15:16:28 2010
+--- Log closed Thu Dec 02 15:16:28 2010
+--- Log opened Thu Dec 02 16:28:52 2010
+16:28 --- Users 452 nicks [0 ops, 0 halfops, 0 voices, 452 normal]
+16:31 --- Channel ##javascript was synced in 219 seconds
+16:41  compaq: anyone know how to do something like this: http://jsfiddle.net/69Y3t/ cause what it does is not what is intended.
+16:41  paxcoder: if i set .className to something, shouldn't whatever is in that class override everything else for that element?
+--- Log closed Thu Dec 02 16:45:47 2010
+--- Log opened Thu Dec 02 16:51:14 2010
+16:51 --- Users 455 nicks [0 ops, 0 halfops, 0 voices, 455 normal]
+16:53 --- Channel ##javascript was synced in 145 seconds
+16:53 --- fg-- is now known as fg-
+16:54  fg-: if i have data as {id: '551'} and i want to do something like for (param in data) { } how can i use the param to get the id? would be something like data.<param>
+16:56  molgrew: data[param]
+16:56  fg-: i didn't know i could do that
+16:56  fg-: let me check
+16:56  Teycho: you're trying to get 'id' from '551' ?
+16:56  fg-: yes, to get data.id
+16:57  gkatsev: fg-: objects in js can be accessed either via dot notation or bracket (array) notation.
+16:57  fg-: but i was trying to create a generic function
+16:58  paxcoder: molgrew, yeah, i don't get it.
+16:59  fg-: thanks a lot molgrew, Teycho, gkatsev
+16:59  fg-: works perfect
+16:59  paxcoder: all i know is it doesn't work
+17:01  molgrew: what rules are involved?
+17:04  paxcoder: molgrew, parent is of class .odd li:nth-child(odd){}, and child's className gets set onmouseover  to .focus {}. Each of the mentioned sets a background-color, but for odd children, the former takes precedence.
+17:04  paxcoder: *the effect is that only even children get background changed by the focus class.
+17:06  paxcoder: molgrew, i can change it setting .odd li:hover to what focus is (probably will), but that won't make me any smarter
+17:10  kicken: paxcoder, you could probably add ! important to the .focus class and it'd work.  :hover seems like the way to go though.
+17:11  molgrew: well, according to the calculation algorithm, the ".odd li:nth-child(odd)" selector is more specific than ".focus"
+17:11  AnthonyCat: Say I have <div id="a"><div id="b"></div></div>. When I click b, I want alert(b), when I click a, i want alert("a"), but when I click b, i get alert("a") and alert("b"). How can I fix this to just get b in this case?
+17:11  paxcoder: kicken, wow, thanks for the tip! i learned something.
+17:11  kicken: .odd li:nth-child has a specifity of 0012 if I calculate right.  .focus is 0010
+17:11  paxcoder: molgrew, thanks. it's... .odd ;-)
+17:13  eMyller: AnthonyCat: stop the event propagation.
+17:13  AnthonyCat: eMyller: how?
+17:13  gkatsev: return false
+17:13  eMyller: .stopPropagation.
+17:14  eMyller: `events @ AnthonyCat
+17:14  jsBot: AnthonyCat: events: http://onlinetools.org/articles/unobtrusivejavascript/chapter4.html   www.quirksmode.org/dom/w3c_events.html   www.quirksmode.org/js/events_tradmod.html
+17:14  gkatsev: or event.stopPropagation
+17:14  MrNibbles: evening gents
+17:14  eMyller: gkatsev: why 'return false'?
+17:14  eMyller: it works for inline/old style events only.
+17:14  gkatsev: eMyller: that stops the propagation of the event, at least it should, as far as I know.
+17:15  eMyller: not for event listeners -- i'm assuming AnthonyCat will do us the favor to use them
+17:15  AnthonyCat: I'm using addEventListener
+17:15  eMyller: great start.
+17:15  AnthonyCat: it only does it once now, but It does the outer event first
+17:16  AnthonyCat: I want to get the inner event
+17:17  gkatsev: eMyller: old/inline like el.onclick = function(){}?
+17:17  kicken: AnthonyCat, check the event's target and make sure it's the element you want.  if it's not, ignore it
+17:17  Luis450: help
+17:18  eMyller: gkatsev: yes.
+17:18  AnthonyCat: kicken: ok, my example was too simple. There are other things in the div. But this should work somehow.
+17:18  NoiseEee: AnthonyCat: the point stands.  query the event to find out the element it happened on; if its something you care about, fire a handler
+17:18  eMyller: AnthonyCat: can you handle the event object? test your target
+17:19  AnthonyCat: eMyller: I get the target
+17:19  NoiseEee: AnthonyCat: in face, taken to the next level, this is called 'event delegation' and by using this method, you can have minimal (single?) event listeners in memory, and you determine the callback by querying the event
+17:19  NoiseEee: s/in face/in fact
+17:19  Luis450: im a senior manager working with several firms on mobile JS for iPad, iPhone and other mobile devices. Does anyone know of resources that can help with the development?
+17:19  NoiseEee: no need to put a listener on everything in the div; just put a single one on the div, and query the event.
+17:20  AnthonyCat: NoiseEee: good idea
+17:20  AnthonyCat: so could I just take my target, and keep doing .parentNode until I get what i want?
+17:20  NoiseEee: Luis450: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference https://developer.mozilla.org/en/javascript http://eloquentjavascript.net/
+17:21  NoiseEee: AnthonyCat: more the reverse.  google about "event delegation"
+17:21  gkatsev: eMyller: and it only works for those? ok, good to know. Thanks.
+17:21  NoiseEee: AnthonyCat: when you add an event listener, the 'event' object holds the DOM element it fired on
+17:21  AnthonyCat: NoiseEee: you are talking about the target?
+17:22  NoiseEee: AnthonyCat: yes
+17:22  NoiseEee: AnthonyCat: http://www.nczonline.net/blog/2009/06/30/event-delegation-in-javascript/
+17:23  Luis450: Thanks
+17:25  bLiNdRaGe: quick question, I'm looking over my senior exam topics, and this is really bland, which google doesn't like
+17:25  bLiNdRaGe: all it says is: "Using type adds in Javascript"
+17:25  bLiNdRaGe: does that mean creating types in javascript?
+17:26  dwarder: i want to split text into an array, separator must be new line sign, how can i do this? what sign to use?
+17:27  dwarder: \n ?
+17:27  dwarder: $^ ?
+17:27  gkatsev: dwarder: str.split('\n'); it also accepts regex if you wish
+17:27  eMyller: dwarder: what kind of new line is it?
+17:28  dwarder: eMyller: source is textarea, when user hits enter
+17:28  eMyller: \n, then.
+17:28  AnthonyCat: ok, I seem to be getting closer. It still fires the event more than once
+17:29  AnthonyCat: ah, I got it, thanks :)
+17:29  dwarder: does unique array function exist? i.e. remove all non unique items?
+17:30  kicken: dwarder, not as part of core javascript I don't think.  Possibly in a library if your using one.
+17:30  gkatsev: not without an external lib or a custom prototype addition
+17:30  dwarder: gkatsev: eMyller: thanks
+17:30  dwarder: kicken: i use jquery
+17:30  dwarder: kicken: well i'm learning
+17:31  dwarder: let me query api of jquery
+17:31  kicken: http://api.jquery.com/jQuery.unique/
+17:31  gkatsev: dwarder: learn pure js, jquery is just to make your life easier with the DOM and ajax and some other stuff.
+17:31  gkatsev: don't become a jquery programmer. Best to be a javascript programmer who knows jquery very well.
+17:31  Funcod: anyone could help me pinpoint what's not asynchrone in a piece of code?
+17:31  Funcod: re
+17:32  dwarder: gkatsev: what book do you suggest, i've almost read manning jquery in action book, and i think i have lack of knowledge in some areas of js
+17:32  gkatsev: dwarder: how new are you to js?
+17:32  bLiNdRaGe: anyone got an idea of what that question means?
+17:32  eMyller: +1 to gkatsev.
+17:32  gkatsev: `eloquent @ dwarder // might be a good place to start
+17:32  jsBot: dwarder: eloquent: Eloquent JavaScript is a comprehensive introductory Web-based book with examples and a built-in interpreter.  http://eloquentjavascript.net/index.html
+17:33  kicken: I found the definitive guide by o'rielly to be good.
+17:33  gkatsev: dwarder: after that Javascript: The Good Parts is good by Douglas Crockford and he has a series of talks on yahoo/youtube that are great
+17:33  eMyller: Funcod: async is anything that doesn't wait for other code nor makes other code wait for it. "run in parallel".
+17:33  Funcod: yeah i know
+17:33  dwarder: gkatsev: i've written not hard stuff, i'm a php programmer, usualy i find something and modify it
+17:33  Funcod: i just need another pair of eyes to be sure
+17:34  eMyller: gkatsev, dwarder: and when you're full of js, let me present a better dom tool than jquery. :)
+17:34  kicken: Funcod, pastebin some code
+17:34  eMyller: "full" as "good"
+17:34  gkatsev: dwarder: yeah, I recommend eloquent then, afterwards, JS:TGP and the definitive guide and other more advanced books
+17:34  gkatsev: eMyller: such as?
+17:35  dwarder: gkatsev: now that i see such cool things like jquery and nod.js i have more motivation
+17:35  gkatsev: dwarder: node.js is pretty awesome.
+17:35  gkatsev: I am rewriting my personal website in node
+17:35  eMyller: gkatsev: i'm developing a dom helper library.
+17:35  dwarder: thank you all
+17:35  eMyller: in fact i already wrote it; am just preparing a new version, written from scratch.
+17:35  gkatsev: eMyller: ah, heh. gl
+17:36  eMyller: gkatsev: http://github.com/emyller/mandoo
+17:37  eMyller: latest 2.x is pretty stable.
+17:37  gkatsev: ah, yeah, I remember you linked it in here before at some point :)
+17:37  FireFly|n900: gkatsev, btw, seems SpiderMonkey does in fact allow some.. well, pattern matching
+17:38  gkatsev: FireFly|n900: does it? well, I mean [a,b] = [1,2,3] is pattern matching
+17:38  eazyigz: node.js has so many frameworks now, I don't have a need to use Django anymore
+17:38  FireFly|n900: js> function foo([a, {bar: b}]) a+b; foo([4, {bar: 5}])
+17:38  gbot2: FireFly|n900: 9
+17:38  FireFly|n900: I'd say it does
+17:38  FireFly|n900: Works in Rhino as well, so it can't be too new
+17:39  gkatsev: eazyigz: there are even django-like frameworks for node :)
+17:39  gkatsev: FireFly|n900: nifty.
+17:40 * gkatsev writes his website so it works only in firefox now >_<
+17:40  gkatsev: v8: function foo([a, {bar: b}]) a+b; foo([4, {bar: 5}])
+17:40  v8bot: gkatsev: SyntaxError: Unexpected token [
+17:40 --- pschriner is now known as DerSchreiner
+17:41  FireFly|n900: heh
+17:42  FireFly|n900: I seem to recall some guy writing his web page so that no browser rendered it correctly
+17:42  FireFly|n900: It wasn't you, was it, gkatsev? :P
+17:42  gkatsev: mozilla is adding some pretty cool stuff to js, wish it was ported over to v8 and others
+17:42  gkatsev: FireFly|n900: lol, no.
+17:44  gkatsev: FireFly|n900: I guess this can be made to work with v8 by writing a precompiler or something
+17:46  FireFly|n900: gkatsev, probably
+17:46  gkatsev: that would be interesting
+17:57 --- Charismatic is now known as Guest82181
+18:00  Gregor: Charismatic just wasn't charismatic /enough/.
+18:00  gkatsev: lol
+18:11  Funcod: anyone got a good article / blog post on asynchronous coding?
+18:12  DanC: any suggestions for how to navigate from a function call to the function definition in firebug?
+18:12  kicken: Funcod, look for stuff on event-driven programming.  that's more what JS uses.
+18:13  Funcod: k
+18:13  Funcod: iv read stuff on bubbling etc
+18:15  iganapolsky: Help
+18:16 --- Necrite is now known as Gronghon
+18:17  Pilate: `help
+18:17  jsBot: help: Paste the Javascript (only the portions relevant to your problem) in a pastebin (see `paste), and tell us what you expected, what else you tried and what actually happened. You might also consider reading: http://diveintomark.org/archives/2003/05/05/why_we_wont_help_you/
+18:22  ispirto: hi, how can i run code when client attempts to close the page or browse another page
+18:25  peeps[lappy]: ispirto, windowonbeforeunload
+18:25  erichynds: onbeforeunload event
+18:26  Guest2010: Hi
+18:27  bnjmn: random question... anyone know what language is being used on the server for urls that end in .do?
+18:27  bnjmn: or in .action?
+18:27  mastro: I've a lot of javascript error on a webpage... I can't reproduce the issue locally... the javascript on the page is minimized so it is really hard to read...... how do you advice to look for the error?
+18:27  iganapolsky: bnjmn: Java
+18:27  Guest2010: I have to include lightbox2 on a page that already has jquery included, but now there occurs a conflict between jquery and prototype, how can I fix this problem?   the real problem is that I cannot overwrite jquery because I haven't got the permission
+18:27  bnjmn: iganapolsky: is it a specific java web library?
+18:27  iganapolsky: Struts
+18:27  bnjmn: Struts...ok thanks. just curious
+18:28  Guest2010: any ideas?
+18:28  bnjmn: do Struts users typically prefer a certain DB like MySQL?
+18:28  peeps[lappy]: Guest2010, jQuery.noConflict()
+18:29  iganapolsky: I used struts with oracle and db2
+18:29  MaxMeents_: need some ideas on why url="http://www.visoogle.com/"  is valid but not url="http://www.visoogle.com/_ajax/Movies/883/1999/Fight Club-1999-MPAA-R.html"  I'm adding twitter buttons dynamically next to all my movies
+18:29  Guest2010: yes I've read that already but I can only include this jquery.noConflict()  but I cannot overwrite the function names in jquery.js
+18:29  iganapolsky: bnjmn: It is essentially java's jdbc
+18:30  bnjmn: yeah so anything that works with jdbc
+18:30  iganapolsky: Yup
+18:30  bnjmn: thanks dude
+18:30  iganapolsky: No prob
+18:30  peeps[lappy]: Guest2010, you mean you can't overwrite the code that calls the jquery?  or you can't overwrite the jquery library itself?
+18:30  Guest2010: yes
+18:31  MaxMeents_: if I type paste that second url in the top of my browser, it will go to that page and redirect back to visoogle becasue thats what that page is supposed to do but any ideas why it isn't a valid url if I can visit it through my browser?
+18:31  peeps[lappy]: Guest15399, yes to which
+18:31  Guest2010: the jqzery library itself
+18:31  Guest2010: sorry: jquery
+18:31  peeps[lappy]: you don't have to overwrite the library
+18:31  peeps[lappy]: only change the code that calls the library
+18:32  alaing: I'm trying to create a "log" function.  I'm console loging for browser that can use console.log which works perfectly but for IE I would like to use alert. I know alert would be a problem if I alert the object. WHats the best way to alert what the developer passes in to the log function, basically alert an object
+18:32  NoiseEee: IE has a console.
+18:32  NoiseEee: developers should be using it, not alert()
+18:33  Guest2010: this is the problem, I cannot change the include of the library because it is an Desktop CMS which only allows me to change the content in between body-Tags
+18:33  alaing: peeps[lappy]: you can overwrite it with a different version if you want to
+18:33  peeps[lappy]: YOU DON"T HAVE TO CHANGE THE GODDAMN INCLUDE
+18:33  NoiseEee: Guest2010: you've been suggested to use jQuery.noConflict()
+18:33  alaing: how do you access ie console. you cant use console.log
+18:33  NoiseEee: alaing: it has to be open
+18:33  NoiseEee: alaing: ie8 only
+18:34  alaing: grrr we still stuck in the ice age with ie6 and 7
+18:34  Guest2010: yes but noConflict doesn't work
+18:34  NoiseEee: alaing: we i'll grab IEDebugBar and JScompanion for those; i think then certainly "console" is valid
+18:34  alaing: Guest2010: I've overwriten jqueyr versions before without any problem maybe you should ask in #jquery
+18:34  NoiseEee: alaing: long story short, no real nice way of alert'ing objects obviously :)
+18:35  NoiseEee: s/JScompanion/CompanionJS
+18:35  NoiseEee: http://www.my-debugbar.com/wiki/CompanionJS/HomePage
+18:35  Guest2010: this line is correct?   <script> jQuery.noConflict(); </script>
+18:36  alaing: grrr with our IT secruity and department no chance of getting those installed
+18:36  alaing: Guest2010: no
+18:36  Guest2010: but?
+18:36  alaing: Guest2010: var yourJQ= jQuery.noConflict();
+18:36  alaing: then use yourJQ where ever yout like
+18:37  NoiseEee: alaing: well then the long way... if(!console) {  //further code if thing.typeof=='object' making a nice string to alert }
+18:37  Guest2010: do I have to write for "yourJQ" a special name or is it unimportant which one to take?
+18:38  alaing: NoiseEee: I'm using jquery to detect IE. So typeof!='object' alert my string is what i should use
+18:39  alaing: Guest2010: you can name it whatever you like it just placing jquery into that variable
+18:39  NoiseEee: alaing: right, i was saying that you could then iterate over the object if you needed to, to make a nicely formatted string to alert to IE
+18:40  alaing: NoiseEee: how can i make it a nicely formatted string.
+18:40  alaing: I so love console.log
+18:41  pigdude: alaing: I like how chrome shits itself if you try and treat it like a function object
+18:41  pigdude: alaing: then I get to write lots of function() { console.log(arguments); }
+18:41  NoiseEee: alaing: for(var x in obj) { if(obj.hasOwnProperty(x)) { str = str + x + ':'+obj[x]+'\n' } } kind of thing
+18:41  Guest2010: okay, but now there is a script that I also cannot change below my lightbox-script  and this other script uses Juery and includes it at this position of the soureccode
+18:41  Guest2010: and it still doesn't work
+18:42  NoiseEee: Guest2010: why cant you just pick a jquery lightbox
+18:42  pigdude: I thought jquery  is supposed to be a "safe" lib
+18:42  pigdude: not augmenting natives and such
+18:42  pigdude: how would its inclusion affect a standalone lightbox script?
+18:43  Guest2010: can I modify lightbox2 to use jquery with it (replacing prototype)?
+18:43  NoiseEee: the lightbox depends on prototype
+--- Log closed Thu Dec 02 18:46:49 2010
+--- Log opened Thu Dec 02 18:47:08 2010
+18:47 --- Users 462 nicks [0 ops, 0 halfops, 0 voices, 462 normal]
+18:47  alaing: yes with two legs theres still a chance of falling over....why you think they make tripods for cameras.....two is never enough
+18:47  pigdude: oh never mind
+18:47  pigdude: good think I asked before I continued to my joke :^)
+18:47  pigdude: something to do with broken condoms
+18:47  alaing: yes i did mean "middle leg"
+18:48  pigdude: alaing: "middle leg" may be taken to mean "penis" that is all
+18:48 * alaing has never heard of jquery being compared to a condom
+18:48 * pigdude has never heard of it used as genitalia
+18:49  pigdude: on that note!
+18:49  pigdude: lunchtime
+18:49  alaing: hot dogs for lunch?
+18:49 --- Channel ##javascript was synced in 145 seconds
+18:54  compaq: can you do if(0=<x<4)?
+18:54  Teycho: takes 12 seconds to try and find out
+18:54  compaq: or do you have to do if (x>=0 && x <4)
+18:57  alaing: compaq:  you answered your own question
+18:58  compaq: I know the answer, I was trying to keep things lively in here
+19:00  alaing: compaq then turn up the music
+19:01  compaq: lts observe a moment of silence for all the poor and defenseless people, murdered by western colonial powers in the recent days, weeks, months, years, decade and centuries, and take solice in the fact that there is a hellfire awaiting, and those murdered did not die, but will awaken in heaven
+19:04  NoiseEee: hmmm?
+19:04  compaq: whats wrong with this here:  var fram-size=0; if(lets>=0 && lets<4) fram-size=3; if(lets>=4 && lets<=6) fram-size=6; if(lets>=7 && lets<=9) fram-size=9;
+19:05 --- alaing is now known as alaing_away
+19:05  Pilate: using a - in a variable name for one
+19:05  NoiseEee: compaq: ^^
+19:05  NoiseEee: you think its a dash
+19:05  NoiseEee: computers know its a mathematical operator
+19:05  streetpc: use an underscore _
+19:05  compaq: NoiseEee, thanks you
+19:05  streetpc: or camelCase
+19:06  gkatsev: or notcamelcase
+19:06 --- alaing_away is now known as alaing
+19:07  svnlto: use hungarian notation (for the sake of saying something different again)
+19:07  svnlto: actually, dont.
+19:08  gkatsev: svnlto: it depends on how strict it is. A friend of mine worked at a place that used hungarian notation, however, custom object types were prefixed with an O or Object rather than M or MyObject
+19:08  compaq: If you are interested, I went with framSize, what is that called
+19:09  svnlto: gkatsev: true that.
+19:09  gkatsev: so, basically, what wasn't a string, int, bool or other such primitive, has O
+19:09  gkatsev: compaq: that's camelCase
+19:09  compaq: gkatsev, thanks
+19:10  compaq: I like camelCase, but it isn't so easy to spot the capitals. Probably better to use underscore, in my next coding project I will maybe
+19:10  l4rk: if you need camel case use object literals
+19:10  svnlto: or a larger font
+19:10  l4rk: camel.case
+19:10  svnlto: camel.case ++
+19:11  compaq: no, I don't like using $ even in variable names, I would never use .
+19:11  compaq: Too confusing to use . in variable names
+19:11  compaq: Is it even allowed to use . in variable names
+19:11 --- alaing is now known as alaing_away
+19:11  SpinachHead: anonymous variables, would solve the problem
+19:11  gkatsev: he meant camel={case: 'case'}; camel.case
+19:12  gkatsev: SpinachHead: anonymous variables? how can you have unnamed variables?
+19:12  SpinachHead: it was a bad joke
+19:12  gkatsev: lol, ok
+19:12  SpinachHead: maybe it will happen someday, the engine just knows!
+19:12  elb0w: wait you can use var $test as a valid variable name in js?
+19:12  gkatsev: hard to spot such stuff in text, unfortunately.
+19:12  Sorella: hyphens to separate words is the way to go
+19:12  gkatsev: elb0w: sure why not?
+19:13  elb0w: never thought to do it
+19:13  Sorella: elb0w ≣ you can use even unicode characters as variable names
+19:13  elb0w: Oh wow
+19:13  elb0w: thats good to know
+19:13  elb0w: Never thought to try any of that
+19:13  svnlto: or even as classnames or id's
+19:13  elb0w: should of known since I use jquery rofl
+19:13  elb0w: Well I guess I knew, I just never did it on my own
+19:14  svnlto: u need to use the "html5" doctype tho
+19:14  elb0w: og
+19:14  fruitwerks: ayone notice hover issues with zeroclipboard?
+19:14  elb0w: oh
+19:14 --- alaing_away is now known as alaing
+19:15 * alaing is eating CSSPIE
+19:15  svnlto: alaing: you want some coffeescript with that?
+19:15  Sorella: v8> function みずき(){ return "mizuki => water" }; みずき();
+19:15  v8bot: Sorella: "mizuki => water"
+19:16  alaing: svnlto: sure if you have some
+19:16  EvanR-work: Sorella: wow.
+19:16  fruitwerks: heh
+19:16 * alaing wonders how many people love greasemonkey
+19:16  gkatsev: huh, what?
+19:16  SpinachHead: I used to use if for loopy
+19:17  alaing: Greaseymonkey
+19:17  gkatsev: sorry, I was referring to Sorella's v8 snippet
+19:17  alaing: I'm starting to love it
+19:17  Pilate: gm is awesome
+19:18  alaing: Pilate: specially for facebook games
+19:18  Sorella: gkatsev ≣ it's on the specs, though I have only seen it a few days ago :3
+19:18  fruitwerks: ok have a looky.. http://pics.boasbysatyra.com/access/fish.php clicking on the filename should copy the link and start meking a list below the pics - all is good, but the hover over the filenames is not consistent, sometimes I can't even click on some
+19:18  gkatsev: js> (function([a,b,c])a+b+c;)([1,2,3])
+19:18  gbot2: gkatsev: Error: SyntaxError: missing ) in parenthetical:  (function([a,b,c])a+b+c;)([1,2,3])  .......................^
+19:18  gkatsev: js> function foo([a,b,c])a+b+c; foo([1,2,3])
+19:18  gbot2: gkatsev: 6
+19:18  gkatsev: Sorella: weird.
+19:18  Sorella: ehe, pattern matching awesomeness :3
+19:19  gkatsev: if only it worked on v8 as well :(
+19:20  gkatsev: fruitwerks: fishies. Also, clicking on a filename does nothing for me.
+19:20  Sorella: you can at least use (function(a, b, c){ return a + b + c })(c=3,b=2,a=1); on v8 with getters/setters
+19:21  Sorella: though it would be a getter/setter on the global object, so it could get pretty dangerous
+19:21  gkatsev: lol
+19:27  FireFly: Sorella, that one could use any valid unicode letter character in identifiers?
+19:28  gkatsev: v8> function みずき(){ return "mizuki => water" }; みずき();
+19:28  v8bot: gkatsev: "mizuki => water"
+19:28  gkatsev: js> function みずき(){ return "mizuki => water" }; みずき();
+19:28  gbot2: gkatsev: Error: SyntaxError: missing ( before formal parameters:  function みずき(){ return "mizuki => water" }; みずき();  ..........^
+19:28  FireFly: <gkatsev> SpinachHead: anonymous variables? how can you have unnamed variables?
+19:28  FireFly: Ever met $_ in Perl? :P
+19:29  gkatsev: FireFly: nope. :D
+19:29  FireFly: It's.. magical. You don't have to refer to it by name
+19:29  FireFly: and by default the result of something is stored there
+19:29  FireFly: or something like that
+19:30  fruitwerks: gkatsev - looks like it is only working in firefox (no action in chrome or safari), I have enabled the clip-list for public use
+19:30  FireFly: js> var åäö = 42
+19:30  gbot2: FireFly: Error: SyntaxError: illegal character:  var åäö = 42  .....^
+19:30 --- Putr is now known as Putr|Away
+19:30  FireFly: :|
+19:30  gkatsev: fruitwerks: I was trying it out in firefox
+19:30  Sorella: FireFly ≣ like _ on Python's REPL?
+19:30  gkatsev: v8: js> var åäö = 42
+19:30  v8bot: gkatsev: SyntaxError: Unexpected token var
+19:30  FireFly: Dunno, maybe
+19:30  fruitwerks: gkatsev, yes please try again now
+19:30  gkatsev: v8: var åäö = 42
+19:30  v8bot: gkatsev: undefined
+19:30  dioek: hello, is it safe to replace a <script src=...> with the actual script in a webpage? i.e, inline a script? even if multiple scripts on the page might have similar variable names etc?
+19:30  FireFly: gkatsev, it works in Rhino though
+19:30  gkatsev: v8: var åäö = 42; åäö
+19:30  v8bot: gkatsev: 42
+19:31  Sorella: Assuming Conkeror uses SpiderMonkey, it works on SM
+19:31  gkatsev: fruitwerks: can only click on first 3
+19:31  FireFly: dioek, as safe as keeping them external
+19:31  FireFly: They share global scope in any case
+19:31  gkatsev: Sorella: yeah, it pretty much has to use spidermonkey, I dont think they wanted to bother to hook it up with v8
+19:32  Sorella: well, SpiderMonkey has lots of cool extensions, like let, yield and stuff
+19:32  dioek: FireFly: Thanks!
+19:32  FireFly: Wait, what engine was gbot2 using?
+19:32  Sorella: gbot2: version
+19:32  gkatsev: spidermonkey
+19:32  Sorella: `version
+19:32  Sorella: baw
+19:32  gkatsev: js> version()
+19:32  gbot2: gkatsev: 185
+19:33  FireFly: Hm, 'kay
+19:34  FireFly: <Sorella> you can at least use (function(a, b, c){ return a + b + c })(c=3,b=2,a=1); on v8 with getters/setters
+19:34  FireFly: <Sorella> though it would be a getter/setter on the global object, so it could get pretty dangerous
+19:34  FireFly: Hrm
+19:35  FireFly: Wouldn't one need to create a setter for every possible variable name?
+19:35  Sorella: yep
+19:35  FireFly: s/need/have/
+19:35  FireFly: Blarg
+19:35  Sorella: you'd have to define them before you use
+19:35  FireFly: Would be a pretty neat hack to implement "named variables" though :P
+19:35  Sorella: you can always use macros :3
+19:35  Sorella: but yeah, it would be a pretty addition to js
+19:37 --- alaing is now known as alaing_away
+19:47  gkatsev: would be awesome if I could do something like this in js function f(0) 1; | (n) n*f(n-1);
+19:47  gkatsev: js> function foo(0) true; [foo(0), foo(1)];
+19:47  gbot2: gkatsev: Error: SyntaxError: missing formal parameter:  function foo(0) true; [foo(0), foo(1)];  .............^
+19:50 --- alaing_away is now known as alaing
+19:52  antlong: hello, im using a firefox extension called firepath, and i noticed that the contents of a panel are not selectable with the cursor, you have to right click the element to copy it to your clipboard. i would like to change that. is there a function in this code that is preventing this functionality from happening? http://dpaste.de/fpG3/
+19:53  antlong: line 887 is where copy is set in the context menu. i dont see anything that would indicate highlighting text with the mouse is disabled though
+20:02  m0: klkdsadkasdasdsdsd14444
+20:03  Pilum: -_^
+20:03  antlong: line 152 and 156 looks like the problem, but im not sure
+20:10  Rockfang: hi all
+20:10  Pilum: Lo
+20:12  Rockfang: Might someone possibly know why the code at the following link is not displaying the submitted words but isnstead displaying "[object HTMLInputElement]" instead? http://pastebin.com/AGtaWS7m
+20:13  Pilum: Because your referencing is awful.
+20:13  Pilum: `forms @ Rockfang
+20:13  jsBot: Rockfang: forms: Accessing form elements via JavaScript: Don't use document.formName.elementName. Use document.forms['formName'].elements['elementName'] or getElementById() or getElementsByName() instead.
+20:13  Rockfang: hm
+20:13  antlong: what do i need to change in this piece of code to allow leftClick to highlight the text you mousedown on and drag over? http://dpaste.de/ARhN/
+20:13  Rockfang: i'm missing the .values
+20:13  erichynds: is there a list of bot factoids somewhere?
+20:14  pigdude: `factoids
+20:14  pigdude: erichynds: I'm afraid not
+20:15  Pilum: Rockfang: Yes. And your referencing is horrible.
+20:15  erichynds: bummer
+20:15  pigdude: erichynds: I'm sure there is, I was being facetious
+20:15  Rockfang: ok.  i will attempt to do better.  im new at this.
+20:15  Pilum: Rockfang: There's no guarantee it'll work even if you do add the .value to those.
+20:16  Pilum: Rockfang: Using the elements collection, as suggested above, will be the most convenient approach.
+20:16  Rockfang: ok
+20:17  Rockfang: ty for the suggestion.
+20:17 --- alaing is now known as alaing_away
+20:18  erichynds: jsBot: commands
+20:18  jsBot: You are at level 0 and have access to: about, beer, commands, find, id, karma, list, popular, profile, time, validate, who
+20:18  pigdude: jsBot: list
+20:18  jsBot: Namespaces: abbr , array , ask , best , classname , css , doctype , dom , efnet , firebug , html , ie , innerhtml , js , new , no , nodeType , not , Number , Object , regex , String , stupid , vector , whois , xhtml
+20:18  antlong: what do i need to change in this piece of code to allow leftClick to highlight the text you mousedown on and drag over? http://dpaste.de/ARhN/
+20:19  Pilum: antlong: Most of us don't wish to support 3rd party software. I strongly suggest you ask the author.
+20:20  antlong: its pure js, it shouldnt matter. youre not fighting the man by not helping.
+20:20  pigdude: antlong: the construct we see here is not any direct way to listen on DOM events
+20:20  pigdude: antlong: so we assume it is some additional layer
+20:21  pigdude: antlong: and because you haven't pasted it, we assume it is third-party
+20:21  antlong: pigdude, perhaps: http://dpaste.de/0BoW/ ?
+20:21  Rockfang: it is interesting how many "pastebin" style websites there are out there
+20:23  Pilum: pigdude: He already told us he's working on some 3rd party Firefox extension.
+20:23  pigdude: Pilum: oh, sorry, I missed that
+20:28  enRaged: is there a way to set innerHTML to a webpage url?
+20:28  NoiseEee: no
+20:28  NoiseEee: but you can use an iframe
+20:28 --- alaing_away is now known as alaing
+20:28  enRaged: what about using ajax or something?
+20:29  enRaged: right now i use ajax to see if a certain time in my databse > currenttime
+20:29  enRaged: then i want to set the div display to block instead of hidden and display content of a dynamic page...
+20:29  NoiseEee: enRaged: you can use your backend to fetch the contents, but you're markup would be insanely invalid and cause problems (two <body> tags for example)
+20:30  enRaged: well can i dynamically set the iframe url somehow with javacript?
+20:30  NoiseEee: of course
+20:30  enRaged: can you point me to a tutorial or tell me how?
+20:31  NoiseEee: google "change iframe location javascript"
+20:31  enRaged: so basically ill pu the iframe in a div and set the div to block then set the iframe url, probably in the other order though
+20:31  NoiseEee: document.getElementById('myIframeID').src = 'http://disney.ca/';
+20:31  enRaged: thx noise
+20:34 --- alaing is now known as alaing_away
+20:41 --- Putr|Away is now known as Putr
+20:51  Freeman606: Hello.
+20:51  Freeman606: Does anyone think they'd be able to help my DOM issue
+20:51  gkatsev: `anyone
+20:51  jsBot: anyone: Somewhere, someplace, in some universe, somebody uses whatever you just asked about. However, if you actually want help with it, please just ask a question; don't ask to ask, or ask if anyone can help.
+20:52  gkatsev: depending on the issue, #html or w/e it is might be more helful
+20:52  gkatsev: *helpful
+20:52  Freeman606: hm thanks, I'll get straight to the point
+20:53  Freeman606: Im trying to create a js script that will detect if the current page has EITHER rss content OR links to rss content
+20:53  Freeman606: I'd like to begin by creating an if statement that checks if the page is an rss document
+20:53  Freeman606: so far " document.getElementsByTagName("rss").item(0) " as a condition isnt working for me
+20:54 --- Gregor is now known as Guest37696
+20:54  Freeman606: it fails on documents that contain an <rss > tag
+20:55  Freeman606: is my condition statement correct?
+21:04  MaxMeents_: alright, I thought I had fixed this but apparently not, could someone help? Here... http://www.jsfiddle.net/w4RfG/5/   Twitter has nothing on this and I've looked everywhere on google, my space in my url will not work regardless of its encoding
+21:04  MaxMeents_: either + or %20, if I use + it shows what I want to see but then the link back to the site still contains the + instead of the space
+21:04  MaxMeents_: in the actual browser
+21:08  SolarBoom: http://pastebin.com/KGtdJE35
+21:08 --- MikhX_ is now known as MikhX
+21:09  SolarBoom: I'm sorry, wronly pasted
+21:11  Freeman606: #html
+21:19 --- alaing_away is now known as alaing
+21:20  outer_space: how can you bind an html info box location to the mouse pointer so it moves with it?
+21:20  EvanR-work: that sounds horrible
+21:21  outer_space: its a spec, just trying to follow the spec
+21:22  peeps[lappy]: uh, then how would you ever mouseout
+21:22  NoiseEee: "info box location"?
+21:22  NoiseEee: are you talking about a tooltip that follows your mouse?
+21:22  outer_space: i never want the info box to do any events
+21:22  outer_space: ya tooltip sounds better
+21:23  peeps[lappy]: outer_space, record the mouse position when your box is created.  then on mousemove, update the box location with the difference between the inital x,y and the current mouse x/y
+21:23  peeps[lappy]: use the mousex/y relative to page.  libraries like jquery make this easy
+21:23  outer_space: ty, i'll have to look into the mousemove event
+21:26  peeps[lappy]: is this something where you are dragging an object?
+21:26  peeps[lappy]: clicking and dragging that is
+21:48  slashiter: does anybody here know a code that take the face of a person in a picture and put this face on another picture?
+21:48  NoiseEee: slashiter++
+21:48  jsBot: NoiseEee gave a beer to slashiter. slashiter now has 1 beer.
+21:49  Sorella: best troll of the day
+21:52 --- Gregor is now known as Guest24183
+21:53 --- Guest24183 is now known as Gregor
+21:57  rupert88: is there a good way i can load content securely to the client side without the user being able to access it
+21:58  rupert88: maybe encrypt it
+21:58  frodenius: 'content'?
+21:58  rupert88: i want to load content to the client side so its available instantly when they click a link on my website
+21:58  rupert88: i want to try and prevent interruption from loading content
+21:58  frodenius: eh?
+21:59  NoiseEee: rupert88: if the data's coming across, the user gets to access it.
+21:59  frodenius: you want the user to not control if something is loaded?
+21:59  rupert88: i want to preload data, but not give access to it until the server says ok
+21:59  rupert88: is that possible?
+22:00  frodenius: 'access'?
+22:00  NoiseEee: i guess
+22:00  NoiseEee: maybe you can give a 'key' to unencrypt it when the server says "ok"
+22:00  NoiseEee: but why don't you just leave ALL the data on the server until its "ok" ?
+22:00  NoiseEee: what perceived benefit are you after?
+22:00  compaq: Love this piece of code here: ('img').error(function() { $(this).remove();  });
+22:01  rupert88: i want the data available instantly, especially for slow connections
+22:02  rupert88: im trying to make a test (question answer system) platform with a timer...i guess i could start the timer when javascript reports document is read
+22:02  rupert88: is ready
+22:03  rupert88: what are your thoughts?
+--- Log closed Fri Dec 03 13:04:41 2010

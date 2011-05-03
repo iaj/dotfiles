@@ -1,0 +1,40 @@
+--- Log opened Wed Nov 03 09:20:57 2010
+--- Log closed Wed Nov 03 09:25:58 2010
+--- Log opened Wed Nov 03 11:04:24 2010
+11:04 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+11:06 --- Channel #awk was synced in 120 seconds
+11:53  tomeo: I have a file tmplist that looks like this http://pastie.org/1269098. I want to get the number 23.976 from the first line. Im using awk '/fps/ {print $6}' tmplist | sed 's/(//' but that give me two lines. Can awk grab just the first line somehow?
+11:55  pgas: awk '/fps/{print substr($6,2);exit}' #no need for sed
+11:56  tomeo: pgas: nice! thanks :) what is the purpose of exit?
+11:56  pgas: to stop processing the file after the first match
+11:58  tomeo: pgas: thanks
+14:46  user01: hi is there a way if I have a statement repeated "T=1" several times in a text file, to keep the first occurence, replace the second with T=1+1, T=1+2, T=1+3 . . . T=1+i?
+14:47  pgas: sub(/T=1/,"T=1+" ++i) # assuming at most one T=1 per line 
+14:49  user01: pgas: thanks!  yes should only be one . . . 
+15:15  user01: pgas: can i pipe the file into that?
+15:15  user01: file.txt | sub(/T=1/,"T=1+" ++i) ?
+15:15  user01: er
+15:16  user01: cat file.txt |
+15:21  user01: mmm awk -f file.txt sub(/T=1/,"T=1+" ++i) doesnt work
+15:22  user01: lets see if i can guess the syntax
+15:24  trumpen: user01: awk '{code here}' file.txt
+15:25  user01: trumpen: i dont need -f?  ok
+15:25  user01: trumpen: thanks!
+15:29  user01: trumpen . . .  in your example is file.txt input file?
+15:30  user01: ive done: awk '{sub(/T=1/,"T=1+"++i)}' inputfile.txt > outputfile.txt
+15:30  user01: didnt seem to work, all blank
+15:34  pgas: you miss a print
+15:34  user01: pgas: ah ok . . . 
+15:34  pgas: sub() ;print
+15:34  gnubien: user01: printf '%s\n' T=1 T=1 T=1 T=1 T=1 |awk '{sub(/T=1/,"T=1+"++i); print $0}'
+15:38  user01: the result shows T=1+2 on the first occurance, T=1+7, T=1+12 . . . 
+15:38  pgas: oh right
+15:38  user01: I just want it to show T=1, T=2, T=3 . . . 
+15:39  pgas: awk '/T=1/{sub(/T=1,"T=1+"++i)}{print}'
+15:39  user01: pgas: ok thanks ill try
+15:40  pgas: i miss a /
+15:40  user01: after T=1?
+15:41  user01: pgas: i think i can just remove the 1+ part
+15:42  pgas: ehe yest after T=1
+15:43  user01: pgas: works perfect now, thanks!
+--- Log closed Wed Nov 03 21:41:39 2010

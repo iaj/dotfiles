@@ -1,0 +1,348 @@
+--- Log opened Sat Nov 13 00:00:04 2010
+00:02  KeeperOfTheSoul: sanmarcos: search for any character with a value > 127 perhaps?
+00:02  sanmarcos: KeeperOfTheSoul: how?
+00:03  KeeperOfTheSoul: also depends if you want to ignore characters < 32
+00:07  KeeperOfTheSoul: sanmarcos: see if any :help /character-classes match what you need
+00:09  sanmarcos: so I just ga a character and it returns
+00:10  sanmarcos: <…> 8230, Hex 2026, Octal 20046
+00:10  sanmarcos: but searching for /\%d8230 doesnt match it
+00:10  sanmarcos: why?
+00:10  sanmarcos: oh never mind it did!
+00:10  sanmarcos: the cursor was hiding it sorry
+00:11  sanmarcos: KeeperOfTheSoul: how would I search for > 127?, I Would have to script it?
+00:11  KeeperOfTheSoul: shouldn't have to, just looking it up now
+00:12  sanmarcos: KeeperOfTheSoul /[^ -~v^I] did it
+00:13  sanmarcos: space is 32 and ~ is 126 in the character table
+00:14  sanmarcos: so, the range of printable characters plus tab
+00:15  KeeperOfTheSoul: yeah, you can do something with 'isprint and the [[:print:]]
+00:15  KeeperOfTheSoul: aka [\p]
+00:16  DHulme: or [[:print:][:space:]]
+00:16  sanmarcos: :print: is ASCII?
+00:16  sanmarcos: *[:print:]*  [:print:]     printable characters including space
+00:17  sanmarcos: what you want is :print: :tab:
+00:17  DHulme: the [:foo:] character classes only work for 8-bit characters
+00:17  sanmarcos: DHulme: isnt utf8 8 bit?
+00:17  sanmarcos: <…> 8230, Hex 2026, Octal 20046 would be in there?
+00:18  DHulme: [[:print:][:tab:]] won't match a vertical tab, for instance
+00:18  DHulme: UTF-8 is an 8-bit encoding of wide characters
+00:18  sanmarcos: what does that mean wide characters?
+00:18  sanmarcos: utf-8 doesn't seem to be compatible with ascii
+00:18  DHulme: that said, [:print:] will match characters between 128 and 255
+00:18  KeeperOfTheSoul: sanmarcos: wide, as in characters larger than 1 byte
+00:18  sanmarcos: so it will match extended ASCII
+00:18  KeeperOfTheSoul: DHulme: depending on your 'isprint setting
+00:19  DHulme: indeed
+00:19  KeeperOfTheSoul: sanmarcos: utf-8 is compatible with 7-bit ASCII
+00:20  sanmarcos: which is non-extended ascii?
+00:20  sanmarcos: 0-127
+00:20  KeeperOfTheSoul: yup
+00:20  KeeperOfTheSoul: extended ascii is just a mess of code pages
+00:20  DHulme: KeeperOfTheSoul: note that \p won't work because it always matches characters > 255
+00:20  KeeperOfTheSoul: DHulme: oh, didn't know that
+00:21  sanmarcos: so 0-127 in unicode matches the 0-127 in utf
+00:21  sanmarcos: utf8
+00:21  KeeperOfTheSoul: 0-127 unicode == 0-127 ascii == 0-127 utf-8
+00:22  DHulme: codepoints 0-127 in Unicode match the 0-127 in ASCII, which also happens to match 0-127 in Latin1
+00:22  DHulme: UTF-8 is not a different character set, it's one way of encoding Unicode characters.
+00:23  Jerub: yay encodings
+00:25  KeeperOfTheSoul: yeah, I just stick with UTF-8 with a BOM and be done with it
+00:43  alex_XD: Hello?
+00:47  peth: alex_XD: http://paranoid.fi/~pasi/docs/questions.html
+00:47  peth: also, hello
+00:48  BadHorsie: Hehe
+00:48  alex_XD: peth: oh! thanks! XD
+00:52  alex_XD: by the way why set comments from vimrc dont work in my c++ files... even after changing formatoptions...
+00:52  fow: set comments?
+00:53  alex_XD: yeah
+00:53  alex_XD: set comments=sr:/**,...
+00:54  fow: you shouldn't have to set that yourself...
+00:54  alex_XD: but it only works in new file, so it is something with filetypes or formatoptions
+00:58  alex_XD: somebody! how to set options for specific filetype?
+00:59  spiiph: :h FileType, :h :autocmd
+00:59  spiiph: alex_XD, and the cpp filetype plugin will set the correct comments for you.
+01:01  alex_XD: spiiph: thanks!
+01:19 --- squiggy_ is now known as squiggy
+01:20  bosie: is there a way to count for something
+01:21  bosie: i.e. /\vfoo but with an overall count instead of searach results
+01:21  bosie: search
+01:21  fow: :%s/foo//n
+01:22 --- isaacs[away] is now known as isaacs
+01:23  bosie: fow: me?
+01:24  fow: yes
+01:24  fow: see :h count-items
+01:26  bosie: hm
+01:27  bosie: what i don't understand though. if i use a visual line and do :'<,'>s/ //n i still have the highlighting in the entire file
+01:27  fow: That's just the way hlsearch works
+01:27  bosie: ok
+01:27  bosie: so i am not doing something wrong?
+01:27  fow: nope
+01:28  bosie: thanks
+01:28  fow: you're welcome
+01:52 --- ajpi is now known as ajpiano
+01:52  eut: hello
+01:52  eut: how can i bind <f2> to toggle expandtab?
+01:53  macrobat: i don't get it. i set noet, bufdo set noet, check set noet? and it says "noexpandtab". then i press tab in insert mode. the resulting whitespace consists of spaces
+01:53  spiiph: macrobat, that's because you indent settings are wrong.
+01:54  spiiph: vimgor, indent
+01:54  vimgor: For a quick overview of Vim's indentation settings, see http://vim.wikia.com/wiki/Indenting_source_code
+01:54  alex_XD: eut: try imap <F2> <ESC>:set expandtab<CR>i
+01:54  spiiph: No, that's not it.
+01:54  spiiph: And why on earth would you want such a mapping anyway?
+01:55  macrobat: why in insert mode? :D
+01:56  eut: i usually have tabs expanded to two spaces but some sources i'm working on recently dont have expanded tabs... i keep getting the two messed up and it causes problems
+01:56  spiiph: Oh, there were two different questions.
+01:56  spiiph: My apologies.
+01:57  eut: alex_XD, that doesnt work
+01:57  alex_XD: ok nmap<F2>:set noexpandtab<CR>
+01:58  eut: alex_XD, awesome.
+01:58  alex_XD: eut: look if it is "imap" you need to be in insert mode
+01:58  eut: alex_XD, it didnt work in insert mode though
+02:00  sjl: how do I read the entire contents of a buffer into a string variable?
+02:00  eut: alex_XD, oh wait... its not working. it will toggle from the default of expandtabs to noexpandtab but it wont go back
+02:01  alex_XD: eut: yeah this, way harder XD
+02:01  eut: alex_XD, possible?
+02:02  alex_XD: eut: I'm no pro XD but sure
+02:06  Fernandos: hi
+02:06  Fernandos: I now may say something that might be schocking for Vi(m) users.. I hate the ESC key.
+02:07  Fernandos: It's usually the least used key for me.. how would I map ESC to RSHIFT in Vim?
+02:07  Fernandos: the right shift button
+02:08  Jerub: Fernandos: i remap esc to capslock
+02:08  Jerub: it's a big key, not used for anything, other people can use your keyboard without a hassle and it stops capslock errors :)
+02:08  Jerub: (i do it OS wide instead of in vim, because doing it in vim is much much harder)
+02:08  Fernandos: Jerub: hmm even better. But capslock would need to get disabled to not interfere right?
+02:08  macrobat: Fernandos: i used xmodmap to swap caps & esc
+02:10  Fernandos: hmm isn't there a simple nmap command that would work for me?
+02:10  Fernandos: I hope you forgive me, I'm currently forced to use windows but want to stay with vim..
+02:13  Fernandos: k I'll remap ESC to CAPS
+02:13  Fernandos: found a tool for windows that remaps keys
+02:14  KeeperOfTheSoul: microsoft keyboard layout creator can do that, plus there is some scankeys registry thing
+02:15  Fernandos: I've used http://webpages.charter.net/krumsick/
+02:15  Fernandos: pretty simple, but requires reboot
+02:15  Fernandos: finally I get rid of the most useless key
+02:16  KeeperOfTheSoul: ah yeah, that's the scancode map registry hack
+02:17  KeeperOfTheSoul: though MSKLC is nice, since the layout is a proper layout, shows up in the language tool bar, etc
+02:17  FruitBasket: When I close vim everything on the screen is erased.. how can I tell it to just leave it alone? Something about a secondary buffer, I think, but no idea where to look.
+02:18  Fernandos: thx KeeperOfTheSoul will fav that
+02:19  Fernandos: I've seen in an interview that  Mark Zuckerberg's developers seems to use Vim too.. I wonder what their vimrc contains..
+02:19  Fernandos: btw. I've made my first vim plugin today :)
+02:19  KeeperOfTheSoul: who's Mark Zuckerberg?
+02:19  FruitBasket: facebook guy
+02:19  KeeperOfTheSoul: ah right
+02:19  Fernandos: the ceo
+02:25  Fernandos: I honestly have to code in: asm, c, c++, java, php, asp, css, html, js, xml, ruby, python and a lot of other languages this semester. And I've installed some plugins for vim, but still I feel more or less lost and don't know howto get codecompletion, codeformatting and indention and compilation working..
+02:28  Fernandos: what's anoying is that there isn't a simple way to just get it to work, but you would need to do all those settings and switches for vim yourself and seek until google bleeds.. idk maybe I've not read enough but I already spent hours reading about vim commands and tutorials
+02:29  spiiph: You're doing something wrong.
+02:29  spiiph: :filetype plugin indent on does most of the work for you.
+02:30  spiiph: There are :compiler settings for the most common compilers. Code completion works decently out of the box for some of the languages you've listed.
+02:32  Fernandos: hmm.. not for me
+02:33  Fernandos: this is my vimrc http://pastie.org/1294217 nothing special..
+02:47  peth: eut: nmap <silent> <F2> :set et!<CR> | imap <silent> <F2> <C-O><F2>
+02:56 --- peth_ is now known as peth
+03:01  spiiph: Fernandos, you've destroyed a perfectly decent .vimrc by sourcing mswin.vim
+--- Log closed Sat Nov 13 03:07:25 2010
+--- Log opened Sat Nov 13 03:07:47 2010
+03:07 --- Users 562 nicks [0 ops, 0 halfops, 0 voices, 562 normal]
+03:08 --- Channel #vim was synced in 70 seconds
+03:12  eut: peth, thanks!
+03:32 --- smorg is now known as ormaaj
+04:12 --- Natch is now known as Natch|
+04:30  Maahes: I'm having a bit of an issue with pasting in vim, when I paste, if it's more than say a 1 or two lines of text, it eats an arbitrary number of characters from the first line.
+04:34  spiiph: :h 'paste, :h 'pastetoggle
+04:36  Maahes: spiiph: thankyou, any recommendation for a good binding to pastetoggle?
+04:37  spiiph: Any F key
+05:27  slimjimflim: hi i'm using the xdebug plugin with vim for php and i'm having trouble finding the value of a variable.  anyone familiar with this?
+05:42  thepro4ever: if I have typed a word or phrase quite a bit in one text file with vim is there a way to tab complete that word???
+05:42  homekevin: Ctrl-N?
+05:44  homekevin: :h i_CTRL-N
+05:47  slimjimflim: xdebug anyone? ^^^^^^^
+05:51  thepro4ever: homekevin: it seems like i have to type more to tab complete than just hitting one button, it seems like a waste
+05:52  thepro4ever: woah just ctrl-n works pretty nice however its scanning all my included files from my header includes statement which is a waste in this case
+05:54  nikhil_: anyone have any advice/link for a newbie as to how to make vim into a python IDE (or something like that -- i'm aware that vim is mainly a text editor)
+06:01 --- tk is now known as Guest61238
+06:13  zdw: I'm trying to map Ctrl-v to Ctrl-V for block mode selection
+06:13  zdw: And map <C-v> <C-V>
+06:14  zdw: doesn't seem to work..
+06:14  zdw: (using mvim, so the system command for paste does not conflict)
+06:16  slimjimflim: nikhil_: http://webcache.googleusercontent.com/search?q=cache:SElzKTYwxUsJ:blog.dispatched.ch/2009/05/24/vim-as-python-ide/+vim+python+ide&cd=1&hl=en&ct=clnk&gl=us
+06:19  Rakko: zdw: there is no such thing as a shifted control character
+06:19  zdw: Uh, in this case there is.
+06:19  Rakko: i.e. <C-v> and <C-V> are both ASCII 22
+06:19  zdw: Go try it.
+06:20  Rakko: Do you mean command-v? That's the only system command for paste on a Mac.
+06:20  zdw: For mvim at least, I don't get into Visual Block mode unless I hold down shift.
+06:20  zdw: The goal is to not have to hold down ctrl-shift-V to get into visual block mode.
+06:20  nikhil_: thanks slimjimflim
+06:20  Rakko: Odd. That doesn't happen on mine.
+06:21  zdw: Hmm...
+06:21  zdw: my vim version: VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Aug 15 2010 22:03:01)
+06:21  zdw: 2nd line: MacOS X (unix) version
+06:21  Rakko: mine too
+06:22  Rakko: Yeah, I think you're pressing Command instead of Control.
+06:23  zdw: I'm pretty sure I'm not - I've remapped caps lock to Control, and using that or the physical Ctrl key, I still have to hold shift to get into visual block mode...
+06:24  Rakko: ok, that's weird
+06:26  zdw: I'm wondering if it's something else in my .vimrc... I'm going to split half on it.
+06:26  zdw: Thanks Rakko :)
+06:30  crocket: hoo
+06:44  thepro4ever: woah just ctrl-n works pretty nice however its scanning all my included files from my header includes statement which is a waste in this case
+--- Log closed Sat Nov 13 07:07:21 2010
+--- Log opened Sat Nov 13 07:07:40 2010
+07:07 --- Users 549 nicks [0 ops, 0 halfops, 0 voices, 549 normal]
+07:08 --- Channel #vim was synced in 73 seconds
+07:34  tylerl: does vim have a mode that's like "less -f"?
+07:36  tecnico: vim will open whatever.. why the -f (force) then?
+07:38  kermit: tecnico: mine doesnt
+07:38  tecnico: what is it not opening?  is it some weird thing like a pipe or device file?
+07:40  kermit: tecnico: yes, thats what we were talking about
+07:40  tylerl: felipe_: "-f" in less is "follow" -- it's essentially like tail -f, it watches for updates to the file and appends new file lines to the working buffer
+07:41  tecnico: man less says -f is force
+07:41  kermit: -f is force in mine too
+07:42  tylerl: kermit: oh you're right. I'm thinking about the "F" command inside the program
+08:14  tlonim: I want to switch to nth(nth in absolute terms) tab in a script -- currently i am doing  tabfirst | count<tabnext> -- is there a better way ?
+08:17  Raimondi: tlonim:  :tabn 3  should take you to tab 3
+08:17  tlonim: Raimondi: but doc says relatively.. ie. 3 from present tab
+08:17  tlonim: not in absolute terms -- like 3rd tab
+08:18  tlonim: 3rd as in from left
+08:18  Raimondi: tlonim: The doc doesn't say relatively.
+08:19  Raimondi: See the section for   :tabn[ext] {count}
+08:19  Raimondi: Under  :h :tabn
+08:19  tlonim: Raimondi: hmm.. yeah.  since it says it wraps around i assumed so
+08:19  tlonim: ah..wait for count it doesn't mention wrapping
+08:20  Raimondi: :)
+08:20  tlonim: cool :)
+08:25  tlonim: is there a way i can have syntax based folding while at same it folds based on markers too.. kind of hybrid ?
+09:21 --- cli is now known as Guest45793
+09:33  jvv: hi, can someone help me with key mappings ? i would like to change NERDTreeMapPreview ("g" . NERDTreeMapActivateNode) to some other key mapping.
+09:34  jvv: but standard nmap solutions dont seem to work ;/
+09:42  jvv: ok, let g:NERDTreeMapPreview = "<CR>" did seem to do the trick
+10:31 --- wtfness is now known as foocraft
+10:50  sktrdie: hey
+10:50  sktrdie: is there a plugin such as that I can use to parse JavaDoc's html from a project and view it directly in VIM and call it's API methods from VIM and reference it all in VIM
+--- Log closed Sat Nov 13 11:02:16 2010
+--- Log opened Sat Nov 13 11:07:38 2010
+11:07 --- Users 553 nicks [0 ops, 0 halfops, 0 voices, 553 normal]
+11:08 --- Channel #vim was synced in 69 seconds
+11:08 --- TK is now known as Guest77206
+13:02  etherealite: Is it possible to paste while in interactive mode/
+13:02  etherealite: ?
+13:02  _rane: insert mode?
+13:02  _rane: C-r
+13:02  _rane: and registry
+13:03  etherealite: _rane control r ?
+13:03  _rane: yep
+13:03  DHulme: yes
+13:04  etherealite: can i paste in insertmode?
+13:04  _rane: yes, you can :)
+13:04  _rane: control-r + registry
+13:04  etherealite: control r isn't working in insert mode.
+13:05  etherealite: oh
+13:05  _rane: e.g. ctrl-r "
+13:05  _rane: for the default anonymous registry, I think
+13:06  etherealite: _rane the regs are zero index it seems
+13:06  etherealite: indexed*
+13:07  _rane: try :registers
+13:08  etherealite: _rane wholy fucking awesome.
+13:08  DHulme: just read :help registers to find out more about registers
+13:21  rindolf: Hi all.
+13:25  iaj: Hi there.
+13:26  heeen: why am i ending up with printf("")hi ; for :ab pri printf("")<esc>2hi
+13:27  rindolf: heeen: an abbreviation is not a macro, I think.
+13:30  heeen: rindolf: i got this from vimtips
+13:30  heeen: http://vim.wikia.com/wiki/Using_abbreviations
+13:31  heeen: also it seems to eat the escape
+13:31  heeen: but not the following commands
+13:31  heeen: and the abbbreviation also is triggered in : mode
+13:33  DHulme: that's because you used :abbr instead of :iabbr
+13:34  DHulme: well, it works for me, probably your 'cpo' is set to something odd
+13:37  heeen: cpo?
+13:38  DHulme: see :help 'cpo'
+13:38  DHulme: I'm afraid I have to go out now
+13:54  heeen: when I type the abbr and then enter it doesn't get expanded
+13:55  heeen: I only get an indentet line
+14:16  fruight: does vim use ncurses?
+--- Log closed Sat Nov 13 14:47:47 2010
+--- Log opened Sat Nov 13 14:48:08 2010
+14:48 --- Users 566 nicks [0 ops, 0 halfops, 0 voices, 566 normal]
+14:48  jamessan: fruight: yes
+14:49 --- Channel #vim was synced in 69 seconds
+--- Log closed Sat Nov 13 14:55:48 2010
+--- Log opened Sat Nov 13 14:56:12 2010
+14:56 --- Users 571 nicks [0 ops, 0 halfops, 0 voices, 571 normal]
+14:57 --- Channel #vim was synced in 77 seconds
+15:09  bassliner: i have a strange problem using the "jump to last position" feature from /etc/vim/vimrc - as root it works, as user not. both root and the user do not have a .vimrc in their homes. any help?
+--- Log closed Sat Nov 13 15:24:14 2010
+--- Log opened Sat Nov 13 15:24:39 2010
+15:24 --- Users 568 nicks [0 ops, 0 halfops, 0 voices, 568 normal]
+15:25 --- Channel #vim was synced in 70 seconds
+15:28  peth: oh, that one. disregard the ctrl-o bit, but check viminfo owner/permissions anyway.
+15:33  bassliner: peth: damn, it was indeed root:root and 0600.
+15:33  bassliner: peth: no idea why. thank you anyways.
+15:34  peth: that can happen when you sudo, bassliner
+15:35  bassliner: peth: yea i'm just playing around with sudo trying to find the thing.
+15:35  bassliner: peth: but usually it should not affect permissions if a .viminfo file was already there and i sudo to edit some file.
+15:36  peth: i'd agree. i remember reading about the exact reason, but i lost where it was
+15:36  bassliner: peth: thank you tho. solved my problem. :)
+15:36  peth: np :)
+16:16  igors: hi. how can I use map with numbers? map <A-1> 1gt ?
+--- Log closed Sat Nov 13 16:24:12 2010
+--- Log opened Sat Nov 13 16:24:33 2010
+16:24 --- Users 571 nicks [0 ops, 0 halfops, 0 voices, 571 normal]
+16:24 --- Server: [bartol.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+16:24  tmr: lineinthesand, :set paste
+16:25 --- Channel #vim was synced in 68 seconds
+16:42  peth: lineinthesand: vim or gvim? if term vim, check that 'mouse' is set to something, eg. :set mouse=a
+16:47  lineinthesand: tmr, thank you – that does the trick!
+17:01 --- jjcli is now known as jjcli_
+17:20  Maahes: what's the way to select the begining of multiple lines and insert a character in each (i.e., comment them out). I found something that said use Ctrl+v, then I then the character. But that only inserts into one spot for me.
+17:22  Maahes: ctrl+V even
+17:24  tlonim: is there a way to prevent current tab change when using tabdo ?
+17:24  tmr: I would just use nerd_commenter, or :substitution over visual selection.
+17:25  peth: Maahes: are you *positive* you're using c-v? it should work after you c-v, I, and <esc>. does it read -- visual *block* -- as mode?
+17:25  Maahes: nevermind, found it. I just didn't wait long enough
+17:33  Maahes: tmr: just tried nerd commenter, it doesn't quite work right for this for some reason. 4,cc does !thing instead of ! thing
+17:36  Maahes: I have another plugin I've been using, comments.vim, it also doesn't work right for this.
+17:41  sudoer: i have have this "asdasdasCURSOR_HERE"   how can i delete the text behind the cursor fastest?
+17:49  paradigm: sudoer: if oyu're still in insert mode, ctrl-u
+17:50  sudoer: paradigm: what does that command do?
+17:50  paradigm: deletes everything from the cursor to the start of the line
+17:50  paradigm: also works in bash, weechat and a number of other programs :D
+17:50  paradigm: sudoer: or, if you're in command mode, d0 will do the same thing
+17:51  paradigm: or d^
+17:51  peth: i thought *behind* the cursor? D will do that in normal mode
+17:51  paradigm: there's a slight difference with regards to whether you want to kill whitespace at the beginning of the line
+17:52  peth: also c-u doesn't kill to start of line in vim
+17:52  paradigm: well, yeah, ther'es the whitespace thing
+17:52  sudoer: cntrl-d doesnt work for m
+17:52  paradigm: in such cases I do ctrl-u twice
+17:52  paradigm: sudoer: but c-u does, rigth? If not can you be more explicit abotu what oyu want done?
+17:53  sudoer: paradigm want the cntrl-u behaviour
+17:53  paradigm: :D
+17:53  paradigm: so you're good, then, right?
+17:53  sudoer: paradigm  but was trying it in command mode
+17:54  paradigm: in command mode you can do d0 or d^
+17:54  paradigm: depending oon if you want to kill whitespace at the beginning of th eline or not
+17:54  sudoer: paradigm: ok, cool
+17:54  sudoer: paradigm: always so many commands to learn :(
+17:55  paradigm: sudoer: stick with it, it pays of fin the end
+17:55  sudoer: paradigm: how about in insert mode how can i delete to end of line?
+17:55  paradigm: if there's a way to do it in insert mode I don't have it memorized
+17:55  DHulme: sudoer: it gets easier when you realise that d0 isn't a separate command, it's the same d operator you already know, operating on the 0 motion
+17:55  paradigm: ^ that, very true
+17:56  DHulme: there's hardly ever a need to do it in insert mode: if you know it's what you're going to do, use C to get into insert mode
+17:56  sudoer: right, i see
+17:56  paradigm: sudoer: in comand mode you can delete until the end of the line with D
+17:57  paradigm: if I'm in insert mode and want to do that, I usually hit <ESC>D
+17:57  sudoer: there reason i ask about insert mode is because often when I do :e path/to/file   <---- i need to edit this fast,  cntrl-u is probably more useful here
+17:58  paradigm: sudoer: I'd also recommend learning insert mode's ctrl-w, which deletes the word behind the cursor
+17:58  paradigm: quite useful
+17:58  sudoer: paradigm: yes, even more useful!!
+17:59  sudoer: can you guys recommend a good list of insert mode commands, I know lots of command mode stuff, but cant find good insert mode commands
+17:59  paradigm: sudoer: :help ins-special-keys
+18:00  paradigm: vim's :help is absolutely wonderful, it's got everythingg in there if you're wiling to spend the time wading through it
+18:00  henux: I want to replace all ',' characters with " & " between lines 269 and 373 in the current document.  How do I do this?
+18:01  DHulme: see :help :s
+18:01  DHulme: and :help :range
+18:01  henux: If I do ":%s/,/ & /" I think it will replace all
+18:01  henux: k
+18:01  DHulme: OK, if you've got as far as using :s, you just need :help :range
+18:06  henux: Okay it worked.  Now I would like to add '//' at the end of each line between those lines.  Can you give me the command I will find out the details myself
+--- Log closed Sun Nov 14 19:50:10 2010

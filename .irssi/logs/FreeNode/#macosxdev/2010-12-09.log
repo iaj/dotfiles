@@ -1,0 +1,100 @@
+--- Log opened Thu Dec 09 00:00:18 2010
+00:51 --- Calvin is now known as cstephens4
+06:21 --- edude03_ is now known as edude03
+10:02 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+10:10 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+10:38  Rapp: hi everybody
+10:38  Rapp: how can i return a c++ class from an ObjC++ method? i get the error "conversion from objc_obj* to non scalar MyClass"
+10:49 @Beelsebob: pastebin your code
+10:49  Rapp: Beelsebob: one second
+10:52  Rapp: http://pastebin.ca/2014579
+10:52  Rapp: line 7 generatess the error
+10:53  Rapp: self.positionCallback is a function pointer, taking a MA::Position as the argument
+10:53 @Beelsebob: can you show me the declaration of positionCallback please?
+10:54  Rapp: sure, one second
+10:54  Rapp: typedef void (*positionCallback_t)(MA::Position);
+10:54  Rapp: that's the type
+10:55  Rapp: and i did a "@property (nonatomic) MA::positionCallback_t positionCallback;" in the objc class
+10:55  Rapp: might that be the problem...?
+10:55 @Beelsebob: no, that looks sane
+10:56 @Beelsebob: it looks sane to me… but in all honesty, I can't figure out why you're not just writing a C function there
+10:57 @Beelsebob: I take it you have a C++ model implementation here that you're trying to get data into from iOS?
+10:58  Rapp: Beelsebob: exactly. the model is running on two different phone OSes
+10:58  Rapp: and i am now writing the iOS backend for that
+10:58 * Beelsebob nods
+10:59 @Beelsebob: I also don't get the early exit there
+10:59 @Beelsebob: why didn't you just write if (NULL != self.positionCallback) { self.positionCallback(MAPositionFromCLLocation(newLocation)); }
+11:00  Rapp: i can try the workaround, by converting the locationToPosition method to a simple non class member, maybe that helps. i just wanted to keep that functionality close to the ObjC class
+11:00  Rapp: Beelsebob: yes, that probably looks a bit more clean. thanks for the suggestion
+11:01 @Beelsebob: http://pastebin.ca/2014582 <— that's what I'd do
+11:02  Rapp: workaround works
+11:02 @Beelsebob: it's not really a workaround
+11:02 @Beelsebob: it's just neater code
+11:02  Rapp: did exactly that
+11:02 @Beelsebob: no need to write crazy OO code when the idea isn't OO
+11:03  Rapp: true
+11:03  Rapp: thanks for your time.
+11:05 @Beelsebob: no probs
+11:05 @Beelsebob: I still don't understand why the obj-c didn't work though
+11:06  Rapp: me neither. will investigate later, when i have the time
+12:36 --- StrAbZ is now known as StrAbZ|away
+19:08  Rapp: hi everybody!
+19:09  Rapp: is it true that for a property, i do not need to write self.myproperty, but just myproperty?
+19:09  Rapp: hm... i think i never need self.something, right? i am so used to python at the moment... there you always need self.something
+19:12  Pieter__: if you don't use self., you won't go through the accessors
+19:12  Pieter__: so stuff like KVO and memory management won't be fired
+19:13  Rapp: ohh... so it is often a good idea to use self.?
+19:13  Rapp: KVO?
+19:13  Pieter__: yes, you should almost always use the accessors
+19:13  Pieter__: key-value observation
+19:14  Rapp: mhm
+19:14  Rapp: thanks
+19:14  Zorg: "self.something" is not the same as "something", which is the same as "self->something"
+19:17 --- JamesUK_ is now known as JamesUK
+19:17  Bavarious: Rapp: bear in mind that declared properties are not the same as instance variables
+19:17  Bavarious: They are commonly related, though
+19:24  Rapp: yes, sure. i am talking about properties, not instance variables. what's the difference? except, that you automatically get getters/setters for them? plus attributes like atomic and retain?
+19:28  Zorg: the way I see it, one directly accesses the instance variable, the other calls a method
+19:28  Bavarious: Yeah, and they are different objects from a runtime perspective. Also, an instance variable doesn't need accessors whilst a property must have at least a getter and can only be accessed through getters/setters, which is why you *must* use either obj.xxx or [obj xxx] or [obj setXxx]
+19:29  Rapp: hmmm
+19:29  Rapp: i just wrote not self.someproperty, but someproperty -- and the compiler ate it. will it fail at runtime?
+19:30 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+19:30  Rapp: (i changed it now, but just curious)
+19:30  Bavarious: That works if you have an instance variable named 'someproperty'
+19:30  Rapp: hm, no i haven't
+19:30  Rapp: i synthesized the properties
+19:30  Bavarious: Show your class declaration
+19:31  Rapp: http://pastebin.ca/2014959
+19:34  Bavarious: Does iOS use the modern runtime?
+19:35  Rapp: i have no idea
+19:35  Bavarious: The modern runtime has the ability to automatically create a backing instance variable, although I'm not sure if it guarantees that the instance variable has the same name as the property
+19:36  Rapp: i guess its runtime is still made of wood...
+19:36  Rapp: hmhm
+19:36  Bavarious: But since you're not declaring instance variables at all, I'd guess that's the case
+19:36  Rapp: well, i guess i'll read up on properties tomorrow. now i'll go home. thanks for all the help!
+19:37  Bavarious: Ah, iOS uses the modern runtime
+--- Log closed Thu Dec 09 20:00:34 2010
+--- Log opened Thu Dec 09 20:15:59 2010
+20:15 --- Users 51 nicks [2 ops, 0 halfops, 0 voices, 49 normal]
+20:17 --- Channel #macosxdev was synced in 95 seconds
+--- Log closed Thu Dec 09 20:41:09 2010
+--- Log opened Thu Dec 09 20:46:36 2010
+20:46 --- Users 51 nicks [2 ops, 0 halfops, 0 voices, 49 normal]
+20:47 --- Channel #macosxdev was synced in 90 seconds
+--- Log closed Thu Dec 09 21:41:05 2010
+--- Log opened Thu Dec 09 21:46:29 2010
+21:46 --- Users 50 nicks [2 ops, 0 halfops, 0 voices, 48 normal]
+21:47 --- Channel #macosxdev was synced in 86 seconds
+--- Log closed Thu Dec 09 22:00:15 2010
+--- Log opened Thu Dec 09 22:05:36 2010
+22:05 --- Users 50 nicks [2 ops, 0 halfops, 0 voices, 48 normal]
+22:06 --- Channel #macosxdev was synced in 89 seconds
+--- Log closed Thu Dec 09 23:18:41 2010
+--- Log opened Thu Dec 09 23:19:07 2010
+23:19 --- Users 43 nicks [2 ops, 0 halfops, 0 voices, 41 normal]
+23:20 --- Channel #macosxdev was synced in 93 seconds
+--- Log closed Thu Dec 09 23:42:11 2010
+--- Log opened Thu Dec 09 23:47:35 2010
+23:47 --- Users 42 nicks [2 ops, 0 halfops, 0 voices, 40 normal]
+23:48 --- Channel #macosxdev was synced in 91 seconds
+--- Log closed Fri Dec 10 00:00:09 2010

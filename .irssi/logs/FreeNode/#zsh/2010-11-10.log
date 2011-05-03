@@ -1,0 +1,125 @@
+--- Log opened Wed Nov 10 08:35:12 2010
+08:35 --- Users 145 nicks [0 ops, 0 halfops, 0 voices, 145 normal]
+08:36 --- Channel #zsh was synced in 99 seconds
+--- Log closed Wed Nov 10 08:48:11 2010
+--- Log opened Wed Nov 10 08:48:33 2010
+08:48 --- Users 145 nicks [0 ops, 0 halfops, 0 voices, 145 normal]
+08:50 --- Channel #zsh was synced in 101 seconds
+09:37 --- insomnia1alt is now known as insomniaSalt
+--- Log closed Wed Nov 10 11:22:11 2010
+--- Log opened Wed Nov 10 11:22:30 2010
+11:22 --- Users 147 nicks [0 ops, 0 halfops, 0 voices, 147 normal]
+11:24 --- Channel #zsh was synced in 109 seconds
+--- Log closed Wed Nov 10 12:10:11 2010
+--- Log opened Wed Nov 10 12:10:37 2010
+12:10 --- Users 148 nicks [0 ops, 0 halfops, 0 voices, 148 normal]
+12:12 --- Channel #zsh was synced in 108 seconds
+12:14  Valodim: hey guys. can someone give me a hint on how to find out in an if condition whether a glob-pattern is non-empty?
+12:14  Valodim: I thought [[ -n *(N) ]] would work, but that appears to always return true
+12:15  Mikachu: you have to assign it to an array first, then check if the array is empty
+12:16  Mikachu: a=( *(N) ); [[ -n $a ]]
+12:16  Valodim: awesome, thanks :)
+12:17  Mikachu: you might be able to get away with just [ -n *(N[1]) ] but it probably breaks sometimes
+12:17  Mikachu: (note single braces)
+12:18 --- f8l-s_body is now known as f8l
+12:20  Valodim: nah the array solution sounds good
+12:27  Valodim: works perfectly in the script, thanks again
+13:33 --- Yorokobi_ is now known as Yorokobi
+14:18  piranha: hi all; is it possible to bind some arbitrary shell command to a key in zle? I'm trying it this way: 'bindkey "\ee" ls', but it doesn't work. Am I doing something wrong?
+14:20  estragib: function foo { ls }; zle -N foo; bindkey key foo
+14:26  iaj: i need to rename a bunch of files.. eg all files that are starting with \digits i want to append a 1 before
+14:26  iaj: how could I do that?
+--- Log closed Wed Nov 10 14:28:14 2010
+--- Log opened Wed Nov 10 14:28:35 2010
+14:28 --- Users 149 nicks [0 ops, 0 halfops, 0 voices, 149 normal]
+14:29  iaj: i need to rename a bunch of files.. eg all files that are starting with \digits i want to append a 1 before   -- did my message make it through before I got disced?
+14:29  Mikachu: you don't want to do that though
+14:29  iaj: \d\d<space> would be the way..
+14:29  Mikachu: the output of ls will just be output on top of your prompt
+14:30 --- Channel #zsh was synced in 116 seconds
+14:30  Mikachu: iaj: autoload zmv; zmv '(<->) (*)' '1$1 $2'
+14:30  iaj: rename \d\d\(whitespace)anything.mp3  to 1(the whole filenamebefore).mp3
+14:31  Mikachu: er, my expression was a bit silly
+14:31  Mikachu: zmv '(<-> *)' '1$1'
+14:31  piranha: estragib: thanks
+14:32  iaj: so if I wanted to have 2 digits in front Id use zmv '(<-><-> *)' '1$1' ? Mikachu ?
+14:32  Mikachu: no, <-> is any number of digits
+14:32  estragib: piranha: note Mikachu's caveat, you probably want to output the info another way
+14:33  piranha: ah...
+14:33  iaj: Mikachu: thanks:)
+14:34  piranha: estragib: any ideas how? I'm not that good at zsh scripting :(
+14:36  iaj: Mikachu: $1 is only containing of the <-> part :/
+14:36  iaj: ioh nevermind :(
+14:37  Mikachu: iaj: you might want to run zmv -n, it'll just print the commands
+14:37  Mikachu: when the output is right, run it without -n
+14:44  iaj: Mikachu: thanks for that hint I just found out the ( ) is needed for encapsulation.. and storing in the replacement registers
+14:45  estragib: piranha: start with man zshzle; see the zle command. quick and dirty: function foo { zle -M "$(ls)" }
+14:45  piranha: ok, will try that and read more if it doesn't work :)
+14:49  Mikachu: _ls () { local oldbuf=$BUFFER;BUFFER=' ls'; print -z $oldbuf; zle .accept-line }
+14:49  Mikachu: zle -N _ls
+14:49  Mikachu: bindkey whatever _ls
+14:49  estragib: ... or wait for Mikachu to fix it :)
+14:50  Mikachu: that is sort of black magic, i don't even know why i have to use print -z instead of setting buffer again
+14:50  Mikachu: if i set BUFFER after doing accept-line, it runs the original command instead of ls
+14:52  piranha: hm, actually zle -M is quite nice as well; this is not what I wanted to do from start, but it's nice
+14:53  estragib: oh, i actually completely misunderstood what you wanted there
+14:54  Mikachu: piranha: as you see, it is a bit tricky to run a command when you press a key, because zle is for _editing_ the command line, not running commands
+14:54  piranha: aha, I see
+14:54  Mikachu: i wanted to do this too long ago, so my solution is much worse
+14:55  Mikachu: bindkey -s '^[v' "${key[F11]} ls
+14:55  Mikachu: "
+14:55  piranha: this more of an experiment, but it looks quite nice and probably useful
+14:55  Mikachu: it relies on that f11 is bound to push-input
+14:55  piranha: though it has no colors after passing it to zle -M :)
+14:55  Mikachu: hm maybe it can be a bit simpler than what i came up with above
+14:56  Mikachu: yeah
+14:57  Mikachu: _ls () { zle .push-input; BUFFER=' ls'; zle .accept-line }
+14:57  piranha: :)
+14:58  piranha: thank you
+15:04  Mikachu: oh, and the space is so it doesn't enter your command history, if you have histignorespace setopted
+15:16  piranha: yeah, I know that, thanks
+16:28  jvm: hi. why is the output of "tail -n5 /var/log/auth.log" different from the output of "test=`tail -n5 /var/log/auth.log`; echo $test"? the newlines seem to be missing. adding -e to echo doesn't change anything. how do i do it right?
+16:29  asyd: IFS?
+16:30  jvm: are you talking to me, asyd? if so i have no clue on what that should tell me ;)
+16:35  ft: test=( ${(f)"$(tail -n5 foo)"} )
+16:35  ft: print -l $test
+16:40  jvm: thanks a lot. do you happen to know how to make it bash compatible?
+16:45  ft: nope.
+16:46  jvm: hehe. have a good evening, anyway ;)
+--- Log closed Wed Nov 10 19:35:40 2010
+--- Log opened Wed Nov 10 19:56:12 2010
+19:56 --- Users 148 nicks [0 ops, 0 halfops, 0 voices, 148 normal]
+19:58 --- Channel #zsh was synced in 133 seconds
+20:02 --- mren|off is now known as mren
+--- Log closed Wed Nov 10 20:21:56 2010
+--- Log opened Wed Nov 10 20:22:21 2010
+20:22 --- Users 148 nicks [0 ops, 0 halfops, 0 voices, 148 normal]
+20:24 --- Channel #zsh was synced in 115 seconds
+--- Log closed Wed Nov 10 21:16:52 2010
+--- Log opened Wed Nov 10 21:22:14 2010
+21:22 --- Users 148 nicks [0 ops, 0 halfops, 0 voices, 148 normal]
+21:23 --- Channel #zsh was synced in 112 seconds
+21:41 --- quaestor is now known as Guest3590
+22:39  veilig_: I keep having to do a 'setopt autocd' for every new terminal I open.  I've tried adding this command to my .zshrc but it doesn't seem to be sticking.
+22:39  veilig_: so everytime I open a new terminal and try to '..' to the parent dir, I get the 'zsh: permission denied: ..'  message
+22:45  teratorn: veilig_: sounds like you have something bad in your .zshrv
+22:45  teratorn: .zshrc
+22:45  teratorn: veilig_: can can setopt other options and they "stick"?
+22:45  teratorn: s/can can/you can/
+22:49  veilig_: teratorn: yes - it appears they do. I just copied over a .zshrc file from my box at home, where it works.  perhaps I'll strip it down and see if I can find out what is causing the issue
+22:50  teratorn: veilig_: if you place 'setopt autocd' as the last line .zshrc does it help?
+22:51  veilig_: no
+22:51  teratorn: also, echo $? after that line
+22:51  teratorn: veilig_: is it 0?
+22:52  veilig_: I put the echo statement after the setopt in my .zshrc file (last two lines)  didn't echo anything out to the terminal when I opened a new one
+22:52  teratorn: redirect to a file, then
+22:52  teratorn: echo $? > /tmp/debug
+22:53  veilig_: yes - 0
+22:53  teratorn: hmmmph well
+22:53  teratorn: pretty weird
+22:54  veilig_: has to be something else, I commented out everything but those last two lines and it works - I'll just have to narrow it down
+--- Log closed Wed Nov 10 23:22:47 2010
+--- Log opened Wed Nov 10 23:23:11 2010
+23:23 --- Users 155 nicks [0 ops, 0 halfops, 0 voices, 155 normal]
+23:24 --- Channel #zsh was synced in 111 seconds
+--- Log closed Thu Nov 11 00:00:39 2010

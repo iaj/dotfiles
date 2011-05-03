@@ -1,0 +1,324 @@
+--- Log opened Wed Oct 27 13:15:55 2010
+--- Log closed Wed Oct 27 13:15:55 2010
+--- Log opened Wed Oct 27 13:16:16 2010
+13:16 --- Users 149 nicks [0 ops, 0 halfops, 0 voices, 149 normal]
+13:17 --- Channel #zsh was synced in 81 seconds
+14:56  buntfalke: Hi
+14:56  buntfalke: Why doesnt this snipped copy the content of myfifo to stdout whenever it's there?
+14:56  buntfalke: exec {CTRL_FD}<myfifo
+14:56  buntfalke: while zselect ${CTRL_FD}; do
+14:56  buntfalke: read -eu ${CTRL_FD}
+14:56  buntfalke: done
+14:57  buntfalke: I get an infinite amount of empty lines as soon as i first write anything to myfifo
+14:57  Mikachu: shouldn't it be {}<& ?
+15:01  buntfalke: Mikachu: i thought no, because of this "exec {myfd}>~/logs/mylogfile.txt" line in the manpage and myfifo is a file, and not a descriptor
+15:01  buntfalke: Am I wrong?
+15:01 * buntfalke tries
+15:01  Mikachu: ah, right
+15:01  Mikachu: i use that syntax so rarely i'm probably wrong
+15:02  buntfalke: Yes, with a & it says "file number expected"
+15:02  buntfalke: so it all seems to be fine so far, i just screw things up with my while-read cycle somehow...
+15:02  buntfalke: essentially, all I intend to do is continuously read a fifo to stdout without polling.
+15:02  Mikachu: err, read doesn't take fds, does it?
+15:03  Mikachu: you're probably storing stdin in $13
+15:03  Mikachu: it takes a parameter name to store the read line in
+15:03  Mikachu: so here you need <&$CTRL_FD
+15:04  buntfalke: note I used the '-u' switch
+15:04  Mikachu: doh
+15:04  buntfalke: plus I used -e to avoid parameter-manipulation
+15:04  Mikachu: but -e is 'echo and do not assign'?
+15:04  Mikachu: oh right
+15:05  Mikachu: but can't you just cat it?
+15:05  Mikachu: it'll get new lines as they come in
+15:06  Mikachu: oh, cat quits on eof
+15:06  buntfalke: right.
+15:06  buntfalke: plus, it's not a builtin :-)
+15:06  Mikachu: if you actually write something to the fifo, do you get that as output?
+15:07  buntfalke: Yes.
+15:07  Mikachu: so the problem is select always returns for fifos i guess
+15:10  Mikachu: if i do
+15:10  Mikachu: cat <&$fd
+15:10  Mikachu: it returns instantly with an empty line
+15:10  Mikachu: but if i do 'cat fifo' it waits
+15:10  Mikachu: and if i echo something into the fifo first, it prints it in both cases and exits
+15:10  Mikachu: so i guess Something Subtle is going on
+15:11  buntfalke: There's even more to it, try this:
+15:12  buntfalke: http://nopaste.info/9319a6582f.html
+15:12  buntfalke: The first line wont be printed, until the fifo is written to
+15:12  Mikachu: right, i noticed it hangs on the exec line
+15:12  buntfalke: ignore the "print .", that's for debugging
+15:13  Mikachu: there was a thread about fifos on the ml recently
+15:13  Mikachu: (maybe it was you)
+15:13  buntfalke: no, wasnt me
+15:14  Mikachu: ah
+15:15  Mikachu: a quick google suggests you will not have this problem if you open a write fd to the fifo yourself
+15:15  Mikachu: and it seems to be true
+15:15  Mikachu: http://www.outflux.net/blog/archives/2008/03/09/using-select-on-a-fifo/
+15:16  Mikachu: % mkfifo fifo
+15:16  Mikachu: % exec {fd}<>fifo
+15:16  Mikachu: % cat <&$fd
+15:16  Mikachu: hello
+15:16  Mikachu: hello
+15:16  Mikachu: (other terminal)
+15:16  Mikachu: % echo hello > fifo
+15:16  Mikachu: % echo hello > fifo
+15:17 * buntfalke tries
+15:18  Mikachu: has the additional advantage of not blocking on the open() too
+15:19  buntfalke: also works with my zselect/read-cycle this way, too
+15:19  buntfalke: which open()?
+15:19  Mikachu: when you do exec {fd}<>fifo
+15:19  buntfalke: an, not blocking with exec you mean?
+15:19  buntfalke: right.
+15:19  Mikachu: zsh does open
+15:19  Mikachu: the exec is just a no-op there
+15:20  Mikachu: you can just as well use : {fd}<>fifo
+15:21  buntfalke: so why is it explicitly mentioned in the manpage-example - it already confused me there, too :-)
+15:22  Mikachu: because you have to write something there
+15:22  buntfalke: if I dont add exec it's a 'command not found: "fd"'
+15:22  Mikachu: you can't just perform a redirection without a command
+15:22  Mikachu: hysterical raisins
+15:24  Mikachu: hm, the syntax {variable}&>- to close an fd isn't documented except in an example, and why do you need to have the fd number in a parameter to close it?
+15:25  buntfalke: you mean historical reasons?
+15:25  buntfalke: :-)
+15:25  Mikachu: yes, that was the joke
+15:25  Mikachu: and i meant {variable}>&-
+15:25 * buntfalke took a while, I'm not a native speaker...
+15:26  buntfalke: Well, simply because I cannot know the fd-number beforehand?
+15:26  buntfalke: It'll be assigned anything >= 10.
+15:26  Mikachu: that is for closing, not opening
+15:26  buntfalke: ply $fd>&- might work just as well as {fd}>&- does
+15:26  Mikachu: if i know i have fd 15 open, i have to do fd=15; exec {fd}>&-
+15:26  buntfalke: propably
+15:26  Mikachu: it doesn't :)
+15:27  buntfalke: ah
+15:28  buntfalke: true, but you could only get that fd 15 when you inherit it a as a child when someone else creates your zsh process
+15:28  buntfalke: cause zsh itself wont provide you with a way to open a numbered fd that's not associated with a parameter name from it's birth on
+15:28  Mikachu: well, it's still strange that you have to give it inside a parameter
+15:28  buntfalke: true
+15:28  Mikachu: and i might have thrown away the parameter
+15:28  Mikachu: say i just want to close all open fds by looping 10-1000
+15:29  Mikachu: i guess if i loop, i have it in a parameter, but still :)
+15:29  buntfalke: Well - there's not a real usecase where you throw them away, cause you never know which descriptornumber you get. you'd need self-modifying code to do so
+15:29  buntfalke: say, you get FDs for 10k files --> you'll need to have 10k parameters anyway, cause how else to get the FDs in zsh-syntac
+15:29  buntfalke: syntax.
+15:30  Mikachu: it could happen very easily in interactive use :)
+15:30  buntfalke: thus, if you throw the params away, you would have to know which FD number is associated with which file beforehand - but you cannot
+15:30  Mikachu: % for a in {10..1000} { : {a}>&- }
+15:30  Mikachu: zsh: parse error near `>&'
+15:30  Mikachu: % for a in {10..1000} ; do : {a}>&- ; done
+15:30  Mikachu: zsh: file descriptor 10 used by shell, not closed
+15:30  buntfalke: uh...if you do interactive use, just keep your params... :-D
+15:30  buntfalke: hmmm
+15:30  Mikachu: i confused my zsh
+15:31  Mikachu: oh wait i'm just an idiot
+15:31  Mikachu: i thought i had written for a ({10..1000})
+15:31  Mikachu: for a ({10..1000}) { : {a}>&- } works fine, phew
+15:31  buntfalke: hehe
+15:31  buntfalke: how did you get the "file descriptor 10 used by shell, not closed" msg?
+15:31  Mikachu: by running that command
+15:32  buntfalke: ah. but how to see if i didnt clean up everything before exiting?
+15:32  Mikachu: not following?
+15:34  buntfalke: the sequence
+15:34  buntfalke: exec {CTRL_FD}<>.ircctrl
+15:34  buntfalke: exec {CTRL_FD}<>-
+15:35  buntfalke: produces "zsh: can't clobber parameter CTRL_FD containing file descriptor 11 \newline zsh: success: -" for example
+15:35  buntfalke: how to properly close before I exit?
+15:35  buntfalke: err. i miss the &. never mind it.
+15:36  Mikachu: you have to lose the < too
+15:36  Mikachu: but exit closes all fds so you don't have to
+15:36  buntfalke: sure, just for the style :-)
+15:36  Mikachu: doesn't seem to matter if you use <&- or >&- to close it
+15:38  buntfalke: <>&- doesnt quite work though, descriptors seem to be a weak point in the syntax somehow...
+15:38  buntfalke: maybe it's for parsing reasons...
+15:41  buntfalke: Mikachu: Do you know of a way to do mkfifo in with builtins/modules only?
+15:43  Mikachu: there's only one call to mkfifo in the code, and it seems to be for the <() syntax
+15:43  Mikachu: and it's only used conditionally
+15:44  Mikachu: for me it creates symlinks to fds
+15:48  buntfalke: Okay, so that can't be avoided. Oh well, who cares.
+15:48  Mikachu: if you want to add it somewhere, zsystem would probably be the place
+15:49  Mikachu: it already has stuff like read and flock
+16:10  cYmen: Hm...so apparently I can't du -hs * in / because there is a symlink cycle somewhere in /dev
+16:11  cYmen: How do I exclude /dev again? du -hs *~dev?
+16:17  teratorn: cYmen: yes
+16:21  buntfalke: Mikachu: thanks
+16:24  cYmen: hm..
+16:24  cYmen: I just tried using this:
+16:24  cYmen: resudo() { sudo $(fc -nl -1)
+16:24  cYmen: With du -hs *^dev
+16:24  cYmen: Isn't history expansion done first? Because it's not working...
+16:25  Mikachu: $() starts a subshell
+16:25  cYmen: Meanin?
+16:25  cYmen: (in this case)
+16:26  Mikachu: meaning it probably doesn't have your history
+16:26  teratorn: it does for me... but that might be because i have shared history and various options turned on
+16:27  cYmen: Mikachu: It generally works it just doesn't seem to work in this case.
+16:28  teratorn: is typing "^p^as <RET>" so hard?
+16:28  teratorn: s being an alias for sudo
+16:29  cYmen: No, that's what I usually do. I still wonder why it doesn't work.
+16:29  Mikachu: or sudo !!
+16:29  teratorn: cYmen: it's worth noting that's not "history expansion", but "command substitution"
+16:30  cYmen: good point
+16:32  cYmen: Still, filename generation and expansion should be performed afterwards.
+16:32  Mikachu: you'd need eval then
+16:33  cYmen: Why?
+16:33  Mikachu: i mean if you use $(fc)
+16:34  cYmen: I'm not following.
+16:34  Mikachu: okay
+16:34  Mikachu: i lost track of what you're doing so it might not be relevant :)
+16:35  cYmen: Well, I was trying to write a function that would repeat the last command using sudo.
+16:35  cYmen: And I found a case where it doesn't work.
+16:35  cYmen: a) Why? b) How to fix?
+16:36  Mikachu: a) because you didn't use eval b) use eval
+16:36  cYmen: c) Fine it's an absurd function and a purely theoretical problem.
+16:36  cYmen: Why do I need to?
+16:36  Mikachu: it would be troublesome if using a parameter expanded shell syntax inside the string
+16:36  Mikachu: a="*"
+16:36  Mikachu: echo $a
+16:36  Mikachu: what output do you expect?
+16:37  Mikachu: (i'm trying to be pedagogic, not annoying)
+16:38 * cYmen is surprised that it ever worked at all.
+16:39  Mikachu: you probably want to put quotes around the $() too
+16:39  Mikachu: or it will first split on spaces, then  eval it
+16:39  Mikachu: which will probably break in other subtle ways
+16:40  cYmen: sudo: eval: command not found
+16:40 * cYmen goes looking for eval in the manpage.
+16:40  Mikachu: other way around
+16:40  Mikachu: eval "sudo $(fc blabla)"
+16:44  cYmen: hm...seems to work
+16:44  cYmen: still a crappy function
+16:45  cYmen: doesn't use alias or anything, works only once because it then runs itself
+17:21  cYmen: hm...is it possible to put colors codes in a textfile so that cat will pick up on them?
+17:34  romen: Hi, I'm working on a zsh script that is loaded from .zshrc, I need to temporarily set the option null_glob before a task (if it is not set) and then set it back to its original value after the task has been done. Is there a way to know if an option is currently set? (I mean something different to grep the output of set -o or similar)
+17:35  estragib: romen: if [[ -o OPT ]]
+17:36  romen: estragib: I knew there was something this simple!! thanks a lot!!!
+17:36  estragib: np :)
+18:06 --- adominguez_ is now known as adominguez
+18:11  Mikachu: cYmen: sure, just put the codes in there
+18:11  Mikachu: cYmen: print -P %F{red}hello > file; cat file
+18:11  Mikachu: romen: if you're in a function, you can setopt localoptions and all options will be restored when you leave
+18:12  Mikachu: romen: for nullglob, you can also append (N) to a pattern to set it for just that pattern
+18:13  romen: Mikachu: both things are really interesting (actually I was right now looking at a way to implement "options" contexts for functions using scripts)
+18:13  Mikachu: if you have an actual separate script file, that environment of course has nothing to do with your interactive shell environment
+18:13  Mikachu: generally we only say script when talking about such files
+18:13  romen: so if inside a function I setopt localoptions and then setopt (p.e.) nullglob, when the function returns nullglob will not be set?
+18:14  Mikachu: right, unless it was before too
+18:14  romen: Mikachu: perfect, and yes I'm using scripts, but I'm sourcing them from zshrc because what they should do is actually modify the env xD
+18:14  Mikachu: ah
+18:15  romen: Mikachu , estragib: thanks a lot again!!
+18:19  romen: Mikachu, please correct me if I'm wrong: If I write something like '' for lp in ~/.zsh/local_plugins/*.zsh(N)  '', it behaves like I'm setting the NULL_GLOB option just for that globbing pattern, right?
+18:20  Mikachu: right
+18:20  romen: perfect
+18:21  romen: My love for zsh grows day after day also because of this IRC chan, thanks to everyone xD
+18:21 * Mikachu takes all credit
+18:21  romen: xD
+--- Log closed Wed Oct 27 18:24:12 2010
+--- Log opened Wed Oct 27 18:44:37 2010
+18:44 --- Users 151 nicks [0 ops, 0 halfops, 0 voices, 151 normal]
+18:45 --- Channel #zsh was synced in 81 seconds
+--- Log closed Wed Oct 27 19:28:09 2010
+--- Log opened Wed Oct 27 19:28:29 2010
+19:28 --- Users 150 nicks [0 ops, 0 halfops, 0 voices, 150 normal]
+19:29 --- Channel #zsh was synced in 81 seconds
+19:44 --- f8l is now known as FBI
+--- Log closed Wed Oct 27 19:53:41 2010
+--- Log opened Wed Oct 27 19:59:04 2010
+19:59 --- Users 151 nicks [0 ops, 0 halfops, 0 voices, 151 normal]
+19:59  firespeaker: how do I find out what a key's binding code is?
+19:59  Mikachu: run cat and press it
+20:00  firespeaker: hm, that's a little different from what I'm already using on some
+20:00  firespeaker: e.g., home is ^[[H in my files, but ^[OH in cat
+20:00 --- Channel #zsh was synced in 76 seconds
+20:00  ft: yeah, doesn't that suck? :)
+20:00  firespeaker: why is that?
+20:00  ft: "special" keys suck balls in terminals.
+20:00  Mikachu: well, that means your ^[[H bind is not effective
+20:00  firespeaker: ugh, tell me about it
+20:00  firespeaker: really?
+20:00  ft: application mode vs. raw(?) mode.
+20:00  Mikachu: or that you change the keypad mode in zle
+20:01  Mikachu: which, if you do, you shouldn't need to ask about it :)
+20:01  ft: it's the correct way to do it, though.
+20:01  ft: then, you can ask terminfo.
+20:02  firespeaker: Mikachu: unless I did it a while ago and haven't touched it since and forgot
+20:02  Mikachu: that's possible
+20:02  Mikachu: does the word smkx ring a bell?
+20:02  firespeaker: my .zshrc is over 200 lines long
+20:02  ft: yes.
+20:02  ft: smkx and rmkx
+20:02  firespeaker: not for me
+20:02  Mikachu: well obviously you know them ft :)
+20:03  ft: I posted some code on -workers. or was it -users?
+20:03  Mikachu: i dunno, i rarely check where a message is directed to
+20:03  Mikachu: and then memorize it for weeks
+20:04  firespeaker: oh, I have '^[OH' and '^[[H'
+20:04  firespeaker: I think one I got from someone and one was my own
+20:04  ft: http://www.zsh.org/mla/users/2010/msg00065.html
+20:05  ft: Then you can use ${terminfo[kpp]} and knp.
+20:05  firespeaker: ft: No such widget `history-beginning-search-backward-end'
+20:05  ft: firespeaker: that's why I said "see man zshcontrib". :-)
+20:05  firespeaker: I'm looking at it right now, but I'm not sure what part of it I should be looking at...
+20:06  firespeaker: you have to autoload it?
+20:06  ft: yes.
+20:06  ft: and then some code.
+20:06  ft: sec.
+20:06  Mikachu: i just bind page up/down to up-history and down-history and leave the fancy stuff for the arrow keys
+20:06  firespeaker: I don't exactly know what that means in this context, but I think I can figure it out.  or at least part of it
+20:06  Mikachu: useful sometimes to just be able to navigate history
+20:07  firespeaker: I use n for up-history
+20:07  firespeaker: but I always forget what down-history is... :-P
+20:07  firespeaker: and then I break and start over
+20:07  Mikachu: heh
+20:07  Mikachu: isn't it hjkl for navigating?
+20:08  firespeaker: hm, yeah
+20:08  firespeaker: apparently so
+20:08  firespeaker: n is from vi's find next
+20:08  ft: autoload -Uz history-search-end
+20:08  ft: zle -N history-beginning-search-backward-end history-search-end
+20:08  ft: zle -N history-beginning-search-forward-end  history-search-end
+20:08  ft: after that they should be there.
+20:08  firespeaker: Mikachu: I thought hjkl were just for moving, not for finding next results and stuff
+20:08  firespeaker: ft: ah
+20:09  firespeaker: I'd seen the zle commands in the manpage, but hadn't found the autoload part yet
+20:09  firespeaker: what exactly is zle?
+20:09  Mikachu: firespeaker: well, i don't use vi mode so i don't know, i just assumed the up/down ones in hjkl would navigate history since there's nothing else useful they can do
+20:09  Mikachu: except in multiline input lines
+20:09  Mikachu: the zsh line editor
+20:09  Mikachu: zle
+20:10  Mikachu: you don't need to autoload in general, it's just that the widgets ft like are special
+20:10  ft: the contributed code is usually in files that define functions. you need to autoload them. :)
+20:11  Mikachu: speaking of autoload, do you have any idea why bashcompinit autoloads itself after it runs?
+20:11  Mikachu: i was super confused why 'which bashcompinit' only showed the autoload line even after i ran it until i did autoload +X bashcompinit
+20:11  firespeaker: now PgUp and PgDn are back to changing case :(
+20:12  Mikachu: firespeaker: in case you're curious about why that happens
+20:13  Mikachu: in vt terminals, most special keys send a string sequence that starts with escape and ends with a tilde
+20:13  Mikachu: the tilde is what's changing case
+20:13  Mikachu: and the escape makes you leave insert mode
+20:13  firespeaker: ah
+20:13  firespeaker: makes sense
+20:13  Mikachu: and sometimes there are numbers etc in the middle
+20:13  Mikachu: so if they're not bound to something, you get that effect
+20:13  Mikachu: well, there are always etc in the middle, but sometimes that's a number :)
+20:13  firespeaker: but now they should be bound to something...
+20:13  Mikachu: if you're in vi mode, i think you need to bind both for viins and vicmd
+20:14  Mikachu: ie bindkey -M viins '^foo' your-stuff
+20:14  firespeaker: ohh
+20:14  Mikachu: and again with vicmd
+20:14  Mikachu: maybe ft knows something
+20:14  firespeaker: oh
+20:14  firespeaker: but I do that automatically
+20:14  firespeaker: for i in viins vicmd; do bindkey -M $i $'\e/' undefined-key; done
+20:14  firespeaker: oh wait
+20:14  Mikachu: why undefined key /
+20:14  firespeaker: I don't know
+20:14  Mikachu: heh
+20:14  firespeaker: I set this up a long time ago
+20:14  firespeaker: and parts of it are based on a friend's .zshrc from an ever longer time ago
+20:15  firespeaker: *even
+20:15  Mikachu: various incarnations of my zshrc are common in another channel :)
+20:15  firespeaker: heh
+20:30 --- mren|off is now known as mren
+20:36  foomor_: hi. how i can use environment variable in alias? i need something like: alias command="echo $SOME_VAR"
+20:37  Mikachu: use single quotes
+20:37  foomor_: Mikachu: thanks a lot :)
+23:26 --- mren is now known as mren|off
+--- Log closed Thu Oct 28 00:00:44 2010

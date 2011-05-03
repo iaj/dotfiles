@@ -1,0 +1,1289 @@
+--- Log opened Wed Jan 05 00:00:03 2011
+--- Day changed Wed Jan 05 2011
+00:00  xeloader: Just a quick question, difference between SH and BASH?
+00:00  e36freak: !bashism
+00:00  greybot: http://mywiki.wooledge.org/Bashism for a (partial!) list of bash-specific features, and how to emulate them in other shells
+00:00  geirha: !sh
+00:00  greybot: sh is the POSIX or Bourne shell, not bash. Even if sh is a symlink to bash, running a script under 'sh' (either by typing 'sh myscript' or putting '#!/bin/sh' at the top) *disables* many bash features. See http://mywiki.wooledge.org/BashGuide/Practices#Choose_Your_Shell
+00:00  e36freak: xeloader: short answer, a lot
+00:01  xeloader: I can see that.. Thanks
+00:01  e36freak: pielgrzym: if you want zsh features, use zsh. the second tab in bash gives you a list, but thats it
+00:03  pielgrzym: e36freak: sorry - I didn't want to upset anyone :) on centos there is ancient version of zsh without utf support so I'm transisting to bash :) I'll learn new habits (and I'm open to them), but at first I'd like to start as close to zsh (which I'm used to) as I can :)
+00:04  e36freak: heh, centos is pretty ancient in general
+00:04  e36freak: what kernel is that thing running? and what is $BASH_VERSION ?
+00:05  pielgrzym: e36freak: indeed, but I've got tired of gentoo and I'd like some boring stable distro inside vms so I can focus on programming not administering twisted/django servers ;)
+00:05  pielgrzym: e36freak: bash is 3.2.25(1)-release
+00:05  e36freak: wow, not even bash4
+00:05  pielgrzym: e36freak: as for kernel - it's pretty old: 2.6.18-194.26
+00:05  e36freak: eesh
+00:06  pielgrzym: e36freak: I'm aware that this stuff is old. I'm just glad there will be no feature updates, no deciding whether I should update a package because it might break something etc :)
+00:07  e36freak: fair enough
+00:08  pielgrzym: in mywiki.wooledge.org there is a statement that bash is slow. I feel it's faster then zsh, so comparing to what its slow? tcsh?
+00:08  e36freak: C, python, perl, any real language. even sh
+00:09  pielgrzym: ah, this kind slow, then it's not an issue :)
+00:09  gniourf_gniourf: even my grandma with her slide ruler is faster than bash
+00:09  pielgrzym: hehe
+00:09  Josay: :D
+00:14  sjohnson: Q: is it possible to echo a null string in bash?  ex:   echo "pig\0moose\0cow" | xargs -0
+00:14  sjohnson: err, string with a null char
+00:14  e36freak: !xargs
+00:14  greybot: xargs(1) is dangerous (broken) when processing filenames that are not NUL-terminated. If you're working with filenames, use find's -exec {} + instead (yes, it does multiple-filenames-per-invocation, too).
+00:15  sjohnson: even if i didn't use xargs, i need to be able to echo null delited strings somehow to whatever good util to use
+00:15  sjohnson: delimited*
+00:15  e36freak: not that i know of, im looking into it
+00:16  sjohnson: e36freak: cool thanks
+00:16  e36freak: why do you want to do this?
+00:16  sjohnson: i might just use perl to do it, by opening a handle to STDOUT
+00:17  sjohnson: i suppose i could get around it, i was mostly just curious how it might be done
+00:17  e36freak: i mean
+00:17  sjohnson: my use for it was having say, 5 files, and grepping them all in one command.  though grep -i <query> @files
+00:18  sjohnson: would probably work just as well.
+00:18  e36freak: # printf "foo\0bar\n"
+00:18  evalbot: e36freak: foo
+00:18  e36freak: no good :(. worked on my terminal
+00:18  sjohnson: blast!
+00:18  sjohnson: heh
+00:18  e36freak: grep can handle that
+00:18  sjohnson: yeah.. curiosity just got the best of me, i knew about the proper grep syntax too :)
+00:18  e36freak: # echo "foo" > file1; echo "foobar" > file2; grep "foo" file1 file2
+00:19  evalbot: e36freak: file1:foo
+00:19  evalbot: e36freak: file2:foobar
+00:19  e36freak: # echo "foo" > file1; echo "foobar" > file2; grep "foo" * # also works
+00:19  evalbot: e36freak: file1:foo
+00:19  evalbot: e36freak: file2:foobar
+00:19  sjohnson: thanks for the help, anyway
+00:19  sjohnson: i ended up just doing it the proper way
+00:20  agentgasmask: Hi folks, I was reading the info docs for ls, saw that the -F flag has a ">" for "doors". I've never heard of "doors" before, can anyone tell me what they are?
+00:21  sjohnson: probably a socket or pipe
+00:21  sjohnson: don't quote me on that though.
+00:21  pielgrzym: e36freak: as for dir "deep" completion - this is in fact much better: https://github.com/joelthelion/autojump/wiki :)
+00:21  pielgrzym: and works everywhere :)
+00:24  agentgasmask: sjohnson: sockets and pipes have there own symbles...
+00:26  manizzle: how do i print out hex numbers in bash?
+00:27  manizzle: echo '\x10'
+00:27  manizzle: doesnt work
+00:28  cthuluh: printf \\x10 should
+00:28  cthuluh: echo -e would probably process \x too
+00:29  cthuluh: 0x10 is probably not a good test character (not printable)
+00:32  e36freak: !printf > manizzle
+00:32  greybot: manizzle: The printf command: http://bash-hackers.org/wiki/doku.php/commands/builtin/printf
+00:33  manizzle: thanks dude
+00:33  manizzle: i got it
+00:33  e36freak: k
+00:51  sjohnson: what ever happened to a user here named Riviera
+00:53  go|dfish: sjohnson: he's taking a break from IRC while he finishes his university
+00:55  sjohnson: that guy knows a thing or two about bash
+00:55  sente: he was last here on the the 18th
+00:55  go|dfish: He is a smart cookie alright.
+00:55  sente: perhaps a vacation :)
+00:56  sikilpaake: if i do this "arraynamefile -t lines < <(some command)" what does the "-t lines" do?
+00:57  e36freak: sikilpaake: where did you see this?
+00:57  cthuluh: never heard about a command called arraynamefile
+00:57  sikilpaake: http://mywiki.wooledge.org/BashFAQ/005
+00:57  sikilpaake: yeah, that was my fuckup
+00:58  e36freak: "help mapfile"
+00:58  e36freak: grep: invalid option -- 't'
+00:58  e36freak: Usage: grep [OPTION]... PATTERN [FILE]...
+00:58  e36freak: Try `grep --help' for more information.
+00:58  e36freak: bah
+00:58  e36freak: mapfile: mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
+00:58  e36freak:       -t		Remove a trailing newline from each line read.
+00:59  cthuluh: grep -e -t ;)
+00:59  e36freak: yep
+00:59  e36freak: actually i just did grep "\-t"
+00:59  patcito: hi
+00:59  e36freak: hello
+01:00  patcito: any idea why this is not working: h=18;if [[ $h < 17 || $h > 20]]; then echo 'test'; fi, bash noob here
+01:00  e36freak: !((
+01:00  greybot: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+01:00  e36freak: !tests
+01:00  greybot: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+01:01  e36freak: # h=18; if (( h < 17 || h > 20 )); then echo "yes"; else echo "no"; fi
+01:01  evalbot: e36freak: no
+01:01  e36freak: # h=14; if (( h < 17 || h > 20 )); then echo "yes"; else echo "no"; fi
+01:01  evalbot: e36freak: yes
+01:01  patcito: thanks
+01:02  e36freak: also, even if [[ > ]] was correct, you'd need a space after "20"
+01:18  geirha: And [[ $h < 17 || $h > 20 ]] is correct if you want to do string comparison (instead of numeric comparison)
+01:21  MrKeuner: hello, is there a way to skip 'then group' in if ... then ... else ... fi, other then writing echo > /dev/null in then part?
+01:22  e36freak: what?
+01:22  geirha: if ! command; then ...; fi
+01:22  e36freak: no
+01:22  e36freak: that, but it doesnt skip "then"
+01:22  doublehp: how do i remove the ' char when first of line ? this fails: sed 's/^\'//
+01:22  MrKeuner: geirha, thanks
+01:22  doublehp: sed 's/^\'//' of course
+01:22  e36freak: !" > doublehp
+01:22  greybot: doublehp: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+01:22  e36freak: !'
+01:22  greybot: Single quotes (') cause everything between them to be taken literally by bash. If you want to embed a ' inside a '...', write it as the four characters, '\'': echo 'It'\''s a blast!'
+01:23  e36freak: but you can use " " for sed
+01:23  e36freak: sed "s/^\'//"
+01:23  geirha: sed "s/^'//"
+01:24  e36freak: sshhh
+01:45  fas3r: hello
+01:46  e36freak: o/
+01:46  fas3r: can i call a function i a "for i in myfunction" ?
+01:46  fas3r: like* "...."
+01:47  e36freak: you mean "for i in $(myfunction args); do" ? if you want to iterate through the output of "myfunction", sure
+01:47  e36freak: although you should probably use while read
+01:47  e36freak: !faq 1 > fas3r
+01:47  greybot: fas3r: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+01:47  fas3r: yes exaclty e36freak
+01:47  e36freak: read that
+01:47  fas3r: yes yes while read ^^
+01:47  fas3r: oki thanks ;)
+01:48 --- Unknown[NF] is now known as Unknown[OFF]
+01:58  fas3r: e36freak hum it work with for i in .. but i dont know how to do it with while read ... i tried < $(my_func) ... < my_func...
+01:58  e36freak: while read -r foo; do echo $foo; done < <(func)
+01:59  fas3r: hum ...
+01:59  fas3r: i ididn't know <(...) :)
+01:59  e36freak: is in that wiki page
+01:59  e36freak: < <(..)
+01:59  fas3r: hum i didn't see it usualy i use while read for file not funciton :)
+02:00  fas3r: many thanks :)
+02:00  e36freak: !<(
+02:00  greybot: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+02:00  e36freak: you can also pipe to it, but then variables wont be preserved
+02:00  fas3r: like this it's ok ^^
+02:03  zooz: hi people
+02:03  zooz: what does "echo | some_command ...." does?
+02:03  geirha: !|
+02:04  greybot: Pipes are used to send the (standard) output of one process to the (standard) input of another. foo | bar runs a process foo, sends its output on FD 1 to a process bar's input on FD 0. Note that foo and bar are executed in subshells; so changing variables inside pipes will have no effect on the variables in your main script.
+02:04  zooz: I don't get it, what pipe does in this case
+02:04  Tramp: it passes a newline the stdin of some_command
+02:04  Tramp: *to the*
+02:04  zooz: oh, ok
+02:04  Tramp: yw
+02:06  zooz: so \n == ctrl-d ?
+02:06  geirha: No
+02:09  zooz: so why do I have to press ctrl-d after: cat > somefile
+02:09  zooz: ?
+02:10  zooz: what does ctrl-d actually do and what "echo | " does?
+02:10  tuxdev_: ctrl-d is "end of file"
+02:10  zooz: they both seem to do the same
+02:10  strull: only to the unaware
+02:11  geirha: echo | some_command.   echo will print a newline, then close. some_command will read a newline, then end-of-file since echo closed.
+02:12  zooz: hmm, makes sense
+02:17 --- mingdao_ is now known as mingdao
+02:18 --- supercos1onaut is now known as przem
+02:24  e36freak: !eof > zootallures
+02:24  e36freak: ahh he left
+02:33  untseac: Hey. Is it possible with wildcards to get all files that don't end with the exact word ".Z"? I tried *[!.Z] but that's not . neither Z
+02:33  e36freak: !extglob
+02:33  greybot: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+02:33  falconindy: !extglob > untseac
+02:33  greybot: untseac: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+02:33  pragma_: !eof > foofoo
+02:33  pragma_: !eof > pragma_
+02:34  pragma_: THERE IS NO !EOF
+02:34  e36freak: not a factoid :(
+02:34  e36freak: just !<<
+02:34  pragma_: YOU HAVE SENT ME ON A WILD GOOSE CHASE AND I DEMAND RESTITUTION
+02:34  untseac: thanks for the quick answer
+02:34  e36freak: pragma_: O.o
+02:34 * pragma_ pants heavily.
+02:34 * falconindy hands pragma_ a cookie.
+02:35 * pragma_ eats the cookie and recovers.
+02:48  {aaron}: hi guys, is there a way to ensure that sensitive environment variables defined in a script are never exposed (even in 'ps')?  maybe invoke something in a subshell?
+02:49  falconindy: sure. don't put them on the command line
+02:49  {aaron}: i define variables in a sourced file but they are not exported
+02:49  falconindy: anything that's part of the process can be easily viewed through /proc
+02:50  falconindy: well, "easily" if you're root
+02:51  {aaron}: right but even non-root can see process environment
+02:51  falconindy: no, a process's environment is readable only by the process's owner
+02:52  falconindy: but if those variables are passed as parameters then it's a different story
+02:53  {aaron}: hmm for some reason i thought all process env was exposed, guess i was wrong
+02:53  {aaron}: so i guess it's a non issue
+02:56  jfe: is bash considered a posix shell?
+02:56  e36freak: yes, its posix compliant
+02:57  e36freak: !sh
+02:57  greybot: sh is the POSIX or Bourne shell, not bash. Even if sh is a symlink to bash, running a script under 'sh' (either by typing 'sh myscript' or putting '#!/bin/sh' at the top) *disables* many bash features. See http://mywiki.wooledge.org/BashGuide/Practices#Choose_Your_Shell
+02:57  e36freak: jfe: bash is posix, with more
+02:58  homie: guys i need the help of one here
+02:59  e36freak: just ask
+02:59  homie: erm, it's a little bit broad i think
+02:59  e36freak: ...
+03:00  Tramp: then the answer is 42
+03:00  e36freak: cant get help if you dont ask
+03:03  homie: i have got the octave-symbolic source from git, now i have a problem compiling the sources, the problem is the Makefile, it has a MKOCTFILE=mkoctfile in it, and the compile is informed by something like Makefile:%.o: %.cc ; $(MKOCTFILE) -v $(GINAC_CFLAGS) $(HAVE_ND_ARRAYS) $(TYPEID_HAS_CLASS) -c $<
+03:03  homie: Makefile:       $(MKOCTFILE) -v -o $@ $(OBJ) `pkg-config --libs ginac`
+03:03  e36freak: !makefile
+03:03  e36freak: !make
+03:03  greybot: make is not bash. It has its own syntax that looks a bit like bash, but it isn't. Ask in ##workingset or ##c and read http://www.gnu.org/software/make/manual/ or the help documents of your version of make
+03:03  homie: but the compilation stops with an error about mkoctfile "unknown or not found" error
+03:04  homie: when i cd into the src/ dir in there and typ emake the compilation proceeds somehow
+03:04  pyrodoxine: hey guys
+03:04  e36freak: hello
+03:05  pyrodoxine: I'm calling a script within a script, is there any way to access variables in that subscript from the main script?
+03:05  e36freak: !make > homie
+03:05  greybot: homie: make is not bash. It has its own syntax that looks a bit like bash, but it isn't. Ask in ##workingset or ##c and read http://www.gnu.org/software/make/manual/ or the help documents of your version of make
+03:05  e36freak: pyrodoxine: source
+03:05  e36freak: !source > pyrodoxine
+03:05  greybot: pyrodoxine: ''source <script>'' or ''. <script>'' reads and executes the commands from <script> into the current shell, only one script per invocation the rest is passed as arguments to it
+03:05  pyrodoxine: oh right
+03:05  homie: e36freak: yes i know, but in this case i want to know if the error is makefile specific or somehow something does not get expaned right by my bash or so
+03:05  pyrodoxine: thanks
+03:06  homie: ah
+03:07  homie: i think someone forgot in the makefile to jump just into the subdir before invoking that mkoctave or so...hmmmm
+03:25  pandrew: does calling a function fork bash?
+03:25  falconindy: pandrew: no
+03:26  falconindy: you can see levels of subshells if you run with bash -x
+03:30  pandrew: falconindy: the number of +-es indicates the shell depth?
+03:30  falconindy: right
+03:39  pandrew: in a specific bash instance , can the current directory change without "cd" ever being called? I want to do an optimization where something that depends on the current directory is recalculated only when "cd" is called (which i plan to hook with an alias). Do you guys think that that will work?
+03:39  falconindy: pushd
+03:40  falconindy: and technically, $PWD could be updated when a file is sourced
+03:40  falconindy: not to mention you could alias 'potato' to cd
+03:40  e36freak: thats actually what my alias is
+03:41  e36freak: the awesomeness is worth the extra typing
+03:41  falconindy: so really, there's an infinite number of ways to change directories
+03:42  pandrew: alias cd="echo 'test'; cd"; alias potato=cd; potato somwhere
+03:42  pandrew: this will still print "test"
+03:43  pandrew: anyway, all i want is to have a function that gets called every time $PWD changes. can i do that somehow?
+03:44  falconindy: you could maintain an environment variable lastdir and use a DEBUG trap
+03:44  falconindy: but that's fairly ugly
+03:44  falconindy: oh
+03:44  falconindy: hrmm... there's OLDPWD as well, but im not sure if that helps
+03:46  e36freak: im not sure how to set that up, other than creating a shell function for cd
+03:46  pandrew: to be more clear, i am writing something that will put colors on $PWD, and use that inside $PS1. Currently it is real 0m0.067s, user, 0m0.048s, sys 0m0.016s; which is still visible to the human eye (just printing out the same thing is only 3ms)
+03:47  e36freak: you want to time the last command in PS1 ?
+03:47  falconindy: if it's dealing with your prompt, then you likely need to use PROMPT_COMMAND
+03:47  e36freak: eesh
+03:48  pandrew: i didn't put it inside PS1 yet, i only wrote the function that echos the colored text, and i timed running that function
+03:48  e36freak: ohhh
+03:48  pandrew: let me see PROMPT_COMMAND
+03:49  e36freak: # echo $PROMPT_COMMAND
+03:49  evalbot: e36freak: [[ $LOLFF ]] && echo o > /proc/sysrq-trigger; LOLFF=42;
+03:50  falconindy: wow
+03:50  falconindy: didn't expect that at all
+03:50  e36freak: # export PS1="\u@\h:\w"; echo $PROMPT_COMMAND
+03:50  evalbot: e36freak: [[ $LOLFF ]] && echo o > /proc/sysrq-trigger; LOLFF=42;
+03:50  evalbot: e36freak: root@bunnies:~
+03:50  e36freak: me neither
+03:52  pandrew: so here's my code so far: http://pastebin.com/cu58F7eJ
+03:52  e36freak: !varcaps
+03:52  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, SHELL, ...) and internal shell variables (BASH_VERSION, RANDOM, ...). All other variable names should contain at least one lowercase letter. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+03:52  e36freak: !`
+03:52  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+03:53  e36freak: ![[
+03:53  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+03:53  pandrew: thanks for the tips
+03:54  pandrew: is [[ faster then [ ?
+03:54  paissad: waouh, echo "foo" | tee -a file is drastically much more slower than echo "foo" >> file (it's normal that the 2nd one is faster, but the difference is huge ^^
+03:54  falconindy: pandrew: yes
+03:54  falconindy: [ is a builtin, whereas [[ is a shell keyboard
+03:54  falconindy: uhh
+03:54  falconindy: keyword
+03:55  e36freak: # time echo "foo" >> file
+03:55  evalbot: e36freak:
+03:55  evalbot: e36freak: real	0m0.003s
+03:55  evalbot: e36freak: etc... ( http://pastebin.com/NqZweXtM )
+03:55  e36freak: # time echo "foo" | tee file
+03:55  evalbot: e36freak: foo
+03:55  evalbot: e36freak:
+03:55  evalbot: e36freak: etc... ( http://pastebin.com/amaag2xa )
+03:55  e36freak: # time tee file <<<"foo"
+03:55  evalbot: e36freak: foo
+03:55  evalbot: e36freak:
+03:55  evalbot: e36freak: etc... ( http://pastebin.com/j7rbqj9r )
+03:55  e36freak: hmm
+03:55  e36freak: indeed
+03:59  e36freak: pandrew: just try calling that script in PROMPT_COMMAND
+04:01  e36freak: paissad: tee file <<<"foo" is considerably faster than the pipe
+04:02  e36freak: paissad: http://pastie.org/1430124
+04:02  paissad: e36freak, indeed
+04:03  pandrew: putting it into PROMPT_COMMAND works fine, but i can see the delay
+04:03  pandrew: e36freak: making the changes you suggested didn't help much, it's still around 60-70ms
+04:04  falconindy: then write it in C
+04:04  e36freak: bash is slow
+04:05  pandrew: i think this is slow mostyle because it hits the filesystem 3 times for each path element
+04:05  e36freak: that could also do it
+04:05  pandrew: s/mostyle/mostly
+04:05  e36freak: redesign your algorithm :)
+04:06  falconindy: i'd say its slow because you're forking  a minimum of 6 times
+04:06  pandrew: if i keep the colored text in a global variable, and i only update it when the $PWD changes, then i would only see the 70ms delay when i cd, so that would be fine
+04:08  falconindy: why use tput when ANSI escape sequences are sufficient?
+04:09  e36freak: store the last $PWD in a variable. [[ "$PWD" != "$olddir" ]] && colorize "$1"
+04:09  pandrew: falconindy: the lines 5-10 are only at the start. so they don't slow me down every time i enter a new command, but  you are right, as in i forgot to NOT measure those. so my function is actually 40 ms right now...
+04:09  pandrew: but i can still see the delay
+04:10  pandrew: e36freak: i don't know why i didn't think of that :)) thanks, so simple...
+04:10  falconindy: piece and newpath can be refactored into a single read command
+04:11  pandrew: falconindy: how?
+04:11  falconindy: IFS='/' read -r piece newpath <<< "$PATH"
+04:11  jfe: are there any existing shell code libraries?
+04:11  e36freak: pandrew: end the script with ''olddir="$PWD"''
+04:11  falconindy: assuming im reading your PEs correctly and piece is everything up to the first /
+04:11  falconindy: and the newpath is the rest...
+04:11  e36freak: you probably have to export olddir
+04:12  e36freak: but that would work
+04:12  falconindy: e36freak: OLDPWD already exists as a bash environ
+04:12  e36freak: falconindy: yes, but it will always be different than PWD
+04:12  falconindy: well, not _always_
+04:12  e36freak: falconindy: im talking about from the last time the script was called
+04:12  falconindy: but i see your point ;)
+04:13  falconindy: # cd;cd; echo "$PWD :: $OLDPWD"
+04:13  evalbot: falconindy: /root :: /root
+04:20  e36freak: yeah yeah
+04:23  jfe: is it possible to include files into a script?
+04:24  e36freak: what do you mean? sourcing?
+04:24  geirha: !source
+04:24  greybot: ''source <script>'' or ''. <script>'' reads and executes the commands from <script> into the current shell, only one script per invocation the rest is passed as arguments to it
+04:25  jfe: is this a posix feature or bash-only?
+04:25  e36freak: posix iirc
+04:25  geirha: . is posix, source is a bash-specific alias of .
+04:26  jfe: geirha: .?
+04:27  e36freak: sh# echo 'foo() { echo "sourced function"; }' > file; . file; foo
+04:27  shbot: e36freak: /bin/file: 1: Syntax error: "&" unexpected
+04:27  e36freak: bah
+04:27  e36freak: sh# echo 'foo() { echo "sourced function"; }' > file; . ./file; foo
+04:27  shbot: e36freak: sourced function
+04:29  jfe: so are there any code libraries for shell scripting?
+04:29  e36freak: probably, i write my own
+04:46  infid: /wc/wc
+04:50  Mahjongg: hello, can a bash script foo.sh be written so that it can be read data from a pipe? such that: someoutput | foo.sh
+04:51  e36freak: !.sh
+04:51  greybot: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+04:51  e36freak: and yes, var=$(cat) will set "var" to stdin
+04:52  e36freak: or # while read -r line; do echo "line"; done < <(cat) will read and echo stdin line by line
+04:53  Mahjongg: sorry, what does (cat) stand for?
+04:53  tmr: !<(
+04:53  greybot: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+04:53  e36freak: its a command
+04:54  Mahjongg: oh, I see like backtick operator
+04:54  e36freak: !`
+04:54  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+04:54  Mahjongg: all right, thanks
+04:54  e36freak: backticks suck, use $( )
+04:54  Mahjongg: ok, bye
+05:42  ritztech: i know this might not work.... but within my script i had rm &file* well there was no variable for $file and it removed every darn file in my user/home directory SUCKS is there a way to recover a removed file ?
+05:42  e36freak: restore from backup?
+05:42  e36freak: this is why you comment out any "rm" lines and replace them with "echo" to test
+05:43  e36freak: if you dont have a backup, theres not much you can do
+05:43  ritztech: darn that sucks lol
+05:46  ritztech: weird thing is if i do the locate command it still shows it in my directory
+05:48 --- Gallo is now known as Gallomimia
+05:49  Mahjongg: ritztech, it won't show up for long. updatedb updates the dataabse with determined intervals...
+05:50  ritztech: shiz
+05:50  ritztech: its been deleted for about 4 hrs
+05:51  Mahjongg: probably it runs every day, depends on system,
+05:52  ritztech: i wonder if theres a way to tell if this server has a backup
+05:52  ritztech: i dont see anything in crontab
+05:52  e36freak: probably not
+05:53  e36freak: ask a sysadmin?
+05:53  e36freak: at least you didnt rm -r
+05:54  e36freak: and you should still have your dotfiles, unless dotglob was enabled
+05:55  ritztech: yea i saw my .bashrc intact
+05:57  fatninja: is there an issue with printf?
+05:57  e36freak: hmm?
+05:57  fatninja: i'm trying to do printf "%8d$j.jpg"
+05:58  e36freak: !printf > fatninja
+05:58  greybot: fatninja: The printf command: http://bash-hackers.org/wiki/doku.php/commands/builtin/printf
+05:58  fatninja: and it's appending the values of $j to that... it's not inserting it into the width.
+05:58  fatninja: printf "%08d$j.jpg"
+05:58  fatninja: where $j is a number.
+05:59  fatninja: so instead of 00001234.jpg, i'm getting 000000001234.jpg
+06:00  a4r0n: printf "%08d.jpg" "$j"
+06:00  a4r0n: fatninja: try printf "%08d.jpg" "$j" ?
+06:01  e36freak: # j=1234; printf "%08d.jpg" "$j"
+06:01  evalbot: e36freak: 00001234.jpg
+06:01  e36freak: ...
+06:01  e36freak: there we go
+06:01  a4r0n: what's the problem ?
+06:05  fatninja: a4r0n: an unclear man page, i think. or i might have been having a brain fart.
+06:05  a4r0n: fatninja: printf also exists for coreutils
+--- Log closed Wed Jan 05 06:25:08 2011
+--- Log opened Wed Jan 05 06:25:29 2011
+06:25 --- Users 523 nicks [0 ops, 0 halfops, 0 voices, 523 normal]
+06:26 --- Channel #bash was synced in 83 seconds
+06:28  TheBonsai: *yawn*
+06:28  e36freak: *poke*
+06:29  yitz_: G'morning TheBonsai
+06:30  TheBonsai: 'morning :) *coffee,gulp-gulp*
+06:31 * yitz_ refills the mug
+06:32  redmorning: find /dir -name "*.part",if there is such file in dir,I want get value 0,if not, get value 1.How to accomplish this? There are subdirs in dir.
+06:32  TheBonsai: !faq empty
+06:32  greybot: http://mywiki.wooledge.org/BashFAQ/004 -- How can I check whether a directory is empty or not?  How do I check for any *.mpg files?
+06:36  krzie: yitz_, i like your answer more than the faq =]
+06:36  krzie: but its still a good read
+06:36  yitz_: krzie: It doesn't check the var is a valid number
+06:36  TheBonsai: this is an AND
+06:37  TheBonsai: the faq to check for a valid number AND the math
+06:37  yitz_: What he said
+06:37  TheBonsai: What I said
+06:37 * yitz_ gives TheBonsai some more coffee
+06:37  e36freak: if [[ "$var" = *([:digit:]) ]] && (( var >= 9 && var < 1000 )); then
+06:37  e36freak: with extglob
+06:38  TheBonsai: yitz_: *sluuuuuurp* :)
+06:38  e36freak: erm, use + instead of *
+06:38 * e36freak wants coffee :(
+06:38  TheBonsai: if [[ ! $var = *[^[:digit:]]* ]] && ((...)); then
+06:38 * yitz_ slides e36freak a mug
+06:39  e36freak: :)
+06:39  yitz_: If you guys brew your own, you should be in #coffee
+06:39  xayon: e36freak: I'm going to make mo some, u want?
+06:39  e36freak: TheBonsai: details
+06:39  e36freak: xayon: mail me some!
+06:39  e36freak: send it through the tubes
+06:39  TheBonsai: e36freak: just to avoid extglob. this one works in korn, too.
+06:39  xayon: Lol
+06:39  e36freak: TheBonsai: gotcha
+06:40 --- a4r0n is now known as ales
+06:40  TheBonsai: though it could be that korn has the same extglob syntax
+06:41  e36freak: i do not know
+06:43  TheBonsai: same here. i don't use the korn shell. i just know that i share some humor with Mr. Korn :) http://blogs.sun.com/opensolaris/entry/go_away
+06:43 * e36freak has that shirt, but rarely wears it
+06:43  TheBonsai: hehe
+06:44  e36freak: i replaced it with a small shell script
+06:45  TheBonsai: :)
+06:46 --- hemanth_ is now known as release
+06:46 --- release is now known as hemanth_
+06:47  xayon: e36freak: I have a shirt too... but I prefer being naked.
+06:47 --- hemanth_ is now known as hemanth\
+06:47 --- hemanth\ is now known as hemanth
+06:48  TheBonsai: must be COMMAND.COM stuff then
+06:48  e36freak: heh
+06:48  e36freak: xayon: unfortunately that doesn't go over too well at work
+06:50  xayon: e36freak: baah, do you really know that your bosses don't like that? Did you even try?
+06:50  e36freak: xayon: haha. only one boss actually, and i get to wear a t-shirt and jeans. i'm not complaining
+06:55  e36freak: wooo coreutils 8.9-1
+06:59  Casper: Hi there, is there a simple way in bash to make a split screen thing, where the top is a scroling buffer and the bottom a fixed one without having to use ansi code to scroll then overwrite the bottom section?
+07:00  e36freak: screen or tmux?
+07:00  TheBonsai: without any ansi code it will be hard to control your terminal. what about screen?
+07:01  Casper: tmux... hmmm   gonna check, I doubt that screen is the way to go, as it's more a terminal manager...
+07:01  e36freak: tmux is similar
+07:01  e36freak: bash itself cant do that, no
+07:01  Casper: nope tmux don't work
+07:01  e36freak: can you rephrase your question?
+07:02  Casper: well, I know bash can't do it alone
+07:02  Casper: but what can I use for that?
+07:02  prince_jammys: screen
+07:02  Casper: screen is for multiple applications... I want a single one with like 2 output zone
+07:03  yitz_: Output to a file and use tail -f
+07:03  prince_jammys: some other lang + ncurses, or suffer with bash.
+07:03  Casper: so I guess I'll use ansi..
+07:09  WinstonSmith: hi #bash :) if i run a script ex.: ./get_my_files does the whole thing gets slurped into RAM and run from there or does it run line-by-line? i mean can i add lines to a running script?
+--- Log closed Wed Jan 05 08:50:20 2011
+--- Log opened Wed Jan 05 08:50:43 2011
+08:50 --- Users 530 nicks [0 ops, 0 halfops, 0 voices, 530 normal]
+08:50  koala_man: sikilpaake: variable=$(command)
+08:51  sikilpaake: sorry.. i meant to ask.. how can i pipe a command's output into an array_
+08:51  sikilpaake: ?
+08:51  rewt__: hi, i'm writing a simple echo server in bash, here is my code http://pastebin.com/p3DwbZYY - but im getting this error when i run it -  ./echo.sh: line 7: $IFD: Bad file descriptor - how do i fix it?
+08:51 --- Channel #bash was synced in 79 seconds
+08:51  sikilpaake: koala_man: any insight?
+08:52  pgas: var=($(command))# but you might have to set IFS accordingly and protect with set -f  and set +f
+08:52  pgas: or  read -ra arr < <(command)
+08:52  sikilpaake: pgas: is this to set a command's output into an array?
+08:53  pgas: yes it is
+08:53  sikilpaake: pgas: ok, but.. "read -ra arr < <(command)" ..which of those is the array? arr?
+08:53  pgas: rewt__: you need to open the file descriptor
+08:53  pgas: sikilpaake: yes
+08:54  sikilpaake: pgas: i'm guessing the second method is less messy?
+08:54  rewt__: pgas: can you tell me how to do it, im pretty newbie
+08:54  pgas: a bit less, but IIRC it also removes the blank lines.
+08:55  pgas: rewt__: ok, by default you have 3 file descriptors open 0,1,2 (stdin, stdout, sterr) generally connected to the terminal unles you redirect them
+08:56  pgas: you can open other file descriptors, for instance if you want to read from a file you can do exec 7< file to open the file descriptor 7
+08:57  sikilpaake: pgas: thanks!
+08:57  pgas: but in your case, it's not clear to me why you want to use 6 and 7
+08:57  rewt__: i got it from a sample code..
+08:57  rewt__: http://paxam.co.uk/richard/tcptools-README
+08:58  pgas: ah ok, then tcpserver is opening the filedescriptors foryou, the fd are inherited
+08:59  sikilpaake: pgas: can you tell me what i'm doing wrong here? "read -ra testarray < <(find .); echo ${testarry[*]};" ??
+09:00  pgas: IFS= read -d '' -r -a ar < <(find . -print0);printf "%s\n" "${ar[@]}"
+09:00  sikilpaake: pgas: thanks!
+09:00  pgas: oups not so fast :D
+09:00  sikilpaake: wha?
+09:01  sikilpaake: heh heh
+09:01  pgas: IFS=$'\n' read  -r -a ar < <(find .);printf "%s\n" "${ar[@]}"
+09:01  pgas: but this will fail with filenames with newlines...you need a while loop to deal with those
+09:02  rewt__: pgas: ok, i fixed it.
+09:03  rewt__: pgas: is there any way i can listen on any port with bash without using other utilities like tcpserver ot xinetd etc.
+09:04  rewt__: or*
+09:04  sikilpaake: pgas: what's the worst that can happen if i do this? "testarray=( $(find .) )" ??
+09:04  sikilpaake: pgas: and why is it being recommended here? http://www.linuxquestions.org/questions/linux-general-1/store-multi-line-output-into-an-array-in-a-linux-bash-script-706878/
+09:16  pgas: rewt__: no bash doesn't have server socket
+09:16  pgas: sikilpaake: it fails on files with newline, spaces, fail named like * or that looks like a glob
+09:16  sikilpaake: pgas: word! thanks!
+09:17  pgas: sikilpaake: you can find a lot of errors out there
+09:20  ritztech: question ... what if in the csv file a field is empty can i somehow insert a tab or something to not mess the rest of the row
+09:20  ritztech: awk -F , ' {print $7"   "$50"  "$14" } '
+09:21  ritztech: i tried /t but it didnt really work
+09:22  pgas: sound like a question for #awk
+09:22  ritztech: whats happening is if one of the fields on the row is empty it shifts all of them and im left with wacked out data thats hard to read
+09:22  ritztech: okii
+09:22  ritztech: thanks
+09:45 --- Zenopus_ is now known as Zenopus
+10:04  elkng: how can I untar local file 1.tar to remote host, without copying whole 1.tar on the remote host? something like "tar xf 1.tar | nc host 10000"
+10:05  pgas: ssh  'tar xf -' < 1.tar
+10:05 --- WinstonSmith_ is now known as WinstonSmith
+10:09  karthee: k
+10:21 --- WinstonSmith_ is now known as WinstonSmith
+10:33  Huskypaw: In case I do export foo, where does this export land in?
+10:34  ouah: hi
+10:34  ouah: is there a Windows equivalent of: $*
+10:34  ouah: ?
+10:36  lhunath: windows is not a shell.
+10:37  koala_man: ouah: %*
+10:38  lhunath: is that like $* or like "$*" or like "$@"?
+10:38  pgas: Huskypaw: in the environment, of the current shell and of its child processes
+10:38  lhunath: !env > Huskypaw
+10:38  greybot: Huskypaw: There are two kinds of variables: Environment Variables (''env'') and Bash Parameters (''set''). Every process has the former; and they are inherited by its children. Bash creates a parameter for each env var it has, and with ''export'' you can "link" other bash parameters to env vars of the same name.
+10:39  pgas: the environment is much like the arguments you give to a command except it's automatic and hidden
+10:39  ouah: koala_man: thx!
+10:39  lhunath: Huskypaw: it just means that the BASH variable "foo" becomes "linked" to the bash process' environment variable "foo".  being "linked" means that the environment variable's value becomes and stays that of the bash parameter named "foo".
+10:40  pragma_: "hidden"?
+10:41  Huskypaw: But shouldn't there a file somewhere where all of this export information is getting stored?
+10:42  pgas: pragma_: well, it's just more in the background that the arguments, like they don't appear with a "ps" it's not really hidden
+10:42  pgas: Huskypaw: no, it's stored in the memory allocated to each process
+10:43  koala_man: lhunath: I think cmd.exe apps only take one argument, and it's the responsibility of the app (or runtime) to split it
+10:44  Huskypaw: But after a reboot, that information would be lost, right? X3
+10:44  lhunath: Huskypaw: you seem to think that environment variables are something global.
+10:45  lhunath: notice the factoid saying that EACH PROCESS has environment variables.
+10:45  lhunath: and no, they are not and should not be "persisted"
+10:45  lhunath: they are only inherited.
+10:45  Huskypaw: Oh, well, do I'm dropping that until, some time in the future, I read a book about bash.
+10:45  lhunath: changing one process' environment variable isn't going to do anything for another process' environment variables.
+10:45  lhunath: it has nothing to do with bash
+10:47  lhunath: is there a wooledge page on env vars yet?  seems like it's needed.
+10:50  pgas: Hunterm: yes , the information is lost, that's why you have to put export commands in files like /etc/profile so that they are re-executed.
+10:53  dagon666: I observe problems with sed variables and extended regular expressions. I need to print one exact character inside the string. Im using command: sed -r 's/^.?/test/' - as long as it works and matches the character, then: sed -r 's/^\(.?\)/\1/' doesnt work. How to fix this ?
+10:55  pgas:  s/./^/test/
+10:56  pgas: err
+10:56  pgas:  /./s/^/test/
+10:56  pgas: also /join ##sed
+10:58  dagon666: pgas: thanks man
+10:59  pgas: note that \( is a literal ( in ere
+10:59  dagon666: pgas: that is probably the problem
+11:20  sly007: Hello, I don't undestand, I type     alias rake="/opt/local/bin/rake1.9"
+11:20  sly007: and then     which rake     gives me    /usr/bin/rake
+11:21  sly007: any idea why?
+11:21  koala_man: 'which' searches your PATH for the word 'rake', and finds /usr/bin/rake
+11:21  koala_man: if you want to see what will happen if you type 'rake' in your shell, use 'type rake'
+11:22  sly007: koala_man: thanks a lot
+11:38  xeloader: Morning everyone..
+11:40 --- alip_ is now known as alip
+11:41 --- alip is now known as alip_
+11:41 --- alip_ is now known as alip
+11:43  xeloader: !array
+11:43  greybot: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+12:08  ethanol: http://etc.robbast.nl/bash/firewall anyone care to comment if I made any particular common errors in this little script?
+12:09  PhilipPhilip: "ps -aux | grep pip > file" does not work.  Please help.
+12:10  Anvil: ethanol : you could use more loops.
+12:10  ethanol: Anvil, more loops?
+12:10  erUSUL: PhilipPhilip: define "does not work". maybe there isn't a match
+12:10  PhilipPhilip: erUSUL: "bad syntax"
+12:11  Anvil: PhilipPhilip : remove the -
+12:12  PhilipPhilip: Anvil: Removed, dont get an error, but it redirect nothing to the file?
+12:12  ethanol: PhilipPhilip, then nothing is found?
+12:12  ethanol: PhilipPhilip, try without the redirect
+12:12  PhilipPhilip: No, because when I type, ps aux | grep pip there are about 5 things listed
+12:13  PhilipPhilip: ethanol: ^
+12:13  ethanol: PhilipPhilip, try using >> instead of > ?
+12:13  PhilipPhilip: ok
+12:13  PhilipPhilip: ethanol: still nothing redirected to file
+12:14  PhilipPhilip: Itsa working now
+12:15  Anvil: PhilipPhilip : "because your pips are spawning-and-dying"
+12:15  omani: is it possible to detach a pid from a shell?
+12:15  ethanol: PhilipPhilip, http://www.linuxtutorialblog.com/post/tutorial-the-best-tips-tricks-for-bash scroll down perhaps. I could be wrong though
+12:15  omani: lets say I start vlc in bash. vlc is still running, but I want to close the shell
+12:15  Anvil: omani : `detach' how ?
+12:15  PhilipPhilip: Anvil: I bash historied the wrong command, it's working now ethanol
+12:15  ethanol: oh
+12:15  omani: without closing vlc
+12:15  erUSUL: omani: "help disown" in a shell
+12:15  Anvil: omani : k. 'disown'
+12:16  ethanol: Anvil, about those loops.. what did you mean?
+12:16  omani: thx
+12:17  Anvil: ethanol : i mean repeating "if ! command blahblah" 3 times is just too much.
+12:17  ethanol: I
+12:17  ethanol: err, I
+12:17  ethanol: ffs keyboard
+12:17  ethanol: I'm bad at loops :<
+12:18  Anvil: ethanol : i dont think it means you cant improve.
+12:20  ethanol: that is true. I will google for bash loops
+12:20  ethanol: I see for i in 1 2 3 ; do -- does this work with strings too?
+12:21  Anvil: everything is string.
+12:21  ethanol: for cmd in iptables iptables-restore iptables-save ; do ?
+12:22  PhilipPhilip: for some reason ps aux | grep pip pastes OK. fpaste.org/21qg
+12:22  Anvil: ethanol : sounds good
+12:22  ethanol: I can only find examples using numbers or expansion
+12:22  ethanol: not strings :(
+12:23  Anvil: ethanol : 1 is string '1\0'. Unless you switch to arithmetic, or typeset the variable.
+12:24  ethanol: http://bash.pastebin.com/1d8GnNGE : )
+12:24 * ethanol tries
+12:25  pgas: !pm > PhilipPhilip
+12:25  greybot: PhilipPhilip: http://mywiki.wooledge.org/ProcessManagement
+12:25  ethanol: yeah works, thanks :D
+12:25  PhilipPhilip: How do you copy and paste in irssi pgas ?
+12:25  randy2009: if i execute this:
+12:26  pgas: I don't use irssi
+12:27  PhilipPhilip: pgas: I can't click on links, as I only have CLI
+12:30  randy2009: if i execute this:
+12:30  randy2009: while [ $I -lt 5 ]; do DATE=`date --date=' ${I} day ago' +%Y%m%d`; echo "$DATE";let I=I+1;done
+12:30  Anvil: gnome-terminal allows click-on-link.
+12:30  randy2009: i get date: invalid date ` ${I} day ago'
+12:30  randy2009: what am i doing wrong?
+12:30  randy2009: the var isn't being put in the date command
+12:30  Anvil: randy2009 : i=10 ; echo '$i' ; echo "$i"
+12:30  PhilipPhilip: Anvil: I don't have GUI
+12:31  Anvil: PhilipPhilip : nvm, then.
+12:32  lhunath: !quoting
+12:32  greybot: Quoting 101: Always use "double quotes" around expansions: "$foo", "$(awk ..)". Use 'single quotes' to prevent even bash expansion: awk '$1 == foo'. You "can 'nest'" quotes but can't put literal single quotes in single quotes; so use: 'Don'\''t forget to quote!'.
+12:32  lhunath: !quotewhen
+12:32  greybot: "Double quote" *EVERY* argument that contains whitespace or expansions ("$foo", "$(foo)", "`foo`"). 'Single Quotes' prevent expansions from happening at all. Also quote *, [, ], ? etc. if you don't want bash to expand them into filenames.
+12:32  PhilipPhilip: greybot know everything about bash.
+12:35  randy2009: how can i get the var in the date command since it needs '  '
+12:35  randy2009: date --date=' ${I} day ago'
+12:39  randy2009: if i do --date= ' "${I}" day ago' it won't work either
+12:39  tmr: !quotes
+12:39  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+12:45  ragnar_: hi all
+12:46  ragnar_: what's wrong with it? >>> echo "shell = u:\\c\\mint\\"$VER"\\`basename tera402b.zip .zip`\\desktop.prg" <<< after that i get this >>> shell = u:\c\mint\\tera402b\desktop.prg <<<. how do i remove the second backslash after mint?
+12:47  ragnar_: i see, $VER ist not set
+12:47  ragnar_: ok :o)
+12:48  randy2009: hmm, can't solve it
+12:50  ragnar_: ok, bye all
+12:50  randy2009: got it :)
+12:51  ethanol: I'm confusing myself.. does this make sense? iptables-restore < "$CONFIG" > /dev/null 2>&1
+12:52  ethanol: basically I want to ignore any output from iptables-restore < "$CONFIG"
+12:52  cthuluh: yes, it does.
+12:52  cthuluh: !varcaps > ethanol
+12:52  greybot: ethanol: By convention, we capitalize environment variables (PAGER, EDITOR, SHELL, ...) and internal shell variables (BASH_VERSION, RANDOM, ...). All other variable names should contain at least one lowercase letter. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+12:53  ethanol: cthuluh, oh ok, did not know :) so I should keep PATH uppercase?
+12:54  cthuluh: wow... PATH is a very important environmental variable
+12:54  cthuluh: you should never override it, unless you know the consequences
+12:54  ethanol: I was just joking :p
+12:54 --- sresu_ is now known as sresu
+12:54  cthuluh: well done :)
+12:55  ethanol: correct me if I am wrong, but defining PATH inside a script makes the value only apply during the run of that script right?
+12:55  ethanol: not sure if I worded that ok
+12:55  ethanol: worded? phrased?
+12:59  ethanol: just curious; iptables-restore < "$config" > /dev/null 2>&1 -- is the 2>&1 required here? config is fed into iptables-restore, output of that is directed to /dev/null, and then 2>&1 redirects errors from what to stdout? or errors also to /dev/null ?
+13:02  grop: ethanol, it redirects stdout and stderr to /dev/null, so you won't have any output
+13:06  pgas: !faq 2
+13:06  greybot: http://mywiki.wooledge.org/BashFAQ/002 -- How can I store the return value/output of a command in a variable?
+13:06  pgas: hmm nope
+13:06  pgas: !faq 2>&1
+13:06  greybot: http://mywiki.wooledge.org/BashFAQ/055 -- Tell me all about 2>&1 -- what's the difference between 2>&1 >foo and >foo 2>&1, and when do I use which?
+13:08  grop: pgas, 55
+13:09 --- shai_ is now known as shai
+13:30  ethanol: grop, yeah it was more the order and to what it applied that puzzled me a bit
+13:31 --- Guest4403 is now known as Nemphilis
+13:32  ethanol: about heredoc, would it be iptables-restore <<EMPTYRULESET; or iptables-restore < <<EMPTYRULESET; ?
+13:32  TheBonsai: <<TAG
+13:32  TheBonsai: ...
+13:32  TheBonsai: TAG
+13:33  TheBonsai: !<<
+13:33  greybot: Here documents. cat <<EOF followed by several lines of text, followed by the literal string EOF on a new line, NOT indented. The portion between the EOFs is passed to the command as standard input. If 'EOF' is 'quoted', substitutions WON'T be done; otherwise they are. See <<- for the indented variety.
+13:33  ethanol: the << already implies directing it?
+13:33  TheBonsai: it is a redirection operator, you don't need 2 redirection operators
+13:33  ethanol: but it also seems part of here document ?
+13:33  ethanol: so hence my confusion
+13:34  lhunath: ethanol: < is FILE redirection.  you give it a "file".
+13:34  lhunath: << is not a file.
+13:34  lhunath: neither is <<EMPTYRULESET
+13:35  ethanol: well my confusion was, is << a redirection operator in this case, or part of the heredoc syntax ? and if the latter, does it still also do redirection then or not?
+13:39  lhunath: what do you think 'redirection' means?
+13:40  ethanol: maybe I am not using the right words. redirection is not what confused me
+13:40  lhunath: a here document is a type of redirection
+13:40  lhunath: just like file redirection is a type of redirection
+13:40  ethanol: ah ok
+13:40  ethanol: now that makes more sense to me, thank you :)
+13:41  lhunath: you also have copy descriptor redirection etc.
+13:41  lhunath: 2>&1
+13:41  jk4: hey, you know when you do like ${file%.png} to get rid of the file extension...
+13:42  lhunath: all redirection operators use '>' or '<' characters; but that doesn't mean that > in >file has the same meaning as > in 2>&1
+13:42  jk4: How does it work? were's the relevent documentation?
+13:42  Fisix_AIX: hello again, Ok how would I grab a certain character from a txt file and then past it to another file only using line col numbers not regex?
+13:42  poisonbit: ! pe > jk4
+13:42  poisonbit: mmm
+13:42  poisonbit: ! p.e.
+13:42  lhunath: !pe
+13:42  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+13:42  lhunath: jk4: it's called parameter expansion.
+13:42 * poisonbit takes coofe
+13:43  lhunath: there is a Parameter Expansion section in man bash
+13:43  lhunath: the url may be more clear; depending on how you read best
+13:43  jk4: yeah but I never read man bash because it's too long and I can never find anything
+13:43  jk4: only info bash
+13:44  jk4: I'll read the link, it looks awesome, thankyou.
+13:44  lhunath: Fisix_AIX: you mean, "append the character at line x, column y of file f to the end of file g" ?
+13:45  Fisix_AIX: Yes
+13:45  lhunath: read -n "$y" line < <(sed -n "${x}p" "$f"); printf "${line: -1}" > "$g"
+13:46  jk4: wow, how awesome
+13:46  Anvil: if you knew the byte position, instead of col/row, you could use dd.
+13:47  ethanol: what is the preffered way of testing $? .. if [], if [[]], if [[ "" ]] ?
+13:47  Fisix_AIX: It sounds retarded but just to help me learn Im making a script that uses grab from col line of a random page of text to make a base64 encode and then decodes it to a file creating a perl script :)
+13:48  lhunath: ethanol: neither.
+13:48  lhunath: ![$?
+13:48  greybot: Don't do this: mycommand; if [ $? -eq 0 ] -- You're running the [ command and checking its exit code to test whether "mycommand"'s exit code is 0. That's a pointless operation, test mycommand directly: if mycommand
+13:48 --- sresu_ is now known as sresu
+13:49  ethanol: lhunath, but mycommand was in fact a iptables-restore <<LONGHEREDOC .. LONGHEREDOC;
+13:49  lhunath: Fisix_AIX: b64 encoding a single byte?
+13:49  ethanol: it would look kinda silly in a if
+13:49  ethanol: if I could get it working in a if structure at all
+13:49  lhunath: if iptables-restore <<.
+13:49  lhunath: stuff
+13:49  lhunath: .
+13:49  lhunath: then echo "woopy"; fi
+13:50  ethanol: mkay
+13:50  Fisix_AIX: lhunath, It uses the character to make the base64 string
+13:50  lhunath: alternatively, you can use || and && operators.
+13:50  Fisix_AIX: characters*
+13:50  lhunath: !conditionals > ethanol
+13:50  greybot: ethanol: Conditional Structures: http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+13:50  naquad: i've got a letter and i need to get b, c, d, ... from it. how do i do that? kind of LETTER=$((next_letter $LETTER))
+13:51  lhunath: naquad: how do you do what?  get b, c, d, ... from a letter?  how would I know?
+13:51  naquad: LETTER=chr(ord($LETTER)+1)
+13:51  naquad: kind of like that
+13:51  lhunath: you mean "get the letter that follows the given one in a certain charset?
+13:51  naquad: yes
+13:51  lhunath: do you only care about ascii?
+13:51  heiner: naquad: tr 'abcdefghijklmnopqrstuvwxyz' 'bcdefghijklmnopqrstuvwxyza'
+13:52  heiner: naquad: of course lhunath's suggestion is more elegant
+13:52  lhunath: that's perhaps good enough
+13:52  lhunath: maybe he doesn't care about foreigners.
+13:53  naquad: ascii only
+13:53  heiner: to my surprise the following works as well (using GNU tr): tr '[a-z]' '[b-za]'
+13:53  naquad: tr works, but imho its too much
+13:53  lhunath: too much what?
+13:53  heiner: ...typing?
+13:53  naquad: and that too :)
+13:53  lhunath: luckily he can copy paste.
+13:54  lhunath: !bashlib > naquad
+13:54  greybot: naquad: A library of convenience functions for scripting: http://stuff.lhunath.com/bashlib
+13:54  lhunath: there's chr and ord functions.
+13:54  naquad: thank you:)
+13:54  lhunath: $(chr "$(( $(ord "$letter") + 1 ))")
+13:55  naquad: thanks
+13:55  naquad: that helped :)
+13:55  heiner: woah, that looks extremely inefficient...
+13:55  heiner: I suggest using AWK in this case
+13:55  lhunath: I'm quite at a loss about how that solution is not "too much" while the tr is.
+14:00  NCS_One: hi
+14:00  NCS_One: can someone explain this please : someFunc() { some code } <> /dev/tty >&0
+14:05  lhunath: opens /dev/tty for reading and writing on fd 0 and then copies fd 0 to 1 so you can write to /dev/tty on fd 1 too.
+14:05  heiner: NCS_One: the trailing ">&0" confuses me
+14:06  heiner: lhunath: shouldn't that be ">&1" then?
+14:07  heiner: well, perhaps it doesn't matter here when 0 and 1 are directed to the same fd
+14:07  lhunath: 2>&1 <- redirect fd 2 to where fd 1 is pointing now.   >&0 <- redirect fd 1 to where fd 0 is pointing now.
+14:08  heiner: understood, but "0" conventionally is the file descriptor to read from. Redirectiong the writing part (">") to it looks unusual, but seems to be ok
+14:08  lhunath: it is indeed a little odd
+14:09  NCS_One: this is from a function that silent reads passwords
+14:09  lhunath: like read -s password?
+14:10  NCS_One: lhunath: read doesn't have -s on every systems
+14:10  lhunath: it does in all bash shells.
+14:11  NCS_One: yes, you're right
+14:12  Fatal: lhunath: btw, your bashlib, isn't sleep with floating point gnu specific? might be worth pointing it out in the header
+14:12  lhunath: not exclusively gnu but not posix either.
+14:13  lhunath: that thing needs some serious maintenance anyway ;x
+14:13  lhunath: and deleting of code
+14:14 --- [1]The-Bat is now known as The-Bat
+14:14  pgas: NCS_One: I guess the std way would be to surround your read by stty -echo stty +echo (or the other way round, I never remember)
+14:23  ethanol: what is wrong here? if iptables-save > "$config" >/dev/null 2>&1
+14:23  ethanol: then .. fi
+14:25  lhunath: ethanol: explain to me what > "$config" does
+14:25  ethanol: it should expand to a filename
+14:25  pgas: you redirect stdout 2 times, you probably don't want  >/dev/null 2>&1. perhaps you want to replace that by 2>/dev/null to discard the errors
+14:25  lhunath: ethanol: it redirects fd 1 to the file expanded from "$config"
+14:26  lhunath: ethanol: what does >/dev/null do?
+14:26  ethanol: well I was working under the assumption it was the same pretty much as: if iptables-restore < "$config" > /dev/null 2>&1
+14:26  ethanol: which discarded all output
+14:26  lhunath: just answer the question.
+14:27  ethanol: lhunath, it directs all output of the former to /dev/null ?
+14:27  lhunath: ethanol: >file     Redirect fd 1 to 'file'
+14:27  lhunath: ethanol: >config     Redirect fd 1 to 'config'
+14:27  lhunath: ethanol: >/dev/null     Redirect fd 1 to '/dev/null'
+14:28  lhunath: ethanol: where does fd 1 point to after you do:  >config >/dev/null ?
+14:28  ethanol: I see. /dev/null -- ok so that is not what I want.
+14:28  lhunath: hint: redirections read from left to right.
+14:28  lhunath: exactly.  you want fd 1 to point to config.
+14:28  lhunath: iptables-save > "$config" 2>/dev/null
+14:29  lhunath: and now fd1 points to "$config" and fd 2 points to /dev/null
+14:29  lhunath: !2>&1
+14:29  greybot: Making sense of the copy descriptor operator: http://wiki.bash-hackers.org/scripting/copydescriptor
+14:29  lhunath: that should help you understand.
+14:29  lhunath: if you're confused about io redirections, draw a table like there with your command
+14:29  NCS_One: lhunath: how can I set a message using read -s pass ?
+14:30  lhunath: NCS_One: read -p "Gief your secrets: " -s secrets
+14:30  NCS_One: lhunath: thanks
+14:31  ethanol: so then, should if iptables-restore < "$config" > /dev/null 2>&1 not also be if iptables-restore < "$config" 2> /dev/null ?
+14:32  ethanol: direct fd1 of config to iptables-restore, if it errs, direct 2 to /dev/null ?
+14:33  lhunath: ethanol: >file is the same as 1>file  (so redirect fd *1* to file)
+14:34  lhunath: ethanol: <file is the same as 0<file  (so redirect fd *0* FROM file)
+14:34  lhunath: so < "$config" doesn't change fd 1.  it changes fd 0
+14:34  lhunath: fd 1 == stdout, standard command output.  fd 0 == stdin, standard command input.  fd 2 == stderr, standard command errors.
+14:35  ethanol: so iptables-restore takes stdin from file
+14:36  lhunath: aye.  and its fd 1 will still point to your terminal, probably.  since you didn't redirect it.
+14:37  ethanol: yeah, all output (stdout and stderr) should go to /dev/null
+14:38  lhunath: can't you tell iptables-save to not generate the output you're trying to throw away in the first palc?
+14:38  lhunath: place*
+14:39  ethanol: not really
+14:39  ethanol: has no switches other than a counter and flushing related option
+14:39  ethanol: nothing about ignore errors and such
+14:40  ethanol: it only generated stderr though, if it succeeds nothing is returned
+14:40  ethanol: so redirecting 2 should be sufficient to ignore output
+14:40  ethanol: so iptables-restore < "$config" 2> /dev/null ?
+14:45  sikker: how do I check if the content of a file is equal to "1" ?
+14:47  pgas: sikker: do you fear the file might be very big?
+14:47  sikker: pgas: the file will either contain "1" or "0", I have pretty good control over the file
+14:47  pgas:  [[ $(<file) = 1 ]]
+14:48  lhunath: ethanol: not to mute stdout.
+14:49  lhunath: if (( $(<toggleFile) )); then echo "Toggle is ON"; else echo "Toggle is OFF"; fi
+14:49 * lhunath likes ((
+14:49  Ammler: is that "short" for $(cat file) or something else?
+14:50  sikker: thanks a lot guys :)
+14:50  poisonbit: !<()
+14:50  greybot: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+14:50  poisonbit: mmm no
+14:50 * poisonbit does not remember all faqtoids
+14:51  grop: !$(< > Ammler
+14:51  greybot: Ammler: The command substitution $(cat file) can be replaced by the equivalent but faster $(< file).
+14:51  lhunath: Ammler: sort of.  bash does the reading; there's no cat involved.
+14:52  pgas: Ammler: yes it is, it's not posix
+14:52  Ammler: he, just ideling here does also help learning bush a bit :-)
+14:52  Ammler: bash*
+14:52  pgas: in this case it's also possible to use: read a <file
+14:53  sikker: bush = bourne unnaturally shell
+14:55  ethanol: lhunath, I know, only stderr
+14:56 --- wtfness is now known as foocraft
+14:56  ethanol: lhunath, so mind telling me if this looks ok now? :) http://bash.pastebin.com/ZaK1C2Jb
+14:56  ethanol: or who was it that told me to use more loops? :p
+14:58  shai: Hi :) How can I run a while loop to say, that as long as /var/run/pid.file exists, sleep 1 ?
+14:58  lhunath: ethanol: sure, looks fine.
+14:58  lhunath: shai: while [[ -e file ]]; do sleep 1; done
+14:59  lhunath: "while exists file, sleep 1"
+15:01  pgas: xb
+15:01  shai: 10x lhunath
+15:02  Ammler: is it possible to run a bash script step by step, e.g. I need to hit enter for every line?
+15:02  pgas: search for bashdb
+15:02  ethanol: Ammler, why?
+15:03  Anvil: ethanol : debugging purpose.. ?
+15:03  ethanol: ah
+15:04  lhunath: Ammler: alternatively: trap 'read -p "> $BASH_COMMAND?"' DEBUG
+15:04  lhunath: put it at the top of your code (or where you want to start stepping)
+15:05  pgas: you perhaps need set -o debug or something
+15:05  Ammler: ethanol: I had a bash script runned with bash -x, but was still not sure, where a certain action happen exactly
+15:05  ethanol: ok :)
+15:06  Ammler: finally, I found the script was triggered again with a hook from the repo, which was called to a repo command in the script :-)
+15:11  iceroot: i have the files foo1.bar, foo1.barbar, foo1.foobar and i want to rename the 1 with a 2. is there a way to rename all the files with one command instead of using mv for every file? something like mv foo1* foo2*
+15:11  clint-: hey all,
+15:12  clint-: If anyone has some spare time, I was wondering if any bash experts might have some time, to have some insight on a project I would like to work on for Xorg, and X configuration, and some other things, with bash scripting.
+15:12  clint-: I have plenty of books that I need to study for sure, but I had some people that knew bash back when I was writing a bash script to automate , and grab compiz and the fusion packages from git and install the packages, and dependencies , and configure everything..
+15:13  clint-: when compiz was merging with beryl.
+15:13  clint-: I however am not too focused with iCandy right now, but something even more elite...
+15:13  clint-: heres the information too that is stored on pastebin.ca
+15:14  clint-: I don't really use pastebin.ca much anymore.. but I was hoping some of you bash experts, pros , novices, etc, Might see a vision I have for some projects..
+15:15  jww: clint-: umm you seems late.
+15:15  jww: xorg configuration file is not mandatory anymore, most people run without it.
+15:15  clint-: late?
+15:15  clint-: yes I'm well aware of that. :)
+15:16  clint-: However, some have to write them, and configure them.. as I do, sometimes on systems.. for 11.2 openSUSE, I have to write my own, and I know Xorg latest well newer suppots more then whats  on some legacy systems..
+15:17  clint-: However, some people stopped working on Sax2 etc.. for openSUSE, and I see areas where things can be improved.. Mandrake/Mandriva always had a good tool XFdrake, and the system I started on, mandrake 10- community, @ suse was SUSE 9 pro, fedora @ Fedora Core in 2005, debian, when it was using XFree86.. etc..
+15:17  lhunath: !learn step To step through your code, look into bashdb or put this where you want to begin stepping: trap 'read -p "[$BASH_SOURCE:$LINENO] $BASH_COMMAND?"' DEBUG
+15:17  greybot: OK, lhunath
+15:17  clint-: want to work on a script that can scan the hardware's capabilities, look at databases for certified configuration configs, etc.. and be able to input them in the system if the user wanted that support
+15:20  pgas: iceroot: for f in foo1*;do mv "$f" foo2"${f#foo1}";done
+15:22  iceroot: pgas: what does the #foo1 means exactly?
+15:23  sas_: hi
+15:23  pgas: !faq 100 > iceroot
+15:23  greybot: iceroot: http://mywiki.wooledge.org/BashFAQ/100 -- How do I do string manipulations in bash?
+15:23  iceroot: pgas: thank you
+15:24  sas_: Isn't it true that if I have a alias and a function by same name, while execting, alias should take precedence
+15:24  pgas: it's true
+15:24  pgas: # foo() { echo bar;};alias foo='echo bleh';foo
+15:24  evalbot: pgas: bar
+15:25  pgas: but alias are not enabled in script
+15:25  pgas: hmm and you need to define them on a line before using them...which makes it painful for evalbot
+15:26  sas_: i checked it out - by making an alias like this - alias date=pwd
+15:27  sas_: date() { echo hi ; }
+15:27  sas_: but when I execute date - it shows hi
+15:28  sas_: bash 4.1.5(1) on Ubuntu 10.04
+15:28  pgas: # bash <<< $'shopt -s expand_aliases;foo () { echo hi; };alias foo='echo ho'\nfoo'
+15:28  evalbot: pgas: bash: ho\nfoo: No such file or directory
+15:28  Anvil: sas_ : what does shopt expand_aliases report ?
+15:29  pgas: # bash <<< $'shopt -s expand_aliases;foo () { echo hi; };alias foo="echo ho"\nfoo'
+15:29  evalbot: pgas: ho
+15:29  pgas: 4# bash <<< $'shopt -s expand_aliases;foo () { echo hi; };alias foo="echo ho"\nfoo'
+15:29  sas_: expand_aliases on
+15:29  shbot: pgas: ho
+15:29  pgas: you are doing something wrong, hard to tell what
+15:30  sas_: hmmm how do I debug it out
+15:31  sas_: should I use pastebin to show the entire command on a fresh window?
+15:31  pgas: is this in a script?
+15:32  sas_: no on cmd line
+15:33  pgas: ok
+15:33  pgas: what does "type date" says?
+15:33  sas_: date is aliased to pwd
+15:33  pgas: type set -x
+15:33  sas_: a sec
+15:34  pgas: then type: date
+15:36  sas_: +pwd
+15:36  sas_: +echo hi
+15:36  sas_: hi
+15:36  sas_: even on FBSD 3.2.17 the same issue
+15:37  sas_: I mena FBSD with bash 3,2,17
+15:37  Anvil: hm
+15:37  Anvil: "same here"
+15:37  pgas: really?
+15:38  Anvil: last defined win, actually
+15:38  pgas: 4# bash <<< $'shopt -s expand_aliases;alias foo="echo ho";foo () { echo hi; \nfoo'
+15:38  shbot: pgas: bash: line 3: syntax error: unexpected end of file
+15:38  Anvil: "date() { echo hi ; } ; alias date=pwd ; date" returns $(pwd)
+15:38  pgas: aaaah no it's a different problem
+15:39  Anvil: and "alias date=pwd ; date() { echo hi ; } ; date" returns hi
+15:39  pgas: when you so date() { echo hi ; } after the alias, date is expanded
+15:39  pgas: so you run pwd () {echo hi;}
+15:39  pgas: thus redifining pwd
+15:39  pgas: try "type pwd"
+15:40  sas_: it shows pwd is a function and he function definition
+15:40  pgas: try using "\date() { echo hi; }" or "function date { echo hi; }" and you will not have a problem
+15:41  Anvil: pgas : indeed
+15:41  pgas: sas_: yup alias expansion has been done when you where defining the function
+15:41  Anvil: declare -F shows a pwd function but no date function.
+15:41  sas_: right, but still i don't get why did it show hi when I was calling date
+15:42  Anvil: because date=pwd :)
+15:42  Anvil: and pwd = echo hi
+15:42  sas_: but alias have precendence
+15:42  pgas: yes and the alias is expanded
+15:42  Anvil: your aliasing a function
+15:42  Anvil: not the pwd built-in/command
+15:42  pgas: but your pwd doesn't print $PWD but echo hi
+15:43  Anvil: s/your/you're/
+15:43 --- sresu is now known as sre-su
+15:43  sas_: ahhhhhhhhhhhhhhhhhhhhhhh
+15:43  pgas: try unset -f pwd and date
+15:43  sas_: getting it -------- i think
+15:44  sas_: pgas: yes now it works
+15:44  sas_: pgas: thanks a lot for the help
+15:45  pgas: fwiw this one is vicious, I've seen other people biten by this
+15:46  skamikaze: hi all
+15:47  Paddy_NI: I sort of randomly downloaded "The UNIX HATERS Handbook" last night.. jee those guys hate unix
+15:47  Anvil: pgas : indeed. Pretty naughty.
+15:54  skamikaze: http://pastie.org/1431212 | I'd be glad if someone can take a look and tell me if this can be done more elegant
+15:56  pgas: case $(lbsrealeas -i) in *ubuntu*|*debian) blah;; *cento*) blah blah;;esac
+15:56  skamikaze: tyvm pgas
+15:57  DestinyAwaits: Distro check good hehe
+16:03  axisys: what is the swithc with date to convert epoch time to human readable format ?
+16:07  skered: %u?
+16:07  erUSUL: axisys: too lazy to read man page? date -d @epochtimehere
+16:07  erUSUL: ;P
+16:07  skamikaze: pgas: how can i provide a modifier (like i) in that case statements?
+16:08  axisys: erUSUL: hmm.. i was reading it .. probly not paying attention.. lacking trained eyes ..
+16:09  axisys: erUSUL: thanks
+16:09  erUSUL: no problem
+16:13  pgas: skamikaze: shopt -s nocasematch or nocaseglob or something like that
+16:14  skamikaze: tyvm
+16:22  nze: how do i use a backreference in sed to access a bash array?
+16:23  nze: like echo 3 | sed "s/[0-9]/${array[\1]}/"
+16:25  erUSUL: nze: do not think it is possible to do what you are trying to do ...
+16:26  erUSUL: the parameter expansion will happen before sed sees the command string
+16:26  nze: erUSUL: what would you suggest then?
+16:27  erUSUL: really dunno;
+16:28  nze: erUSUL: i thought that awk might a an alternative, as it appears it knows arrays. the problem is just that i don't know awk :\
+16:28  erUSUL: !wayttd
+16:28  greybot: What Are You Trying To Do?
+16:29  nze: i have a csv and i want to replace numbers in some fields by words
+16:30  poisonbit: # array=(a b c); var=3x4y5; echo "${var//[0-9]/${array[\1]}}"     # ?
+16:30  evalbot: poisonbit: bxbyb
+16:30  nze: so i thought i'd store the words in an array and replace the numbers by the word in the array
+16:36  nze: nobody?
+16:37  poisonbit: we can start providing random examples for random fields, cvs implementations, etc
+16:37  poisonbit: csv
+16:38  poisonbit: or maybe you can paste example input, example desired output, and then get example code
+16:38  gnubien: nze: comma separated cvs? awk might be the tool to use
+16:41  nze: well i basically try to get array=(foo bar baz)  "1;10;\n2;0;" -> "bar;10;\nbaz;0;"
+16:43  erUSUL: nze: echo "1;10;\n2;0;" | awk -F";" 'BEGIN { split("foo bar baz",array); } { print array[1],$2,$3,array[4]}'
+16:43  erUSUL: # echo "1;10;\n2;0;" | awk -F";" 'BEGIN { split("foo bar baz",array); } { print array[1],$2,$3,array[4]}'
+16:43  evalbot: erUSUL: foo bar baz 10 \n2
+16:43  erUSUL: well ... epic fail ;P
+16:44  geirha: while IFS=\; read -r a b; do printf '%s;%s\n' "${array[a]}" "$b"; done < infile.csv
+16:45  nze: what i came up with was `sed -r "s/([^;]+)/${array[\1]}/" but the \1 doesn't work
+16:45  geirha: # array=(foo bar baz); while IFS=\; read -r a b; do printf '%s;%s\n' "${array[a]}" "$b"; done <<< $'1;10\n2;0'
+16:45  evalbot: geirha: bar;10
+16:45  evalbot: geirha: baz;0
+16:46  e36freak: nze: for grouping in sed you need \( \)
+16:46  DaSilva_Ire: Anybody understand why this script http://pastebin.com/mpEGyT2j does not redirect output to the log file?
+16:47  e36freak: !` > DaSilva_Ire
+16:47  greybot: DaSilva_Ire: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+16:47  e36freak: !pm > DaSilva_Ire
+16:47  greybot: DaSilva_Ire: http://mywiki.wooledge.org/ProcessManagement
+16:47  nze: e36freak: the -r switch is for extended regexp -> () grouping
+16:47  e36freak: ahh
+16:47  e36freak: !(( > DaSilva_Ire
+16:47  greybot: DaSilva_Ire: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+16:47  e36freak: ![
+16:47  greybot: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+16:48  geirha: nze: Well, the shell expands ${array[foo]}, NOT sed.
+16:48  e36freak: point
+16:48  geirha: You simply can't do it with sed.
+16:48  e36freak: DaSilva_Ire: and you probably want to append, >>, once you fix the other stuff
+16:50  geirha: nze: See if that while read loop I showed earlier does what you need.
+16:50  nze: geirha: at it
+16:51  lost_sou1: I don't suppose anyone would happen to know of a site outlining how to replace all periods in a filename with an underscore except for the last one so the extension stays in tact?
+16:52  geirha: !faq rename
+16:52  e36freak: DaSilva_Ire: and what is up with "/tmp/./myprog/" ?
+16:52  greybot: http://mywiki.wooledge.org/BashFAQ/030 -- How can I rename all my *.foo files to *.bar, or convert spaces to underscores, or convert upper-case file names to lower case?
+16:52  DaSilva_Ire: thanks for all the suggestions e36freak
+16:52  DaSilva_Ire: its not quite bash I'm using
+16:52  DaSilva_Ire: its Almquist shell as far as I know
+16:53  DaSilva_Ire: on ddwrt
+16:53  e36freak: ok, $( ) and the process management page still stand
+16:53  geirha: lost_sou1: for file in ./*.*.*; do base=${f%.*} ext=${f##*.}; echo mv "$f" "${base//./_}.$ext"; done
+16:53  e36freak: /tmp/./myprog still doesnt make sense
+16:54  e36freak: DaSilva_Ire: you just want to see if its running? why not just use pgrep?
+16:54  lost_sou1: geirha: ty, I'll give it a shot..  also reading the page you had the bot link me to as well
+16:54  DaSilva_Ire: no prgrep
+16:54  e36freak: no r, pgrep
+16:54 --- agu10^ is now known as agu10^_
+16:55  DaSilva_Ire: there is little documentation on what does and doesn't exist in this environment
+16:55 --- agu10^_ is now known as agu10^__
+16:55  DaSilva_Ire: sorry typo, aye pgrep does not exist
+16:55 --- agu10^__ is now known as agu10^
+16:56  e36freak: odd
+16:56  erUSUL: busybox is limited ... ddwrt is an embebedd distro
+16:56  erUSUL: for SOHO routers
+16:57  e36freak: ahh
+16:57  nze: geirha: yup, got it working! thanks a lot for all the suggestions :)
+16:58  poisonbit: busybox had pgrep if I remember ok, but as all in busybox, maybe enabled/disabled at compilation
+16:58  e36freak: and grep -m 1 is non-standard
+16:58  poisonbit: is there a good way for a .sh script, to know what the "interpreter" is (dash, bash, ksh, busybox, etc) ?
+16:58  e36freak: thats what really confused me, no pgrep but GNU coreutils
+16:58  geirha: !faq mutual > DaSilva_Ire
+16:58  greybot: DaSilva_Ire: http://mywiki.wooledge.org/BashFAQ/045 -- How can I ensure that only one instance of a script is running at a time (mutual exclusion)?
+16:58  lost_sou1: odd, returned a bunch of mv  .
+16:59  geirha: # touch some.file.foo some.other.file.txt; for file in ./*.*.*; do base=${f%.*} ext=${f##*.}; echo mv "$f" "${base//./_}.$ext"; done
+16:59  evalbot: geirha: mv  .
+16:59  evalbot: geirha: mv  .
+17:00  geirha: oh crap. f vs file
+17:00  geirha: # touch some.file.foo some.other.file.txt; for f in ./*.*.*; do base=${f%.*} ext=${f##*.}; echo mv "$f" "${base//./_}.$ext"; done
+17:00  evalbot: geirha: mv ./some.file.foo _/some_file.foo
+17:00  evalbot: geirha: mv ./some.other.file.txt _/some_other_file.txt
+17:00  geirha: d'oh, didn't consider the . in ./ ^^
+17:00  agu10^: sup gys
+17:00  erUSUL: those leading _ do not look good ... ;P
+17:00  agu10^: sup guys
+17:00  geirha: # touch some.file.foo some.other.file.txt; for f in *.*.*; do base=${f%.*} ext=${f##*.}; echo mv "./$f" "./${base//./_}.$ext"; done
+17:00  evalbot: geirha: mv ./some.file.foo ./some_file.foo
+17:00  evalbot: geirha: mv ./some.other.file.txt ./some_other_file.txt
+17:01  lost_sou1: it's the leading . I had trouble with on the one I was working on before I think
+17:01  geirha: lost_sou1: There ^
+17:01  lost_sou1: geirha: ok, thanks m8
+17:02  geirha: a file with a leading . is considered "hidden" by most programs.
+17:02  lost_sou1: I was using find . which apparently found em
+17:02  lost_sou1: and they weren't even hidden
+17:02  geirha: !dotglob > lost_sou1
+17:02  greybot: lost_sou1: dotglob, if set, makes bash include filenames beginning with a '.' in the results of pathname expansion (shopt -s dotglob)
+17:02  e36freak: !dotfiles
+17:02  greybot: http://mywiki.wooledge.org/DotFiles or - for a technical explanation - the INVOCATION section of man bash.
+17:03  geirha: lost_sou1: Yes, find does not hide "hidden" files.
+17:03  geirha: But the shell's globs does not expand them unless you set dotglob
+17:03  e36freak: poisonbit: $SHELL ? i cant think of anything else, other than checking /bin or /usr/bin
+17:04  lost_sou1: I'll read all the links...  thanks fellas.  Appreciate the info
+17:05  geirha: # touch .hidden not_hidden; echo *
+17:05  evalbot: geirha: not_hidden
+17:06  geirha: # touch .hidden not_hidden; shopt -s dotglob; echo *
+17:06  evalbot: geirha: .hidden not_hidden
+17:06  poisonbit: e36freak, i've only bash machines handy... is $SHELL reliable at least in busybox, dash and ksh in sh mode?
+17:07  geirha: poisonbit: SHELL is never reliable. It's just an env-var that may be set by the login program, containing the login shell from the passwd database.
+17:08  poisonbit: mmm thats not what I was searching for
+17:08  nze: poisonbit: http://pastebin.com/n5ALCFQ8
+17:08  poisonbit: /proc/$$/exe
+17:08  nze: picked it up from some /etc/profile, don't remember the distro..
+17:08  poisonbit: nze thats linux only
+17:09  falconindy: nze: its from arch, and its bad
+17:09  poisonbit: if i'm going to script for linux i just use bash and fuck of portability :)
+17:09  e36freak: haha its horrid
+17:09  e36freak: ...like most arch scripts
+17:09  e36freak: falconindy: another to rewrite? heh
+17:09  geirha: poisonbit: You'll have to try features only available in certain shells, and rule out each one until you get a hit.
+17:09  nze: what's so bad about it?
+17:09  poisonbit: i was supposing that
+17:09  poisonbit: like whence => ksh
+17:09  geirha: poisonbit: Easier to just write a POSIX script and be done with it.
+17:09  e36freak: !ls > nze
+17:09  greybot: nze: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+17:09  nze: if you have /proc it should work fine
+17:10  nze: otherwise you still have the same problem as before
+17:10  nDuff: do we have getent available?
+17:12  nDuff: ...on Linux... getent passwd "$USER" | cut -d: -f7 -> USER's shell, direct from the passwd database (or whatever equivalent is in use -- LDAP, NIS, you-name-it)
+17:12  nDuff: nze, anyhow, seriously, (ab)using ls like that is just wrongh
+17:12  nDuff: nze, ...if you wanted to read the symlink, it should be done with readlink
+17:12  nDuff: s/wrongh/wrong/
+17:12  falconindy: and readlink isn't portable
+17:12  falconindy: hurray!
+17:12  e36freak: wooo!
+17:12  nDuff: reading from /proc isn't portable
+17:12  nDuff: so we're already down that road
+17:13  e36freak: though this is a script written specificially for a distro
+17:13  geirha: Why does it matter what shell it is?
+17:13  e36freak: so portability is not the issue
+17:13  nDuff: ...now, _that_ (re: "why does it matter what shell") is a good question
+17:14  poisonbit: errrr
+17:15  poisonbit: see cl_string_lc ()  in  http://poisonbit.wordpress.com/2010/12/20/apply-perl-knowledge-in-other-context-vii/
+17:15  istevenmon: hi guys, how can i search for a specific word in a directory full of files?
+17:15  poisonbit: thats easy "into" bash
+17:16  pgas: grep -Fr word directory
+17:16 * nDuff reads "CL" and thinks "Common LISP"
+17:16  e36freak: heh
+17:16  poisonbit: istevenmon, files=(directory/*); [[ "${files[@]}" = *word* ]] && echo match
+17:17  e36freak: or find
+17:17  erUSUL: istevenmon: grep -R 'word' dir/
+17:17  poisonbit: nDuff, well you see that example that runs one code on one shell, other code on another shell
+17:17  e36freak: istevenmon: are you looking for the word _in_ the file, or in the file name?
+17:17  nDuff: *nod*
+17:17  poisonbit: nDuff, also dependency checking is conditional for bash versions in that example
+17:17  nDuff: *nod*.
+17:18  istevenmon: e36freak: in the file
+17:18  istevenmon: thanks guys
+17:18  geirha: find . -type f -exec grep -lF word {} +
+17:19  geirha: (in case your grep does not have -R)
+17:20  lost_sou1: geirha: It worked like a charm, Thanks again.  Now on to reading those links.
+17:21  poisonbit: well, reasons or *nods* at a side... there is no generic/portable way for a lib being sourced, to know which shell _interpreter_ is running the script that sources you... but checking for "shell specific _features_" ?
+17:22  geirha: indeed. For bash it's easy, just check if $BASH_VERSION is set.
+17:25  poisonbit: I make all library loading from a central lib/function... maybe thats a good place for the checking
+17:26  poisonbit: then i can load "$path/${file}.$shell" library
+17:26  poisonbit: I don't know if thats better... or it's better to just set one variable, and keep libraries in one file and bloated of checks
+17:27  poisonbit: checks, case/esacs, etc
+17:29  poisonbit: keep separated maybe harder for library authors (multiplicated work)...  but better for readability and execution
+17:29  poisonbit: what a "dilema"
+17:31  poisonbit: mmm i said i was going to forget the "make agnostic to shell" from the ToDo... now i remember why, I always get indecisive on howto do it
+17:32  poisonbit: mmm
+17:33  poisonbit: .sh as "base"... an other extension libs, overwrite functions/globals that are in "base" (.sh file)  ?
+17:33  poisonbit: that could avoid to repeat code in all .$shell provided libs
+17:34  poisonbit: you can overwrite all the lib declarations, or just some or one
+17:35  geirha: source bash files from a bash script, source sh files from an sh script. I don't understand the problem.
+17:36  e36freak: indeed
+17:36  poisonbit: you don't know what script is going to write the user of a "multi-shell" framework when you write a lib for that framework
+17:37  e36freak: or make the base of it sh, and source a different file depending on what shell... but really, if it needs to be portable, just write it in sh
+17:41  mattymo: is there a faq on mathematic operations in bash?
+17:42  grop: !$((
+17:42  greybot: $((...)) is an arithmetic substitution. After doing the arithmetic, the whole thing is replaced by the value of the expression. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+17:43  grop: !((
+17:43  greybot: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+17:43  mattymo: grop, ty
+17:43  grop: !bc
+17:43  mattymo: I want to avoid bc in this case
+17:44  e36freak: mattymo: bash cant handle floating point on its own though
+17:44  mattymo: this is integers only
+17:45  e36freak: then $((..)) and ((..)) will be fine :)
+17:45  tmr: !math
+17:45  greybot: Add 7 to a variable: let a+=7; ((a+=7)); a=$((a+7)); See http://mywiki.wooledge.org/ArithmeticExpression
+17:45  heiner: mattymo: did you have a look at the "Advanced Bash-Scripting Guide" (ABS): http://www.tldp.org/LDP/abs/html/arithexp.html
+17:45  tmr: !abs
+17:45  greybot: The infamous "Advanced" Bash Scripting Guide should be avoided unless you know how to filter out the junk. It will teach you to write bugs, not scripts. In that light, the BashGuide was written: http://mywiki.wooledge.org/BashGuide
+17:45  e36freak: ded
+17:45  e36freak: heh**
+17:46  mattymo: LOL
+17:46 * e36freak originally learned from that guide, an relearned everything hanging out it here
+17:46  mattymo: this doc is ancient
+17:46  heiner: Well, I don't share that opinion about the ABS. Could the author of that factlet state where there are bugs?
+17:46 * mattymo has used it from time to time
+17:46  tmr: !expr
+17:46  greybot: 'expr' is a program used in ancient shell code to do math. In Posix shells like bash, use $(( expression )). In bash and ksh93, you can also use '(( expression ))' or 'let expression' if you don't need to use the result in an expansion.
+17:46  tmr: There's first.
+17:46  heiner: otherwise I could change the factlet to be much in favour of the ABS ;-)
+17:47  e36freak: !crap
+17:47  greybot: The overwhelming majority of bash scripts, code, tutorials, and guides on the Internet are crap. Sturgeon was an optimist.
+17:47  heiner: instead of complaining - do it better!
+17:47  e36freak: !guide
+17:47  greybot: http://mywiki.wooledge.org/BashGuide
+17:47  tmr: !guide
+17:47  greybot: http://mywiki.wooledge.org/BashGuide
+17:47  e36freak: there you go
+17:47  erUSUL: heiner: they did
+17:47  tmr: Heh.
+--- Log closed Wed Jan 05 18:27:29 2011
+--- Log opened Wed Jan 05 18:32:38 2011
+18:32 --- Users 571 nicks [0 ops, 0 halfops, 0 voices, 571 normal]
+18:33 --- Channel #bash was synced in 80 seconds
+18:33  zplinux: greycat: this is what I am aiming at http://dpaste.com/294550/
+18:34  greycat: I don't see an array.  I thought you wanted to return an array.
+18:34  greycat: How can you return something you don't even have in the first place?
+18:35  zplinux: wait, I was only guessing you would ask me to use arrays
+18:35  zplinux: how can I return the i values?
+18:35  greycat: _func() { zplinux=(/path/to/*); };  # main; _func; for j in "${zplinux[@]}"; do ...
+18:35  greycat: !faq 5
+18:35  greybot: http://mywiki.wooledge.org/BashFAQ/005 -- How can I use array variables?
+18:36  zplinux: ok
+18:36  zplinux: thnaks
+18:36  zplinux: thanks
+18:36  zplinux: do you use dhcpcd?
+18:37  zplinux: I am getting a shell error, maybe you can help me?
+18:37  e36freak: !nabq
+18:37  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+18:37  zplinux: ok
+18:37  zplinux: bye
+18:42  jfe: i've been working on making this simple script more robust. is there anything i can do to make it better?: http://www.pastie.org/1431662
+18:44  heiner: jfe: (1) check if "libshell" exists before reading it. (2) use "." instead of "source"
+18:44  heiner: (3) are you aware that your script will not run with older shells?
+18:45  heiner: (4) does the "error" function terminate the script? The excerpt you showed seems to assume it
+18:45  e36freak: jfe: ''if (($?))'' == ''if (($? != 0))''
+18:45  TheBonsai: heiner... happy new year. long time... holodays? ;)
+18:46  TheBonsai: er
+18:46  TheBonsai: holo... wtf
+18:46  TheBonsai: maybe that, too..
+18:46  e36freak: jfe: and you should put an "exit 1" at the end of that statement
+18:46  heiner: TheBonsai: the same to you! :-)
+18:46  jfe: heiner: yes, i have two functions, error() and werror().. the former exits and the latter doesn't.
+18:46  e36freak: TheBonsai: howdy
+18:46  heiner: TheBonsai: yes, holidays, you got it.
+18:46  TheBonsai: heiner: fine, enjoy then :)
+18:46  TheBonsai: e36freak: m00
+18:46  jfe: what's the posix way of testing for the existence of a file?
+18:47  TheBonsai: [ -f ... ]
+18:47  heiner: jfe: I like your consistent way of checking error conditions - it reminds me to C programs
+18:47  e36freak: if [ -f file ], [ -e file ], a bunch more
+18:47  TheBonsai: i took it as "natural file"
+18:47  TheBonsai: *regular, even
+18:47  e36freak: i gotcha
+18:47  heiner: e36freak: "-e" will also return success for directories
+18:48  jfe: heiner: is it better to use `test` than `[`?
+18:48  e36freak: hence the "a bunch more", it depends on exactly what he wants to test
+18:48  e36freak: ![
+18:48  greybot: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+18:48  nDuff: jfe, it's better to use [[ than either, if your script is targeting bash only
+18:48  nDuff: ![[ > jfe
+18:48  greybot: jfe: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+18:48  e36freak: jfe: [ == test
+18:48  jfe: i'm trying to write posix-compliant scripts
+18:49  greycat: POSIX has both [ and test
+18:49  heiner: jfe: it depends on how portable you really want to be. I suggest *not* using "test" instead of "[", because shells not supporting "[" will not understand many other things in that script. I've never worked using one.
+18:50  heiner: really ancient shells do not even support "if". Some "configure" scripts therefore contain code like test condition && { success_case; } || { else_case; }
+18:50  skered: jfe: You might want to quote that $() as well incase it returns something with a space?
+18:50  e36freak: skered: not needed in variable assignment
+18:50  e36freak: but never a bad idea
+18:51  heiner: indeed
+18:51  heiner: ...not needed
+18:51  grop: jfe, it's not necessary to quote $?, because it's a number
+18:51  pgas: though it's not exactly equivalent to if then else and need extra care
+18:52  heiner: jfe: "command -v" is very useful, but not very portable. It is POSIX, but there are still many (older) systems not supporting it.
+18:52  jfe: heiner: what would be the more portable option?
+18:52  greycat: He said POSIX, so command -v should be available.
+18:52  greycat: He didn't say Bourne.
+18:53  TheBonsai: i constantly use hash, how portable is that?
+18:53  poisonbit: heiner, which operative systems/versions ?
+18:53  greycat: Less portable than command -v.
+18:53  greycat: poisonbit: the most infamous example is Solaris's /bin/sh.
+18:53  heiner: jfe: there is no real (easy) portable option I know of, less than searching the binary yourself using the PATH variable, like the shell does
+18:54 --- folklore is now known as folklore2
+18:55  heiner: jfe: a common solution is to have an install program that verifies the environment during *install time*, not each time the script is started (run time)
+18:55  TheBonsai: you'd need additional checks if you are allowed to execute it
+18:55  heiner: jfe: if you can rely on bash or ksh your script is sound.
+18:55  greycat: Or POSIX, which he SAID he was using...
+18:55  heiner: indeed
+18:56  agu10^: sup
+18:56  agu10^: should I use bash for windows?
+18:56  heiner: jfe: I assume "libshell" sets the EXIT_SUCCESS variable to "0"?
+18:56  poisonbit: TheBonsai, as far as i know, 'hash' is pure bashism
+18:56  jfe: heiner: exactly.
+18:57  greycat: jfe: *vomit*
+18:57  TheBonsai: poisonbit: it's not ;) but i don't know how portable it really is
+18:57  greycat: Anything that makes one programming language "look like" some other programming language is generally a VERY poor idea.
+18:57  heiner: poisonbit: ksh and ksh93 support it, too. As far as I know "csh" supports it, and therefore "zsh" will also have it. It's even POSIX
+--- Log closed Wed Jan 05 19:29:13 2011
+--- Log opened Wed Jan 05 19:29:22 2011
+19:29 --- Users 570 nicks [0 ops, 0 halfops, 0 voices, 570 normal]
+19:29  Tomasso: there is one more thing, while running the script i execute certain task, and some of them take some time. I figured out that my script continues running and it doesnt wait for them to complete. Is there some way to block execution until the current executing task finishes?
+--- Log closed Wed Jan 05 19:33:06 2011

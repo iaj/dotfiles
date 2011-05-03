@@ -1,0 +1,58 @@
+--- Log opened Sat Dec 04 00:00:40 2010
+00:15  peth: what a nice young man
+00:16  Mikachu: what?
+00:18  peth: what a nice young man that mikebling fellow was, don't you think, charles? perfect manners, good family probably.
+00:19  Mikachu: ah, quite
+00:19  Mikachu: he did say "greetings"
+00:20  peth: :)
+00:21  Yorokobi: But failed to say "Thank you"
+00:22  Mikachu: i forgive him
+00:23  thrig: are we certain of this "him"ness?
+00:24  peth: true, she might have been an undercover mike
+--- Log closed Sat Dec 04 12:46:32 2010
+--- Log opened Sat Dec 04 12:46:41 2010
+12:46 --- Users 157 nicks [0 ops, 0 halfops, 0 voices, 157 normal]
+12:48 --- Channel #zsh was synced in 116 seconds
+13:16 --- mren|off is now known as mren
+19:26  variable: I'm trying to make a generic zshrc and I want to see if a particular command exists in $PATH - how can I test this?
+19:27  fow: whence foo &> /dev/null or  [[ -x ${commands[foo]} ]]  or something like that
+19:27  variable: are either of those methods better ?
+19:28  variable: __exists () {
+19:28  variable:        return [[ -x ${commands[$1]} ]]
+19:28  variable: }
+19:28  variable: like that?
+19:29  variable: followed by             __exists git && (git rev-parse HEAD 2>/dev/null || return 1)
+19:31  fow: As far as I know, the two are equivalent, but I think the second looks better/is easier to read (even if less portable; changing whence to which and &> to 2>&1 > should make the first portable)
+19:32  variable: Even though I'm writing a .zshrc file I'd like to keep the portable non portable separates for bash, sh, and zsh, so I'll use the first :-)
+19:33  variable:       return which $1 >/dev/null 2>&1 $1 ]  -> like that 
+19:33  fow: take out the $1 ] and yeah, that should work and is fairly portable AFAIK
+19:33  variable: woops - remove the extra $1
+19:34  variable: yeah
+19:34  variable: nope - now its failing
+19:34  variable: __exists () {
+19:34  variable:       return which $1 >/dev/null 2>&1     
+19:34  variable: }
+19:35  fow: err, run which and then return $?
+19:35  variable: also: is which -s portable ?
+19:35  fow: no idea
+19:36  variable: return [ which $1 >/dev/null 2>&1 $1 ]  ---> like that as well?
+19:36  zarchne: no which -s in bash
+19:36  variable: zarchne, alright - thanks
+19:37  zarchne: ... well which not builtin in bash
+19:37  variable: zarchne, yeah - it seems to be BSD specific
+19:39  Mikachu: variable: 'return' is for giving a number, not a command
+19:39  Mikachu: variable: if you're running a command, you don't need return
+19:40  variable: Mikachu, I want to return a number - 0 or 1 for exists or does not exists
+19:40  Mikachu: yes, which already does that
+19:41  Mikachu: __exists() { which $1 >&/dev/null }
+19:41  Mikachu: doesn't really save you much typing
+19:41  variable: ah I see
+19:41  variable: I prefer to be explicit about a return 
+19:42  Mikachu: just 'return' without an argument will return the last status
+19:42  Mikachu: but putting return last in a function is useless
+19:42  Mikachu: so don't use return ;)
+19:42  variable: Mikachu, its makes it easier to read and more obvious about whats going on. 
+19:43  variable: return $? seems the best to right now - even though its just syntactic sugar 
+19:43  Mikachu: adding code that does nothing usually doesn't make things more obvious, but feel free
+23:56 --- sjl_ is now known as sjl
+--- Log closed Sun Dec 05 00:00:32 2010

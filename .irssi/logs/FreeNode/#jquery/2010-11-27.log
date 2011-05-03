@@ -1,0 +1,271 @@
+--- Log opened Sat Nov 27 00:05:28 2010
+--- Log closed Sat Nov 27 00:10:29 2010
+--- Log opened Sat Nov 27 00:10:54 2010
+00:10 --- Users 673 nicks [1 ops, 0 halfops, 0 voices, 672 normal]
+00:11  m0dmd: I need my result to hold two values: 1. post_ID, 2. post_date
+00:11  m0dmd: So that I can insert the value into a date_input field.
+00:12 --- Channel #jquery was synced in 115 seconds
+00:19  m0dmd: ....
+00:26  sean`: http://www.dumpert.nl/mediabase/foto/b68e9972_tmobilemobiel.jpg
+00:30  m0dmd: sean` would you happen to know how I can return results from a .post
+00:31  sean`: m0dmd, see ?post
+00:31  bot-t: m0dmd, jQuery.post(url, [data], [success], [dataType]): Load data from the server using a HTTP POST request. http://api.jquery.com/jQuery.post/
+00:31  sean`: it has a callbafck
+00:31 --- unCork[home] is now known as Guest92278
+00:36  m0dmd: buddyq can you take a look at http://pastebin.com/7hHacTDE
+00:37  m0dmd: can you take a look at http://pastebin.com/7hHacTDE
+00:37  m0dmd: I'm already loading data, but I need two values returned .. I can easily return one, with results.
+00:38  m0dmd: But I do not know how to turn the results into results.post_date or results.post_ID
+00:38  jkatana: make the result equal to a JSON object like { post_date: 'foo', results.post_ID: 'bar' }
+00:38  jkatana: whoops remove results. from the post_ID
+00:39  jkatana: then you can say function(results) { var r = eval('(' + result + ')'); } or use JSON.parse
+00:39  jkatana: and you can say r.post_date and get foo
+00:40  snover: jkatana: Did you just suggest someone use eval, with a straight face?
+00:40  jkatana: ok I did snicker a bit... rushing out the door at least it might get something working for now
+00:41  jkatana: ok I feel bad now. Basically just use JSON.parse
+00:42  m0dmd: jkatana so from my autosave, print "{json : 'here', ...}"
+00:43  jkatana: http://pastebin.com/Nc7hv7RL
+00:49 --- corjolio\away is now known as corjolio
+00:56  Hory: doesn't default jquery have functions to scroll the content of an overflowing element?
+00:57  buddyq: what do you mean scroll?
+00:57  Hory: the same thing that would happen by moving a browser scroll bar
+00:57  buddyq: could depend on your css style overflow: hidden or overflow: scroll
+00:57  Hory: except I want to hide the bar and do my own
+00:57  Hory: way of scrolling
+00:57  snover: why?
+00:57  snover: your own way of scrolling is probably awful.
+00:58  snover: no offense, it’s just that they pretty much always are :)
+00:59  Hory: because the scrollbar is ugly and I need to scroll by a fixed increment
+00:59  Hory: and i need the arrows above and below the element
+01:00  Snerf: is there a nice jqueryui replacement for a scrollbar for a div? i found jscrollpane, but then I cant use draggable anymore
+01:00  snover: slider
+01:01  Hory: Snerf: http://jqueryui.com/demos/slider/#side-scroll
+01:01  croby: any qunit experts in the house?
+01:02  Snerf: thanks Hory, will take a look
+01:02  snover: ?ask @ croby
+01:02  bot-t: croby, If you have a question, please just ask it. Don't look for topic experts. Don't ask to ask. Don't PM! Don't ask if people are awake, or in the mood to help. Just ask the question straight out. http://catb.org/~esr/faqs/smart-questions.html
+01:03  rpcesar: is it possible to perform selectors on namespaced items? (non standard html). For instance, when using facebook fbml (prior to parsing), can I do something like $('fb:sometag',holder).attr()?
+01:03  snover: ?selectors @ rpcesar
+01:03  bot-t: rpcesar, Docs: Selectors - Borrowing from CSS 1–3, and then adding its own, jQuery offers a powerful set of tools for matching a set of elements in a document. http://api.jquery.com/category/Selectors/
+01:04  croby: pshhhh - alright. I'm having trouble with delayed execution of QUnit tests - I need to wait for an event to fire and then queue up the tests to run, but the tests don't seem to run at all if I start then on an event handler
+01:05  snover: croby: do you have a link to your tests, or can you paste testcode? See p
+01:05  snover: ?p
+01:05  bot-t: Paste your code at http://jsfiddle.net , http://paste.pocoo.org/+js , or http://fixee.org
+01:05  snover: croby: if you are running an asynchronous test, you need to either use asyncTest or call stop() in the same function that you use to bind the event, and then call start() inside the event handler
+01:06  croby: snover: I'm not waiting for an event during a test, i'm waiting on one before I start any of my tests
+01:06  snover: croby: why?
+01:07  croby: i need to wait for data to be loaded before I start it
+01:07  croby: snover: when the data is loaded and the object is populated with the data, i fire an event saying that its ready to go, and then would like to start my QUnit tests after that
+01:08  croby: snover: http://fixee.org/paste/aw9heie/
+01:11  ponce: hi, I'm having problems with Jquery UI. I want to have multiple radio group but cannot get them to work together
+01:11  ponce: my two radio group "steal" each other focus
+01:12  croby: ponce: sounds like they might all have the same name attribute
+01:13  ponce: but they do not
+01:14  snover: croby: Call QUnit.start()
+01:14  croby: snover: inside the event handler?
+01:14  snover: after you have added all the tests
+01:15  ponce: here is the HTML and javascript to initialize the radio groups http://ideone.com/IonjK
+01:15  ponce: i've stripped out the rest
+01:16  croby: ponce: all your radios have the same name attribute
+01:17  croby: ponce: one group should have one name, the other, a different name
+01:17  ponce: oh, i see
+01:17  ponce: thanks !
+01:17  ponce: wonderful library btw
+01:17  ponce: it works o/
+01:18  croby: snover: that did it - thank you! Why does that need to be there?
+01:18  cohitre: ponce: can i give you some other suggestions?
+01:18  snover: croby: because you aren’t actually telling QUnit to start without it.
+01:18  cohitre: store the value in the value= attribute of your checkboxes
+01:18  snover: croby: if you actually read the source code for QUnit, you will see that it does this automatically for you in an onload handler.
+01:18  cohitre: * radios
+01:19  cohitre: so that you can do tron.sizeofmap = $(this).val();
+01:19  ponce: cohitre: right, i'll do that
+01:19  croby: snover: oh interesting -- so because i delay the instantiation of my tests, QUnit.start() isn't ever called after my tests are defined
+01:19  ponce: thanks again
+01:19  cohitre: after that, give all your checkboxes the same class
+01:20  cohitre: and do $(".size-of-map").button().click(....)
+01:20  cohitre: so that you don't have to bind the events individually
+01:21  ponce: would  $("#m1 #m2 #m3 #4") work too ?
+01:21  cohitre: ponce, yes. but a single class makes it easier to add new fields
+01:22  cohitre: because you add them in the html and don't have to update the JS
+01:22  whltexbread: is there any way to define the desired length of an array when you instantiate it?
+01:23  ponce: new Array(n) ?
+01:23  cohitre: whltexbread: no.
+01:23  cohitre: arrays have a dynamic length.
+01:24  whltexbread: Hm, interesting. so you could keep adding elements to the end of an array until you get an out of memory error?
+01:24  snover: you bet.
+01:26  whltexbread: is there a way too play around in a console without setting up an html file and a script and setting a debug point?
+01:26  cohitre: ? firebug @ whltexbread
+01:26  bot-t: whltexbread, Firebug - Web Development Evolved: http://www.getfirebug.com/ , FireQuery (firebug enhancements for jQuery): http://firequery.binaryage.com/
+01:27  cohitre: firebug has a JS console
+01:29 --- whltexbread_ is now known as whltexbread
+01:29  whltexbread: ah, true enough. you can't do that in the chrome console
+01:39 --- snover is now known as snover|away
+01:39  whltexbread: is there a way to determine the length of an array?
+01:39  JRGould: myarray.length
+01:40  whltexbread: seriously? is there a list of standard object attributes i can look at somewhere?
+01:43  JRGould: w3schools.com always comes up in the top of google for me
+01:43  JRGould: http://www.w3schools.com/jsref/jsref_obj_array.asp
+01:44  whltexbread: thanks for having the mercy to not send me a lmgtfy link. der.
+01:45  GreaterCore: ahh... good... some activity (and i just woke up)
+01:46  GreaterCore: i'm having some issues after using $('a.change').attr('href', URL) on firefox, is this common? is there a workaround? it works on chrome with no problems
+01:47  fission6: http://markmetcalfpaintings.appspot.com/ can someone tell me why when the image tranistion occurs in firefox i can see all the "slices" or vertical lines. seems fine in other browsers but i am confused as to why its messed up only in ff
+01:55  MetaJake: whats that cool jquery method which empties a DIV of its content, entirely?
+01:57 --- snover|away is now known as snover
+--- Log closed Sat Nov 27 16:37:05 2010
+--- Log opened Sat Nov 27 16:37:26 2010
+16:37 --- Users 645 nicks [1 ops, 0 halfops, 0 voices, 644 normal]
+16:39 --- Channel #jquery was synced in 106 seconds
+16:39 --- willdayble is now known as willd[a]yble
+16:42  Hopsy: how should i bypass this? http://gyazo.com/0e9d98851a8c977afd2caffd5b0e6d22.png
+16:43  Lumpio-: by either defining "Modernizr" or checking if it's defined before doing that
+17:02  htrejh: hi
+17:02  htrejh: when adding a timer it works, but the browser shows like it's loading forever
+17:03  htrejh: is it possible to make a timer that does not let the user think the page is still loading?
+17:10  rmurphey: htrejh: can you clarify what you're trying to do?
+17:10  rmurphey: ?p @ htrejh
+17:10  bot-t: htrejh, Paste your code at http://jsfiddle.net , http://paste.pocoo.org/+js , or http://fixee.org
+17:11  htrejh: rmurphey: well no code is needed, when you call setTimeOut() or use .delay() from jquery, the page loading animation of the browser is shown
+17:11  htrejh: can you bypass that?
+17:11  htrejh: i want to load page content using ajax with delay, without it looks like the page is still loading
+17:22  TheIronSky: you should try a loading function
+17:23  htrejh: TheIronSky: what do you mean?
+17:24  TheIronSky: I googled this in about 3 seconds: http://www.electrictoolbox.com/load-content-jquery-ajax-loading-image/
+17:24  TheIronSky: enjoy
+17:25  htrejh: TheIronSky: you did interpret wrongly my question
+17:25  htrejh: TheIronSky: i am talking about the browser's loading icon
+17:25  TheIronSky: what browser
+17:25  TheIronSky: and why would you want to do that?
+17:26  htrejh: i just dont want
+17:26  SugaSlide: the way i see it.. his browsers laoding icon (the spinner thing) keeps turning
+17:26  htrejh: but the browser does
+17:26  SugaSlide: when he does something
+17:26  htrejh: yes, the cursor is also a loading icon
+17:26  htrejh: so it isn't really useable
+17:26  SugaSlide: so an ajax call thats not completing mebbe?
+17:26  htrejh: well it's a timer
+17:27  htrejh: i don't know how jquery implements timers, but it lets the browser think the page is still loading
+17:27  htrejh: probably using some wait function?
+17:27  SugaSlide: jquery doesnt have any timers?
+17:28  TheIronSky: jquery has timers
+17:28  htrejh: well it's a delay
+17:28  htrejh: it's not really a timer
+17:28  htrejh: but javascript has setTimeOut
+17:28  TheIronSky: ?lmgtfy jquery timers
+17:28  bot-t: http://lmgtfy.com/?q=jquery+timers
+17:28  htrejh: TheIronSky: well it's a plugin...
+17:29  jedimind: TheIronSky, if you dont know how to help him, stop being a douche
+17:29 * SugaSlide shakes head at TheIronSky
+17:29  jedimind: and just keep your retarded lmgtfy comments to yourself
+17:29  htrejh: but as i said i used .delay
+17:29  htrejh: -> Description: Set a timer to delay execution of subsequent items in the queue.
+17:29  Rantanen: Hum. Not necessarily jQuery specific, but anyone figured out a way to bypass cross domain restrictions on AJAX calls?
+17:29  Rantanen: While allowing full REST interfaces?
+17:29  jedimind: htrejh, if im not mistaken .delay sets the cursor to wait globally
+17:29  Rantanen: (So JSONP is out)
+17:29  Hopsy: lol
+17:29  Rantanen: And this for development purposes.
+17:29  TheIronSky: I don't get your problem. Seems to me our trying to fix something that doesn't need fixing
+17:29  jedimind: you would not be able to strip it unless you try to maybe overwrite it with a cursor: auto !Important
+17:29  Hopsy: TheIronSky: :D
+17:30  Hopsy: atleast you tried
+17:30  htrejh: jedimind: and also the browser refresh icon?
+17:30  Hopsy: and now disconnect the server :p
+17:30  TheIronSky: *You're
+17:31  jedimind: htrejh, i dont follow, what does the browser refresh icon have to do with it?
+17:31  TheIronSky: see what I mean?
+17:31  TheIronSky: it makes no sense
+17:31  htrejh: jedimind: http://classicrap.fr/ go to this url if you want to have an idea
+17:31  jedimind: asking him to clarify, howeve,r is better than just telling him to google something arbitrary
+17:31  SugaSlide: ive had it before with get json
+17:32  SugaSlide: the results load... but the browser keeps thinking somehting is open
+17:32  SugaSlide: and the loading spinner keeps going
+17:32  htrejh: here's my code: http://pastebin.com/K5GXvQZq
+17:34  rmurphey: Rantanen: can you use a proxy?
+17:34  htrejh: So when the page loads it calls loadOnAirContent which loads the content using ajax and sets a enw timeout to refresj it later
+17:34  compaq: I've been at it all day.  I want to dynamically post <form><img src=""/></form> where src = 1.jpg, 2.jpg, 3.jpg ...until last the jpg, where last one can be anywhere from 5-99.  I tried a for loop, but there is no way to break out of the for loop, I looked into onerror, .error(), and some other stuff with no luck, anyone have an idea?
+17:35  Rantanen: rmurphey: The Javascript runs on top of GWT debugging server, don't think that one supports proxies. :<
+17:36  Rantanen: Mainly asked in case some of browsers allowed some advanced configuration option that'd circumvent the domain restrictions for certain domains.
+17:36  Snerf: compaq, dont use a for loop, try a do/while loop
+17:37  compaq: Snerf, hmm, but what condition would I use?
+17:37  webben: compaq: "no way"... just test for the existence of the element?
+17:38  compaq: webben, how would I do that?  you mean php?
+17:38  webben: compaq: No I mean JS.
+17:38  Rantanen: rmurphey: Nevermind! It's a Java server so it allows proxy servlets. Thanks, had kinda abandoned that solution already. :)
+17:39  webben: compaq: Can't you just loop through the elements matching a selector, e.g. 'form img' ?
+17:39  trave: Ive got a draggable, with some of the options being: .draggable({cursorAt: {top:0, left:0}, cursor: 'crosshair'})  ... but in Chrome on Mac, it doesn't honor the crosshair cursor while dragging... works right in firefox.. any tips? :]
+17:39  webben: compaq: Or alternately test whether 'img[src="' + n + '.jpg"]' yields something or nothing.
+17:42  compaq: webben, if there is no image, and alt is used then src=""?
+17:45  compaq: webben, http://jsfiddle.net/4HbEK/ should I give them unigue id's?
+17:46  dabear: compaq: you can check if an image is loaded by checking the .complete property
+17:46 --- Chainfire_ is now known as Chainfire
+17:46  dabear: jQuery("[href='member.php?35095-tg3'] img").attr("complete")
+17:46  dabear: for example
+17:49  compaq: dabear, I don't have ajax
+17:49  dabear: wtf
+17:49  dabear: I didn't mention ajax
+17:50  dabear: and btw, what you are trying to do is insane
+17:50  compaq: dabear, maybe
+17:52  webben: compaq: I can't understand your code snippet.
+17:52  webben: compaq: It makes reference to variables that aren't defined within it and doesn't really describe what it's trying to do, and doesn't make any mention of posting
+17:53  compaq: webben, I know, I just put the for loop in there
+17:53  compaq: webben, I am trying what you mentioned anyway, I think it is going to work, let me get back to you in a bit
+17:53  webben: ok
+17:53  compaq: webben, But I will post more and you can read if you like
+18:00  compaq: webben, http://jsfiddle.net/4HbEK/2/ Maybe this one is more clear.  I had some old variables I was using for some other efforts I forgot to remove
+18:02  webben: compaq: If there are only 10 images ... where?
+18:03  webben: compaq: Can you tell whether there are 10, 15, or 20 images by inspecting information in the DOM/page? Or is this only known by the image server?
+18:05  compaq: webben, no, only server knows, because, there are many directories, and some have only 10, some have more it varies
+18:06  webben: compaq: Does .select2 refer to some sort of select box where the user selects which images to be shown?
+18:07  webben: compaq: You have two decent options: 1. Include the information about how many images are in each directory somewhere accessible in the DOM.
+18:07  webben: compaq: or 2. When the user selects which images to be shown, ask the server how many images are in that directory.
+18:08  webben: There is another option (try to verify that images exist clientside) but that would be brittle, slow, wasteful.
+18:08  compaq: webben, can you check over the id syntax? http://jsfiddle.net/4HbEK/3/
+18:09  webben: compaq: "'img#'+test2+i" looks very wrong.
+18:09  compaq: webben, I put the class=select2 there, so I can just do $('.select2).remove later
+18:09  webben: compaq: What are the ' and ' doing in there?
+18:10  webben: compaq: (i.e. why are you quoting img# ?)
+18:10  compaq: webben, concatenation
+--- Log closed Sat Nov 27 18:16:08 2010
+--- Log opened Sat Nov 27 18:16:33 2010
+18:16 --- Users 657 nicks [1 ops, 0 halfops, 0 voices, 656 normal]
+18:16  webben: compaq: See Options 1 and 2 above.
+18:16  compaq: webben, ok, thanks anyway
+18:18 --- Channel #jquery was synced in 111 seconds
+18:18  ragefuljoe: what could cause a text form field to not work? as in i'm typing and nothing shows up
+18:19  ragefuljoe: something happened in between this and last vers of my app but comparing the two not seeing anything
+18:19  ravenzz: did you taked a look at console?
+18:20  ragefuljoe: will take a look..brb
+18:20  compaq: oh man...I gotta learn the console soon
+18:21  ragefuljoe: it's just throwing an error on a phonegap plugin
+18:21  ragefuljoe: nothing else
+18:22  webben: ragefuljoe: Maybe that's preventing the code that makes your field work from working.
+18:23  ragefuljoe: but the plugin is working..tested it
+18:25  webben: ragefuljoe: That some other functionality on the page works does not guarantee the error you see in the console and the error you experience on the page are unrelated.
+18:30  ragefuljoe: HAHAHAHAHA
+18:30  ragefuljoe: figured it out
+18:30  ragefuljoe: omg
+18:31  ragefuljoe: it was a css problem
+18:34 --- frigginGone is now known as seutje
+18:34  ragefuljoe: i had some webkit stuff to make the header not open if user held down on it (ios)
+18:34 --- unreal_ is now known as unreal
+18:35  compaq: I have a triple nesting issue: $('.bottom2').append("<fieldset class='select2'><form class='select2'><img id='"+test2+i+"' class='select2' src=" + tint2 + "/" + test2 +"/"+ i + ".jpg width='128' height='196' alt='err' onerror='this.src='error.jpg''/></form></fieldset>");
+18:36  compaq: see the 'this.src='erro.jpg''
+18:36  compaq: its tripple nested
+18:37  ravenzz: are you trying to
+18:37  compaq: ravenzz, yep
+18:37  ravenzz: load a default error image
+18:37  ravenzz: ?
+18:37  compaq: ravenzz, yep
+18:38  compaq: ravenzz, well, mainly, I want the src name to change, so I can later run a test, and get out of a for loop
+18:38  ravenzz: you could use rewrite rules
+18:38  compaq: whats that?
+18:39  webben: compaq: Can't you do one of the two options I suggested instead of this for loop/test business?
+18:39  compaq: webben, I want to run this app locally
+18:39  ravenzz: something like
+18:39  compaq: webben, it should be easy to do
+18:40  Lumpio-: So, it's "tripple nested"
+18:40  Lumpio-: So what?
+18:40  compaq: Lumpio-, you can't tripple nest, it breaks
+18:40  webben: compaq: locally - do you mean via the file:/// protocol?
+--- Log closed Sat Nov 27 18:46:09 2010

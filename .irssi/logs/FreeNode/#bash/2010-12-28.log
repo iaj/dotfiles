@@ -1,0 +1,758 @@
+--- Log opened Tue Dec 28 00:00:04 2010
+01:18  quitr: [quitr@*\304 ~]$
+01:18  quitr: ^ this usually shows my hostname after the @
+01:18  quitr: anybody know wtf would cause this to happen?
+01:18  e36freak: quitr: echo $PS1
+01:18  e36freak: what do you get?
+01:18  quitr: grr can't copy/paste without X11
+01:18  quitr: just a sec
+01:18  e36freak:  /exec -o
+01:19  quitr: hm
+01:19  quitr: $
+01:19  quitr: umm
+01:19  e36freak: maybe not for PS1
+01:19  quitr: that ditn'w work right lol
+01:19  e36freak: but thats probably where your issue is
+01:19  e36freak: \h is hostname
+01:19  quitr: right
+01:19  quitr: hold on i'l write what it returns manually
+01:20  quitr: [\u@\h \W]\$
+01:20  cthuluh: quitr: ever heard about screen? gpm / wsmoused?
+01:20  quitr: cthuluh: yeah but i do'nt normally hve to come into this mode
+01:20  quitr: with no X11
+01:20  e36freak: PS1 looks ok to me
+01:20  quitr: it seems this bash problem is related to a problem with X11
+01:20  quitr: i have a weird bug where X11 stops allowing me to open new windows
+01:20  e36freak: !nabq
+01:21  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+01:21  cthuluh: are there colors in your PS1?
+01:21  quitr: and that also happens to the bash prompt at thse same time
+01:21  quitr: well it's related to bash greybot
+01:21  quitr: i just want to know what causes that problem in bash?
+01:21  cthuluh: greybot is a bot
+01:21  quitr: so i can track down the bug
+01:21  cthuluh: quitr: are there colors in your PS1?
+01:21  quitr: on then e36freak ^ same reply
+01:21  quitr: cthuluh: no
+01:21  cthuluh: weird
+01:22  cthuluh: does your hostname contain weird chars (as unicode ones)?
+01:22  quitr: nope
+01:22  quitr: i think it's just "myhost"
+01:26  quitr: weird
+01:26  quitr: echo $HOSTNAME returns *\304
+01:26  quitr: brb
+01:49  Iceland_jack: Quick question, string manipulation only seems to work when you use variables, such as `str="thisHasLength15" && echo ${#str}` which returns 15
+01:49  e36freak: that is not a question
+01:49  Iceland_jack: is it possible to perform this operation _without_ creating a variable out of the string
+01:49  e36freak: no
+01:49  Iceland_jack: e36freak: That's.
+01:49  Iceland_jack: *thanks
+01:50  Iceland_jack: Quite limited of Bash, but thank you
+01:50  e36freak: its not a full programming language, and you shouldnt expect it to be
+01:50  falconindy: many languages lack the ability to operate on string literals
+01:50  e36freak: just like it doesnt support multi-dimensional arrays or floating point operations
+02:04 --- someone is now known as Guest30279
+02:17  doublehp: for each line, how do i keep chars n-th to last ? not tail, not sed ... not tr ...
+02:17  doublehp: cut ?
+02:18  The-Compiler: you could actually use sed
+02:18 --- Skaag_ is now known as Skaag
+02:18  The-Compiler: doublehp: I think you might be able to do that with parameter expansion, let me check
+02:18  The-Compiler: !pe
+02:18  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+02:18  doublehp: cut -b N-
+02:19  grop: !substring
+02:20  The-Compiler: # var=foobar; echo ${var:4}
+02:20  evalbot: The-Compiler: ar
+02:20  grop: !se
+02:20  e36freak: arrrr
+02:20  e36freak: you can also do
+02:21  e36freak: # foo='aoeuidhtns'; echo ${var:4}; echo ${var:4:3}
+02:21  evalbot: e36freak: no output
+02:21  e36freak: bah
+02:21  e36freak: # foo='aoeuidhtns'; echo ${foo:4}; echo ${foo:4:3}
+02:21  evalbot: e36freak: idhtns
+02:21  evalbot: e36freak: idh
+02:22  e36freak: doublehp: much better than cut for this
+02:23  grop: no substring expansion factoid?
+02:24  e36freak: its probably in the pe link
+02:24  e36freak: indeed it is
+02:24  The-Compiler: e36freak: well, if he wants to do it for a file, cut is the better choose ;)
+02:25  e36freak: depends
+02:25  e36freak: while read -r foo; do echo "${foo:3}"; done < file would be better if he also wants to do other stuff per line
+02:26  doublehp: done <<< "$( mboxgrep -H -i "^Date:" "${mbox}" | grep "^Date:" | cut -b 7- )"
+02:26  doublehp: can't see how any non cut way could be better
+02:27  e36freak: that'll work, do it how you like, but that is the way to do it with PE
+02:27  e36freak: its very useful for breaking up a string into chunks to put in an array, for example
+02:29  e36freak: # foo='aoeuidhtns'; for (( i=0, j=3; j<${#foo}; i++, j+=3 )); do bar[i]="${foo:i:3}"; done; echo "${bar[@]}"
+02:29  evalbot: e36freak: aoe oeu eui
+02:29  e36freak: bah, needed a <=
+02:30  e36freak: # foo='aoeuidhtns'; for (( i=0, j=3; j<=${#foo}; i++, j+=3 )); do bar[i]="${foo:i:3}"; done; echo "${bar[@]}"
+02:30  evalbot: e36freak: aoe oeu eui
+02:30  e36freak: OH
+02:30  e36freak: # foo='aoeuidhtns'; for (( i=0, j=3; j<=${#foo}; i++, j+=3 )); do bar[i]="${foo:j:3}"; done; echo "${bar[@]}"
+02:30  evalbot: e36freak: uid htn s
+02:30  e36freak: something like that, haha
+02:38 --- yitz__ is now known as yitz_
+02:48  Sashi: how can i cat a text file and have the user input the line and it echos the line they selected
+02:50  e36freak: read read -p "line? " var; grep "${var}" file
+02:50  e36freak: like that? cat has nothing to do with it, but that will search the file for any string they give you
+02:50  e36freak: and print any matches
+02:51  Sashi: hmm
+02:51  e36freak: im not quite sure what you want
+02:52  Sashi: http://pastebin.com/QJuuYgzw
+02:52  Sashi: something like that?
+02:52  e36freak: oh you want it by line number
+02:52  e36freak: sec
+02:53  cthuluh: if [[ $REPLY = *[^[:digit:]]* ]]; then echo invalid number; else sed "$REPLY { d; q; }" file; fi
+02:54  e36freak: i was just gonna use sed -n "${var}p"
+02:54  cthuluh: hmmm no, you only want a specific line
+02:54  cthuluh: yeah
+02:54  Sashi: hmm, what does that do exactly?
+02:55  e36freak: shopt -s extglob; read -p "line number? "; if [[ $REPLY = *[^[:digit:]]* ]]; then echo "invalid number"; else sed "${REPLY}p" file; fi
+02:55  e36freak: ahh
+02:56  e36freak: shopt -s extglob; read -p "line number? "; if [[ $REPLY = *[^[:digit:]]* ]]; then echo "invalid number"; else sed -n "${REPLY}p" file; fi
+02:56  e36freak: there you go
+02:57  e36freak: will test to make sure its actually a number, and if not, tell you so. if it is, it will print said line
+02:57  e36freak: you could also do
+02:57  cthuluh: e36freak: extglob is not needed here
+02:57  cthuluh: (and it needs to be on a separate line, anyway)
+02:58  e36freak: ahh
+02:58  e36freak: that, i knew
+02:58  ballison: i've got a perl script that formats a report and returns text to the screen using monospaced text
+02:58  e36freak: read -p "line number? "; if [[ $REPLY = *[^[:digit:]]* ]] && (( $REPLY <= $(wc -l file) )); then echo "invalid number"; else sed -n "${REPLY}p" file; fi
+02:58  e36freak: aw, they left
+02:59  ballison: when i pipe that output to mail and read the report in my gmail i've lost all my monospacing and it looks wrong
+02:59  ballison: is it possible using mail to have mail send the text output as preformated text so when i read it in gmail it's formated correctly?
+03:00  cthuluh: ballison: plain text is still plain text. you can put font definition in plain text
+03:00  Sashi: woops
+03:00  Sashi: sorry, so you guys were saying
+03:00  ballison: how?
+03:00  ballison: it's a plain text file output that's getting piped to mail
+03:00  ballison: how do i get gmail to read that mail as monospaced text ?
+03:01  cthuluh: ballison: which part don't you understand?
+03:01  cthuluh: plain text doesn't bring formatting instructions with it
+03:01  cthuluh: Sashi: 02:58 < e36freak> read -p "line number? "; if [[ $REPLY = *[^[:digit:]]* ]] && (( $REPLY <= $(wc -l file) )); then echo "invalid number"; else  sed -n "${REPLY}p" file; fi
+03:01  ballison: so there's no way to have MAIL the MAIL BINARY sent that information since MAIL is what's sending the text file ?
+03:02  cthuluh: ballison: unless you use some formatting language as html
+03:03  e36freak: Sashi: that last one will also check to make sure the number is equal to or less than the length of the file
+03:03  ballison: cthuluh: It's not HTML.. it's just plain text.
+03:03  cthuluh: ballison: what. the. hell?
+03:04  cthuluh: ballison: what makes you think I didn't understand your problem?
+03:04  cthuluh: I've kept repeating the same thing since at least 10 minutes
+03:04  e36freak: haha
+03:04  ballison: so why can't you give me an answer then?
+03:05  ballison: can you or can you not mail mail/mailx define a font for a plain text file that gets piped to it when it sends it out.
+03:05  cthuluh: LOL
+03:05  ballison: i owe two cthuluh's and you are making me dislike cthuluh - shame on you.
+03:06  ballison: but good on you for poor communication skills.
+03:06  ballison: thanks - you've been no help.  going back to google.
+03:06  cthuluh: asshole
+03:09  e36freak: heh
+03:09  e36freak: i thought you made perfect sense
+03:11  cthuluh: *shrug*
+03:15  Sashi: im kinda confused still
+03:15  Sashi: how would i grab the text file?
+03:15  Sashi: would i just cat?
+03:15  e36freak: to display it? sure, use cat
+03:17  Sashi: hmm
+03:18  Sashi: [[ not found?
+03:18  e36freak: O_o
+03:18  e36freak: are you sure this is bash?
+03:18  cthuluh: [[ is not posix
+03:18 --- meiskam_ is now known as meiskam
+03:18  e36freak: will not work with #!/bin/sh
+03:19  e36freak: Sashi: http://pastebin.com/6YcxNASg
+03:19  e36freak: didnt quite think with the other one, but that will work
+03:20  e36freak: http://pastebin.com/wxegNbec there, even with the shebang
+03:40  iIlL10oO: hello , why [ -n-1 equ ~n ] ?
+03:41  e36freak: what is that supposed to be?
+03:44  cthuluh:  $ [ -n-1 equ ~n ]
+03:44  cthuluh: bash: [: equ: binary operator expected
+03:45  e36freak: yeah, i have know idea what that is supposed to do
+03:45  e36freak: ![
+03:45  greybot: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+03:45  e36freak: ![[
+03:45  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+03:46  cthuluh: iIlL10oO: just ask a real question
+03:46  e36freak: -n isnt even a proper operator for that
+03:47  iIlL10oO: cthuluh: why $[ 0 - 8 - 1 ]  equ $[ -9 ]
+03:47  cthuluh: argh
+03:47  iIlL10oO: equ $[ ~8 ]
+03:47  cthuluh: !$[
+03:47  greybot: Obsolete, deprecated syntax for math. Don't use it. Use $((...)) instead.
+03:48  e36freak: # $(( 0 - 8 - 1 ))
+03:48  evalbot: e36freak: bash: -9: command not found
+03:48  e36freak: ahh
+03:48  cthuluh: ~ is probably the syntax for 2-complement
+03:48  e36freak: # echo $(( 0 - 8 - 1 ))
+03:48  evalbot: e36freak: -9
+03:49  iIlL10oO: why $(( - 8 - 1 )) == $(( ~8 ))
+03:49  iIlL10oO: why $(( - n - 1 )) == $(( ~n ))
+03:50  tuxdev: iIlL10oO, it's called 2's complement
+03:51  cthuluh: iIlL10oO: if you didn't know 2's complement, then you can be proud for having discovered it by yourself :)
+03:52  cthuluh: http://en.wikipedia.org/wiki/Two%27s_complement
+03:54  iIlL10oO: ok
+03:58  jetscreamer: #math is 'interesting'
+03:58  jetscreamer: if interested
+04:02 --- WinstonSmith_ is now known as WinstonSmith
+04:08 --- Unknown[NF] is now known as Unknown[OFF]
+04:35  yitz_: !faq buffer
+04:35  greybot: http://mywiki.wooledge.org/BashFAQ/009 -- What is buffering?  Or, why does my command line produce no output: tail -f logfile | grep 'foo bar' | awk ...
+04:35  e36freak: yitz_: see that in #archlinux?
+04:36  yitz_: For #awk, actually
+04:36  e36freak: ahh, same question was just asked in there
+04:36  yitz_: Oh. Crosspost :S Same user
+04:37  e36freak: i thought it might be
+04:37 * yitz_ debates calling him out
+04:37  e36freak: haha
+04:37  e36freak: i mean, falconindy just pointed him to some man pages
+04:47  falconindy: multiple man pages!
+04:48  e36freak: haha
+04:56 --- maxim is now known as Guest45994
+05:13 --- patrickw_ is now known as patrickw
+05:24  accel: is there some command I can run, like "date", except it returns me cpu clock instead of current time?
+05:24  e36freak: hwclock ?
+05:25  accel: why is it so slow?
+05:25  e36freak: hmm?
+05:26  accel: hwclock
+05:26  accel: is much slower
+05:26  accel: compared to date
+05:26  e36freak: oh, i dont know
+05:31 --- GinoMan is now known as GinoSleeps
+05:39  accel: is ther esome environment varaible that can get read to get the current PID?
+05:40  glenndavy: $$
+05:40  glenndavy: i think
+05:41  e36freak: $$, yes
+05:41  e36freak: $PPID does what you would expect it to as well
+05:42  glenndavy: ah nice, didn't know that one
+05:42  accel: PPID = process PID or parent pID ?
+05:42  glenndavy: parent im hoping?
+05:43  glenndavy: just trying now
+05:43  e36freak: parent
+05:43  e36freak: $! is the last run process as well
+05:43  e36freak: !gm > accel
+05:43  e36freak: !pm > accel
+05:43  greybot: accel: http://mywiki.wooledge.org/ProcessManagement
+05:54  azulita: if [$(echo "$time > 6" | bc) -eq 1] ; then
+05:55  azulita: oh sorry...why doedsn't that work?
+05:56  glenndavy: Zucca, put a space after [ and before ]
+05:56  glenndavy: ?
+05:56  azulita: oh
+05:56  azulita: okay
+05:56  glenndavy: azulita, just a noobs guess lemme know
+05:56  falconindy: why not just if (( time > 6 )); then
+05:56  e36freak: !((
+05:56  greybot: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+05:56  azulita: well...didn't fix it per se ,but it changed the error message
+05:57  azulita: the numbers are floats, that's why
+05:57  e36freak: ahh
+05:57  e36freak: !float
+05:57  greybot: for floating point numbers see !faq 22
+05:57  e36freak: !faq 22
+05:57  azulita: I read that faq =)
+05:57  greybot: http://mywiki.wooledge.org/BashFAQ/022 -- How can I calculate with floating point numbers instead of just integers?
+05:57  e36freak: kk
+05:57  azulita: got me as far as I am now...
+05:57  e36freak: you shouldnt use [ unless its POSIX
+05:57  e36freak: ![[
+05:57  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+05:58  glenndavy: but spaces still an issue right?
+05:58  glenndavy: man i've learned heaps just loitering in here today
+05:58  e36freak: thats the way it goes
+05:59  e36freak: azulita: what format is $time in?
+05:59  steve___: glenndavy: I suggest reading the guide as well.
+05:59  steve___: if you haven't already.
+06:01  azulita: ah...$time isn't right, you're right
+06:01  glenndavy: steve___, yep fair cop..you mean mywiki.wooledge.org i assume?
+06:01  e36freak: yes, its in the title
+06:01  e36freak: http://mywiki.wooledge.org/BashGuide
+06:01  glenndavy: gotcha, cool
+06:02  glenndavy: right, been looking at it today wehn people roll out this ! << bot thing
+06:02  glenndavy: much more penatrable than the man page :D
+06:02  e36freak: man page is for once you understand all the technical jargon
+06:02  e36freak: then its invaluable
+06:02  glenndavy: for sure, what i know mostly comes from it, but yep point taken
+06:06  e36freak: azulita: and you can use if (( $(bc <<<"$time > 6") == 1 )); then
+06:09 --- Skaag_ is now known as Skaag
+06:09  azulita: what exactly is <<< ?
+06:09  e36freak: !<<<
+06:09  greybot: Here strings. Similar to here documents: The word after <<< and a newline are passed to the standard input of a command. Syntax: ''command <<< "some sentence"'' (Like ''echo "some sentence" | command'', but without the overhead of the subshell)
+06:10  azulita: oh slick!
+06:10  azulita: thanks
+06:10  e36freak: aye
+06:15  azulita: !((
+06:15  greybot: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+06:18  e36freak: essentially, [[ is for strings and -e, -d, -z etc, (( is for math
+06:18  e36freak: >, <, <=, etc also work within (( ))
+06:18  azulita: awesome
+06:19  e36freak: keep in mind these are all bashisms and wont work with POSIX sh
+06:20  e36freak: so make sure the shebang is #!/bin/bash
+06:20  grop: e36freak, is there any tut on how to take a bash script and make it POSIX compatible?
+06:20  e36freak: uh
+06:20  e36freak: !posix
+06:20  greybot: The POSIX standard defines what any modern unix should supply. Sticking to the commands and options in http://www.opengroup.org/onlinepubs/9699919799/utilities/contents.html will do wonders for the portability of your scripts.
+06:20  e36freak: !sh
+06:20  greybot: sh is the POSIX or Bourne shell, not bash. Even if sh is a symlink to bash, running a script under 'sh' (either by typing 'sh myscript' or putting '#!/bin/sh' at the top) *disables* many bash features. See http://mywiki.wooledge.org/BashGuide/Practices#Choose_Your_Shell
+06:21  e36freak: i just write for bash
+06:23  grop: wow, the first link is complete
+06:24  e36freak: yeah
+06:24  e36freak: basically, take all the useful stuff out and do it the hard way :P
+06:26  hotwings: so $@ represents all the params passed to a function..  $# gives me the param count. but is it possible to append the param list or should it be copied into an array or something first?
+06:26  e36freak: example?
+06:29  e36freak: # foo() { echo "$@"; }; foo bar baz
+06:29  evalbot: e36freak: bar baz
+06:29  e36freak: # foo() { echo "foo $@"; }; foo bar baz
+06:29  evalbot: e36freak: foo bar baz
+06:30  pragma_: # foo() { foo $@; }; foo foo
+06:30  e36freak: if you mean like "$@+=( foo )" or something, not that i know of
+06:30  evalbot: pragma_: no output within the time limit
+06:30  hotwings: sounds like array=("$@" "whatever i add") is the way to go i guess
+06:31  e36freak: that would work
+06:31  yitz_: array+=("thing to add")
+06:31  hotwings: no prob, just wondered if you could append directly into the function params but it sounds like no
+06:32  yitz_: # add () { arr+=($@) ; } ; add "hello" ; add "bob man" ; printf "[%s] " "${arr[@]}" ; printf " hotwings \n"
+06:32  evalbot: yitz_: [hello] [bob] [man]  hotwings
+06:32  yitz_: Darn. I forgot to quote :(
+06:32  yitz_: # add () { arr+=("$@") ; } ; add "hello" ; add "bob man" "there" ; printf "[%s] " "${arr[@]}" ; printf " hotwings \n"
+06:32  evalbot: yitz_: [hello] [bob man] [there]  hotwings
+06:33  e36freak: yeah, dont think thats quite what he was looking for though
+06:33  hotwings: yeah i meant more like $@+=
+06:33  hotwings: cool, didnt know you could do that.  thanks fellas
+06:33  e36freak: i think he wanted more of # $@+=( foo )
+06:33  e36freak: which wont work
+06:34  yitz_: Add foo to $@? That's be done with set: set -- "$@" foo
+06:34  hotwings: nope, not really.  but still learned something cool since ive always done array=("${array[@]}" "whatever else)
+06:34  e36freak: O_o
+06:34  hotwings: i thought bash couldnt do references like that (yet)
+06:34  yitz_: # foo () { set -- pre "$@" post ; printf "[%s] " "${arr[@]}" ; printf "\n" ; } ; foo "middle stuff" "here"
+06:34  evalbot: yitz_: []
+06:35  yitz_: Fail
+06:35  hotwings: lol
+06:35  yitz_: # foo () { set - pre "$@" post ; printf "[%s] " "${arr[@]}" ; printf "\n" ; } ; foo "middle stuff" "here"
+06:35  evalbot: yitz_: []
+06:35  alkisg: Is there any way to (1) unset *all* bash variables, and (2) get a list of the currently defined variables (not only the exported ones)?
+06:36  yitz_: alkisg: env and/or set
+06:36  yitz_: lol
+06:36  yitz_: I was using arr[@] instead of $@
+06:37  yitz_: # foo () { set - pre "$@" post ; printf "[%s] " "$@" ; printf "\n" ; } ; foo "middle stuff" "here"
+06:37  e36freak: fail
+06:37  evalbot: yitz_: [pre] [middle stuff] [here] [post]
+06:37  yitz_: Copy/paste fail :(
+06:38  yitz_: set --  works, as well, but help set says it uses just a single -
+06:39  infid: i have a file called '-report' that won't rm with rm \-report, rm --report or rm '-report'. how do i rm this?
+06:39  e36freak: what error are you getting?
+06:39  infid: unrecognized option
+06:39  yitz_: infid: rm ./-report
+06:40  e36freak: and where the hell did that come from?
+06:40  yitz_: Or rm -- -report
+06:40  infid: worked thanks
+06:40  yitz_: Somewhat popular one
+06:40  e36freak: haha
+06:41  yitz_: It's an easy solution... but it requires a different approach than most are used to taking. And very frusterating...
+06:41  e36freak: yeah, i can see that
+06:46  azulita: if I have a six character string, how do I remove all but the first two characters?
+06:47  yitz_: !pe > azulita
+06:47  greybot: azulita: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+06:48  e36freak: # foo='bar'; echo "${foo:0:2}"
+06:48  evalbot: e36freak: ba
+06:49  azulita: thank you
+06:54  pragma_: hi, how can I remove the first three letters from a string?
+06:54  e36freak: haha
+06:54  e36freak: !pe > pragma_
+06:54  greybot: pragma_: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+06:54  e36freak: # foo='barbaz'; echo "${foo:3}"
+06:55  evalbot: e36freak: baz
+06:55  azulita: lol
+06:59  yitz_: If you make him follow the link once, e36freak, he's learn how to do it
+07:00  e36freak: different person... but what can i say, im bored
+07:00  yitz_: Oh...
+07:01  e36freak: can you point me to a good place to get my awk skills going? is there a page for it here?
+07:01  mindrape: #awk
+07:01  mindrape: !awk
+07:01  greybot: Check the topic of #awk and also http://www.grymoire.com/Unix/Awk.html -- awk questions belong to #awk. Note: If you are piping through more than one (grep|sed|awk), you're likely doing it wrong.
+07:01  e36freak: gotcha
+07:01  e36freak: just asking
+07:04  yitz_: The GNU awk manual is nice
+07:04  e36freak: yeah, i was gonna start there
+07:05  e36freak: that link looks nice though
+--- Log closed Tue Dec 28 08:45:52 2010
+--- Log opened Tue Dec 28 08:58:11 2010
+08:58 --- Users 506 nicks [0 ops, 0 halfops, 0 voices, 506 normal]
+08:59 --- Channel #bash was synced in 80 seconds
+09:10  Natanaiel: I'm trying to write an script that when a file with specific suffix added to a folder, it uses rsync to sync that file with a server. but I don't know how to specify adding a file with specific suffix to a folder
+09:10  Natanaiel: is there any way to specify that?
+09:23  shaiguitar: Natanaiel: you could either put the script in cron, or you could just do an endless loop (daemon style) that every X seconds/minutes globs for the suffix, and if it sees it, does rsync.
+09:23  shaiguitar: !glob
+09:23  greybot: "Glob", the common name for pattern matching, filename expansion, "wildcards", etc. http://mywiki.wooledge.org/glob
+09:39  TheBonsai: ¹
+10:03  ns5: How to make sure that an array is not initialized before using it?
+10:03  ns5: unset myarray?
+10:06  trash: *nod*
+10:06  trash: Or read your code.
+10:06  trash: Usually it's known at code-time if it is or not
+10:07  ns5: trash: read -ra myarray <<< $(grep stuff)
+10:08  trash: Then it doesn't matter if something in there or not, because it will be overwritten in any case.
+10:08  ns5: no matter how many members the array already got?
+10:08  trash: Yes.
+10:08  ns5: let's say the array already got 100 members, but this now it only reads 2 members
+10:09  trash: !tias
+10:09  greybot: Try It And See
+10:10  ns5: trash: ok thanks
+10:53 --- The-Compiler is now known as Compiler^27c3
+11:12 --- callumac_ is now known as callumacrae
+11:36 --- rot13_ is now known as rot13
+11:46  red2kic: Hello, I would like to run a bash script that would run synergys (server) for 15 seconds. I know what synergys command to use. What is the best way for me to start?
+11:46  Fatal: you want it to shut down after 15 seconds?
+11:46  red2kic: I'm not sure how to use it with time. Yes, Fatal.
+11:47  Fatal: there's a command called timeout
+11:47  lhunath: sounds like a stupid hack.  what do you really want?
+11:48  lhunath: what if synergys takes 5 seconds to start?  and 2 the next time?
+11:48  lhunath: blind timeout killing is retarded.
+11:49  red2kic: lhunath: I use synergy to control XBMC. It's annoying that I have to fire up quicksynergy, then disable/enable, to select whatever I want to watch. I want to fire a script. Get control of the screen. Start a movie or whatever. Synergys terminated.
+11:49  Fatal: why do you need to terminate it?
+11:49  lhunath: you make no sense whatsoever.
+11:50  red2kic: Because I don't need it to run all times. I already have XBMC as a synergyc client in .xinitrc  -- I only need to take control for brief time.
+11:52  Fatal: I don't see the harm in having it running all the time
+11:53  lhunath: indeed.
+11:53  red2kic: XBMC. Spacebar to pause a film. We use spacebar all times. You accidentally go out of screen and whoops, you stopped something.
+11:53  red2kic: Because you're in the other computer's screen.
+11:54  red2kic: I have XBMC running on HTPC in living room.
+11:54  lhunath: sounds like you have a lot of other crap to fix.
+11:55  Fatal: I'd probably use one of the apis xbmc has available, or the built in webserver if I need to control xbmc without native input available
+11:56  red2kic: No. I just don't want to fire up synergys, enable, or whatever everytime I want to access the screen. XBMC have ajax web client that's not even ready. You only can look, but no touch.
+11:57  Fatal: this is quickly going off topic, but xbmc has had a working controlling webserver since before they renamed it to xbm_c_
+11:57  lhunath: is synergys some kind of gui?
+11:57  red2kic: XBMC 10.0 -- They released it a week ago or something.
+11:58  Fatal: virtual xinerama or something, you gain control of mouse/keyboard of a remote computer, mostly used (from my experience) to control an adjecent computer with your keyboard/mouse
+11:58  red2kic: lhunath: synergys is a CLI server. quicksynergy is a GUI. We use CLI commands to automate things. I guess I'll use "sleep 20 ; killall synergys"
+11:59  lhunath: red2kic: if you start synergy yourself; killall would be stupid since you have the PID.
+11:59  red2kic: lhunath: http://synergy-foss.org/
+11:59  lhunath: I still don't get why you can't keep synergy running.
+11:59  lhunath: close your quicksynergy when you're done controlling your xbmc.
+12:00  lhunath: open it when you want to control it some more.
+12:01  red2kic: We use scripts to make things little easier. Sure, you have some yourself.
+12:01  lhunath: what would you be making easier?
+12:02  lhunath: you're starting up a daemon, starting up a gui, keeping it up for X seconds in the hope that you've done what it is you wanna do with xbmc in that time.  not enough time?  tough luck, kill it all.
+12:02  lhunath: try again next time.
+12:02  lhunath: that's not easier.  that's just retarded.
+12:03  Fatal: red2kic: what do you use it for? pause/play/next/stop ?
+12:04  Fatal: red2kic: if so, just use one of the apis and forget about synergy, or keep it running all the time, or just start it when you really need it
+12:04  lhunath: keep synergy running; start it along with your X server or so; if you feel the need to do something with xbmc, start quicksynergy.  the only extra hassle is having to close quicksynergy yourself (one click?) or not, just keep it open.
+12:04  red2kic: lhunath: No. I have synergy client running in XBMC all times. I only need to fire up for 15 seconds. Maybe my sister have to go bathroom. One command and BAM, I have control of the TV.
+12:05  lhunath: ah, you linux kids are all the same.  go on, pile on the hacks.  like it'll show, mixed in with the rest of the hacks that make up your OS.
+12:05  Fatal: :D
+12:06  red2kic: I'm deaf. We constantly pause something to say something. We can't just talk out like you guys does. Get it?
+12:06  red2kic: :P
+12:06  Fatal: sounds like you should use one of the apis
+12:06  lhunath: so hit your pause hotkey.
+12:06  Fatal: bind a key to send the remote command to pause
+12:06  Fatal: BAM!
+12:07  lhunath: ah yes, I missed the BAM.
+12:07  red2kic: BLAM!
+12:07  Fatal: instead of start script, move mouse, press space, wait for script to close service down, bam?
+12:07  Fatal: KEYPRESS, BAM!
+12:07  Fatal: done
+12:09  lhunath: I should learn to speak like that, instead of using long informative sentences.  I might actually get a message through.
+12:10  Fatal: lhunath: yeah, I realised this a couple of minutes ago, but tried with almost proper sentences for a while longer, I refused to give up.
+12:19  red2kic: Okay. I got it working. I only need to run the script when I need to take ahold of the TV. The XBMC client is running all times as a daemon. Thanks for arguing. :)
+12:51  nDuff: lhunath, ..yup, did contact the author asking him to clarify the basis for the assertion (and providing some basis for the position that bzr does indeed support cheap local branching)
+12:53  nDuff: lhunath, re "as awful as [you think] it [is]", I'd need to know more about why you think bzr is awful. The big, persistant bugaboo is performance -- but last time I checked, years ago, it was actually faster than git for huge trees with shallow history (though still scaled poorly with history depth). Given the rate of new development, though, I'd be surprised if that were still the case.
+12:54 * nDuff mostly uses git these days, mostly for the wonderfulness that is git rebase -i (the bzr-rebase plugin doesn't have a fully functional equivalent to interactive rebase), but there are several things bzr still does better... merging trees including directory renames, for instance.
+13:07  lhunath: yes, renames suck in git.  mostly because git doesn't care about filenames; only content.
+13:07  nDuff: lhunath, ...then again, "the bzr way" (also used by hg and others) is to use looms in cases where interactive rebases would be used in git, so it's a matter of learning the tool.
+13:08  nDuff: lhunath, *nod*, exactly -- the "doesn't care about filenames, only content" is sorely overrated IMHO. I mean, yes, it makes sense for storage, but not for directory inventory.
+13:08  nDuff: lhunath, ...and it's a cop-out to use your storage mechanism as an excuse to do filename merges badly.
+13:08  tehbaut: is there an easy way to make my commands stand out more, so I can see the start of a grep when I'm scrolling?
+13:09  nDuff: tehbaut, ...use a highly visible prompt (such that you see the prompt before the command)?
+13:10  mrtnt: Currently my oneliner gives such output: http://pastebin.com/Hf3HYWY0 Is it possible to get desired output using "paste" command? Or any other suggestions?
+13:10  lhunath: tehbaut: http://stuff.lhunath.com/shots/shot.1293538228.png
+13:11  nDuff: mrtnt, "decipher my code and tell me what I'm doing wrong" is not a very nice thing to ask strangers to do
+13:11  nDuff: mrtnt, ...that said, are you sure the output from the various feeds is sorted?
+13:12  tehbaut: lhunath: interesting, thanks a bunch :)
+13:12  lhunath: nDuff: it's why I was thinking about hg for some time; but I should really take the time to investigate the options.
+13:12  nDuff: mrtnt, ...at a minimum, you could provide us the output of the individual snmpwalk commands, so we could experiment on our own; as it is, your one-liner is only usable in your personal environment.
+13:13  tehbaut: lhunath: now how would I untrap myself? exit?
+13:14  nDuff: tehbaut, trap - DEBUG
+13:14  nDuff: tehbaut, ...as documented in 'help trap'
+13:15  tehbaut: doesn't seem to work
+13:16  tehbaut: also, the colors don't seem to work for me with lhunath's command
+13:16  tehbaut: trap 'printf %s "$reset"' DEBUG; PS1='\[$green\]\$\[$red\] '
+13:16  tehbaut: I don't see any typos
+13:17  nDuff: tehbaut, you need to have environment variables with the codes for the colors
+13:17  nDuff: s/environment//
+13:17  nDuff: !faq colors
+13:17  greybot: http://mywiki.wooledge.org/BashFAQ/037 -- How can I print text in various colors?
+13:17  tehbaut: ah, I wondered...
+13:18  tehbaut: how sticky are those vars if, say, I exit the terminal and relaunch?
+13:19  nDuff: !dotfiles > tehbaut
+13:19  greybot: tehbaut: http://mywiki.wooledge.org/DotFiles or - for a technical explanation - the INVOCATION section of man bash.
+13:20  lhunath: tehbaut: personally, I source bashlib from my ~/.bashrc which gives me those variables.
+13:20  lhunath: !bashlib
+13:20  greybot: A library of convenience functions for scripting: http://stuff.lhunath.com/bashlib
+13:21  lhunath: tehbaut: you'd put the stuff in ~/.bashrc to reload it in new shells.
+13:21  lhunath: s/re//
+13:22  lhunath: your bashrc may already set your PS1
+13:22  tehbaut: so I could make it (via ~/.bashrc) so that commands are always red
+13:23  nDuff: tehbaut, btw, as the trap is only resetting the color before each command, I'm not sure how you were determining that the "untrap" command "didn't work".
+13:23  tehbaut: didn't try untrap
+13:23  nDuff: tehbaut, ...if you didn't have the reset variable set, the trap wasn't actually _doing_ anything
+13:23  nDuff: ahh; that's what I thought you were referring to by "doesn't seem to work". Makes sense now.
+13:24  tehbaut: I was referring to "trap - DEBUG"
+13:24  nDuff: umm, what visible effect did you expect that to have?
+13:24  nDuff: it turns off the trap, but without reset and the colors in place, you couldn't tell if the trap was on or not regardless.
+13:25  tehbaut: well with the trap, it started with $, otherwise it started with [user@server dir]$
+13:26  tehbaut: whatever that's called... PS1 is it?
+13:26  lhunath: yes.
+13:26  lhunath: the trap is unrelated to PS1
+13:26  nDuff: tehbaut, lhunath gave you two commands -- one set PS1, the other set the trap
+13:27  nDuff: tehbaut, turning off the trap did not change PS1
+13:27  lhunath: you can't "undo" changes to a parameter.
+13:27  tehbaut: ah, so setting the trap isn't required then?
+13:27  lhunath: not for changing the prompt.
+13:28  lhunath: but I didn't include it for the fun of making it look more complex.
+13:28  tehbaut: so the point of changing the trap was for what then?
+13:28  nDuff: tehbaut, the trap is what makes the output from your commands white
+13:28  nDuff: tehbaut, otherwise the active color just stays red.
+13:28  nDuff: (unless the command emits its own color codes)
+13:29  tehbaut: oh... the output
+13:29  tehbaut: gotcha
+13:29  lhunath: http://stuff.lhunath.com/shots/shot.1293539367.png
+13:31  mrtnt: nDuff: sorry, I was away for a while. Here is output of varios commands: http://pastebin.com/qgerfUts
+13:31  mrtnt: nDuff: I tried to sort with awk as well..
+13:32  mrtnt: nDuff: but it's harder than it looks because jnxContentsDescr can involve for example spaces as well
+13:36  nDuff: mrtnt, those inputs don't match up with your original paste -- for instance, the backplane was S/N AW5003 -- and here you have only two inputs rather than three.
+13:37  nDuff: mrtnt, ...waitaminute here, is the difference between current and desired output just a matter of _alignment_?
+13:38  mrtnt: nDuff: yes
+13:38  mrtnt: nDuff: only alignment of columns
+13:38  nDuff: ahh,  then, that's easy :)(
+13:39  nDuff: # echo $'foo bar\tbaz qux\nfoo bar baz qux meh sheesh\tquux\n' | { IFS=$'\t'; while read one two; do printf '%-40s%-40s\n' "$one" "$two"; done; }
+13:39  evalbot: nDuff: foo bar                                 baz qux
+13:39  evalbot: nDuff: foo bar baz qux meh sheesh              quux
+13:39  evalbot: nDuff:
+13:39  nDuff: mrtnt, ^^^
+13:39  nDuff: mrtnt, ...that's something that didn't need a pastebin to be asked _or_ answered
+13:41  nDuff: ...if you wanted an arbitrary column version, that'd be easy enough too... particularly with bash 4...
+13:42  nDuff: ...actually, no need for 4 ...
+13:43  nDuff: # echo $'foo bar\tbaz qux\nfoo bar baz qux meh sheesh\tquux\n' | { IFS=$'\t'; while read -a columns; do printf '%-40s' "${columns[@]}"; printf '\n'; done; }
+13:43  evalbot: nDuff: foo bar                                 baz qux
+13:43  evalbot: nDuff: foo bar baz qux meh sheesh              quux
+13:43  evalbot: nDuff:
+13:44  nDuff: mrtnt, ^^^ version which uses an array to store each line's contents, rather than hardcoding variables "one", "two", ...
+13:45  Egyptian[Home]: mornign all
+13:45  Egyptian[Home]: anyone know if it is possible to use zenity to create an interface with tabs? if not .. what would be better? thanks
+13:46  twkm: /me shudders
+13:46  mrtnt: nDuff: hehh, thats great! I was not aware Internal Field Separator possibilities. Thanks!
+13:46  twkm: but anyway, try tcl.
+13:47 * nDuff would use Python with whichever GUI library he felt like today
+13:47  nDuff: (tcl? in this day and age?)
+13:48  nDuff: Egyptian[Home], ...anything Glade will generate code for, or with libglade bindings available, will probably be your easiest choice.
+13:48  Egyptian[Home]: glade ?
+13:49  nDuff: Egyptian[Home], http://glade.gnome.org/
+13:50  Egyptian[Home]: nDuff: hmm.. and can glade be considered as multi desktop compatibile? kde enlightenment etc ?
+13:51  Egyptian[Home]: oh and thanks for the reply
+13:53  nDuff: Egyptian[Home], that's not really on-topic in #bash, but interfaces built with glade will work anywhere zenity will.
+14:01  Egyptian[Home]: nDuff: thanks
+14:06  tehbaut: I have a bug where when I'm cycling back in the previously entered commands, sometimes the first 14 characters get "stuck" and even if I cycle back down to an empty command, those 14 stuck characters from another command are still visible
+14:06  tehbaut: is that a fixable issue?
+14:06  tehbaut: only started noticing it after messing with the PS1
+14:08  nDuff: right -- it's the escape sequences for the color codes
+14:08  nDuff: effectively, libreadline isn't doing the right thing when it tries to figure out how long your prompt is
+14:09  nDuff: !faq 53 > tehbaut
+14:09  greybot: tehbaut: http://mywiki.wooledge.org/BashFAQ/053 -- I have a fancy prompt with colors, and now bash doesn't seem to know how wide my terminal is.  Lines wrap around incorrectly.
+14:10 * nDuff second-guesses himself -- actually not sure if that's a readline or bash responsibility
+14:11  tehbaut: nevertheless, the wiki helped... I just needed to wrap my colors in \[ ... \]
+14:12  tehbaut: I was just using the raw \e[0;31m
+14:12  nDuff: tehbaut, not getting them from tput? That'll bite you when you change terminals.
+14:12  tehbaut: what do you mean change terminals?
+14:13  nDuff: tehbaut, if you're logging in from a terminal with different color codes
+14:13  tehbaut: I'll switch when I feel the bite then :P
+14:14 * nDuff sighs.
+14:14  tehbaut: unless you know the tput code for red-orange
+14:15  dagon666: Im having some problems with sed. I try to match some pattern from a file which has encoding cp1250 and my console is utf8 and I get some extra characters in output matched - due to encoding mismatch. The problem is that I want to use the sed call in a script which will be used on many different machines with different encodings configured and with files in different encoding used as input - how to make it as much universal as possible ?
+14:15  dagon666: Do I must detect the file encoding and the terminal encoding all the time ? If so then how to do so ?
+14:16  nDuff: tehbaut, terminals aren't guaranteed to _support_ a red-orange at all.
+14:16  nDuff: tehbaut, ...and without tput, you won't be autodetecting whether you're on one or not.
+14:16  nDuff: (heck, you'll be trying to emit color codes on black-and-white terminals)
+14:17  tehbaut: I just don't see myself using any other terminal than the one I use now
+14:18  nDuff: You never ssh in from a Windows machine?
+14:18  nDuff: (or some random client's HPUX box?)
+14:20  dagon666: can anyone help ?
+14:20  tehbaut: nDuff: if I ssh in from windows, I use putty, which does support these colors
+14:45 --- luxor is now known as Skizorager
+14:56  paissad: hmm simple silly question ^^
+14:56  paissad: which is correct for comparing strings ? (lower or equal)
+14:56  paissad: if [ "$str1" \<= "$str2" ]
+14:56  paissad: if [ "$str1" =\< "$str2" ]
+14:57  Fatal: what?
+14:57  Fatal: lexicographically comparing strings are done with < and >
+14:58  paissad: if the 2 strings  are equal ?
+14:58  Fatal: if you want to compare numbers use (( foo > bar )) or [[ $foo -gt $bar ]]
+14:58  lhunath: paissad: don't use [.  it sucks.  [[ $str1 < $str2 ]]
+14:58  lhunath: [[ $str1 = $str2 || $str1 < $str2 ]]
+14:58  lhunath: note that < in [[ is completely different from < in ((.
+14:59  paissad: lhunath, when i use the double brackets, i had some troubles, let me see again
+14:59  lhunath: then fix those troubles.
+14:59  lhunath: downgrading to [ is not a fix.
+14:59  Fatal: paissad: are you SURE you want to compare how the strings are sorted?
+15:00  paissad: Fatal, yes
+15:00  paissad: sure
+15:00  Fatal: paissad: or are you actually trying to compare if 123 is greater than 56 ?
+15:01  paissad: Fatal, not numbers, strings
+15:01  paissad: example: karmic, lucid
+15:01  paissad: lucid, maverick
+15:01  paissad: ...
+15:01  Fatal: neat, cool, then it's [[ $foo > $bar ]] .. etc
+15:07  Lenhix: lhunath: why does [ suck?
+15:08  nDuff: Lenhix, it's a command, not syntax, so you have to get all the quoting and such right for it. It doesn't support glob tests, it doesn't support regexes, it doesn't support && or ||...
+15:08  nDuff: ![ >Lenhix
+15:08  greybot: Lenhix: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+15:08  nDuff: ![[ >Lenhix
+15:08  greybot: Lenhix: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+15:13  Lenhix: nDuff: thx, nice. Just for curiosity, what if I just have to compare simple things, like [ $(id -ur) -eq 0 ] ? would be better to use [[ anyway? better use test?
+15:14  nDuff: !(( > Lenhix
+15:14  greybot: Lenhix: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+15:14  nDuff: Lenhix, ...and unless you're going to get your quoting right, which you didn't in the "simple" example you gave, use [[ ]] over [ ]
+15:15  Lenhix: Uh :S. And what's the quoting error in that "simple" example?
+15:15  nDuff: Lenhix, ...if you have a transient directory service failure or such and id returns no value, the command you gave becomes [ -eq 0 ], which is invalid syntax.
+15:15  nDuff: Lenhix, use quotes around expansions, always.
+15:16  nDuff: ...so in that case, [ "$(id -ur)" -eq 0 ]
+15:16  Lenhix: Ok, nice to know that. Thx :)
+15:17  alkisg: If for some dumb reason script A sources script B which in turn again sources script A, is there some way to prevent or get notified about the infinite recursion?
+15:17  nDuff: in bash, as opposed to POSIX sh, yes.
+15:18  alkisg: How?
+15:18  dsdeiz: does the \[...\] for a PS1 like mean 'express the statement inside the brackets'? :-?
+15:18  alkisg: (i.e. I've tried it and it just keeps recursing...)
+15:19  nDuff: alkisg, ehh, haven't done it in a while, would have to do actual research. One of the BASH_* arrays will let you look at the stack.
+15:19  alkisg: nDuff: ah, so I'd need to write code to prevent it. OK I can do that with simple I_AM_INCLUDED=true vars, thanks
+15:20  nDuff: well, the advantage of inspecting the stack is that you can be a little smarter -- ie. have a single helper you write in one place and just call from each script
+15:20  nDuff: as opposed to needing to have a different variable each script sets and checks for separately
+15:20 * nDuff shrugs
+15:21  nDuff: !faq 53 > dsdeiz
+15:21  greybot: dsdeiz: http://mywiki.wooledge.org/BashFAQ/053 -- I have a fancy prompt with colors, and now bash doesn't seem to know how wide my terminal is.  Lines wrap around incorrectly.
+15:21  dsdeiz: tnx
+15:27  jargon-: the 2nd function,doesn't properly process the 1st function's echo line. it's spits it out raw. how do i change this? http://dpaste.com/291504/
+15:28  nDuff: jargon-, "process"?
+15:29  nDuff: jargon-, ...by the way, all that could have been put into one line in-channel, no need for a pastebin
+15:29  nDuff: !nopaste
+15:29  greybot: Please don't waste our time by making us go to a pastebin just for a five-line snippet. Paste it in the channel. If you have a larger script that's showing problems, trim it down to the bare minimum size that still shows the problem. You'll probably fix it yourself once you do that.
+15:29  nDuff: !exact > jargon- (it's not clear what you expect that to do, so it's hard to say what's wrong about it)
+15:29  greybot: jargon- (it's not clear what you expect that to do, so it's hard to say what's wrong about it): Please tell us EXACTLY what you typed, and EXACTLY what the error is.
+15:35  jargon-: nDuff: 1st function runs ls -alh, then outputs the current absolute path, printing a background under the path of an inverse color to the terminal's background color. then resets. 7m is the inversion and 0m the rest. 2nd function pipes the first function thru less,i.e. a page by page output of ls -alh
+15:35  nDuff: jargon-, yes, that much is obvious
+15:36  nDuff: jargon-, now, WHAT OUTPUT DO YOU EXPECT, and WHAT OUPUT DO YOU GET?
+15:36  jargon-: greybot: most channels give me grief for pasting that.
+15:36  jargon-: greybot: i'll know better next time
+15:36  jargon-: nDuff: this is what i get,instead of the formatted path output:   ESC[7m/var/logESC[0m
+15:37  nDuff: right
+15:37  nDuff: less does that by default
+15:37  h0ho: is it possible to except invisible text for input.  in the case of "New password:         ". to make my script more secure
+15:37  nDuff: jargon-, search for "raw" in the less man page to understand why
+15:37  nDuff: jargon-, (and for options to disable it)
+15:37  h0ho: s/except/accept
+15:37  lhunath: h0ho: -s
+15:37  jargon-: nDuff: k
+15:38  h0ho: lhunath: thank you my good man
+15:56  jargon-: nDuff: defining a variable INVS="\033[7m" and a variable RST="\033[0m"   and then changing the function to this,brings me back to square one:
+15:56  jargon-: function dir(){ ls -alh; echo -e "   $INV"`pwd`"$RS";
+15:56  jargon-: }
+15:58  nDuff: jargon-, as an aside, you should stop using `pwd` in favor of $PWD -- it adds an extra fork() for no reason at all
+15:59  nDuff: jargon-, ...and you should consider using printf rather than echo -e...
+15:59  nDuff: jargon-, ...and I take it you still haven't added an appropriate flag to the less invocation?
+15:59  nDuff: ...or is the problem that you expect the escapes to be interpreted?
+16:00  jargon-: nDuff: i added the -R flag and it works fine. but when i subsitute the ANSI codes for their corresponding vars,it craps out again
+16:01  nDuff: I can't reproduce that
+16:01  nDuff: unless you're just being insufficiently explicit about the problem
+16:01  nDuff: when you say "craps out again", you mean what, _exactly_?
+16:03  jargon-: nDuff: this is the function that gets piped thru less -R:
+16:03  jargon-: function dir(){ ls -alh; #echo -e "   \033[7m"$PWD"\033[0m"; echo -e "   $INV"$PWD"$RS";
+16:03  jargon-: }
+16:04  jargon-: this is the output:
+16:04  jargon-:  \[\]/var/log\[\]
+16:04  jargon-: (END)
+16:06  nDuff: jargon-, the following does _exactly_ what I expect: INV="\033[7m"; RST="\033[0m"; function dir(){ echo -e "   $INV$PWD$RST"; }; dir
+16:06  nDuff: !varcap > jargon- (btw)
+16:06  greybot: jargon- (btw): By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+16:09  jargon-: ok thanks
+16:10 --- Guest60332 is now known as meiskam
+16:21  alkisg: I want to do the following, is this somehow exploitable if I don't control the value of $b?
+16:21  alkisg: case "$a" in
+16:21  alkisg:   $b) ...
+16:21  lhunath: they can control when a will match.
+16:22  alkisg: That's exactly what I want, thank you
+16:22  alkisg: (I was afraid they could set b to something like "*) execute code ;; 1"
+16:23  lhunath: nay; unless you're using eval crap, that's not possible.
+16:23  alkisg: Phew :)
+16:23  lhunath: which is why you should never use eval crap.
+16:23  alkisg: That's why I try to avoid it, indeed
+16:25  Shin-LaC: a followup on yesterday's issue
+16:25  Shin-LaC: it seems that caching would be a good idea after all, even for local disks
+16:26  lhunath: what makes you think that?
+16:26  Shin-LaC: when the system is under io load, there's a noticeable delay before printing the prompt
+16:26  Shin-LaC: for instance, right now
+16:26  Shin-LaC: I did an "ls", which ran pretty quickly
+16:26  lhunath: and you think this is because of git?
+16:26  Shin-LaC: but there was a 3-4 second pause before the following prompt displayed
+16:27  lhunath: 'git name-rev --name-only HEAD' takes 0.015s
+16:27  Shin-LaC: that's good, it means it's io-bound
+16:27  Shin-LaC: but, as I said, io is exactly the problem here
+16:27  Shin-LaC: it has to be either git or hg
+16:28  Shin-LaC: I added a fallback that checks for an hg repo if it's not git
+16:28  lhunath: find out what the problem is before you start hacking at it.
+16:29  lhunath: if git IS the problem; I'd sooner recommend you to forget about the whole thing than to implement some sort of caching that's gonna suck.
+16:29  Shin-LaC: aha
+16:29  Shin-LaC: it's hg
+16:29  lhunath: but I doubt it is.
+16:30  lhunath: is it just hg, or is it hg | sed | awk | perl | curl-submit-to-a-webservice | sed | cut ?
+16:31  Shin-LaC: it's "hg branch 2> /dev/null"
+16:32  Shin-LaC: argh
+16:32  Shin-LaC: now it's fast again
+16:33  Shin-LaC: ok, I restored the hg check and I don't see the delay any more
+16:33  Shin-LaC: I won't be able to tell whether it was git or hg until the problem starts occurring again
+16:34  Shin-LaC: it'd have to be one of them, or both, though
+16:34  Shin-LaC: I don't have anything else hooked up before the prompt
+16:36  lhunath: git takes 0.3s when I enter another repo for the first time.
+16:36  Shin-LaC: I'm doing a large IMAP sync (no message bodies, just headers)
+16:36  lhunath: which is fine.
+16:37  Shin-LaC: that's for my reference in case I want to try reproducing this again
+16:37  Shin-LaC: yes, git is very fast usually
+16:46  alkisg: Hmm I'm doing something wrong with case... why there's a match with the following?
+16:46  alkisg: case hi in [A-Z]*) echo matches; ;; esac
+16:47  alkisg: I.e. why does it match lowercase hi* instead of only uppercase Hi*?
+16:51  alkisg: Hrm. In sh it works ok...
+16:52  alkisg: $ shopt|grep nocasematch
+16:52  alkisg: nocasematch    	off
+16:53  alkisg: !case
+16:53  greybot: case word in pattern);; esac syntax is used to match a word against a particular pattern, and execute commands if that pattern matches. See 'case word in' in man bash | http://wiki.bash-hackers.org/syntax/ccmd/case
+16:55  lhunath: # case hi in [A-Z]*) echo matches; ;; esac
+16:55  evalbot: lhunath: no output
+16:55  lhunath: alkisg: try [[:upper:]] instead?
+16:56  alkisg: lhunath: I don't want international characters though...
+16:56  lhunath: what are you talking about?
+16:56  alkisg: #case h in [A-Z]) echo matches; ;; esac
+16:56  alkisg: # case h in [A-Z]) echo matches; ;; esac
+16:56  evalbot: alkisg: no output
+16:56  lhunath: try [[:upper:]]
+16:57  alkisg: $ case h in [A-Z]) echo matches; ;; esac
+16:57  alkisg: matches
+16:57  alkisg: $ shopt | grep nocasematch
+16:57  alkisg: nocasematch    	off
+16:57  alkisg: ....what's wrong with my shell?!
+16:57  lhunath: freaking try [[:upper:]] already.
+16:57  alkisg: ok
+16:58  alkisg: $ case Γ in [[:upper:]]) echo matches; ;; esac
+16:58  alkisg: matches
+16:58  alkisg: (Γ is a greek letter, I don't want that)
+16:58  dagon666: is it possible to call a function which name is stored in string variable in bash ?
+16:58  lhunath: blink.
+16:58  lhunath: with h, not Γ
+16:58  alkisg: lhunath: I only want A-Z
+16:58  nDuff: dagni, "$your_function" arg1 arg2 ...
+16:58  alkisg: lhunath: it works fine with h
+16:58  lhunath: alkisg: you're confused as to what A-Z means.
+16:58  alkisg: Probably. What does it mean?
+16:59  lhunath: that depends on what your locale is.
+16:59  alkisg: I'd imagine it would mean "all the (english) letters from A to Z, independed of the locale..."
+16:59  lhunath: it does NOT always mean [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
+16:59  lhunath: alkisg: that doesn't make any sense.
+17:00  lhunath: alkisg: the letters from A to Z ARE DEPENDANT on the locale.
+--- Log closed Tue Jan 04 09:45:51 2011

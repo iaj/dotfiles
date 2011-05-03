@@ -1,0 +1,84 @@
+--- Log opened Wed Oct 27 13:15:55 2010
+--- Log closed Wed Oct 27 13:15:55 2010
+--- Log opened Wed Oct 27 13:16:19 2010
+13:16 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+13:18 --- Channel ##sed was synced in 111 seconds
+14:37 --- Skaag_ is now known as Skaag
+17:01  lotus: hey is there a way to run sed on file a.txt, b.txt, c.txt and output to a.o, b.o, c.o respectively all in the same command?
+17:03  geirha: You can in awk, don't know about sed.
+17:05  gnubien: lotus: sed can do files sequentially like sed '' [a-c].txt; for same time you would have to spawn child processes with a bash script
+17:05  cthuluh: if your sed has -i, you can sed -i '.tmp' on your .txt files and then rename them
+17:07  geirha: -i '.tmp' with bsd sed,  -i'.tmp' with gnu sed
+17:09  lotus: I'm totally confused
+17:09  geirha: What are you doing with each file?
+17:09  lotus: I'm running a substituion command
+17:10  lotus: so... this is what I run on each file
+17:10  lotus: sed 's/<COREF[^>]*>\([^<]*\)<\/COREF>/\1/' < CONCEPT.CONS.standard > CONCEPT.CONS.standard.sed
+17:11  lotus: I want to run that on every file in my current directory
+17:11  lotus: and have it output to filename.sed
+17:11  lotus: possibly in a sub or parent directory to avoid infinite recursion
+17:14  cthuluh: there are hints on this page about the different options you have: http://mywiki.wooledge.org/BashFAQ/021
+17:14  lotus: much appreciated.  Thank you all.
+17:44  masak: is there any way to use the -i flag of `sed` so that it *doesn't* save a backup?
+17:48  cthuluh: it depends on your sed version. if you have GNU sed, just use    sed -i ...    , else if you have FreeBSD sed, then     sed -i '' ...     should work.
+17:49  masak: I appear to have the FreeBSD flavour. I'm on Mac OS X.
+17:50  masak: the `-i ''` tip worked. thank you.
+17:50  cthuluh: an alternative would be to just use ed(1)
+17:50  masak: ooh, indeed.
+17:53  masak: except I was working on multiple files, and I'm not aware that ed can replace things over multiple files.
+17:55  cthuluh: this problem can easily be addressed with a shell loop
+17:56  masak: right. but I question whether ed would be simpler than sed in this case.
+17:57  masak: `sed -i` works on multiple files without the shell loop.
+--- Log closed Wed Oct 27 18:24:12 2010
+--- Log opened Wed Oct 27 18:44:39 2010
+18:44 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+18:46 --- Channel ##sed was synced in 111 seconds
+--- Log closed Wed Oct 27 19:28:09 2010
+--- Log opened Wed Oct 27 19:28:31 2010
+19:28 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+19:29 --- chrischambers_ is now known as chrischambers
+19:30 --- Channel ##sed was synced in 111 seconds
+--- Log closed Wed Oct 27 19:53:41 2010
+--- Log opened Wed Oct 27 19:59:05 2010
+19:59 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+20:00 --- Channel ##sed was synced in 103 seconds
+21:47 --- mmckinst_ is now known as mmckinst
+23:41  mooneyj: Im having trouble getting sed to pass a string which is a directory. Here is the code http://pastebin.com/Vu41sHMz the error is on the sed -e "s/INPUTFILE/....... line
+23:41  mooneyj: Any ideas how to fix this
+23:42  mooneyj: Summary, i am trying to pass several directories to gnuplot, one after the other.
+23:42  waldner: sed "s_INPUTFILE_$i_" and pray
+23:42  mooneyj: By altering the gnuplot setup file.
+23:44  mooneyj: hmm getting there i think, cheers. Now the error is "Syntax error: Unterminated quoted string"
+23:45  waldner: what's the sed command you're doing?
+23:46  waldner: ah, perhaps you need ..._${i}_
+23:48  mooneyj: that didn't work im afraid.
+23:48  waldner: ok, so paste the sed line you're using
+23:48  waldner: you can paste it here, it's a single line
+23:48  mooneyj: The syntax error was my fault though. Using _$i_     i get the error:
+23:48  mooneyj: sed: -e expression #1, char 12: unterminated `s' command
+23:49  mooneyj: sed -e "s_INPUTFILE_$i_" -e "s_OUTPUTFILE_$i_" \
+23:49  waldner: then maybe your filename has underscores
+23:49  waldner: try another separator
+23:49  waldner: "s%INPUTFILE%$i%" etc.
+23:49  mooneyj: cheers will do
+23:50  waldner: (the real solution is to sanitize the filename in advance by escaping, but with a little luck finding a suitable separator may suffice)
+23:51  mooneyj: The % sort of works, there is now data getting to gnuplot, however it is heavily corrupted
+23:51  mooneyj: i will try a |
+23:52  mooneyj: again the | works, but is crazy, the output looks something like this:
+23:52  mooneyj: o�����6�:����f��r��H3�c��v�P����(eʣ'
+23:52  mooneyj: �Z�{�~QxsQ%S�ݓ�p��i��㨽�7�4��Ș���
+23:53  waldner: weird
+23:53  mooneyj: Here is the filename i am trying to pass to gnuplot:
+23:53  mooneyj: "Sample_A/2010-10-22/11-35-49-averaged.txt"
+23:53  waldner: what's the content of $i before you run sed?
+23:53  waldner: ah
+23:53  mooneyj: The quotes are actually there
+23:55  waldner: let me try
+23:56  waldner: 4# i='"Sample_A/2010-10-22/11-35-49-averaged.txt"'; echo abc-INPUTFILE-def | sed "s%INPUTFILE%$i%"
+23:56  shbot: waldner: abc-"Sample_A/2010-10-22/11-35-49-averaged.txt"-def
+23:56  waldner: seems to work
+23:59  mooneyj: Yes it is working!
+23:59  waldner: cool
+23:59  mooneyj: Thanks waldner
+23:59  waldner: np
+--- Log closed Thu Oct 28 00:00:37 2010

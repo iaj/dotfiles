@@ -1,0 +1,653 @@
+--- Log opened Sat Dec 04 00:00:40 2010
+00:00  Gregor: ExorcistToGo: Points-to analyses of JavaScript that exist have mostly been either restricted to rather-silly subsets of the language or so conservative as to be useless. BDDs aren't popular any more :P
+00:02  ExorcistToGo: Gregor: Well this analysis would take into account if an array is an object or not. I believe that enhancement would make it applicable.
+00:02  ExorcistToGo: But I am just a beginner at this.
+00:02  Gregor: ExorcistToGo: "If an array is an object or not" is easy: The answer is yes :P
+00:03 * Gregor now must disappear.
+00:03  ExorcistToGo: Gregor: Oh my.
+00:03  Gregor: ExorcistToGo: Sorry, most of what I do is telling people why their techniques WON'T work, not finding techniques that DO work 8-D
+00:03  yorick: jseval typeof []
+00:04  ExorcistToGo: Gregor: I understand. I am already seeing limitations.
+00:04  yorick: js> typeof []
+00:04  nvictor: hehe
+00:04  gbot2: yorick: "object"
+00:04  ExorcistToGo: Gregor: I want to find techniques that do work.
+00:04  ExorcistToGo: And if Points-to analysis does not work I am better off knowing up front.
+00:05  unixSnob: ExorcistToGo: as slick as that tamperdata tool is, it does not reveal the URL that ends up getting visited.  Does this mean the backend simply figures out what the url is, and doesn't tell my browser?
+00:05  Gregor: ExorcistToGo: Although it's for information flow and not points-to analysis, I would look at Chugh et al's paper Staged Information Flow for JavaScript. It won't work, but its concepts could probably be adjusted to the point that they do make sense, then applied ... maybe. It's static ENOUGH that it could be usefully fast too.
+00:06  variable: javascript:for(i = 0; i < 10; ++i) { setTimeout(doAction(90),10*i); } seems to be only happening once when I want it to happen at 10, 20, 30, etc
+00:06  yorick: variable: wait...what
+00:06  GuySoft: ‎gkatsev, got it, thanks for the help :)
+00:07  variable: yorick, I want doAction() to happen in 10 ms, 20 ms, 30 ms, etc
+00:07  yorick: variable: use setInterval then
+00:07  variable: yorick, I only want it to happen 10 times
+00:07  variable: and its eventually going to be different values inside doAction
+00:07  yorick: (function() { var i = 0; setInterval(function() { if (++i != 10) doAction(90); }, 10); })();
+00:08  variable: yorick, what if I want the 90 to differ?
+00:08  ExorcistToGo: Gregor: What I am thinking about is the temp object that V8 creates and gathering information in regard to that somehow for performance profiling. I am a rank beginner at this. First day thinking about this.
+00:08  yorick: variable: you'd make it dependant on i
+00:08  yorick: or do something else :)
+00:08  TheoMurpse|AFK: Anyone know how to fix this problem? I have a line of HTML with inline JS like this: <li onClick="foo(1,2,'he said "hello" to me');">     Obviously the code fails right now because the browser sees the first " around "hello" and thinks it's the end of the onClick value. If I escape it with \"hello\" the problem remains. How can I fix this? Thanks.
+00:08  variable: yorick, and the time to differ?
+00:08  variable: (this is an early prototype -
+00:08  yorick: variable: how do you mean?
+00:08  Pilate: Theo: use DOM functions
+00:09  yorick: variable: you'd want 10, 30, 40, 60?
+00:09  unixSnob: ha.. I can freetype what gets sent for "user agent".. I think i'll set that to "atari 2600"
+00:09  TheoMurpse|AFK: Pilate: Please elaborate.
+00:09  variable: yorick, 10, 15, 35, whatever
+00:09  yorick: or just 5, 15, 25, 35, 45, 55
+00:09  Pilate: Theo: stop using inline javascript
+00:09  TheoMurpse|AFK: Pilate: Not an option unles I switch to AJAX, which is hardly a scalable solution.
+00:09  TheoMurpse|AFK: Here's teh pastebin (if you grok PHP): http://pastebin.com/G71TsEKa
+00:09  Pilate: thats possibly the dumbest thing ive read today
+00:10  TheoMurpse|AFK: s/scalable solution/cheaply scalable solution
+00:10  variable: yorick, right now I'm more concerned about why I can't have multiple setTimeouts :-)
+00:10  yorick: variable: you could also use (function() { var i = 0; setTimeout(function() { if (++i != 10) {doAction(90);setTimeout(arguments.callee, newinterval}}, firstinterval)})();
+00:10  ExorcistToGo: Gregor: I want to get visibility to the temp objects basically while a javascript program is running, but it through all the execution branches and analyze what happens through each branch with the temp objects.
+00:10  yorick: variable: but you can
+00:10  TheoMurpse|AFK: Or do you deny that AJAX creates more connections to the server?
+00:10  Pilate: using dom functions instead of inline javascript doesnt affect the server at all, do you know what ajax is?
+00:11  variable: yorick, for(i = 0; i < 10; ++i) { setTimeout(alert(i),10*i); } only shows i
+00:11  variable: *1
+00:11  TheoMurpse|AFK: yes I do. I don't know how to change my code NOT to use inline javascript here.
+00:11  TheoMurpse|AFK: Please look at my code and tell me how I can. I'm at a loss.
+00:11  ExorcistToGo: unixSnob: It has to be there ... somewhere ... I did see the .js? strings
+00:11  yorick: variable: do you understand the difference between a function body and a value?
+00:12  variable: yorick, likely not: I almost never do JavaScript coding :-)
+00:13  yorick: variable: what do you usually program?
+00:13  ExorcistToGo: unixSnob: You will probably have to run the scaper inside of a web control with javascript enabled
+00:13  variable: yorick, C++, Python, Perl, little Java, bash,
+00:13  variable: yorick, I'm assuming there is something specific to JS here
+00:13  yorick: variable: do you understand the difference between a function that calls alert(i) (like function() { alert(i); }) and the statement alert(i)
+00:14  yorick: (or expression in this case)
+00:14  variable: yorick, ah yes
+00:14  yorick: good :) now go fix it
+00:14  unixSnob: ExorcistToGo: i just found it, but it's like the url you posted.. bunch of unknowns.  wget gets a blank page.  Must be that the backend knows what goes in the unknowns somehow
+00:14  TheoMurpse|AFK: Pilate: ?
+00:14  variable: yorick, ah stupid me - it was calling setInterval with the return value of alertt
+00:14 * variable is an idiot
+00:14  ExorcistToGo: unixSnob: Correct
+00:15  ExorcistToGo: unixSnob: Some pages can be hell to scrap.
+00:15  yorick: variable: :)
+00:15  yorick: also, if using setInterval you should put clearInterval somewhere
+00:15  unixSnob: ExorcistToGo: the variable of interest is "Sol" I believe.. but it's undefined
+00:15  variable: yorick, makes sense :-)
+00:16  ExorcistToGo: unixSnob: You will probably have to set up state to make it work.
+00:16  unixSnob: anyway, I give up trying to get the real url
+00:16  ExorcistToGo: That is typically what makes these things hard
+00:16  ExorcistToGo: It is invisible and hard to probe
+00:16  yorick: for (var i = 0; i < 10; i++) { setTimeout((function(i) { return function() { alert(i); }})(i), i * 10); } also works :)
+00:17  variable: yorick, lesson learned: think about things before asking stupid questions
+00:17  yorick: variable: you're welcome :)
+00:18  ExorcistToGo: Gregor: Thanks for the reference, reading through the paper now.
+00:22  ExorcistToGo: Gregor: "Due to the flexibility of JavaScript
+00:22  ExorcistToGo: objects, we must assume that every object can have a binding for
+00:22  ExorcistToGo: every possible static field. However, this na¨ıve approach does not
+00:22  ExorcistToGo: scale, as the product of object count and field count is often very
+00:22  ExorcistToGo: large."
+00:22 * ExorcistToGo groans
+00:26  Avi`: quick design question. I have a method called "setOptions()" that I want people to be able to pass many sets of options into. and then just loop through the options they pass me and set them all
+00:26  Avi`: would it be better to take an array of options as [{json:object},{json:object}]
+--- Log closed Sat Dec 04 12:46:32 2010
+--- Log opened Sat Dec 04 12:46:43 2010
+12:46 --- Users 391 nicks [0 ops, 0 halfops, 0 voices, 391 normal]
+12:49 --- Channel ##javascript was synced in 146 seconds
+13:30  kriD86: hi, i need some help please, i want to create a customized confirm-dialog-box with the following code, the dialog box appears, but the ajax-function, which should executed after pressing the "ja" button, but its running without pressing anything :( , here the code: https://gist.github.com/728145
+13:57  guest232173: is there a simple way to do #anchor thing by javascript?
+13:58  guest232173: i want to scroll the page to a certain place after clicking a button
+14:02  Pilum: Set the anchor in the URL then.
+14:03  Pilum: Or use scrollIntoView.
+14:03  Pilum: `dom ref scrollIntoView
+14:03  Pilum: https://developer.mozilla.org/En/DOM/Element.scrollIntoView
+14:14  ruby_on_tails: hi
+14:14  ruby_on_tails: i want to make a hits tracker for my site in JS
+14:14  ruby_on_tails: something like google analytics, etc
+14:14  ruby_on_tails: and i am a js n00b
+14:17  Pilum: If you have your own site you'd be far better of making it serverside.
+14:17  TheSheep: ruby_on_tails: use piwik and be done with it
+14:17  ruby_on_tails: the issue is its a system which runs on multiple server
+14:18  ruby_on_tails: pages are fetched on one server but the data needs to be recorded in the main server
+14:18  ruby_on_tails: i have a php based solution for this
+14:19  ruby_on_tails: TheSheep: i have to use a custom script
+14:19  ruby_on_tails: the data needs to go in the admin panel which is there on the main server
+14:20  TheSheep: ruby_on_tails: use piwik and read its detabase in your custom panel
+14:21  ruby_on_tails: TheSheep: in that case i could use google analytics but the amount of customization needed wont let me do it
+14:21  ruby_on_tails: the client needs a custom solution thats it
+14:21  TheSheep: ruby_on_tails: you don't control teh database of google analytics
+14:22  ruby_on_tails: hmm
+14:22  TheSheep: ruby_on_tails: then download piwik and see how they did it, and do it the same
+14:22  ruby_on_tails: hmm
+14:35 --- ace_me_ is now known as ace_me
+14:40 --- cb_ is now known as alma
+15:13  jwl: ruby on tails .. nice nick name haha
+15:14  MonsterKiller: hey. i have: var reguser = /^([A-Za-z0-9_\-])$/; and then when a form is submitted: if(reguser.test(document.form.username.value) == false) { alert  stuff }; but it no matter what i put in the username it always returns false
+15:15  MonsterKiller: but no matter*
+15:15  Sorella: you could try document.getElementById("username").value...
+15:15  MonsterKiller: it works with the email field i use
+15:15  Pilum: `forms @ MonsterKiller
+15:15  jsBot: MonsterKiller: forms: Accessing form elements via JavaScript: Don't use document.formName.elementName. Use document.forms['formName'].elements['elementName'] or getElementById() or getElementsByName() instead.
+15:16  MonsterKiller: lol
+15:16  Pilum: That was not a joke.
+15:16  MonsterKiller: i know
+15:16  MonsterKiller: :/
+15:17  Sorella: and if you don't like using such a large name everytime, just import it to the local scope: var getEl = function(id){ return document.getElementById(id) }
+15:19  Tempus2: Anyone uses google custom search?
+15:21 --- joo|sleep is now known as joo
+15:22  MonsterKiller: it still returns false, is there something wrong with var reguser = /^([A-Za-z0-9_\-])$/;
+15:23  Tempus2: ewww regular expression, not my favorite
+15:23  MonsterKiller: lol
+15:25  MonsterKiller: i just want to make sure the username only has A-Z, a-z, 0-9, _ and - in it
+15:26  Tempus2: I have an numeric script laying around. Probably spend 7 days figuring that out
+15:27  MonsterKiller: xD
+15:28  MonsterKiller: well, this methode works for email validation
+15:28  MonsterKiller: method*
+15:28  Tempus2: Hum, I recognice your regex string, I am certain I've used alphanumeric once
+15:29  MonsterKiller: http://monster.pastebin.com/LyhRNMFT<-- thats the whole validation script i use for registration
+15:31  MonsterKiller: as i say, the one for email works fine
+15:32  Tempus2: I looked at my alpha numeric one, and I ended up on using something different than regex, since I wanted to stop input on keydown
+15:33  Tempus2: I ended up using a crossbrowser input e variantr
+15:34  llrcombs: Anyone here using Safari and willing to help me debug an extension?
+15:35  Tempus2: It will prevent illegal keys to be entered and just be truncated with a sound of the OS supports it
+15:35  Tempus2: if*
+15:35  llrcombs: MonsterKiller: I hope you're using a server-side validator as well
+15:35  MonsterKiller: llrcombs, i use php as well to validate it
+15:35  MonsterKiller: :P
+15:36  llrcombs: ahh, goody
+15:36  llrcombs: :D
+15:36  Tempus2: Oh wait, maybe it was the serverside script I had regex
+15:36  MonsterKiller: i just really dont understand why this wont work :/
+15:37  ArchAng31: hello!
+15:37  ArchAng31: Could some one help me with a noob question?
+15:38  llrcombs: sure!
+15:38  llrcombs: what might that question be?
+15:38  Tempus2: But I am sure there are other channels that can help you with regex, since it's not just javascript that supports it
+15:38  ArchAng31: I am trying to make a "struct" in Javascript
+15:38  llrcombs: ?
+15:38  ArchAng31: A class
+15:38  llrcombs: ahh
+15:38  llrcombs: well
+15:39  llrcombs: JS doesn't have real "classes"
+15:39  llrcombs: but we have the next best thing
+15:39  Tempus2: objects?
+15:39  Tempus2: :P
+15:39  llrcombs: that'd be it
+15:39  MonsterKiller: Tempus2, im just trying to use javascript. i really dont understand why it doesnt work.
+15:39  llrcombs: with all the bells and whistles like "var newobj = new myObject();"
+15:39  ArchAng31: But the "compiler" is compaining about that my var should be declared as members
+15:39  Tempus2: No but regex is always the same
+15:39  prgmrBill: what's the name of the method in JS for explode? split only works on strings, right?
+15:40  llrcombs: `code ArchAng31
+15:40  gbot2: Show some code.  Code examples should be complete (sufficient to show the problem) and minimal (as short as possible while remaining complete).
+15:40  Tempus2: The regular expression is regular expression
+15:40  Sorella: ArchAng31 ≣ { x: "a" } // you just have a "struct" with member `x` with a string value of `a`
+15:40  Tempus2: Doesn't matter if it's php or javascript, the string should return the same
+15:40  llrcombs: prgmrBill: What do you want to use it on?
+15:41  ArchAng31: Can I paste 5 lines of code here without being kicked out?
+15:41  Tempus2: javascript doesn't have it's own regex, it supports regex
+15:41  prgmrBill: var data = ['yo', 'dawg', 'i heard', 'you like', 'whatever this thing is called'];
+15:42  Tempus2: lal at yo dawg
+15:42  Sorella: v8> var foo = {bar: "1"}; baz = Object.create(foo); baz.foo = "2"; [baz.bar, baz.foo] // inheritance
+15:42  v8bot: Sorella: ["1", "2"]
+15:42  Sorella: `paste @ ArchAng31
+15:42  jsBot: ArchAng31: paste: Paste links, not code: http://erxz.com/pb/   http://pastebin.parentnode.org/   http://www.webdevout.net/test
+15:43  ArchAng31: Ok, thanks...
+15:44  Tempus2: I have a string looking like this: /[\w\s_,.-]/ but I no longer remember what it is supposed to match heh
+15:45  Tempus2: Guess special characters as white space, underscore, commas and dots
+15:45  Tempus2: and dashes
+15:47  ArchAng31: Anyone familiar with regular Java? (So I could ask a question with that vocabulary)
+15:47  ArchAng31: I want to make a "inner class"-definition
+15:48  Pilum: Protip: learn the JS vocabulary instead.
+15:48  ArchAng31: Like a simple struct to hold a few values
+15:48  ArchAng31: I am trying to...
+15:48  mtappenden: Is it possible to use JavaScript to change the URL that appears in a user's browser without refreshing the page? My AJAX application doesn't involve any page reloads and I want to create pretty URLs so that users can bookmark/share what they're doing. Don't want to have to put an ugly # at the start of the path.
+15:48  MonsterKiller: http://monster.pastebin.com/yHiWzyFp i stripped it down to that and the reg.test still returned false
+15:48  MonsterKiller: D:
+15:49  Tempus2: Since JS doesn't support classes, it would kinda trying in vain, I suggest you read about Javascript object
+15:49  ArchAng31: Tempus2: ok, thx I will google it
+15:50  Pilum: `eloquent @ ArchAng31
+15:50  jsBot: ArchAng31: eloquent: Eloquent JavaScript is a comprehensive introductory Web-based book with examples and a built-in interpreter.  http://eloquentjavascript.net/index.html
+15:50  Pilum: ^ it's described there.
+15:51 --- Prot__ is now known as Prot
+15:52  Tempus2: I have the JavsScript Bible by Danny Goodman, but I think I need a new one since it's the 2nd Edition lol
+15:53  Tempus2: From 1996...
+15:56  blez`: I have a code: $("#panel1").momentumScroller();
+15:57  blez`: how can I change that for the whole page?
+15:57  blez`: $("body") don't work
+15:57  Tempus2: What syntax starts with $ ?
+15:58  Tempus2: Don't think I've seen that before
+16:02  blez`: somebody?
+16:02  carlocci: `jQuery @ blez
+16:02  jsBot: blez: jQuery: For help with jquery, try: #jquery
+16:03  blez`: thanks.
+16:03  l4rk: jquery owns
+16:09 --- Unknown[NF] is now known as Unknown[OFF]
+16:13  Tempus2: Is jQuery worth looking into?
+16:14  Excell: hi all
+16:15  Excell: can anyone tell me the best way to sort 3 different variables into order ie a=5 b=7 c=1 result c a b
+16:15  l4rk: Tempus2: no nobody uses
+16:15  l4rk: it
+16:16  Tempus2: It looks kind of nice though, and since I don't like flash at all, jQuery might be a solution to do transitional fancy smancy effects. At least I would think jQuery is better than using flash
+16:17  Tempus2: And nobody uses flash for highly dymanic content anyway.
+16:18  l4rk: dude comparing flash to jquery is like comparing your grandma to emma watson
+16:19  l4rk: sure they both work on the web, but they aren't even in the same line of work
+16:20  Tempus2: Hum, what is jQuery mainly for? Doing ajax like tasks?
+16:21  Tempus2: I just read the description on their mainpage
+16:21  Tempus2: But many use flash for things that can be done by javascript
+16:22  Tempus2: and a lot of times, it can be done by jasascript simply
+16:22  Tempus2: javascript*
+16:22  joo: l4rk, you obviously haven't seen my grandmother
+16:25  CoJaBo: o_ö
+16:26  carlocci: Tempus2, the most useful feature of many javascript libraries/frameworks is that they're portable
+16:26  carlocci: meaning they work around browser inconsistencies for you
+16:41  Wes-: Tempus2: it's library which does ajax-hand-holding, adds DOM-manipulation shortcuts, and wraps all of it up in a cross-browser package where you don't need to worry about where you're running
+16:41  chalcedony: where would i look for help with jsquery ?
+16:42  Wes-: Did you try #jquery?
+16:42  l4rk: #jquery
+16:42  l4rk: but its kind of a madhouse right now
+16:42  Wes-: The jquery book that manning press put out last year is pretty good
+16:43  Wes-: By.... yehuda katz and bear bibeault, I think
+16:53 --- Unknown[OFF] is now known as Unknown[NF]
+16:56  slaymer: `dom ref
+16:56  jsBot: dom ref: http://w3.org/DOM , http://mozilla.org/docs/dom/domref/ , http://krook.org/jsdom/ , http://www.zvon.org/xxl/DOM2reference/Output/index.html
+16:57  slaymer: `js ref
+16:57  jsBot: js ref: http://developer.mozilla.org/en/docs/JavaScript , http://devedge-temp.mozilla.org/central/javascript/index_en.html , http://phrogz.net/ObjJob/ , JScript@MSDN: http://tinyurl.com/9pk3l , www.crockford.com/javascript/
+16:59  slaymer: `help ECMAscript
+17:00  slaymer: `help
+17:00  jsBot: help: Paste the Javascript (only the portions relevant to your problem) in a pastebin (see `paste), and tell us what you expected, what else you tried and what actually happened. You might also consider reading: http://diveintomark.org/archives/2003/05/05/why_we_wont_help_you/
+17:01  kasun: `paste
+17:01  jsBot: paste: Paste links, not code: http://erxz.com/pb/   http://pastebin.parentnode.org/   http://www.webdevout.net/test
+17:21  stephenplatz: dom ref
+17:33  apeiros_: hi there. is there a way to define a "global" setter?
+17:33  apeiros_: I only know of the variant where you have to know the name of the property that is being set
+17:35  apeiros_: something like: myObject.__defineGlobalSetter__(function(property, value) { this.data[property] = value });
+18:00  shiftingcontrol: setTimeout() ll start timer when the page is refreshed but is there method that will remain unaffected even after page is refreshed but need to perform the task of the timer ?
+18:04  paxcoder: i noticed my JS interpreter can take python-like array initialization ie a=[1,2]; is this standard (ECMA?) stuff?
+18:05  carlocci: array literals? Yes, they are
+18:05  paxcoder: i'm asking because i'm passing an anonymous array in this manner now: new Array (1, 2), and passing [1,2] is more conveniant
+18:05  paxcoder: *ent
+18:05  paxcoder: carlocci, thanks
+18:06  paxcoder: i think google's spitting out old tutors or something. noone mentions it for some reason.
+18:09 --- MonsterKiller is now known as monsterkiller
+18:12  Atomix: hello, can anyone tell me please, how can I embed manifest file into the exe? I built an application using MS visual studio 2010, but it made several files - the exe; manifest; icon, but i really want only one file
+18:14  kicken: Atomix, not really the right channel
+18:15  Atomix: i know, but nobody answers me on other channels =/
+18:20  paxcoder: XD
+18:34  mengu_: hello all.
+18:34  mengu_: how can i call a method dynamically within the class?
+18:34  mengu_: lets say i have var methodName = "aMethod"
+18:34  mengu_: how can i call aMethod via methodName within the class?
+18:35  carlocci: `==== @ mengu_
+18:35  jsBot: mengu_: ====: yourObject.foobar is just another way of saying yourObject['foobar']. So of course if varName = 'foobar', then it's also the same as yourObject[varName]
+18:35  carlocci: `classes @ mengu_
+18:35  jsBot: mengu_: classes: There are *no* 'classes' in Javascript.  Javascript uses prototypical OO: objects are constructed directly, based on other objects, without a blueprint.  Thinking of constructor functions as classes is *wrong,* and will confuse you in the long term.
+18:35  mengu_: carlocci: does that work with this? like this[methodName] ?
+18:35  carlocci: indeed
+18:38  mengu_: thank you carlocci
+18:38  mengu_: that did helped
+18:38  carlocci: you're welcome
+18:42  paxcoder: i've add(ed an)EventListener, how do i pass it an arbitrary argument?
+18:43  apeiros_: is there a way go do: try { (function(callback) { for(var i=0; i<100;i++) callback(i); })(function(j) { if(j>10) throw("exit the loop"); }) } catch(e) { ... } // but with a proper control flow construct instead of throw/catch?
+18:43  paxcoder: i've tried making the second argument all this, but i get undefined: function(e, a) { listenah(e, a);
+18:43  carlocci: paxcoder you can wrap it in a closure
+18:43  paxcoder: (event gets through)
+18:43  paxcoder: carlocci, say what?
+18:44  carlocci: addEventListener('some', function(e) {return yourFunction(e, param1, param2...);})
+18:45  paxcoder: isn't that what i did?
+18:45  paxcoder: wait
+18:45  carlocci: you can use apply/call to set the context right too
+18:45  joelennon: if you have function foo(e, a) { ... } you can call this from an event handler like this window.onload = function(e) { var a = 1; foo(e, a); }
+18:45  paxcoder: carlocci, thanks, works. i don't exactly know why tho..
+18:46  temhawk: good evening. instead of "foo >= 0 && foo <=9" can i just do "0 <= foo <= 9"?
+18:46  kicken: carlocci, not really sure what your trying to do there
+18:46  temhawk: i tried it but didn't work. but maybe i am missing a part?
+18:46  kicken: temhawk, no.  Have to do it the long way
+18:47  carlocci: paxcoder, what is that you find obscure?
+18:47  carlocci: kicken, what are you referring to by "there"
+18:47  preaction: temhawk: perl6 is the only language i've seen that does what you want it
+18:47  kicken: carlocci, sorry, wrong name.  ment apeiros_
+18:47  temhawk: kicken: aw, would it be possible for JavaScript to have that feature in the future?
+18:48  paxcoder: carlocci, i guess why function(e, param1) {//...} won't work.
+18:48  temhawk: preaction: ok.. thanks
+18:48  apeiros_: kicken: trying to exit from a callback, without giving control back to whatever invoked the callback.
+18:49  apeiros_: kicken: example (sorry, using jquery): $('.foo').each(function() { ...exit from the 'each' here...})
+18:50  kicken: apeiros_, the proper way I suppose would be to return something, and check the return value in the loop code.
+18:51  apeiros_: kicken: I disagree with that being proper.
+18:51  kicken: apeiros_, doesn't jquery allow you to exit the each loop by returning false?  Not that familar with jquery, but though I read that somewhere
+18:51  apeiros_: it requires the 'each' function to know about that special return value.
+18:51  apeiros_: which is IMO coupling in the wrong place.
+18:52  rupert88: does javascript support for each loops?
+18:52  apeiros_: kicken: possible. I used jquery as an example.
+18:55  kicken: apeiros_, well you can use an exception if you want.  There's no other control structure afaik to do what you want.
+18:55  apeiros_: :-/
+18:55  apeiros_: an exception is what I'm using now
+18:55  apeiros_: I find it... lets say "less than optimal".
+19:09 --- cb_ is now known as campbell
+19:11  FireFly: <rupert88> does javascript support for each loops?
+19:11  FireFly: rupert88, yes, but they don't iterate over the elements in an array
+19:12  FireFly: `ref for...in
+19:12  FireFly: Hrm
+19:12  FireFly: `moz ref for...in
+19:12  FireFly: :(
+19:12  carlocci: `ref js for..in
+19:12  FireFly: https://developer.mozilla.org/en/JavaScript/Reference/Statements/For...in
+19:12  v8bot: carlocci: for...in - MDC Doc Center - https://developer.mozilla.org/en/JavaScript/Reference/Statements/For...in
+19:12  FireFly: Oh, right
+19:53  shiftingcontrol: i have js script which has the vale var some_value; and i need that var some_value in php script how can i do that ?
+19:54  chpwnusr: shiftingcontrol, json!
+19:55  shiftingcontrol: chpwnusr:any sample ?and i don't know any thing about json
+19:56  chpwnusr: for javascript to talk to php I think you need to exchange information using json
+19:56  chpwnusr: shiftingcontrol, then look it up
+19:56  shiftingcontrol: chpwnusr:yea:),i m seraching the material
+19:57  chpwnusr: provide the value in js object notation
+19:57  paxcoder: is there some convenient way to say i want to treat bunch of strings as numbers, rather than concatenate them? preferably, without having to convert each.
+19:57  chpwnusr: then use php to send a request where that script outputs the value, and then run php's json_decode on it
+19:57  chpwnusr: to feed data into js from php arrays, try json_encode and output that
+19:58  chpwnusr: if you have only one variable, output its value in json and then grab that with php and json_decode that voila, you have it in php variale
+19:58  chpwnusr: unless I misunderstood what you're trying to do
+19:59  paxcoder: shiftingcontrol, url-encode string and send it to the script via XMLHttpRequest. then in php script url-decode it.
+20:00  shiftingcontrol: paxcoder:javascript and php are in same page ,actually i need to get client time and store in a session avariable
+20:00  paxcoder: shiftingcontrol, then you can simply document.write it
+20:01  paxcoder: or can you, lemme thing...
+20:01  paxcoder: *think
+20:01  chpwnusr: not document.write
+20:01  paxcoder: yeah, you must send it
+20:01  chpwnusr: you get client's time using js, then you just post it to a php form
+20:01  paxcoder: i'm confused. i'm used to do client-side
+20:01  paxcoder: *server side
+20:01  shiftingcontrol: document.write() is not right way
+20:01  paxcoder: (see how confused i am?)
+20:02  chpwnusr: just create like time.php which accepts an argument like ?time=(whatever it was in JS"
+20:02  chpwnusr: and whatever you pass as the time, it can store that in user's session
+20:02  chpwnusr: you can send the request via ajax
+20:02  paxcoder: shiftingcontrol, what chpwnusr is saying, make a hidden input, use JS to change its value, and submit along with rest of the stuff. if you don't have a form, then you must use "AJAX", ie what i previously said
+20:03  paxcoder: shachaf, JS' function is called encodeURIComponent, and PHP's function is called urldecode.
+20:04  Sagiftw: hello lovely fellows!!!
+20:04  paxcoder: (depending on your time format you might need to use it, if you use unix time, that's all numbers, no need to urlencode/decode)
+20:04  Sagiftw: e*
+20:04  paxcoder: chpwnusr, can you answer my question?
+20:04  chpwnusr: yes I can.
+20:05  Sagiftw: how can i handle an event when the user presses a key?
+20:05  shiftingcontrol: chpwnusr:i want to set session value when a page is opened ,when is displayed i want to retrieve the time and not when it is submitted
+20:05  paxcoder: chpwnusr, would you?
+20:05  chpwnusr: lol
+20:05  chpwnusr: yes I would
+20:05  chpwnusr: :)
+20:05  paxcoder: shiftingcontrol, AJAX it is
+20:05  chpwnusr: I'm sorry I don't see that you asked me a question
+20:06  paxcoder: no need for JSON or XML, but you'll still use XMLHttpRequest function in JS
+20:06  paxcoder: chpwnusr, sry, is there some convenient way to say i want to treat bunch of strings as numbers, rather than concatenate them? preferably, without having to convert each.
+20:06  chpwnusr: oh
+20:07  shiftingcontrol: paxcoder:let me start with ajax
+20:07  shiftingcontrol: then
+20:08  shiftingcontrol: JSON/AJAX which one ll suit my case ?
+20:08  Gregor: JSON and AJAX are not alternatives, they're complementary.
+20:08  paxcoder: shachaf, JSON is, like XML, data representation format. AJAX is a technique which, despite its name, does not need to use any of the aforementioned.
+20:09  Gregor: paxcoder: Dude, it totally needs to use "And"
+20:09  chpwnusr: paxcoder, Number() ?
+20:09  paxcoder: chpwnusr, does that work for a stream of strings, or just one?
+20:09  paxcoder: ie i bet i can't do Number(str+str), can i?
+20:09  Gregor: JavaScript does not have streams.
+20:10  paxcoder: Gregor,  -_-
+20:10  paxcoder: Gregor is a literal
+20:10  Gregor: paxcoder: If you just have a crapload of variables, you're out of luck, just convert them all.
+20:10 * paxcoder ducks for cover
+20:10  Gregor: paxcoder: If you have an array, you can loop.
+20:10  paxcoder: Gregor, ok
+20:10  Sagiftw: Does anyone know why my JS editing program (Komodo Edit) marks blue arrows near my code? http://cl.ly/3VYT
+20:11  paxcoder: shiftingcontrol, in any case, AJAX comes down to XMLHttpRequest function, which simply sends a GET or POST request to, say, one of your PHP scripts.
+20:11  paxcoder: (again, XML is redundant here)
+20:11  shiftingcontrol: paxcoder:i m not using form
+20:11  chpwnusr: parseInt (), parseFloat () ?
+20:11  paxcoder: shiftingcontrol, AJAX is what you need. it has nothing to do with forms.
+20:12  paxcoder: shiftingcontrol, it sends GET/POST when you tell it via JavaScript, and gets the answer there. No reloading of a page.
+20:12  shiftingcontrol: paxcoder:to learn ajax ,js and xml is enough right ?
+20:12  shiftingcontrol: paxcoder:ok
+20:19  paxcoder: does aynone know the name of that XML schema that lets you specify data types? eg. i think it has something like <float>2.3</float>
+20:48  movinthex: So... you're not supposed to "glue HTML" into a document directly, dynamically through JavaScript? You MUST go through the horrible pain of "building a DOM object"?
+20:49  movinthex: What if you're 100% sure it's valid HTML, as I am?
+21:08 --- locci is now known as carlocci
+21:10 --- emma is now known as em
+21:18  movinthex: So... you're not supposed to "glue HTML" into a document directly, dynamically through JavaScript? You MUST go through the horrible pain of "building a DOM object"? What if you're 100% sure it's valid HTML, as I am?
+21:20  paxcoder: movinthex, wouldn't know. innerHTML is non-standard, but then XMLHttpRequest is too. Does it make a difference with the renderers, I wouldn't know.
+21:21  Gregor: ...
+21:21  Gregor: innerHTML is most assuredly standardized.
+21:22  Gregor: Building the DOM objects is more reliable, and it being standard HTML is often unhelpful since it really has to be HTML a-la-whateverTF-browser-you're-on.
+21:22  Gregor: If you can build it with the no-real-pain-whatsoever of using createElement and appendChild, you should. Otherwise, innerHTML isn't a bug factory, you just have to be a bit careful.
+21:23  paxcoder: https://secure.wikimedia.org/wikipedia/en/wiki/InnerHTML#Features
+21:23  paxcoder: says it's a IE-initiated extension
+21:23  Gregor: paxcoder: So is XMLHttpRequest.
+21:24  paxcoder: Gregor, that's what i said -_-
+21:24  Gregor: paxcoder: XMLHttpRequest IS standardized. Dozens of standards started as IE extensions.
+21:25  paxcoder: wiki puts it under "Non-standard extensions"
+21:25  carlocci: innerHTML is not w3c, but it's supported in every browser
+21:26  paxcoder: carlocci, that may well be so.
+21:26  Gregor: innerHTML is, IIRC, in HTML5.
+21:27  carlocci: oh, I see
+21:27  paxcoder: Gregor, MDC agrees
+21:27  carlocci: http://www.w3.org/TR/html5/apis-in-html-documents.html#innerhtml
+21:27  carlocci: the wiki is outdated
+21:28  carlocci: thanks for pointing that out, Gregor
+21:28  paxcoder: carlocci, technically it is not, as HTML5 is not a standard yet
+21:28  Gregor: Heh, I recall being called pedantic earlier 8-D
+21:29  llrcombs: ouch
+21:29  llrcombs: I hate physical pain
+21:30  fatbrain: everyone hates physical pain
+21:30  llrcombs: mine's been there for over 2 hours now
+21:30  llrcombs: can't walk properly
+21:31  fatbrain: hehe, that... was semi-disturbing
+21:31  llrcombs: ?
+21:31  llrcombs: why?
+21:34  fatbrain: because I parsed it through my "i've been sexually assaulted"-filter. :P
+21:37  Sorella: fatbrain ≣ lol
+21:42 --- FireyFly|n900 is now known as FireFly|n900
+21:50  p3lim: Got an issue, when I try to use find(), I get the following error: Object has no method 'find'
+21:50  llrcombs: what
+21:51  llrcombs: 's find()?
+21:51  p3lim: example: $(this).html().find('embed');
+21:51  llrcombs: #jQuery is --> That way
+21:52  p3lim: find() is a part of jQuery?
+21:52  llrcombs: yep
+21:52  llrcombs: this is why I dislike libraries
+21:52  p3lim: thanks :)
+21:52  llrcombs: people end up thinking that it's just "how JS works"
+21:53  llrcombs: remember PHP register_globals?
+21:53  p3lim: not that experienced with js nor PHP, so no
+21:53  kicken: p3lim, pretty much anything you call in a chain starting with $() is jquery
+21:53  Pilum: ... or some other library.
+21:54  p3lim: kicken: thanks, I'll remember that
+21:54 --- Prot__ is now known as Prot
+21:55  llrcombs: that wasn't directed at you
+21:55  llrcombs: it was just in general
+21:55  llrcombs: ::P
+21:55  llrcombs: *:P
+21:57 * llrcombs found some acetaminophen
+22:00  p3lim: I need a function to search a string
+22:00  Pilum: `js ref indexOf @ p3lim
+22:00  jsBot: p3lim: js ref indexOf: on String: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/String/indexOf and on Array (JS1.6): https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/Array/IndexOf
+22:08  p3lim: thanks Pilum, exactly what I needed
+22:09  Pilum: Np.
+22:09  v0lksman: http://pastebin.com/RE6pJbiV  should I be able to access 'lat'?
+22:11  quest88: Is (function(){ .. }) the same thing as the window.onload = function(){..} ?
+22:12  fatbrain: no, you assign a function to window.onload only in the second example.
+22:13  quest88: what's (function(){..})() doing then?
+22:13  fatbrain: there's a big difference between (function() {}) and (function() {})()
+22:13  fatbrain: (function() { ... })() will call the anonymous function right there and then.
+22:13  quest88: right
+22:13  fatbrain: only used to "hide" some variables from polluting global scope.
+22:14  quest88: oh
+22:14  quest88: well that's simple enough
+22:17  GuestQuestions: Can i get help here with a javascript question?
+22:17  fatbrain: `ask
+22:17  jsBot: ask: Ask your question directly, you don't need to ask permission to ask a question!  See also: http://www.catb.org/~esr/faqs/smart-questions.html
+22:17  GuestQuestions: thankyou
+22:19  GuestQuestions: Can i add an setTimeout to a HTML tag, like the way its done with "onmouseover" using javascript, and can they both be done in the same tag?
+22:23  GuestQuestions: im looking for the shortest script possible to use for showing/hiding div's with slide effect if that helps
+22:24  GuestQuestions: is anyone pondering my question???
+22:25  preaction: GuestQuestions: no, mostly boggling at your "shortest script possible" requirement
+22:25  preaction: use an animation lib and get on to something more useful than reinventing the wheel
+22:26  GuestQuestions: did you see first part of question about settimeout in HTML tag?
+22:27  GoSox: clear
+22:27  GuestQuestions: ok, fairwell
+22:27  preaction: GuestQuestions: that question makes no sense
+22:27  GoSox: haha i mean /clear
+22:27  preaction: "setTimeout to an HTML tag"? wtf does that mean?
+22:28  GuestQuestions: sorry, i know HTML and CSS... not so much javascript
+22:28  preaction: so learn javascript
+22:29  GuestQuestions: i can use "onMouseover in HTML tag, can I use setTimeout in HTML tag together with onmouseover?
+22:29  GuestQuestions: im trying
+22:29  preaction: yes. when you are in the onmouseover="" attribute, you are writing javascript
+22:30  GuestQuestions: so drop down menu pauses for two seconds before it closes even if mouse is not over menu
+22:32  GuestQuestions: have CSS menu, but want it to slide up and down, and stay down for two seconds before closing... any takers?
+22:33  FireFly: `eloquent @ GuestQuestions # this is a good tutorial if you're interested in learning JS
+22:33  jsBot: GuestQuestions # this is a good tutorial if you're interested in learning JS: eloquent: Eloquent JavaScript is a comprehensive introductory Web-based book with examples and a built-in interpreter.  http://eloquentjavascript.net/index.html
+22:33  FireFly: Hm
+22:34  FireFly: Didn't work as I hoped, but meh
+22:35  GuestQuestions: ok, thank you. kinda needed help now though as that will take time
+22:37  GuestQuestions: i need this with setTimeout added for 2 seconds before close...<div id="test" style="background: green; margin-top: 0px; top: 0px; height: 1px" onmouseover="show(this)" onmouseout="hide(this)">
+22:39  GuestQuestions: i need this with setTimeout added for 2 seconds before close...<div id="test" style="background: green; margin-top: 0px; top: 0px; height: 1px" onmouseover="show(this)" onmouseout="hide(this)">
+22:39  tandoorii: can javascript be used to make an element show or hide depending on whether a checkbox is checked?
+22:40  GuestQuestions: yes, but im here trying to get answers also and not getting to far
+22:40  tandoorii: heh, im a novice at javascript stuff
+22:40  GoSox: i can do document.getElementByName("name").value to access form elements?
+22:40  GuestQuestions: me to
+22:41  Pilate: guestquestions: stop using inlind js
+22:41  preaction: GoSox: no. use document.forms[formName].elements[elementName] or give the element an ID
+22:41  preaction: `js form
+22:41  preaction: `form
+22:41  preaction: sigh...
+22:41  GuestQuestions: why, i just want it to work, i dont know how to any other way
+22:42  carlocci: `forms
+22:42  jsBot: forms: Accessing form elements via JavaScript: Don't use document.formName.elementName. Use document.forms['formName'].elements['elementName'] or getElementById() or getElementsByName() instead.
+22:42  Pilate: then its exactly time to learn
+22:42  preaction: GuestQuestions: we are here to help people who know some javascript get answers. we are not an interactive tutorial
+22:42  GoSox: preaction: ok that says getElementsbyName()
+22:42  [mighty]Mike: recently ran across some js code where new lines began with a semicolon, before function declars wrapped in parens
+22:43  [mighty]Mike: does that mean anything special?
+22:43  [mighty]Mike: i.e. to start a new line with a semicolon; or does it simply help make sure that minifiers don't garble the code
+22:44  Pilate: its not valid, its probably just formatted wrong to mess with you
+22:44  tandoorii: i have a somewhat idea how it works but i dont understand js syntax enough. I basically attach an onChange event, then in the js code i check the state of the checkbox then i change the visible property of the <div> (i think)
+22:44  [mighty]Mike: Pilate: :) the code works fine
+22:44  Pilate: it only works fine because theyre there for the line above it, if you had one at the end and one at the beggining, it wouldnt be
+22:45  [mighty]Mike: gotcha
+22:45  [mighty]Mike: makes sense
+22:45  GoSox: can you use ! in javascript
+22:45  GoSox: to mean the logical opposite
+22:49  GoSox: ok my .value is undefined, is there another way you access the content of a text input?
+22:52  Pilum: .value is right. If you get undefined then your referencing is wrong.
+22:52  GoSox: document.getElementsByName('email').value
+22:52  GoSox: the input's name IS "email"
+22:53  carlocci: getElement-->s<--ByName
+22:53  Pilum: But that method returns a collection - a nodeList.
+22:53  Pilum: I.e. not a single element reference.
+22:55  GoSox: so why is there no simple getElementByName function that works just like getElementById?
+22:56  Pilum: Because name is not a unique identifier.
+22:56  Pilum: That's the whole point of having ID as a seperate property.
+22:56 --- omni5cience_ is now known as omni5cience
+22:58  GoSox: is there an 'appendHTML' type thing to use instead of .innerHTML ?
+22:58  GoSox: or should i do thing.innerHTML = thing.innerHTML + 'new text';
+22:58  Pilum: Noit necessary.
+22:59  Pilum: You can use the += operator
+22:59  GoSox: ha
+22:59  Gregor: Appending to innerHTML is even less reliable than using innerHTML in the first place, you should use DOM methods if at all possible.
+23:04  GoSox: whats the property for the length of a string?
+23:04  carlocci: unbelievably, length
+23:05  Pilum: `eloquent @ GoSox
+23:05  jsBot: GoSox: eloquent: Eloquent JavaScript is a comprehensive introductory Web-based book with examples and a built-in interpreter.  http://eloquentjavascript.net/index.html
+23:06  Pilum: `innerHTML
+23:06  jsBot: innerHTML: InnerHTML is fast, but has its quirks. DOM methods are a good alternative - without the speed and readability (http://xrl.us/bmaiz). To read a list of innerHTML quirks and possible workarounds, see http://js.isite.net.au/faq/innerHTML)
+23:07 --- monsterkiller is now known as MonsterKiller
+23:08  GoSox: the page that lists innerHTML's quirks only lists one quirk
+23:08  MonsterKiller: Hey. How could i check a persons username after they enter it to see if its already taken? i know it would use php and probably javascript but im not sure how i would use javascript to run the php functon (to check to username) and then get php to give java something it can user to determin an output
+23:08  GoSox: which does not apply to me
+23:09  MonsterKiller: it can use*
+23:09  quest88: MonsterKiller, look into ajax
+23:09  GoSox: MonsterKiller: you would run the php file with the user name as a $_GET, and use the result
+23:09  GoSox: as for 'how' to do that, i don't know
+23:09  GoSox: but i need to look into it later
+23:09  MonsterKiller: :P
+23:10  quest88: use xmlhttprequest, or some other javascript library (e.g. jquery, mootools) which has some built-in functions to make ajax calls
+23:13  GoSox: i'm doing the "right" thing, and pre-checking EVERY field of the sign-up form on my website, before I immediately check them again in php.
+23:13  GoSox: this is great for usability
+23:13  GoSox: but it suuuucks ass for me the coder
+23:14  GoSox: does javascript also use == in if conditionals
+23:15  quest88: yes
+23:15  GoSox: and != for not equal?
+23:15  GoSox: or do they use that weird <> thing
+23:15  systemfault: lol.
+23:15  systemfault: Only PHP has that.
+23:15  Teycho: != or !==
+23:15  GoSox: ok
+23:16  quest88: !=
+23:16  MonsterKiller: GoSox, i so that. I have javascript check every field, check to make sure the email is valid and that the username only has certain values then check it again with php incase they disable javascript :P
+23:16  MonsterKiller: i do that too*
+23:16  quest88: ==, !=, <, >, <=, >=, instanceof
+23:17  quest88: etc.
+23:17  GoSox: the good thing is that, when you check nicely in javascript first, then you can give very raw php error messages, since the only people who will ever see the PHP messages, pretty much, are people trying to hack the form
+23:17 --- MikhX_ is now known as MikhX
+23:20  GoSox: i hate forms that bust your balls though, so my form is going to draw a red box around every problem, and tell you textually what every problem is
+23:20  GoSox: so you'r enot fixing one thing, then being told another
+23:20  GoSox: etc
+23:20  GoSox: forms that do that are so annoying
+23:21  quest88: nice idea
+23:22  GoSox: i'm creating this in safari, i haven't actually tried it in other browsers yet
+23:23  quest88: good luck testing in IE
+23:23  GoSox: ill be pissed if it doesn't work
+23:23  GoSox: as long as IE supports GetElementById
+23:23  GoSox: i shoudl be golden
+23:27  GoSox: ugh ok it stopped working
+23:27  GoSox: my form is submitting even though i'm returning false
+23:28  GoSox: ugh
+23:29  GoSox: i don't get why tiny little syntax errors cause the whole check to be aborted, and the form to submit
+23:29  Pilum: Syntax error stops the script, thus false is not returned heh.
+23:29  GoSox: well, not even a syntax error, just a non-existang getElementByID
+23:30  GoSox: existant
+23:37  GoSox: is javascript have any form is is_int() or is_numeric() type functions?
+23:49  FIQ: `tias
+23:50  ironmagma: GoSox: you could do Number(myvar) === parseInt(myvar)
+23:51  GoSox: actually i found Math.floor(n) == n
+23:51  ironmagma: GoSox: that won't work for negative numbers
+23:51  GoSox: i also check for range
+23:52  GoSox: because i want an integer between 1 and 99999
+23:52  ironmagma: okay; you'll also want to use ===
+23:52  GoSox: ah right
+23:53  GoSox: === is breaking it
+23:53  ironmagma: are you just trying to see if a number is an integer, though?
+23:53  GoSox: which makes sense
+23:53  ironmagma: or are you starting with a string?
+23:53  GoSox: i'm seeing if form input is an integer
+23:54  GoSox: so i'll use the floor thing ==
+23:54  GoSox: and range check
+23:54  ironmagma: just do thevalue.match(/^\d+$/)
+23:54  ironmagma: that may not be correct syntax actually
+23:54  ironmagma: but use a RegEx
+23:55  ironmagma: js> "1234".match(/^\d+$/)
+23:55  gbot2: ironmagma: ["1234"]
+23:55  ironmagma: js> "123.4".match(/^\d+$/)
+23:55  gbot2: ironmagma: null
+23:55  ironmagma: js> "123blah4".match(/^\d+$/)
+23:55  gbot2: ironmagma: null
+23:55  ironmagma: so now you can just do if(myvalue.match(/^\d+$/)) { <do some stuff> }
+23:55  GoSox: this seems to be working just right: if ( !(Math.floor(my_zip) == my_zip) || my_zip == '' || my_zip < 1 || my_zip > 99999 )
+23:56  GoSox: thats a check for not an integer
+23:56  ironmagma: that's really confusing :P and will also not work for "false", I think
+23:56  GoSox: well, not an integer in my range
+23:56  ironmagma: js> Math.floor("false")
+23:56  gbot2: ironmagma: NaN
+23:56  l4rk: js> Math.floor(false)
+23:56  gbot2: l4rk: 0
+23:57  l4rk: don't make it a string..
+23:57  ironmagma: you're getting a form input; it's gonna be a string
+23:57  GoSox: right
+23:57  GoSox: theres no way to pass a true false to it
+23:57  l4rk: I'm not gettin it from anything
+23:57  l4rk: not even a woman
+23:58  ironmagma: GoSox: is that expression supposed to like, match everything except an integer?
+23:58  GoSox: also ironmagma i'd still need the range stuff anyway, so the regexp would only be replacing this part (Math.floor(my_zip) == my_zip) || my_zip == ''
+23:58  ironmagma: js> "0" == ""
+23:58  gbot2: ironmagma: false
+23:58  GoSox: its supposed to match everything except integers between 1 and 99999
+23:59  fatblueduck: hi i was wondering if anyone here has used the 'head.js' script loading tool
+23:59  GoSox: that should probably be inclusive but thats o.t.
+23:59  fatblueduck: I'm trying to determine if head.js is better than lazyload.js
+--- Log closed Sun Dec 05 00:00:21 2010

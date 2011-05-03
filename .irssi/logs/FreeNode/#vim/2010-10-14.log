@@ -1,0 +1,867 @@
+--- Log opened Thu Oct 14 00:00:06 2010
+00:00 --- sjl_ is now known as sjl
+00:03  jeffszusz: hm
+00:04  jeffszusz: eclim's install is doing scary things
+00:04  jeffszusz: luckily i backed .vim/ and .vimrc up
+00:11 * KeeperOfTheSoul likes to use github to store his .vimrc
+00:11 * joeytwiddle still uses CVS doh
+01:24 --- _Unode is now known as Unode
+01:29 --- ml|_ is now known as ml|
+01:38  mansour: I just use vim, and for long time. But I don't do a lot of customization. Now, I like to change something. When I edit xml, the xml comments and tags have the same color. How can I change this ?
+01:40  okayzed: It's a matter of your colorscheme, mansour
+01:40  okayzed: Or your syntax file
+01:41  mansour: okayzed: how do I check, and change ?
+01:42  okayzed: you can run :highlight to see the list of your highlight settings
+01:43  okayzed: look for Comment (for the comment coloring group) and something else for the Tag group
+01:43  okayzed: so, :hi Comment and :hi Tag
+01:43  okayzed: will show you the colors, i think
+01:44  okayzed: and you can set them with :highlight, too
+01:44  mansour: I get this: Tag            xxx links to Special
+01:44  mansour: and this: Comment        xxx term=bold cterm=bold ctermfg=6
+01:45  okayzed: do you know about :colorscheme to change colorschemes - that is the easiest, i think
+01:47  mansour: I will try
+01:48  mansour: soemthing like:   :set colorscheme=XXX
+01:48  mansour: I will google it
+01:51  LeoNerd: Why do people insist on using Google when there's perfectly-working much-better domain-specific search systems?
+01:51  LeoNerd: :he colorscheme
+01:53 * mgedmin googles ":he colorscheme"
+01:55  estragib: snack culture. people don't want to read docs. they want a quick answer suitable for their level of expertise. google will offer them a selection; they can choose the most attractive.
+01:58  okayzed: great answer, estragib
+01:59  spiiph: Because much software doesn't have such good documentation and such a good community as Vim
+02:02 --- Unode is now known as _Unode
+02:04  mansour: LeoNerd: it's just a habbit.
+02:04  smorg: The documentation is highly context-sensitive. This makes it terse, but you can't just open it up and read about how to make a simple change without understanding everything else too.
+02:05  LeoNerd: No.. that's what the :he search is for
+02:05  LeoNerd: Specifically,   :he colorscheme
+02:05  smorg: depth-first search problem occurs when jargon is defined entirely in terms of more jargon
+02:06  fow: Fortunately Vim's help makes it easy to find out what that other jargon means
+02:13  jamessan: smorg: that's why there's the user manual portion of the help and the reference manual section.  use the former when you're still learning the lingo
+02:15  jamessan: you'll still have to dip into the reference manual for stuff, but the user manual will have less terse explanations
+02:16  smorg: I'm just learning too many things at the same time
+02:16  Walt: I always read the manual from start to finish when I need to find something
+02:17  Walt: searching is overrated
+02:17  Walt: this also means I have never read the later parts of it, since I stop when I find what I am looking for
+02:17  okayzed: Walt, can you explain to me what z? does?
+02:18  smorg: "wait so python re has this feature, vim has that feature with except \foo instead of \bar, sed doesn't have it, xml schema has it, doctype doesn't..."
+02:18  Walt: okayzed, yeah, sure, hold on a few weeks
+02:18  okayzed: thanks, Walt
+02:19  smorg: obligatory copypasta http://xkcd.com/761/
+02:22  Walt: I love that one
+02:22  Walt: smorg, in the last project I worked on I created a file format called .smorg :)
+02:23  smorg: :)
+02:28 --- sora_h is now known as sorah_off
+02:31 --- estragib_ is now known as estragib
+02:43 --- sorah_off is now known as sora_h
+03:08  KarlHungus: is there an easy way to debug a vim rc file? specifically, i need to determine what part of the config is bombing because ctags isn't available and wrap that in a conditional
+03:09  rlankfo: you could use vim's search feature
+03:09  rlankfo:  / to search forward and ? to search back
+03:10  lumgwada: KarlHungus: vim -D
+03:10  mgedmin: doesn't the error mention script name/line number?
+03:11  lumgwada: if your used to command line debuggers
+03:11  KarlHungus: well thats not very helpful =) i have a fairly large config across a number of files. it would be nice to trace the script similar to /bin/sh -x
+03:11  KarlHungus: Taglist: Exuberant ctags (http://ctags.sf.net) not found in PATH. Plugin is not loaded.
+03:11  KarlHungus: lumgwada: i believe that vim -D comes up after the .vimrc is processed
+03:12  KarlHungus: i guess i could move it and source it manually once i'm in the debugger
+03:15  KarlHungus: ah. ignore me. vim -v9vimlog or similar will dump all the debug into a file. dogh
+03:16  lumgwada: KarlHungus: yeah I was looking for that in the man
+03:16  Entelin: when searching using  /  how do I say OR ? like I want to find occurrences of  "There" or "there"  i tried  /There|there didnt work
+03:17  KarlHungus: Entelin: escape your pipe
+03:17  Entelin: ah very nice, thanks
+03:23  jamessan: KarlHungus: as the error said, taglist can't find ctags.  so you could install ctags or remove the taglist plugin or prevent it from loading (let loaded_taglist=1)
+03:24  KarlHungus: jamessan: right, but this is my vimrc file. i'll be checking it out on lots of different machines, some without ctags. i just want to wrap it in a conditional
+03:26  jamessan: KarlHungus: taglist is already doing that check for you. that's why it's emitting the message
+03:26  jamessan: ;)
+03:26  jamessan: no reason to duplicate its logic of looking for ctags
+03:27  KarlHungus: jamessan: right, but its much better to wrap that in has("ctags")
+03:27  jamessan: except that's a meaningless check
+03:27  KarlHungus: haha. how so?
+03:27  KarlHungus: why load taglist if i don't ahve ctags?
+03:27  jamessan: the check that taglist does is looking for various ctags executables. when it doesn't find one, it emits that message and stops loading itself
+03:28  jamessan: KarlHungus: I mean that has('ctags') doesn't do anything useful
+03:28  jamessan: ctags isn't a feature that has() knows about
+03:28  KarlHungus: i see what you mean.
+03:30  KarlHungus: so now i need to figure out how to make vim load with the message but not stop me and prompt for ENTER before loading
+03:36  rdpate: Entelin: for that specific case, "There"/"there", check out smartcase and/or use [Tt]here
+03:40  rdpate: hlsearch can't be :setlocal? is there a way to get that effect anyway?
+03:40  jamessan: vimgor: nohl
+03:40  vimgor: :nohl will disable current search highlighting until the next search is performed. A common map to avoid typing :nohl is ':nnoremap <silent> <C-l> :nohl<CR><C-l>'. See also, :help 'incsearch' and :help 'hlsearch'
+03:41  jamessan: hm, I thought that would only clear for the current window for some reason
+03:41  jamessan: guess not
+03:42  rdpate: I don't want to clear the hl in this buffer, I just want to go to another buffer or window and not have it applied there
+03:43  jamessan: yeah, doesn't seem to be a way to do that
+03:43  rdpate: well, thanks anyway
+03:48  momentum: in my .vimrc, I  have:
+03:48  momentum: set clipboard="+
+03:48  momentum: set cb+=unnamed
+03:48  ldvx: Awesome. I just learned how to copy and paste using "+y and "+p. Before that I used alt+insert and shift+insert (now I don't have to use :set paste to avoid indentation being screwed up) :D :D
+03:48  momentum: this should allow me to yank/paste between rxvt windows contianing vim right?
+03:49  momentum: or do I need sometihng else?
+03:49  momentum: it doesn't seem to be writing to a global bufer of any sort
+03:49  frogonwheels: momentum: :echo has('x11')
+03:49  momentum: frogonwheels: 0
+03:49  momentum: wtf
+03:50  frogonwheels: momentum: :) that's why
+03:50  momentum: frogonwheels++
+03:50  frogonwheels: what distro? you need to get a x11 enabled vim
+03:51  momentum: ubuntu
+03:51  momentum: installing vim-gnome
+03:51  momentum: and if thtat does nto work; will try vim-gtk
+03:51  frogonwheels: yeah - either of those
+03:51  momentum: that worked
+03:51  momentum: thanks again
+03:51 * momentum cancels apt-get of emacs
+04:13  ezzieyguywuf: is it possible to save my undo tree for recovery if I exit vim and come back?
+04:17 --- KarlHung1s is now known as KarlHungus
+04:18  KarlHungus: ezzieyguywuf: :help persistent_undo if vim > 7.3
+04:18  systemfault: OMG!
+04:18  systemfault: You have vim 7.4+?
+04:19  KarlHungus: hmm?
+04:20  systemfault: Nevermind... It's just that you written vim _greater_ than 7.3
+04:20 * ezzieyguywuf emerges vim 7.3
+04:20  ezzieyguywuf: thanks
+04:27  godlygeek: systemfault: right, like 7.3.021 for instance.
+04:29  ezzieyguywuf: so, do you guys use vim with csapprox or gvim -v ?
+04:35  jamessan: ezzieyguywuf: vim 7.3 with csapprox
+04:35  jerojasro: -v ?
+04:35  jerojasro: gvim
+04:36  jamessan: jerojasro: makes gvim not spawn the gui
+04:37  jamessan: ezzieyguywuf: or a system where vim & gvim are the same binary, so I can just type vim
+04:40  jerojasro: well, gvim here doesn't have a menu, nor scrollbars, and not even gtk tabs
+04:42 --- aaronf0_ is now known as aaronf0
+04:42  jamessan: sure, but it's still not running in a terminal
+04:42  godlygeek: jerojasro: the reason to prefer vim over gvim isn't the appearance - it's things like gnu screen, and ssh
+04:42  jamessan: gvim -v is just the analog to vim -g
+04:42  ezzieyguywuf: godlygeek: exactly
+04:43  ezzieyguywuf: is there a shortcut to repeat the last movement command?
+04:43  godlygeek: ezzieyguywuf: it ought to be obvious that *i* prefer CSApprox, haha
+04:43  jamessan: and since CSApprox requires gvim's functionality (if you're using < 7.3), then systems that don't use something like alternatives would require invoking gvim -v (or setting up a symlink)
+04:44  jamessan: ezzieyguywuf: for specific movements, yes. not in general
+04:44  ezzieyguywuf: godlygeek: lol, yes of course
+04:44  jerojasro: godlygeek: precisely. I do all I can to make gvim look like vim. I've kind of grown fond to gvim mostly because certain key combinations work properly there, and not in vim (because of terminal issues)
+04:44  sir_lewk: does anyone know if there's a way to make vimscripts from vim.sourceforge.net nicely wget'able?
+04:45  ezzieyguywuf: maybe I should spend more time gettingto grips with a proper terminal
+04:45  godlygeek: jerojasro: depending on your terminal emulator, you can do a lot to help terminal vim out with keystrokes
+04:45  godlygeek: for xterm, my terminalkeys.vim works alright, for instance
+04:46  jerojasro: xterm is too slow
+04:46  jerojasro: i'll say aloud that I use urxvt
+04:46  jerojasro: and then I'll hide ;)
+04:46  sir_lewk: how could xterm be too slow in any meaningful way with vim?
+04:46  godlygeek: heh
+04:47  godlygeek: point: sir_lewk.
+04:47  jamessan: s/ with vim//
+04:48  lumgwada: text mode quake?
+04:48  jerojasro: I don't use the terminal only for vim, and it would be too much of a hassle to use different term emulators just for one program
+04:48  sir_lewk: ok, I can see it being an issue in perhaps that single instance :P
+04:48  jerojasro: no,
+04:48  jerojasro: things like cat'ing a large text file
+04:48  godlygeek: mplayer -vo aa
+04:48  sir_lewk: I mean, I've done some pretty intensive stuff with ncurses/256 colors in xterm, and never found it to be a real issue
+04:48  jerojasro: even stuff like dmesg
+04:49  godlygeek: "how fast stuff can scroll past on screen" is pretty poor metric for the utility of a terminal emulator
+04:49  jamessan: dmesg is usually piped to something, for me
+04:49  godlygeek: since even the slowest terminal emulators are faster than you can read.
+04:50  sir_lewk: ^
+04:50  jamessan: don't really routinely cat a bunch of stuff just to watch it scroll by. that's what a pager is for
+04:50  jerojasro: at some point in the past that was enough of a hassle for me.
+04:50  jerojasro: that, plus needing unicode, and not knowing that xterm could handle it
+04:50  sir_lewk: (it does ;)
+04:51  sir_lewk: oh, my mind inserted an if in there, sorry
+04:51  godlygeek: (better than rxvt-unicode, iirc)
+04:51  jamessan: sir_lewk: hmm, yeah it'd be nice if download_script?script_id=... would download the latest version instead of having to know the right src_id
+04:51  sir_lewk: it naming the file 'download_scri...' is what's bugging me right now :/
+04:52  jamessan: sir_lewk: wget --content-disposition 'http://...'
+04:52  sir_lewk: ooh
+04:52  sir_lewk: awesome, that's getting added to my aliases :)
+04:56  sente: i also always hated that
+05:03  infid: when i do :b foo.txt, is there a way to jump back to the last file i was viewing or do i have to ctrl+o my way back?
+05:04  jamessan: infid: <C-^> or :b #
+05:04  infid: does it toggle too? i really want a way to do like gnu screen's C-a a
+05:04 * infid tries
+05:05  infid: it toggles!
+05:05  jamessan: infid: it switches to the alternate buffer, so yes.
+05:05  infid: have i ever told you you're my hero?
+05:05  jamessan: heh
+05:06  jamessan: infid: you can also prefix <C-^> with a number to switch directly to that buffer number
+05:07  jamessan: (and you may be able to use <C-6> instead of <C-^> depending on your keyboard layout)
+05:07  infid: in the 3 years i've been relying purely on buffers i havent had a need for numbers, but the toggle thing i can't believe i lived without
+05:07  ezzieyguywuf: I use <C-6>, but the number prefix thing is news to me
+05:07  infid: i usually just did :b [part of filename]
+05:07 * ezzieyguywuf tries
+05:07  jamessan: I find it useful if I do an :ls for some reason
+05:08  jamessan: then instead of typing out part of the name, I just switch directly
+05:08  ezzieyguywuf: neato.
+05:08  jamessan: but primarily I use <C-6> on its own and :b partial
+05:08  infid: when i :ls i see the name of the file and it's fresh in my head so :b <file> is feels easier for me than tryin to view/remember it's corresponding number
+05:08  ezzieyguywuf: I use :b number, never use :b partial
+05:08  ezzieyguywuf: to each his own I suppose.
+05:09  infid: fortuntely vim accomodates each
+05:09  ezzieyguywuf: :-P
+05:09  infid: that's a vim command :P
+05:09  jamessan: ezzieyguywuf: well, :b number requires looking up the number.  I tend to remember the filenames instead of the buffer numbers
+05:09  ezzieyguywuf: now, is there a way to do zz from insert mode?
+05:09  ldvx: /wc/wc
+05:09  ezzieyguywuf: jamessan: I use minibufexpl so I always know what number I need to hop to.
+05:10  infid: ldvx wants to leave :(
+05:10  ezzieyguywuf: what is /wc/wc?
+05:10  infid: window close twice
+05:10  jamessan: ezzieyguywuf: minibufexpl is far to limiting.  I frequently have too many buffers open for it
+05:10  ezzieyguywuf: lol
+05:10  jamessan: plus it's buggy
+05:10  ezzieyguywuf: thats right
+05:10  ezzieyguywuf: jamessan: yea, it is buggy
+05:10  lumgwada: I use the number logic but tie it to common file patterns eg \1 to settings.py . I have \1 to \0 and \`1 to \`0 mapped to 20 common files
+05:10  infid: buffers are all i can stand. i've tried buf explorers, tabs and even nerdtree, they all just slow me down
+05:10  ezzieyguywuf: but my main gripe is having to do double :q when exiting
+05:10  infid: i dont mind nerdtree when doing mvc though
+05:11  jamessan: ezzieyguywuf: :qa
+05:11  ezzieyguywuf: other than that, I can deal with a multi-line minibufexpl
+05:11  ezzieyguywuf: mvc?
+05:11  jamessan: ugh, wasted screen space
+05:11  jamessan: model-view-controller
+05:11  jamessan: ezzieyguywuf: as for zz, make a map that does <C-o>zz
+05:12  infid: jamessan: well i only use it if i'm using some mvc framework i'm not used to so i can see the layout until i memorize it enough
+05:12  ezzieyguywuf: wow, what does <C-o> do exactly? let me  do any command mode stuff in insert mode?
+05:12  jamessan: infid: I was referring to minibufexpl
+05:12  jamessan: ezzieyguywuf: :help i_ctrl-o
+05:13  jamessan: infid: especially a multi-line minibufexpl *shudder*
+05:13  jamessan: :)
+05:13  ezzieyguywuf: "sorry no help for i_ctrl-o"
+05:13  infid: someone in here talked me into using normal buffers a few years ago. best thing i ever did. took a lot of convincing but trying it for a few days was enough to convince me
+05:13  jamessan: ezzieyguywuf: then you either don't have help files or you typed it wrong
+05:14  ezzieyguywuf: I do have help files, as I use them all the time
+05:14  infid: the only buf explorer that i ever need to use is gnu screen's but that's only because i often forget how i named my windows since i create a lot
+05:14  jamessan: infid: heh, I have all of those listed in the hardstatus
+05:14  infid: but its partial naming isnt as good as vims
+05:15  ezzieyguywuf: http://ompldr.org/vNXQ1OQ see?
+05:15  infid: jamessan: i dont know why but i never could get used to that in the hardstatus so i took em all out so all i see is the current window name, or i get confused too easily and might mess up
+05:16  ezzieyguywuf: infid: hardstatus = my best friend
+05:16  ezzieyguywuf: peep the hardstatus in that screenshot
+05:16  infid: twss
+05:16  ezzieyguywuf: I really should name my windows :-P
+05:16  infid: i have 19 windows open in screen right now
+05:17  jamessan: oh, that's more than I ever have
+05:17  infid: i work on a lot of web sites all at once
+05:17  infid: yeah, just gets too cluttered
+05:17  ezzieyguywuf: I max out at 9, because I can never remember how to switch to the ones past 9 :-P
+05:17  infid: my job is trying to kill me
+05:17  sente: but how many screen sessions do you have? :p
+05:17  infid: and most of the windows are svn branches
+05:17  infid: just one
+05:18  infid: well two, one for irc
+05:18 --- sora_h is now known as sorah_off
+05:18  KarlHungus: screen is so 2 years ago
+05:18  jamessan: git-svn
+05:18  ezzieyguywuf: if I was you, I'd use a nested screen session for each webpage
+05:18  infid: wait no, three, i forgot i keep logs/htop in a separate terminal
+05:18  ezzieyguywuf: to reduce cluttre
+05:18  sente: i have 4-5 screen sessions on a few differnt machines, each one being more of less a "project"
+05:18  KarlHungus: switch to tmux and thank me later
+05:18  fritzophrenic: hmm...is :help ever case-sensitive? The topic is actually i_CTRL-O
+05:18  infid: KarlHungus: what's this year?
+05:19  ezzieyguywuf: I been hearing so much about tmux
+05:19  jamessan: fritzophrenic: nope
+05:19  sente: KarlHungus: in 2-3 sentences why should i switch?
+05:19  ezzieyguywuf: I started using screen earlier this year, so I'm pretty green still
+05:19  ezzieyguywuf: what are the improvements?
+05:19  ezzieyguywuf: KarlHungus: I'd like to know too.
+05:19  scrooloose: KarlHungus: i saw a blog post the other day where someone was raving about tmux. Whats better? ive been considering looking into it
+05:19  infid: i can count on screen actualy beig installed on all the servers i use
+05:19  KarlHungus: one server pid holds all session pids. you can move windows between sessions. split panes sanely in each window.
+05:20  sente: hm, that does sound nice
+05:20  KarlHungus: infid: hence why i rebind tmux to ctrl-a to match screen
+05:20  jamessan: sounds like functionality I've never needed, but I can see why people would like it
+05:20  infid: i never need to split panes, ther other stuff sounds nice but not enough to get me to switch since i'm used to screen, verrry used to it and it runs everywhere.  i name my screen sessions using -S so i dont have to use pids
+05:21  sente: what about bindings/functiong beyond what screeners are used to?
+05:21  smorg: I won't use tmux until they add ttymouse=xterm2 support
+05:21  KarlHungus: infid: right, but once in tmux, hit ctrl-b s to view all sessions and swtich to one
+05:21  infid: KarlHungus: that's interesting
+05:21  KarlHungus: infid: i dunno. i'm a convert, but to each his own
+05:22  scrooloose: KarlHungus: so the panes and windows are like windows and tabs in vim respectively?
+05:22  ezzieyguywuf: KarlHungus: wow, switching sessions is nice
+05:22  infid: KarlHungus: maybe i'll start using tmux for my irc or something less important just to get used to it and see if i'll ever wannas witch
+05:22  KarlHungus: scrooloose: more or less, yes
+05:22  smorg: no buffers though
+05:23  infid:  more | less yes
+05:23  smorg: A better way is to use screen with a tiling wm so you can use screen buffers to jump around. tmux windows are too hard.
+05:24  scrooloose: KarlHungus: ive often wanted that kind of layout functionality in screen, but fuck nesting 2 levels down for it - all the ctrl-a-a-a-a-a-a crap makes me insane
+05:24  smorg: Why would you ever want to nest more than one level?
+05:24  infid: i cant stand nested screens, even though i know how to do it i never do it
+05:25  smorg: Only time I even do one level is when I'm ssh-ing from a Mac OS box or something and run screen locally
+05:25  KarlHungus: smorg: open a screen/tmux window to each server in a cluster and connect to a screen/tmux session on the individual servers, for instance
+05:25  scrooloose: smorg: yeah same, i only use nesting over ssh
+05:26  jamessan: that's where my use of a non-default escape key comes in handy :)
+05:26  jamessan: non-default for local screen, default for remote
+05:26  KarlHungus: jamessan: bingo ;)
+05:26  smorg: jamessan: yep
+05:27  scrooloose: good idea
+05:27  KarlHungus: ezzieyguywuf: can you share that hardstatus? i like it =)
+05:27  infid: no you like only tmux
+05:27  smorg: Some people use dvtm + screen
+05:28  jamessan: <C-a> is just too common to be a sane escape. of course, I chose <C-g> before I learned what that's used for and now I actually use <C-g> for things
+05:28  infid: what's c-g in screen?
+05:28  jamessan: nothing.
+05:28  infid: c-a, c-g is visual bell
+05:28  infid: i use c-g in vim
+05:28  jamessan: well, nothing I've ever used
+05:29  jamessan: I meant in other applications, since that would require using C-g g
+05:29  jamessan: and the whole point of not using C-a for the escape was to avoid having to do C-a a all the time ;)
+05:29  smorg: See I try sticking with mostly default keys in both vim and screen even if they aren't ideal just because they are so ubiquitous I need to be used to them.
+05:29  infid: i've gotten used to c-a a  to c-a in bash while in screen
+05:30  infid: if i hit c-a and nothing happens it's an easy indication that i'm in a screen session
+05:30  KarlHungus: you don't set -o vi in bash?
+05:30  smorg: I wonder how screen works out with Emacs... doesn't Emacs use very similar keys?
+05:30  infid: cause bash in non emacs mode is fail
+05:30  infid: sorta
+05:30  scrooloose: jamessan: the suspense is killing me! what do you use now!?
+05:31  smorg: Actually IIRC C-a is something really common in Emacs
+05:31  KarlHungus: could switch to zsh, but i'm probably overstepping my bounds with that comment :P
+05:31  smorg: I haven't used it in a long time
+05:31  smorg: KarlHungus: Yes set -o vi is mandatory :)
+05:31  jamessan: scrooloose: C-g, like I mentioned ;)
+05:31  scrooloose: jamessan: ah, i misread. Thought you changed it again :P
+05:32  smorg: Though I need to figure out how to disable the readline keybinding to 'v' starting up vim. That is seriously braindamaged
+05:32  jamessan: no, I've stuck with that
+05:32  jamessan: even since I learned that other apps use it, I don't use it frequently enough to bother changing
+05:32  infid: emacs mode is better for single-line editing
+05:32  infid: =X
+05:33  smorg: infid: probably but I'd rather have consistency between Vim and Readline than have to make my brain switch gears.
+05:34  infid: are you using bash though?
+05:34  smorg: yes
+05:34  infid: last i tried the vi mode had issues
+05:34  infid: not as bad as vimperator or anything but enough
+05:34  smorg: Same applies to other readline REPL programs that don't use ncurses
+05:34  smorg: python, ghci, etc
+05:34  infid: bpython ftw
+05:35  smorg: infid: agreed, though you can't set vim mode there
+05:35  smorg: hopefully eventually ipython will get syntax highlighting as you type
+05:37  smorg: hah and python is where you need it most. When i'm testing things i always write super long lines of nested lambdas because I can't stand multiple line editing in a REPL... if you forget to wrap things in a list() or print() or str() etc you're fscked.
+05:38  ezzieyguywuf: KarlHungus: yea sure let me pastebin it
+05:38  ezzieyguywuf: KarlHungus: http://paste.pocoo.org/show/275251/ you'll find it at the bottom there
+05:38  jamessan: fwiw, here's mine: caption always "%{Bk}%m/%d %{W}%C %A %{g}|%{w} %?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?"
+05:40  infid: what does <c-b> do in vim? :h <c-b> turns up nothing for me but typing it did somethign even though i have no map in vimrc
+05:40  ezzieyguywuf: jamessan: screeny?
+05:40  rdpate: smorg: all python needs is 'import readline'
+05:40  infid: oh its :h ^b
+05:40  infid: think i'll map that to <C-^> since i use <C-b> to toggle windows in irssi and am already used to that
+05:41  infid: yes, as used to the home keys as i am for 99% of things i still use pgup/pgdown :(
+05:43  smorg: I'm trying to get used to using C-e, C-y, C-u, C-d
+05:44  ezzieyguywuf: C-e, C-y are the best things since sliced breads
+05:44  infid: not many contrl keys sequences i use in vim, ctrl+o is probably the main one other than the things i have custom mapped like c-n for :bn or c-y, for zencoding
+05:45  smorg: What does C-o do?
+05:45  infid: jump to the last position
+05:45  smorg: weird
+05:46  ezzieyguywuf: like `` ?
+05:46  smorg: it uses a time delay to figure out what your last position was or something?
+05:46  jamessan: ezzieyguywuf: http://ompldr.org/vNXQ1bg
+05:46  jamessan: smorg: nope
+05:46  ezzieyguywuf: jamessan: I thought you had forgotten about me :-P
+05:46  sente: ipython is pretty terrible for multiline statements no matter what i do, and i can't go back and edit a previous multiline statement in any functional way (inserting a new line in the middle)
+05:47  jamessan: ezzieyguywuf: was switching computers :)
+05:47  sente: anyone here 'solved' that?
+05:47  ezzieyguywuf: jamessan: woah what is that at the top of your screen? your prompt?
+05:47  infid: ezzieyguywuf: kinda except `` does motion iirc
+05:47 --- sorah_off is now known as sora_h
+05:48  jamessan: ezzieyguywuf: yeah
+05:48  ezzieyguywuf: jamessan: what shell do you use?
+05:48  jamessan: zsh
+05:48  ezzieyguywuf: yay me too! lemme steal your prompt
+05:49  KarlHungus: hehe, <3 the zsh oohs and ahhs :P
+05:49  sente: wouldn't that multiline prompt be pretty annoying if it wasn't at the top of the terminal?
+05:49  jamessan: sente: why?
+05:50  sente: jamessan: for instance, earlier i was showing someone in #bash how to search for files within a range: http://sente.pastebin.com/x1ZfX81Z
+05:52  sente: ack, got disconnected
+05:52  jamessan: sente: right. so the only difference is that my prompt is two lines long
+05:52  KarlHungus: jamessan: i do find that having a rprompt on the same line as $ can be annoying with regards to what sente is saying
+05:53  sente: anyhow, i feel that multiline prompts ruin the 'flow', aesthetically as well as get in the way parsing
+05:53 * KarlHungus waffles on the multiline prompt issue
+05:54  jamessan: or they provide a more pronounced break between commands so it's easier to spot when looking through scrollback ;)
+05:54  sente: nah, my eyes are trained to look for a my 'user@host $', it doesn't get any easier than that
+05:54  jamessan: *shrug* I generally sanitize any shell sessions I paste anyway
+05:55  sente: yeah, fair enough
+05:55  jamessan: so it's just "$ cmd ..."
+05:55  KarlHungus: i work with a guy who has a 3 line prompt =)
+05:55  KarlHungus: insanity
+05:55  sente: well often the pastes are a set of commands, so want to see them all together
+06:00  jamessan: ezzieyguywuf: http://pastey.net/141560 is the core of it
+06:01  ezzieyguywuf: jamessan: cool thanks
+06:03  sente: http://sente.cc/stu/prompt.png
+06:04  sente: those are my two cents of promptiness
+06:04  sente: the symlink toggle has been nifty
+06:04  lumgwada: mmm thailand... I could do with a mango shake...
+06:05  tmr: I find moving input postion highly annoying.
+06:05  smorg: yay uptime
+06:07  ezzieyguywuf: I like the red prompt thing
+06:10  smorg: I like the symlink thing
+06:11  sente: yeah, i'm sure hundreds of others have done
+06:11  sente: but i thought of it myself
+06:11  ezzieyguywuf: I don't see the usefulness of the symlink thing
+06:12  jamessan: it's useful because the shell is hiding the directory you're actually in, which affects non-builtin commands
+06:13  jamessan: it's more relevant when the symlink is deep into a directory tree.  shell builtin commands will treat .. relative to the symlink you cd into. non-builtin commands will treat it relative to the actual directory
+06:13  sente: that will tell me if i am anywhere inside a symlink
+06:14  jamessan: which is one reason I dislike shells hiding that information
+06:14  jamessan: fish didn't do that.  I should see if there's a way to disable that in zsh
+06:14  sente: both sets of data are good to know depending on what one is doing
+06:14  ezzieyguywuf: I guess I don't mess with symlinks enough to really worry about these minutae
+06:14  sente: the symlink thing is especially important for rsyncing between two servers
+06:15  jamessan: ezzieyguywuf: it's not minutae if you do "rm -f ../*" because you think you're at the directory level of the symlink but you're actually somewhere else
+06:16  sente: and half the software i use logs the target link the other half logs the displayed symlink, i enjoy knowing ahead of time if there is potentially going to be annoying shit because someone couldn't create an intelligent directory structure
+06:16  ezzieyguywuf: silly people with non-intellgient directory structures
+06:19  sente: yes
+06:19  smorg: Hard to work around all the disorganized pr0n.
+06:20  sente: haha, i just rm -rf that shit because i'm so good at massively downloading it whenever i want
+06:21  sente: what is actually hard though, is working amongst my non-intillegent directory structure for pictures i've uploaded
+06:22  sente: i got carried with shell sripts to thumbnail/create galleries, and my girlfriend got carried away taking worthless pictures
+06:23  systemfault: Wait.
+06:23  systemfault: People still "download" porn?
+06:23  sente: haha
+06:23  systemfault: With all the free video sites?
+06:23  smorg: yeah that's fun. I usually use SSI for that
+06:23  systemfault: It better be HD
+06:23  smorg: create a gallery with a simple CGI + SSI
+06:24  smorg: systemfault: Yes because they all use flash. You have to extract the flv and wget it.
+06:24  sente: just a few days ago i a few obnoxious oneliners to fully index some stupid site because they had an rss feed for every video, and links to videos as well as flash shit
+06:25  sente: i showed a friend, and then deleted it all
+06:25  ezzieyguywuf: i still don't see why symlinks would be so prevalent on your system
+06:25  sente: because it's all shit anyhow
+06:25  smorg: I use symlinks as switches for my vim plugins
+06:25  sente: the inspiration for the symlink check was from work, not personal machine
+06:25  ezzieyguywuf: question mark?
+06:25  systemfault: smorg: When I was single... I was just going to some pr0n website.. did the stuff I had to do, close the browser. Win.
+06:25  systemfault: No downloading... or anything.
+06:26  systemfault: That's just crap.
+06:27  sente: systemfault: yeah, me too really, i wrote the shit because i found it amusing
+06:27  KarlHungus: just when you were single? /me doesn't believe that for a second
+06:27  sente: their bandwidth sucks, and so does the quality
+06:27  smorg: vim-pathogen loads up a directory of symlinks pointing to a directory of git roots
+06:27  systemfault: KarlHungus: For now, I'm still lucky.... perhaps I'll need porn again in a few months/years... who knows.
+06:28  sente: it seems like in the past year or so the internet has blown up with streaming flash sites
+06:29  smorg: hanging out on IRC tends to lead to singleness
+06:29  systemfault: Hmm, in my case, it was the opposite... :/
+06:29  Ikarus: ls
+06:29 * sente 's girlfriend is currently dancing
+06:29  Ikarus: uh, wrong terminal
+06:29  sente: she likes that more than IRC for some reason
+06:29  rtl: Any rvm users around? Wondering about getting it to play nice with vim...
+06:49  mattcodes: if working in a block { }
+06:49  mattcodes: how do I jump to the end of the block }
+06:49  fritzophrenic: ]}
+06:50  mattcodes: works, thansk
+06:51  mattcodes: quickest way to move a line up, do I have to do V$ykkp?
+06:51  mattcodes: up 2 lines?
+06:51  fritzophrenic: that's a copy, not a move
+06:52  fritzophrenic: I'd do yy instead of V$y or even Vy
+06:52  fritzophrenic: but yes that's pretty much the quickest
+06:52  systemfault: Shift+YkP should probably work
+06:53  systemfault: Err YkP :/
+06:53  mattcodes: ddjjP
+06:53  mattcodes: ?
+06:53  mattcodes: that seems to have worked
+06:53  KarlHungus: ddP
+06:53  fritzophrenic: you could also use the :copy ex command, but for this it's probably overkill
+06:53  systemfault: You want to cut? Oops :/
+06:53  fritzophrenic: he said "move" but gave a command for "copy"
+06:53  KarlHungus: oh. two. haha. its too late for me it seems
+06:53  mattcodes: cut and paste 2 lines up, so actually ddkkP
+06:54  mattcodes: my bad, too many changs last ngiht
+06:54  fritzophrenic: yes dd + move + P is probably easiest and quickest for single-line edits
+06:54  mattcodes: in VS I can set show whitespace and tabs tabs show as --> and whitespace and . vertical center aligned
+06:54  mattcodes: can I do this in vim?
+06:54  Jerub: :set list
+06:55  fritzophrenic: sort of, I don't think that gives spaces inside the line, just at the end
+06:55  mattcodes: okay so $ is tab and ^I is space?
+06:55  fritzophrenic: look at :help 'listchars' for what all it can show
+06:55  Jerub: oh hey, sorry, i have better listchars.
+06:55  fritzophrenic: $ is end of line, ^I is tab by default
+06:56  fritzophrenic: spaces aren't shown by default, you'll need to also set 'listchars'
+06:56  Jerub: set listchars=tab:|-,trail:.,extends:>,precedes:<,eol:$
+06:56  KarlHungus: mattcodes: have a look at http://pastebin.com/wuPRgq0R
+06:56  systemfault: set listchars=tab:▸\ ,eol:¬
+06:56  Jerub: hm.
+06:56  Jerub: that doesn't seem to work
+06:56  systemfault: (Textmate style)
+06:56  systemfault: Jerub: Type that and after     :set list!
+06:57  mattcodes: KarlHungus, thanks
+06:58  mattcodes: okay I want to add karls stuff to my vimrc but when I do :e ~/.vimrc its prompting me to save first
+06:58  mattcodes: I just want to make current hidden so I can return
+06:58  mattcodes: and choose to save later
+07:03  KarlHungus: ;/
+07:05  mattcodes: sorry not following
+07:05  mattcodes: ?
+07:07  fritzophrenic: :set hidden you mean?
+07:07  fritzophrenic: vimfor, hidden
+07:07  fritzophrenic: vimgor, hidden
+07:07  vimgor: An option that allows you to switch the buffer being displayed in the current window without requiring that you save it first. This also allows you to keep undo/redo history on multiple files. If you don't know whether or not you want this option, you want it; it makes working with multiple files much more reasonable. See also, :help 'hidden'
+07:08  fritzophrenic: or use tabs
+07:08 * fritzophrenic ducks
+07:08  mattcodes: cool
+07:08  mattcodes: added that to my vimrc
+07:08  mattcodes: thanks
+07:09  mattcodes: okay still problematic with this listchars, there are lines that show indents with no whitespace markings or tabs displayed?
+07:10  fritzophrenic: yeah listchars I don't think can show single spaces that are not at the end of a line
+07:10  fritzophrenic: maybe I'm wrong
+07:11  fritzophrenic: do you need it? if it's not marked as a tab, it's a space
+07:12  mattcodes: kind of used to it, thats all, i see how many spaces etc.. certain languages use spaces as tabs and its good see where things are misaligned, like gt 4 spaces
+07:13  mattcodes: one more quick question, how do I quicky cycle the buffers, if I do :buffers I got 3 js files open, now I use :b1 :b2 :b3 how I can cycle them without splitting the buffers?
+07:14  mattcodes: sorry disconnected, if anyone sent an answer please resend
+07:20  mattcodes: is there any built in shortcuts for :bnext and :bprevious
+07:20  mattcodes: ?
+07:27  mattcodes: found :bn and :bp
+07:27  mattcodes: would prefer non : commands tho
+07:29  mattcodes: will :earlier and :later still work with set nobackup?
+--- Log closed Thu Oct 14 08:39:21 2010
+--- Log opened Thu Oct 14 09:03:12 2010
+09:03 --- Users 556 nicks [0 ops, 0 halfops, 0 voices, 556 normal]
+09:03 --- Server: [verne.freenode.net] [freenode-info] channel trolls and no channel staff around to help? please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+09:04 --- Channel #vim was synced in 63 seconds
+09:07  GDG: how can I wrap/split a very long line of text on the 80th column?
+09:07  DHulme: :set tw=80
+09:08  DHulme: and then use the gq operator to split any existing text
+09:08  DHulme: (note that as gq is an operator, you have to use it in insert mode or followed by a motion, just like you do with d or c)
+09:10  GDG: thanks
+--- Log closed Thu Oct 14 09:18:53 2010
+--- Log opened Thu Oct 14 09:57:36 2010
+09:57 --- Users 518 nicks [0 ops, 0 halfops, 0 voices, 518 normal]
+09:58 --- Channel #vim was synced in 57 seconds
+10:13  zimnyx: Any ideas why this doesn't work (only) when "if" is at beginning of line? syn match pythonError "^\s*if\s.*[^\:]$" display
+10:27  RusAlex: is any using php syntax highlihting ?
+10:40  zimnyx: Yep
+10:46  RusAlex: zimnyx: is your vim highlight HereDoc right ?
+10:46  RusAlex: HereDoc with html
+10:57  zimnyx: It doesn't work for html, sql...
+10:57  zimnyx: I set let php_htmlInStrings=1
+10:59  RusAlex: zimnyx: but this is only in strings, i need in Heredoc blocks
+10:59  zimnyx: wait, if I set it in vimrc, I got highlighting work in strings, but not in heredoc
+11:01  zimnyx: RusAlex: Look into /usr/share/vim/vim72/syntax/php.vim
+11:04  mattcodes: is a vim / keyboard-friendly mail client about? what you guys using for email? vimperator with gmail in low bandwidth atm so not ideal
+11:05  smorg: webmail :/
+11:05  smorg: til I get kmail figured out now that it's all borken with akonadi
+11:05  Starfire: Thunderbird with external editor extension.
+11:06  smorg: Use emacs :)
+11:06  mattcodes: as an email client?
+11:07  smorg: as an entire OS while you're at it, but IIRC it has a mail client believe it or not
+11:09  mattcodes: in the middle of function() { var x = function() { // i am here // }  }  how do I select the whole block 2up, ie the outer function and all within
+11:13  ChrisBuchholz: When I use the netrw plugin in Vim, i can by pressing 'i' shift different "view modes". Can i define the default view mode in my .vimrc file somehow?
+11:14  marlun: mattcodes: How about v2a} ?
+11:14  iaj: vim is just so awesome... I wonder if there's anyone who understands and knows all parts of it.
+11:15  iaj: vim is just so awesome... I wonder if there's anyone who understands and knows all parts of it.
+11:16  mattcodes: nearly I want the whole line that it start on too
+11:16  mattcodes: tried with V same result
+11:19  marlun: mattcodes: v2a}ok ? :P
+11:20  mattcodes: perfect, thansk
+11:20  marlun: mattcodes: great, np
+11:25  cheater: hi
+11:25  cheater: is it legal to do something like this? autocmd BufRead,BufNewFile *.py,*.php syntax on
+11:25  cheater: i want this to match for .py and .php files
+11:25  cheater: match/execute
+11:26  marlun: ChrisBuchholz: :h g:netrw_liststyle
+11:27  ukl: hello #vim.  I wonder where to find docs about vim 7.3's extensibility using Lua.  Any pointers?
+11:27  ukl: a vim.org search didn't yield helpful things and I cant seem to find any examples
+11:28  strull: ukl: first thing to try is :he lua
+11:29  ukl: strull: oh, great. input. thanks :)
+11:30  cheater: also, another question.. how to paste over selection in python without losing the paste buffer?
+11:31  martin3z: small clearance about vista and ~\.vim folder: vista stores config in ~\vimfiles instead of ~\_vim
+11:48  jds: In a vim script, what does an ampersand prefix mean?   Google is kinda failing me...
+11:48  jds: eg   if &cp ... endif
+11:50  Nyoxi: jds: you can access options (the ones you use :set for) that way
+11:50  malfy: anyone got the VimIRC plugin working?
+11:54  jds: Nyoxi: Thanks, that makes sense
+11:58  iaj: do you guys recommen using pathogen? seems quite nice...
+11:58  iaj: especially when one has to disable/plugins for testing
+11:59  marlun: iaj: I am using it and it's working great however mine is just laying there, not doing much disabling :)
+12:01  jds: Nyoxi: Though... looking through various plugins, a lot seem to start with some variant of   if &cp; finish; endif
+12:01  jds: but don't actually set cp anywhere in the script
+12:01  iaj: marlun: ^^ okay... im just wondering... Ive got all my plugins installed currently - would you advice to grab them a new?
+12:02  jds: Is cp some implicit setting somewhere?
+12:03  dindinx: jds: :help 'cp'
+12:04  jds: ohh
+12:04  jds: That makes more sense
+12:04  dindinx: jds: please don't use google to search about vim stuff, the vim help is there for that.
+12:04  jds: Yeah, but 'help cp' wasn't getting me anywhere
+12:05  jds: Why does the quoting make a difference?
+12:05  dindinx: it just did for me...
+12:06  dindinx: jds: try using the tab key after :help cp you'll have access to everything related to cp
+12:06  jds: dindinx:  Hm.  For me it shows the help for :cp :cprevious :cN :cNext
+12:06  jds: Ah, tab helps
+12:13  rdpate: jds: settings used with :set are simply tagged as 'name' in vim's help, nothing more complicated for the quotes
+12:26  Nyoxi: jds: :he help-context to see what that ' means
+12:26  Nyoxi: and some other prefixes
+--- Log closed Thu Oct 14 12:36:32 2010
+--- Log opened Thu Oct 14 12:41:54 2010
+12:41 --- Users 576 nicks [0 ops, 0 halfops, 0 voices, 576 normal]
+12:42 --- Channel #vim was synced in 59 seconds
+12:43  rson: you can also do :help foo<C-d> to get a list of everything in help matching 'foo'
+12:43  rson: shit that was an old convo
+--- Log closed Thu Oct 14 12:54:41 2010
+--- Log opened Thu Oct 14 12:55:13 2010
+12:55 --- Users 577 nicks [0 ops, 0 halfops, 0 voices, 577 normal]
+12:56 --- Channel #vim was synced in 62 seconds
+13:26  iaj: what is autogroup used for?
+13:34  qwerty: hello, how can i quote selected test in a string ? i tryed '<,'>s/\(.*\)/"\1"/g but it works for all string
+13:37  jamessan: qwerty: you might want to look into the surround plugin
+13:37  iaj: qwerty: hmm you could take alook...
+13:37  iaj: :-/
+13:38  jamessan: qwerty: but for doing it yourself, you would want to do '<,'>s/\%V\(.*\)\%V/"\1"/
+13:38  jamessan: qwerty: the \%V sets boundaries on the visually selected area
+13:41  qwerty: jamessan, thanx =)
+13:41  qwerty: it works
+13:42 --- aimka` is now known as aimka
+13:58  Ebrahem: Is there a way to highlight matched search pattern? or if I highlighted some text (variables/method names), their matches get highlighted too
+14:01  jamessan: Ebrahem: :help 'hlsearch
+14:01  minh: Ebrahem: for the latter: just press '*' when the cursor is over the respective method/variable-name
+14:02  Ebrahem: thanks :)
+14:03  minh: Ebrahem: you shoud be reading about :help 'hlsearch', but I think :set hlsearch is pretty much what you want
+14:04  minh: Ebrahem: :set incsearch might be additionally helpful
+14:04  Ebrahem: will do
+14:05  lucas: hi
+14:06  lucas: is there a way to use LocalWords: declarations with vim spell checking, when working with people using emacs' spell checker?
+14:12  Ebrahem: minh, how would you clear the highlight resulted form "*"? :)
+14:16  jamessan: vimgor: nohl
+14:16  vimgor: :nohl will disable current search highlighting until the next search is performed. A common map to avoid typing :nohl is ':nnoremap <silent> <C-l> :nohl<CR><C-l>'. See also, :help 'incsearch' and :help 'hlsearch'
+14:17  Ebrahem: appreciate it jamessan
+14:18  j0su3: Ebrahem, another map to make Space button to clear search highlighting:
+14:18  j0su3: nnoremap <silent> <Space> :silent noh<Bar>echo<CR>
+14:18  j0su3: put in your .vimrc
+14:18  jamessan: what's the echo for?
+14:19  minh: Ebrahem: :let @/ = ''
+14:19  jamessan: minh: that destroys the search register though
+14:20  iaj: is there a nice fold guide somewhere? :-)
+14:20  minh: Ebrahem: you might want to map this to some shortcut...I have: map <silent> ;; :let @/ = ''<Return>
+14:20  jamessan: minh: which means things like n and :s//foo/ etc won't work
+14:20  minh: jamessan: yeah...is there a better way to accomplish it?
+14:20  jamessan: vimgor: nohl
+14:20  vimgor: :nohl will disable current search highlighting until the next search is performed. A common map to avoid typing :nohl is ':nnoremap <silent> <C-l> :nohl<CR><C-l>'. See also, :help 'incsearch' and :help 'hlsearch'
+14:20  jamessan: minh: Vim has a command built in to do it :)
+14:22  Ebrahem: since Shift-8, "*", would do the highligh, I can map C+F+8 to do :nohl right?
+14:22  minh: jamessan: VERY nice stuff...thank you very much!
+14:22  Ebrahem: C+S+* i mean
+14:22  sitaktif: Ebrahem: not on terminals, but on gvim, yes
+14:23  j0su3: jamessan, the echo display a message if you like that
+14:23  j0su3: example
+14:23  j0su3: nnoremap <silent> <Space> :silent noh<Bar>echo "hlight off"<CR>
+14:23  jamessan: j0su3: sure but you don't have any message there
+14:23  jamessan: j0su3: that's why I was asking
+14:24  j0su3: jamessan, got it
+14:24  j0su3: the original command that i found has a message
+14:24  j0su3: but i took off
+14:24  j0su3: heheehehehhhe
+14:25  j0su3: and i forgot the echo command there
+14:40 --- booddin_ is now known as booddin
+14:42  Ebrahem: :nnoremap <C-S-8> :nohl<CR><C-l> isn't working :/
+14:52  graywh: Ebrahem, it won't
+15:19 --- DestinyAwaits is now known as internet
+15:29  mcantor: How can I make Vim load certain plugins ONLY if it's a certain version?
+15:29  mcantor: I keep my dotfiles and stuff in subversion, so I might not have Vim 7 on a box that has, say, VCSCommand, which requiers Vim 7.
+15:31  stamina: ls
+15:31  sec^nd: ww
+15:36  graywh: mcantor, i seem to recall something like ~/.vim/plugin73 for plugins that only work with vim 7.3
+15:37  graywh: but i can't find anything in the docs about it
+15:40  mgedmin: mcantor, if v:version >= 700 etc.
+15:40  mgedmin: what I do is edit vscommand.vim in my ~/.vim/plugin and remove the obnoxious "echohl WarningMsg ..." bit
+15:40  mgedmin: it already checks for v:version and aborts
+15:42  iaj: I got a file in front of me on my windows box which was originally (created on my osx box) utf-8 but when I open it now on my windows box fileencoding=    nothing set :\
+15:42  iaj: what shall I do ?
+15:43  mgedmin: iaj, check 'fileencodings' (plural) -- does it mention 'utf-8'?
+15:44  mgedmin: try to open the file with :e ++enc=utf-8 filename
+15:44  mgedmin: check if 'encoding' is something unicode'y
+15:44  iaj: mgedmin: set fileencodings is ucs-bom only
+15:44  mgedmin: so vim won't autodetect utf-8 files
+15:44  iaj: i tried the :e ++enc=utf-8   but nothing happens :\
+15:44  mgedmin: set it to ucs-bom,utf-8,cp1252 or something
+15:44  iaj: do I have to add it to my $VIMRC?
+15:45  mgedmin: that's a good idea, yes
+15:45  spiiph: Why would you only have ucs-bom in your 'encodings'? That doesn't sound very useful. :)
+15:45  mgedmin: can you clarify "nothing happens"?
+15:45  mgedmin: spiiph, that's a vim default for some reason
+15:45 --- sora_h is now known as sorah_off
+15:46  iaj: mh strange in my vimrc I got set fileencodings=utf-8 already ;\
+15:46  spiiph: Ah, it's the default when 'ecoding' is not set to a Unicode value
+15:46  mgedmin: iaj, what is the setting of 'encoding'?
+15:47  iaj: encoding is latin1
+15:47  spiiph: :set encoding=utf-8 in your .vimrc, and the problem should be solved.
+15:48  iaj: so now... I set encoding=utf-8, fileencodings=ucs-bom,utf-8,default,latin1,  fileencoding=utf-8
+15:48  iaj: but it's still not displayed correctly  :(
+15:49 * mgedmin sighs thinking of those poor poor windows users dealing with this shit all day long
+15:49  mgedmin: what's the setting of 'guifont'?
+15:49  spiiph: I've never had a problem with it.
+15:49  iaj: Oh i had to reload the file
+15:50  iaj: from my osx box... now its working...
+15:50  iaj: thanks mgedmin, spiiph !
+16:01  ManDay: I pressed some key, now my current search pattern is constantly highlighted in orange.
+16:01  ManDay: what did I press?
+16:02  deryni: You searched for it, maybe n. Try :nohl ?
+16:02  ManDay: I know :noh turns if of
+16:02  ManDay: right, that must have been n
+16:02  ManDay: thank you!
+16:05  jsquared: is there a way to delete all spaces between my cursor and the next non-space character on a line?
+16:05  jsquared: Other than tapping delete repeatedly or using substitutions, that is :)
+16:07  deryni: dw ?
+16:07  jsquared: deryni: ah, perfect!
+16:07  ManDay: lol
+16:07  jsquared: Thank you.
+16:07  ManDay: you described it so perfectly obfuscated i couldnt have told that you are looking for dw :D
+16:08  ManDay: btw: that doesnt necessarily work deryni
+16:08  ManDay: dw stops at punctation chars
+16:08  mcantor: mgedmin: I guess it's better that it starts out with a big angry error message--it leads to less surprising behavior.
+16:08  jsquared: ManDay: Ah. Well, it does the trick for me.
+16:08  mcantor: mgedmin: Would be nice if the message had a little "Edit vcscommand.vim to disable this message in the future."
+16:08  jsquared: I'd been using Ctrl+V to block delete groups of spaces
+16:08  ManDay: jsquared: d/<space><CR> would do
+16:09  deryni: No, that'd delete until the first space.
+16:09  deryni: dt<character> would work.
+16:09  ManDay: ah wait i misread
+16:09  ManDay: sorry
+16:10  mgedmin: mcantor, would be even better if there was no message on startup, but every :VCSxxx command showed it
+16:10  mcantor: graywh: Let me know if you remember/find anything about that .vim/plugin73 thing.  I don't have the cycles to try it right now, but I'll try to look into it, too, later.
+16:10  mcantor: mgedmin: Ah, true!
+16:10  mcantor: mgedmin: vimscript plugins are hardly known as paragons of best code practice, though.  ;-)
+16:13  spiiph: That's true for any language, and depends entirely on the author.
+16:14  spiiph: Checkout plugins by godlygeek, tpope_, scrooloose, and others if you want to see well written vimscript code.
+16:14  mcantor: spiiph: Sir, I contend that I have *never* encountered code written in vimscript that struck me as well-written.  I will duly examine code by those authors, and report my findings!  ;-P
+16:15  mcantor: I probably don't give vimscript the respect it deserves... I always find myself fumbling with it whenever I try to write it.
+16:15  spiiph: vimgor, fugitive
+16:15  vimgor: fugitive.vim is a Git wrapper plugin written by tpope. It can be downloaded at http://github.com/tpope/vim-fugitive
+16:15  spiiph: vimgor, netlib
+16:15  vimgor: It has been said that netlib is godlygeek's plugin that attempts to be a more flexible, extensible solution for remote file editing than netrw. It can be found at http://github.com/godlygeek/netlib , but is currently lacking docs and in need of some contributors who can help provide more protocol handlers, spiiph
+16:16  anon33_: so I've installed Pathogen, but now Vim can't find any help files. what should i do? (running :h responds with "cannot find help.txt")
+16:16  spiiph: anon33_, you must've done something wrong.
+16:16  mcantor: spiiph: I don't think invoking Tim Pope's name is fair in this debate.  He could probably write maintable code in brainfuck.
+16:16  spiiph: Haha
+16:17  anon33_: spiiph: well - i have everything symlinked from a dropbox file. ie - my .vimrc calls pathogen before filetype (and plugins are loaded) and the vimrc loads fine
+16:17  spiiph: anon33_, I suggest you investigate :set rtp?
+16:18  anon33_: spiiph: i can't look up anything in help =\
+16:18  pozic: In git I use vim for my commit messages, but it shows a red line if I am in the state - foo<newline><anychar>. Why does that happen?
+16:19  mcantor: anon33_: Use vim -u /etc/vim/vimrc or what-have-you as a stop-gap measure, so you can get a functioning :he in vim while you're resolving the issue.
+16:19  anon33_: mcantor: well here's the thing, running regular vim does include the help files
+16:20  anon33_: it's just gvim that can't find it
+16:20 * mcantor restrains the urge to leave it at, "That's what you get for using a GUI..."
+16:20  mcantor: hmmm... I'm not too familiar with gvim, unfortunately.
+16:21  mcantor: anon33_: Though, you can use the -U switch (capital U) for similar effect.
+16:21  spiiph: anon33_, it sounds like you've modified 'runtimepath' in an unorthodox way.
+16:21  estragib: pozic: because git comments are expected to be summary + empty line + details
+16:22  estragib: pozic: it will highlight chars in the summary too if it gets "too" long
+--- Log closed Thu Oct 14 16:32:12 2010
+--- Log opened Thu Oct 14 16:47:35 2010
+16:47 --- Users 602 nicks [0 ops, 0 halfops, 0 voices, 602 normal]
+16:47  mcantor: lucasoman: I tend to play devil's advocate for the sake of conversation... we might be the most dangerous combination of conversants in existance.
+16:48  lucasoman: hahah
+16:48 --- Channel #vim was synced in 67 seconds
+16:49  jzacsh: i suddenly can't unfold folds in vim anymore
+16:50  jzacsh: gahh pannic is setting in.
+16:50  jzacsh: anyone?
+16:50  lucasoman: jzacsh: what command(s) are you trying to use?
+16:50  jzacsh: i used to hit <some-contorl-button> + R to unfold all folds
+16:50  jzacsh: and the same with lower-case 'r' to unfold just one
+16:50  lucasoman: er, hmm
+16:50  lucasoman: c-r should be redo
+16:50  joeytwiddle: it's zR
+16:50  lucasoman: yes try zr
+16:50  jzacsh: aahah
+16:50  jzacsh: lol
+16:50  jzacsh: joeytwiddle: thank you!!
+16:50  jzacsh: idk why i was doing control buttons
+16:50  jzacsh: thanks :)
+16:50 * jzacsh hugs #vim
+16:51  mcantor: jzacsh: The vim fold panic buttons are zn and zN to disable and re-enable, respectively.  :-)
+16:51  lucasoman: jzacsh: take a xanax and breath
+16:51  lucasoman: e
+16:51  pozic: mcantor: you can already do that in 2010. It's just that you need the computer power of a few 100 Googles to do so and you need about 10 years of R&D.
+16:51  jzacsh: haha. yes, xanax + vim.
+16:51  pozic: mcantor: except you will be outsourced then too ;)
+16:51  mcantor: LOL... true!
+16:56  anon33_: is there an easy way to reinstall vim on Ubuntu? i did apt-get install vim but got a long list of errors...
+16:56  mgedmin: anon33_, apt-get purge vim; apt-get install vim
+16:56  mgedmin: what sort of errors did you get? pastebin
+16:57  anon33_: mgedmin: well, the errors didn't come up after the purge and i installed vim-doc
+16:58  anon33_: mgedmin: but still no results in trying :h 'cannot find help.txt'
+16:58  mgedmin: vim-doc?  I think the help file's in vim-common, or maybe vim-runtime
+16:59  anon33_: mgedmin: they're both at the newest version
+16:59  mgedmin: debsums could check their integrity
+17:00  mgedmin: i.e. if any files are missing/have been changed
+17:00  anon33_: hmm?
+17:04  anon33_: man this really sucks...
+17:04  mgedmin: I can imagine ...
+17:04  mgedmin: what I would do in your place: remove all traces of vim from /usr/local
+17:05  mgedmin: then check which vim packages I've installed with dpkg -l 'vim*'|grep ^i
+17:05  mgedmin: then purge and reinstall them all
+17:05  anon33_: mgedmin: thanks - also, purge didn't remove vim from /etc/share
+17:05  mgedmin: just to make sure /etc/vimrc is fine
+17:05  anon33_: err* /usr/share
+17:05  mgedmin: there's more than one vim package
+17:06  mgedmin: purging just the executable won't remove runtime files, e.g., since those are in a different deb
+17:06  mgedmin: which is why I said I'd do them all
+17:06 --- ezzieyguywuf is now known as ezziey_stealth
+17:06  mgedmin: finally I'd test with vim -u NONE -U NONE, to make sure my ~/.vimrc isn't breaking things somehow
+17:06 --- ezziey_stealth is now known as ezzieyguywuf
+17:07  anon33_: mgedmin: i got results from the dpkg command but it seems to be localization files...
+17:08 * mgedmin has vim, vim-common, vim-gnome, vim-gui-common, vim-runtime, vim-tiny <-- none of those is about localization
+17:09  anon33_: should i do sudo apt-get purge vim* ?
+17:09  anon33_: there's vim72, vimcurrent, vimfiles, vimrc and vimrc.tiny
+17:11  mgedmin: it looks like your shell is expanding vim*
+17:11  mgedmin: quote that
+17:12  anon33_: sorry?
+17:13  mgedmin: sudo apt-get purge "vim*"
+17:13  mgedmin: with the quotes
+17:13  anon33_: okay
+17:14  mgedmin: no, don't do that
+17:14  mgedmin: let me repeat myself: DONT DO THAT!!!
+17:14  anon33_: yeah, too late
+17:14  mgedmin: apt-get uses regexes and not the kind of patterns that dpkg -l uses
+17:15  mgedmin: sudo apt-get purge "^vim.*"
+17:15  mgedmin: good thing apt-get asks for confirmation, eh?
+17:15  mgedmin: well actually in my case it didn't even try, just aborted with many complaints
+17:15  pozic: mgedmin: you can configure it to do otherwise :)
+17:16  pozic: sudo apt-get purge "*emacs*" is more on-topic, no?
+17:17  anon33_: for some reason, that regex caught ubuntu-minimal* as well
+17:17  anon33_: i have no idea what that package does though
+17:19  anon33_: yeah i probably don't want to purge that - any way i can ignore one package and purge the rest without typing them in one by one?
+17:20  anon33_: purge and remove both ask me to remove ubuntu-minimal as well...
+17:20  mgedmin: anon33_, no, no, no, no, no
+17:20  mgedmin: stop for a second, take a deep breath
+17:20  mgedmin: then read what I wrote 5 minutes ago
+17:21  mgedmin: the right command is sudo apt-get purge "^vim.*"
+17:21  mgedmin: with the ^ and the .*
+17:21  mgedmin: because "vim*" matches all packages that contain 'vi' in their name somewhere
+17:22  anon33_: mgedmin: right :) but for some reason (i'm not the best with package management), wanting to purge or remove any of those vim files also asks me to remove ubuntu-minimal*
+17:22  anon33_: mgedmin: your regex is correct, but the minimal package is being brought in for some reason
+17:22  joeytwiddle: perhaps ubuntu-minimal requires some editor be installed
+17:22  mgedmin: really? hmm
+17:22  mgedmin: you're right, I didn't notice
+17:22  mgedmin: don't worry, ubuntu-minimal is just a metapackage
+17:22  mgedmin: you can remove it temporarily
+17:22  mgedmin: reinstall it when you reinstall vim
+17:23  anon33_: mgedmin: ah, okay
+17:24  anon33_: for some reason there's still a folder in /usr/share called vim
+17:24 * mgedmin takes a deep breath and pauses himself 
+17:24  mgedmin: anon33_, is it empty?
+17:24  anon33_: no, it contains addons and registry folders
+17:24  mgedmin: are those empty?
+17:24  anon33_: no
+17:24  anon33_: they all contain files for "mako"
+17:25  mgedmin: don't worry about those
+17:25  anon33_: okay
+17:25  anon33_: time to reinstall
+17:25  mgedmin: (python-mako installs those, just a simple harmless plugin that shouldn't break your help in any way)
+17:25 * mgedmin has it too
+17:25  anon33_: cool :) good to know!
+17:26  joeytwiddle: there is also: aptitude reinstall vim
+17:27  anon33_: mgedmin: thanks for all your help :D
+17:27  anon33_: although...i would like to upgrade this to vim73 at some point..
+17:27  mgedmin: I have
+17:27  mgedmin: I built in in my home directory
+17:27  mgedmin: never installed
+17:27  anon33_: por que?
+17:27  mgedmin: wrote a shell script that sets $VIMRUNTIME and runs ~/src/vim/vim
+17:28  mgedmin: so my system is clean, but I have a recent vim
+17:28  mgedmin: http://pastie.org/1221009 is a shell script that builds vim from sources
+17:29  mgedmin: http://pastie.org/1221010 is a script that starts the locally-built version
+17:30  anon33_: cool!
+17:48  xybre: IS there a way to make sp and vsp open windows on the opposite side? See, when I type :vsp, it opens the new window on top, which is the exact opposite of where I want it. And :sp does the same thing, I'd want it to open on the right, not the left.
+17:49  xybre: So yeah thats been bugging me.
+17:50  graywh: :h 'splitbelow' and 'splitright'
+17:50  deryni: Or :help :sp and read the surrounding section.
+17:53  xybre: Hmm, missed that. I'll check it out, thanks.
+--- Log closed Thu Oct 14 18:30:55 2010
+--- Log opened Thu Oct 14 18:31:16 2010
+18:31 --- Users 606 nicks [0 ops, 0 halfops, 0 voices, 606 normal]
+18:32 --- Channel #vim was synced in 67 seconds
+--- Log closed Thu Oct 14 20:03:40 2010

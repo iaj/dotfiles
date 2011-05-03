@@ -1,0 +1,194 @@
+--- Log opened Wed Dec 08 00:00:50 2010
+00:14 --- yaotti is now known as yaotti_aw
+00:28  speakman: hi folks
+00:29  speakman: How do I partially restore a staged file?
+00:30  cbreak: speakman: git status
+00:30  cbreak: add -p for patch mode
+00:30  cbreak: to the command that git status shows
+00:31  speakman: like git checkout -p -- myfile ?
+00:31  cbreak: if you have changes in your working dir that you want to remove
+00:31  speakman: wow, beautiful! :D
+00:32  speakman: (ftr, it worked)
+00:32  speakman: There was a whitespace diff in a file which I didn't want to commit
+00:33  cbreak: you could have done git reset -p then
+00:33  cbreak: to simply unstage it
+00:33  cbreak: without changing the actual file
+00:36  jast: add/checkout/reset -p is a wonderful set of tools
+00:40  speakman: cbreak: then I could have unstaged just the whitespace chunk?
+00:41  cbreak: yes
+00:43 --- adamholt is now known as adamholt_away
+00:43 --- adamholt_away is now known as adamholt
+00:45  speakman: git still impress...
+00:46  speakman: how do I make a "git diff" between HEAD and the index?
+00:50  speakman: git diff --cached it was
+00:57  AntoineSolutions: I have created a brand new git repository, made a single commit, created a bare clone on my server, but when I try to clone from the bare clone on the server via the http protocol, I get the following - warning: remote HEAD refers to nonexistent ref, unable to checkout.  Am I missing something?
+00:58  Eridius: did you use a branch named something other than master?
+00:58  Eridius: you should verify that the server's HEAD points to master (or whatever branch you used)
+01:00  anjen: Hi, I'
+01:00  AntoineSolutions: Eridius: I followed the Pro Git book which didn't mention branches.  The .git/HEAD contains "ref: refs/heads/master".
+01:00  AntoineSolutions: Eridius: I didn't do anything specific with branches, so I am guessing it should be using master by default?
+01:01  AntoineSolutions: Eridius: Another note, cloning works fine via ssh, but not http!
+01:01  anjen: Hi, I
+01:02  speakman: Is there any "smooth" way to push a repo to a new remote location?
+01:05  anjen: I'm a bit rusty on my git commands. I just re-cloned my repo to get things back in order, after I made the mistake of pushing to the repo for several weeks without using the right syntax (I used 'git push', instead of 'git push origin master'). Anyway. Now that I've cloned the repo, I need to ensure that I have things setup correctly, so that future pushes will be done correctly. Here's where I'm a bit stuck. I *think I need to per
+01:05  anjen: form a checkout before continuing (it's literally been a year since I've had to do any of this)... git checkout --track -b ? origin/? (not sure what I should be putting in for '?'
+01:06  AntoineSolutions: Well... after spending hours trying to figure this out, the 7th google result revealed the answer.  You have to run git update-server-info once after creating the bare clone.
+01:13 --- yaotti_aw is now known as yaotti
+01:20  MOLTEN: Hey guys. I think I've got a really easy question. How do you delete/remove all of the previous commits and everything so all you have is the most recent one (to reduce space)?
+01:25 --- shennyg__ is now known as shennyg
+01:32  anjen: Possibly really dumb question: what does 'git add .' mean? I was originally "trained" to use that syntax prior to comitting changes, but the git manual doesn't show any info for what it does (it, being '.')
+01:33  bremner: anjen: . is a directory
+01:33  bremner: anjen: it works for other directories also
+01:34  anjen: bremner thanks.
+--- Log closed Wed Dec 08 01:48:25 2010
+--- Log opened Wed Dec 08 02:00:05 2010
+02:00 --- Users 703 nicks [0 ops, 0 halfops, 12 voices, 691 normal]
+02:00  MOLTEN: So, I have a TON of commits that are useless, especially since the only one I want is the current version
+02:00  MOLTEN: My app is tiny though, only a couple of pages
+02:00  bremner: how many is a ton? 10, 100, 1000000?
+02:00  MOLTEN: 100 maybe
+02:00  MOLTEN: But, I push it to Heroku also
+02:01  bremner: ah. therein lies the rub.
+02:01  MOLTEN: So now my slug is like 644kb, but my repo size is 1.8mb now and it goes up every time I push
+02:02 --- Channel #git was synced in 156 seconds
+02:03  bremner: MOLTEN: if you have the patience, you can use git rebase to turn your history into something sensible, but then you will have to force push to your remote repo. This will mess up people who have pulled from it.
+02:03  MOLTEN: Well I'm the only one working on it
+02:03  bremner: MOLTEN: if you don't have patience, just use "git archive" to make a snapshot and start again.
+02:05  AntoineSolutions: And the solution to http:  To use access credentials over http, you must use a .netrc file in your user directory containing the credentials.
+02:06  speakman: MOLTEN: how about; rm -rf .git && git init && git add . && git commit -m "Initial commit"
+02:07  MOLTEN: What exactly would that do?
+02:07  MOLTEN: I know git add, git commit
+02:07  bremner: kill all of your history.
+02:08  bremner: I'm not sure what will happen when you try to push that new repo to the old remote.
+02:08  MOLTEN: Ah
+02:09  MOLTEN: Maybe I'll just leave it how it is and try to handle commits better from now on :D
+02:09  bremner: make a backup, before any of these radical procedures.
+02:09 --- ThiefMaster` is now known as ThiefMaster
+02:09  AntoineSolutions: Next question regarding the http protocol... Does anyone know if Digest Authentication is supported?
+02:09  MOLTEN: Is there any way not to make a commit each time you make a change to a file to push to something like Heroku?
+02:09  bremner: MOLTEN: what is Heroku?
+02:10  MOLTEN: Sorry, it's http://heroku.com/, ruby hosting site
+02:10  bremner: I'd guess not, but you'd need to ask somebody who knows about it specifically.
+02:11  MOLTEN: Okay
+02:15 --- shennyg__ is now known as shennyg
+02:16  ChrisPitzer: what's the best way to push code from a get repo to a dumb server (ie, dreamhost)
+02:16  ChrisPitzer: back when I was working with bzr you could use the "upload" plugin... "bzr upload" would send a working copy only to a server over sftp
+02:17  rohanpm: ChrisPitzer: do you have an ssh account?
+02:17  ChrisPitzer: the other option is i could deploy from a live repo and use a post-update hook in get... but i'm not having a ton of luck setting that up
+02:17  ChrisPitzer: yeah.
+02:17  rohanpm: ChrisPitzer: then `git push'
+02:18  ChrisPitzer: but... that won't update the working copy, correct?
+02:18  ChrisPitzer: i'm not pushing to a bare repo
+02:18  rohanpm: ChrisPitzer: oh... right.  `git push' and a hook (and the working copy should probably be in a different directory)
+02:20 --- yaotti is now known as yaotti_aw
+--- Log closed Wed Dec 08 02:26:18 2010
+--- Log opened Wed Dec 08 02:26:45 2010
+02:26 --- Users 696 nicks [0 ops, 0 halfops, 12 voices, 684 normal]
+02:29 --- Channel #git was synced in 157 seconds
+02:30 --- yaotti_aw is now known as yaotti
+02:38  epicmath: Is there a problem with the Git makefile thinking it needs -lcrypto even when NO_OPENSSL=YesPlease in config.mak? This seems pretty recent, just happened after a pull. (Haven't fetched in awhile)
+02:38  epicmath: I don
+02:38  epicmath: I don't think I would need -lcrypto in any case as the makefile says that -lcrypto is needed with -lssl on Darwin but no mention about Linux
+02:43  jayne: Is there a shortcut to add changed files but not untracked files?
+02:44  epicmath: jayne: I believe you are looking for git commit -a
+02:44  xrogaan: git commit -a ?
+02:44  Locutus`of`Borg: Means you don't have to do "git add
+02:44  Locutus`of`Borg: to each file
+02:44  jayne: didn't realize that ignored untracked files. Also, why is tht not in the man page (anymore)?
+02:45  epicmath: jayne: Its like the first option in the man page
+02:45  jayne: http://www.kernel.org/pub/software/scm/git/docs/git-add.html <- I must be blind?
+02:45  epicmath: you can also use git-add -u
+02:45  epicmath: jayne: Thats git-add
+02:46  jayne: oh, you said commit.
+02:46  jayne: looks like I want -u... thanks.
+02:46  epicmath: jayne: Yeah, its a nice combination of add and commit that lets you commit with a single command when its useful
+02:47  zangetsu: git has a log file? I have create new repository and when i run "git add ." it return me an index error o_O
+02:47  jayne: I'm usually pretty careful about staging, so I've never actually used commit -a until now.
+02:47  jayne: zangetsu: what's the exact error?
+02:47  epicmath: Ahh, I found a patch with the libcrypto error...
+02:48  zangetsu: error: bad index file sha1 signature
+02:48  zangetsu: fatal: index file corrupt
+02:48  zangetsu: fatal: git status --porcelain failed
+02:49  epicmath: Apparantly they let the patch slip in without the secondary patch on top of it.
+02:50  xrogaan: I'm searching for a way to work with 2 remotes : one in the "origin", the other will be somewhere else. Is git remote add --mirror can do that for me ?
+02:51  jayne: xrogaan: you don't necessarily need --mirror
+--- Log closed Wed Dec 08 02:55:00 2010
+--- Log opened Wed Dec 08 02:55:24 2010
+02:55 --- Users 687 nicks [0 ops, 0 halfops, 12 voices, 675 normal]
+02:57 --- Channel #git was synced in 155 seconds
+03:05  zangetsu: jayne:  is a new repository :P
+03:06  zangetsu: ok, rev-parse HEAD return 85e3adb3e6913b5cb0fb7d525ce3642be448eb08
+03:06  jayne: does git add . work now?
+03:07  zangetsu: sorry but i'am a newbie with git
+03:08  zangetsu: i have launched rev-parse HEAD and it echo a number
+03:08  jayne: it has a steep learning curve, but the view is nice from the top
+03:08  zangetsu: <jayne> if you do git ref-log, does it show a previous value for HEAD?
+03:08  zangetsu: yes
+03:08  zangetsu: but if i run git add .
+03:08  zangetsu: same error
+03:09  jayne: I think you're going to need help from someone who knows more than me
+03:09 --- ThiefMaster` is now known as ThiefMaster
+03:10  zangetsu: hehe
+03:10  zangetsu: thank you :)
+--- Log closed Wed Dec 08 08:55:23 2010
+--- Log opened Wed Dec 08 09:05:49 2010
+09:05 --- Users 685 nicks [0 ops, 0 halfops, 12 voices, 673 normal]
+09:08 --- Channel #git was synced in 156 seconds
+09:17  k00pa: hi, if I want to move git reporisitory from server to another, can I just copy it and move? Or do I have to change configs on it
+09:17  cbreak_work: you can git clone it
+09:18  cbreak_work: maybe with --mirror
+09:18  k00pa: okey
+09:18  k00pa: will look into it
+09:18  cbreak_work: well, just copying it should work well too
+09:18  malesca: Just moving should work fine too, no? But obviously any remotes pointing to it would need changing (any way you move it).
+09:18  k00pa: yeaah
+09:18  k00pa: then I will just copy and change remotes
+09:19  k00pa: just want to make sure that the repo didn't have any settings that pointed the directory of it or something
+09:20  cbreak_work: no such thing
+09:20  cbreak_work: only to other repos
+09:23  speakman: how do I set up my repo at a remote server in the first place?
+09:23  cbreak_work: git init --bare
+09:23  speakman: using bazaar I can "bzr push ssh://me@myserver/~"
+09:24  speakman: cbreak_work: at the server?
+09:24  cbreak_work: where ever you want the repo to be
+09:24  speakman: can't I do it remote?
+09:24  speakman: scp the .git dir or something?
+09:24  cbreak_work: sure
+09:24  cbreak_work: just scp projectname.git over
+09:25  wereHamster: or you can 'ssh server "cd <path> && git init --bare"'
+09:25  speakman: wereHamster: that's better
+09:26  avinashhm: hi, can we copy git repo's from one pc to anothere ... just plain "cp -rvf" enough or we need to copy it differently .??
+09:26  cbreak_work: yes
+09:26  avinashhm: i am observing that there are some changes when i copy kernel from 1 PC to another ... when i check git diff, lot of new things are introduced ..
+09:27  avinashhm: also, avinash@avinash-laptop:/media/d-drive/mydata/office/linpc/sda2/avi-projects/thara-dvfs/omap-dvfs$ git reset --hard HEAD
+09:27  avinashhm: error: git checkout-index: unable to create symlink arch/microblaze/boot/dts/system.dts (Operation not permitted)
+09:27  avinashhm: fatal: Could not reset index file to revision 'HEAD'.
+09:27  avinashhm: avinash@avinash-laptop:/media/d-drive/mydata/office/linpc/sda2/avi-projects/thara-dvfs/omap-dvfs$
+09:27  avinashhm: i get this error when try to reset --hard .. not sure why ??
+09:27  cbreak_work: don't spam
+09:27  wereHamster: avinashhm: Operation not permitted ...
+09:27  avinashhm: cbreak_work, sorry .. i ll use paste bin
+09:28  avinashhm: wereHamster, sorry i ll use pastebin
+09:28  wereHamster: no need. we've already seen your messages
+09:31 --- Aaaarg_ is now known as Aaaarg
+09:38  fiveofoh: Okay, so I'm trying to do the most basic of regression testing.  I have a remote source, and I made my local copy a few commits back via git reset --hard.  Now I want to get it back to the HEAD of the remote source, but it whines about changes and things when I try to git pull.
+09:38  fiveofoh: Is there a good way to just do a reset --hard to the remote HEAD?
+09:38  fiveofoh: I can't get back to remote HEAD, because that HEAD isn't actually accessible.
+09:39  fiveofoh: From the local checkout, that is
+09:39  wereHamster: fiveofoh: Is there a good way to just do a reset --hard to the remote HEAD? -> yes. Do what you described
+09:39  wereHamster: how is HEAD not accessible..?
+09:40  fiveofoh: Because I already reset --hard to 73dcf
+09:40  fiveofoh: So now 73dcf is HEAD
+09:40  wereHamster: so. ?
+09:40  fiveofoh: instead of 56lgf or whatever
+09:40  fiveofoh: which is the *actual* HEAD
+09:40  fiveofoh: The HEAD of the remote repo
+09:40  fiveofoh: That's the commit I want to revert to
+09:41  dr_lepper: fiveofoh, see `git branch -r`
+09:41  dr_lepper: you'll see the remote branches there
+09:41  wereHamster: git reset --hard 56lgf ? git reset --hard origin/HEAD ? git reset --hard origin/master ?
+09:41  fiveofoh: Aha
+09:41  fiveofoh: There we go
+09:42  fiveofoh: Sorry, I'm not terribly familiar with how git branches and things work
+09:42  fiveofoh: the origin/ prefix is what I needed
+09:42  wereHamster: fiveofoh: read progit.org/book

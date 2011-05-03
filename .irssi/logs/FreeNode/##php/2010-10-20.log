@@ -1,0 +1,1224 @@
+--- Log opened Wed Oct 20 10:31:09 2010
+10:31 --- Users 404 nicks [4 ops, 0 halfops, 1 voices, 399 normal]
+10:31 --- Channel ##php was synced in 2 seconds
+10:31  iaj: lo there
+10:31  joshsmith: I'd like {$query} to be a named or unnamed placeholder, but it simply won't work
+10:31  iaj: when I got a variable containing 2 strings like $a = "foo bar"; how could I extract the first and the second string to two different variables?
+10:31  joshsmith: I'm not sure if it's the single quotes that's doing it or what; any help would be deeply appreciated
+10:31  Snoopal: does somebody of you know a supportchannel for phplist ?
+10:31  bngle: thadin: are discussing what again?
+10:31  Mark_Morcom: Hi - http://pastey.net/141871 - The UPDATE is not working - I have no clue why
+10:32  joshsmith: Mark_Morcom: That's probably a question for #mysql
+10:32  bngle: thadin: checking if string is '' -> $var === ''; isset($var[0]); strlen($var) === 0; ....
+10:32  Snoopal: Mark_Morcom -> echo mysql_error();
+10:32  Mark_Morcom: Well its mysql in PHP
+10:32  Keloran: iaj: you can explode on space
+10:32  Snoopal: and you will know what the problem is
+10:32  Mark_Morcom: I know the SQL is correct it works in PMA
+10:33  Keloran: joshsmith: thats really a question for sphinx
+10:33  joshsmith: Keloran: well it's a PDO question
+10:33  joshsmith: not a Sphinx question
+10:33  Keloran: why did you mention sphinx then ?
+10:33  joshsmith: the problem is clearly with the placeholders, not with anything with SphinxSE
+10:34  joshsmith: because it's contextual information that simply doesn't make sense to omit
+10:34  Snoopal: Mark_Morcom just use that and you will know why mysql does not your update ;)
+10:34  joshsmith: would you prefer I abstract all my questions away so that they're in the most generalized form possible?
+10:34  Shwaiil: Hi people
+10:36  Keloran: joshsmith: so your query looks like, "SELECT this FROM here WHERE :jimmy = 1" ?
+10:36  Keloran: or even, WHERE ? = 1
+10:36  iaj: Keloran: so I'd do  $refs = explode(" ",$a);   and then $refs[0] or $refs[1] would contain of the strings?
+10:37  Keloran: iaj: yeah
+10:37  iaj: thanks a lot
+10:37  joshsmith: no it looks like "SELECT this FROM here WHERE query='?*;mode=any';"
+10:38  Keloran: and that isnt being bound with the bindParam ?
+10:38  joshsmith: does PDO automatically insert single quotes?
+10:39  Keloran: depends on the string yeah
+10:39  Keloran: so if the value is a number, then it doesnt, if its a string then yes
+10:39  joshsmith: no I use execute(array($query))
+10:40  Keloran: so your query would look like WHERE query=''asda'*;...
+10:40  joshsmith: ah, is there any way to parametrize but not place it in single quotes
+10:40  Keloran: or if its a number, then it would do, WHERE query='3*;...
+10:40  joshsmith: gotcha; I forgot that was the case
+10:41 --- Evanlec_ is now known as Evanlec
+10:43  joshsmith: does bindParam() also do the same? with PDO::PARAM_STR?
+10:43  Keloran: yes
+10:43  joshsmith: gah
+10:43  Keloran: if you want that string, you want to pass the whole thing
+10:43  joshsmith: does PDO have a function for pure escaping, then?
+10:43  Keloran: so ? == (stuff) . "*;mode=any'
+10:44  Keloran: (well with the correct " ')
+10:49  smallfoot-: how do i make IF where first condition must be true, then one of the two following conditions must be true too?
+10:50  spuun: if (cond1 && (cond2 || cond3))
+10:50  smallfoot-: like IF ($a == 1 && ($b == 2 || $c == 3)
+10:50  smallfoot-: oh, that works?
+10:51  spuun: yes.
+10:51  iaj: Keloran: another question.. lets say I want to split a string at the last space... so the first string $a should contain everything up to that last space, and the string $b only the last 'word' how would I achieve that?
+10:51  _nix00: hi,all. I found if  switch control structure is included in foreach structure , if I use continue in switch, it is invaild. so it is php problem, not my mistake , am I right ?
+10:51  joshsmith: Keloran: thanks; what I think I'm going to do is just do $query = $query . "*;mode=any"; and then $query = $this->dbh->quote($query);
+10:51  smallfoot-: cool
+10:52  joshsmith: spuun: that doesn't work in all cases
+10:52  joshsmith: nevermind
+10:52  joshsmith: misread
+10:52  spuun: B]
+10:52  joshsmith: logic != working at 2AM
+10:54  _nix00: ok, I get it lol. Note: Note that unlike some other languages, the applewebdata://99234FA5-B21B-4F45-BDE7-66735C570ADE/control-structures.continue.html statement applies to switch and acts similar to break. If you have a switch inside a loop and wish to continue to the next iteration of the outer loop, usecontinue 2.
+10:54  styol: joshsmith: i disagree
+10:55  styol: depends on whether or not you're in the zone, and i guess not being tired as hell helps also
+10:55  joshsmith: yeah, I am well out of the zone and tired as hell
+10:55  joshsmith: it has rained non-stop in San Diego, which is just so far outside my comfort zone I feel like I'm gonna be sick
+10:55  styol: sleep has been deprecated
+10:56  joshsmith: I'm still running on Sleephp 4
+10:56  styol: ah yeah im in LA.. waiting for the rain, only seen a lil
+10:56  silv3r_m00n: where does this method come from >> java_require ?
+10:56  styol: its probably headed here
+10:56  joshsmith: I didn't sign up for this
+10:56  styol: you signed the waiver, i have it
+10:56  styol: and im gonna blow it up at kinkos
+10:57  joshsmith: gah, you're a bureaucratic nightmare, styol
+10:58  styol: not until i take out the advertisement
+10:58  joshsmith: oh, thank God! I finally have SphinxSE working in production
+10:59  joshsmith: Oh man, that only took a metric ton of my blood, sweat, and tears
+11:00  styol: its gonna be so worth it though
+11:02  joshsmith: so true, so very true
+11:02  joshsmith: for future reference, anyone thinking of trying to compile Sphinx as a plugin should forget it
+11:02  joshsmith: remove MySQL entirely and reinstall
+11:02  joshsmith: it is less effort
+11:02  joshsmith: I'm just putting that out there in the universe
+11:03  styol: i will remember this. it will possibly prevent red hot pokers
+11:03  ss23: I thought people used Solr these dayys :S
+11:03  joshsmith: depends on your use case
+11:03  styol: i hear usually either solr or sphinx.. or lucerne?
+11:04  ss23: Lucene is the back end to solr
+11:04  joshsmith: Lucene
+11:04  joshsmith: they merged
+11:04  styol: ah lucerne api
+11:04  joshsmith: both under the same team
+11:04  ss23: Apache put out some kick-ass stuff
+11:05  styol: only a few animals were harmed in the making of apache
+11:05  joshsmith: The thing that killed Solr for me was that it outputs in XML
+11:05  joshsmith: making it a performance bust
+11:06  ss23: joshsmith: http://wiki.apache.org/solr/SolJSON
+11:06  joshsmith: I think there are some other response writers, but Sphinx was quick to do (other than the prod problems)
+11:06  ss23: Yeah, definitly a case of using what you can
+11:06  joshsmith: but that was really ultimately my fault
+11:07  joshsmith: I'd wanted to use Solr originally, but went with Sphinx ultimately
+11:07  joshsmith: partially because it was the recommended engine in High Performance MySQL
+11:08  joshsmith: hmm getting JSON output would be awesome, actually
+11:08  joshsmith: but whatever
+11:08  joshsmith: time wasted implementing Solr now == too much
+11:09  ss23: I'm just glad I'm not the one working with Solr at my work. I mean, cool stuff and all but... seems like such work to get anything done
+11:09  styol: especially 5 minutes after gettting sphinx setup? at least give her a drive around the block
+11:09  joshsmith: oh well I've had Sphinx working on my laptop
+11:09  joshsmith: and it's awesome
+11:09  joshsmith: I've got a kind of weird use case in some situations, too
+11:09  styol: ah word, ive only used solr so i guess im just projecting
+11:09  joshsmith: I'm actually doing recommendations with it
+11:10  ss23: I think we used solr for our recomendations engine too
+11:10  styol: like did you mean or what
+11:10  styol: oh like this this out too or you might also be interested in or something?
+11:10  ss23: I'm guessing the latter styol
+11:10  styol: *check this
+11:11  ss23: Only issue we have with Solr is "Did you mean?"
+11:11  ss23: It's spell check/suggest thing is crap
+11:11  admin0: how do I get an array key from a value ?
+11:11  styol: array_keys()? from a value hmm
+11:11  ss23: admin0: array_keys?
+11:12  admin0: never mind .. found it :)
+11:12  admin0: sorry
+11:12  styol: i wonder how did you mean is going to like mostly names
+11:12  styol: im guessing im going to have to note use it more often then not
+11:12  styol: or does it base it on actual stuff in the index?
+11:13  styol: *not
+11:13  ss23: styol: Uh, what?
+11:13  styol: ss23: sorry, do you know if solr's "Did you mean?" is based on an actual dictionary, or is it based off the indexed terms or whatever its called (im  not deep in it yet)
+11:14  ss23: Not sure, but probably some sort of dictionary. As I said, we had problems with it. We don't even use it because of how bad it is
+11:14  ss23: (Although we could just be configuring/using it really wrong I guess :S)
+11:14  styol: yeah thats what i was just realizing is im using it (or tested it) but its likely not going to work in reality because most of the things that will be searched are names as opposed to common dictionary words or even common devices or anything like that
+11:14  joshsmith: The one thing that makes me think an eventual switch to Solr down the road might not be a bad idea is that I'm using Sphinx to do a lot of autosuggestions
+11:14  joshsmith: so getting JSON out would be awesome
+11:15  styol: ss23: thats the thing too is im almost always sure that im doing something wrong with it haha
+11:15  joshsmith: plus the fact that Solr seems capable of pulling out document data so I don't have to make a round trip myself
+11:20  marthinal: if i use strtotime("now 00:00 +2"); i have correctly today at 00:00 dont understand why +2???? normally strtotime("now 00:00 "); is ok but i put it and then i have 10/20/2010 - 02:00
+11:21  Keloran: what is your timezone set to
+11:22  dr0id: anything wrong here -> $arr['content'] = str_replace("{age}, {error_age}", $form_meta_vals['age'] . "," . $valid_msg2['err1']['age']['error'][0], $arr['content']); ?
+11:22  ss23: Looks okay
+11:23  dr0id: replacement doesn't occurs
+11:23  marthinal: Keloran dont know excuse me how i can check it?
+11:23  dr0id: but when I do $arr['content'] = str_replace("{age}", $form_meta_vals['age'], $arr['content']); replacement for {age} occurs
+11:23  Keloran: marthinal: echo date("e");
+11:24  ss23: dr0id: Not 100%... probably just the space wrong or something
+11:24  Keloran: dr0id: did you read the specs ?
+11:24  dr0id: yeah I did
+11:24  marthinal: ok Keloran i check it
+11:24  Keloran: dr0id: if you want to replace multiple things with seperate values, then you need to read the spec it tells you how
+11:24  dr0id: I did read
+11:25  ss23: Keloran: What he's doing should work
+11:25  dr0id: yeah, it should, as I have done the same thing with different values before too
+11:25  marthinal: Keloran i have 01/01/1970 - 02:00
+11:26  ss23: http://codepad.viper-7.com/Rhw7U1 dr0id - Works there
+11:26  ss23: dr0id: Pastebin your $arr['content']
+11:26  smallfoot-: if any way check if a variable has one or another value with IF?
+11:26  smallfoot-: like IF ($var == (1 || 2)) ?
+11:26  Keloran: marthinal: what version of php are you using ?
+11:27  ss23: smallfoot-: if (($var == 'lol') or ($var == 'no'))
+11:27  ss23: smallfoot-: No "short" way of doing it like that unfortunatly (but I wish there was)
+11:27  marthinal: PHP Version 5.2.6
+11:27  smallfoot-: ss23, i must check the $var twice, i cant use $var = (1 or 2) ?
+11:27  Keloran: marthinal: http://codepad.viper-7.com/RhzgIJ because thats the kind of thing that should return
+11:27  dr0id: ss23: 1 sec
+11:27  smallfoot-: ss23, okay
+11:29  dr0id: ss23: http://codepad.viper-7.com/3QpQwd and http://codepad.viper-7.com/NmoHhd
+11:29  marthinal: Keloran UTC
+11:30  ss23: dr0id: ... You can't replace two values like that
+11:30  marthinal: i did a date_format is for that i had the other result
+11:30  haygus: hi, i have a question about session_set_save_handler
+11:30  ss23: dr0id: Do two str_replaces. Do one for the {age} then one for {error_age}
+11:30  joshsmith: this is bizarre
+11:30  dr0id: why not like that ss23?
+11:30  haygus: "The garbage collector, this is executed when the session garbage collector is executed and takes the max session lifetime as its only parameter. "
+11:30  ss23: dr0id: It's looking for '{age}, {error_age}'
+11:30  haygus: when the session garbage collector is exectured ?
+11:31  joshsmith: I moved from one Linode to another, and suddenly PHP isn't serving the index.php, but will serve other php files
+11:31  joshsmith: any ideas as to why?
+11:31  dr0id: ss23: why does it works in your case then ?
+11:31  Keloran: joshsmith: any index, or just that one ?
+11:31  joshsmith: Keloran: just that one
+11:31  dr0id: ss23: I also tried "{age}, {error_age}" before (if you are talking about the space after the comma)
+11:32  joshsmith: all other PHP files work just fine and dady
+11:32  joshsmith: *dandy
+11:32  Keloran: joshsmith: why not recreate it ?, copy content, delete file, create file, paste content
+11:32  ss23: dr0id: Because my content is literally "{age}, {error_age}"
+11:32  ss23: dr0id: It needs to find that exact line
+11:33  dr0id: o sorry yes :P
+11:33  joshsmith: Keloran: no good
+11:33  ss23: joshsmith: Error reporting all turned on?
+11:33  Keloran: joshsmith: does it not serve it at all, or does it just echo the raw source
+11:33  ss23: And what do you mean by "isn't serving"
+11:33  dr0id: ss23: hell, they have to be arrays lol, my mistake
+11:34  joshsmith: it downloads the page
+11:34  joshsmith: doesn't display anything, just downloads it directly
+11:34  Keloran: thats why i said read the spec
+11:34  ss23: I misunderstood what you were doing dr0id :S
+11:34  ss23: I thought you were searching for the literal string
+11:35  dr0id: sorry my mistake, wanted array there :P should had read the specs when Keloran mentioned :P
+11:35  joshsmith: hmm this might be a Chrome issue and not a me issue
+11:35  Keloran: joshsmith: link ?
+11:35  ss23: joshsmith: Hmm, you're the second person to have an issue like this that I've seen in here today :S
+11:35  joshsmith: http://www.google.com/support/forum/p/Chrome/thread?tid=6eef714cbdc12d30&hl=en
+11:36  joshsmith: There's a long discussion there about it
+11:36  thadin: haygus: probability/divisor is ithe chance the gc is called in a request
+11:38  admin0: hi ..this is my code:   http://php.pastebin.com/Z8WzrEhW    -- why does my loop goes on and on even after it finds the value ?
+11:39  ss23: Why would it stop?
+11:39  ss23: You haven't told it to stop there that I can see :S
+11:39  admin0: how to tell it to stop :D
+11:39  admin0: i can see that it gets the accid in the 3rd or 4th table
+11:39  admin0: from the echo statement
+11:40  ss23: Oh, beecause of the while you mean
+11:40  ss23: admin0: You have it around the wrong way :P
+11:40  ss23: admin0: I'll codepad it for you
+11:40  admin0: i have 7 identical tables .. which is passed from the array ..
+11:40  admin0: ok
+11:41  thadin: admin0: http://php.net/break
+11:41  ss23: admin0: http://codepad.viper-7.com/fpPt02
+11:41  ss23: That's still bad though
+11:41  ss23: But it is probably more what you wanted
+11:42  ss23: admin0: Instead, at the bottom of that foreach, do "if $bla == '' { break; }"
+11:42  thadin: ss23: admin0's code was better, yours will create an infinite loop
+11:43  Keloran: broken or better...
+11:43  haygus: thadin: session.gc_probability is 1; session.gc_divisor 100
+11:43  admin0: :D
+11:43  ss23: Ah, crap
+11:43  ss23: Okay, I take it back :S
+11:43  ss23: It's late! I blame the lateness >.> <.<
+11:43  thadin: haygus: so you have a chance of 1% that the gc is called at a request
+11:44  haygus: for test how can i do for 100% ?
+11:45  haygus: divizor to 1 ?
+11:45  thadin: yes
+11:46  Keloran: http://www.amazon.com/PHP-MySQL-Dynamic-Web-Sites/dp/032152599X now thats a book ahead of its time LOL
+11:46  admin0: thadin, ss23 , the break worked .. thanks .. updated code here: http://php.pastebin.com/p44nFviL
+11:47  thadin: admin0: skip the while loop
+11:47  thadin: otherwise you'll get an infite loop as well if the records aren't found in a table
+11:48  thadin: and remeber to escape your data
+11:48  admin0: escape ?
+11:48  admin0: you mean mysql one ?
+11:49  admin0: thadin, i have been using this for a while: http://php.pastebin.com/6VPtky6A  -- to clean all variables
+11:49  thadin: yes, don't send raw input to the DB
+11:49  admin0: i do have : mysql_real_escape_string
+11:49  admin0: up somewhere
+11:51  thadin: you're "clean" function will destroy normal data as well
+11:51  thadin: just use mysql_real_escape_string once
+11:51  admin0: noted
+11:52  haygus: thadin, thank you
+11:53  Despe70: pretty sure it's obvious, but how can I remove a value from an array ?  $a = array ('green', 'blue', 'red'), remove 'blue' (without knowing it's key) ?
+11:54  admin0: Despe70, i had asked this a while ago, but found out myself ...  to get the key, use  array_search('your-value-here',$array-name);
+11:55  admin0: and it will give you the key
+11:58  Despe70: admin0: k, thought that there was a function just to remove a vallue
+11:58  Despe70: but i'll work it out that way
+12:01  nVee: hi guys
+12:01  nVee: what is the best way to get docroot
+12:01  nVee: i am busy with a front controller
+12:01  nVee: but looking for the best way to get docroot
+12:02  negev: hi, is there any way to 'stub' function calls out in php?  in the past i've done this using the php debugger's rename_function() but that no longer works with 5.3.0
+12:02  negev: specifically i want to be able to catch certain function calls and reroute them elsewhere, for the purpose of unit testing.
+12:13  meatbun: #
+12:17  admin0: i got to run now .. thanks all :)
+12:56  Raydiation: hi im looking for something like django, just for php
+12:57  Keloran: eh
+12:57  Myztik: then you've come to the wrong place
+12:57  Keloran: we dont recommend frameworks
+12:57  Keloran: frameworks, ides, editors, hats are holy wars
+12:57  Raydiation: Keloran: what do you recommend then? cms?
+12:58  Keloran: we dont recommend any (most) 3rd party scripts
+12:58  Raydiation: :/
+12:59  Myztik: Raydiation: The channel is for helping people write PHP
+12:59  Keloran: were here to help you write php, not help you find something that does the work for you
+12:59  ultramage: hello, this is something I've been meaning to ask for a while now: what's the best practices for avoiding/dealing with race conditions in php code?
+12:59  Raydiation: dunno, maybe someone used django before and knows a pretty equivalent php framework
+13:00  Raydiation: i basically just look for a very close copy done in php
+13:00  Myztik: Raydiation: We're not a search engine
+13:01  Myztik: go to #phpc or whatever it's called
+13:01  Raydiation: Myztik: hm ok cya
+13:20  j0nr: hey all...need a little help.
+13:20  j0nr: this script throws up just "Connect Error (0)" in my browser... but I can't figure out why... http://paste.pocoo.org/show/277921/
+13:21  j0nr: I think it is happengin around line 23/24
+13:23  thadin: replace  or die('Connect Error ('.mysqli_connect_errno().')'.mysqli_connect_error());    with     or die('Mysql error: '.myql_error());
+13:23  thadin: code is still wrong, but better then you have atm
+13:24  j0nr: thadin that just gives: Fatal error: Call to undefined function myql_error()
+13:24  thadin: j0nr: oh, you're using mysqli.. so use mysqli_error($link)
+13:24  j0nr: ah
+13:25  j0nr: or die('Mysql error: '.myqli_error($link));   < like that?
+13:25  thadin: yeah
+13:28  j0nr: still undefined function error
+13:28  thadin: you don't have the s in your code
+13:28  thadin: (forgot it in mine as well the first time)
+13:29  j0nr: heh...typo
+13:40  nVee: Hi Keloran, you here?
+13:41  nVee: Busy with a front controller, but remembering from a previous experience, i have an issue i would like to resolve before I do the code. With my previous controller, I had a class which "put together" the template, and the output was then used with e.g. $page->view()
+13:41  nVee: this however cause big issues with not being able to use other classes as you can only extend 1 extra class (and the output was built using a class)
+13:42  Xcon: heya guys, could someone please help me? http://codepad.org/ORdZgbVq <-- Once you have logged into paypal and it redirects to our page, its only fetching back the payment amount, not the contractor ID, job ID, invoice number, any ideas please?
+13:42  nVee: can you give me some ideas on how to do this better? build a template and output, but still have full access to the other classes?
+13:43  j0nr: wow... am learning the devastating power of a _single_ incorrectly captilised letter in my code
+13:43  nVee: xcon: apart from the syntax issues
+13:43  Xcon: just noticed that myself
+13:43  nVee: umm what is in configuration.php?
+13:44  Xcon: just the configuration of the site for access etc
+13:44  nVee: wher eis $row["intid"] specified?
+13:44  Xcon: nothing todo with the paypal
+13:45  Xcon: defined in configuration.php
+13:45  nVee: ah okay
+13:45  Xcon: i just dont understand why its recognising to send the payment amount
+13:45  Xcon: but none of the other fields
+13:45  nVee: well wait
+13:46  nVee: is the issue the form not posting?
+13:46  Xcon: no
+13:46  Xcon: its posting
+13:46  Xcon: going through to paypal sandbox
+13:46  Keloran: nVee: yeah im here
+13:46  Xcon: im then logging in, its sending me back to my page, with the following
+13:46  nVee: mind reading my message at the top?
+13:46  Xcon: http://codepad.org/WC8h29SX
+13:46  nVee: i can repaste but you know how the people get :P
+13:47  Xcon: http://codepad.org/7cAfRDtt
+13:47  Keloran: your wondering how to get other classes but can only extend 1 ?
+13:47  Xcon: sorry thats the url
+13:48  nVee: not really, its more a "how would you do it" question as appose to a query
+13:48  j0nr: hmmm... ok I am fetching an array of mysql rows and then echo'ing a list of certain cell names... e.g. one column is called 'name', so I just echo a list of 'name'.... but sometimes there are rows where name is the same.... I need to some how not repeat listing entries that have already been listed.
+13:48  j0nr: so I cant just  while($uploadRow = mysqli_fetch_array($uploadResult)) {
+13:49  j0nr: echo ...
+13:49  j0nr: as it iterates row by row
+13:49  silver_star_iri: hello , how i can measure a user how long be there in my site ?
+13:49  Keloran: i only have 2 classes that extend, the rest grab an instnace of the other classes or call those classes from the main, e.g. if i want to get the template class tehn $template = $hammer->getTemplate, if its one not in the main then i do $hammer->getnail("name");
+13:50  Keloran: then if i need that passed down the chain, i pass it down, e.g. $hammer->getnail("asda", $hammer->getnail("template"));
+13:50  nVee: i see
+13:51  nVee: it appears that there will be a lot of debating surrounding this topic
+13:51  Keloran: or because everything knows about hammer, i request that class as needed
+13:52  nVee: Keloran, do you have time, mind if I private you? I want to just run my logic past you
+13:52  Keloran: okie dokie
+13:57  James13433: How can I make my select statment case sensitve?
+13:57  silver_star_iri:  how i can measure a user how long be there in my site ?
+14:02  solofight: how can i change the post_max_size php.ini setting from .htaccess file ?
+14:02  further: silver_star_iri: how about have a try of google analytics?
+14:06  dr0id: silver_star_iri: google analytics, or JS(Ajax)
+14:07  zamba: heavy stuff
+14:07  thadin: solofight: php_value post_max_size 4M   or something
+14:08 +Viper-7: James13433: it is case sensitive
+14:08  solofight: thadin, got it thank you its php_value post_max_size
+14:09  James13433: yer just realised, had to edit my database
+14:10  solofight: in the value field can i give something like 1G ?
+14:11  solofight: by default they have specified in M => mb
+14:11  solofight: ? can i say G
+14:11  solofight: ?
+14:11  solofight: thadin, ^
+14:11 +Viper-7: a) try it, b) check the manual, or c) use 1000M instead of 1G
+14:12 +Viper-7: php.net/ini - click directives, click post_max_size
+14:12 +Viper-7: it should be documented ;)
+14:12 --- Putr is now known as Putr|Away
+14:12  solofight: Viper-7, :) i am trying it already, thank you
+14:12  solofight: 1000M is a good one, but wanted to know whether i can use G
+14:12  solofight: thank you Viper-7
+14:12  solofight: Viper-7++
+14:13 +Viper-7: heh
+14:13 +Viper-7: you're capped at about 2gb tho remember
+14:13  further: hi, I am writing a php extension, is there any output buffer implemented in zend source? so that I can use it instead of rewriting a new one.
+14:13 +Viper-7: you cant do more than that over http - at least without recompiling your webserver & php to 64 bit
+14:13 +Viper-7: and you shouldnt really do more than ~50mb of uploads over http imo
+14:14 +Viper-7: its not a file transport protocol ;)
+14:14  Keloran: *repeats Viper-7's last 2 lines*
+14:14 +Viper-7: further: #php.pecl on efnet
+14:14 +Viper-7: they'll be much more helpful for extension development
+14:14  solofight: Viper-7, capped at 2Gb ?
+14:14 +Viper-7: solofight: 32 bit signed integer limit
+14:14  solofight: you mean i cannot upload a file more than 2 GB ?
+14:15  further: Viper-7: thx.
+14:15  solofight: OMG
+14:15 +Viper-7: php has trouble dealing with any files larger than like 2.1gb
+14:15 +Viper-7: as do most webserver
+14:15 +Viper-7: as do most clients
+14:15 +Viper-7: etc
+14:15  solofight: Viper-7, so what do we do in that case ?
+14:15  solofight: whats the alternative or fix ?
+14:16 +Viper-7: solofight: use a different protocol. ftp? scp? tftp? etc
+14:16 +Viper-7: im sure there's flash/java/js (tho probably html5 only) solutions for most of those
+14:16 +Viper-7: to handle the client side
+14:17  Keloran: theres defentlly a flash one for ftp
+14:18  winmutt: hi
+14:18  winmutt: gd doesnt seem to want to provide jpeg support
+14:18 +Viper-7: winmutt: its possible to compile gd without libjpeg support - but i'd call that a broken install heh
+14:18  winmutt: i am on debian and have compiled my own php from src
+14:19  winmutt: i guess ill just roll my own then
+14:19 +Viper-7: add
+14:19 +Viper-7: --with-jpeg-dir --with-png-dir
+14:19 +Viper-7: to your configure
+14:19  Keloran: did you compile with jpeg supprot ?
+14:19 +Viper-7: you dont need to specify the actual paths
+14:19 +Viper-7: apt-get install libjpeg62-dev libjpeg62 libpng12-dev
+14:19 +Viper-7: for the dependencies for those
+14:20  dr0id: sudo apt-get....
+14:20 +Viper-7: sif sudo :P
+14:21 +Viper-7: just sudo su and dont run anything stupid :P
+14:22  Keloran: lol
+14:25  dr0id: Viper-7: saw my ecommerce yesterday ? :P
+14:25 +Viper-7: i saw the link :D
+14:26  dr0id: lol, k
+14:39  ccapndave: Hey all - has anyone ever heard of a database driver (e.g. PDO) that reads and writes to XML files instead of a real database?
+14:39  prgmrBill: sounds terrible
+14:39  codec: i thought thats called oracle
+14:39  codec: *scnr*
+14:39  prgmrBill: ha ha ha
+14:40  ccapndave: Guess that means no :(
+14:43  ajavid: good morning
+14:45  orangey: hello all!
+14:45  orangey: I'm having trouble with something that sounds like it should be easy: playing with arrays.
+14:45  orangey: : )
+14:45  orangey: What I want is the "getVolume()" object from $issueDao->getIssueById('14')
+14:46  orangey: unfortunately, there's a layer in this PHP program that seems to be returning the object only as a variable.
+14:46  orangey: thereby causing a fatal error
+14:47  orangey: I'm wondering if there's one construction that would give me the getVolume for IssueId 14 in object issueDao
+14:47  orangey: $issueDao->getIssueById('14')->getVolume()?
+14:49  orangey: (obviously the above doesn't work)
+14:50  Shadow: Hi, I have this, if (THIS_SCRIPT == 'osc_shop') {  .Is there a way that if the THIS_SCRIPT was equal to osc_shop1 or osc_shop2 etc, it would execute.
+14:50  salathe: you're playing with arrays?
+14:51  Shadow: <salathe> is that for me
+14:51  salathe: nop
+14:51  Shadow: np
+14:52  salathe: i can't type that quickly
+14:52  prgmrBill: Shadow: if( in_array(THIS_SCRIPT, array('foo', 'bar')) )
+14:52  prgmrBill: Shadow: switches also work and if/elseif or an if with the OR operator
+14:53  prgmrBill: I think switches are purdy
+14:53  Shadow: <prgmrBill> not using arrays
+14:53  prgmrBill: okay, so the three other approaches still apply
+14:53  prgmrBill: I'm not sure why you'd avoid arrays though
+14:53  prgmrBill: they sure are useful
+14:54  orangey: prgmrBill: he likes purdy
+14:54  salathe: arrays are purdy too
+14:54  prgmrBill: any code that doesn't use arrays is not purdy imo
+14:54  prgmrBill: it's deliberately crippling yourself
+14:54  Shadow: Basically each file has a line like: define('THIS_SCRIPT', osc_shop);
+14:54  orangey: arrays are like beautiful hot women
+14:55  ajavid: no they are not.
+14:55  ajavid: Not at all.
+14:55  ajavid: But then again, beauty is in the eye of the beholder.
+14:55  Shadow: another file would have define('THIS_SCRIPT', osc_shop1);  etc
+14:55  orangey: they're great, and you'd love them when they work out. BUT DAMN, they are fickle
+14:55  orangey: and make you want to pull your hair out
+14:55  ajavid: haha
+14:55  djmccormick: array like a beautiful hot woman: [ . ][ . ]
+14:55  orangey: just like my current array/object problem
+14:56  Shadow: How how do I have something like,   if (THIS_SCRIPT == 'osc_shop*') {
+14:56  sacho: "arrays are fickle"?
+14:56  salathe: orangey: how is your current problem related to arrays?
+14:56  sacho: Shadow: use substr
+14:57  ajavid: djmccormick, with square breasteses
+14:57  sacho: substr(THIS_SCRIPT, 8) == 'osc_shop'
+14:57  ajavid: ?
+14:57  ajavid: robot chics.
+14:57  orangey: salathe: let me start by saying I'm an idiot. However, if I'm trying to get getVolume() from $issueDao->getIssueById('14'), aren't I essentially diving deep into arrays?
+14:57  salathe: sacho: you sure about that substr?
+14:57  ajavid: ( . )( . ) <- not square.
+14:57  sacho: I really hate it when people refer to computers as having feelings, and whatever not.
+14:57  ajavid: sacho, why not?
+14:57  sacho: salathe: you're right, substr(..., 0, 8)
+14:57  orangey: sacho: It helps people make sense of the world. Whatever works.
+14:57  ajavid: sacho, there is nothing wrong with anthropomorphsizing electronics
+14:58  salathe: orangey: maybe, maybe not... but you're working on objects not arrays
+14:58  Shadow: <sacho> what exactly will that do
+14:58  sacho: orangey: arrays aren't "fickle"
+14:58  djmccormick: nah ajavid push 'em together buddy (  .  Y  .  )
+14:58  sacho: your understanding of them might be
+14:58  ajavid: As Chuck Schuldiner puts it
+14:58  ajavid: "Individual Thought Patterns"
+14:58  sacho: Shadow: it will check if the first 8 characters in THIS_SCRIPT are equal to 'osc_shop'..?
+14:59  orangey: salathe: Hence my referral to it as an array/object problem : ) Notwithstanding, is there any way to dive into objects, so that a subobject of a subobject is accessed?
+14:59  Shadow: so substr(THIS_SCRIPT, 0, 8) == 'osc_shop'
+14:59  salathe: orangey: sure, just do what you were doing :P
+15:00  LabMonkey: wtb easy-to-use MVC AJAX framework working today
+15:00  orangey: salathe: hehehe ; ) I'm here because it wasn't working!
+15:00  salathe: orangey: we don't know how your getIssueById() and so on works
+15:00  LabMonkey: In other news: AT&T is all geeked up about installing my internet service today.
+15:01  LabMonkey: They're emailing me and texting me, "o0o0o0o0o just one more day!" and, "TODAY! YEAH! YEAH! WOOO"
+15:01  LabMonkey: and I'm just kind of, "mkay..."
+15:01 --- Putr|Away is now known as Putr
+15:01  orangey: salathe: I'm essentially playing with templates, and I've already gone into the core enough times. But if I can't get this done in some reasonable way, then that's a major core chunk that needs rewriting. The essence of the problem is that the core sanitizes my variable {assign var=blah value=blah} into I believe something unusable
+15:01 * LabMonkey quacks.
+15:02 * ss23 throws a wild duckling at LabMonkey 
+15:02  salathe: orangey: i still have no idea what you want or have :|
+15:02  JdGordon: really noob question... is "curl_setopt ($curl, CURLOPT_URL, "http://forums.rockbox.org/index.php?action=login2");" wrong? without "?action=login2" it works, with it, nope
+15:02  sacho: orangey: "diving" and "subojects" are terms that are not defined for a general object
+15:03  LabMonkey: oh
+15:03  LabMonkey: Why I'm asking this is kind of an involved explanation, but...
+15:03  orangey: salathe: this is the "object" that should come back: http://pkp.sfu.ca/ojs/doxygen/html/classIssue.html
+15:03  sacho: JdGordon: define wrong, and "works", and "not works"
+15:03  prgmrBill: JdGordon: that argument should be a URL. if you want get arguments use the post fields argument
+15:03  LabMonkey: What's that mythical creature that looks normal/human if you're looking directly at it but when you're not looking it's a monster?
+15:03  prgmrBill: and set tthe type to get
+15:03  Shadow: thanks for the help
+15:03  orangey: salathe: with one of the "public member functions" being getVolume()
+15:04  salathe: orangey: ok so why doesn't what you've got work?
+15:05  JdGordon: prgmrBill: bah, thanks :) /me is a very tired not-web dev :)
+15:05  ajavid: yes
+15:05  ajavid: it is raining
+15:05  ajavid: ! beautiful morning
+15:06  prgmrBill: JdGordon: np
+15:06  orangey: salathe: Well, I'm working not within the core (where it would work), but within a *template*, which I suspect is sanitizing what the var can come back as. To assign a variable, I have to execute: {assign var=issue2 value=$issueDao->getIssueById('14')}
+15:06  orangey: however, issue2 cannot be manipulated in any way. I can't say $issue2->getVolume(), for example.
+15:07  orangey: The error I get is: registered 'issue2' is not an object
+15:07  salathe: orangey: ok
+15:07  salathe: orangey: so make a new variable for the volume
+15:09  orangey: salathe: I just tried: {assign var=issue2 value=$issueDao->getIssueById('14') \ {assign var=issue3 value=$issue2->getVolume()}
+15:09  orangey: but now get a different error message when I try to display $issue3
+15:09  orangey: syntax error: unrecognized tag 'issue3' (Smarty_Compiler.class.php
+15:10  salathe: orangey: how about {assign var=volume value=$issueDao->getIssueById('14')->getVolume()}
+15:10  j0nr: I have a mysql table, with (for example) a column called 'name'. rows under 'name' contain '1', '2', '3', '4', '4'. I am using: while($row = mysqli_fetch_array($result)) { echo $row['name'] }   to produce a list of 'name'. How can I prevent it from repeating '4' as '4' shows up twice. I don't want duplications
+15:11  davidthedrake: j0nr: maintain an array of values that have already been output and check before you echo
+15:11  j0nr: I was thinking of building a temporary list and ... davidthedrake I thought so
+15:11  prophile: alternatively, modify your query
+15:12  davidthedrake: *nod* or, modify your query so you don't have dupes :)
+15:12  prophile: which I would suggest is preferable, as it means transferring less data from your database
+15:12  prophile: I suggest looking up 'distinct' in the MySQL documentation
+15:12  j0nr: so how can I iterate each row in a while loop and simultaneously check for duplication?
+15:13  prophile: s/suggest/recommend/
+15:13  j0nr: aha
+15:13  orangey: salathe: doesn't work either. I think I need to go back to the core and make sure everything is solid. Thank you very much.
+15:13  salathe: orangey: no problemo
+15:14  j0nr: prophile: thanks, I see more clearly now
+15:14  prophile: you're welcome
+15:16  orangey: salathe: indeed a typo in my core crept up about 15 minutes ago
+15:16  orangey: though it still doesn't work, but the errors are getting more reasonable.
+15:16  j0nr: prophile: stunning, a simple fix (adding one word) I like it :)
+15:18  orangey: salathe: SUCCESS!!!!!!!!!!! Thank you so much for your help
+15:18  salathe: orangey: :)
+15:20  LabMonkey: needz moar !!!s
+15:25  philsturgeon: Hey guys, throwing something out here which annoyingly will probably just end up getting flamed, but try to hold back.
+15:25  philsturgeon: would any of you post scripts to CodeCanyon if it wasn't such a rip-off for the developer?
+15:26 --- cescalante is now known as ce_afk
+15:26 --- imphasing_ is now known as imphasing
+15:27  Myztik: Why would it be a rip-off and that's off-topic
+15:27  philsturgeon: by rip-off i mean, the developer gets 50%
+15:27  philsturgeon: that's only just up from 40%
+15:27  dr0id: where ?
+15:27  philsturgeon: they change it a month back :)
+15:27  dr0id: seems like some interesting convo goin on :)
+15:27  philsturgeon: http://codecanyon.net/
+15:27  Myztik: and in return they give you a massive exposure to customers
+15:27  dr0id: yeah, that's a rip-off :P
+15:28  dr0id: lets open our own marketplace where we would give 80% to the devs/designers, what do ya say ?
+15:28  philsturgeon: Myztik: yes, thats why it works. but right now they can charge that much because they are the only real option
+15:28  philsturgeon: dr0id: i have that in place already. im looking for a little more seed content
+15:29  dr0id: seed content ?
+15:29  philsturgeon: i have a few people interested, business plans, marketing people on hold, a bunch of content, a design, etc. i need a few guys that dont mind knocking out some simple scripts and throwing em on the site
+15:29  philsturgeon: seed content = launch content
+15:29  dr0id: ic
+15:29  philsturgeon: think http://devot-ee.com/ for Ruby, PHP, jQuery, etc
+15:30  dr0id: I had planned to start such website, but it's difficult you know, envato has a good grip over the market
+15:30  philsturgeon: thats the guy helping me :)
+15:30  dr0id: awesome userbase, so they won :P
+15:30  philsturgeon: dr0id: ahh yes indeed. the joy of what im offering here is that we dont expect exclusivity
+15:30  philsturgeon: and we give people 80%
+15:30  philsturgeon: so throw your code on both, who gives a f**k.
+15:31  philsturgeon: and, you dont have to worry about the plan. make some random code and we sell it :D
+15:31  imphasing: I'm guessing the chan ops aren't going to love the idea of you pimpin out your product here.
+15:31  philsturgeon: i just need a few more people interested in providing content
+15:31  imphasing: "Give me free code" <- this isn't a good plan for this channel, methinks.
+15:31  philsturgeon: imphasing: im trying to get in touch with a large number of php developers. thats basically it
+15:32  prophile: this is going against channel guideline 7
+15:32  dr0id: philsturgeon: anyone buying yet ?
+15:32  imphasing: I get it dude. This is more than likely the wrong place though.
+15:32  philsturgeon: imphasing: not at all, i'll take it private, email and contract up anyone that wishes to work with me. just explaining the plan in full so people can make up their minds
+15:32  dr0id: philsturgeon: the discussion is cool for me
+15:32  dr0id: some people are probably hating the fact that you will become rich soon lol
+15:32  philsturgeon: lol i'll shut it now guys, IRC seems a bad way to go about this. people generally end up complaining. Twitter works brilliantly but hard to explain it properly and have a real-time discussion
+15:33  prgmrBill: philsturgeon: it's not the fact that it's irc, it's that you're asking people to code for free
+15:33  sacho: IRC is not a bad way.
+15:33  dr0id: philsturgeon: any sales you having yet
+15:33  imphasing: Not welcoming solicitors in a community channel and complaining are highly different things.
+15:33  sacho: This channel is.
+15:33  prgmrBill: many of us make careers out of this
+15:33  philsturgeon: im not asking for code for free, of course not!
+15:33  philsturgeon: im asking if people are interested in providing seed content, that is paid for
+15:34 @cythrawll: philsturgeon, no recruiting
+15:34  philsturgeon: i have been building up a passive income using sites like this for a long time, i just want an option for PHP developers that isn;t a rip-off
+15:34  imphasing: Whether there's money involved or not doesn't seem very pertinent.
+15:34  philsturgeon: cythrawll: fair enough
+15:35  philsturgeon: didnt want to cause any trouble, just struggling with content and this seemed like a good "last ditch" :)
+15:35 @cythrawll: turns out you were wrong
+15:35  philsturgeon: ./shuts his face
+15:38  u0m3: can anyone think of any reason why text send to a php script via xmlhttp would have issues with the "+"(plus) character?
+15:38  prgmrBill: u0m3: define issues
+15:38  NiLon: u0m3 most likely because + is ommited with integers
+15:38 @cythrawll: u0m3, url decoding is turning it into a space?
+15:38  NiLon: or that
+15:38  u0m3: prgmrBill: well it's transformed in a white space
+15:39  prgmrBill: sounds like you have your answer
+15:39 @cythrawll: ooh what do I win?
+15:39  u0m3: cythrawll: yes kind of... tho I use encodeURIComponent
+15:39 @cythrawll: doesn't sound like it's encoding + signs right then
+15:43  u0m3: cythrawll: I tested the java script and it works.. eg: C++ is encoded as C%2B%2B
+15:43  u0m3: cythrawll: s/java script/javascript/
+15:43 @cythrawll: u0m3, are you double decoding then?
+15:43  u0m3: cythrawll: don't think so... I can show you the javascript code.
+15:43 @cythrawll: u0m3, it's the server side part I'm worried about
+15:44 @cythrawll: not encoding DECODING
+15:45  u0m3: cythrawll: I don't have access to the code right now but it's: escape all quotes, exchange \r\n|\r|\n with <br />, insert in database
+15:45  u0m3: so I figure something wen't wrong in "insert in database"
+15:46  u0m3: s/wen't/went/
+15:48  knubbze: hi there
+15:48  knubbze: is zend_eval_string supposed to act just like function.eval ? because it doesn't
+15:48  knubbze: [15:46:28] (@       knubbze_) php if (true) print("yes");
+15:48  knubbze: [15:46:29] (         phpbint) [php.err] syntax error, unexpected T_IF
+15:49  knubbze: even weirder, if I invoke function.eval through zend_eval_string, it does work:
+15:49  knubbze: [15:49:19] (@       knubbze_) php eval("if (1) { printf($a); }");
+15:49  knubbze: [15:49:20] (         phpbint) [php.out] 5
+15:50 --- ajavid is now known as stoned
+15:54  stoned: hmm
+15:54  stoned: interesting
+15:56 * LabMonkey sighs.
+15:56  LabMonkey: We've pretty much decided to use YUI client-side controls in our application.
+15:57  LabMonkey: We're also intent upon using MVC controls.
+15:57 +Viper-7: LabMonkey: sounds like you're fully buzz-word compliant
+15:58  LabMonkey: The problem is... There isn't room in the budget for me to develop MVC controls from scratch.
+15:58  Vienzzion: anyone here knows a good fast php framework
+15:58  LabMonkey: Viper-7: Apply more cynicism.
+16:00  stoned: vienzzion, we really don't.
+16:00  stoned: vienzzion, but I bet google does.
+16:00  stoned: vienzzion, /msg php-bot frameworks
+16:01  stoned: labmonkey, I think it was appropriate
+16:01  Vienzzion: let me see
+16:01  stoned: viper-7, I call it 'Buzzard compliance'
+16:01  stoned: ;) (say Buzz word really fast... buzzard buzzard)
+16:02  stoned: I think a buzzard is like a Vulture maybe
+16:02  stoned: http://en.wikipedia.org/wiki/Buzzard
+16:02  Northwoods: hi stoned
+16:02  stoned: Hello northwoods long time no see
+16:02  stoned: demegeek, please do not /msg me
+16:02  Northwoods: yeah long time no seige
+16:02  dr0id: huh
+16:03  stoned: northwoods, I made a facebook app after... 2 years
+16:03  stoned: They changed the whole php-sdk around, and its using a brand new api system
+16:03  Northwoods: after 2 years ?
+16:03  stoned: yes
+16:03  Northwoods: ah ok
+16:03  stoned: I haven't made an fb in two years
+16:03  stoned: so they changed a lot of stuf around
+16:04  stoned: Hip hop!
+16:04  stoned: hahahahaha
+16:12  ace_me_: php store anywhere the lastr error ?
+16:14  stoned: ace_me_, log
+16:14  stoned: ace_me_, try apache's error.log and also in php.ini you can specify where to log php errors
+16:14  stoned: ace_me_, check the manual
+16:14  ace_me_: so no command store error
+16:15  stoned: im sorry?
+16:15  stoned: you want to see php give errors?
+16:15  stoned: ace_me_, /msg php error reporting
+16:15  stoned: ace_me_, /msg php-bot error reporting
+16:18  IDT: what is php-bot?? is it a bot written in php or sth ?? it's not givig me /version ..
+16:19  stoned: he is a python based factoid bot
+16:19  stoned: you can send him messages to get pre written facts and answers so people don't have to type them over and over again
+16:20  Keloran: e.g. rule 8
+16:20  stoned: do /msg php-bot guidelines
+16:20  IDT: ah .. i tried to /msg (him) but no anserr
+16:20  IDT: i'll try this
+16:21  stoned: idt, it only responds to factoid's key/val pair. You type in key, it gives your val. You have to know the factoid name. I'm not sure if this is info or bloot
+16:21  stoned: either of those would have listkeys and listvals directives
+16:21  Keloran: yeah theres some in there that are just comedy
+16:21  stoned: so that you can search the factoid db.
+16:21  IDT: good .. it responded now :)
+16:21  stoned: yay
+16:21  IDT: sorry .. (he)
+16:21  stoned: :)
+16:24 --- ce_afk is now known as cescalante
+16:24  feindbild: hi
+16:25  feindbild: how do I get a child of a DOMElement by it's tagname?
+16:26  u0m3: cythrawll: you said the bug might be on the server side... so here is the code. the fuction is "putcomments" http://codepad.org/NDiHZVw4
+16:26  prophile: feindbild: http://www.php.net/manual/en/domelement.getelementsbytagname.php
+16:27  feindbild: prophile: I want the children, not the descendants ...
+16:27  knubbze: is it possible to undefine functions?
+16:27  knubbze: like: function a() { return 1; } undefine(a); function a() { return 2; }
+16:27  prgmrBill: isn't that called overloading?
+16:28  ndee: I have following array: $foo[0][position]=4, $foo[1][position]=3, $foo[2][position]=2. Now I want to sort the array $foo according to the values in $foo[X][position]. How can I do that?
+16:28  imphasing: prgmrBill: Well, overloading would imply that both would exist, and are callable, but the runtime decides which to call based on args.
+16:28  u0m3: prgmrBill: overloading requires having different argument count/type
+16:28  imphasing: I think he just wants to kill a function he defined.
+16:29  prophile: knubbze: yeah it is
+16:29  prgmrBill: I see
+16:29  prophile: iff you have the runkit extension
+16:29  domo: is it "correct" to have setFoo() or "setter" functions in a static class:  ie.    foo::setDir('some_dir/');
+16:29  knubbze: hm nope
+16:29  imphasing: It should be possible to undefine a function though.
+16:29  knubbze: it isn't really important, I do have the option of freeing the entire php codebase before re-evaluating another command
+16:30  knubbze: that would mean re-evaluating the interface at any call though
+16:30  knubbze: hm
+16:30  prophile: knubbze: what I've seen done, which is a little hacky but works
+16:30  prophile: for long-running php processes
+16:30  prophile: is to look up functions you want to redefine from an array
+16:30  knubbze: going to write a custom vtable-esque manager
+16:30  prophile: ie $callbacks['my_callback_name']
+16:30  knubbze: yeah, that's what I am going to do, only I will do it not from userspace
+16:31  prophile: then you can redefine them by just doing $callbacks['my_callback_name'] = function() { /* do different stuff */ }
+16:31  knubbze: now it would only be useful to know if zend already has an interface to the userspace codebase
+16:31  knubbze: i.e. extracting existing functions and their code
+16:33  knubbze: hm, if function.die does call zend_bailout() then I might have another dirty work-around
+16:33  knubbze: brb
+16:34  knubbze: okay - another question, once I figured that one out I'll be gone for a while implementing this, I promise ;)
+16:34  knubbze: is there a way to intercept userspace function calls
+16:35  knubbze: just like ub_write, etc. are replaceable
+16:36  Kuifje111: could anyone tell me what the at sign in @mysql_query(); means?
+16:36  NiLon: @ = error supress
+16:36  knubbze: it surpressed the error
+16:37  Kuifje111: oh, ok. thanks.
+16:37  NiLon: don't use it
+16:37  NoiseEee: its a perfect way of making sure you never know what mistakes you are making
+16:37  Kuifje111: so normally mysql_query postes an error if something goes wrong and with @ it doesnt post the error?
+16:37  NiLon: knubbze runkit kind of does what you are looking for, tho that extension is not something that should be relied on
+16:37  NoiseEee: Kuifje111: no
+16:37  NoiseEee: Kuifje111: displays an error, yes
+16:38  Kuifje111: ok.
+16:38  NiLon: Kuifje111 @ hides the error if function can generate one, don't use it, use display_errors setting instead when moving to production
+16:39  Kuifje111: ok, thanks
+16:39  NiLon: error supression basically means that "let my code be broken and do fatal things"
+16:39  NiLon: errors are not logged etc. also it slows down your code
+16:40  NiLon: it's not toggeable so you need to modify your code to see possible errors, so it's not maintable
+16:42  ickmund: does WWW-Authenticate use cookies to store PHP_AUTH_USER?
+16:45  ickmund: I have a scenario where I do a www-auth on one page then forward to another page. One the second page, PHP_AUTH_USER is *usually* set, but never on my iPad. If I instead just print PHP_AUTH_USER on the first page, it's present
+16:46  knubbze: does php come with a way of dumping its current state as php?
+16:46  prgmrBill: state?
+16:46  Keloran: ickmund: i think its held in a private session flag, since its passed by the authorize header
+16:46  knubbze: e.g. $a = 5; function b() { return 5; } $code = DUMP(); would yield: $code = "$a = 5; function b() { return 5; }"
+16:47  prgmrBill: I think the closest thing to that would be a trace string
+16:47  ickmund: Keloran, any idea why it wouldn't work on the iPad? I can't find anyone else with this problem, so I'm guessing I'm doing something wrong...
+16:48  NoiseEee: ickmund: what about using sessions
+16:48  ace_me_: how to ensure that two arrays are equal and they are same type
+16:48  ace_me_: === ?
+16:48  knubbze: hm
+16:49  knubbze: prgmrBill: that would work from userspace only
+16:49  Keloran: is on the same domain (as in your going from www.asda to www.asda) because i think iOS doesnt like it when you change subdomin .e.g www.asda => images.asda
+16:49  khinester: hello, how does the get_browser() function determines if the USER-AGENT has javascript enabled or not?
+16:50  ickmund: I'm doing the testing on IP even, so no domain changes
+16:51  thadin: khinester: "Attempts to determine the capabilities of the user's browser, by looking up the browser's information in the browscap.ini  file. "  http://php.net/get_browser
+16:51  Keloran: maybe ios just doesnt like it then, possible that mobile-safari really doesnt like it
+16:51  ickmund: NoiseEee, I would usually roll with sessions (and not use www-authenticate either), but it's on a legacy system and while I could tell them a re-write is in order, it would never be approved to be fixed for iPad only...
+16:52  FFForever: Good morning
+16:53  NoiseEee: ickmund: if you can't find similar issues on the google, i'd assume you're doing something wrong.  maybe linking to a file in a (differnet) protected directory or something
+16:53  onomi: hello
+16:53  FFForever: Is it possible to create an array with the same keyvalue multiple times? like array('item' => array(), 'item' => array())
+16:53  NoiseEee: ickmund: it would be highly unlikely for you to be the first person with this issue this far into ipad / iOS4 :)
+16:54  Keloran: ickmund: http://lightyearsoftware.com/blog/2010/05/remember-http-password-in-mobile-safari/
+16:54  NoiseEee: Keloran: ouch
+16:54  ickmund: Is it common practice to always issue the www-auth-headers if $_SERVER['PHP_AUTH_USER'] isn't set? Because this actually works... IE, on second page, if PHP_AUTH_USER is not set, issue www-auth, then print PHP_AUTH_USER. It's now set, and I don't get challenged.
+16:54  onomi: im using xpath('/item/person') and there isnt a <person> in any item, but xpath returned an Array(), is that right? if yes... how can i guess if a <person> exists ? :S
+16:55  NoiseEee: onomi: my guess is that the array would actually have contents
+16:55  onomi: nope
+16:55  onomi: im print_ring
+16:56  NoiseEee: onomi: you're saying its not returning anything but there IS a <person>?  if thats the case your query is wrong
+16:56  prgmrBill: FFForever: I think that would either not work or overwrite the value
+16:56  prgmrBill: pretty sure you can't do it
+16:56  ickmund: Keloran, But that is only for saving the data in the browser so I don't have to re-type it every time I visit the site (and has been logged out)
+16:56  onomi: no, there isnt a person but calling xpath with that query returned an empty array, instead return false or something...
+16:56  Keloran: onomi: you can ask its nodelength
+16:57  onomi: nodelenght, let me google it
+16:58  NoiseEee: onomi: right, im saying if there IS a <person> then the array will not be empty
+16:58  NoiseEee: check the LENGTH of whats returned, not true/false
+16:58  Keloran: onomi: http://us2.php.net/manual/en/class.domnodelist.php
+16:59  khinester: thadin: but the map to javascript how is this done? http://en.wikipedia.org/wiki/List_of_HTTP_header_fields there is no field javascript
+17:00  thadin: khinester: no, see that browsercap file
+17:00  salathe: onomi: you're using SimpleXML?
+17:00  onomi: salathe: yes, http://pastie.org/private/xypk384zv196nun1nkxnow
+17:00  ace_me_: how mysql_real_query() differ from mysql_query ?
+17:01  onomi: so next to this im doing print_r with the returned $error
+17:01  onomi: and its an empty array
+17:02  sarfios: Hello
+17:02  davidthedrake: ace_me_: mysql_real_query() isn't a PHP function
+17:02  NoiseEee: onomi: why $error[0] and not $error?
+17:02  NoiseEee: also, "return $error" ?
+17:02  sarfios: I got a little problem, I've installed joomla, and then one tamplate with name ja purity 2, but when i've tried to enter the site it's write me that
+17:02  NoiseEee: n/m that last part
+17:02  sarfios: Fatal error: Call to undefined function: overload() in /home/www/tehamv.com/www/templates/ja_purity_ii/libs/ja.obj.extendable.php on line 39
+17:02  klusias: hello. i got some problem with ldap + php..i got lot of user entries, where [dn] = CN=User Name,OU=Agents,OU=_Groupname, but some of them is without OU=_Groupname...how can i check is, OU=_Groupname in [dn]? without strpos...
+17:02  aidan: How can I set the path that is searched when running an exec() call?
+17:03  Keloran: onomi: ask for its length, since it returns an array, you can perform count on it
+17:03  NoiseEee: sigh
+17:03  NoiseEee: sarfios: check joomla support
+17:04  stoned: sarfios, $joomla
+17:04  stoned: doh
+17:04  stoned: #joola
+17:04  stoned: seriously?
+17:04  sarfios: what
+17:04  stoned: I give up.
+17:04  stoned: #joomla.
+17:04  sarfios: i've write there, but no one was able to help
+17:05  azazul: because its too damn hard to understand what you're saying
+17:05  sarfios: xDD
+17:05  NoiseEee: sarfios: well we can't help you here, we don't support joomla/anything other than homegrown PHP
+17:05  sarfios: Well, sorry for my poor english...
+17:05  cj101: hi
+17:05  aidan: sarfios: this is about programming in PHP, your question has nothing to do with that, go away.
+17:06  stoned: aidan, there is no reason to be mean
+17:06  aidan: sarfios: sorry, not to be mean :)
+17:06  LabMonkey: says the pot
+17:06  stoned: Then don't be.
+17:06  azazul: LabMonkey++
+17:06  sarfios: stoned, thanks i don't mind it...
+17:06  cj101: ive just enabled uploadprogress on my php server but i cant find any docs on php.net about how to use it. anyone got any ideas?
+17:06  stoned: apparently I'm the pot...
+17:06  NoiseEee: cj101: what is uploadprogress?
+17:07  khinester: i don't get this, get_browser() function depends on the setting set on my browser, if USER-AGENT headers sent does not include javascript how is this determined?
+17:07  aidan: cj101: heh, no, it's so undocumented. Have a look at the Drupal source code for an example.
+17:07  cj101: http://pecl.php.net/package/uploadprogress
+17:07  stoned: Not sure how I've ever been mean to anyone while supporting or told someone to just go away without at least pointing them in the right direction
+17:07  Keizer: Hey guys
+17:07  aidan: khinester: what's user-agent have to do with javascript?
+17:07  Keizer: Which pdf library is the most opensource/best performing for PHP
+17:08  Keizer: I seen PDFLib but it says my program has to fall under the OpenSource Initiative list of projects
+17:08  aidan: Keizer: they all suck. I've used tcpdf and it successfully wrote the PDF, but that's all the praise I would give it.
+17:08  Keizer: lol
+17:08  Keloran: i love that, most opensource, or best performing
+17:08  abstrakt: sarfios: try #joomla
+17:08 --- ChanServ sets modes [##php +o cyth]
+17:08  Keizer: aidan: I will look into that
+17:08  stoned: abstrakt, you're the 3rd person to say that :)
+17:08  NoiseEee: cj101: its a PECL package; you won't find any documentation in the php manual
+17:09  abstrakt: stoned: not surprised
+17:09  aidan: NoiseEee: most PECL packages are documented in the PHP manual
+17:09  stoned: abstrakt, yet here he is :)
+17:09  abstrakt: stoned: again, not surprised, look at where we are
+17:09  NoiseEee: aidan: not well
+17:09  cj101: aidan, but not this one?
+17:09  stoned: abstrakt, exactly.
+17:09  aidan: cj101: nope, sorry.
+17:09  khinester: aidan: http://php.net/manual/fr/function.get-browser.php [javascript] => 1
+17:09  stoned: ai dan, artifically intelligent dan
+17:09  stoned: hehe
+17:10  aidan: khinester: JS information is not usually sent in the UA. It's guessed from a huge library of browser information. You can't rely on it, instead use functional based sniffing.
+17:10  azazul: khinester: yeah , because browsers only tell the truth
+17:10  azazul: its stupid to check for JS on php side
+17:11  IDT: i am trying to do this http://ajaxpatterns.org/HTTP_Streaming#Goal_Story
+17:11  IDT: is it practical (from the resource pov) to keep a connection open between every open page and the server (which will be idle most of the time) ?
+17:11  onomi: Keloran: NoiseEee: ok i think its not the problem, maybe a CDATA, look at this: http://pastie.org/private/qxaanjgqtwekwa4hxfuj7g
+17:11  cj101: aidan, is there anywhere that does have docs on it?
+17:11  aidan: IDT: no
+17:12  aidan: IDT: you need to use something other than PHP for Comet programming
+17:12  IDT: ah ..
+17:12  khinester: so get_browser() makes a test on the browser to see if javascript is on or off when a user makes a request?
+17:13  aidan: IDT: I recommend Twisted, Medusa, Tornado or even Node.js
+17:13  IDT: aidan: i thought so, but hoped otherwise .. thanks .
+17:13  aidan: khinester: no, did I say that? did anyone say that?
+17:15  Keloran: khinester: the capfile just says "JavaScript=true", so it might not
+17:16  stoned: this is php
+17:16  stoned: oops
+17:16  IDT: aidan: as i can see, every possible solution includes a custom server (no shared hosting where i most my clients are)
+17:16  Keloran: khinester: you dont really need to care about javascript beign turned on or not if you follow the guidelines of Progressive Enhancment, make it work like its a text browser to start, and then add on extra caps if they browser can accept them
+17:16  stoned: shared hosting sucks
+17:16  stoned: why does it even exist
+17:16  khinester: Keloran: ok this is where i got twisted
+17:16  LabMonkey: Why are you so closed-minded?
+17:17  NoiseEee: onomi: take your xml/query to http://www.whitebeam.org/library/guide/TechNotes/xpathtestbed.rhtm and play ther
+17:17  stoned: labmonkey, why are you so serious?
+17:17 @cyth: IDT, nah, it depends on what you use for an application container.
+17:17  Keloran: onomi: if it returns a simplexml object, you can ask it, hasChildren ?
+17:17  IDT: stoned: i know .. nut i can't force any of my software buyers to get a server
+17:17 @cyth: IDT, for example I wouldn't need a custom server because I use tomcat, which can do comet just fine.
+17:17  stoned: imagine if one server was hacked. He has access to however many sites are stord on that server
+17:18 * LabMonkey quacks.
+17:18  stoned: its not a matter of taste, its a matter of freaking security, not to mention server resources and other technical shortcomings
+17:18  stoned: technoloical*
+17:18  stoned: worrying about those issues is not being close minded.
+17:18  IDT: cyth: tomcat can save me ?? thats good news cuz most shared hosts offers it as an option ..
+17:19  onomi: NoiseEee: invalid, error, can u help me to find the error?
+17:19  stoned: idt, vps or cloud is good
+17:19  IDT: so i just implement the live part in java :D
+17:19  stoned: :D
+17:19  aidan: IDT: have a look at what Drupal does, it does not include a custom server
+17:19 @cyth: IDT, yeah iirc it has to be tomcat 6+
+17:20 @cyth: aidan, what drupal does is technically bad.
+17:20  stoned: you can actually deploy server virtual machines on clouds (not sure if you knew that) and it cost only a few dolalrs more than share dhosting.
+17:20  IDT: aidan: i am trying to avoid doing what drupal does
+17:20  LabMonkey: stoned: I dare you to cease stating opinions for one hour.
+17:20  aidan: stoned: so you're actually advocating people manage their own servers on a security standpoint? lol.
+17:21 @cyth: aidan, some of us are better at that than most web hosting companies
+17:21  stoned: we're developers, not shared hosting users who know nothing.
+17:21  aidan: cyth: right, which is why I have my own servers
+17:21  aidan: but there is obviously a case for shared hosting
+17:21  LabMonkey: Being a developer does not necessitate administrative duties.
+17:21  stoned: so yes, in our context, I would advise manaing your own security
+17:21  IDT: believe me i know .. but i am still stuck with a bunch of clients who insist to use shared hosting ..
+17:21  NoiseEee: but most websites aren't exactly designed/coded by 'developers'
+17:21  NoiseEee: aidan's point is quite valid
+17:21  stoned: no, but being a good developer does.
+17:21 @cyth: shared hosting is good for people's personal blogs and sites.
+17:22  NoiseEee: most people, even developers, know shit all about best practices for linux security
+17:22 @cyth: it should never be used for anything concerning business
+17:22  stoned: idt, i am too unfortunately
+17:22 @cyth: unless the risk is worth the low price
+17:22  IDT: +1 for NoiseEee
+17:22  stoned: idt, bu those client are only using blogs or wordpress etc. to its cool, not high traffic or anything
+17:22 @cyth: not to mention how extremely limited you are ina  shared host
+17:22  LabMonkey: Being a good developer does not necessitate administrative duties.  That's what datacenter personnel are for.
+17:22  stoned: neccessitate?
+17:22  aidan: Speaking of the cloud, I can't recommend rackspace cloud servers enough if anyone is in the market. Being able to fire up a VM through a python script on my desktop ROCKS.
+17:22  LabMonkey: necessitate*
+17:23 @cyth: LabMonkey, only to a point.
+17:23 @cyth: you can't be a good developer and not know how to configure atleast yoru web stack securely.
+17:23  stoned: cyth, thank you.
+17:23 @cyth: *web developer
+17:23 @cyth: now, there are plenty of developers who can't, but we can't call them good :p
+17:24  imphasing: lol, "cloud." People need to get over these buzzwords and just call it managed virtual hosting or something.
+17:24  LabMonkey: cyth: An application can provide as much security as is available to its runtime environment.  An application cannot, for example, prevent people from breaking into your building and physically tampering with hardware.
+17:24  stoned: imphasing, cloud is one word
+17:24  stoned: imphasing, youre suggestin we use 3 insetd of one?
+17:24 @cyth: LabMonkey, that goes beyond the web stack
+17:24  stoned: imphasing, that does away with the whole giving things a short sweet name logic
+17:24 @cyth: so that's not included
+17:24  Keloran: bah who needs security, bugs like that are only features waiting to be discoverd, how else will the candy unicorn get fed....erm or somet to that effect
+17:24  stoned: hehe
+17:24  imphasing: stoned: Cloud is a stupid word for that tech, so yeah.
+17:24  stoned: imphasing, i think its cute
+17:24  stoned: I like clouds.
+17:24  Cryp71c: Given that I have Class A which Inherits from Class B. Class B has a method test(), can I overload B's implementation of test with a more relevant implementation of test() in class A?
+17:25  stoned: I have no problem with the word, its a silly thing to argue about
+17:25  imphasing: It's a buzzword for the sake of being a buzzword. I hate "AJAX" too.
+17:25  imphasing: And Web 2.0.
+17:25  Keloran: Cryp71c: class b overloads, class a is the defult
+17:25  stoned: i don't really have time for hatred.
+17:25  stoned: :)
+--- Log closed Wed Oct 20 21:13:12 2010
+--- Log opened Wed Oct 20 21:13:34 2010
+21:13 --- Users 457 nicks [5 ops, 0 halfops, 1 voices, 451 normal]
+21:13 --- Server: [niven.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+21:15 --- Channel ##php was synced in 125 seconds
+--- Log closed Wed Oct 20 21:21:39 2010
+--- Log opened Wed Oct 20 21:22:01 2010
+21:22 --- Users 459 nicks [5 ops, 0 halfops, 1 voices, 453 normal]
+21:22  git__: apc is built into php6
+21:22  Alan_Hicks: git__: Unfortunately I'm stuck with php5
+21:23  git__: have u gather statistic on your site?
+21:23  NoiseEee: sweb: sounds like you don't have correct form encoding for file uploads
+21:23  NoiseEee: git__: ????
+21:23  git__: i find that getting the elapsed load time for each page stats help
+21:23  sweb: NoiseEee, ty
+21:23 --- Channel ##php was synced in 111 seconds
+21:23  Alan_Hicks: git__: Only the most rudimentary ones. I've been kinda side-swiped by this suddenly.
+21:33 @caffinated: git__: PHP6 is largely irrelevant as it doesn't even have a production release yet.
+21:33  chachan: Hi, everyone, I'm trying to createmulti independent processes using exec from the parent process and fork from the child process, but the exec function doesn't realese the control, instead of releasing it waits for the output
+21:34  chachan: is there a way to release the exec function calling, so, I can call many exec function, is that clear enough?
+21:35  chachan: I really don't care wheather I have to use exec or another function, I just want to make many call to external scripts
+21:37  hmd: Alan_Hicks, don't worry, everyone is "stuck" on PHP5 :P
+21:37  hmd: Alan_Hicks, PHP6 doesn't have a release.
+21:38  NiLon: there's no php 6 at all
+21:38  hmd: Technically..
+21:38  hmd: There is :/
+21:39  NoiseEee: chachan: as you can see, php really isn't the best language for what you want to do.  consider doing that via CRON if you can
+21:39  Alan_Hicks: hmd: Ah. :-) I hadn't even looked. I'm forced to use 5.2.x right now. If 5.3 is out then 6 is way out.
+21:40  hmd: Alan_Hicks, 5.3 is starting to gain adoption. It's on the horizon.
+21:40  chachan: I have this: http://fpaste.org/cmti/
+21:40  hmd: Alan_Hicks, 5.2 is realistic ;)
+21:40  hmd: chachan, if you mean parallel/asynchronous process calls, proc_open/popen/process_open
+21:40  pteague_work: 5.3 is worth it if you can get 5.3
+21:40  hmd: chachan, I do forget which one was the best, but one of these.
+21:41  pteague_work: it has goto statements
+21:41  hmd: pteague_work, how could we forget.
+21:41 * hmd forgets...
+--- Log closed Wed Oct 20 21:49:15 2010
+--- Log opened Wed Oct 20 21:49:39 2010
+21:49 --- Users 460 nicks [5 ops, 0 halfops, 1 voices, 454 normal]
+21:50  pteague_work: Strav, you mean `SubClass extends Class { ... }` ?
+21:50  hmd: Strav, give us all that's applicable 1. code or pseudo code on a pastebin 2. expected results 3. actual results.
+21:50  Strav: pteague_work: yea it
+21:50  Strav: it's a subclass.
+21:51  Strav: hmd: it'll fetch a pastebin, gimme a sec.
+21:51 --- Channel ##php was synced in 111 seconds
+21:52  prgmrBill: what if I am definitely in object context and I get Using $this when not in object context?
+21:52  domo: then you're not in an object
+21:52  domo: paste some code ;)
+21:53  dp: php is segfaulting on me; is there a way to have php output debug stuff until such time as it segfaults?
+21:54  prgmrBill: so bizarre
+21:54  prgmrBill: I changed Class::method to $class->method
+21:54  prgmrBill: and it worked
+21:54  Strav: hmd: here: http://pastebin.com/HXr6jWwD
+21:54  prgmrBill: so I'm guessing if you try to call a method statically when it's not static, you get that cryptic error message
+21:55  hmd: prgmrBill, yea, very cryptic :P
+21:56  Strav: (of course, I've stripped irrelevant code from it)
+21:56  deadowl: the this variable in javascript is wierd
+21:57  b1lly: lets say I have a string like .... brakes_bendix_price                    is there like an instring command to grab between the two "_" underscores? so that it returnns bendix
+21:57  garrett__: What's the favored method of running unit tests for things that need to interact with the db?  use pdo and a local sqlite?
+21:57  garrett__: and write your code using PDO or something so you can interchange the underlying bits?
+21:57  Strav: Now since php is evaluated, I would have guessed that $this->validator would be resolved as an object.
+21:57  prgmrBill: hmd: do you think that error message says "you called a method statically when you shouldn't have"?
+21:57  prgmrBill: it really doesn't
+21:58  hmd: prgmrBill, what does it say
+21:58  prgmrBill: hmd: Using $this when not in object context?
+21:58  prgmrBill: I guess perhaps they mean the object doesn't exist when called statically
+22:00  b1lly: say $string = "brakes_bendix_price";   is there away to return what is inbetween the two underscores? so that I can return a value of "bendix"?
+22:00  hmd: prgmrBill, this means you have not enabled E_STRICT which would directly complain about calling static method that is not static.
+22:00  hmd: prgmrBill, instead it runs it and then it sees $this in a static call and it, naturally, s**ts itself.
+22:00  prgmrBill: hmd: is that different than E_ALL? I have that on
+22:01  themiddleman: Hi guys, is there an easy to convert a string formatted: '2010-10-20' to a timestamp?
+22:01  hmd: prgmrBill, somehow E_ALL doesn't include E_STRICT you need to specify both E_ALL | E_STRICT
+22:01  prgmrBill: themiddleman: strtotime
+22:01  prgmrBill: b1lly: explode by _ and return the second array element
+22:01  prgmrBill: hmd: awesome, thanks
+22:01  themiddleman: prgmrBill: thanks
+22:01  b1lly: orgrnvukk!!!!!!!!!!!
+22:01  b1lly: prgmrBill: thx man
+22:02  prgmrBill: np guys
+22:02  Strav: May anyone take a look at this  http://pastebin.com/HXr6jWwD and tell my why can't php resolve $this->validator to an object? (btw the Validator class def isn't in the paste and that shouldn't matter, it instantiate correctly).
+22:03  hmd: Strav, sorry for the delay. First thing I notice, aside from your issue: you changed the constructor signature, which is a bad idea.
+22:03  hmd: Strav, I'll read more now.
+22:06 --- cescalante is now known as ce_afk
+22:06  Strav: hdm: it's really been a while since I touched php, so it's a bad idea to specify args to __construct()?
+22:06  hmd: Strav, second thing I notice, $validator is private.
+22:06  hmd: And private var are local to a class, make it protected, that's what you want.
+22:06  hmd: private: only the class sees it;  protected: class and subclasses see it;  public: everyone sees it
+22:07  ispirto: hey, how can i post an XML to an url by curl?
+22:07  hmd: Strav, no, what's a bad idea is to make a subclass and change its *signature*
+22:07  hmd: Strav, PHP will complain in some cases when it detect you do that.
+22:07  hmd: detects*
+22:08  hmd: Strav, a subclass can do more and have more methods, but it needs to be a strict superset of the parent class for those concerned that use it.
+22:08  Strav: hdm: about the private keywords, before making scrapping my code, I was using accessors but perhaps now this is actually the problem.
+22:08  hmd: Strav, pardon?
+22:09  Strav: hdm: my properties were private and the subclass constructors used public setters and getters to set and get them.
+--- Log closed Wed Oct 20 22:15:49 2010
+--- Log opened Wed Oct 20 22:16:14 2010
+22:16 --- Users 457 nicks [5 ops, 0 halfops, 1 voices, 451 normal]
+22:16  hmd: ygip, try this, after you set the memory limit to 256mb, also get it and echo it, see if it was set at all.
+22:16  ygip: Fatal error: Out of memory is what it said. i dont get the error right now
+22:16  ygip: i found the error in a google search
+22:16  ygip: ok
+22:16  ispirto: anyone knows how i can post a xml to an api?
+22:16  hmd: Ok wait.
+22:16  hmd: This is not a memoty limit error, ygip.
+22:17  hmd: That's a system eror.
+22:17  ygip: oh?
+22:17  ygip: i checked and my parallels machine said it had 755 memory left
+22:17  ygip: 255 left
+22:17  ygip: 25%
+22:17  hmd: ygip, do you use WordPress with that SEO all-in-one extension?
+22:17 --- Channel ##php was synced in 112 seconds
+22:18  ygip: no, I use Qcodo framework, thats all
+22:18  pteague_work: ispirto, curl would work
+22:18  hmd: ygip, try to set your memory limit low and see if it dies.
+22:19  hmd: ygip, if it does, it'll tell you when, and might orient you as to what the usage  comes from
+22:19  ygip: good idea, but if it says "Fatal error: Out of memory" it's the OS deniying it ram?
+22:19  hmd: ygip, if you set it low and you still get Out of Memory error, it *might* be a leak.
+22:19  ispirto: pteague_work, http://pastebin.com/TUEbNt55 returns bad request error
+22:20  dp: TML: still here?
+22:22  hmd: ygip, let me check something
+22:23  hmd: ygip, this is typically how a memory limit error looks like: Fatal error: Allowed memory size of 1048576 bytes exhausted (tried to allocate 524289 bytes) in somefile.php on line 4
+22:23  Ross: Important message:
+22:23  Ross: http://twitter.com/wikileaks
+22:23  Ross: Not realted, off topic, but...
+22:23  Ross: related*
+22:23  hmd: ygip, Out Of Memory I think means a system issue.
+22:23  Ross: "WikiLeaks communications infrastructure is currently under attack. Project BO move to coms channel S. Activate Reston5."
+22:23  hmd: ygip, i.e. leak, no RAM, something else takes RAM, something like that.
+22:24  hmd: ygip, try with a low limit as I said, say, 16MB, and see how it goes.
+22:24  pteague_work: ispirto, um, look at CURLOPT_HTTPHEADER for the headers & CURLOPT_POSTFIELDS for your $xml
+22:25  ispirto: pteague_work, POSTFIELDS doesn't work
+22:26  hmd: Ross, they like drama a lot.
+22:26  ygip: its on 16mb now
+22:26  hmd: ygip, does it manage to serve pages when you browser
+22:26  ygip: http://mtgpulse.com/includes/info.php right?
+22:26  hmd: browse*
+22:26  hmd: ygip, yes it's at 16M
+22:26  hmd: B
+22:27  ygip: tried spamming it a bit
+22:27  ygip: no errors
+22:27  pteague_work: ispirto, are you sure? & are you sure your sample.xml is in the right format?
+22:27  pteague_work: as it is .net... .net has weird issues
+22:27  hmd: ygip, is there a page that may do something more complicated
+22:27  ispirto: pteague, i've added content-length and worked now
+22:27  Igoru: can i make questions about phpunit here?
+22:27  ispirto: weird
+22:31  hmd: Ross, the Pentagon is still using this language of "return the documents to us", as if someone physically went there and delivered papers :/
+22:31  hmd: Some very old folks in there, it seems.
+22:32  ygip: hmd, hmm i dont think it on any pages gets that much more complicated
+22:32  victrolla: hmd, I think they want the documents 'returned' so they know exactly what wikileaks has. They're sort of scrambling to find out what everyone knows
+22:35  hmd: victrolla, yes, I do find the way they formulate it slightly comic, though.
+--- Log closed Wed Oct 20 22:42:28 2010
+--- Log opened Wed Oct 20 22:42:54 2010
+22:42 --- Users 451 nicks [5 ops, 0 halfops, 1 voices, 445 normal]
+22:42  prgmrBill: nah that seems far-fetched
+22:44 --- Channel ##php was synced in 109 seconds
+22:45  hmd: sie, I don't know what's it called, but $a &= $b means $a = $a & $b, which is bitwise AND.
+22:45  hmd: sie, bit math with integers.
+22:45  hmd: Not to be confused with =&, which is what prgmrBill said..
+22:45  sie: Oh, I'm talking about =&.
+22:46  hmd: :/
+22:46  sie: &= is good ol' bitwise mahick. :]
+22:46  sie: magick*
+22:46  NoiseEee: and what's your question
+22:46  azazul: emm .. peeps ... just checking , but
+22:46  NoiseEee: what kind of answer do you expect from "How's &= called?"
+22:46  azazul: do i have to sanitize data befor using  execute() for prepared PDO statement ?
+22:46  sie: NoiseEee, I got exactly what I wanted, almost.
+22:46  NoiseEee: azazul: before!!
+22:47  sie: What does it really do? It assigns the thing your assigning to to the last instance of class made?
+22:47  prgmrBill: hmd, thanks for correcting me :P
+22:47  NoiseEee: sie: it has minimal use really
+22:47  prgmrBill: you're just making a fool of me today
+22:47  azazul: NoiseEee: that didnt look like an answer
+22:47  NoiseEee: passing by reference, sie. http://php.net/manual/en/language.references.pass.php
+22:47  NoiseEee: azazul: hmmm?
+22:48  Deltachaos: i try to do a "convert -size 100x500 xc: -sparse-color Shepards '50 300 rgba(255, 0, 255, 0)' test.png" with the PHP Imagic class
+22:48  Deltachaos: there is a metode called: Imagic::sparseColorImage
+22:48  Deltachaos: but if i try to do the folowring: sparseColorImage(SPEPARDS, array( 0, 0, 1, 0 ), Imagick::COLOR_ALPHA) i get only a red image
+22:48  Deltachaos: i try to understand witch values in the array are do what but it dosent make any sense
+22:50  hmd: Deltachaos, BGRA?
+22:50  Ineluctable: I have two html select forms (http://fpaste.org/3OFM/)  The first select echos the menu names(i.e. menu 1, menu 2, etc...) and the second the page position in the menu (i.e. 1, 2, etc).  I need the second select form to display something like if menu one is selected then give the position(order) of the page you want to display under that menu.
+22:50  Ineluctable: I have googeled for two days, and I am lost what would I search for or how would I do this?
+22:51  kov: hey, I have a script that does this: "$command = $_GET['command'];" if command is not given in the GET request, though, the script errors out and logs something about undefined index; is there a setting I can use to disable this being strict?
+22:51  Evil_Otto: check for $_GET['command'] being set first
+22:52  Deltachaos: hmd: 0, 1, 0, 0 => black
+22:52  Deltachaos:  0, 0, 1, 0 => red
+22:52  Deltachaos:  0, 0, 0, 1 => green
+22:52  Deltachaos: 1, 0, 0, 0 => black
+22:52  kov: yeah, I'm aware of that, but can I make that work without changing the code? it does work on a couple other servers, so I'm wondering
+22:52  NoiseEee: kov: turn down error reporting
+22:52  Evil_Otto: it probably just doesn't report the error on the other servers
+22:52 * Evil_Otto thwaps NoiseEee 
+22:52  NoiseEee: thank you sir may i have another
+22:52  Evil_Otto: he should fix the error :P
+22:53  NoiseEee: obv!
+22:53  Evil_Otto: change the code.
+22:53  NoiseEee: but his request is "without changing the code"
+22:53  hmd: Deltachaos, HSVA?
+22:53  Evil_Otto: yeah well i'd like to request a pony but i'm not getting that either
+22:53  kov: this code is part of a test suite, the tests pass on the other servers but not on this one (which has a newer php than the others, I'm almost certain)
+22:54  kov: so I'm pretty sure there's a difference in behavior handling this case
+22:54  Xyphoid: your error_reporting ini setting is different
+22:54  Deltachaos: and 0, 0, 1, 1 => yellow
+22:54  Deltachaos: hmd: can you give me an example
+22:55  kov: Xyphoid, shouldn't error reporting affect just what is reported, and not how it behaves?
+22:55  PointMan: !paste
+22:55  PointMan: where can I paste code?
+22:55  Deltachaos: PointMan: http://pastebin.org/
+22:55  Xyphoid: if your code prints errors to screen, then error_reporting will absolutely affect how it behaves
+22:55  NoiseEee: kov: http://php.net/manual/en/function.error-reporting.php
+22:56  NoiseEee: PointMan: pastebin of your choice
+22:56  kov: the code does not report errors, no
+22:56  NoiseEee: kov... read the link
+22:56  kov: NoiseEee, on it!
+22:58  Deltachaos: hmd: 0, 68, 48, 0 gives rgb(255, 0, 0) but it suld be in rgb(123, 39, 39)
+22:58  Deltachaos: hmpf :(
+22:59  kov: NoiseEee, so that seems to be indeed related only to error printing, not to how it behaves, or am I missing something?
+22:59  kov: this is the file, by the way: http://trac.webkit.org/browser/trunk/LayoutTests/http/tests/resources/network-simulator.php#L156
+22:59  NoiseEee: kov: on one server, you are requesting that warnings be reported.  on the other, your are not.
+23:00  Evil_Otto: make your error_reporting setting the same as on the servers it 'works' on and i bet you get the same results
+23:00  kov: NoiseEee, I understand that
+23:00  hmd: Deltachaos, you know, I gave $30 bucks to the imagic author for a Windows version of the extension (and many did) for a Visual Studio license, we later learned he got a free copy on a conference, but didn't return the money, AND today there's still no Windows version. Hope that says enough.
+23:00  NoiseEee: kov: okay, and now your question is?
+23:00  kov: NoiseEee, notice I did not say the other server does not report the warning, I'm saying the test passes
+23:00  NoiseEee: what test?
+23:01  Evil_Otto: error reporting will affect the outcome of the test
+23:01  kov: NoiseEee, the webkit test that uses this php code
+23:01  Evil_Otto: now try the error_reporting setting
+23:01  kov: Evil_Otto, it would, if the error was being reported to the test results, yeah =)
+23:01  Deltachaos: hmd: hmm but a friend of my work on windows and use the imagic class as well? haw can it be? :D
+23:01  Evil_Otto: obv it is
+23:02  Evil_Otto: just try the setting
+23:02  kov: Evil_Otto, sorry, but it's not
+23:02  Evil_Otto: and if it doesn't work, then let us know
+23:02  kov: this is a webkit test, the warning is only going to the apache log
+23:03  NoiseEee: ...
+23:03  kov: but anyway, thanks for your attention, I'll try to figure it out
+23:04  hmd: Deltachaos, hmm, Windows builds were made available on Sep 19.
+23:04  hmd: Deltachaos, there was a period of over an year where no Windows builds were available and I stopped bothering.
+23:05  hmd: Deltachaos, I'll check, thanks for the heads up.
+--- Log closed Wed Oct 20 23:11:06 2010
+--- Log opened Wed Oct 20 23:11:28 2010
+23:11 --- Users 443 nicks [5 ops, 0 halfops, 1 voices, 437 normal]
+23:11  hmd: shad0w1e, if it's HTTP, you can simply do a file_get_contents
+23:11  GoogleGuy: shad0w1e: well define best really
+23:11  hmd: shad0w1e, you can setup a "context" (check stream context) to setup a timeout.
+23:12 --- hsa2|gone is now known as hsa2
+23:12  pea[0]: can someone proof read this little script. it's just supposed to echo out something a day before to a day after oct 31: http://omgpaste.com/d/dvm5rs/halloween.php
+23:13  pea[0]: i always end up making mistakes with this kinda thing and i can't check it
+23:13 --- Channel ##php was synced in 112 seconds
+23:13  shad0w1e: what would a GoogleGuy be doing in a PHP room?
+23:13  Rye_Seronie: QUESTION: can header() be a relative path or does it have to be an absolute path?
+23:13  GoogleGuy: what would a shad0w1e be doing in a PHP channel?
+23:14  shad0w1e: there's no company called shad0w1e that doesn't use PHP :D
+23:14  smallfoot-: if ($moo == "HELLO") is different from "hello" ?
+23:14  pea[0]: you mean header('location: ...') ?
+23:14  Rye_Seronie: yeah
+23:14  pea[0]: it can be anything
+23:14  GoogleGuy: yea that didn't make any sense
+23:14  git__: google guy wants to say hello
+23:15  Rye_Seronie: so if I make it ../index.php it should go up on level correct?
+23:15  Xyphoid: googleguy isn't a google person
+23:15  pea[0]: no one wants to proof read my script? it's only 7 lines
+23:15  GoogleGuy: pea[0]: there's nothing wrong with your code
+23:15  pea[0]: thanks
+23:15  GoogleGuy: you can't do a simple debugging of 7 lines of code on your own?
+23:16  pea[0]: i did
+23:16  GoogleGuy: So what's to proof read... this isn't grammar 101
+23:16  pea[0]: um it was a play on words
+23:16 --- zamabe_ is now known as zamabe
+23:18  Rye_Seronie: this should work right? header("location: ../index.php");
+23:18  Xyphoid: pea[0]: i recommend putting () around each subblock in a large expression like that
+23:18  Xyphoid: much easier to see your intention
+23:18  pea[0]: yeh
+23:19  Rye_Seronie: hmmm
+23:19  GoogleGuy: Rye_Seronie: yes, but remember it's URL relative in that case, not filesystem relative.
+23:19  Rye_Seronie: could you elaborate?
+23:20  GoogleGuy: Was that really so hard to understand? The location redirects the browser through the status code. The location is relative to the URL the agent is visiting.
+23:21  victrolla: lol
+23:21  victrolla: GoogleGuy you're always so angry man
+23:21  GoogleGuy: How am I angry?
+23:21  Xyphoid: you add in a little barb every time you respond to someone
+23:21  victrolla: ^
+23:22  GoogleGuy: actually, I'm rarely ever emotional
+23:22  Xyphoid: like they've insulted you by asking something so STUPID
+23:22  pea[0]: you called me cocky the other day and made me cry :(
+23:22  GoogleGuy: Xyphoid: that's just my cynical attitude
+23:22  GoogleGuy: pea[0]: was you cocky?
+23:22  pea[0]: of course
+23:22  Xyphoid: well, consider losing it
+23:23  GoogleGuy: pea[0]: well then how's that my fault?
+23:23  pea[0]: :'(
+23:24  Xyphoid: i always recommend http://freenode.net/channel_guidelines.shtml it's a really great set of principles
+23:24  JosephK: Hii all
+23:25  JosephK: Question:  How would one expressed if (this index is defined at all)  ??
+23:25  Tyler--: if(isset($foo)) { }
+23:25  Xyphoid: isset($array[$index]) is the simplest approach
+23:25  GoogleGuy: where's saje... I want his auto response thingy
+23:26  JosephK: okay thanks
+--- Log closed Wed Oct 20 23:38:43 2010

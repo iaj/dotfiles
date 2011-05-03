@@ -1,0 +1,211 @@
+--- Log opened Mon Nov 22 00:00:51 2010
+02:17  doublehp: how do i make a regexp match any char, except " ? any, including ; = SPACE QUESTION-MARK & ........
+02:19  cthuluh: [^"?...]
+02:24  doublehp: what does "&" match ?
+02:25  cthuluh: "&" matches "&", & is only special in the right hand side of a s command
+02:26  doublehp: no, in my case, [0-9a-zA-Z\/_-\&] and [0-9a-zA-Z\/_-&] both match also -;- and -"-
+02:26  doublehp: when i remove & or \&, " and ; go away
+02:27  doublehp: [^&"] is cleaner anyway
+02:32  cthuluh: 4# echo \" | grep '[0-9a-zA-Z/_-&]'
+02:32  shbot: cthuluh: no output
+02:32  cthuluh: hmmm
+02:32  cthuluh: 4# echo $LANG $LC_ALL
+02:32  shbot: cthuluh: no output
+02:33  doublehp: http://pastebin.com/5akRJMJj
+02:33  doublehp: ( I promise i did not fake this paste ^^ )
+02:34  cthuluh: I don't have those locales installed, but anyway...
+02:34  cthuluh: you want your character range to match a '-' ?
+02:34  doublehp: i don't mind, [^"] works for me, but for curiosity, you said that & matches only &, while, not for me
+02:35  doublehp: obviously, as i said first, & matches "
+02:35  doublehp: and also ;
+02:35  doublehp: and maybe other ones i ... could not "guess" yet
+02:35  cthuluh: no, the character range [_-&] matches " and ;
+02:35  cthuluh: this is locale-dependant
+02:36  doublehp: mouarf
+02:36  doublehp: get it: "range" :D
+02:37  cthuluh: fwi, [_-&] is not valid on every systems (openbsd's grep rejects it)
+02:37  doublehp: =>  '[_\-&]' to just get _ minus and & ?
+02:38  cthuluh: no, [-_&] or [_&-]
+02:38  cthuluh: well, the \- solution might work, but it's not the safer one, imho
+02:38  doublehp: oh ... so, just put minus at begin or end ?
+02:38  cthuluh: where it can't imply a character range, yes
+02:41  doublehp: thanks :)
+02:46  cthuluh: you're welcome
+03:47  sc1ssor: Hello fellow sed people
+03:47  sc1ssor: I cannot sed for my life
+03:48  sc1ssor: So I need your help
+03:48  sc1ssor: How do I search for a string between "s and "extract" it?
+03:49  sc1ssor: Or I think in sed
+03:49  sc1ssor: I need to delete everything up to the "
+03:49  sc1ssor: then stop deleting
+03:49  sc1ssor: until I hit another "
+03:49  sc1ssor: then keep deleting
+03:51  cthuluh: I thought that the solution I gave you in #bash worked well...
+03:52  cthuluh: perhaps adding a space after between \1 and / would help
+03:53  sc1ssor: Oh, was it for me?
+03:53  sc1ssor: I seriously didn't know :p
+03:54  cthuluh: it was
+03:54  sc1ssor: Holy jeez, thank you :)
+03:54  cthuluh: well... you're welcome?
+03:54  sc1ssor: Is there some way you could add a new line to every line?
+03:55  sc1ssor: And search for <img as well?
+03:55  cthuluh: hmmm
+03:56  cthuluh: sed ': loop; $!{ N; b loop; }; s/[^"]*"\([^"]*\)"[^"]*/ \1\
+03:56  cthuluh: /g'
+03:56  cthuluh: about the <img, I don't know
+03:56  cthuluh: I didn't think you wanted to parse html ;)
+03:57  sc1ssor: I do :P
+03:57  guther: what do u mean by search for <img?
+03:57  cthuluh: that's evil
+03:57  guther: as well
+03:57  sc1ssor: "<img"
+03:57  cthuluh: sed ': loop; $!{ N; b loop; }; s/[^"]*<img src="\([^"]*\)"[^"]*/ \1\
+03:57  cthuluh: /g'
+03:58  sc1ssor: Didnt work
+03:58  sc1ssor: Cannot write to `-' (Broken pipe).
+03:58  cthuluh: well...
+03:58  cthuluh: are you sure about that?
+03:58  guther: what are u doing? parsing website for images?
+03:58  sc1ssor: yea
+03:59  guther: use firefox
+03:59  sc1ssor: .
+03:59  guther: join #sqlite
+03:59  sc1ssor: I'd rather do it with one command line command. :)
+03:59  sc1ssor: And I think cthuluh is pretty close
+03:59  sc1ssor: to completing that
+03:59  guther: wget/curl, or lynx -dump?
+03:59  sc1ssor: wget
+04:00  guther: u know - lynx -dump lists all links at the end of it's output
+04:00  guther: have a look
+04:00  sc1ssor: ok
+04:01  cthuluh: lynx -dump -listonly
+04:01  sc1ssor: Pretty.
+04:01  sc1ssor: Any way to get rid of the line numbers
+04:02  cthuluh: oh and by the way, the last sed command is wrong
+04:02  cthuluh: well
+04:02  sc1ssor: Yeah I know :p
+04:02  cthuluh: ;)
+04:02  sc1ssor: sed does seem super useful
+04:02  sc1ssor: I'd like to learn how to use it
+04:02  sc1ssor: :\
+04:02  sc1ssor: But the docs on gnu.org are confusing
+04:02  cthuluh: guess what?
+04:03  cthuluh: well, there's not only GNU sed
+04:03  cthuluh: and there are links in the /topic
+04:03  sc1ssor: ah
+04:03  sc1ssor: Like
+04:03  sc1ssor: doesn't s/ replace something?
+04:04  cthuluh: it's supposed to, yes. why?
+04:05  sc1ssor: Well, how is replacing something going to take something out?...
+04:06  guther: replace it by nothing?!
+04:06  sc1ssor: to me it looks like you're replacing <img src="asdfasf">
+04:06  sc1ssor: or whatever
+04:11  sc1ssor: This tutorial is much better.
+04:11  cthuluh: I don't understand, you have lynx -dump now, you don't need sed antmore
+04:11  cthuluh: anymore*
+04:13  sc1ssor: Yea but not everyone has lynx :\
+04:13  sc1ssor: But on top of that, I'd just like to learn it.
+04:14  sc1ssor: :)
+04:15  sc1ssor: I don't quite understand what & does. XD
+04:17  Riviera: But.
+04:17  Riviera: You want to learn? :)
+04:19  sc1ssor: Yes.
+04:20  Riviera: So ... look it up :)
+04:20  Riviera: To learn!
+04:20  sc1ssor: The solution requires the special character "&." It corresponds to the pattern found.
+04:21  Riviera: Cool
+04:21  sc1ssor: I don't understand this at all
+04:21  sc1ssor: oh well.
+04:21  sc1ssor: s/[0-1000]//
+04:22  sc1ssor: Shouldnt that get rid of numbers between 0 and 1000?
+04:22  Riviera: no
+04:22  Riviera: everything in [] matches exactly one character
+04:22  Riviera: 1000 has a length of 4 characters
+04:23  sc1ssor: oh.
+04:23  sc1ssor: ah
+04:24  sc1ssor: How do I search for numbers from 0 to 1000 ending with a .
+04:24  sc1ssor: like: 564.
+04:25  Riviera: I think that's impossible.
+04:25  Riviera: From 0 to 9999 would be: [[:digit:]]\{1,4\}
+04:26  Riviera: well,
+04:26  Riviera: [[:digit:]]\{1,4\}\.
+04:26  sc1ssor: ah ok
+04:26  sc1ssor: that's fine too
+04:26  sc1ssor: :p
+04:29  Riviera: With alternation one could build something along that: \([0-9]\|[1-9][0-9]\|[1-9][0-9][0-9]\|1000\)\.
+04:29  Riviera: But standard sed does not support \|, only a few, like GNU sed, do.
+--- Log closed Mon Nov 22 11:20:31 2010
+--- Log opened Mon Nov 22 11:20:53 2010
+11:20 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+11:22 --- Channel ##sed was synced in 97 seconds
+--- Log closed Mon Nov 22 12:38:06 2010
+--- Log opened Mon Nov 22 12:38:34 2010
+12:38 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+12:40 --- Channel ##sed was synced in 101 seconds
+14:40 --- Natch is now known as Natch|
+--- Log closed Mon Nov 22 16:05:28 2010
+--- Log opened Mon Nov 22 16:11:25 2010
+16:11 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+16:13 --- Channel ##sed was synced in 146 seconds
+--- Log closed Mon Nov 22 16:41:52 2010
+--- Log opened Mon Nov 22 16:42:12 2010
+16:42 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+16:43 --- Channel ##sed was synced in 98 seconds
+--- Log closed Mon Nov 22 17:41:43 2010
+--- Log opened Mon Nov 22 17:42:07 2010
+17:42 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+17:43 --- Channel ##sed was synced in 100 seconds
+--- Log closed Mon Nov 22 18:31:26 2010
+--- Log opened Mon Nov 22 18:31:50 2010
+18:31 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+18:33 --- Channel ##sed was synced in 99 seconds
+--- Log closed Mon Nov 22 19:41:31 2010
+--- Log opened Mon Nov 22 19:41:53 2010
+19:41 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+19:43 --- Channel ##sed was synced in 97 seconds
+19:44  Riviera: Kream: is that removing everything up and including "From: "?
+19:44  Riviera: up to*
+19:46  Riviera: 4# sed 's/.*From: //' <<< 'Mail/tcom/new/1290416286_1.13085.muashell,U=286,FMD5=6026c55a7aa971d83bfab5b4c50415b1:2,:From: Ashank <ashankar@xxx.xxxlka.com>'
+19:46  shbot: Riviera: no output within the time limit
+19:46  Riviera: mh.
+19:46  Riviera: 4# sed 's/.*From: //' <<< 'Mail/tcom/new/1290416286_1.13085.muashell,U=286,FMD5=6026c55a7aa971d83bfab5b4c50415b1:2,:From: Ashank <ashankar@xxx.xxxlka.com>'
+19:46  shbot: Riviera: Ashank <ashankar@xxx.xxxlka.com>
+19:49  Kream: Riviera: yes indeed
+19:50  Kream: huh. suppose i have a huge file with tons of lines like that?
+19:50  Riviera: so, then try sed 's/.*From: //'
+19:56  Kream: wow
+19:56  Kream: this is so awesome
+19:56  Kream: i'm having an epiphany
+20:30  Bop: can anyone help me with a reg exp ? numbers with decimal , without non-significant zeros ( valid : 0 ; 0,3 ; 3,01 ; not valid : 01 ; 0,0 ; 0,30 )
+20:35  trumpen: 4# printf "%s\n" 0 0,3 3,01 01 0,0 0,30 | sed -n '/^\(0\|[1-9][0-9]*\),[0-9]*[1-9]$/ p'
+20:35  shbot: trumpen: 0,3
+20:35  shbot: trumpen: 3,01
+20:37  Bop: lacks 0 :p
+20:37  trumpen: do you need others intergers too? I mean 1 2 3 ...
+20:37  Bop: yeah
+20:38  Bop: all numbers
+20:38  Bop: just non-significant zeros wont be matched
+20:39  Bop: this numbers are just a sample
+20:39  Bop: it needs to match all numbers
+20:45  trumpen: this should match all numbers that don't have non-significant zeros: /^\(0\|[1-9][0-9]*\)\(,[0-9]*[1-9]\)\?$/
+20:46  Bop: let me check
+20:47  Bop: 4# printf "%s\n" 0 0,3 3,01 01 0,0 0,30 | sed -n '/^\(0\|[1-9][0-9]*\)\(,[0-9]*[1-9]\)\?$/'
+20:47  shbot: Bop: sed: -e expression #1, char 40: missing command
+20:47  Bop: trumpen, ^
+20:51  Bop: ops
+20:52  Bop: lacks pprint in the end
+20:52  Bop: it works ! xD
+21:07  Bop: trumpen, what if values are mixed in the text , is there anything i can do ?
+21:07  Bop: like bla ble bli 0,4 , bli blo blu
+21:11  Bop: i could make a reg exp to aniquilate all alphabetic chars , but that wont help me if line has 2 or more acorrences :s
+21:23  Bop: trumpen, any help ? :s
+--- Log closed Mon Nov 22 23:41:24 2010
+--- Log opened Mon Nov 22 23:41:55 2010
+23:41 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+23:43 --- Channel ##sed was synced in 100 seconds
+23:55  Bop: i have this sed reg exp '/^\(0\|[1-9][0-9]*\)\(,[0-9]*[1-9]\)\?$/p' and it works for matching numbers or floating withtout non-significant zeros (ex 0,30 ; 030 , 0 ) but i need it to find these numbers in the middle of text and not as number \n number \n format
+23:57  mczinger: i have a long string with spaces, dashes, etc. (it's a filename) and i'd like to extract the numbers in a certain format
+23:58  mczinger: example: The Venture Bros. - S01E03 - Mid-life Chrysalis.avi -> 01.03
+23:58  mczinger: i'm having major issues
+23:58  mczinger: any help?
+--- Log closed Tue Nov 23 00:00:02 2010

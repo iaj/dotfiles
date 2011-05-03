@@ -1,0 +1,176 @@
+--- Log opened Sun Oct 17 00:00:17 2010
+--- Day changed Sun Oct 17 2010
+00:00 --- Channel #bash was synced in 81 seconds
+00:01  go|dfish: 3.2.39(1)-release
+--- Log closed Sun Oct 17 00:03:31 2010
+--- Log opened Sun Oct 17 12:27:40 2010
+12:27 --- Users 502 nicks [0 ops, 0 halfops, 0 voices, 502 normal]
+12:29 --- Channel #bash was synced in 97 seconds
+12:32  soreau: I am trying to say if [ ! cmd arg1 ]; then die fi
+12:32  twkm: remove the [ and ].
+12:32  soreau: ah
+12:32  twkm: notice that i didn't use them in my example.
+12:32  twkm: i.e., they are not part of if's syntax.
+12:32  erUSUL: command arg1 || die
+12:32  geirha: The [ command doesn't execute other commands
+12:36  wrksx: is there any diff beetween command 2> /dev/null and command 2>> /dev/null
+12:36  jasonx: hi. is it possible to write a one-liner that will play a sound file every 15 minutes?
+12:36  pgas: wrksx: no
+12:37  wrksx: pgas, ok thx, the doulbe >> mean concatenation if it where redirecting to a file, that's rtight ?
+12:37  geirha: wrksx: if you change /dev/null to a regular file, there is a difference
+12:37  wrksx: I just asked to be sure I understood
+12:38  pgas: jasonx: while :;do playsound & sleep $((15*60));done # but maybe use cron instead
+12:38  geirha: Yes >> starts writing at the end of the file.  > empties the file, then starts writing at the start.
+12:39  soreau: twkm: Thanks, it's much better with if conditionals
+12:39  soreau: (I never looked at your example though ;)
+12:39  twkm: *shrug*
+12:40  jasonx: pgas thank you.
+12:42  pgas: jasonx: this version will not run exactly every 15 minutes but every 15minutes plus some milliseconds, so it might not be good enough for your purpose
+12:43  jasonx: pgas it's good enough!
+12:46  MessedUpHare: Hi all, I'm trying to write a bash script that watches a directory then makes an action on new files in a directory (the easy part) but doesn't take an action if the file is still copying to the directory.
+12:46  MessedUpHare: Currently i'm trying to get it to read the filesize then wait 5 seconds and check again, if the file hasn't increased in size then ok to go..
+12:47  MessedUpHare: is there a more elegant way of doing this?
+12:47  trash: incron.
+12:48  MessedUpHare: i've used inotify with python before, is this similar?
+12:49  trash: Somehow, yes.
+12:49  MessedUpHare: thanks trash
+12:49  trash: It's linux only though.
+12:49  geirha: There's the inotifywait command on linux
+12:50  Spyzer:  when a service exists on the system then echo $(service service_name status) > /dev/null 2>&1
+12:50  MessedUpHare: I found this on the web, I was trying do this without having to install any extra packages/libraries
+12:50  Spyzer: does redirect the output to the null device
+12:50  Spyzer: otherwise it is printed
+12:50  Spyzer: how can this happen?
+12:50  Spyzer: e.g. echo $(service smb status) > /dev/null 2>&1 prints the output to STDOUT as
+12:50  Spyzer:  service: no such service smb
+12:50  ondrejk: MessedUpHare: incron?
+12:50  Spyzer:  but echo $(service smbd status) > /dev/null
+12:50  trash: Spyzer: WTF?
+12:50  Spyzer: prints nothing
+12:51  trash: Spyzer: Are you also doing echo $(ls)?
+12:51  Spyzer: as expected
+12:51  geirha: Spyzer: lose the echo
+12:51  MessedUpHare: at the moment doing stat -c%s
+12:51  geirha: service smb status >/dev/null 2>&1
+12:51  MessedUpHare: inside a for loop on the folder
+12:52  Spyzer: geriha: echo helps in knowing the return status of the service command
+12:52  trash: Spyzer: WTF?
+12:52  Spyzer: service smbd status
+12:52  geirha: Spyzer: With your echo there, the 2>&1 is only redirecting stderr from the echo command, the service command's stderr goes straight to the tty
+12:52  Spyzer: prints Checking for service sshd                                            running
+12:53  Spyzer: echo $(service sshd status) prints
+12:53  Spyzer: Checking for service sshd ..running
+12:53  Spyzer: the gaps are lost
+12:53  trash: Spyzer: Welcome to word splitting.
+12:53  geirha: Spyzer: No, echo overrides the exit status, making it always return true
+12:54  Spyzer: yeah i meant the echo command sorry, not the return value
+12:54  geirha: if service smb status >/dev/null 2>&1; then echo "it's up"; else echo "it's down or non-existant"; fi
+12:55  Spyzer: geriha: oh yeah, i never looked it that way, thanks
+12:56  clever: how would i go about monitoring the output of 2 commands at once, 'mii-tool -w eth2' and 'iwevent'
+12:56  clever: neither will ever exit, and i need to perform some basic actions based on the output of the 2, in real-time
+12:58  trash: clever: screen with split windows.
+12:58  clever: trash: i need to have bash automaticaly perform the actions
+12:58  trash: Sounds painful, get a real API.
+12:59  clever: if it was by hand, id just background both with & and use one shell
+12:59  clever: iwevent will inform me whenever the wireless link is lost, and mii-tool will do the same for wired
+12:59  clever: trying to automaticaly switch the route rules over when that happens
+13:00  trash: Use a real network manager.
+13:00  clever: i havent seen one that will auto-fallback to wifi without changing ip and everything
+13:03  clever: bbl
+13:03  geirha: If you can tell the lines apart yourself, this might work   while read -r; do echo "$REPLY" done < <(mii-tool & iwevent)
+13:04  clever: geirha: yeah, that looks like it might work
+13:04  clever: i'll work on the parsing and handling it all right when i get back
+13:05  und3f: Good day. I am writing scipt for sh and have problems with passing arguments in variable. opt="--date=\"-1 day\""; date $opt
+13:06  und3f: It doesn't unquote "
+13:06  geirha: You can't put syntactical quotes in variables. Period.
+13:06  taylanub: eval
+13:06 * taylanub runs away
+13:06  geirha: !faq complex > und3f
+13:06  greybot: und3f: http://mywiki.wooledge.org/BashFAQ/050 -- I'm trying to put a command in a variable, but the complex cases always fail!
+13:06  und3f: geirha, thanks )
+13:14  wrksx: I'm still workin on the cron execution of my script, and I wish to log the execution of the script with date and time. Should I do this in my script or does cron provides tool for this ?
+13:16 --- MuzerAway is now known as muzer
+13:17  joeytwiddle: wrksx: grep CRON /var/log/syslog
+13:18  wrksx: joeytwiddle, ok i'll take a look at it
+13:18  wrksx: thank you
+13:27  rawplayer: noes, its jasonx
+13:27  rawplayer: hide the cookies
+13:32  uwjesd: How can I remove all *.class files in the current dir and all its subdirs? "rm -r *.class" did not work.
+13:33  clever: uwjesd: find . -name '*.class'
+13:34  clever: you could then either use -delete on find itself, or -print0 | xargs -0 rm -vi
+13:34  pgas: -exec rm {} +
+13:34  clever: thats a 3rd option
+13:35  clever: since find has -delete on itself, -exec rm {} + is kinda useless, and has extra overhead of calling an external program
+13:35  pgas: gnu find has -delete
+13:35  clever: if you had other arguments, like say -exec rm -vi {} +, it would make more sense
+13:35  clever: ah, i'm not used to the non-gnu versions, havent run into them much
+13:35  uwjesd: find . -delete -name '*.class'   also deleted my whole subdirectory.
+13:36  pgas: yeah the -delete should go after -name
+13:36  clever: using rm -vi is also always safer, since -i asks before deleting
+13:36  erUSUL: uwjesd: why you swapped the order of parameters ?
+13:36  uwjesd: Alright
+13:36  clever: i always use rm -vi when i'm not sure its going to work
+13:37  uwjesd: Thank you very much.
+13:37  erUSUL: clever: -exec echo rm ... you see what is going to do; run second time without the echo
+13:38  clever: yep, or just copy/paste the rm ....'s it spews out and run it
+13:38  clever: assuming the spaces/quoting arent a problem
+13:39  clever: another 'cheap' way to cheat your way out, rm -vi *.class */*.class */*/*.class ....
+13:40  erUSUL: !**
+13:40  greybot: In bash 4, when the globstar shell option is enabled ( shopt -s globstar ), the glob ** expands to all files and directories found recursively under the current directory, and **/ to all directories. As of 4.0.28, combinations like foo/**/*.txt work, but **.txt and foo** do not.
+13:41  clever: whoa
+13:41  clever: an infinite version of my hack! :P
+14:10  clever: if echo "$REPLY" | grep 'link ok'; then
+14:10  clever: what would be another way to do this?
+14:10  twkm: use [ or [[, or ditch the if and use case, or ...
+14:10  geirha: if [[ $REPLY = *"link ok"* ]]; then
+14:11  clever: ah, that looks good
+14:11  clever: i knew there was a pure-bash way
+14:19  clever: geirha: got it all working:)
+14:19  clever: just a minor arp cache problem
+14:20  clever: its to be expected when i keep changing my mac and what port i use on the switch
+14:21  clever: a little bit of poking with arping and i can update the main peer asap, the rest should recover automaticaly
+14:27  c00kiemon5ter: I have a script and read arguments in the order they were given. If $@ is 'a b c' if I read 'a' I can then 'shift' so now $@ is 'b c'. Can I do the same the other way? like 'weird-shift' and have 'a b' ?
+14:29  geirha: set -- "${@:1:$#-1}"
+14:29 --- JmZ is now known as JmZ_
+14:29  c00kiemon5ter: :) thanks
+14:30 --- JmZ_ is now known as JmZ
+14:30 --- JmZ is now known as JmZ_
+14:31  wrksx: if I do this does it also redirect the error output ? > /dev/null
+14:31  pgas: no
+14:33  wrksx: is there a shortcut to redirect standard outpu and error too ?
+14:33  pgas: in bash: &> /dev/null or >&/dev/null
+14:34  c00kiemon5ter: you can redirect err to std and std to null
+14:34  c00kiemon5ter: or std to err and err to null
+14:34  c00kiemon5ter: or all to null
+14:38  wrksx: else can I > /dev/null 2> /dev/null
+14:38  wrksx: <?
+14:39  pgas: yes
+14:39  wrksx: cool
+14:39  pgas: or >/dev/null 2>&1
+14:39  wrksx: ok thank you all
+15:12  TheBonsai: 1
+15:13  twkm: m
+15:13  twkm: 0
+15:13  twkm: 0
+15:13  wrksx: ?
+15:13  rawplayer: s
+15:13  rawplayer: e
+15:15  taylanub: i'm 12 and what's this?
+15:18  hatseflats: hi everyone
+15:18  hatseflats: quick question; can I use bash parameter expansion so that it doesn't put spaces in between de expanded parameters?
+15:19  twkm: what an oddnotion.
+15:19  twkm: oops, i mean... whatanoddnotion.
+15:20  hatseflats: is it?
+15:20  twkm: usually.
+15:20  rawplayer: what are you trying to achieve?
+15:22  hatseflats: Oh, I have a password generator lying around which can take one parameter from the commandline, the set of characters to build a password from, it then does some mangling etc, but I'd like to feed it a couple of ranges which it usually doesn't do. stupid coder forgot that some people like passwords with both lower case and upper case passwords
+15:22  hatseflats: since I don't have access to the source of the thing and it's tied into our way-to-big management system I don't have a choice but to feed it said string
+15:22  hatseflats: figuring bash does expansion, that's my reasoning anyway
+15:23  hatseflats: I can hardwire the ranges, I don't really care, but it got me wondering
+15:23  hatseflats: I found that I need to do something with the IFS environment variable
+15:25  ferret: hatseflats: use arrays
+15:27  ferret: # as=( {a..z} {A..Z} {0..9} _ ); len=11; for ((i=0; i<len; i++)); do printf %s "${as[RANDOM%${#as[@]}]}"; done
+15:27  evalbot: ferret: Uu8j9hUKHpj
+15:28  taylanub: i'd grep /dev/urandom :P
+15:29  hatseflats: ferret: aah, that'll work fine, thanks :)
+--- Log closed Sun Oct 17 21:23:13 2010

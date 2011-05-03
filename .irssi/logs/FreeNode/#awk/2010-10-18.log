@@ -1,0 +1,156 @@
+--- Log opened Mon Oct 18 01:28:54 2010
+01:28 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+01:30 --- Channel #awk was synced in 114 seconds
+--- Log closed Mon Oct 18 04:24:22 2010
+--- Log opened Mon Oct 18 04:24:45 2010
+04:24 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+04:26 --- Channel #awk was synced in 102 seconds
+06:27 --- pr3d4t0r is now known as pr3d4k4t
+--- Log closed Mon Oct 18 08:26:24 2010
+--- Log opened Mon Oct 18 08:26:46 2010
+08:26 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+08:28 --- Channel #awk was synced in 103 seconds
+08:53  galaxywatcher: I am trying to process a lines that only has 4 or more fields in it, less than 4, do not send to standard output. My attempt is starting to get gangly and I need to consolidate: awk -F"," '{print $3}' | awk -F"." '{ print NF ":" $0 } '
+08:53  galaxywatcher: process lines *
+08:55  igli: awk .. '(NF>=4)' # should do that
+08:55  igli: default action is print
+08:57  igli: condition { action }
+08:57  galaxywatcher: ok...
+08:57  galaxywatcher: Thakns
+08:57  igli: yw (if it works;)
+08:58  galaxywatcher: I managed it..yes...Thanks again.
+08:58  igli: np
+09:22  galaxywatcher: This is what is working for me: awk -F"," '{print $3}' | awk -F"." '(NF>=4) {print $1"."$2"."$3"."$4}'
+09:25  galaxywatcher: hmm..
+09:26  g0pher: what is data line?
+09:28  galaxywatcher: 1265630745,79.88.174.206,206.174.88-79.rev.gaoland.net
+09:28  galaxywatcher: is one example.
+09:28  galaxywatcher: WHat I want to output is the last 4 fields of the 3rd , separated column, or: 88-79.rev.gaoland.net
+09:29  galaxywatcher: But what I have prints out the first 4 columns.
+09:29  galaxywatcher: I would prefer to do this without the use of rev.
+09:29  g0pher: so u want 206.174.88-79.rev.gaoland.net ->
+09:29  galaxywatcher: no..thats the last 6 columns.
+09:30  galaxywatcher: awk -F"," '{print $3}' | rev| awk -F"." '(NF>=4) {print $1"."$2"."$3"."$4}' |rev
+09:30  galaxywatcher: is what I want.
+09:30  igli: don't you want to print $(NF-4)"."$(NF-3).. ?
+09:31  galaxywatcher: Will that limit records to those that have at least 4 columns?
+09:31  igli: the condition does that
+09:31  igli: $NF is the last field
+09:32  igli: '(NF>=4) {print $(NF-4)"."$(NF-3)"."$(NF-2)"."$NF}'
+09:32  igli: (i think)
+09:33  galaxywatcher: that looks interesting...
+09:33  igli: shit
+09:33  igli: '(NF>=4) {print $(NF-3)"."$(NF-2)"."$(NF-1)"."$NF}'
+09:33  galaxywatcher: I get an out of range field.
+09:36  galaxywatcher: I mean the rev | rev works.....
+09:37  galaxywatcher: But it looks un awk like
+09:37  igli: did you try second version? tbh I've never done computed field numbers like that
+09:38  galaxywatcher: Yes. I get an out or range field error.
+09:38  igli: oh well, wait for someone else to pitch in
+09:39  galaxywatcher: I came across this before and gnomon gave me this: awk 'BEGIN{FS=OFS="."};  {for (i=2;i>=0;i--) printf "%s%s", $(NF-i), (0==i?"":OFS); print ORS}'
+09:42  galaxywatcher: BUt I am struggling to replicate the success I recalled I had before. I would have thought a simple {for (i=3l...) would have worked here...but I get an error. 
+09:47 --- pr3d4k4t is now known as pr3d4t0r
+10:31  karthee: Hi .. I am not able  pass shell variable which is having a space  character  to awk script   http://pastebin.com/a5bziVK6   .. Any help please
+10:32  geirha: Don't embed variables, pass them with -v
+10:33  geirha: awk -v ft="$fromTime" '$2 > ft ...'
+10:33  geirha: For more vars, use more -vs  -v var1=value1 -v var2=value2 ...
+10:35  karthee: geirha:  okay .. thanks .. 
+10:39  karthee: geirha: http://pastebin.com/pgmasC4M  .. Am i doing anything wrong
+10:40  geirha: Yes, you are still embedding the shell var into the awk script. Use ft instead of $fromTime now, inside the awk script.
+10:40  geirha: '$1" "$2 > ft { ... }'
+10:42  karthee: ops i  m idiottt 
+10:43  karthee: geirha: thanks
+11:10  mar77i: hi
+11:11  mar77i: awk -v 're=word' "/$re/ { for(i=0;i<NF;i++) count += ($$i ~ $re) } END {print count; }" <<<$'word, word!\nword' # fails, $re is not defined
+11:14  mar77i: does anyone have an example how -v can be used?
+11:16  g0pher: -v sets the value of a var to a value - eg -v varname=value      or if $re is shell   -v re=$re
+11:16  g0pher: then in your awk code u just use the var re
+11:16  karthee: awk  -v var1=value1 -v var2=value2   ...   var => awk variables, value=>shell variables .. 
+11:19  mar77i: I failed at quoting real bad btw
+11:21  mar77i: awk -vre='word' '{ if(!$re) exit 1; for(i=0;i<NF;i++) count += ($re ~ $$i) } END { print count; }' <<<$'word, word!\nword' # works great :)
+11:42  karthee: Hi .. I want to search if a word is there on the columns $4 to NF-1 ..  i ll can it if its only $1 or $2  by $1~/regex/{action} .. How would I do this  for $4 to NF-1 ?
+11:54  g0pher: eg awk -v word=string {isthere=0; for(i=4; i<=(NF-1); i++) if($i ~ word) isthere=1; if(isthere)print}
+11:56  g0pher: or {for(i=4; i<=(NF-1); i++) if($i ~ word) {print;break}}
+12:07  karthee: g0pher: I thought there would be some short cut, avoiding these looping ..  Thanks for you help . 
+12:15  mar77i: g0pher: heh, does $i expand to $4 if i is 4?
+12:16  g0pher: yes iirc
+12:17  mar77i: yeah, works
+12:17  mar77i: awk -vre='wor' '{ if(!$re) exit 1; for(i=0;i<NF;i++) count += ($re ~ $i) } END { print count; }' <<<$'word, wordblah!\nword'
+12:19  g0pher: try simple stuff eg   C:\!> awk  {i=$1;print($i)}
+12:19  g0pher: 1 2 3
+12:19  g0pher: 1
+12:19  g0pher: 2 a b
+12:19  g0pher: a
+12:19  g0pher: 3 c d
+12:19  g0pher: d
+12:19  g0pher: ^Z
+12:20  g0pher: eg the input line 3 c d printed the third field
+12:20  pgas: $ is an operator, you can also do things like $(4+5*2)
+12:22  g0pher: so $(i++) is ok ?
+12:22  pgas: yup
+12:24  pgas: 4# echo 2 second  | awk '{print $$1}'
+12:24  shbot: pgas: second
+12:31  g0pher: mar - dont u need a space after the -v ? eg awk -v re='wor'
+12:37  mar77i: works with gawk
+12:37  mar77i: no spaces after short opts is POSIX iirc
+12:38  mar77i: accordingly you log in with mysql -uroot -ppassword :)
+12:45  g0pher: yep -vre=2 works with gawk
+13:23  karthee: HI .. I have this condition.. if user mentions the value of a variable then take it .. otherwise its hould be .* .... I m not getting this ..  http://pastebin.com/dqBBRzst
+13:41  pgas: $2 ~ level
+13:41  pgas:  / / are used to delimit literal regexps, like " " are used to delimit literal strings
+13:47  karthee: pgas: thanks .. 
+--- Log closed Mon Oct 18 15:43:00 2010
+--- Log opened Mon Oct 18 15:48:21 2010
+15:48 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+15:49 --- Channel #awk was synced in 100 seconds
+--- Log closed Mon Oct 18 19:10:02 2010
+--- Log opened Mon Oct 18 19:10:23 2010
+19:10 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+19:11 --- Channel #awk was synced in 101 seconds
+19:14  steve___: cthuluh: maybe gnomon also has an aversion to your tes^Hntacles...  He has been MIA for a while now.
+19:16  cthuluh: steve___: I don't understand what 'MIA' means 8)
+19:20  igli: missing in action
+19:35  cthuluh: oh...
+19:36  cthuluh: well, then I'll shut up, I think he helps way better than I do. ;)
+19:37  benny99: hi ... I just want to match a word and print the next two words to it - how may I do that ?
+19:39  benny99: I guess awk is just not the right tool here, sorry
+19:42  cthuluh: ...
+22:38  Carmageddon1: guys, I have a command: 'cat /etc/dhcpd.conf |grep some.domain.com -B1 |head -1' which gives me something like: 'fixed-address 999.666.333.107;' - how do I use awk on the same line, to end up with the IP only? I want to build a single line command I can easily pass eventually like: ssh root@server.com 'long line goes here' and get the answer
+22:39  pgas: can you paste an example of your input/ expected output?
+22:39  Carmageddon1: pgas: yes I'll repeat: input command:
+22:39  Carmageddon1: cat /etc/dhcpd.conf |grep some.domain.com -B1 |head -1
+22:40  Carmageddon1: outputs: fixed-address 999.666.333.107;
+22:40  Carmageddon1: this I want to turn into: 999.666.333.107
+22:40  jwillia3: the INPUT not the command.
+22:40  pgas: $ cat /etc/dhcpd.conf
+22:40  pgas: cat: /etc/dhcpd.conf: No such file or directory
+22:41  Carmageddon1: well its a very long file, let me get you a sample of the repeating line format
+22:42  jwillia3: Carmageddon1, http://dpaste.com
+22:43  Carmageddon1: http://dpaste.com/259796/
+22:44  pgas: awk -v dom=some.domain 'prev ~ dom{ sub(/;$/,"",prev);print prev;exit }{prev=$2}' dhcp.conf
+22:46  Carmageddon1: not owrking pgas
+22:46  Carmageddon1: no output
+22:46  pgas: yes
+22:47  Carmageddon1: ?
+22:47  pgas: awk -v dom=some.domain 'prev ~ dom{ sub(/;$/,"",ad);print ad;exit }{prev=$0;ad=$2}' dhcp.conf
+22:47  jwillia3: Carmageddon1, sed -n 's/.*fixed-address \(.*\);/\1/p'
+22:48  pgas: ah no sorry too late
+22:48  pgas: awk -v dom=some.domain '$0 ~ dom{ sub(/;$/,"",prev);print prev;exit }{prev=$2}' dhcp.conf
+22:48  Carmageddon1: lol secondoffer outputted the word host-name pgas
+22:48  Carmageddon1: trying third
+22:50  Carmageddon1: perfect :) lol thanks pgas! trying jwillia3's method too :) hmm where does hostname go there?
+22:50  Carmageddon1: its a problematic line though pgas, lol I am not sure how to pass it in my program.. since it uses both " and ' quotations :D
+22:51  Carmageddon1: but will deal with that, thanks again
+22:51  pgas: ssh host << EOF
+22:51  pgas: blah
+22:51  pgas: EOF
+22:52  Carmageddon1: my program is actually Perl.. probably something like @arg = ("ssh root@server 'awk cmd'); then system @args
+22:52  Carmageddon1: so will be interesting for sure, dealing with these quotes
+22:52  pgas: ugh.
+22:52  pgas: just use perl then
+22:52  Carmageddon1: I dont want to write whole parser there lol
+22:52  Carmageddon1: and deal with multilines
+22:54  pgas: well, I just hope you sanitize your input before passing things through ssh like this
+22:55  Carmageddon1: yup but its not public anyway its part of internatal provisioning system. not accessible from outside
+22:56  Carmageddon1: the hostnames are also something we control
+--- Log closed Tue Oct 19 00:00:59 2010

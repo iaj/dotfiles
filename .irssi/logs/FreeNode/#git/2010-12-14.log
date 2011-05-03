@@ -1,0 +1,816 @@
+--- Log opened Tue Dec 14 11:47:24 2010
+--- Log closed Tue Dec 14 11:47:24 2010
+--- Log opened Tue Dec 14 11:52:48 2010
+11:52 --- Users 703 nicks [0 ops, 0 halfops, 10 voices, 693 normal]
+11:54 --- Channel #git was synced in 119 seconds
+11:56  kirthi: how to make a file run on konsole by directly clicking on that in twill
+11:56  cbreak: what is a twill?
+11:59 --- Unknown[OFF] is now known as Unknown[NF]
+12:01  jeeger: Greetings! I'm using the (arguably great) git svn integration. However, I also want to push my repo to another git server. Is that possible to do cleanly, or will the git svn rebase get in the way of that (Seems like I've created some double commits already)?
+12:02  cbreak: rebase rewrites history.
+12:03  cbreak: rewriting public history makes you diverge
+12:03  cbreak: people will hate you
+12:04  jeeger: cbreak: It's just me using the server. However, no possibility to avoid the rebase consequences?
+12:04  cbreak: stop using svn
+12:04  cbreak: if it's only you, it can work
+12:06  jeeger: cbreak: In what order would I have to git svn rebase and git push?
+12:07  cbreak: what do you mean?
+12:07  jeeger: cbreak: Or were you talking about not using svn
+12:07  cbreak: both
+12:07  cbreak: but anyway
+12:08  cbreak: what do you mean with "which order"
+12:08  cbreak: just do it in the order you want?
+12:08  jeeger: cbreak: Isn't rebasing harmless, as long as the changes weren't already pushed to the external repo?
+12:08  cbreak: depends
+12:09  jeeger: thats helpful^^
+12:09  cbreak: as soon as push fails due to non-fast-forward, either someone else pushed something, or you rewrote history in an incompatible fashion
+12:10  jeeger: but then it's too late anyways
+12:10  jeeger: Ach, I'll just see if the svn server is externally accessible.
+12:11  jeeger: And just use svn
+12:15  silv3r_m00n: when doing git diff , I want to open the output in a text editor like kate , how ?
+12:15  jeeger: silv3r_m00n: git mergetool
+12:15  jeeger: oh wayt
+12:16  cbreak: silv3r_m00n: use pipes?
+12:16  cbreak: git diff | kate
+12:16 --- yaotti is now known as yaotti_aw
+12:17  silv3r_m00n: thanks
+12:20  darkredandyellow: cbreak, could you elaborate on what you mean with "or you rewrote history in an incompatible fashion"?
+12:22  cbreak: why?
+12:22  cbreak: ask a question.
+12:25  silv3r_m00n: hi there
+12:25  silv3r_m00n: another developer is doing git push origin master , to submit his changes , but when doing git log on central repo there are no new commit points
+12:26  cbreak: silv3r_m00n: how?
+12:26  mapreduce: silv3r_m00n: Sounds like you're pushing to a non-bare repository.
+12:26  silv3r_m00n: when I push , and developer2 pulls he gets the changes
+12:26  cbreak: silv3r_m00n: how do you git log on the central repo?
+12:27  silv3r_m00n: but when dev2 pushes , there are no new commit points in the central repo
+12:27  darkredandyellow: cbreak, well, I have been using git for a while and I cant think of a way to "rewrite history in an incompatible way" - hence my question
+12:27  silv3r_m00n: I switch to central repo directory and do a git log
+12:27  cbreak: silv3r_m00n: correct branch?
+12:28  silv3r_m00n: git branch shows * master
+12:28  cbreak: darkredandyellow: every rewrite of a commit that is known to someone else is incompatible
+12:28  cbreak: which does your partner push to?
+12:29  silv3r_m00n: he does git push origin master
+12:29  silv3r_m00n: and I also do the same from my end
+12:29  silv3r_m00n: my changes reflect on central repo , but his changes don't
+12:29  cbreak: and his origin is the central repo?
+12:30  silv3r_m00n: he gets success message with delta 1 or 3
+12:30  silv3r_m00n: yes
+12:30  cbreak: then type the following:
+12:30  cbreak: git log master
+12:30  cbreak: doesn't show anything?
+12:30  silv3r_m00n: yes git log master doesn't show changes
+12:31  cbreak: wicked... wonder what you do wrong.
+12:31  silv3r_m00n: if my changes are reflecting fine , what's wrong then
+12:32  cbreak: you just said what's wrong :/
+12:32  cbreak: don't know why though
+12:32  silv3r_m00n: HEY WAIT
+12:33  silv3r_m00n: when I PULL I get the changes of my partner and all new commits appear
+12:33  silv3r_m00n: but in central repo they aren't there
+12:33  silv3r_m00n: what fun is this
+12:33  cbreak: you sure you were looking in the central repo?
+12:33  cbreak: git remote -v in your local should show you the url
+12:34  silv3r_m00n: yes its correct
+12:35  silv3r_m00n: there are 2 main problems
+12:35  silv3r_m00n: I can pull the new commits of my partner , but doing git log on central repo doesn't show the new commits
+12:35  silv3r_m00n: and doing git diff on my local repo doesn't show any file changes
+12:35  silv3r_m00n: while there are some changes
+12:36  cbreak: git status?
+12:36  cbreak: what changes are there?
+12:37  silv3r_m00n: # Not currently on any branch.
+12:37  silv3r_m00n: git branch says :
+12:37  silv3r_m00n: * (no branch)
+12:37  silv3r_m00n:   master
+--- Log closed Tue Dec 14 12:41:36 2010
+--- Log opened Tue Dec 14 12:52:02 2010
+12:52 --- Users 709 nicks [0 ops, 0 halfops, 10 voices, 699 normal]
+12:52  silv3r_m00n: cbreak: thanks for the explanation of non fast forward
+12:52  silv3r_m00n: I got it now
+12:53  ptor: Yes, it's just that I like to do 'git checkout master; git pull' and have 'git log' show the remote log up to that point.. instead of having to add origin/ in there. But that's just me, it feels better somehow.
+12:53  silv3r_m00n: cbreak: but if I am not wrong the remote repo shud show all newer commits that my partner is pushing , correct ?
+12:53 --- Channel #git was synced in 121 seconds
+12:54  cbreak: in normal circumstances yes
+12:54  cbreak: all the pushes that succeeded
+12:54  silv3r_m00n: I think I should first get this in palce
+12:54  silv3r_m00n: place*
+12:55  silv3r_m00n: cbreak: 1 more thing , suppose partner edits style.css and I edit main.js , I have already pushed , now can't he push also , since he edited only style.css which I didn't touch
+12:55  silv3r_m00n: or will this also create the non fast forward problem ?
+12:56  cbreak: incompatible history, non-fast-forward
+12:56  cbreak: git does not care the slightest which files you did or did not change
+12:56  cbreak: seither merge or rebase
+12:57  silv3r_m00n: OH I got it
+12:57  silv3r_m00n: my partner shud first pull then push
+12:57  silv3r_m00n: pull then push
+12:57  silv3r_m00n: correct ?
+12:57  cbreak: depends
+12:57  cbreak: if you don't mind merge commits littering the history, sure
+12:57  cbreak: go ahead
+12:58  silv3r_m00n: cbreak: this is strange , I can't see the partners commit on remote repo , but when I pull from remote repo I can see them in my local git log master , but at the same time the updated files aren't there
+12:58  silv3r_m00n: :( what is this
+12:59  cbreak: git log -p
+12:59  cbreak: shows you exactly what changed in those commits
+12:59  silv3r_m00n: where ? on repo or local ?
+12:59  cbreak: locally...
+12:59  silv3r_m00n: AHH
+13:00  silv3r_m00n: no changes shown in the new commit that I pulled
+13:00  silv3r_m00n: but if I do checkhout new_commit_hash , they become visible
+13:00  cbreak: don't do that
+13:00  silv3r_m00n: ok I won't
+13:00  silv3r_m00n: I will wait at this point to fix it
+13:00  cbreak: if git log -p doesn't show changes, then there are no changes
+13:01  silv3r_m00n: see I confirm this
+13:01  silv3r_m00n: when I push to remote repo the new commits are there in remote repo git log
+13:01  silv3r_m00n: but when my partner does the same the new commits aren't there
+13:01  silv3r_m00n: :(
+13:02  silv3r_m00n: I am sure the problem is here only
+13:18 --- yaotti_aw is now known as yaotti
+13:39  leadgy: sitaram_, are you here?
+13:40  leadgy: I've tried to install the gitolite but I have issues - got a minute to help me through? thanks!
+13:43  leadgy: or..anyone with gitolite experience around?
+13:44  leadgy: I get these errors while running the gitolite setup: http://pastebin.com/cE1v579y
+13:47  cbreak: leadgy: https://github.com/sitaramc/gitolite/blob/pu/doc/1-INSTALL.mkd
+13:47  cbreak: did you run gl-system-install
+13:47  cbreak: ?
+13:49  leadgy: cbreak: yes, no output given while running gl-system-install
+13:50  leadgy: I'm running all logged in as the gitolite user via "su gitolite"
+13:50  cbreak: you have to run system install as root
+13:50  leadgy: cd $HOME
+13:50  cbreak: read the docs...
+13:50  leadgy: sorry :)
+13:50  leadgy: cbreak: http://sites.google.com/site/senawario/home/gitolite-tutorial - I'm following this tutorial
+13:50  cbreak: just follow the instructions
+13:50  cbreak: https://github.com/sitaramc/gitolite/blob/pu/doc/1-INSTALL.mkd
+13:50  cbreak: those
+13:51  leadgy: cbreak: ok, thanks
+13:51 --- yaotti is now known as yaotti_aw
+13:55  sec^nd: hi
+13:56  sec^nd: how can I update a bare repo ?
+13:56  sec^nd: if I git clone --bare repo.git how can I git pull to it  ?
+13:57  Bombe: sec^nd, no, you push to a bare repository.
+13:57  leadgy: what's the different btw gitolite and gitosis?
+13:57  Bombe: sec^nd, you can not pull stuff into it because a pull might require a merge and you can not have a merge without a working directory.
+13:58  leadgy: s/different/difference
+13:59  Bombe: leadgy, one is named “gitolite,” the other is named “gitosis.”
+13:59  silv3r_m00n: cbreak: I solved it , it was a path problem
+13:59  cbreak: so, wrong repository? :)
+14:00  leadgy: Bombe: hehe, ok..I meant if they're different tools, have different functionality, etc.
+14:01  Bombe: leadgy, seeing that they are named differently I would say they do different things. I wouldn’t know, though, I’ve never used either of them.
+14:02  leadgy: Bombe: aah..ok
+14:04  silv3r_m00n: cbreak: 1 last thing , I pulled new commits from remote repo successfully and all changes look good , but suppose I want to know the difference between this new pull and before , then how to check
+14:04  cbreak: silv3r_m00n: git log
+14:04  cbreak: probably something like git log -p if you want the diffs
+14:04  silv3r_m00n: yah -p does it
+14:04  cbreak: or git log --graph --describe if you want the history lines
+14:05  silv3r_m00n: and all members should do a pull before pushing , correct ?
+14:05  silv3r_m00n: to avoid the fast forward errors
+14:09  sec^nd: how do I ignore the https cert ?
+14:09  sec^nd: it keeps failing for github
+14:17  sec^nd: :) just did http
+14:17 --- yaotti_aw is now known as yaotti
+14:18  WildPikachu: do I need to specify the -f flag to git-repack to get a very large pack broken up into smaller ones when using --max-pack-size ?
+14:18  FauxFaux: Why don't you try it and find out?
+14:19  WildPikachu: 195Gb repo :)  backed it up, trying now tho, just wanted to make sure
+14:19  FauxFaux: /o\
+14:19  sitaram_: leadgy: is $HOME/bin a part of default $PATH for your gitolite user?  I suspect that tutorial assumes so but didn't say so
+14:20 --- Unknown[NF] is now known as Unknown[OFF]
+14:21 * FauxFaux grrs at not being able to turn off the SPAM that comes out of git rebase --interactive about how to use --continue etc.
+14:21  sitaram_: leadgy: I know that tut uses "non-root" method, which *does* assume so, and in my nstall doc I do state it
+14:23 --- yaotti is now known as yaotti_aw
+14:23  rolfb: is there such a thing as a git based mail client?
+14:23  rolfb: where you could actually diff mails?
+14:24  rolfb: and have some fun
+14:24  rolfb: :P
+14:29  sitaram_: leadgy: ping
+14:50  leadgy: sitaram_: sorry for delay - was away
+14:50  leadgy: I've managed to continue the install doing some configs
+14:50  leadgy: but now it says that I need to upgrade my git version to something > 1.6.2
+14:51  leadgy: I have Debian
+14:51  leadgy: is there a way to specify git in /etc/apt/sources.list?
+14:51  leadgy: so that when I type apt-get update git - it will update to latest version?
+14:52 +hartog: leadgy: you're better of compiling git from source on debian
+14:52  curtana: leadgy, backports.debian.org may have a newer versino
+14:53 +hartog: is there a way to 'git rm' all the files that where manually deleted in one go?
+14:53  leadgy: curtana: thanks - will try backports then
+14:53  curtana: hartog, see the git-rm man page
+14:54  curtana: under REMOVING FILES THAT HAVE DISAPPEARED FROM THE FILESYSTEM
+14:54 +hartog: ENO_ENTRY ... ?
+14:54 * hartog goes forth and updates to a newer git
+14:55  curtana: hm. try the online copy: http://www.kernel.org/pub/software/scm/git/docs/git-rm.html
+14:55  sitaram_: leadgy: no idea what "managed to continue the install doing some configs" means...  dont be surprised if things dont work :)
+14:55 +hartog: i see the problem, my man pages are for 1.6.3.3 - my git is 1.7.3.1
+14:56  leadgy: sitaram_: for now I need the git > 1.6.2 - I'll come back if issues arise afterwards
+14:56 +hartog: the man pages where installed by ubuntu and i later removed it and manually compiled git, must have forgotten to  install the man pages
+14:56  curtana: hm. you should probably purge git-core then and solely rely on your locally built version
+14:57 +hartog: curtana: yup, i never purged it
+14:58 +hartog: hartog: the manual comes pretty close to what I concocted: git status | grep deleted | awk '{ print $3 }'
+--- Log closed Tue Dec 14 15:03:14 2010
+--- Log opened Tue Dec 14 15:13:39 2010
+15:13 --- Users 725 nicks [0 ops, 0 halfops, 10 voices, 715 normal]
+15:13  leadgy: in gitolite docs(https://github.com/sitaramc/gitolite/blob/pu/doc/1-INSTALL.mkd#_installation_and_setup), from the client I should type: git clone git@server:gitolite-admin
+15:13  leadgy: what can I do if I have a custom port for the SSH connection?
+15:14  leadgy: does the above command work via SSH?
+15:14  genjix: thanks all- that worked great
+15:14  wereHamster: leadgy: man git-clone has a list of all possible urls
+15:14  jast: leadgy: the 'git-clone' manpage can be found at http://git.or.cz/man/git-clone [automatic message]
+15:15  leadgy: wereHamster: but the above URL which kind of connection creates?
+15:15 --- Channel #git was synced in 120 seconds
+15:15  wereHamster: leadgy: ssh
+15:16  wereHamster: leadgy: if you cared to read the man page, you'd see this: An alternative scp-like syntax may also be used with the ssh protocol: [user@]host.xz:path/to/repo.git/
+15:16  leadgy: wereHamster: aah..ssh - thanks! - I'll read it now
+15:17  wereHamster: thank you, too. Next time you ask me something I'll remember that you are too lazy to read man pages..
+15:18  leadgy: wereHamster: :)
+15:22  leadgy: wereHamster: I've tried with git clone ssh://gitolite@<server>:<port>/gitolite-admin
+15:22  leadgy: but it doesn't work
+15:23  wereHamster: leadgy: given the url 'git@server:gitolite-admin' and the pattern '[user@]host.xz:path/to/repo.git/', what is the user?
+15:23  leadgy: wereHamster: well..git
+15:23  leadgy: but I'm using the gitolite user
+15:24  wereHamster: alright. Then define 'doesn't work'
+15:24  sitaram_: we need a seperate channel for ssh
+15:24  leadgy: fatal: '/gitolite-admin' does not appear to be a git repository
+15:25  leadgy: fatal: The remote end hung up unexpectedly
+15:25  wereHamster: leadgy: try gitolite-admin.git
+15:25  leadgy: ok
+15:25  wereHamster: sitaram_: Not sure if the .git suffix is needed. Is it?
+15:25  sitaram_: not needed
+15:25  leadgy: same error
+15:26  sitaram_: try "ssh -p PORT user@server info"
+15:26  leadgy: but the path to my repo is: /home/gitolite/repositories/gitolite-admin.git
+15:26  wereHamster: ah, then my guess is that you're using the gitolite admin ssh key and not your 'normal' ssh key
+15:27  sitaram_: leadgy: try "ssh -p PORT user@server info"
+15:27  sitaram_: and report what it says
+15:27  leadgy: ok
+15:29  leadgy: http://pastebin.com/M2EximLP
+15:29 --- yaotti is now known as yaotti_aw
+15:29  curtana: exim!
+15:31  wereHamster: leadgy: yep, you're using the wrong ssh key
+15:31  sitaram_: leadgy: clearly that is not your gitolite key.  Check your server side ~/.ssh/authorized_keys file for duplicates.
+15:31  sitaram_: leadgy: try running "sshkeys-lint" on the server; it should be in the same PATH as gl-auth-command etc
+15:31  leadgy: sitaram_, wereHamster: thanks! will try
+15:33  curtana: leadgy, gitolite is also in backports FYI
+15:34  leadgy: curtana: I don't want to install it system-wide
+15:34  leadgy: I just want it inside the gitolite user
+15:35  wereHamster: isn't that painful? Inside a user?
+15:35  sitaram_: very
+15:35  sitaram_: undocumented, of course
+15:35  leadgy: well, yes, but I want to understand how it works this way
+15:36  wereHamster: you dn't have to install it just to figure out how it works - that's decsribed in the docs
+15:36  leadgy: also I don't want to use it between multiple users - only the gitolite user will handle the gitolite things
+15:37  cbreak: that's normal
+15:37  cbreak: usually you'd call the user git though, shorter :)
+15:37  leadgy: I mean, I'll use the gitolite user as a server for all the other users which will connect to gitolite user
+15:37  cbreak: that's normal
+15:38  leadgy: cbreak: yeah..gitolite came from the first tutorial I was following :)
+15:38  leadgy: and I didn't care to change it
+15:38  cbreak: you still didn't get it to work? :/
+15:38 --- ChanServ sets modes [#git +v SimoydMasta]
+15:38  leadgy: lazy me..I know
+15:38  cbreak: took me half an hour, and I had to install and compile git first...
+15:38 --- adamholt is now known as adamholt_away
+15:38 --- adamholt_away is now known as adamholt
+15:39 +SimoydMasta: is it possible to add an empty dir to a git repo? so that when I check it out the dir will be there?
+15:39  cbreak: no
+15:39  cbreak: make it not empty.
+15:39 +SimoydMasta: fuck
+15:39 +SimoydMasta: ok
+15:39 +SimoydMasta: thanks anyways
+15:39  leadgy: cbreak: well, no - I'm also documenting what I do step by step in a blog
+15:39  cbreak: git doesn't track empty things, only content
+15:39  leadgy: so it takes time ;)
+15:42  cbreak: leadgy: can't you just copy paste the manual? :)
+15:42  leadgy: cbreak: no, I'm also writing about what configs I do to the server, etc.
+15:42  leadgy: to be able to follow them next time I do this
+15:42  leadgy: :)
+15:42  cbreak: I didn't have to change configuration of the server. you had to change something?
+15:42  yrlnry: SimoydMasta:  the usual workaround is to create an empty .gitignore file in the directory, and check that in instead.
+15:42  leadgy: I had to install newer version of git until now..so no
+15:42  leadgy: well, you're right, I could have skipped the blog
+15:42  wereHamster: yeah, it takes a *really* long time to curl the tarball, extract it and run make install...
+15:42  leadgy: but I couldn't have known these were the only issues I was going to have
+15:42  leadgy: :)
+15:42  leadgy: wereHamster: actually I've used the backports for that :)
+15:42  leadgy: so it was even simpler.. :P
+15:42  cbreak: I first got git via archive, then built it, installed git, got git.git, compiled and installed it again
+15:42  leadgy: but I want to keep it organized..so takes time - anyway :) let's not waste any more time on this silly thing
+15:42  cbreak: then got gitolite.git, installed it, set up all the config and stuff
+15:42  cbreak: and it just worked. magical.
+15:43  leadgy: cbreak: but if you install it like that, how do you uninstall it if you want?
+15:43  cbreak: not.
+15:43  leadgy: I'm not very experinced with debian but I'm learning
+15:43  cbreak: I just reset the VM if I don't like it.
+15:44  cbreak: but it's not like there's any serious alternative to gitolite :)
+15:44  cbreak: at least none I know of
+15:44  leadgy: cbreak: then you're not running a server
+15:44  cbreak: sure I do
+15:45  cbreak: the git server got it's own VM Shard
+15:45  leadgy: and you have a VM?
+15:45  wereHamster: why would VM automatically mean not a server?
+15:45  leadgy: wereHamster: because it's emulated, takes more resources, I wouldn't put it on a server
+15:46  cbreak: sure. There's one massive HW Server Cluster with a bunch of load balanced VMs
+15:46  leadgy: at least for production that is
+15:46  cbreak: the git server is one of them
+15:46  imMute: leadgy: uh, not all VMs are emulated.  VMs are quite fast these days.
+15:46  cbreak: that's much more scaleable and much less resource hungry than a real server
+15:46  wereHamster: yeah, gitolite uses *huge* amounts of resources to run...
+15:46  cbreak: since the VM uses almost no CPU resources most of the time (because there are no active jobs running besides the ssh server)
+15:46  piotr: is there a way to insert one repo into a branch in other git repo?
+15:46  piotr: import that repo as branch history?
+15:46  wereHamster: all the perl stuff that runs all the time.. unpossible in a vm
+15:46  cbreak: a real server always uses it's full resources
+15:46  cbreak: because you can't use it for anything else
+15:46  leadgy: it's not that but I think of VM like VMWare works - maybe I'm wrong but that's very resource hungry
+15:46  cbreak: piotr: fetch
+15:47  imMute: cbreak: except when it doesnt.
+15:47  sitaram_: wereHamster: I have a feeling sarcasm is sorta lost here :)
+15:48  wereHamster: leadgy: if you have a box with 32G or more ram (or several in a cluster), you'll gladly trade the one G and a few cpu cycles for the flexibility..
+15:48  cbreak: setting up a new VM is much cheaper than setting up a new real server :)
+15:48  piotr: cbreak: but then moving from a remote to a local branch?
+15:48  leadgy: wereHamster: well, I don't unfortunatelly
+15:49  leadgy: I only have a quad-core CPU server
+15:49  leadgy: with 4G of RAM
+15:49  leadgy: not much, I know..but it's a start
+15:49  cbreak: piotr: git branch -t remotename/branchname
+15:49  cbreak: that sounds more like a desktop machine :)
+15:50  leadgy: cbreak: yes, but it's 24/24 so for me is a server - I work for myself, not for a company :)
+15:54  leadgy: btw, I launched the sshkeys-lint and it says I should copy the authorized_keys file somewhere on the client
+15:54  leadgy: in my case, the client is a windows machine
+15:54  leadgy: with GIT unpacked in a folder
+15:54  inji: hi guys, I want to have a production server I can push changes to, but when I push, the production server doesn't add the file, it says # Changes to be committed: deleted: index.html, I can solve this by manually "git checkout -f", must I hook this, or is there a better way?
+15:54  leadgy: that folder contains a .ssh folder
+15:54  bremner: inji: have your read faq non-bare?
+15:54  jast: inji: Pushing to non-bare repositories is discouraged: please see https://git.wiki.kernel.org/index.php/GitFaq#non-bare [automatic message]
+15:54  leadgy: should I copy the server/authorized_keys file to my client/.ssh folder?
+15:54  cbreak: why would you want to copy the authorized-keys file anywhere else?
+15:54  cbreak: that makes no sense
+15:54  cbreak: don't touch that file
+15:54  cbreak: (unless you know what you're doing)
+15:54  cbreak: gitolite manages it for the user you assigned it to
+15:54  leadgy: cbreak: ok, I know the private key is in that file
+15:54  bremner: no, no it isn't
+15:54  cbreak: leadgy: if it were, then it'd be a pretty insecure software, wouldn't it? :)
+15:54  leadgy: ok..so then what should I do?
+15:54  cbreak: the private key is supposed to be private
+15:54 +hartog: this might be useful for you lot: https://gist.github.com/740527
+15:54  cbreak: it will NEVER EVER be on the server
+15:55  cbreak: it's created on the computer it is used from, and NEVER leaves that computer
+15:55  wereHamster: hartog: no, it isn't
+15:55 +hartog: woops - wrong channel :-$
+15:55  leadgy: cbreak: ok, so what do I do?
+15:55  cbreak: leadgy: don't know. what do you want to achieve?
+15:56  sitaram_: cbreak: he's got dup keys in ~/.ssh/authkeys on server
+15:56  inji: bremner, guess not, should the post-update hook solve my problem?
+15:56  leadgy: cbreak: I want the windows computer to connect to my gitolite server via the gitolite user
+15:56  sitaram_: cbreak: assuming he did the rest of the tutorial right but just added the key directly first
+15:57  cbreak: leadgy: create private key on windows computer
+15:57  cbreak: then put it into the gitolite-admin.git repo, correctly of course
+15:57  cbreak: commit, push.
+15:57  cbreak: you're done
+15:58  cbreak: unless you mean login access
+15:58  leadgy: cbreak: how do I create the private key?
+15:58  leadgy: ssh-keygen?
+15:58  cbreak: leadgy: by multiplying two big prime numbers
+15:58  cbreak: well, if you like using a premade tool, sure...
+15:58  leadgy: cbreak: hehe ..
+15:59  bremner: inji: I would recommend using rsync to deploy rather than git push.
+15:59  leadgy: ssh-keygen?
+16:00  sitaram_: leadgy: you posted a tutorial link.  Could you please please follow that *exactly* and paste ALL the output?  Then you dont have to ask these questions
+16:00  inji: bremner, so I won't use git on the server? (I'm the only developer, so won't need a repo?)
+16:00  leadgy: sitaram_: :) ok
+16:00  sitaram_: leadgy: that tutorial works; I didn't write it but I checked it.  Except for assuming $PATH contains $HOME/bin
+16:01  sitaram_: leadgy: I want to see the entire output if you have a problem installing, and please start by deleting the userid to start with
+16:01  bremner: inji: it is possible to do it with hooks, but it seems much simpler just to deploy with rsync.
+16:01  sitaram_: leadgy: because that tut starts with "useradd gitolite"
+16:01  sitaram_: from scratch
+16:01  workmad3: bremner: I tend to deploy by doing 'git pull' on the server... when I'm not using a deploy tool like capistrano
+16:02  inji: bremner, okay, thanks
+16:02  leadgy: sitaram_: sure, I'll try and see what I get
+16:06  tangledhelix: i have a submodule i pull via anon https from github, and i forked it so now i want to change the url to my fork. is that as easy as changing the url in .gitmodules, git submodule update?
+16:06  tangledhelix: i have tried this before with less than clean results and i don't remember what worked last time. i think i rm -rf'd and recloned it.
+16:08  cbreak: tangledhelix: you have to change the url in .gitmodules if you want it to apply to all who use the repo and then run git submodule sync
+16:08  cbreak: or change it in .git/config
+16:09  tangledhelix: cbreak: thanks
+16:14  roger_padactor: is it possible to use gitx on from a remote server?   I have the repo that i work on on a server, not on my computer.
+16:14  wereHamster: roger_padactor: you can tunnel X11 apps through ssh...
+16:15  wereHamster: roger_padactor: but why don't you clone the repo and work on it locally?
+16:16  roger_padactor: you know thats a good questions :)
+16:17  roger_padactor: i guess I use the one on the server to see the changes.   So I wont have to clon the server one and commit to it.  the master branch is on another server not in the office.
+16:18  wereHamster: each clone has its own master branch..
+16:19  roger_padactor: origen i guess is the right term
+16:19  roger_padactor:  maybe
+16:22  leadgy: sitaram_: I'm now following https://github.com/sitaramc/gitolite/blob/pu/doc/install-transcript.mkd - it's much easier to follow :)
+16:23  leadgy: as you also said :P
+16:23  bhosie: im following https://gist.github.com/569530 to set up a remote branch. I've verified that i have two branches on the remote: *master and *v2 . v2 has one commit after it was branched and that commit was done before setting up the remote branch. When i try to push to the remote, git says everything is up to date, but i've verified the newest commit on v2 is not there. how do i get v2 to update correctly on my remote?
+16:24  wereHamster: bhosie: git push origin v2
+16:25  LV-426: will git recognize multiple pre-commit scripts such as pre-commit_00, pre-commit_10, etc. ?
+16:25  wereHamster: LV-426: no
+16:25  LV-426: mmm, too bad - any special reason ?
+16:25  workmad3: LV-426: it doesn't take much to write a script that will run multiple scripts though ;)
+16:26  bhosie: wereHamster: awesome, thx. I was doing git push origin:v2 . user error...
+16:28  LV-426: i know, but i'd much rather manage pre-commit functionality as files...
+16:28  bhosie: wereHamster, apparently i wasn't reading that link correctly. I had thought git push origin master would update all branches, but obviously that only updates the master branch. how would i push all branches in one command?
+16:28  wereHamster: LV-426: what prevents you from doing so?
+16:29  wereHamster: bhosie: --all ?
+16:29  bhosie: ah ok
+16:31  LV-426: wereHamster, well i'd have to write a generic script to scan the hooks dir and run each pre-commit_XX file it finds - i'd prefer if git would do that for me, saving me the need to install that generic script into each repo.
+16:32  wereHamster: LV-426: is 'for file in /path/to/dir/pre-commit_*; do $file; done;' that difficult?
+16:33  LV-426: wereHamster, of course not, just more more thing to maintain.
+16:39  WildPikachu: wereHamster, thanks for your help :)
+16:44  LV-426: wereHamster, don't forget to check exit codes ;]
+17:05 --- EqS is now known as EgS
+17:23 --- mw___ is now known as mw
+17:23 --- pheaver_ is now known as pheaver
+17:33  tangledhelix: i asked this yesterday and i thought the advice given worked but it seems not. i have a repo with submodules, a particular submodule is not matching the contents of the repo as seen on github. it shows (no branch). i can checkout master and the contents are fine, but then i get into this endless cycle of the submodule always showing dirty in 'git status' in the master repo. is there a "proper" way to handle this?
+17:34  cbreak: tangledhelix: submodules usually show no branch
+17:34  cbreak: they are in a detached head state
+17:35  cbreak: and point exactly where their parent tells them to point to
+17:35  cbreak: the way you are handling them is proper
+17:35 * offby1 suspects that tangledhelix needs to check out whatever he likes in the submodule, and then "git add" and "git commit" from the top
+17:35  cbreak: IF you want to change the parent repository, then that's the way to go
+17:35  offby1: ya
+17:36  offby1: cbreak: that's a pretty big IF.  Was it expensive to ship?
+17:36  tangledhelix: so it's normal to have it just show dirty all the time because i have to 'checkout master' to get it to show the proper contents?
+17:37  tangledhelix: this is a read only https from github, the submodule. however i do control it so i can change the repo and pull it again. i may be committing changes to it improperly to begin with.
+17:37  cbreak: offby1: no. Just compensating for my usual lack of capitalisation.
+17:37  tangledhelix: i update the master copy with `git commit -m 'blah'` and `git push` and it goes to github origin/master
+17:38  cbreak: tangledhelix: the parent repo decides where submodules point to. if the parent is wrong, change it as described above
+17:39  tangledhelix: cbreak: well in this case .gitmodules has this under that submod:   https://github.com/tangledhelix/vim-endwise.git
+17:39  tangledhelix: i'm not finding a way to force it to say to use master instead of head
+17:39  cbreak: because submodules don't point to branches but commits
+17:40  tangledhelix: that isn't reflected in .gitmodules, it must be somewhere else?
+17:40  cbreak: yes
+17:40  cbreak: it's in the tree object
+17:41  tangledhelix: okay, so bear with me if i use improper terminology. 'git submodule' for that module shows the commit that github calls 'parent'
+17:42  tangledhelix: meaning if i click the commits tab on github, the most recent commit's "parent" is the hash that `git submodule` shows for it.
+17:42  cbreak: doesn't really matter
+17:43  cbreak: it points to an sha directly
+17:43  offby1: tangledhelix: how well do you understand git's object model?  Have you read "Git For Computer Scientists" (http://eagain.net/articles/git-for-computer-scientists/)?  It's _hugely_ useful for this sort of question
+17:43  PovAddict: beware of CVE-2010-3906 if you use gitweb
+17:43  offby1: tells you _exactly_ what a tree is, and what it means for the submodule's tree entry to be a commit (as opposed to a blob or another tree)
+17:44  offby1: and it's simple, too.
+17:44  cbreak: PovAddict: "** RESERVED ** This candidate has been reserved by an organization or individual that will use it when announcing a new security problem. When the candidate has been publicized, the details for this candidate will be provided."
+17:44  tangledhelix: offby1: i have not read that; i will add it to my reading list though
+17:46  Tobias|: Is using git with SSHFS slow, or is this just me? I'm only getting 2-3KB/s when 'Writing objects' if I push over SSHFS
+17:47  Tobias|: Whereas I typically upload at a minimum of 80KB/s to this server
+17:47  bremner: Tobias|: why push over sshfs? Why not push over ssh?
+17:48  Tobias|: Because I originally pulled over SSH, as I already had it configured (and, to be frank, didn't expect it to be this slow)
+17:48  bremner: so you gave a file:/// url ?
+17:48  ShooterMG: anybody have any resources on how to manage projects that contain multiple repositories?
+17:49  bremner: Tobias|: just edit the remote url's then
+17:49  Tobias|: I didn't explicitly define 'file:///', but yes
+17:49  Tobias|: How?
+17:49  Tobias|: Redefine url = '' in my config?
+17:49  bremner: yes
+17:50  ShooterMG: any resources on how to keep versions of all repositories related to each other? i.e. i'm working in repo A and i checkout a prior commit....what commit does this correlate with in repo b? stuff like that
+17:50  Tobias|: to ssh://tobias@server/path?
+17:50  bremner: Tobias|: that should work. I always use server:/path
+17:51  Tobias|: I normally do too. Wasn't sure that'd work here :)
+17:51  Tobias|: Thanks
+17:51  bremner: welcome
+17:52  ShooterMG: also when working with projects that utilize a database, is it common practice to somehow include the database in with the version control?
+17:52  offby1: ShooterMG: sometimes submodules help with that
+17:53  offby1: ShooterMG: another idea is for each module to simply include a text file that says "I work best with commit 123456 of git://whatever.github.com"
+17:53  offby1: not very automated, but since those values ought to change only rarely, it might be OK
+17:53  ShooterMG: hmm not a bad idea, thanks offby1 :)
+17:58  offby1: maybe the projects should be combined into one repo, if they are tightly coupled
+18:02  ShooterMG: that's how it was before. we had our main application and the sub applications in the same repo. the problem is that these sub applications are really full-blown applications themselves that get loaded into our main application (sometimes all of them, sometimes not), and making adjustments to them required that we commit the whole project.
+18:03 --- _psychic__ is now known as _psychic_
+18:05 --- cytrinox_ is now known as cytrinox
+18:05  hiffy: hey peeps
+18:05  hiffy: I checkouted a specific commit; how do I get back to the most recent commit in that branch?
+18:05  hiffy: ah.... I checkout the branch don't I
+18:06  cbreak: correct
+18:06  hiffy: somehow typing that out made me remember
+18:06  cbreak: that will return you from the detached head to a branch
+18:06  hiffy: thanks!
+18:09 --- hagebake is now known as hagabaka
+18:19  BuGo_laptop: Can i copy branch somehow so i can switch to it in case i ruin something with rebase?
+18:19  bremner: git branch backup
+18:19  bremner: BuGo_laptop: man git-branch for details\
+18:19  jast: BuGo_laptop: the 'git-branch' manpage can be found at http://git.or.cz/man/git-branch [automatic message]
+18:20  BuGo_laptop: thenk you!
+18:20  BuGo_laptop: *thank
+18:25  coldboot: When doing `git add --patch` is there a way to arbitrarily split sets of adjacent lines? It seems "split" only lets you split up disjoin patch sets. Editing diffs manually is extremely hard to get right, and there's not much help from git...
+18:25  PovAddict: I usually use "git citool" for that (needs X)
+18:26  PovAddict: you can right-click individual lines and stage them
+18:26  coldboot: PovAddict: Can you do it with `git reset` and `git checkout` as well?
+18:27  coldboot: PovAddict: Looks like it, thanks!
+18:37 --- adamholt is now known as adamholt_away
+18:37 --- adamholt_away is now known as adamholt
+18:42  setuid: Does anyone know if there's a standalone tool that can do a checksum of a tree object outside of git? Something like sha1sum, md5sum, etc. that works on a whole tree?
+18:42  cptG: hello! i am having this fancy idea (kinda gitolite-related) to fill clones of empty wildcard-repos with default content depending on the ref so that projects coming from git@myServer:cpp_tests/anything will be fille with skeleton-cpp files or alike - is there ANY way imaginable to realize something like this?
+18:43  cptG: by any way i mean without me executing anything manually after git clone, of course :)
+18:46  ShooterMG: is it common practice when, working with projects that utilize a database, to have git track the database contents?
+18:48  setuid: ShooterMG, No, the database tracks its own changes, via the transaction logging
+18:48  ShooterMG: is it common to try and associate a particular commit with a particular version of the database?
+18:49  setuid: What does a commit to git, have to do with a transaction in a database?
+18:50  setuid: Not enough information given to help
+18:50  ShooterMG: not a transaction in a database, but the entire state of the database when the commit was done
+18:50  setuid: are you committing changes to php scripts that power a web blog?
+18:51  setuid: What does your database have to do with git? How are they related, in your environment? That's the missing piece in your question.
+--- Log closed Tue Dec 14 21:42:32 2010
+--- Log opened Tue Dec 14 21:42:56 2010
+21:42 --- Users 729 nicks [0 ops, 0 halfops, 11 voices, 718 normal]
+21:42  ew0: oops 111279 commits
+21:44  kevlarman: ew0: i would strongly recommend doing that on the same box as the svn repo
+21:44  kevlarman: if you can
+21:44 --- Channel #git was synced in 119 seconds
+21:45  kevlarman: it's the only way fetching each revision individually will be remotely fast
+21:45  ew0: nah, I don't have access to the svn repo. If I had, it would already be a git rep =D
+21:46  kevlarman: ew0: in that case just see if you can get low latency to it
+21:46  kevlarman: you're going to spend by far the majority of your time waiting for git to open each connection
+21:47  ew0: I did what I could, I addad a /etc/hosts entry for the hostname
+21:47  ew0: but there's no reason to worry
+21:48  ew0: I can wait until tomorrow
+21:48 --- ChanServ sets modes [#git +v jaggednz]
+21:49 +jaggednz: Hi, I'm having issues with commits "disappearing". Currently have a few devs using a ssh repo as an origin. Workflow is git pull; (make changes) git commit -a; git pull; git push;
+21:50 +jaggednz: If I have the SHA1 of a file that was added / modified, is there a way to see when it was removed/modified back ?
+21:50 +jaggednz: should we be using git pull --rebase; ?
+21:51  ew0: btw, one of my pals started his own rep a few months ago
+21:51  ice799: Hi. I have a remote branch and I've rewritten some history on it locally. No one else is using this branch. I want to push -f it, so I am doing: git push -f origin branchname
+21:52  ew0: he created a git rep that only contains the files we changed
+21:52  ice799: But I am getting this error: error: denying non-fast forward refs/heads/branchname (you should pull first)
+21:52  ew0: to be cloned over a svn work copy
+21:52  ice799: which I dont understand because I am up to date, except for my history rewriting.
+21:52  ew0: is there a way to incorporate his revision history?
+21:52  ice799: I am using git 1.7.1.1
+21:56  kevlarman: ew0: you're going down a very painful path
+21:58  ew0: well, I'll have to tell him bad news
+21:58  kevlarman: ew0: i mean in general
+21:58  ew0: why?
+21:58  kevlarman: you shouldn't rebase published code
+21:59  cbreak: ice799: do you know what history rewriting does?
+21:59  kevlarman: and with svn, you *have* to rebase it
+21:59  cbreak: it rewrites history. The rewritten history is NOT the same as the one you had before
+21:59  cbreak: so you are missing history that is on the server.
+21:59  cbreak: if you understand that, tell me: what are your options now?
+22:00  kevlarman: ew0: i suppose you could have an svn branch and a git branch
+22:00  kevlarman: and constantly merge the svn branch into the git branch
+22:00  cbreak: ew0: do you want to keep the git repo for after you put them into svn?
+22:00  ew0: no
+22:00  cbreak: then you can init a git repo inside your svn repo
+22:01  cbreak: then fetch and checkout the remote
+22:01  cbreak: then check out the history, from oldest to newest
+22:01  cbreak: svn committing it each time
+22:01  cbreak: this is, of course, a horrible and terrible, and evil deed
+22:01  cbreak: and it's a hack. and manual labor not worthy of even undergrads or chimpanzees
+22:01  cbreak: but it is possible.
+22:01  leadgy: hi
+22:02  cbreak: and after you're done, rm -rf .git
+22:02  leadgy: any idea why portable git(on windows) saves the rsa_id in documents and settings?
+22:02  leadgy: is there any way to make it save under portablegit/.ssh?
+22:03  dunpeal: cbreak: yeah, colors are fully enabled.
+22:03  cbreak: leadgy: that's not git's deal
+22:03  cbreak: it's ssh's
+22:03  leadgy: (it asks where to save and the default is documents and settings) - I'd like to modify that default
+22:04  cbreak: if you do ssh-keygen, it should tell you where it puts new id_rsa/id_dsa by default
+22:04  leadgy: cbreak: you're right, I've ran ssh-keygen from git-bash.bat
+22:05  leadgy: and I was thinking that maybe I could configure something related to git-bash.bat
+22:05  ice799: cbreak: yep
+22:05  ice799: i still want to do it
+22:05  leadgy: so that ssh-keygen will take a different default path
+22:05  cbreak: ice799: so, you know your options?
+22:05  cbreak: you can either pull, therefore merging the old and the new, rewritten history
+22:05  cbreak: or you can force push, overwriting the old history with the new
+22:05  ice799: right
+22:06  ice799: i am tryin to do the latter
+22:06  ice799: i am getting yelled at saying my branch is not fast forward
+22:06  ice799: which is untrue
+22:06  ice799: i've pulled, i've squashed a bunch of commits
+22:06  ice799: and now i want to push -f that branch
+22:07  ice799: git push -f origin branchname  is complaining that i am not fast forward.
+22:09  hvgotcodes: how do i remove a commit from my master branch?
+22:09  fission6: whats the proper way to manage the following. I want to take my branch and got back/undoe three commits. use this code as my current HEAD for the branch
+22:09  cbreak: ice799: it's not fast forward
+22:09  hvgotcodes: i did git reset HEAD sha1 -- where sha1 is the previous commit
+22:09  cbreak: the act of rewriting history made the history diverge
+22:09  cbreak: do you comprehend what fast forward means?
+22:10  cbreak: git push -f should push even though it's not fast-forward thought
+22:10  aep: fission6: you can set the branch to any object you like. just use reset
+22:10  cbreak: do you have access to the repository directly?
+22:10  aep: fission6: git reset HEAD~3
+22:11  fission6: and that is the proper way to rollback three commits
+22:11  aep: probably not, depending on what you mean by "rollback"
+22:11  ice799: cbreak: yes i do
+22:11  aep: maybe you want git-revert
+22:11  ice799: cbreak: this is why i am confused
+22:11  aep: this will add commits on top that reverse the earlier
+22:11  ice799: git push -f should not complaim about anything
+22:11  ice799: i've done this before without problems
+22:11  fission6: like undoe the last three commits, another way to ask this is i wnt my branch to be the exact same code ihad three commits ago
+22:11  ice799: i have no idea why it is complaining now.
+22:11  cbreak: it will, if on the remote
+22:11  cbreak: well, anyway
+22:12  cbreak: go to the remote repo, open .git/config
+22:12  cbreak: read it :)
+22:12  aep: fission6: do you want the undo to propagate to a clone you push to?
+22:12  aep: fission6: or do you want to erase it from history?
+22:12  cbreak: look for receive.denyNonFastForwards
+22:12  hvgotcodes: aep: that worked for me to
+22:13  hvgotcodes: the reset HEAD~1
+22:13  hvgotcodes: now, i had rebased a branch to master before doing that -- that branch still has the chage
+22:13  fission6: yes - i want it to propagate - i think i did it "poorly" and had to force a push and erase history, after detching the head and did git checkout HEAD~3, saved to new branch, dropped old branch, renamed new branch to old branch anmd pushed ...... pretty bad
+22:13  aep: hvgotcodes: you can rebase again after reseting. no trouble there
+22:13  hvgotcodes: aep: hmm didnt do anything
+22:14  aep: fission6: yes, if you want to avoid forced push, you use git revert
+22:14  hvgotcodes: says branch is up to date
+22:14  aep: hvgotcodes: yes because it rebases the other commits as well
+22:14  fission6: ok and that will just continue my history by commiting overtop
+22:14  aep: fission6: yes
+22:14  homa_rano: MadCoder: do you know a plumbing way to determine whether the working copy is dirty? Specifically if `git commit -a` will generate a new commit or not.
+22:14  fission6: ok
+22:14  hvgotcodes: aep: i dont understand -- i still see the change in the other branch
+22:15  aep: hvgotcodes: you will have to rebase differently. i dunno the exact call. manpage might help. personally i'd just cherry-pick
+22:15  hvgotcodes: i can cherry pick to remove a commit?
+22:15  aep: hvgotcodes: the change you erased is now considered part of the stuff you want to rebase
+22:15  aep: no, but you can chery-pick the change to a new clone of master
+22:16  aep: the correct way is probably a different invokation of rebase, but i'm lazy
+22:16  hvgotcodes: ?
+22:16  hvgotcodes: sorry
+22:16  fission6: aep what if i just want a certain file from head~3, do i just do checkout -- file name
+22:16  hvgotcodes: i went did a reset HEAD~1 on master
+22:16  hvgotcodes: the commit is gone from master
+22:16  hvgotcodes: i did checkout other
+22:16  hvgotcodes: git rebase master <-- nothing happens
+22:16  aep: yes because the base is still the same
+22:17  aep: lets have commits 1,2,3,4 on master and 1,2,3,4,5  on other
+22:17  ew0: homa_rano, git status |tac isn't enough?
+22:17  hvgotcodes: aep: so you are saying the reset of the head doesn't get rid of the commit
+22:17  aep: now you did git reset 2 on master
+22:17  aep: then you checkout other, and say "git rebase master"
+22:17  aep: the base is now 2
+22:17  aep: so it rebases 3,4,5 on top of 2
+22:17  homa_rano: ew0: I was hoping for something more machine readable and future-proof
+22:17  aep: so it does nothing
+--- Log closed Tue Dec 14 22:21:34 2010
+--- Log opened Tue Dec 14 22:36:58 2010
+22:36 --- Users 736 nicks [0 ops, 0 halfops, 12 voices, 724 normal]
+22:36  leadgy: I'll read on :)
+22:37  leadgy: aah ... gl-tool shell-add ~/foo.pub
+22:37  leadgy: :P
+22:38  leadgy: I guess it's all there afterall :)
+22:38 --- Channel #git was synced in 113 seconds
+22:42  leadgy: cbreak: now that I look back, I feel a bit sorry about  all those questions - hope you won't remember them forever and take it against me :)
+22:42  cbreak: we've talked before?
+22:43  cbreak: honestly
+22:43  cbreak: do not EVER log in to the gitolite user again
+22:43  cbreak: unless you update it
+22:43  cbreak: administration ONLY happens with gitolite-admin.git
+22:46  leadgy: cbreak: hehe :)
+22:47  leadgy: I promise next time I'll come to deploy a new gitolite release .. until then, I've got lots of work to do :)
+22:49  leadgy: cbreak: anyway, leaving the joke away, thanks for helping me!
+22:50  Gent: I have a project in which I have two branches, one of the branches contains a number of files which I don't want in the original branch.  Up until now I've been creating patches and using the modfied files only switch to ensure it didn't pull in any of the new files.  This, however, does not keep track of commit messages.  Is there any way to do a normal merge, but ignore all new files and only merge changes to files which exist in the first 
+22:51  piotr: can you help me understand this * globs at .git/config ?
+22:51  queso: If I tar.gz a repository, copy to another computer, and un-tar.gz, will everything be preserved okay?  (Got a new computer at work that I'm moving stuff to.)
+22:52  PerlJam: queso: do you doubt tar's ability to preserve parts of your filesystem?  :)
+22:53  queso: PerlJam: Not really. I guess I'm just paranoid.
+22:54  cbreak: leadgy: no problem. but don't log in to the server for administration. I am serious.
+22:55  leadgy: cbreak: you mean for gitolite andministration?
+22:55  cbreak: yes
+22:56  leadgy: I could configure it on the client and then do a commit
+22:56  leadgy: but what's the security issue of logging with the git user via 'su git'?
+--- Log closed Tue Dec 14 23:02:17 2010
+--- Log opened Tue Dec 14 23:07:42 2010
+23:07 --- Users 734 nicks [0 ops, 0 halfops, 12 voices, 722 normal]
+23:08  hal: I think I added a remote to a completely wrong repo a couple of days ago, and then deleted that remote. Now I have run git status in that directory, it shows a lot of files have been deleted that weren't ever in this directory
+23:08  hal: the branch its in is "no branch"
+23:08  hal: ls
+23:08  leadgy: cbreak: found smartgit - looks nice and very similar to smartsvn(which was what I was using for svn)
+23:08  hal: hmm, it seems I did  a pull from the other repo into this "no branch" also  :-/
+23:09  hal: so there are loads of files in there that do not relate to this directory/repo
+23:09  hal: does anyone know how I can recover from this please?
+23:09 --- Channel #git was synced in 119 seconds
+23:10  wereHamster: hal: just adding a remote does not modify the working tree
+23:10  hal: wereHamster: yes but I think I pulled into it
+23:11  wereHamster: soso.. you think
+23:11  cbreak: hal: just git checkout a branch
+23:12  cbreak: and you're back on that branch
+23:12  cbreak: and everything you did to the history while not being on a branch will be a thing of the past
+23:12  cbreak: phantoms. that will stop haunting you in no time
+23:12  wereHamster: you can also use git clean to get rid of all files not on that branch
+23:14  hal: wereHamster: the error it gives is "You have local changes to '.gitignore'; cannot switch branches"
+23:14  wereHamster: what do you want to do with those changes?
+23:15  hal: I'd like to disregard them
+23:15  hal: yes, maybe clean would do it
+23:15  wereHamster: you can't ignore them. You need to do somethign
+23:15  hal: hehe
+23:15  hal: what do you suggest?
+23:15  spikku: Does git sprinkle dirs/files throughout a project like svn does (.svn)?
+23:15  hal: I don't think they have been committed
+23:15  wereHamster: hal: git reset --hard
+23:16  wereHamster: spikku: no
+23:16  spikku: wereHamster, Thank you :)
+23:16  kevlarman: spikku: only .git at the root
+23:16  spikku: kevlarman, That's wonderful/normal.
+23:17  hal: wereHamster: but I'm in no branch, does that matter?
+23:17  wereHamster: hal: no
+23:17  ries: Hello, is it correct that if I want to commit changes I always need to do git add <filename> and then git commit -m "My message"
+23:17  wereHamster: ries: yes
+23:17  ries: wereHamster: Ok... Pfff thanks
+23:18  jast: ries: no. instead of -m "message" you can use an editor to compose your commit message, and there's the -a flag to automatically stage changes in all tracked files during commit.
+23:19  kevlarman: -a is a bit of a bad habbit though
+23:19  jast: you do have to add untracked files if you want them included in a commit, though. every SCM system I know does it that way.
+23:19  jast: -a has its uses
+23:19  ries: jast: I like to commit per each file... but I wasn't sure about the add
+23:19  jast: "commit per each file"?
+23:19  kevlarman: ries: you can add multiple files
+23:19  kevlarman: and commit once
+23:20  kevlarman: git add stages your changes in the index
+23:20  kevlarman: git commit generates a commit from the index
+23:20  ries: kevlarman: that I have done so far...  I just wasn't sure why you need to add each time, I would expected something like git commit <file>
+23:20  hal: wereHamster: I did the reset hard, but now when I try to checkout another branch it keeps warning me that the files will be overwritten by merge
+23:20  wereHamster: ries: git commit <file> =~ git add <file> && gjit commit
+23:20  lau: in which file does gitosis log ?
+23:20  wereHamster: not exactly thesame, but close
+23:21  wereHamster: hal: those would be untracked files. Remove them (with rm)
+23:21  ries: I will use the separate commands for now untill I am more convortable
+23:21  cbreak: one commit per file sounds stupid.
+23:21  kevlarman: ries: because git add has different meaning than svn add
+23:21  kevlarman: svn doesn't have an index
+23:21 +jaggednz: Should I git pull or git pull --rebase before git push ?
+23:22  ries: kevlarman: ic...
+23:22  hal: wereHamster: cool, it worked! Thank you :)
+23:22  cbreak: jaggednz: either is fine, which one is good and which one is terrible depends on your situation alone
+23:22  kevlarman: ries: like jast said, git commit -a has roughly the same meaning as svn ci
+23:23  ries: ok..
+23:23 +jaggednz: cbreak: with local commited changes pushing to ssh:// origin/master ?
+23:23  kevlarman: but it's often useful to add only part of your changes to a commit, and git lets you easily do that
+23:23  kevlarman: (by file, hunk, or even line if you need to)
+23:23  wereHamster: jaggednz: either is fine
+23:23  cbreak: jaggednz: that's not the relevant part. decide yourself which to use
+23:24  cbreak: do you want a linear history? or a true history?
+23:24  leadgy: cbreak: how do I remove a repository in gitolite? I've removed the entry from the config file but the repo is still there after git push
+23:24  ries: kevlarman: I noticed that GitX has that feature... but I never used that yet...
+23:24  cbreak: leadgy: read the gitolite docs
+23:24  cbreak: afaik, you can just delete it.
+23:24 +jaggednz: it just that I've "lost" commits ... might have been due to merging ... but can't figure it out :s
+23:24  cbreak: merging does not lose commits
+23:25  leadgy: cbreak: I searched for deleting a repo in docs - but it doesn't say..maybe I missed it
+23:25  cbreak: rebase might
+23:25  cbreak: but it should not
+23:26  piotr: is there a way to make remote branches local?
+23:26  piotr: to copy them to local I mean
+23:27 +jaggednz: one last question ... git branch myChanges; (make some changes, workmate makes some changes to master); git commit; git pull origin master;  is this a bad thing to do for any reason ?
+23:27  wereHamster: piotr: yes, with git-brach
+23:27  kevlarman: piotr: git branch master origin/master where master is your branch name
+23:27  wereHamster: jaggednz: the git branch command is useless
+23:28 +jaggednz: wereHamster: I mean to say while working on branch 'myChanges' is it a bad idea to pull in changes from origin master ?
+23:28  wereHamster: jaggednz: depends..
+23:29  lau: is there an equal to gitolite pushlog in gitosis ?
+23:29  piotr: ok
+23:32 +HrznDefeated: leadgy: TortoiseGit seems pretty decent for Windows
+23:32  cbreak: "for windows" is a low standard.
+23:33  wereHamster: cbreak: did you try tower (http://www.git-tower.com/)?
+23:33  kevlarman: HrznDefeated: have you actually used it?
+23:33 +HrznDefeated: cbreak: gui "for linux" is a low standard.  Alas, the flamewar has already been done :).
+23:34 +HrznDefeated: kevlarman: yes but I'm new to git so that kind of biases it.
+23:34 +HrznDefeated: kevlarman: Why do you ask?
+23:34  kevlarman: HrznDefeated: no, actually that's the perfect point of view for me
+23:34  kevlarman: the lack of something like tortoisegit is one of the reasons for some projects i care about using hg over git
+23:34  kevlarman: and i find hg extremely painful to work with
+23:35 +HrznDefeated: kevlarman:  Hm... can't comment about that, haven't even used Hg at all.
+23:35  kevlarman: HrznDefeated: it's somewhere between 1 and 3 orders of magnitude slower than git
+23:36  kevlarman: (usually towards the 1)
+23:36 +HrznDefeated: kevlarman:  I was able to use Tortoise git to clone a repository, make a couple of local branches and fetch from the remote repo.  Basically I was able to do everything that I want/needed from the GUI
+23:36  kevlarman: HrznDefeated: that's great to hear
+23:36 +HrznDefeated: kevlarman:  On that scale where does subversion rank?
+23:37 +HrznDefeated: kevlarman:  The speed scale that is.. not the DVCS
+23:37  frogonwheels: lau: !gitosis
+23:37  jast: lau: gitosis is no longer maintained and supported by the author; we usually recommend gitolite instead which has much better documentation and more features: http://github.com/sitaramc/gitolite [automatic message]
+23:37  kevlarman: svn isn't comparable to dvcs
+23:37 +HrznDefeated: kevlarman: I know I'm just talking about the speed thing you mentioned
+23:38  kevlarman: HrznDefeated: the operations where speed is important don't even exist in svn
+23:38  kevlarman: or if they do they require downloading a ton of data from the server
+23:38 +HrznDefeated: kevlarman: fair enough.  Eg cloning?
+23:38  kevlarman: HrznDefeated: e.g. git checkout HEAD~5
+23:39  kevlarman: git grep
+23:39  kevlarman: etc.
+23:39  slaskis: i've been working on a master branch and another one, we can call it "other", parallell and now we've decided to move on only with 'other' so i'd like to make the 'other' branch the master basically, how do i do that? and update the remote repository we use...
+23:40  MadCoder: homa_rano: look at what git-stash does
+23:40  MadCoder: it's a shell script
+23:40  wereHamster: slaskis: git chckout other; git merge -s ours master; git checkout master; git merge other; git push
+23:41  MadCoder: homa_rano: the function no_changes()
+23:41  MadCoder: namely
+23:41  MadCoder: 	git diff-index --quiet --cached HEAD --ignore-submodules -- &&
+23:41  MadCoder: 	git diff-files --quiet --ignore-submodules
+23:41  slaskis: wereHamster: thanks!
+23:48  JordiGH: How do you handle large binary files in git?
+23:48 --- yaotti_aw is now known as yaotti
+23:49  kevlarman: JordiGH: you try to avoid doing that
+23:49  JordiGH: People who use Java like to ship jars around with everything.
+23:50  kevlarman: bad idea
+23:50  JordiGH: Yeah, but changing it is harder than using svn to handle large binary files. What can you do with git?
+23:50  kevlarman: better to have makefile(or build system of choice) targets to generate the jars
+23:51  JordiGH: Dude, it's not happening. hg has bfile extensions. What does git have?
+23:51  bremner: users
+23:51  kevlarman: JordiGH: failing that, make sure the jars are uncompressed
+23:52  JordiGH: So git can't do it?
+23:52  JordiGH: I don't believe it.
+23:52  kevlarman: can't do what? destroy its own history?
+23:52  JordiGH: Handle large binary files differently.
+23:53  wereHamster: JordiGH: what is bfile extensions?
+23:53  JordiGH: wereHamster: Basically designates an hg repo to handle large binary files like svn handles them. Their history isn't copied when cloned, but you still get the updated file when the designated hg repo with the bfile extensions has the file updated.
+23:54  bremner: there is http://caca.zoy.org/wiki/git-bigfiles  ; I don't know how active it is.
+23:54  JordiGH: Oh, that Sam.
+23:54  JordiGH: caca.zoy.org
+23:54  bremner: there is also git-annex
+23:55 * frogonwheels wishes git-annex were possible with msysgit :(
+--- Log closed Wed Dec 15 00:00:31 2010

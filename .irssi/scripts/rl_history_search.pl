@@ -1,0 +1,1 @@
+/Users/iaj/git/irssi-scripts/history-search/rl_history_search.pl

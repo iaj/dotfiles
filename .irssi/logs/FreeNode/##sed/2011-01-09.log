@@ -1,0 +1,68 @@
+--- Log opened Sun Jan 09 17:48:12 2011
+17:48 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+17:49 --- Channel ##sed was synced in 95 seconds
+20:07  virus_found: Is this syntax any wrong?   sed 's/\x0D$//;/^#\[/{n;d};s/^#//'   (the first part makes [dos] -> [unix], the second one removes the line below the one that starts with #[, the first part _should_ remove all #, but it doesn't!)
+20:08  virus_found: Why doesn't it?
+20:08  virus_found: Sorry, I meant, the third part shold remove all # at the start of a line, indeed. It doesn't do anything really.
+20:14  virus_found: sed 's/^#//' alone works (indeed), but not in a sequence like above (sed 'regex1;regex2;s/^#//'). Can somebody explain, why it's so?
+20:21  virus_found: Isn't  sed 'regex1' file ; sed 'regex2' file      the same, as      sed 'regex1;regex2' file     ?
+20:28  waldner: it can't work, the line from which you want to remove the # is gone at that point
+20:30  waldner: try sed '/^#\[/{s/^#//;n;d;}'
+20:30 * cthuluh wonders what "UPT3 34.17" (in the /topic) is supposed to mean
+20:30  waldner: unix power tools
+20:30  waldner: I wonder why it's still there
+20:31  waldner: http://oreilly.com/catalog/9780596003302
+20:32  cthuluh: hmmm ok, "Unix Power Tools", chapter 34
+20:34  virus_found: waldner: I see, thank you very much.
+20:35  waldner: np
+20:35  virus_found: Btw, is it really advisable to use an extra semicolon at the and of {a;b;c;} ? Why not {a;b;c} ?
+20:36  waldner: it has something to do with the arcane sed syntax rules, I think you can drop it with gnu sed
+20:36  virus_found: I see.
+--- Log closed Sun Jan 09 22:02:02 2011
+--- Log opened Sun Jan 09 22:02:27 2011
+22:02 --- Users 86 nicks [0 ops, 0 halfops, 0 voices, 86 normal]
+22:04 --- Channel ##sed was synced in 105 seconds
+--- Log opened Sun Jan 09 22:34:11 2011
+22:34 --- Users 88 nicks [0 ops, 0 halfops, 0 voices, 88 normal]
+22:35 --- Channel ##sed was synced in 95 seconds
+23:23  shingen: rying to figure out how to match CD1 as \2 ....   e.g., echo The\ Kid\ 2010\ Limited\ Bdrip\ Xvid\ Fico.-CD2 | sed -E 's/^(.*?)(CD[0-9])(.mkv|.avi)$/mkdir \1\n\r\mv \1\2\3 \1/' works, but I'd also like it to print out if there is no CDx, e.g., echo The\ Last\ Exorcism.2010.avi | sed -E 's/^(.*?)(CD[0-9])(.mkv|.avi)$/mkdir \1\n\r\mv \1\2\3 \1/'
+23:23  shingen: so how do I write (CD[0-9]) as something that may or may not exist?
+23:24  cthuluh: (CD[0-9])?
+23:24  cthuluh: weird
+23:24  cthuluh: .*? will probably not do what you want it to do
+23:26  shingen: echo The\ Kid\ 2010\ Limited\ Bdrip\ Xvid\ Fico.-CD2 | sed -E 's/^(.*?)(.mkv|.avi)$/mkdir \1\n\r\mv \1\2 \1/' works too but I don't want everything with a CD name in it with a unique directory
+23:30  virus_found: Can someone answer me, why      echo / | sed ':/:d'     still shows / ? Why doesn't it remove that only line, it does contain "/" symbol.
+23:32  virus_found: Wrong delimiter?
+23:32  virus_found: What delimiter do I use them, in order to delete a line, containing / ?
+23:33  cthuluh: 4# echo / | sed '\:/:d'
+23:33  shbot: cthuluh: no output
+23:33  cthuluh: shingen: you'd better use your shell to perform this kind of stuff
+23:34  cthuluh: shingen: try /msg greybot pe , /msg greybot rename , etc
+23:34  virus_found: cthuluh: thank you, but I don't get it, why to use "\" before the rest.
+23:34  cthuluh: virus_found: your sed manpage might answer
+23:34  shingen: cthuluh: pain in the ass, bash is giving me all sorts of issues with passing strings with spaces and all that jazz, easier to do as string manipulation
+23:35  cthuluh: shingen: you'll comme across these problems with sed too
+23:35  cthuluh: shingen: the difference is that with bash you have a way to get rid of these problems
+23:35  cthuluh: shingen: but you need to learn how to use quotes
+23:35  shingen: nah, nested seds will let me do whatever I want
+23:35  shingen: quotes are pita :)
+23:35  cthuluh: shingen: I suggest /join-ing bash
+23:35  shingen: did, they told me to come here
+23:35  cthuluh: shingen: quotes are life, when you're in a shell
+23:36  cthuluh: shingen: they were wrong, you're dealing with file names
+23:36  shingen: I did this with sed last week... ugly as hell, but it was from a log file...
+23:37  shingen: grep -i '] Moving File'  /var/log/couchpotato/CouchPotato.log  | sed -E 's/[0-9][0-9]:[0-9][0-9]:[0-9][0-9] INFO  \[//' | sed -E 's/app.lib.cron.renamer\] Moving file //' | sed -E 's/ to//' | sed -n '1!G;h;$p' | sed -E 's/     //' | sed -E 's/ /\\ /g'  | sed -E 's/\.mkv\./\.mkv/' | sed -E 's/\.m2ts\./.m2ts/' | sed -E 's/\.avi\./.avi/' | sed -E 's/mkv\\/mkv/' |  sed -E 's/avi\\/avi/' |  sed -E 's/m2ts\\/m2ts/' |  sed -E 's/"\\/"/'  |  sed -E 's/(".*?") (.*
+23:37  cthuluh: ewww
+23:37  shingen: so I figured it's easier to just do sed for something similar
+23:37  shingen: worked :P
+23:38  cthuluh: come on, that's insane
+23:38  shingen: hey, it's not something I'm gonna in a production box
+23:38  shingen: it's all about manipulating the string to how you want it, right? :)
+23:38  cthuluh: right. good luck :)
+23:40  shingen: so all I'm trying to do with sed right now is match something that may or may not exist, and the text would be CD[0-9]... can't remember the syntax to mark if something doesn't exist, ignore
+23:41  cthuluh: how do you know what .*? is supposed to do without knowing how to say "zero or one"?
+23:46  shingen: hmmm, I see what you're saying
+23:49  shingen: bah, I'll be lazy and just not process files with CD[0-9] in it and write two scripts... easier
+23:50  cthuluh: :))
+23:52  shingen: in prod for me, I usually do log file manipulation, hence the heavy reliance on sed....  at home I do more file manipulation and I'm just too lazy to learn the nuances of where to use "" or '' ...
+--- Log closed Mon Jan 10 00:00:50 2011

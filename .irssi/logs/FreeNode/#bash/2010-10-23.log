@@ -1,0 +1,508 @@
+--- Log opened Sat Oct 23 00:00:38 2010
+00:11  republican_devil: ok I figure dit out
+00:11  republican_devil: I needed ot launch a second while loop inside the loop listing the boxes files, to read each boxes file, grpe out the junk and operate on the servernames, and take whitespace
+00:12  republican_devil: whitepsace seems to ahve been taken by IFS= or without it in the while
+00:12  republican_devil: not sure benefit of IFS=
+00:12  republican_devil: hm
+00:15 --- jzacsh_ is now known as jzacsh
+00:16 --- muzer is now known as MuzerAway
+00:22  geirha: !ifs
+00:22  greybot: Internal Field Separator (or Input Field Separator), used to break things into words. See http://mywiki.wooledge.org/IFS and http://mywiki.wooledge.org/BashFAQ/001 and http://bash-hackers.org/wiki/doku.php/syntax/words
+00:26  republican_devil: oow
+00:26  republican_devil: how primative I am
+00:27  c00kiemon5ter: hi all, how can I have a two line output, made one line ?
+00:28  bekks: hi
+00:28  bekks: how can i strip off the first 4 lines of output?
+00:29  ferret: tail -n +5
+00:29  nDuff: c00kiemon5ter, read them in, and write the combined results out?
+00:29  nDuff: !faq 1 > c00kiemon5ter
+00:29  greybot: c00kiemon5ter: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+00:29  ferret: c00kiemon5ter: tr -d '\n'
+00:29  c00kiemon5ter: thanks, I'll read and try :)
+00:33 --- MuzerAway is now known as muzer
+00:34  republican_devil: can find be made ot do mulitple command?
+00:34  republican_devil: oh I can put command in script and exec the script eh
+00:34  nDuff: republican_devil, yes, you can give multiple actions
+00:34  republican_devil: ooow
+00:34  nDuff: replay, ...or you can exec a shell, yes.
+00:34  republican_devil: I think i tried to separate em with ; and nuked
+00:34  nDuff: !find > republican_devil
+00:34  greybot: republican_devil: http://mywiki.wooledge.org/UsingFind
+00:35  Barnerd: republican_devil: multiple -exec statements
+00:35  republican_devil: ah but i want to pipe from one to the next
+00:36  nDuff: then you do in fact want to exec a shell
+00:36  republican_devil: and if I do a script to what extent will variables from find itself be avialbale?
+00:36  nDuff: which the wiki page describes how to do
+00:36  republican_devil: ah
+00:36  republican_devil: ok
+00:39  republican_devil: how much faster is doing that than simply piping to while loop and sub while loop?
+00:44  geirha: Try both, time them and see.
+00:50 --- muzer is now known as MuzerAway
+00:51  republican_devil: what trial and error in bash? no way
+00:53 --- MuzerAway is now known as muzer
+01:04 --- muzer is now known as MuzerAway
+--- Log closed Sat Oct 23 09:51:10 2010
+--- Log opened Sat Oct 23 09:51:34 2010
+09:51 --- Users 503 nicks [0 ops, 0 halfops, 0 voices, 503 normal]
+09:52 --- Channel #bash was synced in 82 seconds
+09:55  karthee: justlooks: how do i change it on the first occurance only ?
+10:12 --- vezeena is now known as genjix
+10:30  Mohan: karthee: sed 's/find/replace/1'
+11:14 --- hittt[timeout] is now known as hittt
+11:15 --- JmZ_ is now known as JmZ
+11:18  geirha: !html > karthee
+11:18  greybot: karthee: You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+11:21  karthee: geirha: okay thanks
+11:25  TheBonsai: y0
+11:28 --- MuzerAway is now known as muzer
+11:29  amidelalune: i using ${parameter:+word} or ${parameter+word}, a matter version adn shell type? or is there another difference?
+11:29  amidelalune: adn=and
+11:31  prince_jammys: the ':' means "when empty or unset". without the ':', it means just "when unset"
+11:31  prince_jammys: # unset parameter; echo "${parameter+word}"
+11:31  evalbot: prince_jammys: no output
+11:32  prince_jammys: # parameter=; echo "${parameter+word}"
+11:32  evalbot: prince_jammys: word
+11:33  prince_jammys: with ':', you'll see 'word' in both cases (unset or empty)
+11:33  geirha: Older versions of the bourne shell, only supports the +, not the :+ version
+11:34  geirha: They are both POSIX though
+11:37  amidelalune: wow tnx
+11:38  TheBonsai: Shmerl?
+11:54  maxexcloo: hey all
+11:55  maxexcloo: I am working on a script that starts and stops a few processes and am having trouble with a certain part of it
+11:55  maxexcloo: Here is the script: http://www.pastie.org/1242689
+11:56  maxexcloo: The commands in the stop section dont seem to stop the processes started in the start section
+11:56  maxexcloo: Anyone have ideas?
+11:59  TheBonsai: what did you find out for now?
+12:00  TheBonsai: do the PIDs in the files match the PIDs of the actual processes?
+12:02  maxexcloo: hang on, ill test that (as far as I know, yes)
+12:04  maxexcloo: yes, they match
+12:04  TheBonsai: can you manually kill them with this method kill $(cat ....) ?
+12:05  maxexcloo: yes
+12:05  TheBonsai: then it will work from the script, too.
+12:05  maxexcloo: it only kills the sh process though, not the processes started by the script that is run
+12:06  TheBonsai: hm
+12:06  maxexcloo: For example, the Server.sh script starts a java process (not backgrounded or under nohup)
+12:07  maxexcloo: and java is still going...
+12:07  TheBonsai: i tested it. right.
+12:09  maxexcloo: Any ideas?
+12:10  maxexcloo: would this work? http://www.unix.com/17901-post4.html
+12:12  TheBonsai: no idea, since you don't let me time for a bit research for the reasons behind it
+12:12  TheBonsai: install a TERM handler and kill the whole group
+12:13  maxexcloo: sorry about that :|
+12:13  TheBonsai: you also could kill by session ID
+12:14 --- vezeena is now known as genjix
+12:14  TheBonsai: try: install a TERM handler, find out your session ID and kill all processes in this session (except yourself)
+12:15  maxexcloo: ill google around
+12:15  maxexcloo: thanks :)
+12:15  TheBonsai: ah it also works by process group here
+12:15  TheBonsai: try to kill -15 -$(cat ...)
+12:16  TheBonsai: (my test child is a simple sleep 600)
+12:16  maxexcloo: so only use kill -15?
+12:17  TheBonsai: no, the key is -PID
+12:17  fahmad: hey Jan
+12:17  TheBonsai: hey hey...!
+12:17  TheBonsai: how are you?
+12:17  fahmad: how are you doing bro
+12:17  fahmad: i am good
+12:17  fahmad: long time :)
+12:17  TheBonsai: what's up over there? i heard some bad things
+12:18  fahmad: well things ok
+12:18  fahmad: people used to live with that
+12:18  TheBonsai: though that doesn't make it better
+12:18  fahmad: yes
+12:18  fahmad: :(
+12:18  fahmad: thats the problem
+12:19  fahmad: you know people are just like making money for their livihood
+12:19  fahmad: and our government does not care they are part of it bro
+12:20 --- mingdao_ is now known as mingdao
+12:21  TheBonsai: fahmad: my government sucks, we know :)
+12:21  fahmad: TheBonsai: you remember you told me once about hitler ...
+12:21  TheBonsai: maxexcloo: the key is to use the negative PID to kill a process group. -15 is default anyways
+12:21  fahmad: TheBonsai: man its worse them hitler :(
+12:22  TheBonsai: fahmad: a hard comparison i'd say
+12:22  fahmad: hmm
+12:45  chalcedony: i appear to be missing an xchat logfile (or more?!) is this something you can help with?
+12:46  taylanub: chalcedony: not related to bash at all
+12:47  maxexcloo: if anyone is interested, I figured it out: http://www.pastie.org/1242737
+12:54  realubot: How do I get grep to grep something like this: grep "string1 (string2\|string3) string4", where string2 or string3 is present but not both of them at the same line.
+12:55  realubot: echo "1 2 4" | grep "1 (2\|3) 4" shall match 1 2 4 for example.
+12:56  realubot: How do I get grep to grep for some pattern that may differ in some parts.
+12:56  realubot: ?
+12:57  akfaew: what is the use of [ X"${somevar}" != X"NO" ] ?
+13:07  tolland: is it possible to do ${somevar%%:*} to a value, like ${"my string:some string"%%:*} or recursively like ${${somevar##x}%%:*}?
+13:08  erUSUL: tolland: pe can not be nested... do two steps?
+13:09  Bushmills: !re
+13:09  greybot: Regular Expressions. These come in several flavors (BRE, ERE, PCRE, and more). See http://mywiki.wooledge.org/RegularExpression and http://www.grymoire.com/Unix/Regular.html and http://www.regular-expressions.info/
+13:09  Bushmills: realubot ^^^
+13:10  tolland: erUSUL: ok, just like to stuff it all into one line if I can ;-)
+13:10  tolland: well, one command etc
+13:11 --- JmZ is now known as JmZ_
+13:14  Bushmills: # bar="foo:me:this"; bar="${bar%%:*}"; echo "${bar/f/b}"    # one line :)
+13:14  evalbot: Bushmills: boo
+13:18  karthee: Hi ..    I have this structure /usr/storage/storages/C/CO/COM/COMFOUND/a/al/all/D/DA/DAY/DAYTONA/default/data/swfs/present112/45.pdf .. I want to  find the size of  all such pdfs .. I used find command its taking too much time .. Is there any other better way to  get the sizes of those pdfs  whose path is of this format .. Characters which are in Caps will vary .. remaining wont change ..
+13:18  karthee: I used find with -path also .. its also taking much time ..
+13:19  karthee: i tried with ls -l  /usr/storage/storages/*/*/*/*/a/al/all/*/*/*/*/default/data/swfs/present112/*.pdf also
+13:21  akfaew: karthee: try locate
+13:21  karthee: akfaew: ahh .. good idea ..
+13:30 --- vezeena is now known as genjix
+13:53  realubot: Bushmills: Thanks.
+13:55  realubot: Bushmills: I should not escape the | character. Now it works. Thank you for the links.
+14:08  Kwpolska: I would like to make a script which will do a certain (same) action for each of the arguments, how can I?
+14:09  cthuluh: !$@
+14:09  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+14:10  cthuluh: for arg in "$@"; do something with "$arg"; done
+14:10  cthuluh: !guide > Kwpolska
+14:10  greybot: Kwpolska: http://mywiki.wooledge.org/BashGuide
+14:12  Kwpolska: cthuluh: I know, I know, that's not the matter. I want the number of arguments.
+14:17  juanmabc: !$#
+14:17  greybot: the number of arguments, not counting $0
+14:23  pgas: you don't need the number to iterate over the arguments, hence cthuluh's initial answer
+14:24 --- EMMA is now known as emma
+14:26  juanmabc: yeah, incredible switch of the clearly asked question, i like the "that's not them matter" sentence
+14:42  TheBonsai: y0
+14:55  s0enke: hi
+14:56  s0enke: is there any escape seq for blinking that works also in vte?
+15:01  geirha: tput blink; echo foo; tput sgr0
+15:01  geirha: If foo isn't blinking, the terminal doesn't support it.
+15:02  s0enke: gnome-terminal.
+15:03  geirha: gnome-terminal doesn't support it. The only terminal I know that supports it is urxvt
+15:03  s0enke: doh
+15:03  s0enke: :P
+15:04  geirha: You're trying to drive someone insane by using blinking text? :P
+15:06  tmr: Any sane trminal setup has things like that disabled anyway.
+15:06  cthuluh: xterm does support it too
+15:06 --- muzer is now known as MuzerAway
+15:07  geirha: Oh, indeed it does
+15:15  Backglass: lol
+15:16  Backglass: that command is the most dangerous ever exist hdparm -mRuUwx --dco-restore --drq-hsm-error --fwdownload --security-unlock PWD --security-set-pass PWD --security-disable PWD --security-erase PWD --security-erase-enhanced PWD --user-master USER --security-mode MODE [device]
+15:16  Backglass: don't test it
+15:17  tolland: in a function what is a syntax to get the first arg into say $arg1 and the rest of the args concated into another $arg2="$2 $3 $4" etc?
+15:19  tolland: or how do i chop the first $1 variable
+15:20  erUSUL: tolland: var="$1"; shift ; echo "$@"
+15:21  erUSUL: # f () { var="$1"; shift ; echo "$@"; echo "$var" } ; f 1 2 3;
+15:21  evalbot: erUSUL: Missing terminating quote, bracket or keyword
+15:21  erUSUL: # f () { var="$1"; shift ; echo "$@"; echo "$var"; } ; f 1 2 3;
+15:21  evalbot: erUSUL: 2 3
+15:21  evalbot: erUSUL: 1
+15:23  tolland: cool thanks
+15:23  tolland: id managed to managle this ${@##$1}
+15:23  tolland: shift looks more sensible
+15:24  tolland: does bash need semi colons?
+15:24  pgas: # set -- foo foobar foobaz;echo  "${@##1}"
+15:24  evalbot: pgas: foo foobar foobaz
+15:24  pgas: # set -- foo foobar foobaz;echo  "${@##$1}"
+15:24  evalbot: pgas:  bar baz
+15:25  pgas: tolland: not if you use a newline where ; is needed
+15:28  dropdrive: Hi, what's the right way to conform to the 80-char rule if I want a string that is 120-chars long?  Or, how do I continue a string on the next line?
+15:29  erUSUL: dropdrive: use \
+15:38  mechbangirc: hi i have two sets of names set A is big list of names one on each line and set B is smaller one name on each line, what is the best way to get a list of A-B set?
+15:42  pgas: !faq subtract > mechbangirc
+15:42  greybot: mechbangirc: http://mywiki.wooledge.org/BashFAQ/036 -- How can I get all lines that are: in both of two files (set intersection) or in only one of two files (set subtraction).
+15:43  mechbangirc: pgas: thanks
+15:46 --- whaley- is now known as whaley
+15:48  dropdrive: erUSUL: Thanks.
+15:48  oxikcza: yo
+15:50  oxikcza: sukajic
+15:50  oxikcza: sup
+15:50  oxikcza:    erman
+15:51 --- MuzerAway is now known as muzer
+16:06 --- vezeena is now known as genjix
+16:06  tolland: is there an operator precedence for pipes and assignments, or are they always one way
+16:06  tolland: ie can I do {somevar=command|sort}
+16:07  tolland: or do I need to wrap it somehow?
+16:07  TheBonsai: rephrase, please
+16:07  tolland: i guess i meant somevar=`command|sort`
+16:07  tolland: and that just works fine
+16:08  TheBonsai: and where do you need a precendece here?
+16:09  tolland: TheBonsai: sorry, was being thick
+16:09  tolland: how do i unset "set -x"
+16:10  TheBonsai: +x
+16:11  barraponto: how do i ls and show subfolders?
+16:12  barraponto: -R found it.
+16:17  Ward|: if i wanna do sed -u 's|foo|bar|g' , but with a lot of words instead of foo
+16:17  Ward|: whats the best way?
+16:17  Ward|: just pipe it to a new sed?
+16:49 --- oxikcza is now known as {`xmb`}
+16:54 --- {`xmb`} is now known as honier
+16:58 --- honier is now known as ownnowman
+17:00  hemanth: !functions
+17:00  hemanth: !function
+17:00  greybot: To define: funcname() { your code here; } ## To use: funcname arg1 arg2 ... ## function http://mywiki.wooledge.org/BashGuide/CompoundCommands#Functions
+17:11  pif: hi, is there a way that a cron job is not reported in the syslog?
+17:11  pif: like a "quiet" option
+17:13  janzert: is there a better way in sh script to check if file a is a link to file b than if [ `readlink /dir/a` = "/dir/b" ] ?
+17:15 --- ownnowman is now known as mainnoho
+17:16 --- mainnoho is now known as rofla
+17:18  Ghosty: hello, what are the possible values for $OSTYPE?
+17:18  Ghosty: im trying to make a script that will first detect the OS type, then check if a package is installed
+17:19  Ghosty: dpkg for Debian / Ubuntu Linux and rpm in Red Hat Enterprise / Fedora Linux / Suse Linux / Cent OS
+17:20  Ghosty: hello?
+17:23  }ls{: Ghosty: what about using "uname" ? (Will fit also to "homemade" distros....)
+17:23  Ghosty: can you explain?
+17:23  }ls{: tra "man uname"
+17:23  }ls{: -a+y
+17:23  Ghosty: thaaaank you
+17:24  Ghosty: ah
+17:24  Ghosty: seems simpler
+17:24  }ls{: unix is simple, if you went through complicated learning....
+17:25  Ghosty: um
+17:25  Ghosty: this would still bring me the same issue?
+17:25  Ghosty: i dont know which arch returns what value
+17:26  Ghosty: debian / ubuntu would return Linux
+17:26  Ghosty: but what would suse, centos return
+17:26  Ghosty: because the script im writing requires a certain package, and ive included a check
+17:27  Ghosty: but some OS use dpkg , some use rpm
+17:27  Ghosty: is there an easier way to do this
+17:27  Ghosty: or no?
+17:28  pgas: not really. cat /etc/*-release is sometimes interesting, you might test if dpkg or rpm is installed...you might ask the user
+17:29  }ls{: or how about just calling "dpkg" or "rpm" and testing the return code...
+17:30  Ghosty: grr... my function for debian/ubuntu looks like this
+17:30  Ghosty: http://pastebin.com/PitUJnAn
+17:33  Ghosty: but i dont know what the correct output should be for any other OS
+17:33  Ghosty: does anyone understand my question?
+17:34  rofla: wha
+17:34  rofla: ummm u should have said ' in <something'
+17:34  rofla: ill check it
+17:34  pgas: if command -v screen >/dev/null; then echo 'creen doesn't seem available please install it with "apt-get install screen" or "yum install screen"';fi
+17:35  {g}: Hey People! Any idea how to make a recursive wget like "wget -r host" but so that wget stops if it encounters an error?
+17:35  rofla: is that for above
+17:35  rofla: yec dood
+17:35  rofla: for C url| U)
+17:35  rofla: er
+17:36  rofla: for C url| U
+17:36  rofla:  do
+17:36  rofla:   
+17:36  rofla: umm i stfu and do the kot
+17:36  rofla: for d in $( C $url| U); do wget $url; done
+17:36  rofla: sek for references
+17:37  xok: hello all..
+17:38  rofla: hai
+17:38  xok: any chance to provide password to the ssh from the bash script?...
+17:38  xok: I do know about private keys... :-)
+17:38  rofla: curl is aliased to `command curl -A i+intelligentware -e i'
+17:38  rofla: a C=dl dl=curl curl=...
+17:39  rofla: d U=urlgrep.awk
+17:39  xok: but want to use passwords in variables and connect servers in loop...
+17:39  rofla: i also have a urljump.sh ready
+17:42  Ghosty: # uname
+17:42  evalbot: Ghosty: Linux
+17:48  {g}: How do I easily do something 10 times in bash?
+17:48  {g}: # for (i=0;i<10;i++) echo hi
+17:49  evalbot: {g}: bash: syntax error near unexpected token `('
+17:49  {g}: something like that i mean.
+17:49  xok: {g}: for i in $(seq 1 10);do echo something;done
+17:49  {g}: thanks
+17:49  xok: you're welcome... :-)
+17:49  pgas: !seq
+17:49  greybot: seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+17:50  xok: pgas: thanks, great thing...
+17:51  Ward|: if i want to grep for '> FOO'
+17:51  Ward|: should '\> FOO' work?
+17:51  {g}: so if i do "for i in $(seq 1 10); do wget url; done" how can i make it so it spawns 4 processes? im trying to do a stresstest. xargs?
+17:52  Linex: wget don't work with sourceforge's download links
+17:52  Ward|: is does not/
+17:52  Ward|: ?
+17:52  Ward|: iirc i used it the other day
+17:52  GentooGeoff: {g}: add &
+17:53  {g}: GentooGeoff: "for i in $(seq 1 10); do wget url &; done" ?
+17:54  GentooGeoff: yes
+17:54  {g}: GentooGeoff: ok thanks. let me try that one.
+17:55  {g}: GentooGeoff: syntax error. hmm...
+17:55  GentooGeoff: can you pastebin all of it
+17:55  {g}: # for i in $(seq 1 10); do echo $i &; done
+17:55  evalbot: {g}: bash: syntax error near unexpected token `;'
+17:55  Ward|: ah, you might have to rename the download file in some cases with sourceforge i see
+17:55  {g}: GentooGeoff: see the one-liner ^
+17:56  GentooGeoff: are you downloading sourceforge urls?
+17:56  {g}: GentooGeoff: me? no. trying to reproduce a http 500 on my own server. it misteriously throws an http 500 in 1 of 10.000 requests.
+17:57  {g}: So is it possible with & or do I have to use xargs?
+17:57  GentooGeoff: are you escaping your urls correctly?
+17:57  {g}: GentooGeoff: the problem is not about the url. look at the oneline:
+17:57  {g}: # for i in $(seq 1 10); do echo $i &; done
+17:57  evalbot: {g}: bash: syntax error near unexpected token `;'
+17:58  {g}: GentooGeoff: and look at what evalbot says ^
+17:58  GentooGeoff: ok, hold on
+17:59  {g}: # for i in $(seq 1 10); do (echo $i &); done
+17:59  evalbot: {g}: bash: seq: command not found
+18:00  {g}: # for i in $(seq 1 10); do echo $i & done
+18:00  evalbot: {g}: bash: seq: command not found
+18:01  GentooGeoff: yeah, that's what it's missing the ( and )
+18:01  GentooGeoff: do (echo $i &); done
+18:02  GentooGeoff: for example, for i in $(seq 1 10); do (ping google.com &); done
+18:03  tmr: !b6
+18:03  greybot: When given a choice of solutions, the newbie will always choose the wrong one.
+18:03  pgas: GentooGeoff: no need for ( ) just use & in instead of ;
+18:03  pgas: !pf &;
+18:03  greybot: http://mywiki.wooledge.org/BashPitfalls#pf21 -- Don't do this! -- for i in {1..10}; do ./something &; done
+18:04  jo: hey everyone, I'm trying to remove all colons in an entire derectory three. the expression works perfectly on my test files but on the actual files it just won't work: this is the expression: find /media/LaCie\ 2/Muziek/Music/Jo -iname "*:*"|xargs  rename -n 's/\:/_/'
+18:05  GentooGeoff: pgas: does it really matter?
+18:06  jo: also: if i use rename -n it politely states that it is going to change all the right files.. but when I remove the -n it just gives me: Can't rename Elise: Elise_: Aucun fichier ou dossier de ce type (No file or directory of this type)
+18:07  pgas: GentooGeoff: not really, ( ) creates a subshell and I was just telling you why &; doesn't work
+18:07  GentooGeoff: ok
+18:10  jo: any ideas anyone?
+18:10  GentooGeoff: jo: your file names probably need escaped
+18:11  jo: GentooGeoff: sorry but how do I do that?
+18:11  pgas: jo: find .... -print0 | xargs -0
+18:16  {g}: pgas: and how would it work for multiple commands? for example:
+18:16  jo: GentooGeoff and pgas: Tx! It worked for 99% of the files!
+18:16  {g}: # for i in $(seq 1 10); do echo "$i once"; echo "$i twice"; done
+18:16  evalbot: {g}: bash: seq: command not found
+18:17  {g}: pgas: how could i execute multiple of the 2 echos at once?
+18:17  pgas: what do you mean by "at once"?
+18:18  pgas: you line works fwiw
+18:18  {g}: pgas: well, 10 threads. every thread executes echo "$i once"; echo "$i twice";
+18:18  GentooGeoff: echo "test" & echo "test 2" & echo " test 3"
+18:18  pgas: { echo 1;echo 2; } &
+18:19  {g}: pgas: wow, i have never used {}!
+18:19 --- taylanub0 is now known as taylanub
+18:19  {g}: # for i in $(seq 1 10); do {echo "$i once"; echo "$i twice";} & done
+18:19  evalbot: {g}: bash: syntax error near unexpected token `}'
+18:19  {g}: # for i in $(seq 1 10); do { echo "$i once"; echo "$i twice"; } & done
+18:19  evalbot: {g}: bash: seq: command not found
+18:19  {g}: ok
+18:23  likewhoa: stop using seq ffs
+18:23  likewhoa: so eevil
+18:24  pgas: at least with the bot that obviously doesn't have it...
+18:24  likewhoa: !seq > {g}
+18:24  greybot: {g}: seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+18:26  {g}: likewhoa: ok thanks
+18:27  xok: how do I reference the matched string in a variable with parameter substitution?..
+18:28  xok: e.g. var='something1:something2:something3'
+18:28  xok: echo ${var/*:*:*/\2} <<< to catch the second one?...
+18:28  likewhoa: xok: use an array instead
+18:28  pgas: you can't
+18:28  xok: in sed backslashing wotks, but here not..
+18:29  xok: likewhoa: can you help a bit, haven't worked with arrays in bash yet.. :-P
+18:30  likewhoa: !arrays > xok
+18:30  greybot: xok: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+18:30  xok: likewhoa: thanks, I'll have a look..
+18:48  junis: greetings .. how do i make an env var be set with bash startup
+18:48  GentooGeoff: .bashrc
+18:48  twkm: ewww.
+18:54  terrorpup: is there a way to use awk to get only the information between [ ]
+18:55  terrorpup: I got those string  == > grep 'reject: RCPT' mail | awk 'BEGIN { FS ="[" } ; { print $3 } ' | sort | uniq | head
+18:55  terrorpup: but I am getting things like this
+18:55  terrorpup: 109.0.58.100]: 554 5.7.1 Service unavailable; Client host
+18:55  terrorpup: and I don't want the ]: 554 5.7.1 Service unavailable; Client host
+18:56  Linex: cp mydirectory /myhome/   does not work.
+18:56  GentooGeoff: terrorpup: can you paste the entire line of the text
+18:56  GentooGeoff: Linex: cp -a
+18:56  Linex: do I need a / after the direcotru name ?
+18:57  Linex: cp mydirectory/
+18:57  terrorpup: Oct 17 19:13:45 magi postfix/smtpd[29696]: NOQUEUE: reject: RCPT from 77-253-65-190.adsl.inetia.pl[77.253.65.190]: 554 5.7.1 Service unavailable; Client host [77.253.65.190] blocked using cbl.abuseat.org; Blocked - see http://cbl.abuseat.org/lookup.cgi?ip=77.253.65.190; from=<conner@magidesign.com> to=<conner@magidesign.com> proto=SMTP helo=<77-253-65-190.adsl.inetia.pl>
+18:57  Linex: ok GentooGeoff. thqanks
+18:57  terrorpup: I want one get this 77.253.65.190 which is between [77.253.65.190]
+19:00  pgas: awk -F'[][]' '{print $4}'
+19:00  pgas: !uniq
+19:00  greybot: uniq is a utility for removing or reporting repeated lines. uniq will only work effectively with sorted input (sort | uniq). awk '!s[$0]++' is an order-insensitive alternative.
+19:01  terrorpup: pgas , I know uniq quite well, I do sort and uniq  when dealing with ip, let me try that awk
+19:01  terrorpup: I am trying to get to speed on awk and sed
+19:02  pgas: I was just showing that it's possible with awk to do the uniq part
+19:02  pgas: awk -F'[][]' '!a[$4]++{print $4}'
+19:03  terrorpup: thanks pgas, I got about 350 ip I need to block.
+19:08  tharkun: terrorpup: why bother blocking dynamic ips when your mta will use rbl to block them?
+19:12  tharkun: terrorpup: also use SPF to avoid that kind of problems
+19:15  twkm: hahahaha.
+19:26  linuxtester: hello everyone
+19:27  linuxtester: http://pastebin.com/p2ZMQ82b   - is it any way to do it simpler (i heard that i can do this by using only 'ls' with only one parametr
+19:28  linuxtester: if it's possible, please tell me how i can do this
+19:29  lil_cain: I don't think it is. But 'man ls' would tell you if it is.
+19:30  linuxtester: lil_cain, i did read 'man ls', and i didn't find how to do it simpler, so i decided to ask here
+19:30  falconindy: !ls > linuxtester
+19:30  greybot: linuxtester: Don't try to parse ls output. http://mywiki.wooledge.org/ParsingLs
+19:30  falconindy: shell globbing exists for a reason
+19:32  linuxtester: falconindy, i think, that i used some kind of globbing (like liba?*.so, etc [?*] )
+19:32  go|dfish: linuxtester: md5sum /usr/lib/lib{a..c}?*.{a,so} | sort ... although, ? followed by * doesn't make sense ...
+19:32  twkm: required character followed by zero or more makes sense to me.
+19:33  go|dfish: ah, required
+19:33  linuxtester: go|dfish, i mean, that i'm looking for files like liba[one and more chars].so
+19:33  go|dfish: yes yes, it makes sense now :)
+19:34  go|dfish: twkm: thanks
+19:34  falconindy: # echo lib{a..c}*.{a,so}
+19:34  evalbot: falconindy: liba*.a liba*.so libb*.a libb*.so libc*.a libc*.so
+19:36  linuxtester: btw, i'm wondering if i can use 'ls' to do such operation
+19:36  twkm: i hope not.
+19:37  twkm: however, if you feel safe using it, well who am i to complain.
+19:37  linuxtester: i'm just asking to know ;)
+19:37  twkm: as an aside, ls doesn't expand globs, the shell does it, so ''ls *.c'' turns into ''ls a.c b.c c.c ...'' prior to ls running, so just what you want ls to do is somewhat vague.
+19:37 --- muzer is now known as MuzerAway
+19:39  linuxtester: and please tell me, if i wanna get at least 2 chars between X and ., should i type: X?*. or X??*.
+19:40 --- MuzerAway is now known as muzer
+19:41  linuxtester: ok, i got it, nvm ;)
+19:44  linuxtester: thanks for help me, gotta go, bye ;)
+19:44  mahipal: to make a variable available for all processes what needs to be used "set" or "export"?
+19:45  terrorpup: tharkun,  I am using black list and spf, but i want them to see my box. I am going to it black to those ip.
+19:47  drizztbsd: mahipal: export
+19:48  twkm: mahipal: ''help set''.
+19:50  prahal: hi is it wanted that adding a space in front of  any command prevents it from behing added to the history ?
+19:50  prahal: since bash 4
+19:50  tharkun: terrorpup: take a look at postfix 2.8 look for the postscreen section and enjoy
+19:51  prahal: ie sadly I often forget a space in front of command (paste or edited) and I loose history feature
+19:57  sn18: prahal: check HISTCONTROL
+20:02  prahal: thank you sn18 . It looks like this variable was meant to be a comment (there are multiple initialisations that overwrite themselves in the debian /etc/skel/.bashrc) and the last one is ignoreboth :)
+20:05 --- vezeena is now known as genjix
+20:48  latenitess: Hi folks, I want to save the path of a logical Volume in a Variable but I cant use "awk" since it s not on that box. How can I save only the "/dev/vg0/data" part? http://pastie.org/1243426
+20:49  erUSUL: !faq 1
+20:49  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+20:58  krzee: !seq
+20:58  greybot: seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+21:02  latenitess: erUSUL, I tried it leek that http://pastie.org/1243445 but that seems wrong. How is that done?
+21:04  erUSUL: latenitess: read _ _ vol <<< "LV Name                /dev/vg0/data" ; echo "$vol"
+21:05  erUSUL: latenitess: read _ _ vol <<< "$(lvdisplay | grep "LV Name")"
+21:05  erUSUL: # read _ _ vol <<< "LV Name                /dev/vg0/data" ; echo "$vol"
+21:05  evalbot: erUSUL: /dev/vg0/data
+21:06  geirha: while read -r line; do if [[ $line = "LV Name"* ]]; then vol=/${line#*/}; break; fi; done < <(lvdisplay)
+21:07  geirha: or, while read -r line; do if [[ $line = "LV Name"* ]]; then vol=${line##* }; break; fi; done < <(lvdisplay)
+21:08  latenitess: erUSUL, what are the "_" for?  It still outputs anoterh line ontop http://pastie.org/1243459
+21:08  erUSUL: latenitess: dummy vars to hold LV an Name
+21:09  latenitess: erUSUL, oh so could be anything..and you choose "_". ok
+21:09  latenitess: erUSUL, why is it still outputting  "File descriptor 3 (/tmp/sh-thd-2152977764) leaked on lvdisplay invocation. Parent PID 7587: -bash
+21:09  latenitess: "
+21:10  erUSUL: no idea
+21:10  sn18: latenitess: _ is special
+21:10  geirha: Seems to be some debugging message from the OS
+21:11  latenitess: geirha, both of yours do nut return anything: http://pastie.org/1243464 what am i doing wrong here?
+21:11  latenitess: sn18, special? like how?
+21:12  geirha: latenitess: It stores it in the vol variable. echo "$vol" to see the result
+21:13  latenitess: geirha, oh ok...sorry :) and thanks this is perfect for what I want to do
+21:14  latenitess: in what way is "_" special?
+21:14  geirha: !$_
+21:14  greybot: "expands to the last argument to the previous command, after expansion" (man bash, Special Parameters)
+21:15  geirha: # echo some stuff; echo "Last arg of previous command: $_"
+21:15  evalbot: geirha: some stuff
+21:15  evalbot: geirha: Last arg of previous command: stuff
+21:15  geirha: So anything you store to _ is quickly overwritten.
+21:15  taylanub: is _ even used in scripts?
+21:18  latenite: geirha, oh that s handy :)
+--- Log closed Sat Oct 23 21:24:34 2010
+--- Log opened Sat Oct 23 21:35:33 2010
+21:35 --- Users 546 nicks [0 ops, 0 halfops, 0 voices, 546 normal]
+21:36 --- Channel #bash was synced in 90 seconds
+21:37  sn18: latenite: as geirha said thats the wrong approach
+21:38  latenite: sn18, wrong like how?
+21:38  latenite: sn18, all I want is these pathes saved in an array
+21:40  sn18: you could store them in the array in the loop itself
+21:42 --- JmZ_ is now known as JmZ
+21:50  latenite: sn18, I am almost there http://pastie.org/1243523 but I fail to see my mistake. can you hint me a little?
+21:53  sn18: array+=("$line")
+21:55  latenite: sn18, this leaves only one entry in the array: http://pastie.org/1243534 but I have two lvs
+21:56  sn18: latenite: sn18: array+=("$line")
+21:56  latenite: sn18, my fault...sorry.
+21:57  latenite: sn18, thank you man, this works now :)
+21:57  latenite: http://pastie.org/1243541
+--- Log closed Sat Oct 23 22:04:10 2010
+--- Log opened Sat Oct 23 22:04:38 2010
+22:04 --- Users 547 nicks [0 ops, 0 halfops, 0 voices, 547 normal]
+22:05 --- Channel #bash was synced in 90 seconds
+22:11 --- muzer is now known as MuzerAway
+22:29  CalimeroTeknik: hi !
+22:30  CalimeroTeknik: what command outputs the character that the shorcut ^D does ?
+22:30  CalimeroTeknik: maybe echo -e something ?
+22:31  twkm: no.  stty.
+22:31  twkm: (fyi, it isn't a shortcut)
+--- Log closed Sat Oct 23 23:04:18 2010
+--- Log opened Sat Oct 23 23:04:40 2010
+23:04 --- Users 542 nicks [0 ops, 0 halfops, 0 voices, 542 normal]
+23:06 --- Channel #bash was synced in 87 seconds
+23:43 --- caemir_ is now known as caemir
+--- Log closed Sun Oct 24 00:00:09 2010

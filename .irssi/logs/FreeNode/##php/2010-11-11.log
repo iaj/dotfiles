@@ -1,0 +1,1466 @@
+--- Log opened Thu Nov 11 11:17:33 2010
+11:17 --- Users 447 nicks [5 ops, 0 halfops, 1 voices, 441 normal]
+11:17 --- Channel ##php was synced in 2 seconds
+11:18  iaj: lo there...
+11:19  iaj: how would I link a href field with a download request?
+11:19 +Viper-7: iaj: an anchor tag <a> doesnt specify how the client should open the file (apart from wether to use the current or different browser window)
+11:20 +Viper-7: the rest is handled by the Content-Type and Content-Disposition headers that are sent by your webserver when the client requests the static image
+11:20 +Viper-7: (or by you from php if you're generating it on the fly)
+11:21 +Viper-7: a Content-Disposition: inline; will open in the browser, a Content-Disposition: attachment; filename=foo.zip will offer it for download (or for opening if the user has an application associated with the Content-Type)
+11:22  iaj: Viper-7: thanks for all that useful information :)  infact its a .pdf file.. and on my system I get that download window behaviour but on my other one, its opening the page within the same page (views the pdf).
+11:23 +Viper-7: iaj: if you sent a file with a Content-Type that the users browser doesnt recognise, it'll always offer the file for download
+11:23 +Viper-7: so it sounds like you just dont have a pdf reader setup in your browser
+11:23  iaj: Viper-7: yeah. but I want to always show a download window - whether or not theres a pdf reader setup in one's browser.
+11:23 +Viper-7: you can also use a Content-Type of application/octet-stream , which the client will treat as a 'raw binary file', and so by default wont have an associated application
+11:24 +Viper-7: iaj: the best solution for your case is Content-Disposition
+11:24  iaj: Content-Disposition - is there any example for this?
+11:24 +Viper-7: you can probably set apache to always send Content-Disposition: attachment; for .pdf files in your .htaccess
+11:24 +Viper-7: but you'll have to ask #httpd for the specifics
+11:24 +Viper-7: (or google :P)
+11:25 +Viper-7: iaj: just double checking an assumption, the link is going directly to a .pdf file yes? not a .php script that generates pdf data ?
+11:26 +Viper-7: if its linking to a file, you need to use your webserver, as php wont be involved with sending the image at all
+11:26 +Viper-7: so yeah, .htaccess ;)
+11:26  ispirto: hey, how can i generate a cookie.txt manually for curl purposes
+11:27 +Viper-7: ispirto: i dont know cURL very well at all, i'd do it using php streams.. but using either method you should be able to send a cookie as a query-string encoded header
+11:28  ispirto: Viper-7, i just wonder the cookie format
+11:28 +Viper-7: ispirto: http_build_query() will generate it for you
+11:28 +Viper-7: from an associative array
+11:28 +Viper-7: but that'll only work for manually specifying the cookie header - the cookie.txt likely also includes expiry details and such
+11:29 +Viper-7: ahh, curl does have a manual cookie option tho ;)
+11:29  ispirto: hmm i'll check that
+11:29 +Viper-7: curl_setopt($ch, CURLOPT_COOKIE, http_build_query($cookiedata))
+11:35  Kingsy: if I am using a foreach, what is the php to move onto the next item in that foreach?
+11:35  Kingsy: kinda like a break; ?
+11:35 +Viper-7: Kingsy: continue will end execution of the current iteration and begin the next one
+11:35  Kingsy: ok thanks, I thought it was something like that
+11:36 +Viper-7: foreach(glob('*') as $file) { if($file == '.' || $file == '..') continue; .. handling code .. }
+11:36 +Viper-7: most common usage i'd say ;)
+11:39 --- Farkie[Away] is now known as Farkie
+11:45  Kingsy: what would generally be the reason if I did die(var_dump($input)); and I get a white screen? so a fatal error...
+11:46  mh`: dunno, but var_dump outputs to stdout.. doesn't return its value
+11:46  mh`: returns void
+11:47  mh`: so do var_dump($input); die(); for what you want to do
+11:47  mascool: try $dump = print_r($var,true)
+11:48  mascool: if you dont want to dump to stdout
+11:48  mh`: yeah, you can do that if you need to get the output.. but print_r and var_dump don't have precisely the same info
+11:48  mascool: true
+11:48  Kingsy: just tried that, I get the same thing.. fatal error
+11:48  FiFU: hi
+11:48  mh`: well, find out what line the fatal error is on, then
+11:49  Kingsy: mh` - well it has to be the var_dump() line, the error goes away when you comment out the var_dump
+11:49  Kingsy: all I am trying to do is see whats inside an object
+11:49  mh`: it could be the line before it..
+11:49 +Viper-7: Kingsy: dont guess, check :/
+11:49  Kingsy: php logs it is then yea?
+11:49  mh`: engrih?
+11:49  mh`: +s
+11:49 +Viper-7: on a development server you should have display_errors = On anyway
+11:49 +Viper-7: but i guess
+11:50  Kingsy: thats true I dunno why its not set to display errors
+11:51  mh`: error_reporting(E_ALL); ini_set("display_errors",1); at the top of the file, though that won't help you if it's a parse error
+11:52  Kingsy: mh` - yea that does nothin :S
+11:52  mh`: check error logs then
+11:54  heartstorn: hi there folks can you please help me with the error on line 160 http://pastebin.com/ykXyRxSN
+11:55  Farkie: give us a cluie
+11:55  Farkie: what's the error
+11:55  Kingsy: mh` - hmmm there isnt a php.errors file in var/logs
+11:56  heartstorn: Fatal error: Call to a member function update() on a non-object in /home/admin/domains/hostingenious.co.uk/public_html/components/com_joobb/system/joobbeditor.php on line 160
+11:58  Farkie: btw, you know you spelt genius wrong, right?
+11:58  heartstorn: yeh im trying to get 123-reg to change it
+11:58  Farkie: they won't
+11:58  Farkie: it's not even possible to change
+11:58  Farkie: without re-paying
+11:58  Kingsy: can I set fatal errors to display in the .htaccess file?
+11:58  heartstorn: no  ut as it new domain they can hit delete
+11:58  heartstorn: :P
+11:58  Farkie: err no
+11:58  heartstorn: and i can rereg the right one
+11:58  Farkie: registrar's won't allow that
+12:00  heartstorn: oh well just have to put up with it for a week or two until i can buy new domain :P
+12:02  heartstorn: brb need coffee
+12:02  heartstorn: hopefully someone knows the error :-D
+12:04  ddilinger: if i had to guess, just from naming conventions, #joomla ?
+12:05  heartstorn: yeh
+12:06  heartstorn: ty ddilinger
+12:10  Kingsy: ok guys I really need some help displaying a fatal error, could someone advise me?
+12:11  Kingsy: I had a look around for logs and I don't see any, I added this to the htaccess file --> php_flag display_errors 1
+12:11  Kingsy: php_value error_reporting 8191
+12:12  Kingsy: no joy, and I added error_reporting(E_ALL); at the top of the file, still just a white screen
+12:12  Kingsy: all I am doing is var_dump($object); die();
+12:13 --- spq` is now known as spq
+12:13 --- spq is now known as 94SAAAO9U
+12:13 --- 94SAAAO9U is now known as spq`
+12:14  ddilinger: how about if you just var_dump(true); die();
+12:14  ddilinger: does it at least then show something?
+12:15  Kingsy: yup that returns bool(TRUE)
+12:17  Kingsy: ddilinger - any ideas aout what I can do?
+12:17  Kingsy: about*
+12:18  ddilinger: Kingsy: my guess is $object is undefined
+12:18  ddilinger: Kingsy: the error your not seeing is an undefined variable error, if i'm right
+12:20  Kingsy: hmm it shouldnt be
+12:20  mekwall: object(stdClass)#4 (3) { ["@attributes"]=> .... How do I access that object?
+12:20  mekwall: doesn't work with ->@attributes
+12:22  mekwall: ->{'@attributes'} <-- is that the only way? :)
+12:25  ddilinger: mekwall: pretty much
+12:25  mekwall: ok, thx :)
+12:27  starlays: hello to all
+12:27  salathe: mekwall: use array-style syntax... $element['attribute_name']
+12:27  mekwall: salathe, doesn't work.. it's an object
+12:27  salathe: oops should read the question first before being helpful
+12:27  starlays: can someone tell me witch is best phpbb or smf?
+12:27  mekwall: salathe, hehe
+12:27  salathe: mekwall: i saw @attributes and thought simplexml, sorry :P
+12:28  mekwall: salathe, well... I've converted a xml to json to store in database... and now I am converting it back to xml
+12:36  synapt: Will switch() default if given a NULL?
+12:36  ddilinger: synapt: would almost be faster to write a 4 line script, run it and find out :)
+12:37  synapt: dilinger: VM is currently going through an update restart, so technically it was quicker to ask here out of possible experience :P
+12:37  Kingsy: ddilinger - ok I have just confirmed that the variable is DEFINATLY not undefined.. but I am still getting a fatal error when I try and dump it .. any ideas on what I can do?
+12:37  Kingsy: I really need to see whats in the variable cos I need to spilt it in two
+12:37  nVee: hey, anyone knows what the zend framework channel is?
+12:38  Kingsy: #zftalk I think
+12:38  ddilinger: Kingsy: i've never heard of var_dump() crashing php, but if the var is defined, and the only difference between running and crashing with no output is that one line, then somehow that object is crashing the interpreter
+12:38  ddilinger: Kingsy: or i could be completely wrong :)
+12:38  Kingsy: yup :S
+12:39  mekwall: ok... this is stupid
+12:39  synapt: kingsy: What's the exact error you get when you try to var_dump() ?
+12:39  synapt: Even if the variable isn't defined it shouldn't be a fatal, should just be an undefined variable warning
+12:39  mekwall: json_encode(new SimpleXMLElement($xml->asXML())) doesn't preserve attributes of children nodes :/
+12:39  Kingsy: synapt - I get no error, a white screen is all I see
+12:40 --- Affix is now known as Affix-AFK
+12:40  ddilinger: mekwall: SimpleXML isn't an actual php object is the problem
+12:40  ddilinger: mekwall: i mean, it looks like one, but its not :)
+12:40  mekwall: ddilinger, ok... so what do you recommend?
+12:40  synapt: Kingsy: And you have error_reporting(E_ALL) and display_errors set on?
+12:41  EugenA: we have here a problem, that after i've logged in into a cms, i can get the login link with firebug. If i call this link from another IP, i can also login
+12:41  mekwall: ddilinger, or do you have a better way to store serialized xml in a database? :)
+12:41  EugenA: the cms on a dev server doesn't have this issue
+12:41  ddilinger: mekwall: well, postgresql can natively store XML and perform xpath on it :)
+12:41  EugenA: could this be php config issue?
+12:41  Kingsy: I think so, I put error_reporting(E_ALL) at the top of the file, and I added php_flag display_errors on to the htaccess
+12:41  mekwall: ddilinger, too bad I'm using mysql then hehe
+12:41  Kingsy: synapt - ^^^^
+12:41  ddilinger: mekwall: whats wrong with storing the xml in the database?  you need to be able to query the nodes?
+12:42  synapt: kingsy: Don't have any access to httpd.conf?
+12:42  mekwall: ddilinger, nah... not really
+12:43  mekwall: ddilinger, I just think that xml is kinda bulky
+12:43  Kingsy: synapt - yea I do.. what can I change in that file?
+12:43  mekwall: ddilinger, so rather store it with something that doesn't take up as much room
+12:43  ddilinger: mekwall: it compresses well though, i'm not very familiar with mysql but i know postgres behind the scenes compresses any long text(128 chars or something)
+12:44  mekwall: ok
+12:44  ddilinger: mekwall: if mysql doesn't have that optimization, i still wouldn't worry about it unless your db is huge
+12:44  ddilinger: mostly because your more likely to introduce bugs in the xml->json->xml translation
+12:45  synapt: Kingsy: argh sorry, I meant php.ini
+12:45  synapt: no clue why I said httpd.conf
+12:45  synapt: I meant display_errors in php.ini, could be .htaccess isn't letting you override
+12:46  Kingsy: synapt - in my php.ini it says --> display_errors = On
+12:46  synapt: Hrm, interesting
+12:46  mekwall: ddilinger, it will probably become huge :P about 500-1k records a day
+12:46  synapt: What about the httpd logs?  Anything in error_log being recorded?
+12:46  mekwall: maybe that isn't that big though
+12:47  ddilinger: mekwall: thats not huge,  that fits easily in memory :P
+12:47  mekwall: ddilinger, xml file are about 500 lines
+12:47  mekwall: or 40k chars :)
+12:47  Kingsy: synapt - would that be in var/log/apache2 ?
+12:48  synapt: Kingsy: Probably, depends on your httpd.conf configuration ultimately
+12:48  Kingsy: synapt - no there is nothing in error_log
+12:48  Kingsy: :S
+12:48  ddilinger: 40k chars, at 1k records a day is 40MB, a full year at 15GB, for a db thats easy work :)
+12:49  mekwall: ddilinger, cool
+12:50  mekwall: ddilinger, anyway are you any good at regexp? I have three patterns that I'd like to match using one preg_match_all
+12:50  mekwall: ddilinger, I can only get them to match one by one :P
+12:51  ddilinger: looks like there might also be an xml2json::convertSimpleXmlElementObjectIntoArray i'm not sure where xml2json came from but the code is here: http://code.google.com/p/taxon-name-processing/source/browse/trunk/taxontagger/xml2json.php?r=368
+12:52  ddilinger: not sure about going from the json back into xml though
+12:52  mekwall: I'll check it out
+12:52  ddilinger: regexp can be easy, untill about 10s after you close the window and look at something else :P
+12:52  mekwall: hehe
+12:52  ddilinger: what are you trying to match?  decifering regexp can be tedious but writing them isnt that bad
+12:53  mekwall: me and regexp have a love and hate relationship
+12:53  ddilinger: http://regexp.info
+12:53  mekwall: it's html-code
+12:53  mekwall: want to match three elements from the same html
+12:53  ddilinger: you cannot succede
+12:53  ddilinger: html is not a regular language
+12:53  ddilinger: use an html parser, like DomDocument
+12:53  ddilinger: or if you need fancy stuff, i like phpQuery
+12:54  mekwall: hehe :) I have simple_html_dom :)
+12:54  mekwall: could use that
+12:54  mekwall: it has css3 selectors but not as fancy as phpQuery
+12:55  ddilinger: so why the regexp?
+12:56 --- Affix-AFK is now known as Affix
+12:56  mekwall: ddilinger, I built it before I got it
+12:56  mekwall: so thought I could try and get it to work
+12:57  mekwall: since I had the three patterns working :)
+12:57  starlays: can someone tell me witch is best phpbb or smf?
+12:58  ddilinger: just change it, matching html with regexp has way too many edge cases
+12:58  ddilinger: starlays: for you, in your specific situation, and your hosting configuration, i suggest xyz
+12:59  starlays: ddilinger: a?
+13:00  ddilinger: starlays: thats like asking Mac or PC, Vi or Emacs, etc. etc.,  you have to decide whats best for your situation and use case
+13:00  wobbles: starlays:  And also /msg php-bot guidelines and see #10 especially
+13:00  milligan_: I'm trying to use the snmpwalk class. Running snmpwalk from cli, I append the -Cc argument to avoid IOD errors.. I can't see any arguments listed in the manpage of snmpwalk for php. Any ideas how I append it ?
+13:01  starlays: ddilinger: i was asking from the perspective of security not usability ... doh
+13:01  starlays: wobbles: ok man ...
+13:03  kel39: Hi all - can someone give me a lead or something as to how I would make a page only visible once to a user (cookies?)
+13:04  ddilinger: kel39: a cookie is an option, although remember that that cookie now has to be sent along with every request to your website, and the user can delete the cookie(so its not really once)
+13:05  kel39: yeah that wont concern me lol
+13:05  kel39: cookies arent in the mb afaik
+13:05  Kingsy: ok check this out --> print_r("THIS IS SOEMTHING"); var_dump($activeChildren); die(); <--- shows NOTHING
+13:05  kel39: you got any good links for one?
+13:05 +Viper-7: ddilinger/kel39 you can fix that by specifying a strong path to setcookie()
+13:05  Kingsy: not even the print_r string
+13:05 +Viper-7: kel39: its simple php code, just check the manual
+13:05  Kingsy: man this is taking the p*ss
+13:07  kel39: ohh nevermind
+13:07  kel39: http://css-tricks.com/redirecting-to-a-splash-page-but-only-once-with-cookies/
+13:07  kel39: :)
+13:07  ddilinger: the one true answer ...
+13:07 +Viper-7: if(isset($_COOKIE['has_used'])) { header('Location: index.php'); die(); } setcookie('has_used', 1, time() + (86400 * 365), '/path/to/script.php', 'mydomain.com');
+13:07  Kingsy: could it be a exhausted memeory error perhaps?
+13:07 +Viper-7: screw doing it in jquery :P
+13:09  kel39: Viper-7 cheers
+13:10 +Viper-7: kel39: i probably wouldnt quite use exactly that, but those are the functions you need at least :P
+13:10 +Viper-7: the php.net manual pages for each will pretty much give you the rest
+13:11  kel39: yeah
+13:11  kel39: the site isnt massive - so i dont really care if its poor practice lol
+13:12 +Viper-7: kel39: it'd also be much nicer to include one of two different scripts there, rather than force a client side redirect
+13:14  kel39: uhuh
+13:15 +Viper-7: im still in 'dodgy world' btw :P
+13:15 +Viper-7: there are FAR cleaner ways that i'd normally handle such a task :P
+13:16  kel39: path/to/script is my splash page right?
+13:17 +Viper-7: it should be a folder
+13:17 +Viper-7: but yes as narrow as you can make it to the splash page
+13:17 +Viper-7: so the cookie isnt sent to other pages
+13:17 +Viper-7: again, php.net/setcookie explains it in more detail
+13:21 --- Farkie is now known as Farkie[Away]
+13:26  EugenA: how can i output all active php settings?
+13:27 +Viper-7: phpinfo() ?
+13:27  salathe: EugenA: ini_get_all() ?
+13:31  kel39: urgh Viper-7 that fails
+13:31  kel39: might do jquery
+13:31  kel39: wordpress is a bitch with headers
+13:32  kel39: 'Warning: Cannot modify header information – headers already sent by'
+13:32 +Viper-7: you just need to do it earlier then
+13:32  kel39: anyway i can force override those headers?
+13:32 +Viper-7: you cant rewind time, no
+13:32  kel39: hmm
+13:32 +Viper-7: once you start sending body content, you cant alter the headers
+13:33 +Viper-7: they're done.
+13:33  kel39: yeah
+13:33  kel39: well i cant edit those other files
+13:33  kel39: otherwise wordpress will fail
+13:33 +Viper-7: ugh
+13:33 +Viper-7: wordpress should have a redirect mechanism then
+13:33 +Viper-7: check their docs / channel
+13:34  dr0id: how to have bold headers ?
+13:34  dr0id: in csv export
+13:34 @LawnGnome: Don't use a plain text format?
+13:35  dr0id: no other way ?
+13:35 @LawnGnome: Nope.
+13:39  ^elf^: uh
+13:39  ^elf^: dr0id if you're putting bold into a csv, and you wish to save it, it will no longer be a csv
+13:39  ^elf^: this is why excel says you'll lose all such formatting if you do continue with the save
+13:40  dr0id: ic, thanks for the info :)
+13:41  egsome: Can preg_replace tell me what is the part that matched my regexp pattern before replacing ? as the new string would depend on that.
+13:41  rampr: hi, if i create an object $obj and call its functions without using the object name like here http://pastebin.com/z15eJ5VM, is there a name for this ?
+13:41  ^elf^: that's not to say that you can't simply put "<b>text</b>" as the value of one of the csv fields if you wish to have a browser parse it at a later point
+13:42  kel39: someone explain what headers are getting changed here?
+13:42  kel39: if(isset($_COOKIE['has_used'])) { echo "<head><meta http-equiv=\"refresh\" content=\"0;url=/?page_id=15\"></meta></head>"; die(); } setcookie('has_used', 1, time() + (86400 * 365), '/?page_id=163', 'domain.org');
+13:42  rampr: and can I use the same for variables ?
+13:42  thadin: kel39: why not use the HTTP Refresh header instead?
+13:43  kel39: im doing that?
+13:43  thadin: or location since it's 0
+13:43  thadin: no, that's html
+13:43  kel39: <thadin> i cant modify the actual headers
+13:43  kel39: its wordpress
+13:43  Kingsy: is it possible in php to have memory leaks? i.e code that drains memory infinatly?
+13:44  j0nr: hi all... anyone use PHPlot or know where I can find people who know much about it?
+13:44  thadin: kel39: no idea, never worked with WP, but setcookie() sends a header as well.. why wouldn't header() work
+13:44  kel39: ok
+13:44 --- cna_ is now known as cna
+13:44  kel39: <thadin> header() wont work because post-template.php already sends headers
+13:44  ddilinger: possible, yes.  one way i'm familiar with is objects that have circular references ($A->foo === $B && $B->foo === $A), then if A and B are no longer referenced anywhere, they wont be garbage collected(fixed in 5.3)
+13:45  Kingsy: or does php throw away variables after they are used?
+13:45  Kingsy: so the only way to get a memory leak is an infinate loop?
+13:45  yebyen: it need not be infinite
+13:46  yebyen: what version of php?
+13:46  Kingsy: php 5.2
+13:46  yebyen: i have some installations of 5.2.x that i can not convince them to garbage collect
+13:46  yebyen: all i had to do was open a lot of files and try to grep through them
+13:47  yebyen: had no choice but to increase the memory, i would look up the code so someone could point out my obvious mistake
+13:47  yebyen: but
+13:47  yebyen: no idea
+13:47  Kingsy: well, see I am getting fatal errors when I am trying to var_dump an object
+13:47  yebyen: yeah that might have been it!
+13:47  Apl: Fatal?
+13:47  Kingsy: there is no reason for it cos the object is definatly defined
+13:47  yebyen: why not use var_export or serialize?
+13:47  Kingsy: Apl - justa  white screen
+13:48  Kingsy: var_export? never used that before
+13:48  Apl: Kingsy, enable error reporting and see what it is
+13:48  Apl: Anyway.
+13:48  Kingsy: Apl - I did enable error reporting it still returned nothing
+13:50  Kingsy: ahhh var_export prints it!!!!
+13:50  Kingsy: awsome!!
+13:50  yebyen: ;)
+13:50  Kingsy: yeben - what is the difference between var_dump and var_export? why would one work and the other not?
+13:50  yebyen: var_export is meant to output code that you can run
+13:50  yebyen: if you have all of the class imports, then surely you can run it
+13:51  yebyen: serialize is actually not meant to output code that you can read, for large objects they all get printed on one single line
+13:51  Kingsy: well var_dump gives me a white sceen and var_export prints the object.. is that a worrying symptom?
+13:52  yebyen: var_dump is supposed to be for what i don't know
+13:52  yebyen: it's not guaranteed to export code that can be re-imported though
+13:52  mh`: var_dump is like print_r with more info.. if its not working something is wrong
+13:52  yebyen: just something human readable
+13:53  Kingsy: mh` - something being what? could it be a memory issue? perhaps? should it be something I should be concerned with?
+13:53  mh`: is anything in the error log when you do it?
+13:53  Kingsy: not that I can see
+13:53  yebyen: a white screen
+13:53  mh`: i dont know what that means..
+13:54 +Viper-7: Kingsy: php should _NEVER_ give you a blank white screen unless you tell it to
+13:54  leitz: Is there a way to make a $key from an array part of a variable name? Like $my_$key = $this_array[$key];
+13:54  mh`: do you have 20/20 vision? astigmatism?
+13:54  yebyen: i always wonder where to find the errors when they don't go where you expected
+13:54  mh`: Viper-7: i'm just assuming he's in a display_errors 0 environment producing a fatal error
+13:54 +Viper-7: error_reporting = -1 and display_errors = On, check phpinfo() and your Loaded Configuration File to make sure you're editing the right one
+13:54 +Viper-7: mh`: he was asking earlier iirc
+13:54  mh`: he was, and i told him then how to do it
+13:54  mh`: so blank screen = he still hasnt
+13:55  larsemil: How do i get the column names when using PDO?
+13:55  Bheam: hi
+13:55  Bheam: is the md5 hash of a 128bit value unique?
+13:55  Kingsy: I think its a memory limit problem.. I found a reference to that in the logs
+13:56  Kingsy: is it common to use more than 256MB memory_limit using var_dump ? if the object is big?
+13:56  Kingsy: and why would var_export not cause this effect?
+13:56  mh`: how big
+13:56  mh`: because var_dump produces substantially more information
+13:56  Kingsy: I see
+13:56  mh`: it shows the type of each element (such as properties on an object), the length of said object
+13:56  ddilinger: Bheam: more of a comp sci question, not sure anyone here would know
+13:56 +Viper-7: larsemil: PDO::FETCH_ASSOC ?
+13:56  mh`: and so forth
+13:56  mh`: ddilinger: i can field the question
+13:56  Kingsy: I reckon thats it then
+13:56  Bheam: ddilinger: ah well.. gotta start somewhere ;)
+13:57  mh`: but there's a short answer, and the long one that i won't type for free :)
+13:57  mh`: (not cuz i'm a dick, but because i don't have hours to type it out)
+13:57  ddilinger: heh, i was thinking the answer is probably not, but i dont know enough to be sure :)
+13:57  mh`: the short answer is no
+13:57 @LawnGnome: Bheam: Not necessarily. The intention of a good one way hash function is that it output values should be evenly distributed and unpredictable, but obviously you can't represent every possible input string in 128 bits. MD5 is showing its age now, though: SHA-256 and SHA-512 are the best general purpose hash functions available at present.
+13:57  mh`: no md5 values can be guaranteed to be unique
+13:58  mh`: (intentionally computed) collisions are becoming more common - google Rainbow Tables
+13:58  leitz: Bheam, if the 128 bit value is longer than the md5 hash then no.  :)
+13:58  mh`: leitz: even a 3-4 byte value doesn't guaranteed uniqueness
+13:58  Bheam: leitz: a md5 hash is 128 bits :p
+13:58  salathe: leitz: if the 128 bit value is longer than a 128 bit value?..
+13:59  Bheam: LawnGnome: well someone has to know the cutoff where source bits can produce duplicate hashes?
+13:59  mh`: i'm trying to say that it doesn't matter, you cannot trust an md5 to be 100% unique.. that's why people a) use salts b) sanity check with a companion value
+13:59  mh`: Bheam: i do, try 1.
+13:59  mh`: :P
+13:59  Bheam: ...
+14:00  Bheam: most likely md5 produces unique values far beyond what i can manually check with a duplicate checking loop
+14:00 @LawnGnome: Bheam: 129 bits. :)
+14:00  mh`: here, i'll demonstrate for you, one second
+14:01  leitz: All, mea culpa. I was thinking of the md5sum output and crossing my bits and bytes.  :(
+14:01 +Viper-7: use crypt() over md5() or hash() too :P
+14:02 @LawnGnome: Viper-7: For passwords, absolutely.
+14:02  mh`: um
+14:02  silv3r_m00n: I need to remove an element from an array
+14:02  mh`: encryption != hashing
+14:02  silv3r_m00n: how ?
+14:02  mh`: don't confuse the two
+14:02  mh`: a hash is one-way
+14:02  mh`: crypt() is not
+14:02 +Viper-7: mh`: php.net/crypt
+14:02 +Viper-7: dont lecture without knowing :P
+14:02  Bheam: LawnGnome: that'd assume that all hashes were unique as long as source bits were <= hash bits - which i'm pretty sure isn't true
+14:03 @LawnGnome: Bheam: It's not. I was being sarcastic. The point is that you can't guarantee uniqueness. :)
+14:03  mh`: erm, i guess it's more of a stayed-up-all night failure :)
+14:03  silv3r_m00n: Viper-7: hi , i need to remove an element from an array
+14:03  mh`: mcrypt != crypt, also :D
+14:03  leitz: Any thoughts on the $key question? I'm stumped in the middle of one of my few "hermit periods"...
+14:03  silv3r_m00n: either remove by value
+14:03 +Viper-7: mh`: crypt will do one way salted hashing, with a large repetition count
+14:03  kel39: cheers Viper-7, got it sorted
+14:03  kel39: I created a custom page template
+14:03  kel39: defined cookies in thar
+14:03  kel39: :D
+14:04  mh`: Bheam: it's not true, assume that the hashes are normally distributed in the keyspace (roughly inaccurate)
+14:04  mh`: the keyspace is 2^128 (128 binary digits)
+14:04 @LawnGnome: leitz: Variable variables: http://au2.php.net/variables.variable
+14:04  mh`: so the odds of a collision are 1:2^128
+14:04  mh`: multiply that by your sample size
+14:04  mh`: to figure out _ROUGHLY_ how close you are to a potential collision, on a probability basis
+14:05 * leitz is off to read LawnGnome's suggestion...
+14:05  mh`: Bheam: if you explain why this matters i can give you a more useful answer
+14:06  mh`: you're getting into a very.. theoretical topic
+14:06 @LawnGnome: mh`: Well, the birthday paradox factors into this as well, so the odds are actually less than that: 2^64.
+14:06  mh`: LawnGnome: aye, good point
+14:07  mh`: LawnGnome: for his purposes (assumption here) those numbers might as well be the same :)
+14:07 +Viper-7: the real point is, hashing algorithms due to their nature are basically designed to make calculating stuff like collision rates hard
+14:07 @LawnGnome: Quite.
+14:07 --- krz_ is now known as krz
+14:07 +Viper-7: you literally have to store every possible value and cross-reference, theres no shortcuts here ;)
+14:07  mh`: yea, thats why i said roughly/approximate/etc :)
+14:07 +Viper-7: although for md5 thats.. slightly broken
+14:07  mh`: yeah, thats what rainbow tables are
+14:09  milligan_: I'm running a command with exec .. can I kill the shell after X seconds, some how ?
+14:10  mh`: the best advice i can give is if it matters to you, and you're not doing something embedded where computational difficulty is a concern, use something like sha-1.. simply because it has a bigger keyspace and it's not in the crosshairs :)
+14:10  mh`: milligan_: you could set max execution time?
+14:10  milligan_: mh`, I want the script to continue, not die ..
+14:10  mh`: so you just want to stop the exec() if it's not done after a certain amount of time?
+14:10  milligan_: correct
+14:11  mh`: not that i'm aware of.. without using pcntl_* stuff
+14:11 +Viper-7: milligan_: $pid = exec($yourcmd . ' 2>&1 >/dev/null & echo $!'); sleep(2); exec('kill -9 ' . $pid);
+14:11 +Viper-7: thats linux specific tho
+14:11  mh`: o_0
+14:11 +Viper-7: bash specific i should say
+14:11  mh`: Viper-7: is that tested (have you done that before?)
+14:11 +Viper-7: many many times
+14:12  mh`: interesting
+14:12  mh`: i was thinking that letting exec() finish with a suspended process
+14:12  mh`: would be akin to exit'ing bash
+14:12 +Viper-7: 2>&1 redirects STDERR to STDOUT, >/dev/null redirects STDOUT to /dev/null, effectively redirecting both output pipes away from php, preventing php blocking for input on a pipe
+14:12 +Viper-7: the & will spawn the process in the background in bash
+14:12  mh`: yeah i understand the output redirection, i was referring to the fact that it's backgrounded now
+14:12 +Viper-7: and the echo $! will echo the process id, so you can capture it in $pid
+14:12  mh`: right
+14:13  mh`: will the backgrounded task outlive that php execution?
+14:13  mh`: if it's not finished
+14:13  mh`: (i'd test myself but this isn't something trivial to find out :))
+14:13 +Viper-7: mh`: http://www.viper-7.com/snippets/view/27
+14:13 +Viper-7: if you want a more formal version
+14:14  milligan_: Man, this is a pain. And it's all because I have to write workarounds for other peoples shaity software. Pretty annoying :(
+14:14  mh`: ahhh
+14:14  mh`: the disown
+14:14  mh`: thats why it works
+14:14 +Viper-7: and no, php will terminate the child process on script end, for that you need to add either disown after the & (another bash command to sever the parent/child relationship) or use the nohup utility to spawn the process
+14:14  mh`: that's importnat
+14:14  mh`: yeah
+14:14  mh`: thats why i was o_0'd at your code here in the chan.. though i didn't even think of calling disown
+14:14  mh`: that's slick
+14:14  mh`: nice code :)
+14:14 +Viper-7: i learned the disown trick from TML ;)
+14:15  mh`: teach me more!
+14:15 +Viper-7: the rest is just old school dos / nix stuff hehe
+14:15 +Viper-7: check the other snippets on my site :P
+14:15  mh`: yeah i understood everything, had never thought of using disown
+14:15  mh`: clever stuff
+14:16  milligan_: Viper-7, I see how your command would the job, but it would also prevent me from getting the output of the command .. It keep returning data.
+14:16 +Viper-7: milligan_: use popen() and pclose() then
+14:16  mh`: Viper-7: did i break your website? :(
+14:16  mh`: i clicked on snippets
+14:16  mh`: now it's not loading
+14:16  mh`: lol
+14:16 +Viper-7: mh`: you may need to refresh
+14:16 +Viper-7: its on my home connection atm heh
+14:16  mh`: ah
+14:16 +Viper-7: australian adsl :<
+14:17  Kingsy: is $i == 0 || $i == 2 the same as $i%2   ?
+14:17 +Viper-7: milligan_: php will block on a read from a handle opened by popen(), but if you arent actively reading, you can terminate the process yourself in php code once $starttime + 2 < time()
+14:17  mh`: you know a rackspacecloud server is $10 US a month right :)
+14:17  johanness: Kingsy: not at all
+14:17 +Viper-7: Kingsy: no, $i == 4 also works with $i%2, and every other multiple of 2 :P
+14:18 +Viper-7: not to mention $i%2 is actually flipped, you normally check $i%2==0
+14:18 +Viper-7: $i%2 will give you all odd numbered rows
+14:18 +Viper-7: $i%2==0 all even ones
+14:18  Kingsy: hmm so what would be the correct condition to make $i==0 && $i==2 true?
+14:18 +Viper-7: mh`: i have a vps ( http://codepad.viper-7.com ), but im going to move my personal site to my works hosting, once they get their new server heh
+14:19 +Viper-7: $i==0 && $i==2
+14:19  mh`: Kingsy- bending the spacetime continuum?
+14:19 +Viper-7: ? lol
+14:19  Kingsy: $i$2 would be the equiv of $i == 1 || $i == 3 ?
+14:19  mh`: i vote for my answer
+14:19  mh`: we're going to need more plutonium
+14:19 +Viper-7: $i == 1 || $i == 3 || $i == 5 || $i == 7 || $i == 9 || $i == 11 et al
+14:19  mh`: and gigawatts
+14:19  Kingsy: $i%2
+14:19 +Viper-7: Kingsy: % is the remainder from a division
+14:19 +Viper-7: 1 / 2 = 0 with 1 left over
+14:20 +Viper-7: and 1 is considered true ;)
+14:20  milligan_: Viper-7, can I read line by line from a popen resource ?
+14:20 +Viper-7: yep, use fgets() on it
+14:22  leitz: LawnGnome, I'm still confused. Maybe it's the decaf coffee...http://codepad.org/8ZY0Araq
+14:24  Rickardo1: I need to talk with someone who has memcache experience.
+14:24 +Viper-7: leitz: notices help
+14:24 +Viper-7: http://codepad.viper-7.com/K3Xp1n
+14:24 +Viper-7: leitz: also, why not use an array for that :/
+14:24  crackguy: is there any free online shopping website making library
+14:25  johanness: leitz: ${'CLEAN_'.$value}
+14:25 +Viper-7: leitz: use empty() instead of strlen() in your check to avoid the notices
+14:26 +Viper-7: or isset()
+14:26 +Viper-7: if you're expecting 0 as a valid value
+14:26  milligan_: Viper-7, looks like I might be able to solve it using this .. cheers mate :)
+14:26 +Viper-7: np
+14:28  leitz: Viper-7, full code:  http://codepad.viper-7.com/B6GoQJ
+14:29 +Viper-7: leitz: http://codepad.viper-7.com/7wZfA8
+14:29 +Viper-7: i just followed exactly what i said :/
+14:30 +Viper-7: use an array, use isset
+14:30 +Viper-7: also, ill show you a nicer way
+14:32  leitz: Viper-7, thanks! The question about using an array is interpretation in an SQL statement. Eventually this will be and INSERT or UPDATE, and I was setting $CLEAN_value to avoid array references in the SQL statement. I've had issues with echo and such before.
+14:35 +Viper-7: leitz: http://codepad.viper-7.com/1KsHA9
+14:36 +Viper-7: $value instead of {$clean[$key]} in the echo even :P
+14:36 +Viper-7: that will cleanly break references too
+14:36 +Viper-7: both array_map and array_intersect_key return copies, not references
+14:37 +Viper-7: i normally wouldnt have $filtered, i'd just do it inline, but that made it clearer :P
+14:37  Blinkiz: Hello. I would like to find out what previous month is. Like, if the date is 2010-01-23, I would like to know that previous month is "2009-12". What functions should I work with to get this result?
+14:37 * leitz has to go read some php manual to really get the array stuff...
+14:38  leitz: Viper-7, thanks! I don't get it yet, but I will. Off to code some more...
+14:39 +Viper-7: leitz: i'd normally use it like this http://codepad.viper-7.com/UdHJQ5 :P
+14:40 +Viper-7: but i wouldnt store html encoded data in my database :P
+14:41  Blinkiz: Here is a try from my side to get the date back in time: http://codepad.org/hba1TrUv. Should I work with strtotime()? Will it handle current date like 2010-10-31 so it gets 2010-10-30 as previous month ("-1 month")?
+14:41  Blinkiz: I mean, so it gets 2010-09-30.
+14:43  hewks: hi all !
+14:43  mikunos: hi guys I'm little bit confused about apply some rules to a price: http://pastie.org/1289778
+14:44  mikunos: I have 1 to n rules and I need to apply a percentage to all products that are affected
+14:44  mikunos: any help?
+14:45 +Viper-7: Blinkiz: strtotime() will process absolute date parts before relative ones, so strtotime('2010-10-30 -1 month') will do exactly that, but be aware that if that puts it at say.. the 31st of feburary, you'll probably get a date thats actually the 3rd or 4th of march
+14:46  hewks: I'm browsing this website ,http://www.doctrine-project.org/projects/orm/1.2/docs/en  i'm new to ORM ,  It says API & ORM , what is difference and why is an ORM required
+14:46 +Viper-7: mikunos: usually rules like that are defined per order, not per product
+14:47 +Viper-7: if the order knows, make the product ask the order what percentage to apply
+14:48  hewks: Viper-7: what should i be reading ?
+14:49 +Viper-7: hewks: im not a big ORM junkie, although ive come to like my current one, it has integrated schema generation and such, so i define everything in code, and basically never touch the db myself
+14:49  Tricks: does anybody know how I enable PDO lib using Apache?
+14:49 +Viper-7: in that sort of situation, it can save you a TON of code, time, planning, schema building, etc, etc
+14:49 +Viper-7: but plugging an ORM onto an existing database.. im much more dubious of
+14:50  hewks: ok
+14:50 +Viper-7: Tricks: huh?
+14:50 +Viper-7: hewks: i can tell you doctrine and propel are the two big ones for php, but i know extremely little about either heh
+14:51  hewks: Viper-7: i work on codeigniter
+14:51 +Viper-7: ouch.
+14:51  Tricks: Viper-7, I have just deployed a site I have been developing to a centos box but PDO appears to be disabled after checking phpinfo(); I can see the following statement --disable-pdo
+14:51  hewks: it has queries run as $this->db->query();
+14:51  hewks: and i made another simple application without CI  ,i want to use such structure in my application Viper-7
+14:51  hewks: basically my own framework
+14:51 +Viper-7: Tricks: that just means you need to load it as a shared extension - however you installed php likely has a php5-pdo module too, either that or it'll include it with php5-mysql or such
+14:52  Tricks: Viper-7, okies :)
+14:53  Apl: I have a new hobby.
+14:53  Apl: I find the employers of all regulars here and tell their employers they chat all day.
+14:53  prgmrBill: my employer is in this room with me :)
+14:53  prgmrBill: he actually encourages me to use irc
+14:53  Apl: prgmrBill, who is he
+14:54  prgmrBill: none ya business
+14:54  Apl: I'll find out. And then I'll find *his* employer and tell him he encourages his employees to chat all day.
+14:54  prgmrBill: good luck with that, haha
+14:54  Apl: :}
+14:54 +Viper-7: aye, enjoy ;)
+14:54  Apl: just kidding, just kidding ;) how are all
+14:55  Apl: you all*
+14:56  hewks: Viper-7: $this->db->query() , does it require an ORM or what ?
+14:56 +Viper-7: not at all heh
+14:56  prgmrBill: haha
+14:56  hewks: basically want active record class
+14:56 +Viper-7: ORMs are about not using SQL at all
+14:56 +Viper-7: or trying not to at least :P
+14:57  Apl: Yes, ORMs are about trying to, and failing every damn time :/
+14:57  fruitwerks: hmm
+14:57  dr0id: ORM FTL!!!
+14:57 +Viper-7: $product = DB::get('Product', array('ID' => 5)); echo $product->Title;
+14:57  hewks: FTL ?
+14:57  fruitwerks: is there any way to override expires headers for an external css / js?
+14:57  dr0id: for the loose :P
+14:57  mh`: fruit of the loom
+14:57  hewks: what can i have ?
+14:57  Apl: hewks, before we go further, the ORM hate you may encoutner doesn't mean any SQL API that helps you is bad.
+14:57  Apl: It's about how it does it.
+14:57  dr0id: hewks: if you like it, go and use
+14:58 +Viper-7: yeah, SilverStripe's is awesome! :P
+14:58 * Viper-7 ducks
+14:58  dr0id: ENOUGH!!!
+14:58  hewks: www.phpactiverecord.org , i think is what i need , correct ?
+14:58  dr0id: yes
+14:58  dr0id: and doctrine too
+14:58  hewks: what is doctrine ?
+14:58  prgmrBill: need? I don't think so.
+14:58  dr0id: my doctor's name
+14:58  hewks: how would that help ?
+14:58  prgmrBill: doctrine is a popular PHP ORM
+14:58  hewks: ORM again , ......
+14:59  hewks: f**k ORM :D
+14:59  dr0id: hewks: what makes you think you need an ORM ?
+14:59  hewks: actually i had no idea what it was
+14:59  hewks: i basically want to use active records
+14:59  dr0id: then why talk about it ?
+14:59  dr0id: that's the same
+14:59 +Viper-7: hewks: $this->db->query() is just $db->query() with $db stored as $this->db (an object property)
+14:59  dr0id: are you using codeigniter by any chance ?
+15:00 +Viper-7: codeigniter injects itself into objects it creates, so you can do $this->CI->...
+15:00 +Viper-7: he sure is
+15:00  hewks: and this->db->where , this->db->update
+15:00  hewks: etc
+15:00  Apl: hewks, this is not ActiveRecord.
+15:00  dr0id: ok
+15:00  Apl: ActiveRecord is an ORM.
+15:00  Apl: You need to seriously sort your terms out.
+15:00  dr0id: Apl: in codeigniter that's called active record
+15:00  johanness: hewks: if you want active record pattern, you should go with www.propelorm.org
+15:01  Apl: johanness, isn't Propel abandoned?
+15:01  prgmrBill: all of this is sooooo off topic
+15:01  johanness: Apl: it isnt
+15:01  johanness: the recent versions are actually very promising
+15:01  Apl: Interesting.
+15:01  Apl: Was is abandoned at some point?
+15:01  johanness: and better than doctrine 1.x imo
+15:01  johanness: yeah it was, but was picked up late last year again
+15:01  Apl: Because that's what I heard when I was being explained why Symfony droppe dit.
+15:01  Apl: Huh.
+15:01  Apl: Ok.
+15:02  johanness: symfony didnt drop it
+15:02 +Viper-7: SQLQuery in silverstripe is exactly that, $query = new SQLQuery(); $query->select(array('ID', 'name')); $query->where(array('ID' => 5')); $query->execute(); foreach($query as $row) { ... }
+15:02 +Viper-7: just a query builder, not an ORM, but i dont know of any standalone packages that do it, its usually a framework thing
+15:02  Apl: johanness, how does it fare compared to Doctrine.
+15:02  dr0id: Viper-7: are they paying you ? :P
+15:02  prgmrBill: Viper-7: is the SQLQuery thing standalone?
+15:02 +Viper-7: dr0id: nope
+15:03  Apl: I mean, what are the distinctive differences.
+15:03  hewks: Viper-7: can i excract database class from silverstripe ?
+15:03  dr0id: hewks: what is silverstripe ?
+15:03  johanness: it has less magic, better performance, better IDE auto-completion, better to debug
+15:03  Apl: Less magic, sounds good..
+15:03  hewks: http://www.silverstripe.com/ dr0id
+15:03  dr0id: hewks: are you talking about the silverstripe IDE ?
+15:03 +Viper-7: its a distinct class, but there will be some hacking involved to make it use your db resource/object and query functions
+15:03  hewks: ok
+15:03  stuk_gen: hi all :)
+15:03  Aquaguy: Hello
+15:04 +Viper-7: silverstripe.org but hey ;)
+15:04  stuk_gen: is to fast for() or foreach() ?
+15:04  dr0id: Viper-7: he used google when I questioned :P
+15:04 +Viper-7: (same company, very different sites ;)
+15:04  Apl: johanness, it's a bit closer to the DBIx::Class?
+15:04  hewks: there must be something specally made to allow us convert quering easier and with objects ?
+15:04  Apl: In Perl.
+15:04  dr0id: stuk_gen: they are different
+15:04 +Viper-7: hewks: ORMs heh
+15:04  johanness: dunno perl sorry :)
+15:04  Apl: Ok :)
+15:04  hewks: wtf
+15:05  johanness: hewks: did you look at propel?
+15:05  hewks: someone said its outdated
+15:05  johanness: http://www.propelorm.org/#ShowMe
+15:05 +Viper-7: someone asked and was told they were wrong :P
+15:05  Apl: hewks, if it's updated, and has less magic, I'd recommend propel too :/
+15:05  stuk_gen: dr0id: i mean using in array element
+15:06  hewks: ok , i will have a look
+15:06  dr0id: hewks: I highly recommedn read beans
+15:06 +Viper-7: dr0id: i've build 4 complete modules now, each in a FAR shorter dev cycle time than ever before
+15:06  hewks: Apl: if (!updated_propel ) then ?
+15:06 +Viper-7: im not blind :P im a fan for very good reasons ;)
+15:06  dr0id: I know bud
+15:07  hewks: dr0id:  what is it , RED BEANS ?
+15:07  dr0id: ORM
+15:07  hewks: dr0id: did you say you had made your own thing with red beans ?
+15:08  hewks: sorry Viper-7 it is
+15:08 +Viper-7: Object Relational Mapper - Object being objects in your php code, Relational being relational database tables in mysql or such, Mapper meaning it connects the two
+15:08  Apl: hewks, well, like the PM of Israel says, "we don't comment on hypotheticals"
+15:08  zok: If I'm trying to change a date's format from MMDDYYYY to YYYY-MM-DD, would it be faster to use substring functions or just $var{4}.$var{5}.$var{6}... (concatenation)
+15:08  dr0id: hewks: enough
+15:09  dr0id: zok: umm, strtotime + date ?
+15:09  dr0id: ohh, sorry
+15:09 +Viper-7: foreach($product->Orders() as $order) { echo $order->Customer()->getTitle(); }
+15:09 +Viper-7: that just queried 3 different tables
+15:09  dr0id: Viper-7: are you building any RBAC ? or using the default from SS ?
+15:10  hewks: dr0id: if you have learned something over time and have gained experienced , that doesn't mean you should over-pretend , and pull people
+15:10 +Viper-7: havent got that far yet
+15:10 +Viper-7: using SS atm
+15:10  zok: dr0id: can strtotime parse MMDDYYYY? How does it know if it's MMDDYYYY or DDMMYYYY ?
+15:10  dr0id: hewks: huh ?
+15:10  hewks: *enough*
+15:10  zok: Like, if it got 01021959 - how would it know if it was jan 2 or feb 1?
+15:10  prgmrBill: zok: using / will do m-d-y and - will do d-m-y, I think
+15:11  richwil: Hi there. I've got a very basic MySQL insert query that executes fine, but when I check the database half the content is missing - it doesn't insert anything found after the degree symbol. Is there something I can do in PHP to fix this? http://pastie.org/1289843
+15:11 +Viper-7: zok: http://au2.php.net/manual/en/function.strtotime.php#91165
+15:11  Apl: johanness, you say less magic but on Propel's home page is this:   $book->filterByPublishYear(2009).  I can't see what would be the benefit of that over  where('publishYear', 2009)
+15:11  hewks: i hope this is not an ORM  , http://www.phpactiverecord.org/
+15:11  zok: Interesting...
+15:11 +Viper-7: 8 digits is YYYYMMDD first, and if outside that, MMDDYYYY iirc
+15:11 +Viper-7: hewks: you're saying you dont want an ORM, then list all the features of an ORM in what you want
+15:12 +Viper-7: it doesnt make sense
+15:12  johanness: Apl: with less magic im mostly referring to doctrine's heavy usage of (__call, __set, __get)
+15:12  hewks: Viper-7: ok let me read , and i will come back
+15:12  Apl: johanness I see.
+15:12  hewks: thankyou
+15:12  johanness: actually each doctrine entity has set(), _set(), and __set()
+15:12  hewks: all
+15:12  Apl: ew
+15:13  johanness: each doing sth different
+15:13  verblendet: hi, i'm looking for a library to grab content of a website except the header.  its used to grab news from a small newssite and insert them into a newsletter or something
+15:13  Apl: johanness, then does it mean the Propel model has all those methods pre-generated? Seems a bit wasteful.
+15:13  johanness: yes propel pre-generates them
+15:13  Apl: filterByX, ByY, Z, ...
+15:13  verblendet: can i do that with native curl functions? or is there a kinf of html parsing library for php you can recomend?
+15:13  johanness: dunno about filters, but the properties and setters/getters as well as behaviors are merged in at generation time
+15:14  johanness: doctrine does all of that dynamically
+15:14 +Viper-7: verblendet: DOMDocument ;)
+15:14  johanness: so that a runtime hit, plus harder to debug
+15:14  Apl: johanness, it's nice to have an alternative to Doctrine I guess.
+15:14  Apl: Thanks for the heads up
+15:14  dr0id: Viper-7: you suggest any read/code for RBAC ?
+15:14  verblendet: Viper-7, thanks, i'll look for it
+15:14  salathe: zok: what's wrong with just moving around the date parts as you want?
+15:15 +Viper-7: verblendet: it can load a html file directly from a URL if you want, and you can use standard DOM functions (like javascript) ie $dom->getElementsByName('a') functions
+15:15  verblendet: Viper-7, no, no javascript :)
+15:15 +Viper-7: verblendet: this is php
+15:15 +Viper-7: DOM (document object model) is a standard used by many languages
+15:15 +Viper-7: people are just most familiar with it in browser & javascript
+15:15  verblendet: just want to strip header and footer
+15:16  verblendet: with pure php, it was just an idea, i was asked to include something like that in my app
+15:16 +Viper-7: which means, you want to fetch the content of a specific container <div> or such in the page
+15:16 +Viper-7: DOMDocument is a standard php extension
+15:16 +Viper-7: it comes with it heh
+15:16  verblendet: and it should run without a browser open, like in a cronjob
+15:16 +Viper-7: yup
+15:16  verblendet: Viper-7, ok, thanks :)
+15:16  verblendet: thats exactly what i was looking for :)
+15:19  nVee: Viper-7: you got any openssl experience?
+15:19 +Viper-7: very limited
+15:24  richwil: Sorry I got disconnected.. did anyone reply to my message about the INSERT query problem?
+15:24  verblendet: no
+15:24  richwil: damn, thanks
+15:28  davidthedrake: cyth: have you seen the Wolfram Alpha cracking captcha discussions going on?
+15:29  mh`: i'm not cyth, but have a link? that sounds interesting
+15:29  davidthedrake: http://news.ycombinator.com/item?id=1891375
+15:29  davidthedrake: Interesting stuff. Wolfram has a smart :)
+15:34 @cythrawll: davidthedrake, no I haven't that's interesting though.
+15:36 --- Farkie[Away] is now known as Farkie
+15:36  thevishy: hi what is a good way to parse XML's ?
+15:37 @cythrawll: thevishy, depends on what you need to do and xml size etc...
+15:37 @cythrawll: simplexml, dom, xmlreader
+15:38  thevishy: cythrawll my idea is to get financial information from popular websites like google finance and then parse and extract data from it
+15:38  thevishy: I would like to do it on the fly
+15:39 @cythrawll: how big are these xml's?
+15:39  tokam: chr() makes an int to an char, how to make a char to an int?
+15:40 @LawnGnome: tokam: !+ord
+15:40  php-bot: tokam, int ord(string character)  - Returns the codepoint value of a character - http://php.net/ord
+15:41  thevishy: these are mostly 50 -100 lines
+15:41  thevishy: it would be xhtml actallu
+15:42  hewks: http://www.propelorm.org/wiki/Documentation/1.5/Installation , this says , i have to add the pear.propelorm.org channel to your PEAR environment , what is that ?
+15:42  warflyr: thevishy should be somehing like this http://finance.google.co.uk/finance/historical?q=LON:VOD&startdate=Oct+1,2008&enddate=Oct+9,2008&output=csv
+15:42  hewks: do i run php in command line , i'm using WAMP server
+15:42  warflyr: you can
+15:43  warflyr: sometimes good for testing
+15:43  warflyr: but put your php files in your docroot to view on website
+15:44  hewks: warflyr: firstly i want to install , propelorm
+15:44  hewks: i jsut run the command line php mode
+15:44  b1lly: When I pull something out of the mysql database that has multiple lines, it returns it in 1 line...is there anyway I can add spaces?
+15:45  fruitwerks: is it worth compressing png files with mod_deflate?
+15:45 @LawnGnome: fruitwerks: No.
+15:45 --- ce_afk is now known as cescalante
+15:45  thevishy: Yes like that warflyr
+15:45  fruitwerks: didn't think so
+15:45 @LawnGnome: b1lly: You probably just need to run the output through nl2br(), if you're outputting to a Web page.
+15:45  b1lly: yeah
+15:46  thevishy: Actually a bit different , it would show the balance sheet etc
+15:47  thevishy: --- > http://www.contentlinks.asiancerc.com/IB/FinalCompanyProfile.asp?txtCompanycode=16490238
+15:47  thevishy: somethin like that and am planning to parse it
+15:47  thevishy: would that be possible ?
+15:47  thevishy: I would use google charts of some other char techniques to do the rest
+15:48  hewks: where should i invoke this line --> > pear channel-discover pear.propelorm.org ?
+15:52  kc8hfi: how do you rename a file when you upload it?
+15:54  thevishy: would that work any idea
+15:56  davidthedrake: kc8hfi: move_uploaded_file
+15:57  BlaDe^: Can you do a full 32bit bitwise not operation in php?
+15:59 +Viper-7: BlaDe^: signed int, sure
+15:59 +Viper-7: unsigned.. not directly
+16:00 +Viper-7: ^ == XOR
+16:00  BlaDe^: im dealing with all 32bit data types
+16:00  BlaDe^: and 6 bytes aren't decoding properly
+16:01 +Viper-7: http://php.net/operators.bitwise
+16:01  BlaDe^: 6 of 16 bytes don't decode properly, always in the same position
+16:02 +Viper-7: need much more info than "don't decode properly" to help, and i gotta go :P maybe someone else can help
+16:02  BlaDe^: okay, no problem.. I'll figure it out, thanks
+16:02 +Viper-7: check out pack/unpack if you need to go further
+16:15  atirjavid: bad morning.
+16:15  atirjavid: What's up?
+16:16  prgmrBill: good morning!
+16:16  atirjavid: It absolutely is not a good morning.
+16:16  atirjavid: just... morning.
+16:17  atirjavid: It feels like I need to be in a mental institution or the rest of the world needs to be
+16:17  atirjavid: I hate fixing moron's code
+16:17  atirjavid: and I do not like to fire people either.
+16:17  atirjavid: but sometimes you have to do what you have to do.
+16:19  leitz: Is there a PDO based equivalent to sqlite_escape_string()? I'm on RHEL/CentOS and sqlite is not compiled in. Getting this error:  undefined function sqlite_escape_string()
+16:20  leitz: Or am I missing something simple, as usual?
+16:21  prgmrBill: leitz: you're missing something - if you're binding variables with PDO, escaping is unnecessary
+16:22  thevishy: is it possible to extract data from this site and make a graphy
+16:22  thevishy: http://money.rediff.com/companies/wipro-ltd/11060011/results-quarter
+16:23  prgmrBill: I don't know what a graphy is.
+16:23  thevishy: sorry I mean graph
+16:23  thevishy: i just to extract and make a graph out of it for my stock analysis
+16:23  azazul: yeah , thats pretty much the main reason to use PDO ( if you are not in oop ) ... no worries about injection
+16:24  azazul: at least not 1st kind sql injection
+16:24  pigdude: anyone aware of a php implementation of git, akin to dulwich for python?
+16:24  pigdude: something like this would be incredibly useful for upgrading deployments
+16:24  e01: is it possible to repair invalid html source with domDocument
+16:25  azazul: pigdude: did you try to search through freshmeat.neet ?
+16:25  ManDay: Whats the name of the at( ) function that returns the element of an array?
+16:25  pigdude: which often reside on a machine without build tools or the rights to install software
+16:25  azazul: *net
+16:25  pigdude: azazul: I did not
+16:25  e01: because when try to loadHtml, it return an error
+16:25  pigdude: azazul: nothing there that I see
+16:25  azazul: hmm
+16:26  pigdude: azazul: I doubt it exists, it is an extensive undertaking
+16:26  pigdude: but I just took a shot in the dark
+16:26  rhelic: ManDay: what do you mean function, when you want a certain part of an array you just  $array[$key]
+16:27  ManDay: rhelic: the array is returned by a function
+16:27  Lemon_BE: Hi, is there a way to force php's garbage collection?
+16:27  Lemon_BE: http://bin.cakephp.org/view/1091500094
+16:27  ManDay: unfortunally   myfunc( )[ ... ] stil ldoesnt work
+16:27  Lemon_BE: unsetting doesnt really help
+16:27  salathe: e01: DOMDocument tries, but if it's really broken you'll need a tool aimed at "fixing" broken HTML
+16:29  stuk_gen: is there a way to use json_decode() from a file ?
+16:29  ManDay: Is there any     function ( $anarray, $amixed ) { return $anarray[ $amixed ]; } ?
+16:30  e01: salathe, missing closing tags or such, are the problems usually
+16:30  ManDay: http://codepad.org/zGsMFAPL
+16:30  salathe: e01: take a look at "html tidy"
+16:32  [gunner]: manday: i think only $a = f(); echo  $a[0] is possible
+16:32  [gunner]: and not echo f()[0]
+16:32  stuk_gen: some hint?
+16:32  ManDay: [gunner]: yes thats my point
+16:33  sacho: stuk_gen: "from a file"? what does that mean?
+16:33  ManDay: i find it ridiculous that after decades of php its still not possible to get a value of an array returned by a function in one step!
+16:33  ManDay: not even an array_at( a,k ) function exists!
+16:33  sacho: ManDay: /msg php-bot fad
+16:33  arex\: ManDay: $a[$k] ?
+16:33  ManDay: sacho: lol!
+16:34  ManDay: took you a while but great do know
+16:34  stuk_gen: sacho: i can use $t = [a : "1"] ecc... and use json_decode($t); but i have a file save with a json structure, i want open that file and pass its content to json_decode() is possible this?
+16:34  sacho: stuk_gen: what you just showed isn't php syntax
+16:34  sacho: stuk_gen: php.net/file_get_contents
+16:35  leitz: prgmrBill, the statement I'm running is getting a SQLSTATE[HY000]: General error: 1 SQL logic error or missing database. Trying to figure out what the error actually is.
+16:35  leitz: My first thought was escaped words bing INSERT'd.
+16:36  stuk_gen: sacho: is an example.... $t =  '{"a":1,"b":2,"c":3,"d":4,"e":5}'; echo json_decode($t);  --> this is php syntax
+16:36  sacho: stuk_gen: yes, and what do you call the thing between the ''s?
+16:37  stuk_gen: sacho: between the ''s? where?
+16:37  sacho: $t = '....'
+16:37  sacho: it's called a string.
+16:37  sacho: So to transform your question, how do I read a file into a string.
+16:38  sacho: php.net/file_get_contents
+16:38  stuk_gen: sacho:...i mean is called a string, i only post a complete example becouse you told me i put a non php syntax
+16:40  Igoru: is there any phpt channel?
+16:41  stuk_gen: sacho: so...thanks for the reply
+16:41  leitz: Snippet is at: http://codepad.org/tknudPan
+16:41  sacho: "phpt"?
+16:41 --- sanchaz-away is now known as sanchaz
+16:41  stuk_gen: php-qat
+16:41  sacho: leitz: why are you using pdo but not prepared statements?
+16:41  TranceC: Hey guys. When i redirect people through a index.php that uses the header("location: script, the referrer would just be the url that it came from , right?
+16:42  Igoru: not phpt neither php-qat
+16:42  sacho: TranceC: possibly.
+16:43  TranceC: sacho, which other referrers would it show ? or wouldnt it show anything ? :)
+16:43  sacho: well, it should be that, but you know should.
+16:43  leitz: sacho, I'm using PDO because the base PHP install on RHEL/CentOS doesn't have sqlite3 compiled in. I'm learning to connect to SQLite so no idea what prepared statements are. I have about 6 months of PHP experience spread over about 8 years of interruptions.
+16:44  sacho: leitz: what is the sql string?
+16:44  sacho: leitz: http://php.net/manual/en/pdo.prepared-statements.php
+16:44  TranceC: sacho, hehe true true. :) lets say im referring people from site A, to the redirect script on site B, which then redirects people to site C. Would the people on site C, be able to see that the people came from Site A ? :)
+16:44  ziro`: am i mistaken in believing try {} catch {} finally {} made it into 5.3
+16:44  ziro`: ?
+16:44  leitz: sacho, here's a sample"  sql is INSERT into client ( 'client_ID' , 'client_name' , 'url' ,  'address1' , 'city' , 'state' , 'country' , 'zip_code' ) values (  'trans_02_23' , 'T' , 'r' , 'r' , 'r' , 'r' , 'rr' , 'r' )	
+16:45  sacho: ziro`: yes
+16:45  ziro`: sacho: thanks!
+16:46  sacho: leitz: I would guess sqlite does not expect 'strings' as column names, try without the apostrophes
+16:47  leitz: sacho, those make sense. I saw a reference to them in some of the other docs I was reading. The sql statement works if I just use it as SQL. That's one of the things confusing me.
+16:49  sacho: leitz: then I would guess there's something wrong with the connection string
+16:50  sacho: are you sure it's sqlite3?
+16:50  sacho: (it being the database)
+16:51  felixjet: im trying to understand OOP >.< but, why some php docs use $var = new class(); and others $var = new class; ?
+16:52  roger_padactor: Why is it then whena  site is encrypted it sometimes says their is other content that is not how do you find out which other content is not?
+16:52  sacho: preference
+16:54  dsdeiz: hi a date format like this "Wed, 12 May 2010 07:57:57 GMT" is there a way to display it with date() ? :-/
+16:54  atirjavid: strtodate?
+16:54  atirjavid: sorry time
+16:54  atirjavid: http://php.net/manual/en/function.strtotime.php
+16:55  dsdeiz: oh cool. will check it out.. thanks
+16:56  TylerE: Is there any way to identify the calling site inside a function call, for debugging?
+16:56  leitz: sacho, yup. The string has worked before, but I've been trying to make it a bit better.
+16:59  Dr4g: I have a timestamp of someone's birth - trying to see if they're under 18 or not. Suggestions ?
+16:59  Dr4g: DateDiff ?
+17:00  felixjet: im trying to understand OOP >.< but, why some php docs use $var = new class(); and others $var = new class; ?
+17:01  leitz: sacho, the PDO connection statement is a copy and paste from the one that pulls the data. So there's some issue with my INSERT, still trying to figure that one out...
+17:03  dsdeiz: aren't those the same if there are no arguments for the "default constructor"?
+17:03  deadroot: hello. does anyone know of any installation hiccups with php 5.2 and mysql 5.5 on windows 7 64-bit? apache seems to be unable to load the php_mysql.dll.
+17:05  rhelic: deadroot: well I know it works fine in Win7 64bit when you just install XAMPP
+17:06  movinthex: Are there any scary security issues I should be aware of these days when allowing people to upload (not too big) files?
+17:06  movinthex: No bugs allow a user to upload a .php script which is then executed or something, I hope?
+17:07  deadroot: xampp is not an option for me
+17:09  azazul: rhelic: just a note : you cant really have XAMP on windows
+17:09  azazul: x stand for NIX
+17:09  movinthex: Lunix?
+17:09  rhelic: azazul: XAMPP is the name of a product, so stuff it :)
+17:09  NoiseEee: movinthex: you're in charge of all files going to your server.
+17:09 @LawnGnome: azazul: The X actually stands for cross-platform in this case.
+17:10  rhelic: azazul: also you are thinking of LAMP  Linux Apache MySQL PHP
+17:10  NoiseEee: movinthex: there's not like antivirus, or 'bad code scanners' or anything in PHP when you're allowing file uploads to your box...
+17:10  azazul: you dont _want_ to know what i think about canned servers
+17:10  leitz: Yes, I'm an idiot. I was using $dbh->query. Set it to beginTransaction, exec, and commit and things work nicely now!
+17:11  movinthex: NoiseEee: Huh?
+17:11  deadroot: so php 5.2 and mysql 5.5 should be fine?
+17:11  movinthex: NoiseEee: I mean for the server itself.
+17:11  rhelic: azazul: I generally assume anybody trying to install PHP/MySQL on their Windows box, it's because it's a workstation, not a server, therefore XAMPP makes perfect sense
+17:12  movinthex: NoiseEee sounds like a rapper name.
+17:12  Dr4g: I'm trying to see if someone is less than 18. Does DateTime::diff() handle Leap Years if i ask it for number of years ?
+17:12  deadroot: or should i get an older version of mysql?
+17:12  NoiseEee: movinthex: what do you mean 'for the server itself'; unless you're actually executing uploaded files
+17:13  sacho: Dr4g: yes it does
+17:13  deadroot: is there a way to get a more verbose error message than the standard "Unable to load dynamic library 'C:\\Program Files (x86)\\PHP\\ext\\php_mysql.dll' - The specified module could not be found."
+17:13  Dr4g: sacho, ok grea.t
+17:13  Dr4g: ok great * ty
+17:14  NoiseEee: deadroot: that kinda says it all, don't you think?
+17:14  sacho: deadroot: difficult.
+17:14  TylerE: deadroot: That sounds pretty clear to me. The dll is either missing or coruppted.
+17:14  deadroot: the dll is fine. checked with depends
+17:16  movinthex: NoiseEee: I'm asking if there is some sort of BUG or something which could make PHP execute a script uploaded or something.
+17:16  NoiseEee: movinthex: um, no.
+17:16  thevishy: can somebody help me ? a site like this http://money.rediff.com/companies/wipro-ltd/11060011/profit-and-loss
+17:16  rhelic: thevishy: try asking a question
+17:16  thevishy: would I be be able te  extract the data from it ?
+17:17  rhelic: thevishy: if you parse the HTML, then cross your fingers and hope they don't block you and/or change it
+17:18  thevishy: rhelic: no I dont have that worry , besides I am doing for private purpose - so I want a solution , instaed of me looking at value I would love to view it as a grpah
+17:20 --- RJD22 is now known as RJD22|away
+17:20  infid: what's the diff between $var = new class() and $var = new class;?
+17:21  salathe: parentheses :)
+17:21  salathe: infid: practically, nothing.
+17:21  thevishy: any ideas how to deal with the website ?
+17:23  thevishy: xhtml is a subset of XML right ? any xml parser should work with xhtml too ?
+17:23  Dr4g: sacho, here's the code to see if sum1 is under 18: http://pastebin.com/e886W1eN
+17:23  Dr4g: :)
+17:23  Dr4g: just tested it
+17:23  salathe: thevishy: yep
+17:23  deadroot: thevishy: 90% of the sites that claim to be XHTML aren't
+17:23  sacho: awesome, now make my colleagues upgrade to 5.3 so I can delete the 1239534 ways they wrote to calculate age and replace them with that one liner
+17:24  deadroot: most will fail horribly with an XML parser
+17:24  ziro`: anyone worked with paypals recurring payments (subscriptions) before? The docs on actually recieving payment notifications is lacking...
+17:24  thevishy: will check that out , any idea how I can work  on a xthml page ? especially on the fly
+17:25  thevishy: XML are usually stored in database , how do I deal with a X(HT)ML parsing of a file which is online ?
+17:25  thevishy: on the fly ?
+17:25  deadroot: XML is XML. no matter where it is stored
+17:26  deadroot: the problem with XHTML is because of microsoft's IE
+17:26  deadroot: IE doesn't fail on invalid XHTML pages
+17:27  deadroot: instead IE always uses the HTML 4.0 engine on even strictly valid XHTML pages, or fails to render on the real strictly valid XHTML pages
+17:27  deadroot: so 90% of "XHTML Developers" aren't
+17:29  rhelic: XHTML is pretty much an abondoned format, don't use it
+17:29  deadroot: it still lives on in some fashion within HTML 5
+17:29  rhelic: ugh no
+17:30  rhelic: the W3C scrapped XHTML2 in favor of HTML5
+17:30  deadroot: doesn't HTML 5 still have support for "application/xhtml+xml"?
+17:30  deadroot: or did they finally ripped it out?
+17:31  deadroot: thevishy: i just checked that link of yours. it's not even an xhtml page
+17:32  deadroot: it's strict html 4.0
+17:32  thevishy: deadroot , thanks it looked xhtml like , do u know how I can partse it ? I want to extract the datas
+17:32  deadroot: it doesn't even validate as html 4.01 strict. http://validator.w3.org/check?uri=http%3A%2F%2Fmoney.rediff.com%2Fcompanies%2Fwipro-ltd%2F11060011%2Fprofit-and-loss&charset=%28detect+automatically%29&doctype=Inline&group=0
+17:33  deadroot: just load it up with the DOM
+17:33  thevishy: deadroot: I had lot of conflicting suggestions like Curl DOM etc , I dont understand why one over the other
+17:34  Igoru: is there any phpt channel?
+17:34  deadroot: pick your poison. i prefer DOM as i believe it's more primitive
+17:36  Xcon: could someone please help me? http://thetradespeople.co.uk/contractorlogin.php -> when you fil in a username / password, and hit [return] its trying to submit the login form on the right hand side of the page and i dont know why, instead of it filling in the form with text, anyone able to point me in the right direction as to why it would do this please?
+17:36  Xcon: if u press login obviously its fine, but it doesnt like [return]
+17:37  deadroot: bah. uninstalled mysql 5.5 and installed 5.1. it just works. -_-'
+17:37  thevishy: DOM and Curl what are the difference fundamentally ?
+17:38  deadroot: i don't know about curl
+17:38  thevishy: right
+17:38  thevishy: DOM has functions to parse also ?
+17:38  etenil: Hi there
+17:39  bamaboy: How can i read emails from an hotmail account using php ?
+17:39  deadroot: thevishy: http://www.php.net/dom check out the DOMDocument::loadHTML
+17:40  thevishy: thanks
+17:40  deadroot: you will also need a passable knowledge of how to use the DOM...
+17:40  deadroot: i hope you're familiar enough with getElementsByTagName and the like
+17:41  anteatersa: hi, I have a hacked php file somewhere on my server, everytime a request comes from google it must be curling some other website for a list of spam links and then inserting them in the header of my site.... does anyone know which command I can use to find the file (I have tried grep for curl etc)???
+17:43 @cyth: anteatersa, well are remote includes on ?
+17:43 @cyth: because you can do that through includes
+17:43 @cyth: (which could also explain how it got on the server to begin with)
+17:43 @cyth: anteatersa, also any file opening function: (fpoen, file_get_contents, readfile, etc)
+17:44  etenil: I'm having a problem with a SOAP server that has messy characters before or after the SOAP xml. That generates me an error "Looks like we got no XML". How can I trim the SOAP response before it gets parsed by the SOAP client?
+17:44  deadroot: thevishy: if the DOM is too complex for that page and you have a passable grasp of regex, you might want to consider that instead
+17:44 @cyth: anteatersa, also any place where auto_prepend file can be set.
+17:44  NoiseEee: anteatersa: also, are you sure it's php?
+17:44 @cyth: etenil, messy characters? you mean like a BOM?
+17:44  NoiseEee: anteatersa: i'd wager that some rogue JS is happening
+17:45  anteatersa: pretty sure its php, it is only affecting typo3 websites
+17:45  etenil: cyth: more like a new line
+17:45  thevishy: deadroot: what you advise then ?
+17:45  anteatersa: no, I have used google wbemaster function "fetch as googlebot" and it showing me the spam.... so that rules out JS
+17:47  etenil: cyth: I hoped for some kind of a callback to pre-process the raw SOAP document before it's parsed by the client, but there is no mention of this in the documentation.
+17:47  deadroot: thevishy: if you're not time constrained, learn DOM. if you're time constrained, you don't know DOM but you know regex, use regex for now. if you're time constrained and you don't know anything, you're going to have to learn things quickly
+17:48  deadroot: hmm.. a creative use of substr and explode may help, tho, but they can be messy. messier if the page doesn't help you.
+17:49  swiggy: whats the irc command to part->rejoin
+17:49  ZeNNeC: ./hop
+17:50  thevishy: thnx deadroot will look into both now
+17:50  swiggy: sage: HOP <nick>, gives chanhalf-op status to the nick (needs chanop)
+17:50  mh`: there is no native irc command ofr that
+17:50  mh`: your irc client might implement /cycle
+17:50  swiggy: ah ha
+17:50  swiggy: ty
+17:50  mh`: np
+17:50  mh`: i wish my head was filled with more useful knowledge than crap like the IRC RFC :/
+17:52  deadroot: what use is the /hop command?
+17:52  mh`: well depends if you mean hop as in go from one channel to another, or if you mean half-op
+17:53  mh`: back before halfop was invented it commonly meant like to /part chan1 and /join chan2
+17:53 @cyth: etenil, pretty sure there isn't one
+17:53  deadroot: what about /cycle then? the same thing?
+17:53  mh`: no /cycle is to part and join the same channel
+17:53 @cyth: cycle is the new hop
+17:53  mh`: etenil: what soap client are you using? wasn't reading before
+17:53  deadroot: okay. what is the point of /cycle then?
+17:54  mh`: for you to ask stupid questions, apparently
+17:54  deadroot: so it's a stupid feature?
+17:55  deadroot: hmm... somebody doesn't like me. mysql 5.1 is causing php to crash and, in turn, apache to crash...
+17:56  mh`: it's karma for wasting my time with inane, googlable questions about irc
+17:56  mh`: i did it.
+17:56  mh`: HA HA HA
+17:56  deadroot: ah. you're a bad person
+17:56  mh`: but no seriously, how is "mysql 5.1 causing php to crash"?
+17:56  mh`: no arguments there
+17:56  mh`: but i'm trying to help anyway, for some reason
+17:56  deadroot: thank you. although i feel that you're setting me up for a bigger fall
+17:56  mh`: i promise i'm not
+17:57  deadroot: i have no idea. i'm guessing it's windows 7
+17:57  mh`: oh, can't help you there thought you were talking about like an actual php/mysql setup
+17:57  neobenedict: if I has like
+17:57  neobenedict: had*
+17:57  deadroot: Apache/MySQL/PHP has always been kind to me
+17:57  neobenedict: class PartList { function getPart($part) }
+17:57  neobenedict: could I make another class like this:
+17:57  mh`: me too, but not on windows 7
+17:57  neobenedict: class MotherBoards extends PartList
+17:58  mh`: is that the whole question neo?
+17:58  neobenedict: er
+17:58  nondraj: how do i check if set_ini is enabled ?
+17:58  deadroot: bbiab
+17:58  neobenedict: let me pastebin the whole question
+17:58  mh`: k
+17:58  sacho: neobenedict: yes, you can extend classes in php
+17:58  thevishy: by regex , i think you mean regular expression , but where can I read more ? dead
+17:58  mh`: yeah i think he knows that, thats why i held my answer :)
+17:58  ccapndave: Apologies for what might be a really noob question, but this has been annoying me forever.  How do I get an element out of a method that returns an array in a single line?  e.g. $extension = pathinfo($filename)['extension'];
+17:58  mh`: regular-expressions.info
+17:58  mh`: ccapndave: you can't, yet
+17:58  nondraj: how do i check if set_ini is enabled ?
+17:58  thevishy: is that a PHP function mh ?
+17:59  mh`: that's called dereferencing
+17:59  mh`: it's proposed for php 5.4
+17:59  ccapndave: Aha
+17:59  salathe: ccapndave: you can't yet, unless you're running the bleeding-edge PHP
+17:59  ccapndave: Bring it on :)
+17:59  mh`: ccapndave: i've been saying that for 12 years or so
+17:59  ccapndave: Good to know I wasn't being a noob, at least
+17:59  salathe: ccapndave: but with pathinfo you can just use the PATHINFO_EXTENSION flag :)
+17:59  thevishy: mh`: idead is to extract financial data from a website
+17:59  nondraj: how do i check if set_ini is enabled ?
+17:59  mh`: thevishy: i don't care
+18:00  ccapndave: salathe: Wahey :)
+18:00  thevishy: can we do it with regex mh`  ?
+18:00  thevishy: is regex sutiable for something like that
+18:00  neobenedict: http://pastebin.com/TNDsezcJ
+18:00  mh`: yes
+18:00  NoiseEee: thevishy: don't parse html with regex.  you've been suggested the DOM, so try xpath too.
+18:00  neobenedict: if I included the second file at the top of the class page
+18:00  mh`: ^
+18:00  NoiseEee: thevishy: how you do it is up to you, good luck
+18:00  neobenedict: include(getmbs.php); class p...
+18:00  neobenedict: would that work?
+18:01  thevishy: Fine , NoiseEee just a thought , I use DOM and then parse it out ?
+18:01  pteague_work: is there a way to get number_format to format numbers based on setlocale()? like how money_format() works...
+18:01  neobenedict: or am I not getting the "extends"'s function
+18:01  thevishy: NoiseEee: I will read it up but what would you advise? Reading DOM ?
+18:01  NoiseEee: neobenedict: you are not getting it.
+18:01  NoiseEee: thevishy: http://www.ibm.com/developerworks/library/x-xmlphp1.html and other links from there
+18:01  neobenedict: hold on
+18:02  neobenedict: where would I include and start MBs.class.php then
+18:02  neobenedict: I have to do it on every function atm
+18:02  neobenedict: kinda annoying
+18:02  neobenedict: :/
+18:02  NoiseEee: neobenedict: you should look into autoloading perhaps
+18:02  NoiseEee: neobenedict: http://php.net/manual/en/language.oop5.autoload.php
+18:03  thevishy: Than you , NoiseEee I am trying to extract data from a html 4.0 webpage basically - deadroot suggested DOM initially and then mentioned regex but I dont get the basic idea ,I am fine with saving a local copy of the file and working on it
+18:03  neobenedict: so
+18:03  neobenedict: function __autoload($class_name) {
+18:03  neobenedict:     include $class_name . '.php';
+18:03  neobenedict: }
+18:03  neobenedict: inside the class of the file?
+18:04  JPT: no.. that's a "global" function
+18:04  thevishy: like if I enter a particular company , I would just ineffect save the HTML and then parse it and extract data , looking for a function to achieve this
+18:04  neobenedict: like class foobar { *code I just pasted* function whatever { etc
+18:04  neobenedict: well
+18:04  neobenedict: how do I do it then
+18:04  neobenedict: I only want to include it once
+18:04  neobenedict: not on every page I use the class on
+18:04  neobenedict: :/
+18:04  JPT: <?php function __autoload(....)  $foobar = new BlaClass(); //automagically calls __autoload
+18:04  mh`: it only calls the autoloader if the class isn't defined
+18:05  mh`: so that _is_ whaty ou want
+18:05  neobenedict: er
+18:05  neobenedict: so where do I put it
+18:05  mh`: do you use some sort of header file, or auto prepend?
+18:05  rgr: when using $_GET in PHP does it have to be enabled? I am passing a parameter e.g myweb/page?id=123 and I would expect $_GET["id"] to return 123 but its returning blank. Any obvious config or gotchas here?
+18:05  neobenedict: basically
+18:05  neobenedict: I want one class file
+18:05  neobenedict: with one class in - and several functions
+18:05  nondraj: how do i enable set_ini ?
+18:05  nondraj: or ini_set
+18:05  nondraj: whats are the parameters ?
+18:06  neobenedict: then I want seperate class files such as mobo.class.php, ram.class.php with lists of mbs or ram types etc
+18:06  mh`: neobenedict: it needs to be ran globally, basically as approximately the first thing in the file, with every php script.. so you probably want to do php.net/auto-prepend-file
+18:06  pyoor: does anyone here know where I can find a basic scrypt to decrypt a des-cbc encrypted file
+18:06  neobenedict: with a couple of functions in
+18:06  neobenedict: ergh I'll figure it out
+18:06  mh`: u mad?
+18:06  neobenedict: change of plan
+18:06  mh`: lol :)
+18:06  neobenedict: not a class in each part file
+18:06  neobenedict: just variables
+18:06  Viliasas: hello, i
+18:07  boludiko: hi, i'm executing this code ftp_get($FtpConn, "db.cfg", "db.cfg", FTP_BINARY);
+18:07  neobenedict: do I include the file and do extract($GLOBALS) in the __construct of the class
+18:07  boludiko: and i got this error
+18:07  neobenedict: or do I have to do it on every flipping function
+18:07  boludiko: Warning: ftp_get(db.cfg): failed to open stream: Permission denied in /var/www/ftp/index.php on line 41 Warning: ftp_get(): Error opening db.cfg in /var/www/ftp/index.php on line 41
+18:07  neobenedict: like I've been doing
+18:07  Viliasas: hello, i'm trying to work with xml files, could anyone tell me how i could access elements which are gotten through childNodes command?
+18:07  neobenedict: permission denied maybe, boludiko?
+18:07  JPT: boludiko: fix your permissions for the db.cfg.
+18:07  neobenedict: ^
+18:08  deadroot: well, that didn't helped... :/
+18:08  neobenedict: me?
+18:08  deadroot: sorry, no. myself
+18:08  boludiko: but whit a ftp client i can get this
+18:10  JPT: boludiko: ftp_get() was unable to open db.cfg, therefore, it could not login to ftp i guess
+18:10  boludiko: no
+18:10  boludiko: because i can get the file list
+18:10  boludiko: and upload a file
+18:10  JPT: okay
+18:10  JPT: your ftp client works
+18:10  _m4rk_: hi all. i have a select box on my page, with the options coming from a database. i want to make a certain one the default selected one. anyone know how i can do this? http://pastebin.com/995L2rti thats the code i am currently using. thanks
+18:11  thevishy: given a website can I just save it to my computer using PHP as html or XML ?
+18:11  JPT: but the php script has some permission issues concerning the _LOCAL_ filesystem
+18:11  deadroot: thevishy: you don't have to save it to disk to work on it
+18:11  Curtis_B: I have a weird one (curl - same behavior with file_get_contents())
+18:11  Curtis_B: http://pastie.org/1290323
+18:12  thevishy: deadroot: can I save it using php like say enter the URL and save it as html in a mentioned folder
+18:12  JPT: Curtis_B, mind the 3 in the and at line 14?
+18:12  etenil: mh`: I'm using the built-in SOAP client
+18:13  JPT: *end
+18:13  deadroot: thevishy: assuming the right settings, you can use file_get_contents to download from a website. but the server may see an unusual User-Agent and they might balk at it. Curl might be an alternative to set up the appropriate fake User-Agent
+18:13  boludiko: JPT but what issues?
+18:13  Curtis_B: JPT - what do you mean by 'mind the 3' ?
+18:13  JPT: boludiko: i don't know what ftp_get() does. but it looks like it cannot open or create "db.cfg" in the current directory in order to put the remote db.cfg contents into it
+18:13  deadroot: it should be fine to proceed naively though, as most people wouldn't care about such little details
+18:14  thevishy: deadroot: Fine , Curl can be used to save it also isnt it ? Further I figured that I only want contents from a specific tag called <tbody>   </tbody>
+18:14  JPT: Curtis_B: i'm not sure if the error is part of curl ;) the other url has a '3' at the end
+18:14  thevishy: thats the core data that I want to work on
+18:14  Curtis_B: JPT, ok, why would a 3 be problematic?
+18:14  JPT: i don't know how the script works that you're asking. but if you're using a bad session id, the script might have problems...
+18:14  JPT: bad/different
+18:15  JPT: maybe i just don't get the real problem...
+18:15  deadroot: sorry thevishy, but i have my own problems and i am time constrained. good luck. :)
+18:15  wthpr0: _m4rk_: what  do you know about your defual value ?
+18:15  JPT: if you tell curl to fetch contents of a perfectly good url, it should work
+18:15  wthpr0: _m4rk_: like do you know the name or id in the database ?
+18:15  thevishy: deadroot: thanks sorry but gave good pointers gl to u too
+18:16  Curtis_B: JPT - thanks for your input, I will do some more testing...
+18:16  JPT: okay :)
+18:16  rgr: can anyone suggest why $_GET["id"] is not returning the value of id from the url of mypage?id=123 ?
+18:16  boludiko: JPT solved
+18:16  Curtis_B: You're right, I feel like an idiot, it's not curl at all, if I put that into my browser its unresponsive
+18:17 @cyth: rgr, it's not mypage.php?
+18:17  _m4rk_: wthpr0: i know the ccode for it
+18:17  brillopad: Evening all
+18:17  sacho: rgr: get is not being filled by php due to configuration
+18:17  rgr: what configuration do you know?
+18:17  sacho: although I think cyths would be more likely :p
+18:18  brillopad: Is there a way of telling the browser that the server hasn't died when I'm running a long script? I've tried ob_start() and then echo'ing "." and then ob_flush(), but the browser still times out. Any ideas?
+18:18  sacho: rgr: variables_order in php.ini
+18:18  rgr: cyth: actually its an autogenerated page from a php template using apache rewrites. Bet thats it. damn.
+18:18  kukosk: hi all … is there some simple way to draw a rectangle rotated by 45 degrees ?
+18:18  JPT: brillopad, if the browser gets content, it shouldn't close the connection. try echo "." and flush() :)
+18:18  brillopad: flush()? Will do, thanks JPT!
+18:19  JPT: you might also want to set the ignore_user_abort flag of php
+18:19  rgr: variables_order = "GPCS"
+18:19  rgr: so Get is enabled
+18:20  brillopad: JPT - I've just put flush() in there directly after the echo, but it's still not sending anything to the browser while it's running. I know it's happening because the MySQL DB is filling up. It goes for about 30 seconds and then Google Chrome displays that the web page is not available.
+18:20  brillopad: Bizarre
+18:20  JPT: hmm
+18:20  JPT: aah
+18:21  JPT: do you have php via cgi or apache module?
+18:21  JPT: there might also be some webserver-caching going on
+18:21  rgr: aha, its a rewrite rule issue. QSA.
+18:21  brillopad: JPT -- I'm using Xampp on Windows while I'm building.
+18:21  JPT: okay, so probably apache module
+18:21  brillopad: Yep
+18:22  JPT: let's see if there are some hacks in the examples...
+18:22  JPT: http://de2.php.net/flush <-- the hints. do you use mod_gzip or similar things?
+18:24 @cyth: rgr, yeah I was just gonna tell you it was your rewrite rule
+18:24  brillopad: JPT - only if Xampp has them enabled by default. I'll check now
+18:24  JPT: mhh... otherwise, see one of the comments... there is one who reccomends sending 256 space chars and then "foobar <br" in a loop
+18:25  JPT: also, check whether your script really "does" some output... maybe the work you're doing blocks the script from doing echo "lol, still alive"
+18:26  brillopad: JPT - it's mod_gzip isn't loaded and I've just spotted the 256 space chars idea. Guess what? It works! Woohoo, thanks for your help. Didn't even think to look at php.net's examples! D'oh :)
+18:26  JPT: :D
+18:26  JPT: they're worth even more than a chair of gold^^
+18:27  brillopad: Thanks again mate, I might have some hair left by the end of tonight :P
+18:27  JPT: :D no problem :)
+18:29  brillopad: JPT - another tip -- sleep(1) doesn't appear to do anything, so I've removed that. Also, it only starts to output after 4 cycles. I increased the number of spaces to 1024 and hey presto -- it updates on every cycle
+18:29  brillopad: Job done :)
+18:29  JPT: ah, okay
+18:34 @caffinated: yay me, I came to work and totally forgot it was a stat holiday
+18:34 @caffinated: I rule!
+18:34  JPT: :D
+18:35 @caffinated: Someone explain to me how I forget about a holiday called "Remembrance day".
+18:35 @caffinated: :(
+18:35  JPT: mhh... did i understand this? : i want to call socket_bind() in order to use a specific interface for outgoing connections or listening on it.
+18:37  brillopad: Anyone know of a way of seeing RAM available to PHP under Windows while the script is running? I'd like the script to output 'Working - xxxx kb of memory available'
+18:38 @caffinated: JPT: socket_bind() is what you use after socket_create() in order to bind an IP to the socket.
+18:38  sacho: brillopad: you can check the memory limit from the php.ini
+18:38 @caffinated: so the answer is yes.  after this, if you want the socket to listen, you have to tell it to do that too.
+18:38  JPT: okay :)
+18:39  JPT: then i'll need to put that into the concept... might be useful if there are special interfaces...
+18:39 @caffinated: php isn't the best language for a socket server, but it can be done.
+18:39  brillopad: sacho -- I know, but one of my scripts keeps dying on its arse due to a lack of memory. I can't change the memory limit on my shared hosting, so I'm just going to have to make this script more efficient! :)
+18:40  brillopad: Is there a way of outputting how much memory is free at this moment in time?
+18:40  JPT: i already have the basic structure working... i just need some knowledge-based finetuning and some classes that will provide a nice api
+18:40  sacho: brillopad: you can check the memory limit from the php.ini
+18:40  JPT: socket_select is strange but cool
+18:40  sacho: brillopad: *check*
+18:40 * sacho finds it odd to have to emphasize written word
+18:42  brillopad: sacho, I know -- but I'd like to see the amount of free memory available a few times during a scripts execution. Whether PHP has 5mb or 500000mb available to it, I'd like to see how much is free at the present moment
+18:43  sacho: brillopad: php.net/memory_get_usage
+18:43  brillopad: Magic, thanks sacho
+18:45  brillopad: Hmmm... PHP's memory usage increases exponentially as the script runs, even though after each cycle I'm unsetting the object that I'm using. Is there any way of triggering PHP's garbage collector manually?
+18:46  brillopad: Ah, looks like I've nailed it. Rather than creating a new object on each cycle and then unsetting it and leaving it hanging around waiting for garbage collection to happen, I just use the same object over and over. Simple, but I am tired :)
+18:48  brillopad: Now keeps to a respectable 6mb or under!!
+18:52  shal3r: How to check if contents of variable is image?
+18:52  shal3r: variable holds image source, not filename
+18:56  tPl0ch: hello, http://pastebin.com/pfdFjNpi - probably someone can help me with this little SOAP question. I need the xmlns="http://www.example.com" on every single var and I don't have a clue on how to achieve that
+18:58  goodknight: Is there an open source ecommerce system anyone can recommend that will allow consumer's to sign up and see a set list of items while a distributor can signup and see a different set of items with different prices?
+18:58  tPl0ch: goodknight, xt:commerce can do that
+18:58  dr_traktor: What would be the best channel to ask questions about Apache2 configuration?
+18:59  tPl0ch: dr_traktor, #httpd
+18:59  goodknight: tPl0ch: is there an English version of this? And free doesn't matter, as long as I can modify the source.
+18:59  dr_traktor: Mkay.
+19:00  FalsAlarm: what part of this json array contains the actual data for the byte_array?
+19:00  FalsAlarm: {"byte_array":{"position":0,"length":1274,"bytesAvailable":1274,"objectEncoding":3,"endian":"bigEndian"}}
+19:01  |TheWolf|: hi
+19:01  |TheWolf|: I've got my root folder with two directories in it. how do I manage to include a file from /foo in a file in /bar?
+19:02  Seppoz: FalsAlarm: byte_array":{"position":0,"length":1274,"bytesAvailable":1274,"objectEncoding":3,"endian":"bigEndian"} ut thats not a valid json message
+19:02  _jesse_: FalsAlarm: I don't see the data in there
+19:02  JPT: FalsAlarm, have json_decode run over that, it will tell you :)
+19:03  FalsAlarm: ok
+19:03  Seppoz: position=0 lengh= 124 bytesAvailiabe=1274 ...
+19:03  Seppoz: but still not a valid json
+19:03  tPl0ch: Seppoz, why is that not valid json?
+19:04  Seppoz: well usually they are tagged
+19:04  Seppoz: by id and version
+19:04  Seppoz: but maybe only jsonrpc does that
+19:04  sacho: dur what?
+19:04  _jesse_: |TheWolf|: same way you normally do; just use relative or absolute path
+19:05  _jesse_: yeah I think that's only jsonrpc Seppoz; I've never heard of that
+19:05  Seppoz: yea my mistake then, ignore it then
+19:05  Seppoz: :)
+19:06  |TheWolf|: _jesse_ : the same way I usually do doesn't work ;)
+19:06  deadroot: okay. apparent culprit for my headache for the last few hours may have been because of this: http://coreygilmore.com/blog/2009/11/20/fix-php-5-3-hang-on-windows/
+19:06  |TheWolf|: I'll have a look
+19:06  tPl0ch: |TheWolf|, what error message do you get?
+19:07  tPl0ch: when trying to include the files
+19:07  |TheWolf|: failed to open stream: No such file or directory
+19:08  |TheWolf|: when saying include('foo/foo.php');
+19:08  |TheWolf|: and Unable to access when trying include_('/foo/foo.php');
+19:08  _jesse_: |TheWolf|: depending on the directory you're in, you may need to do ../foo/foo.php
+19:08  tPl0ch: |TheWolf|, if you are in a file in /bar, how should that work?
+19:08  _jesse_: for relative directories
+19:08  tPl0ch: what _jesse_ says
+19:09  warflyr: strtotime() is giving me issues with daylight savings time (in a counter, incrementing by hours, the timestamp is a 7200 increment rather than 3600); whats the best method to deal with this?
+19:09  |TheWolf|: _jesse_ : : tPl0ch : thanks!
+19:09  |TheWolf|: works now
+19:10  _jesse_: :) may want to read up a bit on paths
+19:11  warflyr: ill try adding GMT to the end of the time string, but im guessing when the string is put back into the date format, its going to be different?
+19:11  tPl0ch: |TheWolf|, the absolute path is the real absolute path on your machine, so probably '/home/user/project/foo/foo.php'
+19:12  tPl0ch: or '/var/www/vhosts/yourdomain.com/httpdocs/foo/foo.php' i.e. on a server
+19:12  |TheWolf|: yeah =)
+19:16  elb0w: Is it possible for anyone to download my php code on my website and view the source?
+19:16  snowyrooftops: elb0w: Do you mean using a browser? Not unless there's a security issue with your code.
+19:16  elb0w: well how secure is it?
+19:17  snowyrooftops: elb0w: The web server executes files that end in .php - it doesn't send them to the browser
+19:17  elb0w: ok
+19:17  snowyrooftops: elb0w: If your code did a File read, followed by sending it to the browser, that's the only way someone can get to your code
+19:17  NoiseEee: or if they logged into the server ;)
+19:17  snowyrooftops: elb0w: Or if you executed some PHP code dynamically and someone injected some PHP into it
+19:18  elb0w: confused because I think webpage and I think client
+19:18  snowyrooftops: NoiseEee: Yes, that too - FTP, Cpanel, ...
+19:18  elb0w: but index.php is serverside
+19:18  elb0w: it blends
+19:18  snowyrooftops: elb0w: index.php is executed, and the output is sent to the client
+19:18  elb0w: yeah I understand that now
+19:18  elb0w: :)
+19:18  snowyrooftops: elb0w: But index.html is sent to the client as-is
+19:18  snowyrooftops: elb0w: The web server decides what to do depending on the file extension
+19:19  elb0w: ok cool
+19:19  movinthex: Despite having read the manual page on it, I don't understand the purpose of the is_uploaded_file() function. "This is useful to help ensure that a malicious user hasn't tried to trick the script into working on files upon which it should not be working--for instance, /etc/passwd." <-- How could it possibly?
+19:20  JPT: mh
+19:20  JPT: it's just a measure of security... and i guess it's a good idea.
+19:21  movinthex: Seems to be redundant.
+19:21  movinthex: move_uploaded_file already does this check?
+19:21  JPT: yep
+19:21  JPT: but maybe you just want to open the file...or delete it..
+19:21  movinthex: So why should a different function do it?
+19:21  JPT: fopen_uploaded_file()? unlink_uploaded_file()
+19:21  elb0w: when you pass variables in a URI to a php script, how do you access them?
+19:21  JPT: i guess these do not exist
+19:22  snowyrooftops: elb0w: $_REQUEST['var_name']
+19:22  movinthex: Sorry, but how exactly could you "trick" PHP to do malicious stuff?
+19:22  tPl0ch: movinthex, there are milliopn ways
+19:22  tPl0ch: mostly connected with bad coding
+19:22  movinthex: In this context...
+19:22  JPT: if the script coder did not think about certain things...
+19:22  movinthex: $_FILES['userfile']['tmp_name'] can't be /etc/passwd... because it's some random string in some tmp dir?
+19:23  JPT: but the file_name can
+19:23  JPT: and if you do not check $_FILES["foo"]["error"], you can accidently..
+19:23  movinthex: The file_name?
+19:23  movinthex: Huh?
+19:23  JPT: well.. it's hypothetical... but it might work
+19:23  movinthex: What is file_name?
+19:24  JPT: well, maybe it's just "name", idk
+19:24  JPT: it contains the original file name
+19:25  movinthex: You mean "name"...
+19:25  JPT: hmm...nevermind.. a coder that does not check for errors would not use is_uploaded_file() either
+19:25  JPT: yep
+19:25  movinthex: Check for errors?
+19:25  NoiseEee: errors in the upload
+19:25  NoiseEee: maybe the file didnt arrive
+19:26  tPl0ch: movinthex, http://www.acunetix.com/websitesecurity/upload-forms-threat.htm
+19:27  apsinvo: hey. I have $player which has a load of properties, i.e. $player->id, $player->name, etc. How can I access 'id' but using the name of a variable? i.e. $this_var = 'id'; echo $player->$this_var ?
+19:28  elb0w: that doesnt work?
+19:28  tPl0ch: apsinvo, $player->{$myvar}
+19:28  elb0w: oh
+19:29  elb0w: tPl0ch, I dont know php so well but wouldnt that try to find a hash rather than a string?
+19:29  apsinvo: That works. Ty :)
+19:29  _jesse_: apsinvo: what you had works too
+19:31  _jesse_: apsinvo: http://codepad.org/jRmS4ESt
+19:32  NoiseEee: tPl0ch: great link on file uploads.
+19:32  pneftali: hi guys.
+19:33  tPl0ch: apsinvo, the brackets are actually there to use string literals $this->{"aLiteralString}
+19:33  tPl0ch: oops
+19:33  tPl0ch: $this->{"aLiteralString"}
+19:34 --- dive is now known as junius
+19:34 --- junius is now known as dive
+19:34  sl0ppy: is there a benefit to the variables being in braces for this line?  $delete = "DELETE FROM {$table} WHERE {$condition} {$limit}";
+19:34  sacho: no
+19:35  sacho: readability maybe
+19:35  tPl0ch: sl0ppy, try: $delete =  DELETE FROM $table['foo']
+19:36  sl0ppy: this is copied out of a book
+19:37  sl0ppy: i was just wondering
+19:37  _jesse_: you need the {} around things like $table['foo'] or $object->property
+19:37  _jesse_: simple variables don't require them
+19:37  sl0ppy: i thought a variable of a variable was something like ${$variable}
+19:38  _jesse_: no, $$variable
+19:38  _jesse_: is a variable variable
+19:38  _jesse_: it'd likely work w/ braces too
+19:39  tPl0ch: _jesse_, it does, just tried
+19:39  Darkonz: Hello
+19:39  _jesse_: tPl0ch: nice :)
+19:39  Darkonz: Anyone know the BBCode (T30)Hide Content for IPB 3? I need to put it on my site
+19:39  Darkonz: And I have some problem
+19:40  _jesse_: you'd probably need them for something like ${$object->property}
+19:40  skione: Hi I am setting up a new server and when I run an fopen I get the following error: failed to open stream: HTTP request failed! HTTP/1.0 500 Internal Server Error
+19:40  _jesse_: skione: check the logs
+19:41  jastor: skione: what url are you trying to open?
+19:41  skione: thanks, missing Curl
+19:42  tPl0ch: skione, you shouldn't need curl to use fopen
+19:42 --- Farkie is now known as Farkie[Away]
+19:42  callumacrae: Where the hell are these swap files coming from?! :(
+19:43  skione: probably but the whole script before that wont work so I am just fixing the problem I see
+19:43  sl0ppy: The first thing to understand is what $ is. $ is actually a shorthand for ${} and means "return the value of the variable whose name is contained in this".
+19:43  sl0ppy: still not even sure why the author is using ${variable}
+19:44  _jesse_: callumacrae: your editor is likely creating them
+19:44  NoiseEee: sl0ppy: what book?!
+19:44  _jesse_: callumacrae: e.g. vim does
+19:44  callumacrae: _jesse_: I'm using Vim, but I'm not touching those files :/
+19:44  _jesse_: callumacrae: vim creates the swap files
+19:44  _jesse_: it removes then when you exit the program
+19:44  callumacrae: fair enough :)
+19:44  callumacrae: It's messing with git :)
+19:44  _jesse_: it's just a backup thing
+19:45  tPl0ch: callumacrae, it's the buffer
+19:45  _jesse_: and file locking
+19:45  callumacrae: It's saved my neck before more than once, in all fairness
+19:45  sl0ppy: NoiseEee: php 5 social networking
+19:45  tPl0ch: callumacrae, put it into .gitignore
+19:45  _jesse_: well vim warns you if you open a file that a swp exists for anyway
+19:45 --- destinydrivenAFK is now known as destinydriven|AF
+19:47  tPl0ch: callumacrae, it's good practice to globally hide the tmp files of your favourite editor in your git config
+19:47  callumacrae: Yup, I'm trying to work out how now XD
+19:48  tPl0ch: callumacrae, 'git config --global core.excludesfile ~/.yourgitignorefile '
+19:48  callumacrae: thanks :)
+19:49  callumacrae: Bad idea to simply ignore all files beginning with .?
+19:49  callumacrae: '.'?*
+19:49  tPl0ch: callumacrae, oooh yes
+19:49  tPl0ch: what about .htaccess
+19:49  callumacrae: I don't think I've got any htaccesses anywhere
+19:50  callumacrae: well, it's completely irrelevant to my project
+19:50  tPl0ch: well, you're the boss of your machine
+19:50  tPl0ch: ^^
+19:50  callumacrae: I don't suppose I can use regex?
+19:50  Darkonz: Anyone know the BBCode (T30)Hide Content for IPB 3? I need to put it on my site
+19:50  felixjet: whats the difference on new class(); and class::function() ?
+19:51  tPl0ch: !static
+19:51  felixjet: !static ?
+19:51  felixjet: thats an answer for me?
+19:51  callumacrae: It was a bot command
+19:51  callumacrae: has php-bot died?
+19:52  felixjet: XD
+19:52  tPl0ch: felixjet, the first one is instantiating a class, the second is calling a static class method
+19:52  tPl0ch: they are actually not really the same
+19:53  felixjet: so, if class method is not static, shouldnt be called with :: ?
+19:54  NoiseEee: only certain people have permission to run php-bot commands
+19:54  callumacrae: haha, I'm assuming I can add gitignore to gitignore?
+19:55  tPl0ch: NoiseEee, and paarently I am not one of them
+19:55  tPl0ch: :)
+19:55  NoiseEee: felixjet: no, you would use $object->methodName()
+19:55  tPl0ch: felixjet, not only that, it __can't__ be called like that
+19:55  tPl0ch: PHP will throw an Exception
+19:55  Darkonz: Anyone know the BBCode (T30)Hide Content for IPB 3? I need to put it on my site
+19:55  Darkonz: Anyone know the BBCode (T30)Hide Content for IPB 3? I need to put it on my site
+19:55  Darkonz: Anyone know the BBCode (T30)Hide Content for IPB 3? I need to put it on my site
+19:55  callumacrae: wtf
+19:55  callumacrae: go to an IPB place
+19:56  callumacrae: this is PHP support, not IPB support
+19:56  mh`: i think you're being too nice in the face of us being spammed like that
+19:56  mh`: i'd rather instead of him going to an IPB place he goes in front of a train
+19:57  NoiseEee: Darkonz: gdiaf
+19:57  mh`: right.
+19:57  tPl0ch: Anyone knows how I can earn millions in twenty minutes
+19:57  felixjet: thanks for the info :)
+19:57  callumacrae: tPl0ch: Rob a bank
+19:57  Darkonz: NoiseEe: gfto
+19:57  jastor: mh`: flooded
+19:57  callumacrae: You will earn millions... for 20 minutes
+19:57  warflyr: tPl0ch 3 times as much in 60 minutes o.0
+19:58  warflyr: * make 3 times as much
+19:58  jastor: mh`: flood != spam
+19:58  callumacrae: I would consider flooding as spamming
+19:58  TruPilot: Why does PHP complain about making a base (abstract) class with an abstract static function?
+19:59  Curtis_B: I'm going insane http://pastie.org/1290637
+19:59  Curtis_B: what is wrong with that?
+20:00  tPl0ch: TruPilot, static methods belong to the class that declared them. When extending the class, you may create a static method of the same name, but you are not in fact implementing a static abstract method.
+20:00  callumacrae: Curtis_B: Weeeell you are using pretty unreadable code
+20:00  TruPilot: Curtis_B: if () : should be if () {
+20:00 * TruPilot agrees with callumacrae
+20:00  callumacrae: and <?= is just nasty
+20:00  TruPilot: tPl0ch: That sucks
+20:01  Curtis_B: by wrapping it in a if (count($myarray)) it should only get there if it's an array with elements no?
+20:01  TruPilot: tPl0ch: What's the right way to get that capability?
+20:01  callumacrae: Curtis_B: try if (count($myarray) > 0)
+20:02  Curtis_B: i did that, same result
+20:02  TruPilot: I don't necessarily want to have to instantiate the extending class just to get something that should be a static function...
+20:02  tPl0ch: Curtis_B, $error_messages is not an array
+20:02  TruPilot: correction result of a static function
+20:03  TruPilot: Curtis_B: var_dump($error_messages)
+20:03  callumacrae: if (is_array($error_messages) && count($error_messages))
+20:03  callumacrae: or what TruPilot said :)
+20:03  Curtis_B: bool false.... wonder why that gets past count()
+20:03  tPl0ch: callumacrae, you don't need the count
+20:04  callumacrae: if you've got an empty array though?
+20:04  TruPilot: He does because he doesn't want to show the error h4...
+20:04  tPl0ch: if (empty($errors)
+20:04  TruPilot: Well - sorta..
+20:04  TruPilot: tPl0ch: Yes
+20:04  tPl0ch: if (!empty($errors))
+20:05  tPl0ch: if you have dozens of error messages it would be better to check only if its not empty then always counting the whole shabang
+--- Log closed Fri Nov 12 00:50:48 2010

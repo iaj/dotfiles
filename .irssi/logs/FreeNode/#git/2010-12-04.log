@@ -1,0 +1,637 @@
+--- Log opened Sat Dec 04 00:00:35 2010
+--- Day changed Sat Dec 04 2010
+00:00  g3d: I wanted to have a separate .git directory from my working directory, so I used GIT_DIR environment var for that. The problem is that if I set that, all the repositories use that, not only one. I though it could be set in config somehow, but config resides in .git and allows setting working dir location for a repo, not the other way around. I know I can pass --git-dir option to commands, but that's a pain. Do I have any other solutions for
+00:01  Eridius: g3d: you could use an alias: alias git2 'GIT_DIR=foo git'
+00:04  g3d: Eridius: oh, haven't thought of that, that sounds like a bearable workaround. Thanks!
+00:04  Eridius: oh btw, I got the syntax wrong. git2='GIT_DIR=foo git' (e.g. space replaced with =)
+00:06  tusbar: g3d: you could also (if you're using zsh) add your own function to the chpwd_functions and set GIT_DIR if $(pwd) starts with /path/to/your/repo
+00:08  rlb: If you have a repo where people committed multi-line messages with no subject lines (say a three line description with no blank lines), "git log --format '%s%n%b" will reformat all three lines as %s.
+00:08  rlb: Is there a better way than just parsing the log --raw output to get the original log message?
+00:08  Eridius: git cat-file commit $sha1
+00:08  rlb: (without newline quashing)
+00:09  Eridius: unless you want multiple commits, at which point the log is probably fine
+00:09  Eridius: and if you just want messages and not diffs, you can add -s as well
+00:09  mDuff: Eridus, ...btw, I'd do that as a function rather than an alias (that way it'd still work in non-interactive contexts)
+00:10  Eridius: mDuff: functions work in places where aliases don't?
+00:10 * mDuff notes that in #bash, the bot factoid for !alias is "if you have to ask, use a function instead"
+00:10  g3d: tusbar: yeah, actually you can do a similar thing with just sh syntax
+00:10  mDuff: Eridius, indeed; functions use everywhere.
+00:10  mDuff: s/use/work/
+00:10  Eridius: mDuff: where don't aliases work?
+00:11  rlb: ok, so "git cat-file ... | tail -n +6" -- thanks
+00:11  Eridius: rlb: strictly speaking, you want to break after the first blank line
+00:12  mDuff: Eridius, by default, aliases aren't available in scripts; also, they're much (much!) less flexible; you can do pipelines, flow control, etc. in functions, whereas aliases only do what it says on the label.
+00:12  mDuff: Eridius, ...if you're really interested, we can continue this in #bash
+00:13  jaalto: What is the easiest way to init a git repository -- so, that starting branch is "upstream" and there is no "master" by default?
+00:14  Eridius: rlb: a quick way to do the 'first blank line' rule is something like git cat-file commit $SHA | sed -n '/^$/,$p' | tail +2
+00:16  bremner: jaalto: just move master?
+00:16  bremner: I guess script it if the commands are an issue
+00:17  jaalto: bremner: Hm. That was simple.
+00:18 --- ProperN[out] is now known as ProperNoun
+00:22  g3d: one problem with using function though, you can't call it git(), because it'll will get executed recursively. Alias on the other hand you can call git, but it won't work with git arguments
+00:24  Eridius: g3d: calling it 'git' would introduce the same problem as just setting GIT_DIR permanently. That's why it's called git2
+00:25  Eridius: also, aliases do work with arguments
+00:25  rlb: Eridius: thanks
+00:25  g3d: Eridius: they do? how?
+00:25  Eridius: rlb: if you want to avoid the tail at the end you could also use something like git cat-file commit $SHA | awk 'BEGIN { body=0 }; { if (body) print }; /^$/ { body=1 }' but there's probably no reason to bother
+00:26  Eridius: g3d: the shell basically does a string replacement of the alias token with the expanded value, and then executes the line
+--- Log closed Sat Dec 04 12:46:32 2010
+--- Log opened Sat Dec 04 12:46:44 2010
+12:46 --- Users 675 nicks [0 ops, 0 halfops, 9 voices, 666 normal]
+12:49 --- Channel #git was synced in 151 seconds
+12:56 --- adamholt is now known as adamholt_away
+12:56 --- adamholt_away is now known as adamholt
+13:39  tango_: I get the impression that junio doesn't update during the week-end
+13:58  banisterfiend: isn't `git checkout -m my_branch` supposed to merge my current  branch into my_branch and checkout my_branch?
+13:58  banisterfiend: i get the checkout  of my_branch, but no merging takes place :/
+14:05  luke--: hi
+14:06  luke--: is there a parameter for commit that adds all changed -and new- files before commiting?
+14:12  banisterfiend: if there is such a parameter
+14:12  banisterfiend: it's the parameter of death
+14:12  banisterfiend: because that's horrible :)
+14:12 --- adamholt is now known as adamholt_away
+14:12 --- adamholt_away is now known as adamholt
+14:16 --- dwmw2 is now known as dwmw2_gone
+14:23  wereHamster: banisterfiend: no, checkout -m does not merge the whole branch, just tries to merge the changes in your working tree
+14:23  wereHamster: it's sueful is plain checkout fails because of conflicting changes and you dont' want to stash+checkout+stash pop
+14:23  wereHamster: s/is/if/
+14:27  adimit: hello #git. I had a git repo that people 'imported' to SVN by just checking the whole source tree into svn with 1 commit. Work on the tree continued on SVN. I've checked it out via git svn now, and am trying to merge back the svn commits. But they don't have a common history. Are there any "best practices" for this scenario?
+14:28  adimit: i.e. I want to cherry-pick the commits that I want form the svn repo into my git repo. I'd do it via trial and error, but thought you guys may have some advice.
+14:28  charon: adimit: you can use grafts or replacements to fake common history
+14:28  adimit: charon: I have never heard of that…
+14:29  adimit: thanks, I'll check it out.
+14:29  charon: i'd do something like, first find the commit G that svn was based on, and commit S that was the commit in SVN (and reimported to git of course) that has the same contents as G
+14:29  charon: then you can say 'git replace S G'
+14:30  charon: which means "whenever you want to look at S, please pretend you see G"
+14:30  charon: and voila, your history is connected again and you can do a plain 'git merge' etc
+14:30  adimit: charon: there might not be such a commit during the porting from git to svn people continued to work on it :-|
+14:30  charon: for sanity i recommend that you remove the replacement again (git replace -d S) when you're done merging
+14:31  charon: oh.
+14:31  adimit: charon: but thanks, I'll try to do that. worst case, i'll update the git tree to the initial SVN commit.
+14:31  adimit: it's what happens if people don't really understand SCMs >.<
+14:31  charon: well, you can also 'echo $(git rev-parse S G) >> .git/info/grafts' to only fake the parent of S
+14:32  charon: which then makes S a commit with "real content" but based on G instead of being a root commit
+14:32  charon: same as with replacements, i recommend that you remove .git/info/grafts after you have done the merges (or whatever)
+14:32  adimit: charon: interesting. that sounds like something I might wanna do. I'll give it a shot! Thanks.
+14:32  charon: but you can also "set the graft in stone" if you want to actually keep the whole svn history in git
+14:33  charon: (which would mean, rewriting all of those SVN commits so that the new S' rewritten from S *actually* has parent G)
+14:33  charon: lots of options really
+14:33  charon: also, you may want to buy a supply of 2x4 LART sticks at your nearest DIY store
+14:33  adimit: yeah, I figured there'd be more than one way to do it, and I'm not very skilled in the more arcane corners of repo management.
+14:34  adimit: charon: haha, yeah, that might be a good idea. University research… i've been trying to make them switch to DVCS, but they keep hugging svn for some odd reason…
+14:34  charon: heh. i feel your pain
+14:35  charon: play around with grafts for a while, their effects are visible in e.g. gitk so it's easy to see whether it is what you wanted.
+14:35  charon: for the "setting in stone", the basic idea is 'git filter-branch -- --all' which see, but make sure you have backups
+14:36  adimit: I shall! Just reading the docs before I start :-)
+14:36  charon: and of course feel free to ask if you need more help
+14:36  adimit: ah yeah. Well, everything's safe on github and the remote uni-svn server. So no chance to f- up the source.
+14:36  adimit: thank you!
+14:37  banisterfiend: charon: you written anything about replace or grafts in your books?
+14:37  charon: banisterfiend: i'm not schacon if that's what you mean
+14:37  banisterfiend: ah
+14:37  banisterfiend: hehehe
+14:37  banisterfiend: sorry
+14:38  banisterfiend: well, do you know if there's any blogs or books that discuss those kind of features?
+14:38  charon: i thought there was a section on those, but i got good enough at git before those books were written to never need them
+14:39  charon: also, if you fully grok "git for computer scientists" or "a visual git reference" (at least as far as parent pointers are concerned) you will not have much trouble with grafts, so maybe start with that
+14:59  renatosilva: english question: in a commit message like "reverted changeset xyz", reverted is past participle, not simple past, right? that is, changeset was reverted, not I reverted it.
+15:01  madewokherd: I think it is meant to be simple past
+15:02  renatosilva: madewokherd: but are you native en speaker?
+15:02  madewokherd: yes
+15:02  madewokherd: sometimes people (incorrectly, as a shortcut) leave the "I" out in cases like that
+15:02  renatosilva: I always assumed it to be past participle but now I wonder
+15:03  renatosilva: so if wanted to use past participle it would be "changeset xyz reverted" ?
+15:04  wereHamster: renatosilva: git.git has this in SubmittingPatches: uses the imperative, present tense: "change", not "changed" or "changes"
+15:04  madewokherd: I'm not sure what past participle is exactly :/
+15:05  madewokherd: it's one of those terms I always get confused
+15:05  renatosilva: wereHamster: changeset undone - past participle
+15:05  renatosilva: madewokherd: changeset undone - past participle
+15:05  renatosilva: madewokherd: undid the changeset - simple past
+15:06  renatosilva: wereHamster: sorry
+15:06  renatosilva: wereHamster: it's not the case here
+15:06  renatosilva: wereHamster: I just want to know if it's simple past or past participle
+15:08  madewokherd: if "reverted changeset xyz" is meant to be a complete sentence, it is simple past where the subject has been omitted (which is technically incorrect)
+15:08  madewokherd: it could also be a noun phrase
+15:09  madewokherd: but that would require more context
+15:10  parasti: use present, problem solved
+15:11  renatosilva: not solved
+15:11  madewokherd: I'm not confident enough of my own understanding of english (because it is intuitive, not formal) to say what happens when you move the participle, as in "changeset xyz reverted"
+15:11  renatosilva: madewokherd: by noun you mean past prticiple, the changeset which was reverted?
+15:12  madewokherd: yes
+15:12  renatosilva: madewokherd: so it's ambiguous? it may be read either way without problem?
+15:12  parasti: it's not ambiguous
+15:13  madewokherd: well, I think that a native speaker would only read it as a noun phrase if it's used in a sentence
+15:13  renatosilva: madewokherd: well it's ambiguous when simple past is the same as past participle, changed, reverted, added etc
+15:13  renatosilva: madewokherd: ok
+15:14  madewokherd: we wouldn't have that problem if people included the subject like they're supposed to
+15:14  madewokherd: but people (including me) are lazy
+15:15  wereHamster: git should ship with a default commit hook which checks the grammar of the commit message :)
+15:17  madewokherd: apparently all my commit messages are imperatives >_>
+15:17  parasti: madewokherd: is the a rule that says you have to?  it's not uncommon to leave the "I" out of the sentence.
+15:18  madewokherd: it's what I was taught
+15:19  madewokherd: the only care I'm aware of where you're allowed to omit the subject is in an imperative, where the subject is an implied "you"
+15:20  madewokherd: *case
+15:30  zorzar: hey is it safe to interupt a git gc?
+15:30  zorzar: it already takes about 3 days
+15:31  wereHamster: yes
+15:32  wereHamster: how big is your repo? And what are its contents (text files, binary, ?) and how big are the filse on average?
+15:32  zorzar: are there any parameters that i can fiddle around with to make it faster?
+15:33  wereHamster: zorzar: yes, look at man git-config, there are a few options related to packing files
+15:33  jast: zorzar: the 'git-config' manpage can be found at http://git.or.cz/man/git-config [automatic message]
+15:33  zorzar: its 285G
+15:33  zorzar: the packfiles aren't created by git itself
+15:34  wereHamster: oh, no chance a 285G repo will be fast in git
+15:34 --- napster_123_ is now known as napster_123
+15:34  zorzar: the packfiles are around 954M each
+15:34  wereHamster: where do they come from?
+15:35  wereHamster: maybe set pack.packSizeLimit to something sensible?
+15:35  zorzar: wereHamster: bup, a backup tool that uses git's file format
+15:35  wereHamster: I kindof expected that :)
+15:36  zorzar: wereHamster: :P
+15:36  andres: Oh, what happened to using the right tool for the right job :P
+15:36  zorzar: andres: the backuptool is awesome
+15:37  zorzar: it just isn't a 1.0 yet and a lot of stuff, that git wasn't made for has to be reimplemented with focus on binary data
+15:40  zorzar: correct me if i'm wrong. git gc searches for data that isn't reachable by any commit anymore and repacks the remaining data. right?
+15:40  zorzar: andres: in fact i think it is a pretty good tool for that job
+15:40 --- adamholt is now known as adamholt_away
+15:41 --- adamholt_away is now known as adamholt
+15:42  andres: zorzar: I don't see the point of basing it on git, but ...
+15:44  zorzar: andres: the concept of having immutable data-chunks and not writing data twice leads to some nice deduplication
+15:47  andres: zorzar: and heavily impacts restore performance...
+15:47  zorzar: andres: it's not that bad
+15:48  patrikf: someday I will understand people's urge to shoot themselves into the foot
+15:49  andres: zorzar: try using it daily on an imap server or such (i.e. frequent data changes, but parts of old data lying around) for a year and try to restore the data.
+15:50  andres: (with working set bigger than memory obviously)
+15:50  wereHamster: andres: backup solutions existed for decades.. it's hard to believe that none of those solved deduplication yet...
+15:53  andres: wereHamster: depending on what exactly you define as deduplication there are such systems ;-)
+15:54  zorzar: andres: hard to argument if you ask me to do a test for a year
+15:55 --- cytrinox_ is now known as cytrinox
+15:56  wereHamster: bup still needs to check each file to see if it's already backed up, right?
+15:56  andres: zorzar: with sufficient changes some weeks will suffice
+15:57  zorzar: andres: if you're interested and willing to give me some numbers, i'll test that
+15:58  andres: numbers about what?
+15:58  cbreak: wereHamster: take a look at apple's Time Machine
+15:58  zorzar: wereHamster: yeah during the backup step you have to check if you have to backup a file or not
+15:58  zorzar: cbreak: IIRC time machine only uses hardlinks for files that didn't change
+15:58  cbreak: it does some form of deduplication (it uses file and folder hard links to not store the same file multiple times, but it does not remove duplicates that already used in the original)
+15:58  zorzar: andres: what sufficient changes are
+15:59  cbreak: but unlike for example RSync, TimeMachine does NOT check which files have changed
+15:59  zorzar: yeah, i use rsnapshot atm which does a very similar thing but uses rsync
+15:59  cbreak: it gets told which files changed by FSEvents
+15:59  cbreak: which is of course much faster than anything rsync can do
+16:00  zorzar: cbreak: yeah shure, my use case is a different :) i do backups of servers
+16:00  cbreak: the technique should work on servers too
+16:01  zorzar: cbreak: would transfer diffs permanently though
+16:01  andres: zorzar: 10% of the dataset changing daily with dataset being 10x main memory or such?
+16:01  cbreak: transfer diffs?
+16:02  andres: zorzar: been there, done that ;-)
+16:02  cbreak: backup systems usually are per-file
+16:02  zorzar: cbreak: yeah then a diff would be a file
+16:02  zorzar: andres: what tools did you test?
+16:03  andres: zorzar: these days I use bacula (7 days incremental, then differential for 4 weeks,  then full) and use base-backups for all the VMs to avoid hugely duplicated data)
+16:03  zorzar: andres: ok
+16:04  andres: Using rsnapshot started taking too long for incremental backups and especially fsck.
+16:05  zorzar: andres: yeah i believe that
+16:05  andres: (fsck on ext* keeps an in-memory table of files with an refcount > 1 - which doesnt scale very well with 3 months of daily backups + several TBs of data)
+16:07  zorzar: andres: if you're interested i'll see if i can do that benchmark (dataset of 10*main memory with 10%changes each day for a couple of days)
+16:08  renatosilva: thanks all
+16:08  andres: zorzar: sure
+16:08  andres: zorzar: measuring restore speed regularly?
+16:09 --- Unknown[NF] is now known as Unknown[OFF]
+16:09  zorzar: andres: yeah measuring backup size, backup speed, restore speed
+16:10  cbreak: any backup > no backup :)
+16:10  zorzar: andres: hardest thing will be the data generator
+16:11  zorzar: andres: wanted to play around with markov chains for text generation anyways
+16:53 --- Unknown[OFF] is now known as Unknown[NF]
+16:55  adamramadhan: hello
+16:55  adamramadhan: http://superuser.com/questions/38815/git-receive-pack-command-not-found where do i put this ?
+16:55  cbreak: put what?
+16:55  adamramadhan: export PATH=$PATH:/usr/local/bin  to where ?
+16:56  cbreak: in some file that gets executed when you log in/open a shell
+16:56  adamramadhan: if i use cgwin ?
+16:56  adamramadhan: oo
+16:57  adamramadhan: i see
+16:57  cbreak: why would you use cgwin on a unix?
+16:57  adamramadhan: where do i find this .bashrc ?
+16:57  adamramadhan: do i need to add the export PATH in .bashrc ?
+16:57  cbreak: in ~/
+16:57  adamramadhan: im useing it on windows.
+16:58  cbreak: why do you have a /usr/local/bin on windows?
+16:58  cbreak: you are making no sense
+17:00  adamramadhan: well still dont work.
+17:00  adamramadhan: i got the same error as http://superuser.com/questions/38815/git-receive-pack-command-not-found
+17:01  adamramadhan: im useing windows as my laptop and centos as my server
+17:01  adamramadhan: at my windows im useing cygwin
+17:01  cbreak: as I said
+17:01  cbreak: since when does windows have a /usr/local/bin?
+17:01  adamramadhan: what do i have to do then ?
+17:01  cbreak: does git work locally?
+17:02  cbreak: does git work on the server?
+17:02  adamramadhan: on my windows.
+17:02  cbreak: so, where do you think you have to fix something?
+17:02  adamramadhan: ok should i install git too on my server ?
+17:03  adamramadhan: well im just google sorry, thats why im asking here.
+17:03  cbreak: of course you need to
+17:03  adamramadhan: ok doing it now
+17:04  cbreak: it even said so in the error message
+17:06  adamramadhan: wtg
+17:06  adamramadhan: IT WORKS
+17:06  adamramadhan: thanks cbreak
+17:07  cbreak: np
+17:11 --- ivey_off is now known as ivey
+17:15 --- ivey is now known as ivey_off
+17:20  SpookyET: hi
+17:20  SpookyET: Github pull requests are bloody confusing. I think I've been sending pull requests to myself.
+17:27 --- tj- is now known as tjholowaychuk
+17:33  bremner: SpookyET: perhaps you would like to complain in #github
+17:33  tim: hi, i want to rewrite the history of my git repository so that all commits before a specific commit are squashed into one. how can this be achieved?
+17:33  cbreak: tim: man git-rebase
+17:33  jast: tim: the 'git-rebase' manpage can be found at http://git.or.cz/man/git-rebase [automatic message]
+17:34  cbreak: tim: take a look at -i and --root
+17:36  tim: cbreak, hm --root may be what i need ... thanks
+17:56  Luyang: Does git track empty directories?
+17:56  rgrig: Luyang, no
+17:56  mbroeker: touch dir/.keep helps a lot
+17:56  Luyang: hm ok
+17:59  wereHamster: SpookyET: the corerct channel would be #github. And I don't think you can send a pull request to your own repo
+18:00  SpookyET: wereHamster: I just did
+18:00  wereHamster: why are you doing it then? :)
+18:00  SpookyET: No I'm wondering how to cancel said pull requests, not close them.
+18:00  SpookyET: Because it's confusing. It wasn't intentional.
+18:07  rgrig: tim, from my reading of man git-rebase, --root is not what you want. Try "git rebase -i `git rev-list HEAD --reverse | head -1`" and then change "pick" into "squash" for the commits that should be merged into what precedes them.
+18:07  jast: tim: the 'git-rebase' manpage can be found at http://git.or.cz/man/git-rebase [automatic message]
+18:12  wereHamster: maybe grafts + filter branch woyuld be a better approach here?
+18:14  cbreak: probably even easier: create a new orphan branch at the new start point
+18:14  cbreak: and rebase the commits you want to keep onto it
+18:28  rgrig: cbreak, what is an "orphan" branch?
+18:29  cbreak: one created by git checkout --orphan... I think... should be in man git-branch
+18:29  jast: the 'git-branch' manpage can be found at http://git.or.cz/man/git-branch [automatic message]
+18:29  cbreak: man git-checkout I mean
+18:29  jast: the 'git-checkout' manpage can be found at http://git.or.cz/man/git-checkout [automatic message]
+18:31  rgrig: cbreak, the word "orphan" does not appear in the git-checkout and git-branch manuals, which is why i asked (at least in 1.7.1)
+18:31  cbreak: then read again
+18:31  cbreak: I just checked, it's in there
+18:32  wereHamster: cbreak: Documentation/RelNotes/1.7.2.txt: * "git checkout --orphan newbranch"
+18:32  wereHamster: so it's not in his version
+18:32  cbreak: how unfortunate.
+18:32  cbreak: update :)
+18:32  cbreak: or do it some other way
+18:33  cbreak: there are plenty
+18:33  rgrig: cbreak, do what? :)
+18:33  parasti: poor orphan branch
+18:33  rgrig: cbreak, i'm not trying to do anything O:)
+18:34  cbreak: too bad for  you :)
+18:43 --- martinciu_ is now known as martinciu
+19:37  pingswept: When I try to pull a new branch from a remote repo, it seems I have to checkout the commit where the branch occurs first, or git merges it wherever HEAD is. Is there a way to do this automatically?
+19:37  pingswept: Or am I even more confused than I think?
+19:45  wereHamster: pull = fetch+merge
+19:48  SpookyET: How do you send a pull request on GitHub with just one commit. Even though I clicked Pull Request from inside a commit, it still wants to send all commits since the repositories branched?
+19:48  wereHamster: make a branch with just that one commit
+19:56 --- ChanServ sets modes [#git +v acs]
+19:56 +acs: I have the same problem as 2 days before
+19:56 +acs: I rebased too much
+19:56 +acs: my name does not appear in patch
+19:57 +acs: I commited and rebased over the patch of somebody else
+19:57 +acs: How can I undo the rebase ?
+19:57  wereHamster: acs: man git-reflog
+19:57  jast: acs: the 'git-reflog' manpage can be found at http://git.or.cz/man/git-reflog [automatic message]
+19:57  cbreak: reset
+19:57  LjL: with the premise that i don't know anything about git... can i see the log (as in "git log") of an http://blah/blah.git without actually "branch"ing it locally? i'd just like the log
+19:58  cbreak: no
+19:58  parasti: apart from browsing the web interface, no
+19:58  cbreak: and the word you wante to use is cloning, not branching
+19:59  cbreak: even a web interface requires a local clone
+19:59  cbreak: (local to the web interface though :)
+19:59  parasti: err, okay :P
+20:00 +acs: wereHamster: thanks
+20:00 +acs: jast: thanks
+20:00 +acs: jast: git reflog --help
+20:01  wereHamster: acs: it was an automatic message .. in case you didn't see that
+20:01  cbreak: yeah. jast ate the brain of the late gitbot, and acquired it's abilities.
+20:02 --- parasti is now known as parasti1
+20:02  parasti1: man git-log
+20:02  jast: the 'git-log' manpage can be found at http://git.or.cz/man/git-log [automatic message]
+20:02 --- parasti1 is now known as parasti
+20:02  parasti: man git-log
+20:02  jast: the 'git-log' manpage can be found at http://git.or.cz/man/git-log [automatic message]
+20:03  parasti: hmm
+20:03 +acs: how can I paste you here?
+20:03  wereHamster: acs: see topic
+20:04  parasti: I'd rather you not paste me here
+20:04 * wereHamster pastes parasti 
+20:05 --- napster_123_ is now known as napster_123
+20:05 +acs: https://gist.github.com/728394
+20:06 +acs: HEAD@{0}: commit: Draw text under filled box cursor in inverted color (Bug#7479).
+20:06 +acs: this patch is not mine
+20:06 +acs: This is what I squashed with my commits
+20:06 +acs: and this is what I have to give out from my patch
+20:15 +acs: i do not know how to undo it...
+20:15 --- Slix` is now known as rulersintheusare
+20:15 --- rulersintheusare is now known as Slix`
+20:19  SethRobertson: acs: If you have not pushed, to undo the rebase (or merge or reset), you can `git reset --hard ORIG_HEAD`
+20:20  SethRobertson: acs: In you example, you could also git reset --hard HEAD@{1}
+20:20  SethRobertson: You can also checkout ORIG_HEAD or HEAD@{1} to investigate it before you decide to checkout master and reset back to that
+20:34 +acs: SethRobertson: thanks. I did so : git log -g master --prety=oneline , then I did git reset --hard SHA1 before the last rebase
+20:35 +acs: and gitk reports me the 3 patches I applied before to make the rebase
+20:35 +acs: I understood the logic now
+20:35 +acs: thanks
+20:35  SethRobertson: I hope that worked for you, because you cannot always reset past a rebase problem using the results of `git log`.  The reflog is often more useful in a rebase situation
+20:36 +acs: SethRobertson: instead of HEAD@{1}, I did wrte its sha1
+20:36  tango_: well, git log -g is the reflog
+20:39  SethRobertson: Ah, I didn't notice the -g and didn't realize you could get the reflog with `git log`.  Learn something new...
+20:40 +acs: my manual after which I did learn git is this one
+20:41 +acs: http://progit.org/book/
+20:41  philstar: I'm new to git, so please endure me for 5mins - as I understand, the effect of git commands (esp commit) is sensitive to my $PWD? so in automating git, I would need to change $PWD to ensure only the repo corresponding to that cwd/pwd gets updated?
+20:42  wereHamster: philstar: no, commit doesn't care about your pwd
+20:43  philstar: wereHamster: so is it session-based?
+20:43  wereHamster: no
+20:43 * philstar is stumped
+20:43  wereHamster: tell what you are doing, what you are seeing and what you expected to be different ...
+20:45  philstar: just reading documentation and trying to understand how to manage thousands of documents as a back-end to a web gui - it would be a very simplified github/gitalist/etc.
+20:46  wereHamster: install git and try it out
+20:47  ptor: (just to be clear - philstar meant pwd as in directory ($PWD), not password, and well, yes, git commands work in the git repo you're in, as indicated with git rev-parse --git-dir)
+20:56  parasti: or you can use environment variables or command options to specify alternative directories
+20:56  parasti: as listed in man git
+20:56  jast: the 'git' manpage can be found at http://git.or.cz/man/git [automatic message]
+20:57  Luyang: is there a good summary page where it describes the usage differences between concepts such as fetch, merge, branch, reset and branches and commits and fast-forwards
+20:57  philstar: thanks ptor, parasti
+20:57  Luyang: s/where it/which/
+20:58  saganbyte: Hi :)
+20:58  saganbyte: :P
+20:58  philstar: wereHamster: will try and see where it gets me
+20:59  saganbyte: I just pushed origin master to a git server and then deleted a file from my local machine, how can i delete it from the server repo as well
+20:59  wereHamster: saganbyte: git rm --cached <file> && git commit && git push
+21:00  saganbyte: when i try git push, it wereHamster the first command will delete the file from the local machine?
+21:00  saganbyte: I had accidentally deleted that from the file manager
+21:00  wereHamster: saganbyte: man git-rm
+21:00  jast: saganbyte: the 'git-rm' manpage can be found at http://git.or.cz/man/git-rm [automatic message]
+21:00  saganbyte: wereHamster, ok thanks
+21:05 +acs: how can I make git ignore the .o files when commit ?
+21:06  zorzar: acs: add *.o to your .gitignore file
+21:07 +acs: zorzar: I added, and no effect
+21:07  zorzar: acs: did you add and commit the .gitignore file?
+21:07 +acs: zorzar: I created that file in ~/.gitignore, and alsi in $TOP/.git/.gitignore
+21:08 +acs: zorzar: should I add and commit it ? lol
+21:08 +acs: # git add .git/.gitignore
+21:08 +acs: error: Invalid path '.git/.gitignore'
+21:08 +acs: error: unable to add .git/.gitignore to index
+21:09  zorzar: acs: I'm not sure about the gitignore in .git
+21:09  xelister: uh, with git, how do you simply show info about current working dir
+21:09  zorzar: for ~/.gitignore to take effect you have to have excludesfile = ~/.gitignore in ~/.gitconfig under [core]
+21:09 +acs: zorzar: can you tell me exactly what I should do ?
+21:09  xelister: like, from what URL it is checked out
+21:10  wereHamster: acs: you already committed the .o files, correct?
+21:10  zorzar: xelister: in git working copys aren't checked out from urls
+21:11  xelister: zorzar: what?
+21:11  xelister: I have a dir that is from git, how to see the address
+21:11  wereHamster: acs: cd `git rev-parse --show-cdup`. && echo '*.o' >> .gitignore && git add .gitignore && git commit
+21:11 +acs: great I did it
+21:12  wereHamster: xelister: /path/to/the/dir
+21:12  parasti: .gitignore is a regular file that is put in your work tree, nowhere else
+21:12  zorzar: xelister: you clone a repository and check a wc out from that
+21:12 +acs: git config  --global core.excludesfile /root/.git-ignore && nano /root/.git-ignore
+21:12 +acs: this was the solution
+21:12  wereHamster: acs: don't work as root...
+21:12 +acs: lol
+21:12  xelister: oh my
+21:12  xelister: how to do like  "svn info"  but in git
+21:13 +acs: nobody cannot crash me from irc :))
+21:13  wereHamster: tha'ts not the point
+21:13  xelister: I did  git pool from some URL that I do not remember. How to see that URL
+21:13 +acs: xelister: see git svn
+21:13  wereHamster: xelister: git status
+21:13  wereHamster: xelister: git config --get remote.origin.url
+21:13  parasti: git remote -v
+21:13  zorzar: xelister: git status; git remote; git branch
+21:13  wereHamster: git remote show origin
+21:13  xelister: thanks
+21:13  xelister: :)
+21:14 +acs: xelister: see here http://progit.org/book/ch8-1.html
+21:14 +acs: (my main ref is always progit_
+21:14 +acs: )
+21:17  hemmecke: I'm just trying to compile git 1.7.3.2 on Maverick. configure runs fine, but "make" stops with
+21:17  hemmecke: http://pastebin.com/HfkqXySp
+21:17  hemmecke: And indeed I had to install zlib1g-dev for the zlib.h. That's a configure bug. Where should it be reported?
+21:17  parasti: probably nowhere...  you should use the supplied Makefile instead
+21:18  wereHamster: hemmecke: don't use configure, just run make
+21:18  Rhonda: hemmecke: Why don't you take the source-package of git from natty and just recompile it on maverick?
+21:18  wereHamster: hemmecke: and you need to install zlib-dev
+21:18  hemmecke: Oh? Not running ./configure? That's unusual for me.
+21:18  wereHamster: it's not needed
+21:19  hemmecke: OK, I'll try
+21:19  parasti: if you downloaded a tarball, untar it again, as the original Makefile probably got overwritten
+21:19  Rhonda: hemmecke: deb-src for natty, apt-get source -b git  # and be done
+21:21  hemmecke: Rhonda: "deb-src"? You mean, I have to put something into /etc/apt/sources.list?
+21:21  Rhonda: Yes
+21:22  Rhonda: hemmecke: Or just go to http://packages.ubuntu.com/natty/git and download the .dsc, the .orig.tar.gz and the .diff.gz
+21:22  Rhonda: Then you have a proper deb package in the end.
+21:24  hemmecke: Rhonda: BTW, the original makefile even complains about "/bin/sh: curl-config: not found".
+21:26  Rhonda: hemmecke: Install at least the build-depends of the package, as seen on http://packages.ubuntu.com/source/natty/git
+21:29  wereHamster: hemmecke: you don't haev curl installed. Just ignore that warning
+21:29  hemmecke: Rhonda: where do I find "build-depends", I've already all the depends.
+21:30  Rhonda: On the page that I handed you the link for?
+21:31  hemmecke: Rhonda: Oh, I was on the wrong page. :-(
+21:33  hemmecke: Rhonda: cool... that installs texlive on my system. Interesting.
+21:36  rhalff: so checked out a my repository on github to work at an other location, I've commit there, now I'm home and want to pull in the changes ? how to do this ?
+21:36  rhalff: so I..
+21:37  wereHamster: rhalff: did you push the new changes from the other repo to github?
+21:37  rhalff: wereHamster: yes :-)
+21:37  wereHamster: rhalff: then just pull
+21:37  rhalff: I need git pull I guess ? but that doesn't work
+21:37  wereHamster: 'doesn't work' is pretty vague
+21:38  rhalff: wereHamster: hm maybe I'm the wrong user at the moment, it says I didn't tell it which branch I want to pull
+21:38  wereHamster: then tell it
+21:40  rhalff: I'm used to just do a svn update, git pull master, ain't it either.
+21:41  Rhonda: hemmecke: I think it's pulled in because of documentation parts.
+21:41  wereHamster: rhalff: git pull origin master - you also need to tell it where to fetch from
+21:42  hemmecke: Rhonda: anyway, I think, configure should report a missing zlib.h, no?
+21:43  cbreak: rhalff: you didn't need to tell svn where to update from because svn didn't support branches
+21:43  cbreak: and svn didn't support more than one repository
+21:43  cbreak: but git supports branches and repositories
+21:43  cbreak: so you have to tell git pull which repository to fetch from, and which branch on that repository to merge into yours
+21:43  rhalff: ok, so there is not really a default master then, I basically just want to pull from github and push it back, the same I'll do from other locations
+21:44  Rhonda: hemmecke: Not if you have installed zlib1g-dev per build-depends
+21:44  rhalff: I don't have any friend developers :\ :p
+21:44  cbreak: rhalff: branches can have default upstreams
+21:44  cbreak: many ways to set them
+21:44  cbreak: git push -u, git branch --set-upstream, ...
+21:44  cbreak: read the man page
+21:46  rhalff: cbreak: ok, but when I checkout the first time, the one I pull from doesn't automatically become the default upstream ?
+21:46 --- cytrinox_ is now known as cytrinox
+21:46  cbreak: no... why should it?
+21:46  Gunni: origin?
+21:46  cbreak: when you clone a repository, that repository becomes your origin
+21:46  cbreak: yes
+21:47  cbreak: just a name for the remote that your repo is cloned from
+21:47  monokrome: Hmm... Someone commited something into a repository and I tried to change it
+21:47  monokrome: Now, git commit gives me this: http://paste.pocoo.org/show/300363/
+21:47  monokrome: I set core.autocrlf and core.safecrlf to true
+21:47  monokrome: still doesn't commit :/
+21:47  cbreak: fix it
+21:48  cbreak: or ignore it
+21:48  cbreak: your choice
+21:48  monokrome: There's no extra whitespace at the end of the line though
+21:49  monokrome: never mind
+21:49  monokrome: that line did have it
+21:49  monokrome: the last one didn't
+21:51  monokrome: I got past those ones and now I get this... http://paste.pocoo.org/show/300367/
+21:51  monokrome: It doesn't tell me what file they're in?!
+21:55  rhalff: cbreak: I think my 'problem' was that it was my initial code and I pushed it to github. with git remote add origin, so that didn't make it the default upstream I guess ?
+21:55  monokrome: I even tell Vim to delete all trailing whitespace from files I save
+21:55  monokrome: and it still thinks we have trailing whitespace
+21:56  cbreak: rhalff: no
+21:56  rhalff: cbreak: ok thanks :)
+21:56  cbreak: rhalff: just git push -u ...
+21:56  cbreak: that will set it
+22:01  armence: Hey all. Is there a way to use git with mercurial repos?
+22:03  Luyang: "Since hg-git is a two-way bridge, it will also allow you to push changesets from Git to Mercurial. I have also not tried the extension, but as far as I know it is the only option for Mercurial <-> Git interoperability." http://stackoverflow.com/questions/883452/git-interoperability-with-a-mercurial-repository
+22:08  puff: I am getting this error when I try to push to a remote repo: error: unable to create temporary sha1 filename ./objects/ab: Permission denied
+22:08  Knat: I'm using git mergetool with vimdiff, it brought up 3 windows one on the left local, the middle im not sure, and the one on the right remote, can someone tell me what i need to do to resolve the conflict?
+22:10 --- adamholt is now known as adamholt_away
+22:10 --- adamholt_away is now known as adamholt
+22:13  daze21: I need a little help with the config global settings...
+22:14  daze21: I was typing "git config --global user.name "myname" " but I made a mistake and typed "uer.name"
+22:14  daze21: so now, when I type git config --global --list, I get "uer.name=myname" which is annoying.... how do I get rid of it???
+22:14  wereHamster: daze21: git config --global --unset user.name
+22:15  wereHamster: daze21: man git-config
+22:15  jast: daze21: the 'git-config' manpage can be found at http://git.or.cz/man/git-config [automatic message]
+22:15  daze21: oh....thanks.....!
+22:16  daze21: when I push changes to a repo, is the name that is set here the name of the author of the changes?
+22:16  wereHamster: yes
+22:17  daze21: thank you so much....
+22:23  daze21: wereHamster - wait, that didn't happen.  the name that appeared as author of the changes was not the name set in config... is it because I'm the author?
+22:24  daze21: the name instead is the name of the author of the project.....i.e. my username on github
+22:25  wereHamster: author = who wrote the changes, committer = who committed them
+22:25  wereHamster: did you write the changes?
+22:26  daze21: yeah
+22:26  wereHamster: then your name should appear as the author
+22:26  wereHamster: is that not what you want?
+22:27  daze21: It's just not the name of the config setting on my machine, but rather the name of my github account -
+22:27  wereHamster: what github displays in its web interface is not always what's in the git log
+22:27  wereHamster: look at the git history in your local repo (git log)
+22:27  daze21: AH!  Got it!  thanks!!!!
+22:28  wereHamster: github displays my name as 'wereHamster', even though the identity I use is different
+22:30  docelic: Hey folks, I switched from "(no branch)" to master... Is there any way I can view the commits that were done outside any branch?
+22:31  wereHamster: deanc: git log HEAD@{1} or git reflog
+22:32  parasti: .
+22:32  daze21: wow you're incredible
+22:32  docelic: That does it, git log -p HEAD@{4}
+22:32  docelic: ++
+22:39  philstar: is it possible to use pipes/stdin/sockets to avoid writing a new revision to the hdd first? local push, maybe? any mileage?
+22:42  wereHamster: no
+22:45  cbreak: philstar: what?
+22:46  philstar: cbreak: commit straight from RAM
+22:46  wereHamster: you can create a ramdisk..
+22:46  cbreak: yeah. ram disk!
+22:46  cbreak: you could try to find out what git add does
+22:46  cbreak: and write the stuff to the index directly
+22:46  philstar: will check it out, thanks
+22:46  cbreak: or find out what git commit does, and write the stuff that it does to the database directly
+22:47  philstar: ok
+22:47  cbreak: but ... chances that you corrupt your history are significant :)
+22:47 * hyperair stares at cbreak as if he was barking mad
+22:47  cbreak: nah, they really are significant
+22:47  wereHamster: don't forget that git add also stores the object on the object store
+22:47  hyperair: cbreak: i meant the entire idea of writing directly to index
+22:47  cbreak: it's like accessing an sql database with a hex editor
+22:47  cbreak: it's possible
+22:48  cbreak: but ...
+22:48  hyperair: =_="
+22:48  wereHamster: or talking to a web server with telnet :)
+22:48  banisterfiend: im in one branch, and i want to change to another branch but merge the branch im in into the branch im switching to as i change, i thought git checkout -m new_branch does that, but it doesnt do the merge
+22:48  cbreak: wereHamster: oh, THAT's easy
+22:48  cbreak: unless it speaks ssl :/
+22:48  banisterfiend: what am i doing wrong?
+22:48  tango_: banisterfiend: git checkout -m merges uncommitted changes
+22:48  wereHamster: banisterfiend: what kind of merge did you expect? The kind that 'git merge' creates?
+22:48  tango_: you have to merge after the switch
+22:49  cbreak: banisterfiend: merge afterwards
+22:49  cbreak: -m is for uncommited local changes
+22:49  banisterfiend: wereHamster: yes i thought thats what i did, i thought it just merged my local branch into the new branch
+22:50  wereHamster: banisterfiend: that's not what -m does. See what tango_ and cbreak said
+22:50  banisterfiend: wait so... -m just merges the 'uncommited local changes' into the branch im originally on?
+22:50  banisterfiend: before checking out the new branch?
+22:50 --- wolog_ is now known as wolog
+22:51  wereHamster: banisterfiend: say you have uncommitted changes. And you want to switch the branch. But those uncommitted changes conflict with changes on the other branch. plain git checkout won't let you switch int hat case
+22:51  wereHamster: banisterfiend: your choices are : throw away the uncommitted changes and switch, or stash the changes and switch (and then stash pop), or checkout -m
+22:51  banisterfiend: wereHamster: so where does -m put the changes?
+22:52  cbreak: local working directory
+22:52  cbreak: and index
+22:52  wereHamster: -m is like stash && checkout && stash pop
+22:52  banisterfiend: ah
+22:52  banisterfiend: i get it
+22:52  banisterfiend: cool
+22:52  banisterfiend: thanks
+22:52  wereHamster: did I not say that a few hours ago?
+22:52  cbreak: wereHamster: the man page said that many many days ago :/
+22:52  cbreak: but people don't neither it nor you
+22:52  cbreak: ... read. throw a read in somewhere in that sentence
+22:53  cbreak: ... ah well. :)
+22:53  wereHamster: yep, 14:23 CET
+22:53  wereHamster: I thought I remembered your nick...
+22:55 --- rgrig is now known as Guest26417
+23:10  mardum: when I run git fsck --full I get error: git/objects/pack/pack-a74 SHA1 checksum mismatch- I am trying to find the object that is corrupted, but failing miserably- am I screwed?
+23:14  mardum: git fsck on older backups gives the same "cannot unpack" error with a different object that is corrupted...
+23:15  ablemike: is there a "git" way to share hooks ?
+23:16  wereHamster: ablemike: distribute them through other means and then tell the users to put them into .git/hooks?
+23:17  cbreak: ablemike: change the template
+23:17  ablemike: i guess it's a security issue?
+23:17 --- MikhX_ is now known as MikhX
+23:18  ablemike: cbreak: what do you mean template ? in ~/.git ?
+23:19  wereHamster: no
+23:19 --- psoo_ is now known as psoo
+23:19  cbreak: -> /usr/local/share/git-core/templates/
+23:20  ablemike: Was really hoping to rick-roll team members via post-commit
+23:20  ablemike: :)
+23:26  ice799: Hi there. I have two branches, master and test. I've made lots of commits to test and rewrote history via rebasing and squashing (even some history that was in master).
+23:26  ice799: These branches are pushed to a remote (github).
+23:26  ice799: Is there some way I can just force update master to look like test?
+23:27  cbreak: sure
+23:27  cbreak: git reset --hard/git push -f
+23:27  cbreak: everyone who uses master will hate you
+23:27  ice799: thats fine, this reop is just a scratch space before i pull into the "official git repo" located elsewhere
+23:28  ice799: cbreak: just out of curiosity
+23:29 --- rg_ is now known as rgrig
+23:29  ice799: cbreak: there is no way to undo that right? i mean i could use the reflog but people would still need to git pull -f to rewrite the history back into the old state, yes?
+23:29  cbreak: you can undo it the same way you did it
+23:30  cbreak: well, obviously you can't undo the uncommited losses from git reset --hard
+23:30  ice799: right
+23:30  ice799: but i'd need to look in the reflog
+23:30  ice799: find the sha and then reset --hard to that sha
+23:30  ice799: then push -f it
+23:30  ice799: to go back to before i rewrote it.
+23:30  cbreak: the old sha is also in other branches
+23:30  cbreak: like the unupdated remote tracking branches
+23:31  cbreak: potentially other repos
+23:31  ice799: Oh, I see. So this really fucks a bunch of shit up.
+23:31  ice799: this might be a bad idea.
+23:31  cbreak: no big deal
+23:31  cbreak: if you're prepared to deal with the fallout :)
+23:31  mdunham918_: is there a pdf version of progit anywhere?
+23:32  ice799: cbreak: ehhhh whatever. dont feel like sorting this out by reverting stuff and recommitting stuff. way too much work.
+23:32  ice799: would rather just force it
+23:33  ice799: let people get mad for a couple days (weeks) and save a few days of my life
+23:38  daze21: If someone works on both a laptop and a desktop, and has git set up on both, should the person use the same user.name setting on both systems?
+23:40  frogonwheels: daze21: you should probably set it up the same.
+23:40  daze21: frogonwheels: just so there's less confusion?  what if I wanted to be able to tell if I made the change from my laptop or my computer?
+23:42  frogonwheels: daze21: hmm..  well I guss you could put a (laptop)  after the name?
+23:42  daze21: well, I just want some practicality.  What do people in general do?
+23:43  frogonwheels: daze21: I would say people generally don't distinguish
+23:43  frogonwheels: daze21: you could always put it in the body of the commit message?
+23:43  daze21: frogonwheels: there  IS no need to, I guess....
+23:45  daze21: frogonwheels: how come the name that appears in the git interface isn't always the name set in git config?
+23:45  daze21: when you make a commit?
+23:46 * frogonwheels shrugs
+23:47  frogonwheels: as the committer.. or the author?
+23:47  cbreak: it is the same unless you override it
+23:55  daze21: I don't understand...
+23:55  daze21: Why would the committer and the author differ?
+23:55  frsk: I can write some code, and you can accept it into a project..
+23:55  cbreak: when you commit something from someone else
+23:56  cbreak: for example, from a patch
+23:57  daze21: so then... the committer's name should appear in git log, and the author's name in the github interface, maybe?
+23:57  thiago_home: if you use --pretty=fuller
+23:58  frsk: Or you full
+23:58  frsk: fuller is a bit noisy imo
+23:59  frsk: s/you/just/
+--- Log closed Sun Dec 05 00:00:32 2010

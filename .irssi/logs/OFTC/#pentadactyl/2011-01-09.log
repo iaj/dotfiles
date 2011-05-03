@@ -1,0 +1,155 @@
+--- Log opened Sun Jan 09 17:48:07 2011
+17:48 --- Users 37 nicks [1 ops, 0 halfops, 1 voices, 35 normal]
+17:48 --- Channel #pentadactyl was synced in 5 seconds
+17:52  iaj: which firefox version do you recommen?
+17:52  iaj: :-)
+17:53  John-Galt: Probably 4.0b8
+17:53  iaj: using 4.0 b8 but its crashing a lot
+17:53  John-Galt: Not for me.
+17:53  John-Galt: Although there are some rather severe crashing bugs that are still open... :(
+17:54  John-Galt: iaj: What other add-ons do you use?
+17:54  iaj: hmm sec.. lemme check
+17:54  iaj: can only browse for 1min
+17:54  iaj: :\
+17:54  iaj: firebug / penta nightly / adblock plus / 1password
+17:55  John-Galt: Could be 1password, I suppose. I use the rest of them.
+17:55  John-Galt: When does it usually crash?
+17:56  iaj: which firebug are you using?
+17:57  John-Galt: 1.7a7 and 1.6b1
+17:58  iaj: k im using the same
+18:18  stepnem: ;S is not useful for sites that require the query string to be in some crazy encoding like big5. :-(
+18:19  stepnem: Is there an easy way to have it recoded? I remember being slightly horrified last time I tried to figure out Mozilla JS encoding capabilities.
+18:23  stepnem: (E.g., I need 愛 to be encoded as "%B7%52", not "%E6%84%9B".)
+18:46  John-Galt: :echo Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(Ci.nsIScriptableUnicodeConverter)
+18:49 +CIA-9: Kris Maglione <maglione.k@gmail.com> * b916bcc6fc8409fae1263f0d4aa55b895ce6bffb /common/ (4 files in 3 dirs) Move things to the buffer instance that have no business being in the buffer class.
+19:12 * John-Galt could do with some mental floss.
+19:25 * John-Galt settles for a very large cup of coffee.
+19:27 * John-Galt doesn't understand the distinction between buffer.js and browser.js
+19:28  John-Galt: Except that :downloads and :redraw wouldn't make sense in buffer.js and should probably be in dactyl.js
+19:45  stepnem: John-Galt: Yeah, that's what I remembered. It's terrible.
+19:47  stepnem: Using emacs -batch to do the conversion and formatting would be more convenient than that.
+20:03  John-Galt: Hum? It's one method call...
+20:05  John-Galt: :echo let c=Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter); c.charset="Big5"; c.ConvertFromUnicode("愛")
+20:06  John-Galt: Or services.addClass("CharsetConv", "@mozilla.org/intl/scriptableunicodeconverter", Ci.nsIScriptableUnicodeConverter, "charset"); services.CharsetConv("Big5").ConvertFromUnicode("愛")
+20:10  stepnem: John-Galt: Yeah, but I then need to uri-encode the individual bytes of the big5 string.
+20:10  stepnem: When I just pass it to encodeURIComponent, it re-encodes is as UTF-8.
+20:12  John-Galt: Use escape
+20:12  John-Galt: Although encodeURI does the right thing for me.
+20:13  stepnem: For me it returns %C2%B7R.
+20:14  John-Galt: I see. Still, not UTF-8.
+20:15  stepnem: ? It _is_ UTF-8.
+20:15  stepnem: The two big5 bytes are re-encoded as two UTF-8 characters.
+20:15  John-Galt: Right, but it's not the original string in UTF-8. Just use escape.
+20:17  stepnem: John-Galt: What escape?
+20:18  John-Galt: The function?
+20:18  worldisdevil: so i have this problem. why i type :history, i cant seem to find a way to select individual history items. is that option available?
+20:18  John-Galt: worldisdevil: Click them?
+20:18  worldisdevil: John-Galt: i'd rather not use the mouse
+20:19  John-Galt: Then use hints.
+20:19  worldisdevil: John-Galt: "f"? doesn't activate them
+20:20  John-Galt: ;
+20:20  John-Galt: (although f works in nightlies)
+20:21  worldisdevil: ahh i hit ; then t.
+20:21  stepnem: John-Galt: I don't see how escape would help (and it's not completed on the dactyl command line, BTW).
+20:22  John-Galt: stepnem: Because it doesn't re-encode to UTF-8.
+20:24  stepnem: John-Galt: Right, thanks. I was confused by the fact that it didn't encode the R, but I see that's actually correct.
+20:24  John-Galt: Yep.
+20:25  stepnem: Too bad "The escape and unescape functions do not work properly for non-ASCII characters and have been deprecated. In JavaScript 1.5 and later, use encodeURI, decodeURI, encodeURIComponent, and decodeURIComponent." :-|
+20:26  stepnem: Hopefully they won't also be removed.
+20:27  John-Galt: They do exactly what you want them to do, which is what they mean by that.
+20:27  John-Galt: They won't be removed. They're part of ES4.
+20:27  John-Galt: At any rate, it'd break thousands of web sites.
+20:27  John-Galt: And quite a lot of internal Firefox code...
+20:29  John-Galt: Hm. Ok, not part of ES3, but mentioned in the spec. Whatever.
+20:30  stepnem: Anyway, it sucks that there is no way to have a specific bookmark use some other charset than UTF-8.
+20:30  stepnem: s/charset/encoding/
+20:32  John-Galt: Yeah, you'd think they'd take into account document charset at the time. Well, we can manage it ourself with annos, anyway.
+20:32  stepnem: Annos?
+20:32  John-Galt: Annotations.
+20:33  stepnem: Still nothing ;-) Perhaps if you can point me to some studying material...
+20:34  John-Galt: https://developer.mozilla.org/en/Using_the_Places_annotation_service
+20:35  stepnem: Thanks. Another great service.
+20:51  John-Galt: Fuck. I think I pushed some unintended changes with that last commit.
+21:03 --- thrope_ is now known as thrope
+21:05  John-Galt: stepnem: Weird. We apparently already do take charset into account.
+21:06  stepnem: John-Galt: Hm, interesting. In any case, that site does declare its being big5, but the bookmark still uses UTF-8.
+21:07  John-Galt: Yeah, well, that's because we apparently copied the code from Firefox, and they do it wrong.
+21:07  John-Galt: They do history.getCharsetForURI, but since you've never visited the URI with %s rather than a search string, it just returns null.
+21:08  John-Galt: Stupid, really.
+21:08  stepnem: Heh.
+21:09 * John-Galt would like to see Sylvia Brown flayed alive.
+21:36 +CIA-9: Kris Maglione <maglione.k@gmail.com> * 8f47356c3885b2989f849d5ca831ea22dde7565c /common/ (7 files in 2 dirs) Automagically grab form charset in ;S.
+21:42  stepnem: John-Galt: Great, that works. Thank you very much.
+21:47  John-Galt: Sure.
+21:47  John-Galt: It looks like there was always some hack where you could add &mozcharset=foo to the end, by the way.
+21:48  stepnem: Heh, noted, thanks.
+21:51  stepnem: I'm getting "Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsICharsetConverterManager.getCharsetTitle]" when trying to complete the -charset option.
+21:52  stepnem: I mean the value.
+21:52  John-Galt: Oh.
+21:52  John-Galt: Works for me.
+21:52  John-Galt: Ah, unless I type a character.
+21:54  stepnem: Hm, and this happens when trying to start a fresh Penta: http://pastebin.com/b2KSuzKW
+21:56 +CIA-9: Kris Maglione <maglione.k@gmail.com> * 597400e033b73181b2b171f8456b5adab9258b01 /common/modules/io.jsm Fix completion.charset issue.
+21:56  John-Galt: Yeah, like I said, I committed some code accidentally.
+21:57  stepnem: Yeah, but it prevents Penta from working at all it seems. The runnig instance I have probably still works after :rehash because I didn't use -purgecaches or something.
+21:58  John-Galt: Yeah, I know.
+21:58 +CIA-9: Kris Maglione <maglione.k@gmail.com> * 5c12b5ecc784675ba2d5f3d1c613a8c04ebfbe9c /common/modules/base.jsm Fix some accidentally committed code.
+--- Log closed Sun Jan 09 22:01:25 2011
+--- Log opened Sun Jan 09 22:01:43 2011
+22:01 --- Users 38 nicks [1 ops, 0 halfops, 1 voices, 36 normal]
+22:01 --- Channel #pentadactyl was synced in 8 seconds
+22:02  stepnem: OK. Those "CSP WARN:  Directive "font-src https://addons.mozilla.org fonts.mozilla.com" violated by https://www.mozilla.com/img/fonts/MetaWebPro-Black.woff" and "CSP WARN:  Directive "violated base restriction: Inline Scripts will not execute" violated" are still there and new, though.
+22:04  John-Galt: That's not us.
+22:06  stepnem: Right, sorry. Somehow I apparently managed to have been ignoring it for some time.
+22:16 +CIA-9: Kris Maglione <maglione.k@gmail.com> * 40e49837cafd804ebc7a88a4d0d997157ee7ff4a /common/ (10 files in 3 dirs) Deal with fallout from 609832.
+--- Log opened Sun Jan 09 22:34:06 2011
+22:34 --- Users 37 nicks [1 ops, 0 halfops, 1 voices, 35 normal]
+22:34 --- Channel #pentadactyl was synced in 4 seconds
+22:52  procto: latest minefield breaks pentadactyl, how do I determine if this is an upstream issue or not?
+22:53  John-Galt: 16:16 <+CIA-9> Kris Maglione <maglione.k@gmail.com> * 40e49837cafd804ebc7a88a4d0d997157ee7ff4a /common/ (10 files in 3 dirs) Deal with fallout from 609832.
+22:54  procto: symptoms: even though it says addon is loaded, pentadactyl bar on the bottom and the dactyl:// protocol handler's inoperational
+23:04 +CIA-9: Štěpán Němec <stepnem@gmail.com> * 30b1152673c67f72451c799d60b75db21492956c /common/locale/en-US/marks.xml Document the new -charset option of :bmark.
+23:04 +CIA-9: Štěpán Němec <stepnem@gmail.com> * 5330896763bcca01ae1559a767e44a2a02446847 /common/locale/en-US/various.xml Improve :h :helpall description.
+23:04 +CIA-9: Štěpán Němec <stepnem@gmail.com> * ca3b7e9fee79762fd64a2d353431dfd32d129cd6 /common/modules/base.jsm Fix some typos.
+23:11  denkr: when starting firefox (4.08b) I have to disable and then re-enable pentadactyl for it to load (sounds similar to issue #247). ping me up if there is anything I can do  to locate the cause.
+23:12 +CIA-9: Štěpán Němec <stepnem@gmail.com> * 1a93f4c46a3c54743e745c7b94d0c640cc40f421 /pentadactyl/NEWS Mention -post and -charset :bmark options in NEWS.
+23:21  John-Galt: Is -post nes?
+23:21  John-Galt: *new
+23:21  stepnem: You seem to have added it with ;S.
+23:21  John-Galt: Ok.
+23:37  stepnem: This is hilarious: "common/content/buffer.js:428: buffer.findScrollable is deprecated: Please use buffer.findScrollable instead" (happened when doing `mM')
+23:38  John-Galt: Heh. I knew I saw a message somewhere.
+23:40  rsFF: i just forgot what the ENV VAR for windows was so that pentadactyl coudl work
+23:40  John-Galt: It should Just Work.
+23:43  rsFF: hummm its not getting the script names and neither the color scheme
+23:43  rsFF: ...
+23:43 +CIA-9: Kris Maglione <maglione.k@gmail.com> * 5fd0392a787186e6a242c7c5aa42059397aa1761 /common/content/buffer.js Fix deprecation warnings in buffer.js.
+23:44  rsFF: John-Galt - so dont i need to define penta_home or something?
+23:44  rsFF: cos it isnt working
+23:44  John-Galt: Nope, you probably just need to put your files in the right place.
+23:46  fennng: just updated firefox to 4.0 b8, penta is not supported.
+23:47  denkr: try to disable and re-enable it. that's what I have to do with every restart :/
+23:48  fennng: denkr: I cannot enable it, there is only a remove button.
+23:48  rsFF: yep John-Galt  right place resolved
+23:48  rsFF: :P
+23:48  rsFF: bad vimp habits
+23:48  rsFF: :P
+23:51  denkr: do you usetry the latest beta http://code.google.com/p/dactyl/downloads/list?can=1&q=label:project-pentadactyl
+23:51  denkr: argh
+23:52  denkr: whatever. i guess you're using the version at addons.mozilla.com? try installing the latest beta from http://dactyl.sourceforge.net/pentadactyl/
+23:54  fennng: denkr: That helps.
+23:54  fennng: I always get addons from mozilla.
+23:54  fennng: denkr: Thank you very much.
+23:55  fennng: denkr: I am not keen to use betas....
+23:55  stepnem: Heh.
+23:56  denkr: but firefox 4 is  in beta too atm :)
+23:56  stepnem: fennng: There's no actual Pentadactyl release yet. They're all betas.
+23:56  John-Galt: Oh, my, when you google me one of the first pages to come up is AtheistNexus...
+23:56  John-Galt: You'd think they'd be more discreet.
+23:56  fennng: denkr:  :)
+23:57  fennng: stepnem: didn't know that. I thought that I was using a stable release....
+23:59  John-Galt: fennng: The last beta is awaiting review. They bumped it to the bottom of the queue.
+23:59  fennng: denkr: I using firefox 3 for development, firefox 4 for fun.
+23:59  John-Galt: And despite the fact that I've reviewed about 150 add-ons this month, no-one can be bothered to review it.
+23:59  fennng: John-Galt: now understand.
+--- Log closed Mon Jan 10 00:00:50 2011

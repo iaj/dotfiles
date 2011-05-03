@@ -1,0 +1,516 @@
+--- Log opened Fri Nov 26 00:00:49 2010
+00:16 --- ChanServ sets modes [#irssi +v FireTalon]
+00:24 --- ChanServ sets modes [#irssi +v Iceman_B]
+00:38 --- ChanServ sets modes [#irssi +v contempt]
+00:38 --- ChanServ sets modes [#irssi +v tomik]
+00:38 +tomik: hi
+00:40 +tomik: emerged 0.8.15, and after $ irssi all it says is Segmentation Fault
+00:41 +tomik: anyway to get some logs about it?
+00:41 +tomik: to check the error
+00:41 +shabble: does irssi --help crash as well?
+00:43 --- ChanServ sets modes [#irssi +v contempt]
+00:47 * Bazerka calls hand-edited config file
+00:47 +Bazerka: ;)
+00:47 * Geert seconds
+00:51 +cromag: i cant be ulra awsoem all the time..
+00:52 +cromag: and i can't type either..
+00:52 +tomik: shabble: that works, guess it crashes when trying to enter gui
+00:53 +shabble: tomik: mkdir ~/irssi-test; irssi --home=~/irssi-test
+00:53 +shabble: does that work?
+00:53 +Bazerka: no need for the makedir, it'll auto-create
+00:54 +shabble: oh, ok
+00:54 --- ChanServ sets modes [#irssi +v icedearth]
+00:54 +tomik: seems like yes, iam in an empty irssi window
+00:54 +shabble: ok, then you've got a borken config file. Did you edit it by hand at any point?
+00:54 +Bazerka: tomik: can you mail me a copy of your broken config to bazerka -at- irssi.org please?
+00:54 +Bazerka: hash out any sensitive info, but leave all lines as they are
+00:55 +icedearth: does anyone have their beep working?
+00:56 +icedearth: cant get mine to work
+00:56 +shabble: it's down to how your terminal responds to the BEL charater, really
+00:56 +icedearth: oh
+00:57 +tomik: Bazerka shabble
+00:57 +tomik: i had a working 0.8.12
+00:57 +tomik: and the other root was playing with libs
+00:57 +tomik: and i got
+00:57 +tomik: some lib error at start
+00:57 +tomik: then i guess he recomplied perl
+00:58 +tomik: and i got segmment fault from then, so i reinstalled as 0-8-15
+00:58 +tomik: no config edit
+00:58 +tomik: i saved my old scripts from .irssi
+00:58 +tomik: but those are hidden now for irssi i guess
+00:58 +Bazerka: ok, so try this :
+00:58 +Bazerka: rename your config file and start irssi
+00:59 +Bazerka: this will still load any scripts you have set to auto run
+00:59 +Bazerka: if it doesn't segfault, you do have a broken config and I'd like a copy of it
+00:59 +Bazerka: all these config related segfaults need to be fixed
+01:00 --- ChanServ sets modes [#irssi +v orafu]
+01:01 +shabble: or write a more robust config parser to begin with :P
+01:01 +tomik: hm ye i still have old .irssi dir
+01:01 +tomik: with the config
+01:01 +Bazerka: shabble: we await your patches with a new config parser contained therein :)
+01:02 +shabble: Bazerka: excellent, everyone loves XML, right?
+01:03 +Bazerka: the new parser must be able to read/write the existing format
+01:03 +tomik: so i guess i need to owerrite my old config from the new irssi-test
+01:03 +Bazerka: (and only that format) :)
+01:03 +tomik: and u want my old?
+01:04 +shabble: Bazerka: spoilsport!
+01:04 +Bazerka: tomik: did you try it with your existing scripts but a clean config yet?
+01:04 +Bazerka: need to rule the scripts out being the cause
+01:04 +Bazerka: if it works with your scripts and a clean config, then yes, I'd like a copy of your "broken" old config
+01:04 +Bazerka: (ie, the config causing the segfault)
+01:06 +shabble: I wonder if you could write a little fuzzer that removes random bits of a working config and checks for segfaults.
+01:09 +tomik: Bazerka: nope. its not working if i overwrite it. cleared the whole dir now and used the new so its working now with simple $irssi
+01:09 +tomik: too bad i remember i had a hard time setting up a nicklist
+01:10 +ahf: shabble: should be fairly easy to write.
+01:10 +ahf: if we ever are to switch format, then we probably could do something naughty like having both parsers for a while, load in the old format if present, then serialize and save to a new format and remove the old one
+01:10 +ahf: and if we switch to something new then clearly it should be xml!
+01:10 +shabble: I could even automate it to send all the broken configs straight to Bazerka!
+01:11 +Bazerka: yeah right
+01:11 +shabble: I'd go with YAML, personally.
+01:11 +Bazerka: I'd go with libconfig
+01:11 +shabble: although that would probably also get messy with the amount of embedding that happens
+01:11 +ahf: i'd go with yaml too, probably
+01:11 +ahf: or an active language.
+01:11 +Bazerka: libconfig is pretty much close to what it is already
+01:12 +Bazerka: but with all the bugs gone :)
+01:12 +Bazerka: and far easier to migrate to
+01:12 * ahf mutters something about lua
+01:12 +ahf: :P
+01:12 +Bazerka: a script dep for core? not a chance
+01:12 +shabble: libconfig looks a lot like what you have already
+01:12 +ahf: pffffffffff. everyone else is doing that these days!
+01:12 +shabble: on, you said that :p
+01:13 +ahf: but yeah, libconfig is probably the way
+01:14 --- ChanServ sets modes [#irssi +v orafu]
+01:20 --- ChanServ sets modes [#irssi +v atxq]
+01:21 +atxq: so I want to block all messages telling me that someone has join r quit the channel. actually wanted to block it on the irssi config file
+01:22 +shabble: atxq: /help ignore
+01:22 +atxq: can someone tell me what I need to add to the config file so that I can block these messages from showing up in irssi?
+01:23 +shabble: also, /topic
+01:23 +atxq: they tell me the command, but I want to actually configure it
+01:23 +shabble: use the command, then use /save.
+01:23 +shabble: all the ignoring fun, none of those pesky segfaults
+01:24 +shabble: it's a win-win!
+01:24 +atxq: so I run the command in irssi, then /save?
+01:24 +shabble: yep
+01:24 +atxq: will it also save the channels that I am connected to?
+01:25 +shabble: not afaik. There's a handy alias I found: /alias ADDALLCHAN script exec foreach my \$channel (Irssi::channels()) { Irssi::command("channel add -auto \$channel->{name} \$channel->{server}->{tag} \$channel->{key}")\;}
+01:26 +shabble: run that before save
+01:26 +shabble: well, that creates the alias - then run the alias with /addallchan
+01:28 +atxq: \/IGNORE -regexp -pattern "is (away|gone|back)" * ACTION
+01:28 +atxq: this would work too, right?
+01:28 +shabble: that'll block those /me is away messages, but not joins/quits
+01:28 +atxq: away, gone, back...is there more than these three?
+01:29 +shabble: you want /ignore * JOINS PARTS QUITS
+01:29 +atxq: add join and quit to the list then?
+01:29 +shabble: replace the * with #channel if it's only for a specific place
+01:29 --- ChanServ sets modes [#irssi +v orafu]
+01:29 +atxq: thanks shabble
+01:30 +atxq: it is just annoying to have to see all those messages
+01:30 --- ChanServ sets modes [#irssi +v v_v]
+01:30 +shabble: yeah, in busy channels it''s a pain
+01:30 +v_v: hello, any gui nofify script for irssi ?
+01:30 +shabble: you can still use /names or try to tab complete someone to see if they're still there
+01:30 +atxq: if I want to know if a certain user is still in the channel, I can just list all the users and check I guess
+01:31 +atxq: exactly
+01:31 +atxq: and what is the command to leave a particular channel?
+01:36 +bremner:  /part
+01:38 +atxq: thanks bremner
+01:42 +zagabar: Can I somehow set the autoclose_query so that it closes queries automatically after X seconds, but ignores some query windows that I want to keep open all the time?
+01:54 +tomik: thx for help and goodnight
+01:55 --- ChanServ sets modes [#irssi +v Franz12]
+02:00 --- ChanServ sets modes [#irssi +v happyface]
+02:00 +happyface: how do I mute?
+02:00 --- ChanServ sets modes [#irssi +v fadein]
+02:00 +happyface: this guy is trolling the heck out of me
+02:00 +happyface: so annoying
+02:02 +cromag: /ignore
+02:02 +cromag: /help ignore would be a start.
+02:02 +happyface: thanks
+02:02 +happyface: I was thinking /mute
+02:02 +happyface: this is more versatile
+02:02 --- ChanServ sets modes [#irssi +v peth_]
+02:05 --- ChanServ sets modes [#irssi +v angstrom]
+02:05 --- peth_ is now known as peth
+02:06 +angstrom: is there a way to ensure that I'm unable to join channels when I'm not registered with services (i.e., no hostname cloak etc)?
+02:14 +lestat: angstrom: try to use an unregistered nick ?
+02:19 +angstrom: lestat: when I have connection problems I find myself "getting unregistered". I have to manually re-register then. what I'd prefer in such a situation is rather being unable to rejoin channels, or, even better, have irssi automatically re-register my nick before rejoining channels. does that make sense?
+02:19 +Iceman_B: how do I start logging for a specific channel?
+02:19 +Iceman_B: until I deem enought
+02:19 +Iceman_B: -t
+02:23 --- ChanServ sets modes [#irssi +v Anthoo]
+02:29 +Iceman_B: how does /log start differ from /log open ?
+02:30 +Bazerka:  /help log
+02:30 +Bazerka: look at the syntax
+02:30 +Bazerka:  /log start only supports and ID (of an existing configured log) or a filename
+02:30 +Bazerka: *an
+02:31 +Bazerka: so, /log (start|stop|close) is pretty much for logs already /log open'd (or autologged)
+02:33 +Iceman_B: hurr
+02:33 * Iceman_B dont get it
+02:34 +Iceman_B: what i want is to start logging a channel in a window i already haven open
+02:34 +Iceman_B: and just have irssi figure out the filename
+02:34 +Iceman_B: how do I do that?
+02:34 +Bazerka: it's quite simply really
+02:35 +Bazerka:  /log (start|stop|close) can only refer to logs that are already in your /log list
+02:35 +Bazerka:  /log open is how you put new logs into that list
+02:35 --- ChanServ sets modes [#irssi +v CEnTR4L]
+02:35 +Bazerka: (or automatically via autologging)
+02:35 +Bazerka: you can't /log (start|stop|close) a non-existant log
+02:37 +Iceman_B: autologging grabs all open windows, no?
+02:37 +Bazerka: autologging grabs whatever you configure it to
+02:38 +Bazerka: or rather, it grabs everything except what you tell it not to
+02:38 +Bazerka:  /set autolog
+02:39 +Bazerka: if you're not auto-logging and only want to log a specific window, then /log open is what you want
+02:39 +Iceman_B: ok
+02:39 +Iceman_B: that *is* what i want
+02:39 --- ChanServ sets modes [#irssi +v vincent_wang]
+02:39 +Iceman_B: autolog is off
+02:40 +Bazerka:  /log open -autoopen -somenet -targets #somechan ~/irclogs/somefilename.log-%Y-%m-%d ALL
+02:41 +Bazerka: eg
+02:41 --- ChanServ sets modes [#irssi +v efaust]
+02:41 --- efaust is now known as Guest42766
+02:45 --- ChanServ sets modes [#irssi +v niko]
+02:48 --- ChanServ sets modes [#irssi +v ferret]
+02:49 --- ChanServ sets modes [#irssi +v hpt]
+02:50 --- ChanServ sets modes [#irssi +v pwrcycle]
+02:56 --- ChanServ sets modes [#irssi +v niko]
+02:59 --- ChanServ sets modes [#irssi +v viddy]
+03:18 --- ChanServ sets modes [#irssi +v n-iCe]
+03:18 +n-iCe: hi, how do I list the whole highlight list
+03:18 --- ChanServ sets modes [#irssi +v preller]
+03:19 +xgenesis: n-iCe: /hilight
+03:21 +n-iCe: 20:21 Highlights:
+03:21 +n-iCe: 20:21    1 nick
+03:21 +n-iCe: But I see highlight where my nick is not mentioned.
+03:22 +Bazerka: an example of which is?
+03:23 +n-iCe: 20:17 < DrAgAlUs1989> art No such nick
+03:23 +n-iCe: I see his nick in yellow, why is that.
+03:24 +Bazerka: because you have a hilight on the word "nick"
+03:24 +xgenesis: how about that
+03:24 * xgenesis touches Bazerka 
+03:26 +Bazerka: steady on tiger
+03:26 +Bazerka: :)
+03:26 +n-iCe: how do I delete it?
+03:26 +n-iCe: :
+03:26 +n-iCe: :
+03:26 +xgenesis: hehe
+03:26 +xgenesis: n-iCe: /dehilight nick
+03:26 +n-iCe: :*
+03:26 +xgenesis: you might want to check out /help hilight
+03:26 +xgenesis: er
+03:26 +Bazerka:  /dehilight 1
+03:27 +n-iCe: sure!
+03:27 +n-iCe: say my name
+03:27 * n-iCe coughs
+03:27 +n-iCe: sorry my nick, please
+03:27 +xgenesis: well either works :P
+03:27 +Bazerka: n-iCe and easy does it
+03:27 +n-iCe: :D
+03:27 +n-iCe: Awesome! thanks!
+03:27 +Bazerka: np :)
+03:27 +n-iCe: irssi 0.8.15 (20100403 1617)
+03:28 +n-iCe: Good I have the lastest
+03:28 +xgenesis: n-iCe: i see you've ventured from undernet :P
+03:28 +Bazerka: xgenesis: sure, but id is much better once you start getting awkward masks :)
+03:28 +n-iCe: oh god
+03:28 +Bazerka: and less typing is always good :)
+03:28 +n-iCe: Marcus!
+03:28 * xgenesis hides
+03:29 +n-iCe: hehehe
+03:29 +n-iCe: Didn't know you were here.
+03:29 +n-iCe: BSD ah?
+03:29 +n-iCe: may we chat in here? or do we need to go to an offtopic chan?
+03:30 +xgenesis: yep, bsd .
+03:30 +xgenesis: we'll chat on undernet :)
+03:31 --- ChanServ sets modes [#irssi +v prodrome]
+03:31 +Bazerka: suits you sir!
+03:33 +n-iCe: xgenesis: nick?
+03:35 +xgenesis: genesis
+03:54 +Iceman_B: Bazerka: okay I think I have it going now
+03:55 +Iceman_B: the logging thing I mean
+03:55 +Iceman_B: is there any way I can prepend the already typed lines in the buffer to log number <id> ?
+04:00 --- ChanServ sets modes [#irssi +v Steve57]
+04:10 --- ChanServ sets modes [#irssi +v Copia_de_sud0]
+04:10 --- Copia_de_sud0 is now known as sud0
+04:16 +billnye: Iceman_B: yes-and-no
+04:16 +billnye: Iceman_B: /help lastlog, but for great justice you would do the command before you start your other logging
+04:27 --- ChanServ sets modes [#irssi +v declan2]
+04:38 --- ChanServ sets modes [#irssi +v v_v]
+04:39 +v_v: i can't receive ctcp information if i ignore ctcps ?
+04:41 +v_v: i want to ignore the ctcp which is going to get my information, but receive the answer of ctcps i sent
+04:43 +v_v: !ctcp
+04:45 --- ChanServ sets modes [#irssi +v Anthoo]
+04:46 --- ChanServ sets modes [#irssi +v hyperair]
+04:47 --- JSP is now known as JoshuaP
+04:56 --- ChanServ sets modes [#irssi +v joneal]
+05:00 --- ChanServ sets modes [#irssi +v hpt]
+05:11 --- ChanServ sets modes [#irssi +v hpt]
+--- Log closed Fri Nov 26 09:16:33 2010
+--- Log opened Fri Nov 26 09:16:55 2010
+09:16 --- Users 395 nicks [0 ops, 0 halfops, 388 voices, 7 normal]
+09:16 --- ChanServ sets modes [#irssi +v iaj]
+09:18 --- Channel #irssi was synced in 110 seconds
+09:20 --- ChanServ sets modes [#irssi +v preller_]
+09:29 --- ChanServ sets modes [#irssi +v kkady32]
+09:31 +Steve57: does anyone know what can cause a weird ping reply value like  -142.-33 seconds?
+09:32 +echelon: your clock? not sure, but i know it happens
+09:32 +echelon: is it persistent?
+09:32 +Steve57: oh, could be... thank you
+09:32 +Steve57: it's from someone who keeps getting disconnected
+09:32 +echelon: hmm
+09:33 +Steve57: and yes, seems to be. only from one person
+09:33 +Steve57: they aren't using irssi, btw
+09:36 +blueyed: Does irssi support 256 colors? (see also http://superuser.com/questions/97576/terminal-irc-client-with-xterm-256color-support)
+09:37 +Steve57: thanks echelon. apparently it's not that uncommon :)
+09:37 +echelon: alright, np :)
+09:38 --- ryzer-afk is now known as ryzer
+09:49 --- ChanServ sets modes [#irssi +v uwjweq]
+09:55 --- ChanServ sets modes [#irssi +v przemoc]
+09:57 --- ChanServ sets modes [#irssi +v ferret]
+10:01 --- ChanServ sets modes [#irssi +v culb]
+10:02 --- ChanServ sets modes [#irssi +v shabble]
+10:04 --- ChanServ sets modes [#irssi +v skonek]
+10:09 --- ChanServ sets modes [#irssi +v wooden]
+10:10 --- ChanServ sets modes [#irssi +v Plasmast-]
+10:11 --- ChanServ sets modes [#irssi +v joneal]
+10:13 --- ChanServ sets modes [#irssi +v SolarisB1y]
+10:17 --- ChanServ sets modes [#irssi +v sud0]
+10:17 --- ChanServ sets modes [#irssi +v supercosmonaut]
+10:21 --- ChanServ sets modes [#irssi +v hyperair]
+10:21 --- ChanServ sets modes [#irssi +v echelon]
+10:22 --- ChanServ sets modes [#irssi +v niko]
+10:26 --- ChanServ sets modes [#irssi +v echelon]
+10:34 --- ChanServ sets modes [#irssi +v niko]
+10:36 --- ChanServ sets modes [#irssi +v joneal]
+10:38 --- ChanServ sets modes [#irssi +v icedearth]
+10:38 --- ChanServ sets modes [#irssi +v supercosmonaut]
+10:46 --- ChanServ sets modes [#irssi +v FernandoBasso]
+10:50 --- ChanServ sets modes [#irssi +v Weust`afk]
+10:55 --- ChanServ sets modes [#irssi +v CiRlE]
+11:02 --- ChanServ sets modes [#irssi +v CiRlE]
+11:17 --- ChanServ sets modes [#irssi +v tomik]
+11:17 +tomik: hi
+11:18 +tomik: Bazerka: dont know if you remember me from yesterday, well seems like its instantly segfaults whenever i load ANY script, manual or auto
+11:27 --- ChanServ sets modes [#irssi +v skonek]
+11:27 --- ChanServ sets modes [#irssi +v gemelen]
+11:39 --- ChanServ sets modes [#irssi +v supercosmonaut]
+11:40 --- holmes.freenode.net sets modes [#irssi +v icedearth]
+11:57 --- ChanServ sets modes [#irssi +v jasd]
+12:19 --- ChanServ sets modes [#irssi +v Miles__]
+12:22 --- Miles__ is now known as Miles
+12:30 --- ChanServ sets modes [#irssi +v leadgy]
+12:49 --- ChanServ sets modes [#irssi +v hyperair]
+12:51 --- ChanServ sets modes [#irssi +v Yvemath]
+13:02 --- ChanServ sets modes [#irssi +v mortenmj]
+13:03 +mortenmj: hi. can i write my scrollback from a particular channel to a file somehow?
+13:03 +shabble: mortenmj: /help lastlog
+13:03 +shabble: tomik: does it also crash with something like '/script exec print "moo"'?
+13:04 --- ChanServ sets modes [#irssi +v peder]
+13:10 --- ChanServ sets modes [#irssi +v gemelen]
+13:16 --- ChanServ sets modes [#irssi +v uzsolt]
+13:18 --- ChanServ sets modes [#irssi +v Anthoo]
+13:25 +tomik: shabble: [(status)] /script exec print "moo"Segmentation fault
+13:29 --- ChanServ sets modes [#irssi +v Martinp23]
+13:30 --- ChanServ sets modes [#irssi +v ferret]
+13:34 +shabble: tomik: ok, sounds like you've got a problem with the version of libperl you're loading (mismatch between system and irssi version?)
+13:35 +shabble: you're running gentoo, right?
+13:35 --- ChanServ sets modes [#irssi +v tolecnal]
+13:37 +tomik: shabble: ye gentoo
+13:41 +tomik: shabble: v5.12.2 for perl i guess
+13:50 --- ChanServ sets modes [#irssi +v preller]
+13:53 +shabble: there's a way to tell what libraries irssi is trying to load
+13:53 +shabble: ldd, I think?
+13:53 +tomik: hm
+13:53 +shabble: yeah, 'ldd `which irssi`'
+13:56 +tomik: perl_use_lib =
+13:56 +shabble: hmm?
+13:58 +tomik: what do u mean by ldd?
+13:58 +tomik: ah ok
+13:58 +shabble: it's a command, it shows library dependencies for a binary
+14:00 +tomik: libperl.so.5.12 => /usr/lib/libperl.so.5.12 (0x00006cfa6d257000)
+14:01 --- ChanServ sets modes [#irssi +v cloq]
+14:02 +shabble: I think that looks ok
+14:02 +shabble: but I'm getting a bit out of my depth here regarding debugging it. Maybe wait for Bazerka or someone who knows a bit more
+14:03 --- ChanServ sets modes [#irssi +v hyperair]
+14:03 +shabble: my next step would be to try strace or gdb to see if you can figur eout where the segfault is happening
+14:03 +Remco: What does perl --version give you?
+14:03 +shabble: or just blindly re-emerge perl and irssi and hope for the best :)
+14:03 +Remco: Most importantly, does the version match the one irssi is linking to?
+14:07 +tomik: perl is (v5.12.2)
+14:07 +tomik: so its probably wrong since it wants .2
+14:12 +Remco: Does this work: perl -e 'print "test\n"'
+14:14 --- ChanServ sets modes [#irssi +v gemelen]
+14:14 +tomik: yes
+14:23 --- ChanServ sets modes [#irssi +v izibi]
+14:24 +Nei: load irssi in gdb for a try
+14:24 +Nei: then complain to your distro people
+14:25 +Rhonda: wasn't me!
+14:27 +Dice-Man: hi
+14:28 +Dice-Man: running irssi is awesome
+14:28 --- ChanServ sets modes [#irssi +v chemist]
+14:29 +webvictim: yes it is :)
+14:32 +Remco: I rather have irssi stay put, much easier to use
+14:32 --- ChanServ sets modes [#irssi +v mavrc]
+14:35 --- ChanServ sets modes [#irssi +v vincent_wang]
+14:45 --- ChanServ sets modes [#irssi +v hpt]
+14:46 --- ChanServ sets modes [#irssi +v Cy-4]
+14:51 --- ChanServ sets modes [#irssi +v mavrc]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv tolecnal ferret Anthoo Miles]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv supercosmonaut skonek niko Plasmast-]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv shabble CEnTR4L mquin maveas]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv athit buu Brownout Death4Life]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv 13WAARZT3 HarryS f00li5h Cydex]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv lamstyle Cap_J_L_Picard pils shad0wgen]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv Kyrus simmel Pici damyan]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv vizz kingkong|brb {n8} desikitteh{G}{H}]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv plavcik Axims butcha Babar]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv tdn initself ikonia Tianon]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +v Guest85340]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv furtardo xand Tam^_ compromised]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv tmr paggas idl0r toddf]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv pronto fahadsadah blue navap]
+14:52 --- kornbluth.freenode.net sets modes [#irssi +vvvv rusak anttil jink Koffa]
+14:53 --- ChanServ sets modes [#irssi +v ikonia]
+14:53 --- ChanServ sets modes [#irssi +v HarryS]
+14:54 --- ChanServ sets modes [#irssi +v Ceelvain]
+14:54 +Ceelvain: How does irssi detect netsplits ?
+14:58 +ahf: Ceelvain: it checks the quit message of the clients :P
+14:58 +lestat: otherside: ? o_o
+14:58 +lestat: erf i meant ahf
+14:59 --- ChanServ sets modes [#irssi +v KB1JWQ]
+14:59 +ahf: lestat: try to see the QUIT message of a client that is involved in a netsplit
+15:00 --- ChanServ sets modes [#irssi +v joneal]
+15:02 --- ChanServ sets modes [#irssi +v GuntherDW]
+15:09 --- ChanServ sets modes [#irssi +v icedearth]
+15:10 --- holmes.freenode.net sets modes [#irssi +v icedearth]
+15:12 --- ChanServ sets modes [#irssi +v mavrc]
+15:14 --- ChanServ sets modes [#irssi +v surgeon_]
+15:18 --- ChanServ sets modes [#irssi +v Steve57]
+15:18 +Ceelvain: ahf: yes but it also need some kind of timer. Idem for rejoin after split.
+15:18 +ahf: Ceelvain: it uses the same logic that it uses for stacking mode-changes together
+15:19 +ahf: if you do:
+15:19 +ahf: MODE #foo +o a
+15:19 +ahf: MODE #foo +o b
+15:19 +ahf: MODE #foo +o c
+15:19 +ahf: then irssi will show you mode #foo +ooo a b c
+15:19 +Ceelvain: You CAN do MODE #foo +ooo a b c
+15:19 +ahf: yes, that was not the point
+15:19 +ahf: irssi stacks modes together if it can.
+15:19 +Ceelvain: ok.
+15:20 +ahf: such that you wont see multiple lines of modechanges if you can avoid it.
+15:21 +Ceelvain: then, if the server doesn't add "Quit" before the quit message, I could fake a netsplit for irssi. Right ?
+15:21 --- ChanServ sets modes [#irssi +v joneal]
+15:23 --- ChanServ sets modes [#irssi +v mavrc]
+15:23 +Ceelvain: mavrc: the same as #hzv ?
+15:24 +ahf: Ceelvain: it's the ircd that prefixes your comment with "Quit: "
+15:25 +ahf: that logic is in modules/core/m_quit.c of the ircd codebase.
+15:25 --- ChanServ sets modes [#irssi +v altur]
+15:25 +mavrc: Ceelvain: yes :)
+15:26 +mavrc: Ceelvain: who are you on #hzv?
+15:26 +Ceelvain: mavrc: with another nickname.
+15:26 +Ceelvain: Just find out wich. ;)
+15:26 +ahf: GoatMasterJack
+15:26 +Ceelvain: +se
+15:27 +ahf: dot cx
+15:27 +Ceelvain: ;)
+15:27 --- Guest85340 is now known as RaNdY
+15:28 --- RaNdY is now known as Guest78998
+15:28 --- Guest78998 is now known as Guest85340
+15:28 +Ceelvain: Well, about "Quit: " prefix, I think I can remember of an option for unrealircd that let customize it. And I also see a couple of servers without prefix.
+15:29 +ahf: for actually client quits with a message?
+15:30 +Ceelvain: set::prefix-quit
+15:30 +ahf: oh well, fuck unrealircd :P
+15:30 +ahf: nobody uses that on large networks anyway :P
+15:30 +Ceelvain: everybody use that on small and medium networks. :)
+15:31 +ahf: yes, sadly
+15:31 +ahf: i'm on one network that uses it.
+15:31 +ahf: out of... 14-20'ish
+15:35 --- ChanServ sets modes [#irssi +v xeon-enouf]
+15:35 --- ChanServ sets modes [#irssi +v joneal]
+15:35 --- ChanServ sets modes [#irssi +v pronto]
+15:35 --- ChanServ sets modes [#irssi +v tonsofpcs]
+15:36 --- ChanServ sets modes [#irssi +v praetorian]
+15:36 --- ChanServ sets modes [#irssi +v achromic]
+15:36 --- ChanServ sets modes [#irssi +v SS3]
+15:37 +Ceelvain: For my part, 14 networks over 22 are using unrealircd.
+15:38 --- ChanServ sets modes [#irssi +v buu]
+15:38 --- ChanServ sets modes [#irssi +v Miles]
+15:41 --- ChanServ sets modes [#irssi +v Genieliu]
+15:43 --- ChanServ sets modes [#irssi +v {Nathan}]
+15:43 +Genieliu: I want to shield the notice like *has quit[Ping time out:].How can I use the ignore command to fulfill it?
+15:43 --- ChanServ sets modes [#irssi +v hyperair]
+15:45 --- ChanServ sets modes [#irssi +v hyperair]
+15:46 +Bazerka:  /ignore * QUITS
+15:47 +Bazerka: although you may want to include PARTS too
+15:49 +Genieliu: Bazerka: Thx,I got it
+15:49 +Bazerka: np
+15:50 +tomik: dont have gdb seems liek
+15:51 +Bazerka: why do you need gdb to correctly build irssi against the right perl libs? :)
+15:52 +tomik: got that advice to use that
+15:52 +Bazerka: to do what?
+15:52 +tomik: to track my segfault error
+15:52 +Bazerka: it will just point to something perl related and won't provide any useful information
+15:53 +Bazerka: the problem is building irssi's perl module correctly
+15:54 +tomik: well i've installed it from emerge so it should build it correctly
+15:54 +tomik: seems like it didnt
+15:54 +Bazerka: that's not strictly true
+15:55 +Bazerka: given that you've said someone with root has been messing around with libs, you don't know what state the machine is in
+15:55 --- ChanServ sets modes [#irssi +v icedearth]
+15:55 +Bazerka: and if emerge is building stuff correctly at all
+15:55 +Bazerka: s/and/or/
+15:56 +tomik: but if perl was preinstalled it should correctly link irssi after or?
+15:56 +Bazerka: if soemone has been messing around with perl libs, all bets are off
+15:56 +Bazerka: until you get the system back into a known state
+15:57 +tomik: sigh
+15:58 +Bazerka: personally, I'd deinstall perl and its libs, then manually remove any perl related crap left over
+15:58 +Bazerka: then once you know you've cleaned all perl related stuff, re-emerge perl and its dev libs
+15:58 +Bazerka: then re-emerge irssi
+15:59 +Bazerka: or whatever the correct gentoo terminology is :)
+15:59 +tomik: will do that i guess
+15:59 +tomik: that is
+16:10 --- ChanServ sets modes [#irssi +v Copia_de_sud0]
+16:21 --- ChanServ sets modes [#irssi +v preller]
+16:36 --- ChanServ sets modes [#irssi +v icedearth]
+16:37 --- ChanServ sets modes [#irssi +v tyebud]
+16:39 +tomik: bb
+16:41 +\ottizen: 22:29 <+\ottizen> What does this mean and how do I solve it?
+16:41 +\ottizen: 22:29 <+\ottizen> Irssi: warning SSL handshake failed: sslv3 alert handshake failure
+16:43 +Bazerka: which version of irssi and where were you connecting to that generates that error?
+16:44 +\ottizen: Latest stable, connected to irc.operatorstat.us.
+16:44 +\ottizen: Port 6697.
+16:45 --- ChanServ sets modes [#irssi +v pix|]
+16:45 +Bazerka: latest stable being 0.8.15?
+16:47 +pix|: Bazerka:
+16:47 +\ottizen: Yes.
+16:47 +pix|: .
+16:47 +pix|: yes
+16:47 +Bazerka: \ottizen: it seems to be a problem with that server
+16:48 +Bazerka: I get that error connecting directly with OpenSSL's s_client
+16:48 +\ottizen: It's my own server, so, uh, do you know what it might be?
+16:48 +\ottizen: Oh
+16:48 --- ChanServ sets modes [#irssi +v icedearth]
+16:49 +Bazerka: http://pastebin.com/cezZamME
+16:49 --- ChanServ sets modes [#irssi +v sud0]
+16:49 +pix|: anyone an idea what could cause highlighted I letters at the end of an msg?
+16:49 +Bazerka: pix|: inverted I's are how irssi displays the tab character
+16:50 +mquin: pix|: if it's a string of higlighted I's and spaces then the other person is using OTR
+16:51 +pix|: Bazerka: ah, thx. Is there a case where tabs are appended unintentionally?
+16:51 +\ottizen: mquin: Hello
+16:51 +\ottizen: Bazerka: Thank you.
+16:52 +mquin: 'lo \ottizen
+16:52 +Bazerka: pix|: only if that's what the person is sending
+16:52 +Bazerka: irssi won't add them to incoming or outgoing text
+16:53 +icedearth: whats the best script for getting notifications if you are accessing irssi over ssh?
+16:57 +pix|: Well, if I type a tab then nothing happens but stating the tab-completion. From some people, however, I sometimes get those blinking I characters and they don't know why.
+16:57 +pix|: starting*
+16:58 +Bazerka: that's because you're receiving tabs *FROM* them
+16:58 +Bazerka: (if you're talking about inverted I's appearing in lines from other people)
+16:59 +Bazerka: there's a couple of scripts that will strip them out if they annoy you and people can't fix sending them
+17:00 +mquin: there's a tab_stop script, or you can do the same with a trigger rule (it's one of the examples)
+17:01 +pix|: yep found it, thx
+17:05 +pix|: but the trigger script is even better :)
+17:06 --- ChanServ sets modes [#irssi +v kkady32]
+17:07 --- ChanServ sets modes [#irssi +v shamrock]
+17:08 --- ChanServ sets modes [#irssi +v lost_soul]
+17:16 +Bazerka: yup, trigger++
+--- Log closed Sat Nov 27 00:05:28 2010

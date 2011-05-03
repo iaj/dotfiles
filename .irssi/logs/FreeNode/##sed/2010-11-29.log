@@ -1,0 +1,89 @@
+--- Log opened Mon Nov 29 08:19:23 2010
+--- Log closed Mon Nov 29 08:24:24 2010
+--- Log opened Mon Nov 29 08:24:48 2010
+08:24 --- Users 87 nicks [0 ops, 0 halfops, 0 voices, 87 normal]
+08:26 --- Channel ##sed was synced in 123 seconds
+08:51 --- rapid_ is now known as rapid
+11:51 --- maxim is now known as Guest98978
+--- Log closed Mon Nov 29 15:27:31 2010
+--- Log opened Mon Nov 29 15:27:56 2010
+15:27 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+15:30 --- Channel ##sed was synced in 167 seconds
+15:44  mjf: Hello. I need to do some further operation on part of line only, not on whole line. I suppose I can not do it by sed, whilst it's basically line-oriented. I created a simple shell script as workaroung called "led" which acts as I want but I want to be sure there is really no way to achieve it with sed itself/
+15:44  mjf: ?
+15:49  Riviera: Well.
+15:49  Riviera: You can do almost every manipulation of textual data in sed. It's a programming language.
+15:50  mjf: Well.
+15:50  Riviera: The question usually only is if the task is easy or not so easy. :)
+15:50  Riviera: (And then, if it's worth bothering.)
+15:50  Riviera: So, what exactly do you want to do?
+15:51  mjf: I would like to do some sed command on part of line matching some pattern only.
+15:51  Riviera: Yes, that's possible but a bit complicated. Maybe your particular task is easier, what's your particular task?
+15:52  mjf: Riviera: my particular task is I time to time need to do that.
+15:52  Riviera: Okay.
+15:52  mjf: Therefor I searched for a tool that could do it.
+15:52  mjf: But there is not standard UNIX tool like that.
+15:52  Riviera: That's true.
+15:52  mjf: Thus I wrote ugly petite shell script to achieve it.
+15:52  Riviera: awk often works, but it also is limited.
+15:52  mjf: It's crap.
+15:53  Riviera: A general possible way to achieve that in sed can be somethink like that:
+15:53  Riviera: 1) match the part of the line you want to process with s/pattern/
+15:53  mjf: I would like to do it in pure sed better and then use it in script and just insert some $1 and $2 (from shell) somewhere in the sed code.
+15:53  Riviera: 2) surround that part of the line with newline characters, because newline characters don't appear in the input, so it's safe to insert them, no escaping needed, like that: s/pattern/\
+15:53  Riviera: &\
+15:53  Riviera: /
+15:54  Riviera: 3) store the whole buffer (three lines now) in the hold buffer
+15:54  Riviera: 4) remove everything up to the first newline character and after the second newline character from the buffer
+15:54  Riviera: 5) you now have only the part you wanted to match in the buffer, now do your processing with the sed command you wanted to do
+15:55  Riviera: 6) append the stored hold buffer to the line you processed
+15:56  Riviera: 7) the buffer now looks like that: [your processed pattern]<newline>[part before the matched pattern]<newline>[old matched pattern]<newline>[part after the matched pattern]
+15:56  Riviera: 8) sort everything in place, something like that: s/\(.*\)\n\(.*\)\n\(.*\)\n/\2\1/ [untested]
+15:56  Riviera: done.
+15:57  Riviera: So, that answers the question if it's possible in sed.
+15:57  Riviera: (The answer is "yes")
+15:57  mjf: To split in 3 lines was my initial idea. That's how my script works (but using sed 4 times).
+15:58  Riviera: I only meant one invocation of sed.
+15:58  mjf: yes.
+15:58  mjf: That's why I asked here.
+15:58  Riviera: In fact, using more than one invocations would probably even more complicated.
+15:58  mjf: s/my script/my shell script/
+15:58  Riviera: +be
+15:58  Riviera: :)
+15:59  Riviera: ah!
+15:59  Riviera: :)
+15:59  mjf: Sorry.
+15:59  mjf: :)
+15:59  mjf: I have to express things more precisely.
+16:00  Riviera: Usually awk is easier for things like that, if one does not really need backreferences or match-groups.
+16:00  Riviera: But if you script with shells like bash, zsh or ksh93, you can do everything in these that you can do with sed
+16:00  mjf: Riviera: Thank you. I will try to write the sed code later in the day...
+16:00  Riviera: only that they normally are a lot slower
+16:00  Riviera: okay
+16:00  Riviera: good luck :)
+16:00  mjf: Thanks.
+16:00  Riviera: if you need help or an example script, just ask
+16:01  mjf: ad. Example script - I want to try myself first. If I run in troubles I will pastebin it and show you the "code" :D
+16:02  Riviera: cool :)
+16:04  mjf: Riviera: that way I can even learn something (or not) :)
+16:04  mjf: Ok, leaving now... bye.
+--- Log closed Mon Nov 29 16:20:12 2010
+--- Log opened Mon Nov 29 16:20:36 2010
+16:20 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+16:22 --- Channel ##sed was synced in 130 seconds
+16:51  f00bar80: anything wrong with the following => sed -e /Web Hosting \-/{"s%For% %"} , to match and replace "For" with " " in a sentence that includes "Web Hosting -"
+16:54  gnubien: f00bar80: echo "For Web Hosting -"| sed '/Web Hosting -/s/For /\" \" /'  #prints: " " Web Hosting -
+17:27 --- Natch is now known as Natch|
+17:29  f00bar80: ppl any comment ?,  the above mentioned inquiry has the words "For" and "Web Hosting" non-successive, i think gnubien incorrectly understood me
+17:33  backtogee: could someone give me some help with sed? i am trying to read a line from a txt file then use the output to replace a word in another file. I am thinking (wrongly) along the lines of 'sed -n '2p' < account.txt | sed -i "s/var1/$output_of_sed -n '2p'/g"
+17:35  Riviera: sed 's/var1/'"$(sed '2!d;q')"'/g' or something.
+17:36  Riviera: sed 's/var1/'"$(sed '2!d;q' account.txt)"'/g' or something.
+17:37  Riviera: f00bar80: To change "For" to " " in lines that contain "Web Hosting -" you could maybe use: sed '/Web Hosting -/s/For/ /'
+17:37  Riviera: f00bar80: Also, gnubien's solution does not require "For" and "Web Hosting" to be in any particular order.
+17:37  Riviera: f00bar80: You are not only too fucking lazy to type, you're also too fucking lazy to try solutions people give you.
+17:38  Riviera: f00bar80: (i. e., you deserve some insults.)
+17:41  backtogee: hmm that just deleted all the txt in my script haha
+17:41  backtogee: sed 's/var1/'"$(sed '2!d;q' account.txt)"'/g' new.sh
+17:42  backtogee: oops kinda wish I took a backup now
+17:44  backtogee: on that note I am going to give up for the day, eat some dinner and go to bed....
+--- Log closed Mon Nov 29 21:30:22 2010

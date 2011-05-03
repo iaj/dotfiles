@@ -1,0 +1,669 @@
+--- Log opened Wed Nov 10 08:35:13 2010
+08:35 --- Users 501 nicks [0 ops, 0 halfops, 0 voices, 501 normal]
+08:35  mercutio22: pgas but it still does not work inside the heredoc script =[
+08:35  pgas: what do you have now?
+08:36 --- Channel #bash was synced in 109 seconds
+08:37  mercutio22: pgas: I have the file unmodified. The script is: http://debian.pastebin.com/wkwHQG0b
+08:37  mercutio22: pgas: test file: http://debian.pastebin.com/LZq3mNSU
+08:39  mercutio22: This is probably very basic but I don't know where I am at error
+08:40  pgas: works here, maybe your file doesn't really have space but tabes?
+08:41  pgas: what if you use s/[[:blank:]],[[:blank:]]REDE[[:blank:]]\/32/ ?
+08:47  mercutio22: pgas.. no. Hasn't worked
+08:47  mercutio22: pgas: well thanks for the help.. I will try and research some more
+08:47  pgas: well, it works copy pasting your code and your sample file
+08:48  pgas: what if you do: sed -n l yourfile
+08:48  pgas: do you see something funky?
+--- Log closed Wed Nov 10 08:48:11 2010
+--- Log opened Wed Nov 10 08:48:33 2010
+08:48 --- Users 502 nicks [0 ops, 0 halfops, 0 voices, 502 normal]
+08:48  mercutio22: pgas: I just see the file;;
+08:48  mercutio22: You think it might be an encoding issue?
+08:50 --- Channel #bash was synced in 111 seconds
+08:51  pgas: not encoding but sometimes what looks like a space is not really a space
+08:53  mercutio22: pgas: its weird though cus if I edit in vi or ex by hand it works. The heredoc script fails...
+08:55  pgas: mercutio22: http://pastebin.bash-hackers.org/index.php?show=91
+08:58  mercutio22: pgas: wtf... it worked there!
+09:03  mercutio22: pgas: actualy it also works here.. but if I tun in a script file
+09:04  pgas: make sure the second EOF is at the beginning of the line, no spaces before
+09:05  pgas: and no spaces after either
+09:46  kotique: have always been wondering how to apply patches interactively?
+09:47  kotique: what tools do you use?
+09:47  kotique: other than just editing the diff
+09:48  trash: patch.
+09:49  kotique: it doesn't support interactive merging
+10:38  lapsusbrutus: Hi guys,  Im making a whiptail script with a --menu ...   From MAN file: "When whiptail exits, the tag of the chosen menu entry will be printed on stderr."  How do I uuse stderr into if then else?
+10:41  lapsusbrutus: variable=`whiptail --menu .....`;  if [ "$variable = ....] ??
+10:45  geirha: !faq dialog
+10:45  greybot: http://mywiki.wooledge.org/BashFAQ/040 -- How do I use dialog to get input from the user?
+10:46 --- obadiah_ is now known as VivekVC
+10:47  lapsusbrutus: Is dialog better than whiptail?
+10:51  geirha: Dunno. They can mostly do the same thing.
+10:55  geirha: Neither are standard, so just use whichever's available on all the target systems.
+10:58  lapsusbrutus: ok thanks:) and the way they handle --menu is the same?  I would like to use whiptail. Looks like debian-distros come with it preinstalled.(?)   Still im not able to make a menu with three options together with if, elif, else. :s   Did install dialog though:)  Anyone have a link to a good example?
+10:59  cloq: hello, what am I doing wrong here? I double-quoted everything, but the spaces in filenames still act as separators: for line in $(cat files.txt); do line2="`echo "$line" | sed 's/\|/&/g'`" echo mv "$line" "$line2"; done
+11:03  geirha: You're telling bash to split the content of files.txt on whitespace, then do pathname expansion, then iterate each word.
+11:04  geirha: Bash has no chance to know where your filenames start and end.
+11:04  geirha: for var in $(...)  is almost always wrong.
+11:04  geirha: !faq 1 > cloq
+11:04  greybot: cloq: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+11:04  geirha: !faq 20 > cloq
+11:04  greybot: cloq: http://mywiki.wooledge.org/BashFAQ/020 -- How can I find and deal with file names containing newlines, spaces or both?
+11:04 --- mingdao_ is now known as mingdao
+11:05  geirha: And what's sed 's/\|/&/g' supposed to do?
+11:06  cloq: oh, I thought that `for line` uses \n as a separator, thanks...
+11:06  geirha: No, for iterate words, not lines.
+11:07  cloq: and I was trying to replace | in filenames by &
+11:07 --- chaGp8vP4n is now known as chalcedony
+11:11  lhunath: cloq: "${line//|/&}"
+11:12  geirha: cloq: If you have GNU sed, sed 's/\|/&/g' will attemt to replace empty or empty with empty or empty
+11:15  Bersam: hi everybody ... i have multiplate version pkg of one app in my cache ... i want to just have the lastest pkg cache ... any idea ?
+--- Log closed Wed Nov 10 11:22:11 2010
+--- Log opened Wed Nov 10 11:22:30 2010
+11:22 --- Users 516 nicks [0 ops, 0 halfops, 0 voices, 516 normal]
+11:22  Bersam: geirha: i want to rm first two file and have last one !
+11:23  geirha: Bersam: Are they in the right order when you do ''echo pkgone*xz'' ?
+11:24 --- Channel #bash was synced in 119 seconds
+11:24  Bersam: geirha: yes
+11:25  Bersam: geirha: i just want have last pkg (that is 46.1)
+11:26  geirha: pkgs=(pkgone*xz) n=${#pkgs[@]}; echo rm "${pkg[@]::n-1}"
+11:26  geirha: err, pkg -> pkgs on the last one
+11:26  Bersam: geirha: i got the point ! thanks ... hmmm "${pkg[@]::n-1}"
+11:27  geirha: See Paramater Expansion in ''man bash''
+11:32  nocturnal: COMP_WORDS
+11:32  nocturnal: was the answer to my query
+11:32  nocturnal: thanks for nothing! =D
+11:45  lapsusbrutus: anything wrong with this?  var=(whiptail --title "Title" --backtitle "backtitle" --menu "Your choice" 12 40 4 1. "Choice 1" 2. "Choice 2")
+11:45  trash: the command itself should be in a seperate variable
+11:45  trash: !faq complex
+11:45  greybot: http://mywiki.wooledge.org/BashFAQ/050 -- I'm trying to put a command in a variable, but the complex cases always fail!
+11:46  geirha: lapsusbrutus: var=$(...)
+11:46  geirha: Oh, you're building up an array?
+11:47  trash: *shrug*
+11:47 --- Weust`afk is now known as Weust`
+11:47  lapsusbrutus: array? :p  just trying to make a dialog/whiptail script with two choices with --menu  and use if, elif else to  :)
+11:48  trash: Then FAQ2.
+11:48  geirha: There's a difference between (...) and $(...)
+11:49  lapsusbrutus: ok:)  thanks Ill look into that..  I think I have used ` `  once too?
+11:49  geirha: !`
+11:49  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+11:49  lapsusbrutus: ohh  nice :)
+11:57  lapsusbrutus: nothing i try seem to work.  http://en.wikibooks.org/wiki/Bash_Shell_Scripting#Menus   Here its nicely explained.. But how to get the choice(stderr) to a variable?
+11:58  lapsusbrutus: or use the stderr in if,then,else?
+11:58  trash: !faq dialog
+11:58  greybot: http://mywiki.wooledge.org/BashFAQ/040 -- How do I use dialog to get input from the user?
+11:58  lhunath: the author of that page fails to understand the need for quoting in bash
+--- Log closed Wed Nov 10 12:10:11 2010
+--- Log opened Wed Nov 10 12:10:37 2010
+12:10 --- Users 515 nicks [0 ops, 0 halfops, 0 voices, 515 normal]
+12:12 --- Channel #bash was synced in 116 seconds
+12:12  zoidberg-: Hey guys, I have a list of HTML form elements, e.g:  <action id="ShowLogonPage">, i want to get the string inside " " and just display that what can of bash trick can I use to do this ?
+12:13  geirha: !html
+12:13  greybot: You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+12:14  zoidberg-: your kidding me, you an't cut between the " " ?
+12:14  zoidberg-: thats surprising
+12:14  geirha: Sure you can.
+12:14  lhunath: sure you can.  but you wouldn't be getting the id of an element doing so.
+12:14  lhunath: you might, if you're lucky.
+12:15  zoidberg-: im confused
+12:15  zoidberg-: i just want ShowLogonPage
+12:15  lhunath: that's OK.  solutions are listed.
+12:15  zoidberg-: ?
+12:15  trash: zoidberg-: Read what greybot said.
+12:15  trash: It's all there.
+12:15  psycho23: perl -e 'print STDERR hello' 2>&1 | grep -o hello
+12:15  psycho23: How am I suppose to remember that '2>&1' means pipe STDERR into/with STDOUT?
+12:16  lhunath: it doesn't.
+12:16  trash: !redir Y psycho23
+12:16  trash: !redir > psycho23
+12:16  greybot: psycho23: Learn about redirections! Syntax: http://bash-hackers.org/wiki/doku.php/syntax/redirection and http://mywiki.wooledge.org/BashGuide/InputAndOutput#Redirection ## Illustrated tutorial: http://bash-hackers.org/wiki/doku.php/howto/redirection_tutorial
+12:16  lhunath: it means, send stderr where stdout is going right now.
+12:16  lhunath: !2>&1
+12:16  greybot: Making sense of the copy descriptor operator: http://wiki.bash-hackers.org/scripting/copydescriptor
+12:16  lhunath: hmm; lots of links.
+12:16  psycho23: great, now I have to spend at most 15 minutes reading html pages
+12:16  trash: and still people continue asking questions.
+12:17  trash: psycho23: Isn't that great.
+12:18  psycho23: I just said it was great, what do you think I was being sarcastic or something?!
+12:18  trash: I was just pointing that out, what do you thik I was being sarcastic or something?
+12:18  trash: s/thik/think/
+12:19  shai__: Hi :) How do I use 'ed' to search a file and replace text in it? I go to this point: (echo 's/\/tmp\//\/var\/s3tmp\//' ; echo '.' ; echo 'wq') | ed -s Utils.py.new
+12:19  shai__: But I'm not sure how to give it the file to edit ...
+12:19  trash: By argument.
+12:20  shai__: ah ... nm :)
+12:20  shai__: got it working :)
+12:20  trash: Cool.
+12:20  shai__: thanks.
+12:20  trash: No problem.
+12:20  psycho23: shai__: well don't keep us in suspense how did you do it?
+12:20  shai__: This was the cmd: (echo ',s/\/tmp\//\/var\/s3tmp\//' ; echo '.' ; echo 'wq') | ed -s Utils.py
+12:20  psycho23: oooo, weird.
+12:21  shai__: Can I paste the output?
+12:21  lhunath: shai__: printf '%s\n' is prettier for that.
+12:21  shai__: 9 lines
+12:21  sn18: shai__: useless subshell
+12:21  lhunath: shai__: not in channel.
+12:21  shai__: printf to edit the file?
+12:21  lhunath: printf ',s/\/tmp\//\/var\/s3tmp\//' . wq | ed -s
+12:21  lhunath: printf '%s\n' ',s/\/tmp\//\/var\/s3tmp\//' . wq | ed -s
+12:21  shai__: hmm...
+12:21  geirha: printf '%s\n' 'g/\/tmp\//s,,/var/s3tmp/,' w | ed -s file
+12:22  psycho23: I prefer to use the best editor on the planet.   wine notepad.exe
+12:22  geirha: Meh, too bloated. Go cat.
+12:22  psycho23: simple, secure, portable
+12:24  shai__: geirha:  what is the diff between your printf and lhunath's latter?
+12:24  shai__: I think lhunath is accurate.
+12:24  shai__: Need the period and the ,s to search the entire file and change every occurance.
+12:24  lhunath: I just copy pasted your ed commands.
+12:24  shai__: s/occurance/occurrence/
+12:25  lhunath: that's what his g is for.
+12:25  shai__: What's the diff between ,s and g?
+12:25  geirha: shai__: Mine won't give an error if there are no substitutions to be done.
+12:26  psycho23: I don't understand why there would ever need to be a ',' (comma) on the first letter of any command to any editor.
+12:27  geirha: # touch file; printf  '%s\n' ',s/foo/bar/' w | ed -s file
+12:27  evalbot: geirha: ?
+12:27  geirha: # touch file; printf  '%s\n' 'g/foo/s//bar/' w | ed -s file
+12:27  evalbot: geirha: ?
+12:28  psycho23: well, I better start reading those html files...
+12:28  geirha: Hm. Guess both will give an error if the file is empty
+12:28  lhunath: psycho23: , is short for 0,$ which means "from line 0 to the last line, do .."
+12:29  geirha: # echo baz > file; printf  '%s\n' ',s/foo/bar/' w | ed -s file
+12:29  evalbot: geirha: ?
+12:30  geirha: # echo baz > file; printf  '%s\n' 'g/foo/s//bar/' w | ed -s file
+12:30  evalbot: geirha: no output
+12:31  shai__: echo 123 > file ; echo 456 >> file ; printf '%s\n' ',s/123/456/' . wq | ed -s file ; cat file
+12:31  shai__: # echo 123 > file ; echo 456 >> file ; printf '%s\n' ',s/123/456/' . wq | ed -s file ; cat file
+12:31  evalbot: shai__: 456
+12:31  evalbot: shai__: 456
+12:31  evalbot: shai__: 456
+12:31  shai__: :)
+12:32  shai__: works.
+12:32  geirha: Why do you have the . there?
+12:32  psycho23: # uname -a
+12:32  evalbot: psycho23: Linux bunnies 2.6.27.6 #9 Sat Nov 15 16:44:53 CET 2008 i686 Pentium II (Klamath) GenuineIntel GNU/Linux
+12:33  shai__: geirha: "Input mode is terminated by entering a single period (.) on a line. "
+12:33  geirha: There's no input mode in your script ...
+12:34  psycho23: #echo I'm a good bot and yeah yeah and I rock because I'm cool and stuff
+12:34  trash: psycho23: There is #evalbot
+12:36  shai__: # echo I'm a good bot and yeah yeah and I rock because I'm cool and stuff
+12:36  evalbot: shai__: Im a good bot and yeah yeah and I rock because Im cool and stuff
+12:36  shai__: Need to space the hash from the 'echo'
+12:37  geirha: It ate your apostrophees
+12:37  psycho23: so, &1 is the file descriptor of '1'?  And so I'm suppose to assume that 1 means stdout?
+12:38  shai__: geirha: how else do you emphasize a command which is also a real word?
+12:38  psycho23: I think '2>&1' should be:    $STDERR_FILE_DESCRIPTOR>$STDOUT_FILE_DESCRIPTOR
+12:38  psycho23: now doesn't that look much clearer?
+12:38  geirha: shai__: huh?
+12:39  geirha: There's only three numbers to remember...
+12:39  psycho23: so there's a 3rd!?
+12:39  geirha: 0, 1 and 2.
+12:39  psycho23: 0!?
+12:39  geirha: stdin
+12:39  psycho23: is that /dev/null?
+12:40  psycho23: oh
+12:40  psycho23: oh man, 1 2 and NOW, 0!
+12:40  psycho23: what does bash expect me to do cartwheels 30 feet?
+12:41  psycho23: I can only do 3.74
+12:41  psycho23: # echo oh yeah 0>&1 | cat
+12:41  evalbot: psycho23: oh yeah
+12:42  shai__: geirha: nm .. just understood what you meant :)
+12:42  sn18: psycho23: 0 is stdin
+12:43  psycho23: I just piped stdin to stdout, why is piping even functional?  bash should've like, blew up because the pipe should've snapped and water should be surrounding my computer
+12:44  psycho23: and why do I not have to go:   &2>&1 to redirect stderr to stdout?  This is just, this is MADNESSS
+12:45  sn18: psycho23: you haven't read those links
+12:45  pr0mised_: hey!
+12:46  pr0mised_: i have so much folder on my /home/ i need remove all but an folder called important i can't remove.. i need from this folder.. how can i use rm -rf for this?
+12:48  psycho23: That's not true, I read that last one
+12:49  sn18: pr0mised_:  echo ./!(important)/
+12:49  pr0mised_: find . -type f ! -name 'important' -execdir rm -rf{} + :) solved.
+12:49  psycho23: mv /home/important /tmp/do_not_delete ; rm -fr /home/*
+12:50  sente: #i wouldn't run this without checking..but: #shopt -s extglob; folders=(${!important}); for x in "${folders}"; do rm -rf "$x"; done
+12:50  sn18: !extglob > pr0mised_
+12:50  greybot: pr0mised_: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+12:50  sn18: sente: you didn't use the extended glob features
+12:51  psycho23: ewwww extended glob, talk about shit in the sink
+13:08  X-Raimo: i need to parse auth.log. The problem is: http://paste.opensuse.org/23322179 To get only IPs
+13:08  X-Raimo: ?
+13:08  crocket: Is there any caution that I need to take when using bash on FreeBSD?
+13:10  psycho23: that is an interesting concern.  I mean, even Mac OS has bash.  I would take into consideration the version # of bash
+13:11  crocket: FreeBSD has bash in ports tree
+13:12  crocket: bash can be broken after updating ports.
+13:12  Evet: crocket: dont make bash default for root
+13:12  psycho23: in that case, freebsd may not or may have applied its own thesis of what special patches to apply to the original bash sources, those would require consulting the bash.freebsd.readme.txt
+13:12  crocket: Evet : I currently use csh for all users
+13:13  sente: sn18: heh, apparently not, i was in a hurry and assumed it was wrong somehow, if nothing else from a typo ;)
+13:13  Evet: crocket: okay. keep csh for root
+13:19  psycho23: cat /var/log/auth.log.1 | grep "Failed password" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'
+13:20  geirha: yikes
+13:20  geirha: also, too late
+13:20  psycho23: we abandoned him :( nnnnnnnooooOOOOOoooooo........
+13:22  psycho23: hopefully because we didn't answer his bash question his doesn't become a worthless hobo on the streets
+13:28  geirha: One sed or awk would've sufficed though ... instead of cat and two greps.
+13:29  psycho23: you should see this one bash script I made, it took 18 minutes to execute
+13:29  psycho23: and no it wasn't `sleep 18m`
+13:32  DSAFEW\: lol
+13:32  geirha: sleep 15m and a bunch of cat|grep|grep|cut|grep|awk then?
+13:32  psycho23: pretty much
+13:34 --- Natch is now known as Natch|
+13:46  untseac: Hey. I have a question. Does stderr always appear after stdout?
+13:46  untseac: If you execute a command
+13:48  koala_man: untseac: no
+13:49  untseac: ok thanks.
+13:50  psycho23: # perl -e 'print 1;print STDERR 2'
+13:50  evalbot: psycho23: bash: perl: command not found
+13:51  psycho23: versus
+13:51  psycho23: perl -e 'select(STDERR);$|++;print 1;print STDERR 2'
+13:51  psycho23: output of the first:   21
+13:51  psycho23: output of the second:  12
+13:52  psycho23: so therefore, stderr always appears after stdout if and only if the program that outputs stderr treats the stream as unbuffered
+13:52  psycho23: or line-buffered
+13:52  psycho23: or weird buffered
+13:56  psycho23: or strangely and yet slightly annoyingly weirdly buffered
+14:01  cpk: the thing is stdout is always buffered and stderr is never buffered (default)
+14:01  cpk: when attached to terminal stdout is line buffered
+--- Log closed Wed Nov 10 14:28:14 2010
+--- Log opened Wed Nov 10 14:28:35 2010
+14:28 --- Users 517 nicks [0 ops, 0 halfops, 0 voices, 517 normal]
+14:28  geirha: !globstar
+14:28  greybot: In bash 4, when the globstar shell option is enabled ( shopt -s globstar ), the glob ** expands to all files and directories found recursively under the current directory, and **/ to all directories. As of 4.0.28, combinations like foo/**/*.txt work, but **.txt and foo** do not.
+14:28  visof: find . ?
+14:29  visof: geirha, ?
+14:29  geirha: find . -print
+14:30 --- Channel #bash was synced in 126 seconds
+14:30  visof: geirha, tree ?
+14:32  visof: geirha i want to learn bash in a good way , what book or tutorial should i read ?
+14:33  sente: visof: the links in the channel topic are pretty top notch
+14:33  pgas: !tutorials
+14:33  geirha: !guide
+14:33  greybot: http://mywiki.wooledge.org/BashGuide
+14:33  geirha: !google
+14:33  greybot: Google is NOT a preferred source for learning bash, because 90% of the "tutorials" and scripts out there are JUNK. Refer to the Guide and FAQ (see topic) instead.
+14:34  pgas: !tutorial
+14:34  pgas: hmmm
+14:34  greybot: A list of tutorials can be found here: http://bash-hackers.org/wiki/doku.php/scripting/tutoriallist
+14:34  sente: visof: between reading as well as #bash chatter you'll learn a good bit
+14:34  visof: unix programming env by rob pike and k
+14:34  visof: ?
+14:34  visof: sente, yeah , i learnt a lot by #bash
+14:35  m0ar: I'm echoing a question, and it reads Y/n as answer. However, the chosen letter appears on a newline, I don't want it to show at all. How do I make that happen? Right now I'm using 'read -e -n 1 a' to get the reply.
+14:35  sente: m0ar: read -s, for silent
+14:35  m0ar: sente: Wonderful, thank you
+14:36  sente: np
+14:37 --- julian_zZzZ is now known as Julian
+14:37  pgas: though I think what you really want is read -p
+14:37  m0ar: pgas: How come?
+14:37  pgas: read -p 'ok? Y/n' -n 1 a
+14:38  pgas: ah no to not show at all it's -s sorry
+14:38  visof: sente, did you read unix programming env by rob pike and k ?
+14:38  pgas: I thought the newline was bothering you
+14:38  m0ar: pgas: Yah, thanks anyway
+14:38  sente: visof: i've probably at a minimum perused it
+14:39  sente: if it was included in the 250 ebook torrent
+14:39  visof: sente, it's a wonderful book
+14:39 * sente looks at the amazon pic of it
+14:39  sente: no, i don't tihnk i've read it
+14:42  sente: visof: neat, i just bought two history books last week, and i rarely ever buy books, i'll search for an ebook / see if any friends/co-workers have it
+14:44  m0ar: sente: Hm, it still outputs the "n". Could you help me out? The line looks like 'read -e -s -n 1 a'
+14:45  geirha: lose the -e
+14:45  geirha: read -p "Question (Y/n)? " -s -n1 answer
+14:45  m0ar: Ah, makes more sense
+14:50  visof: that book "Kernighan_Pike-Unix_Programming_Environment"  any one can download http://www.mediafire.com/?nnx1mj4wdby
+14:50  visof: the link for the book
+14:51  visof: the first time i feel i'm useful for the other
+14:52  visof: are the 519 users have that book ?
+14:58  pgas: in an illegal way that can get you banned from freenode but...
+15:01  visof: pgas, thanks
+15:14 --- jzacsh is now known as jzacsh_
+15:46 --- Weust` is now known as Weust`afk
+16:01  chairabanta: Hi, I would to write my alias function on one line how do I do that http://paste.pocoo.org/show/288883/ ?
+16:02  erUSUL: chairabanta: function whereis() { /usr/bin/whereis $1 | sed -e "s/ /\n/g" ; }
+16:03  damnshock: erUSUL: you are quick :)
+16:03  damnshock: by the way, that's from Dune, right?
+16:03  chairabanta: erUSUL, it works I don't why I was wrong perhaps the comma
+16:11  lhunath: quote the expansion
+16:21 --- cloq is now known as cloq[slackingoff
+16:21 --- cloq[slackingoff is now known as cloq
+16:44  sybariten: permissions-issues arent really bash related are they
+16:46  {xmb}{bottz}7man: so
+16:47  {xmb}{bottz}7man: u recieved on the shell, and bash is your shell, so they are
+16:49  sybariten: ok i was curious if anyone knew of a system ("system"), typically some small console tool, thats made for managing permissions, perhaps by giving search criteria and affecting only certain files, etc
+16:50  sybariten: i'm looking at freshmeat now and there seems to be some stuff at least related to my ideas
+17:02 --- cloq is now known as cloq[work]
+17:05  twkm: find?
+17:05 --- cloq[work] is now known as [krow]qolc
+17:10 --- caemir_ is now known as caemir
+17:14 --- sno_ is now known as sno
+17:37 --- taylanub0 is now known as taylanub
+17:39 --- galaxywatcher_ is now known as galaxywatcher
+17:43 --- MuzerAway is now known as Muzer
+17:50 --- [krow]qolc is now known as qloc
+--- Log closed Wed Nov 10 19:35:40 2010
+--- Log opened Wed Nov 10 19:56:13 2010
+19:56 --- Users 529 nicks [0 ops, 0 halfops, 0 voices, 529 normal]
+19:58 --- Channel #bash was synced in 144 seconds
+19:58 --- ring2 is now known as ring0
+20:15  miltio: hi
+20:15  miltio: maybe OT
+20:16  miltio: is possible to backup file creation time?
+20:16  SilverFox: I've got a script that uses extended globbing, but for some reason extglob appears to be unset when run from cron.  I tried adding setopt -s extglob to the top of the script, but no love.  What key tidbit do I need to know to solve this problem?
+--- Log closed Wed Nov 10 20:21:56 2010
+--- Log opened Wed Nov 10 20:22:21 2010
+20:22 --- Users 537 nicks [0 ops, 0 halfops, 0 voices, 537 normal]
+20:24 --- Channel #bash was synced in 125 seconds
+20:26  SilverFox: erUSUL: thats handy.
+20:27  dunpeal: koala_man: yeah, like a static view of top, that has more than one page worth of data.
+20:28  dunpeal: trash: generating a monitor email to admin regarding the state of the server at the current time point.
+20:31  dunpeal: Is there a way to "pause" top?
+20:31  twkm: sheesh.
+20:31  twkm: ps.
+20:31  twkm: ''man top''
+20:35  dunpeal: twkm: I kind of glanced at it ;-)  the only thing I found was to set the delay (via 'd') to a very high value.
+20:36  dunpeal: which would be kind of like pausing it.
+20:36  dunpeal: the best is if there's a solution that actually pauses, preferably by pressing a single key.
+20:38  Synthead: I'm trying to process base64 versions of files that are megabytes in size with awk and sed.  I am getting "Argument list too long".  Am I forced to make temporary files or is there a better way?
+20:40  ilab: How can I push the results of find into an array?
+20:41  twkm: ilab: faq #1.
+20:41  teckan: what's the best way to pick a string variable x in bash and manipulate it? (i would like to use the "cut" unix command) thnks.
+20:41  twkm: teckan: don't.  use parameter expansion.
+20:42  Synthead: # a="really groovy things"; echo "{a/groovy /}"
+20:42  evalbot: Synthead: {a/groovy /}
+20:42  Synthead: # a="really groovy things"; echo "${a/groovy /}"
+20:42  evalbot: Synthead: really things
+20:43  teckan: twkm, thanks :)
+20:43  twkm: Synthead: how are you forming the list of files?
+20:44  Synthead: ilab, array=( $(find . --printf '%f\ ') )
+20:44  twkm: then you are doing sed ... "${array[@]}"?
+20:45  twkm: (spaces, holy fuck!)
+20:45  sente: ilab: http://sente.pastebin.com/ip1mh5KW
+20:45  twkm: consider find -exec sed ... {} + instead.
+20:45  nDuff: !faq 1 > Synthead
+20:45  greybot: Synthead: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+20:45  sente: ilab: geirha wrote those functions the other day when I was asking that same question
+20:45  nDuff: Synthead, ...as another workable way to read find's output
+20:45  Synthead: nDuff, I know how to do that
+20:45  dunpeal: twkm: reading through the top manual, I don't see how one can specify the column to sort by.
+20:45  dunpeal: (on the command line, that is)
+20:46  Synthead: nDuff, one of these lines is larger than sed and awk can handle
+20:46  nDuff: Synthead, ...then why would you do something that word-splits on IFS?
+20:46  nDuff: Hmm.
+20:46  Synthead: nDuff, I was helping teckan
+20:46  nDuff: Synthead, ...there's no limit on file size as such -- sed, by its nature, streams rather than buffering...
+20:47  Synthead: # echo "beans" | sed "s/beans/$(seq 1 100000000000)/"
+20:47  evalbot: Synthead: bash: seq: command not found
+20:47  sente: that last pastebin is wrong, this is correct: http://sente.pastebin.com/5yCf06mX
+20:48  twkm: traditionally sed has a problem with lines that are too long.  even gnu sed might.
+20:48  Synthead: anyway, here
+20:48  ilab: What's the difference between + and \; at the end of exec in find?
+20:48  twkm: ''man find''
+20:48  Synthead: parameter expansion seems to work
+20:48  nDuff: yup; line length, as opposed to file size, is an issue. Not sure why one would split the stream into files rather than into lines as a workaround.
+20:49  sente: ilab: + will pass multiple files to the cmd you specify with exec, \; will pass one at a time
+20:49  nDuff: Synthead, ...what kind of operation are you trying to do on these base64-encoded streams?
+20:49  Synthead: nDuff, form an XML to send to a faxing system
+20:49  ilab: sente: thanks
+20:50  nDuff: Synthead, ...that's pretty vague for my purposes. Could be taken to mean nothing more than adding a header and footer, for instance.
+20:51  Synthead: nDuff, I'm exhausting the limits of sed and awk.  It says that the argument list is too long, that's all.
+20:51  nDuff: Synthead, "argument list is too long" means you're passing in too many command line arguments, not anything about your input.
+20:51  nDuff: (or excessively long command line arguments)
+20:51  Synthead: nDuff, latter
+20:52  nDuff: why would you be passing in the base64 data on the command line?
+20:52  Synthead: nDuff, it's stored in a variable that sed uses
+20:52  nDuff: especially in awk, where you can refer to environment variables or open files
+20:52  nDuff: well, don't do it that way :)
+20:52  nDuff: it's not a sed or awk limit, but an operating system one on command line length
+20:53  Synthead: nDuff, my original question: what other way?
+20:53  Synthead: nDuff, ah, which would explain why parameter expansion works
+20:53  dunpeal: This is interesting; top and ps are reporting completely different stats.
+20:53  nDuff: Synthead, pass the data into awk via an environment variable, or a file, as I suggested.
+20:53  Synthead: nDuff, crap, cat doesn't
+20:53  twkm: it isn't the commands which are complaning.
+20:54  dunpeal: Apparently firefox and X get aggregated by top, but not by ps
+20:54  Synthead: nDuff, can it use environment variables in a way that it won't hit a limit?  I never really understood how ENVIRON works in awk
+20:54  nDuff: Synthead, won't hit _that_ limit, anyhow. See ##awk for help. And, again, you can just write an awk script that reads from a file; it's flexible like that.
+20:55  twkm: dunpeal: unlikely.  or top has been f'd with lately.
+20:55  twkm: dunpeal: more likely you don't understand where some resources are allocated -- inside your x server to comply with the commands sent by the client.
+20:55  nDuff: twkm, ...I could believe it, if it's a matter of how threads are handled
+20:55  Synthead: nDuff, I'm trying to make a fileless script ... there will be many instances of this running and I don't want to bother with writing to a disk
+20:56  Synthead: nDuff, I'll run this by ##awk, thanks
+20:56  nDuff: Synthead, not all files are _files_
+20:56  dagni: so i have http://slackbuilds.org/slackbuilds/13.1/libraries/pangomm.tar.gz, how do i extract just the name of that file without whole link ? where number of "/" in the link is random ...
+20:56  Synthead: nDuff, how so?
+20:56  twkm: nDuff: only if you believe firefuckup uses system specific features to share threads between processes.
+20:56  nDuff: Synthead, foo <(echo bar) ## in that case, "bar" is sent in on a file descriptor, but no on-disk file is necessarily created
+20:56  nDuff: !<( > Synthead
+20:56  greybot: Synthead: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+20:57  Synthead: nduff
+20:57  Synthead: nDuff, right, but if I foo <(echo "$base64"), it'll substitute the $base64 with a length that will make it fail
+20:58  nDuff: Synthead, if you have a $base64 variable, just put it in your environment.
+20:58  nDuff: Synthead, ...and have awk pull it out of the environment directly.
+20:58  Synthead: nDuff, why?
+20:58  Synthead: nDuff, oh, hm
+21:00  twkm: sounds mildly kooky, to load up the environment with such a fat thing.
+21:00  nDuff: Synthead, ...note that available environment space varies by platform; see "man execve" on Linux for a description
+21:00  nDuff: twkm, indeed, I think the "must not hit disk" thing is stupid.
+21:00  dagni: basename..
+21:00  dagni: thanks ;)
+21:00  dagni: the irc made me lazy ;P
+21:00  nDuff: Synthead, ...you might actually be fine if you just emit the value using builtins only
+21:00  twkm: also, you can't export arrays, so if that find thing is part of this you'll have to flatten it out.
+21:01  nDuff: Synthead, <(printf '%s' "$base64") doesn't actually need to run an exec() anywhere, so it may work fine.
+21:01  Synthead: nDuff, ahh :)
+21:06  Slony: Help, when I try to get a list of unique flags used by a nick on irc (Dxx where xx is the country code), I can't manage to get freebsd's uniq command to work as expected, please see http://paste2.org/p/1083164
+21:07  Slony: i want the first three columns (date, time, nick) to be ignored when running uniq
+21:08  hipodilski: hi I want to delete all files older than the last three days including today
+21:08  hipodilski: should I do it with a cmd like find . -mtime +3 -exec rm -f {} \;
+21:08  hipodilski: ?
+21:09  twkm: age is a little harder to determine than you've done, but, throw an echo before rm and see if you like the results.
+21:09  twkm: or use -ls instead of -exec.
+21:09  hipodilski: think is I have at least a couple of thousand hundred files
+21:10  Slony: works fine when i just cut out the first 2 columns grep -i \\-klose\\-\ D .rbot/logs/#gta2gh | tr -s ' ' | cut -d ' ' -f 3-4 | sort -u
+21:10  erUSUL: Slony: the date/timestamp is two fields
+21:11  Slony: erUSUL: yes, as you see in the paste2.org snippet i told it to ignore the first three fields and the first 31 chars, neither works
+21:11  hipodilski: so I just want to come with some kind of command to delete all the files older than the last three days and the thing is this files are actually a php sessions directory so it's not a good thing to loose the user sessions :)
+21:12  Slony: im curious whether uniq will show me the last or first unique match if i manage to get it to ignore everything except for the flag column Dxx
+--- Log closed Wed Nov 10 21:16:52 2010
+--- Log opened Wed Nov 10 21:22:14 2010
+21:22 --- Users 539 nicks [0 ops, 0 halfops, 0 voices, 539 normal]
+21:22 --- Server: [pratchett.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+21:23  hipodilski: somebody to help me pls?
+21:24  Slony: one more question: if I want to grep for \\klose.*Dxx where xx are two characters A-Z, how do I do that?
+21:24  Slony: so that it matches:
+21:24 --- Channel #bash was synced in 122 seconds
+21:24  Slony: [Monday 16 August 2010] [21:04:29] Notice       -KLOSE to #gta2gh- DIL
+21:24  Slony: but not:
+21:24  Slony: [Monday 16 August 2010] [22:11:17] Notice       -KLOSE to #gta2gh- S=Deckendieb
+21:27  Slony: aa got it :)
+21:27  Slony: grep -i \\-klose\ to\ \#gta2gh\\-\ D[A-Z][A-Z] logs/gtanet_#gta2gh.log
+21:30 --- lynucs is now known as jham
+21:30  Synthead: can I use variables in parameter expansion like sed?
+21:30  Synthead: memory, that is
+21:32  erUSUL: !find > hipodilski
+21:32  greybot: hipodilski: http://mywiki.wooledge.org/UsingFind
+21:32 --- cdave_ is now known as cdave
+21:42  duckx0r: how do I create a gnome launcher to launch multiple commands? if I do "command1 && command2" it doesn't do anything
+21:55  {xmb}{bottz}7man: twkm: i tried ffmpeg -i in out.format, says unsupported output format
+21:55  {xmb}{bottz}7man: on an in.mp3
+21:58  twkm: sorry to hear it.
+22:00  {xmb}{bottz}7man: lolz
+22:00  {xmb}{bottz}7man: ' any idea to see codecs' is my q
+22:01  rickest: duckx0r: I don't know how the Gnome launcher works but maybe: bash -c 'cmd1 & cmd2'
+22:01  nDuff: !nabq > {xmb}{bottz}7man
+22:01  greybot: {xmb}{bottz}7man: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+22:01  {xmb}{bottz}7man: dewd stfu
+22:01  duckx0r: rickest, yeah, i did something similar and it worked. thanks
+22:03  {xmb}{bottz}7man: !define nlo = nolossoptimize7xmb
+22:04  {xmb}{bottz}7man: !nlo
+22:04  {xmb}{bottz}7man: shifucat
+22:07 --- jzacsh_ is now known as jzacsh
+22:18  dunpeal: Hey. What's a good way to run a command every 0.5 seconds, indefinitely or until it succeeds?
+22:18  dunpeal: ("success" here being defined as "non-zero exit status")
+22:18  {xmb}{bottz}7man: he he he
+22:18  nDuff: Do you want to wait 0.5 second between failures? Or 0.5 seconds total between invocations?
+22:18  nDuff: If the latter, what if it takes more than 0.5 seconds to run?
+22:18  cusco: hi
+22:18  koala_man: until cmd; do sleep 0.5; done if you have a sleep that handles fractional seconds
+22:18  dunpeal: nDuff: 0.5 between failures
+22:19  cusco: I have a string "/dir/dir/dir/file" what is the best way to get only the filename?
+22:19  dunpeal: koala_man: cool, that's pretty simple.
+22:19  yitz_: !pe > cusco
+22:19  greybot: cusco: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+22:19  yitz_: !basename > cusco
+22:19  greybot: cusco: basename(1) can strip the directory and extension from a path. (a/b/c.d -> c.d or c). Or you can use a parameter expansion: "${path##*/}" or "${path%.*}"
+22:19  {xmb}{bottz}7man: while sleep .5134 ;do cmd &&(( ++x >=11)&& break ;done
+22:19  {xmb}{bottz}7man: there meit
+22:19  cusco: thanks yitz_
+22:21  {xmb}{bottz}7man: dunpeal
+22:23  dunpeal: {xmb}{bottz}7man: thanks, although I'm not sure what's the advantage of that over using koala_man's simpler form?
+22:23  {xmb}{bottz}7man: cuz its ng and its counting
+22:24  dunpeal: {xmb}{bottz}7man: OK, so you support limiting to x attempts. not sure what "ng" means.
+22:25  {xmb}{bottz}7man: well well d ng=valid
+22:25  yitz_: dunpeal: until cmd ; do sleep 0.5 ; done
+22:26  yitz_: Like koala_man said. That does exactly what you asked
+22:26  {xmb}{bottz}7man: nada noob
+22:26  {xmb}{bottz}7man: that until answer to his q is inkomplete kode so is not vaid
+22:26  sente: here's a generalized question
+22:26  {xmb}{bottz}7man: valid mines that only one
+22:26  {xmb}{bottz}7man: ask on
+22:26  {xmb}{bottz}7man: ask frag
+22:26  dunpeal: funny troll :)
+22:26  nDuff: *plonk*
+22:27  {xmb}{bottz}7man: bot rather
+22:27  {xmb}{bottz}7man: im the master here
+22:27  {xmb}{bottz}7man: i may get kicked or banned
+22:27  {xmb}{bottz}7man: that doesnt get my mastership away
+22:27  {xmb}{bottz}7man: noobs
+22:29 * yitz_ does that plinkly thing, too
+22:29  sente: there are a bunch of files on a remote server which i want to rsync to my local machine, i have an ugly find statement that finds them all, their names are as shitty as names get, spaces, single quotes, double quotes, etc.  how can i find/transfer the files in one pass? e.g.: ssh server 'find <UGLINESS> -exec ???'?
+22:30  sente: or ssh server 'find <UGLINESS> | ???'
+22:30  {xmb}{bottz}7man: hmmh
+22:30  yitz_: sente: rsync directory
+22:30  {xmb}{bottz}7man: try
+22:30  nDuff: sente, if you must use find, use it conjunction with rsync's support for null-delimited filename lists
+22:30  {xmb}{bottz}7man: try f files| ssh .. ' rsync --read-from-stdin'
+22:30  sente: yitz_: can you show me specifically, I struggled a good bit on this earlier this morning
+22:31  {xmb}{bottz}7man: i would kot an own solution
+22:31  nDuff: sente, ...see the --from0 argument in rsync's man page
+22:31  {xmb}{bottz}7man: and yeah pack em together, the strings, halbpacking
+22:31  yitz_: sente: rsync user@remote:/path/to/sync /path/to/dest
+22:31  {xmb}{bottz}7man: yes -0
+22:31  {xmb}{bottz}7man: and f -print0
+22:31  sente: yeah, i'm familiar with the -0, but nothing i did worked
+22:31  sente: the files are all over the place and named poorly
+22:32  {xmb}{bottz}7man: ignoring me or something, noob ?
+22:32  nDuff: sente, using -0, the names don't matter as long as you're using -print0 in one side, and feeding them into rsync via a file (-0 is only used for file input)
+22:32  sente: my problem is using rsync's stdin
+22:32  nDuff: sente, ...quotes, whitespaces, etc. aren't parsed in that mode.
+22:32  {xmb}{bottz}7man: oh i get it meit
+22:32  {xmb}{bottz}7man: try this
+22:33  nDuff: sente, ahh; I don't know that stdin is supported in that way. You might consider --files-from instead
+22:33  {xmb}{bottz}7man: # find dirs -names -print0 |rsync -0 ..
+22:33  evalbot: {xmb}{bottz}7man: bash: rsync: command not found
+22:33  evalbot: {xmb}{bottz}7man: find: unknown predicate `-names'
+22:33  nDuff: sente, alternately, you might try #rsync
+22:34  {xmb}{bottz}7man: or
+22:34  {xmb}{bottz}7man: # |xargs -0 rsync ..
+22:34  evalbot: {xmb}{bottz}7man: bash: syntax error near unexpected token `|'
+22:34  {xmb}{bottz}7man: noobbot
+22:36  sente: can you specify stdin to --files-from=? there is no mention of it and i tried a few syntaxes
+22:36  {xmb}{bottz}7man: illreadmaiceuv
+22:36  nDuff: sente, /proc/self/fd/0
+22:37  {xmb}{bottz}7man: gewd
+22:37  sowell: is there anyway to get a script to read screen input for a particular string and then exit based on that string?
+22:37  sente: {xmb}{bottz}7man: i wondered about "| xargs -0 rsync", the problem is that will put the file at the end of the rsync command, unless I do -I{} which will then effectively call rsync 500 times
+22:37  sowell: heh
+22:37  sowell: screen output, i should say
+22:37  nDuff: sente, ...also /dev/fd/0
+22:37 --- Jolia_ is now known as Jolia
+22:37  {xmb}{bottz}7man: hmm
+22:38  geirha: sente: - as filename usually means stdin/stdout (depending on context)
+22:38  nDuff: sente, ...you could also copy it to a different FD and close FD 0 if you didn't want the ambiguity of allowing it to be read both ways.
+22:38  {xmb}{bottz}7man: try this then
+22:38  {xmb}{bottz}7man: IFS=$'\n'
+22:39  {xmb}{bottz}7man: d=( $( f))
+22:39  {xmb}{bottz}7man: rsync "${d[@]}" dest
+22:41 * nDuff shudders at the bad advice (which allows rsync arguments to be injected through malicious filenames), and puts {xmb} back on ignore
+22:41  sente: '\n' won't work though because the files suck
+22:41  {xmb}{bottz}7man: dude
+22:41  {xmb}{bottz}7man: k
+22:41  sente: heh
+22:41  {xmb}{bottz}7man: its rsync -.. -- $d dest then
+22:42  geirha: find ... -print0 | rsync -0 --file-from=- ...
+22:42  {xmb}{bottz}7man: well
+22:42  geirha: *--files-from
+22:42  {xmb}{bottz}7man: try matching em with a shell glob
+22:43  {xmb}{bottz}7man: gimme an account and ill do it
+22:43  {xmb}{bottz}7man: then u got em in an array as d my example t
+22:43  snappy: h
+22:43  sente: {xmb}{bottz}7man: sure
+22:43  {xmb}{bottz}7man: greatnec
+22:43  {xmb}{bottz}7man: =:)
+22:44  geirha: o_O
+22:44  binbrain: how would 1 go about ". Python/virtualenv/bin/activate" from in a bash script since when you run its a subprocess?
+22:45  {xmb}{bottz}7man: pathwise ? where did u catch this path
+22:45  geirha: binbrain: If you source a bash script, it's not run in a subshell.
+22:46  {xmb}{bottz}7man: ah yeah
+22:46  {xmb}{bottz}7man: that other
+22:46  {xmb}{bottz}7man: nada
+22:46  {xmb}{bottz}7man: supernada
+23:11  aborticide: is greg's wiki bash pages available as a pdf download?
+23:11  aborticide: i see its divided into chapters, so i figured perhaps
+23:12  cthuluh: !pdfguide
+23:12  greybot: PDF version of the BashGuide: http://stuff.lhunath.com/BashGuide.pdf or print http://mywiki.wooledge.org/FullBashGuide (to paper or PDF) for the latest version.
+23:14  dasil003: what's the best way to test for the existence of at least one file on a wildcard expansion?
+23:15  dasil003: eg. if [ -e /tmp/* ] fails because too many operands
+23:15  cthuluh: !faq empty
+23:15  greybot: http://mywiki.wooledge.org/BashFAQ/004 -- How can I check whether a directory is empty or not?  How do I check for any *.mpg files?
+23:15  dasil003: ty
+--- Log closed Wed Nov 10 23:22:47 2010
+--- Log opened Wed Nov 10 23:23:11 2010
+23:23 --- Users 528 nicks [0 ops, 0 halfops, 0 voices, 528 normal]
+23:23  Guest57185: cthuluh: if this is what i see in my terminal: idk% cd /bin/zshrc    -before i press enter! is it possible to get that text? i dont want to make a keylogger to see what characters has been written, if that clears it up for you :)
+23:24  Guest57185: before the command i wrote in terminal has been executed
+23:25  iEatChildren: i have a directory of jpg image with random filenames. Can anyone point me in the direction of a script or command that will batch rename them all in order of something like 1.jpg, 2.jpg, 3.jpg, etc?
+23:25 --- Channel #bash was synced in 121 seconds
+23:25  Guest57185: im guessing this is too heavy for bash, feels like a C mission :P
+23:26  nexusone: is it possible to put ${string##substring} and ${string%substring} in the same line/statement, to remove both from front and end of the string?
+23:26  geirha: iEatChildren: i=1; for f in *.jpg; do echo mv "$f" "$(printf %03d.jpg)"; ((i++)); done
+23:26  geirha: err
+23:27  geirha: iEatChildren: i=1; for f in ./*.jpg; do echo mv -i "$f" "$(printf %03d.jpg "$i")"; ((i++)); done
+23:27  Guest57185: Is there internal variables for the current directory and my rights to it (read, write and execute)? thanks =)
+23:27  nDuff: Guest57185, $PWD, and you'll need to use stat to get the permissions
+23:27  nDuff: ...or test
+23:28  iEatChildren: geirha: it did print the command to move each of them but the end result is that nothing changed in the directory
+23:28  nDuff: test being easier
+23:28  geirha: Guest57185: You already know you have execute permissions to it.
+23:28  geirha: iEatChildren: Yes, if it looks right, remove the echo so it actually runs the mv.
+23:28  iEatChildren: ah
+23:29  iEatChildren: awesome
+23:29  iEatChildren: thank you!
+23:30  geirha: Guest57185: if [[ -r $PWD ]]; then echo "It's readable"; fi
+23:30  geirha: ''help test''
+23:32  Guest57185: let me try, thanks! :)
+23:32  republican_devil: how to find the folders in a dir, then pick out all but the newest, then delete rest
+23:32  republican_devil: mtime and find no good
+23:32  republican_devil: since dates vary
+23:33  republican_devil: some boxes have 30 days apart
+23:33  republican_devil: some 3
+23:33  geirha: !faq newest
+23:33  greybot: http://mywiki.wooledge.org/BashFAQ/099 -- How can I get the newest (or oldest) file from a directory?
+23:34  republican_devil: ah but for a directory not a file
+23:34  republican_devil: my good man
+23:36  geirha: */ instead of *
+23:36  geirha: # touch file1 file2; mkdir dir1 dir2; echo *
+23:36  evalbot: geirha: dir1 dir2 file1 file2
+23:36  geirha: # touch file1 file2; mkdir dir1 dir2; echo */
+23:36  evalbot: geirha: dir1/ dir2/
+23:39  gniourf_gniourf: # touch -- -e anotherfile; echo *
+23:39  evalbot: gniourf_gniourf: anotherfile
+23:39  gniourf_gniourf: :s
+23:44  Guest57185: geirha: is it possible to define a variable directly with readable or not? without using if statements. it would be cool to get it in binary too :P
+23:49  geirha: [[ -r . ]] && readable=1; [[ -w . ]] && writable=1; if ((readable && writable)); then ...  not sure what you're asking.
+23:53  p3kA: what is the utility for slice text files in chapters... I remember the output files are sth like aa ab ac ..., sugestions for apropos also apreciated
+23:54  geirha: p3kA: split
+23:55  p3kA: _thanks_ it was on the tip on my tonge :)
+23:55 --- Muzer is now known as MuzerAway
+23:56  geirha: No, I mean split it, get out. ;P
+23:56  geirha: I'm kidding, bad humour.
+23:56  p3kA: t h a n k s
+23:56  p3kA: :P
+23:59  winkey: how do you read into an array indice? read myarray[1] ?
+--- Log closed Thu Nov 11 00:00:32 2010

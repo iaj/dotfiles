@@ -17,7 +17,7 @@
 # If you're editing this in Vim and don't know how folding works, type zR to
 # unfold them all.
 
-### myPathzj
+### Path settings
 # These settings are only for interactive shells. Return if not interactive.
 # This stops us from ever accidentally executing, rather than sourcing, .zshrc
 [[ -o nointeractive ]] && return
@@ -27,7 +27,6 @@ export LIBXCB_ALLOW_SLOPPY_LOCK=true
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export PYTHONPATH=/usr/local/lib/python2.6/site-packages:"${PYTHONPATH}"
-
 # coreutils nowadays puts its stuff in /opt/local/libexec/gnubin/ ...
 if [ -d /opt/local/libexec/gnubin ]; then
     PATH=/opt/local/libexec/gnubin:$PATH
@@ -46,14 +45,7 @@ if [ -d ~/bin ]; then
     INFOPATH=~/info:$INFOPATH
 fi
 
-# Fast directory-pathing
-#bp=$HOME/java/VeriDebug/Documents
-#bps=$HOME/java/VeriDebug/src
-#w=$HOME/Documents/work
-#ba=$HOME/ba
-#logs=$HOME/Documents/textual\ logs/irc.freenode.net/Channels
-#queries=$HOME/Documents/textual\ logs/irc.freenode.net/Queries
-
+### Coloring
 # Use colorized output, necessary for prompts and completions.
 autoload -U colors && colors
 # Some shortcuts for colors.
@@ -78,7 +70,6 @@ printf '\e[91m%s\e[0m' "$line";
 #printf ${red} "$line";
 print -n $'\0';
 done &)
-
 ### SETUP
 # These settings are only for interactive shells. Return if not interactive.
 # This stops us from ever accidentally executing, rather than sourcing, .zshrc
@@ -148,7 +139,6 @@ fi
 if [ -d $HOME/Documents/work ]; then 
     w() { cd $HOME/Documents/work }
 fi
-
 if [ -d $HOME/Documents/work ]; then 
     ba() {
         if [[ $1 -eq 1 ]]; then
@@ -160,87 +150,27 @@ if [ -d $HOME/Documents/work ]; then
         fi
     }
 fi
-
 if [ -d $HOME/Dropbox ]; then 
     db() { cd $HOME/Dropbox/ }
 fi
-logs() { cd $HOME/.irssi/logs/FreeNode }
-logsb() { cd $HOME/.irssi/logs/bitlbee/ }
+leo() { elinks "http://dict.leo.org/?search=$1"; }
+dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
+psg() {
+    # using a perlre lookahead 'trick' to prevent grep from
+    # greping it's own process
+    # grep with --enable-pcre needed!
+    ps ax | grep -i -P "$1"'(?!\(\?\!)'
+}
+#logs() { cd $HOME/.irssi/logs/FreeNode }
+#logsb() { cd $HOME/.irssi/logs/bitlbee/ }
 
 # Replaces the current window title in Gnu Screen with its positional parameters
 set-screen-title() { echo -n "\ek$*\e\\" }
-
 # Replaces the current terminal titlebar with its positional parameters.
 set-window-title() { echo -n "\e]2;"${${(pj: :)*}[1,254]}"\a" }
-
 # Replaces the current terminal icon text with its positional parameters.
 set-icon-title() { echo -n "\e]1;"${${(pj: :)*}[1,254]}"\a" }
 
-# Given a command as a single word and an optional directory, this generates
-# a titlebar string like "hostname> dir || cmd" and assigns that to an element
-# in PSVAR for use by the prompt, and to the exported variable TITLE for use by
-# other applications.  If the directory is omitted, it will default to the
-# current working directory.  It then takes the first word of that command
-# (splitting on whitespace), excluding variable assignments, the word sudo, and
-# command flags, and assigns that to an element in PSVAR for use as a screen
-# name and icon title, as well as to the exported variable ICON.  Finally, it
-# actually writes those strings as the screen name and title bar text.
-set-title-by-cmd() {
-    # Rather than setting the screen name and titlebar to "fg..." when fg is
-    # executed, we determine what the user is trying to foreground and change the
-    # screen name and titlebar to that, before actually calling fg.  So, we take
-    # our current job texts and directories and use them, in a subshell from a
-    # process substitution, to set the title properly.
-    if [[ "${1[(w)1]}" == (fg|%*)(\;|) ]]; then
-        # The first word of the command either was 'fg' or began with '%'
-        if [[ "${1[(wi)%*(\;|)]}" -eq 0 ]]; then
-            local arg="%+"              # No arg began with %, default to %+
-        else
-            local arg=${1[(wr)%*(\;|)]} # Found a % arg, use it
-        fi
-        # Make local copies of our jobtexts and jobdirs vars, for use in a subshell
-        local -A jt jd
-        jt=(${(kv)jobtexts}) jd=(${(kv)jobdirs})
-        # Run the jobs command with the chosen % arg.  If it can't find a matching
-        # job, we discard the error message and continue setting the title as
-        # though we hadn't found a command that should change the foreground app.
-        # If it finds a matching job, we redirect the output into a process
-        # substitution that handles getting the job number and calling
-        # set-title-by-cmd-impl with the job description and job CWD.  We use a
-        # process substitution so that the text processing can be done in a
-        # subshell, leaving the 'jobs' command run in the current shell.  This
-        # should work fine with older versions of zsh.
-        jobs $arg 2>/dev/null > >( read num rest
-        set-title-by-cmd-impl \
-            "${(e):-\$jt$num}" "${(e):-\$jd$num}"
-        ) || set-title-by-cmd-impl "$1" "$2"
-    else
-        # Not foregrounding an app, just continue with setting title
-        set-title-by-cmd-impl "$1" "$2"
-    fi
-}
-
-# This function actually does the work for set-title-by-command, described
-# above.
-set-title-by-cmd-impl() {
-    set "$1" "${2:-$PWD}"                      # Replace $2 with $PWD if blank
-    psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")} # The new title
-    if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
-        psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
-    else
-        psvar[2]=$1                              # The whole line if only one word
-    fi                                         # or a variable assignment, etc
-
-    if booleancheck "$shellopts[screen_names]" ; then
-        set-screen-title "$psvar[2]"           # set the command as the screen title
-    fi
-    if booleancheck "$shellopts[titlebar]" ; then
-        set-icon-title   "$psvar[2]"
-        set-window-title "$psvar[1]"
-    fi
-    export TITLE=$psvar[1]
-    export ICON=$psvar[2]
-}
 
 #### Capability checks
 # Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
@@ -269,7 +199,7 @@ typeset -T LS_COLORS          ls_colors
 # First off, allow commands after sudo to still be alias expanded.
 # An alias ending in a space allows the next word on the command line to
 # be alias expanded as well.
-alias :q='echo "This is not Vim!" >&2'
+#alias :q='echo "This is not Vim!" >&2'
 alias sudo="sudo "
 alias l='ls -CF'
 alias c=clear
@@ -278,6 +208,15 @@ alias s="sudo "
 alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
+
+# If the window naming feature is used (see above) then use ".zsh" (leading
+# dot) as title name after running clear so it's clear to me that the window
+# is empty. I open so much windows that I don't know in which I have something
+# important. This helps me to remember which windows are empty (I run clear
+# after I finished my work in a window).
+if [[ -n $window_reset ]]; then
+    alias clear='clear; window_reset=yes; window_precmd reset'
+fi
 
 # on mac the gnutls are wicked...
 # hidden in the clouds!
@@ -298,7 +237,7 @@ if [[ $OSTYPE == darwin* ]]; then
     # Make vim the manpage viewer or info viewer
     # Requires manpageview.vim from
     # http://vim.sourceforge.net/scripts/script.php?script_id=489
-    man() { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
+    manx() { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
     pledit() {
         plutil -convert xml1 ${1}
         $EDITOR -w ${1}
@@ -307,6 +246,12 @@ if [[ $OSTYPE == darwin* ]]; then
 else
     alias ls='ls --color=auto -B'
 fi
+
+#PeepOpen
+function pn() {
+    open "peepopen://$1?editor=MacVim"
+}
+alias pnc='pn `pwd`'
 
 alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 alias grep='grep --color=auto'
@@ -322,6 +267,7 @@ alias vi=vim
 alias v=vim
 source $HOME/.zsh/gitaliases
 source $HOME/.zsh/functions/git.zsh
+source $HOME/.zsh/vi-mode.zsh
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
@@ -398,7 +344,6 @@ setopt AUTO_CD             2>/dev/null
 #### Environment variables
 export SHELL=$(whence -p zsh)             # Let apps know the full path to zsh
 export DIRSTACKSIZE=10                    # Max number of dirs on the dir stack
-
 if booleancheck "$shellopts[utf8]" ; then
     export LANG=en_US.UTF-8                 # Use a unicode english locale
     #export LC_CTYPE=C                      # but fix stupid not-unicode man pages
@@ -408,11 +353,9 @@ export SAVEHIST=500000                      # Lines of history to write out
 export HISTFILE="$HOME/.zsh/.zsh_history"   # File to which history will be saved
 export HOST=${HOST:-$HOSTNAME}              # Ensure that $HOST contains hostname
 
-### Key bindings
+### Keybindings
 bindkey -v                                         # Use vi keybindings
-
 TRAPINT() { zle && print -s -r -- $BUFFER; return $1 }
-
 if zmodload -i zsh/terminfo; then
     [ -n "${terminfo[khome]}" ] &&
         bindkey "${terminfo[khome]}" beginning-of-line # Home
@@ -422,6 +365,164 @@ if zmodload -i zsh/terminfo; then
         bindkey "${terminfo[kdch1]}" delete-char       # Delete
 fi
 zmodload zsh/stat
+
+
+search-backwords() {
+    zle history-incremental-search-backward $BUFFER
+}
+zle -N search-backwords
+
+bindkey -M vicmd "^R" search-backwords
+bindkey "^Y" yank
+bindkey -M viins '^r' search-backwords
+bindkey -M vicmd '^r' search-backwords
+paste-xclip() {
+    BUFFER=$BUFFER"`pbpaste`"
+    zle end-of-line
+}
+yank-pb() { 
+    zle copy-region-as-kill $BUFFER
+    echo $BUFFER | pbcopy
+}
+zle -N paste-xclip
+zle -N yank-pb
+
+#bindkey -M viins "^R\*" yank-pb
+bindkey -M viins '^A' beginning-of-line
+bindkey -M viins '^E' end-of-line
+bindkey -M viins "^[^M" self-insert-unmeta
+bindkey -M viins "^[x" execute-named-cmd
+bindkey -M viins "^R\*" paste-xclip
+bindkey -M viins "^O" accept-line-and-down-history
+#bindkey -M viins "^[h" run-help
+bindkey -M vicmd 'yy' yank-pb
+bindkey "\e[1~"   beginning-of-line              # Another Home
+bindkey "\e[4~"   end-of-line                    # Another End
+bindkey "\e[3~"   delete-char                    # Another Delete
+bindkey "\e[1;5A" up-line-or-search              # Ctrl - Up in xterm
+bindkey "\e[1;5B" down-line-or-search            # Ctrl - Down in xterm
+bindkey "\e[1;5C" forward-word                   # Ctrl - Righ~/bin/ba
+bindkey "\e[1;5D" backward-word                  # Ctrl - Left in xterm
+bindkey "\eOa"    up-line-or-search              # Another ctrl-up
+bindkey "\eOb"    down-line-or-search            # Another ctrl-down
+bindkey "\eOc"    forward-word                   # Another possible ctrl-right
+bindkey "\eOd"    backward-word                  # Another possible ctrl-left
+bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
+bindkey " "       magic-space                    # Space expands history subst's
+bindkey "^@"	  _history-complete-older        # C-Space to complete from hist
+bindkey "^]."	  insert-last-word
+bindkey 'jk'	  vi-cmd-mode
+bindkey '^T' _most_recent_file
+# No Delays please, we want flashy SPEEDZ
+KEYTIMEOUT=50
+
+# Vim like completions of previous executed commands (also enter Vi-mode). If
+# called at the beginning it just recalls old commands (like cursor up), if
+# called after typing something, only lines starting with the typed are
+# returned. Very useful to get old commands quickly. Thanks to Mikachu in #zsh
+# on Freenode (2010-01-17 12:47) for the information how to a use function
+# with bindkey.
+zle -N my-vi-history-beginning-search-backward
+my-vi-history-beginning-search-backward() {
+    local not_at_beginning_of_line
+    if [[ $CURSOR -ne 0 ]]; then
+        not_at_beginning_of_line=yes
+    fi
+    zle history-beginning-search-backward
+
+    # Start Vi-mode and stay at the same position (Vi-mode moves one left,
+    # this counters it).
+    zle vi-cmd-mode
+    if [[ -n $not_at_beginning_of_line ]]; then
+        zle vi-forward-char
+    fi
+}
+bindkey '^P' my-vi-history-beginning-search-backward
+bindkey -a '^P' history-beginning-search-backward # binding for Vi-mode
+# Here only Vi-mode is necessary as ^P enters Vi-mode and ^N only makes sense
+# after calling ^P.
+bindkey -a '^N' history-beginning-search-forward
+
+# I don't need the arrow keys, I use ^N and ^P for this (see below).
+bindkey -r '^[OA' '^[OB' '^[OC' '^[OD' '^[[A' '^[[B' '^[[C' '^[[D'
+# Also not in Vi mode.
+bindkey -a -r '^[OA' '^[OB' '^[OC' '^[OD' '^[[A' '^[[B' '^[[C' '^[[D'
+
+autoload -U edit-command-line
+autoload zmv
+#autoload zcalc
+zle -N edit-command-line
+
+#bindkey "^N"      complete-word
+# Tab completes, never expands
+# so expansion can be handled
+# by a completer.
+
+### Set window title
+# Given a command as a single word and an optional directory, this generates
+# a titlebar string like "hostname> dir || cmd" and assigns that to an element
+# in PSVAR for use by the prompt, and to the exported variable TITLE for use by
+# other applications.  If the directory is omitted, it will default to the
+# current working directory.  It then takes the first word of that command
+# (splitting on whitespace), excluding variable assignments, the word sudo, and
+# command flags, and assigns that to an element in PSVAR for use as a screen
+# name and icon title, as well as to the exported variable ICON.  Finally, it
+# actually writes those strings as the screen name and title bar text.
+set-title-by-cmd() {
+    # Rather than setting the screen name and titlebar to "fg..." when fg is
+    # executed, we determine what the user is trying to foreground and change the
+    # screen name and titlebar to that, before actually calling fg.  So, we take
+    # our current job texts and directories and use them, in a subshell from a
+    # process substitution, to set the title properly.
+    if [[ "${1[(w)1]}" == (fg|%*)(\;|) ]]; then
+        # The first word of the command either was 'fg' or began with '%'
+        if [[ "${1[(wi)%*(\;|)]}" -eq 0 ]]; then
+            local arg="%+"              # No arg began with %, default to %+
+        else
+            local arg=${1[(wr)%*(\;|)]} # Found a % arg, use it
+        fi
+        # Make local copies of our jobtexts and jobdirs vars, for use in a subshell
+        local -A jt jd
+        jt=(${(kv)jobtexts}) jd=(${(kv)jobdirs})
+        # Run the jobs command with the chosen % arg.  If it can't find a matching
+        # job, we discard the error message and continue setting the title as
+        # though we hadn't found a command that should change the foreground app.
+        # If it finds a matching job, we redirect the output into a process
+        # substitution that handles getting the job number and calling
+        # set-title-by-cmd-impl with the job description and job CWD.  We use a
+        # process substitution so that the text processing can be done in a
+        # subshell, leaving the 'jobs' command run in the current shell.  This
+        # should work fine with older versions of zsh.
+        jobs $arg 2>/dev/null > >( read num rest
+        set-title-by-cmd-impl \
+            "${(e):-\$jt$num}" "${(e):-\$jd$num}"
+        ) || set-title-by-cmd-impl "$1" "$2"
+    else
+        # Not foregrounding an app, just continue with setting title
+        set-title-by-cmd-impl "$1" "$2"
+    fi
+}
+# This function actually does the work for set-title-by-command, described
+# above.
+set-title-by-cmd-impl() {
+    set "$1" "${2:-$PWD}"                      # Replace $2 with $PWD if blank
+    psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")} # The new title
+    if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
+        psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
+    else
+        psvar[2]=$1                              # The whole line if only one word
+    fi                                         # or a variable assignment, etc
+
+    if booleancheck "$shellopts[screen_names]" ; then
+        set-screen-title "$psvar[2]"           # set the command as the screen title
+    fi
+    if booleancheck "$shellopts[titlebar]" ; then
+        set-icon-title   "$psvar[2]"
+        set-window-title "$psvar[1]"
+    fi
+    export TITLE=$psvar[1]
+    export ICON=$psvar[2]
+}
 
 if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Is set to a non empty value to reset the window name in the next
@@ -538,100 +639,8 @@ else
     # "RUN COMMANDS").
     window_preexec() { }
 fi
-
-search-backwords() {
-    zle history-incremental-search-backward $BUFFER
-}
-zle -N search-backwords
-
-bindkey -M vicmd "^R" search-backwords
-bindkey "^Y" yank
-bindkey -M viins '^r' search-backwords
-bindkey -M vicmd '^r' search-backwords
-paste-xclip() {
-    BUFFER=$BUFFER"`pbpaste`"
-    zle end-of-line
-}
-yank-pb() { 
-    zle copy-region-as-kill $BUFFER
-    echo $BUFFER | pbcopy
-}
-zle -N paste-xclip
-zle -N yank-pb
-
-#bindkey -M viins "^R\*" yank-pb
-bindkey -M viins '^A' beginning-of-line
-bindkey -M viins '^E' end-of-line
-bindkey -M viins "^[^M" self-insert-unmeta
-bindkey -M viins "^[x" execute-named-cmd
-bindkey -M viins "^R\*" paste-xclip
-bindkey -M viins "^O" accept-line-and-down-history
-#bindkey -M viins "^[h" run-help
-bindkey -M vicmd 'yy' yank-pb
-bindkey "\e[1~"   beginning-of-line              # Another Home
-bindkey "\e[4~"   end-of-line                    # Another End
-bindkey "\e[3~"   delete-char                    # Another Delete
-bindkey "\e[1;5A" up-line-or-search              # Ctrl - Up in xterm
-bindkey "\e[1;5B" down-line-or-search            # Ctrl - Down in xterm
-bindkey "\e[1;5C" forward-word                   # Ctrl - Righ~/bin/ba
-bindkey "\e[1;5D" backward-word                  # Ctrl - Left in xterm
-bindkey "\eOa"    up-line-or-search              # Another ctrl-up
-bindkey "\eOb"    down-line-or-search            # Another ctrl-down
-bindkey "\eOc"    forward-word                   # Another possible ctrl-right
-bindkey "\eOd"    backward-word                  # Another possible ctrl-left
-bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
-bindkey " "       magic-space                    # Space expands history subst's
-bindkey "^@"	  _history-complete-older        # C-Space to complete from hist
-bindkey "^]."	  insert-last-word
-bindkey 'jk'	  vi-cmd-mode
-bindkey '^T' _most_recent_file
-# No Delays please, we want flashy SPEEDZ
-KEYTIMEOUT=50
-
-# Vim like completions of previous executed commands (also enter Vi-mode). If
-# called at the beginning it just recalls old commands (like cursor up), if
-# called after typing something, only lines starting with the typed are
-# returned. Very useful to get old commands quickly. Thanks to Mikachu in #zsh
-# on Freenode (2010-01-17 12:47) for the information how to a use function
-# with bindkey.
-zle -N my-vi-history-beginning-search-backward
-my-vi-history-beginning-search-backward() {
-    local not_at_beginning_of_line
-    if [[ $CURSOR -ne 0 ]]; then
-        not_at_beginning_of_line=yes
-    fi
-    zle history-beginning-search-backward
-
-    # Start Vi-mode and stay at the same position (Vi-mode moves one left,
-    # this counters it).
-    zle vi-cmd-mode
-    if [[ -n $not_at_beginning_of_line ]]; then
-        zle vi-forward-char
-    fi
-}
-bindkey '^P' my-vi-history-beginning-search-backward
-bindkey -a '^P' history-beginning-search-backward # binding for Vi-mode
-# Here only Vi-mode is necessary as ^P enters Vi-mode and ^N only makes sense
-# after calling ^P.
-bindkey -a '^N' history-beginning-search-forward
-
-# I don't need the arrow keys, I use ^N and ^P for this (see below).
-bindkey -r '^[OA' '^[OB' '^[OC' '^[OD' '^[[A' '^[[B' '^[[C' '^[[D'
-# Also not in Vi mode.
-bindkey -a -r '^[OA' '^[OB' '^[OC' '^[OD' '^[[A' '^[[B' '^[[C' '^[[D'
-
-autoload -U edit-command-line
-autoload zmv
-#autoload zcalc
-zle -N edit-command-line
-
-#bindkey "^N"      complete-word
-# Tab completes, never expands
-# so expansion can be handled
-# by a completer.
-
-# Allow substitutions and expansions in the prompt, necessary for
-# vcs_info.
+### vcs_INFO - SCM in Prompt
+# Allow substitutions and expansions in the prompt, necessary for vcs_info.
 setopt promptsubst
 # Load vcs_info to display information about version control repositories.
 autoload -Uz vcs_info
@@ -646,11 +655,11 @@ zstyle ':vcs_info:*' actionformats "($green%b%u%c$default/$red%a$default:$blue%s
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' unstagedstr '?'
 zstyle ':vcs_info:*' stagedstr   '!'
-
 zstyle ':completion:*' special-dirs ..
 # Call vcs_info as precmd before every prompt.
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
+source /Users/iaj/.zsh/functions/vcs_hooks.zsh
 
 # Display the VCS information in the right prompt.
 if [[ $ZSH_VERSION == (4.3.<9->|4.<4->*|<5->*) ]]; then
@@ -662,27 +671,6 @@ else
     RPROMPT='${vcs_info_msg_0_:- }'
 fi
 
-#### Function to hide prompts on the line - Will be replaced eventually
-TogglePrompt() {
-if [[ -n "$PS1" && -n "$RPS1" ]]; then
-    OLDRPS1=$RPS1; OLDPS1=$PS1
-    unset RPS1 PS1
-else
-    RPS1=$OLDRPS1; PS1=$OLDPS1
-fi
-zle reset-prompt
-}
-zle -N TogglePrompt
-bindkey "^X^X" TogglePrompt
-
-#### Function to allow Ctrl-z to toggle between suspend and resume
-Resume() {
-    zle push-input
-    BUFFER="fg"
-    zle accept-line
-}
-zle -N Resume
-bindkey "^Z" Resume
 
 #### Allow interactive editing of command line in $EDITOR
 if autoloadable edit-command-line; then
@@ -692,12 +680,6 @@ if autoloadable edit-command-line; then
 fi
 
 ### Misc
-#### batterycharge function
-#PROMPT='$(battery_charge)'
-function battery_charge {
-    echo `$BAT_CHARGE` 2>/dev/null
-}
-
 #### Some minicom options:
 # linewrap use-status-line capture-file=/dev/null color=off
 export MINICOM='-w -z  -C /dev/null -c off'
@@ -847,16 +829,29 @@ loadGitAliases
 
 
 ### Prompt
+#### Function to hide prompts on the line - Will be replaced eventually
+TogglePrompt() {
+if [[ -n "$PS1" && -n "$RPS1" ]]; then
+    OLDRPS1=$RPS1; OLDPS1=$PS1
+    unset RPS1 PS1
+else
+    RPS1=$OLDRPS1; PS1=$OLDPS1
+fi
+zle reset-prompt
+}
+zle -N TogglePrompt
+bindkey "^X^X" TogglePrompt
+
+#### Function to allow Ctrl-z to toggle between suspend and resume
+Resume() {
+    zle push-input
+    BUFFER="fg"
+    zle accept-line
+}
+zle -N Resume
+bindkey "^Z" Resume
 typeset +x PS1     # Don't export PS1 - Other shells just mangle it.
 
-leo() { elinks "http://dict.leo.org/?search=$1"; }
-dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
-psg() {
-    # using a perlre lookahead 'trick' to prevent grep from
-    # greping it's own process
-    # grep with --enable-pcre needed!
-    ps ax | grep -i -P "$1"'(?!\(\?\!)'
-}
 
 hg_prompt_info() {
     hg prompt --angle-brackets "\
@@ -883,8 +878,8 @@ prompt-setup() {
         # <blue bright=1><truncate side=right len=20 string="..">
         #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}in %b${green}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # Prompt with history set
-        PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
-        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}%1v-(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
         #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # basic prompt
         #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"

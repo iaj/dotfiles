@@ -1,0 +1,86 @@
+--- Log opened Wed Nov 17 11:21:13 2010
+--- Log closed Wed Nov 17 11:21:13 2010
+--- Log opened Wed Nov 17 11:53:51 2010
+11:53 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+11:55 --- Channel ##sed was synced in 95 seconds
+14:06 --- maxim is now known as Guest72963
+--- Log closed Wed Nov 17 20:28:19 2010
+--- Log opened Wed Nov 17 20:28:41 2010
+20:28 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+20:30 --- Channel ##sed was synced in 105 seconds
+20:44 --- Natch is now known as Natch|
+21:07  PrestonConnors: Hello, I am trying to search and replace the first 3 numbers in a phone number by using line: echo "123-4567" | sed "s/[0-9]{3}/test/" but this does not replace anything. How would I go about doing this?
+21:08  Riviera: PrestonConnors: It does not work because in sed regular expression it's \{ and \}, not { and }.
+21:08  Riviera: PrestonConnors: sed 's/[[:digit:]]\{3\}//
+21:08  Riviera: PrestonConnors: sed 's/[[:digit:]]\{3\}//'
+21:08  PrestonConnors: ahh i see, thank you!
+21:08  Riviera: 4# sed 's/[[:digit:]]\{3\}//' <<< "123-4567"
+21:08  shbot: Riviera: -4567
+21:09  PrestonConnors: would you recomend digit over 0-9?
+21:09  PrestonConnors: or is it just a matter of preference
+21:09  Riviera: It's probably completely equal :)
+21:10  PrestonConnors: thanks
+21:10  PrestonConnors: i was actually trying to replace ip addresses - which sed "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/1.2.3.4/" seems to work fine
+21:11  PrestonConnors: thanks!
+21:11  Riviera: :)
+--- Log closed Wed Nov 17 21:41:41 2010
+--- Log opened Wed Nov 17 21:42:01 2010
+21:42 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+21:43 --- Channel ##sed was synced in 120 seconds
+22:22  PrestonConnors: Hello (again). I am trying to replace i.p. addresses except for ips beginning with 127. i have the following line but it does not seem to be working. any help would be appreciated.
+22:22  PrestonConnors: sed 's/\([^127]\)|\([0-9]\)\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/1.2.3.4/'
+22:24  omes: sure... do you actually want to replace it to 1.2.3.4?
+22:26  PrestonConnors: yes that's fine
+22:26  cthuluh: [^127] doesn't mean "any string but '127'"
+22:27  PrestonConnors: 1.2.3.4 will actually be a variable in a bash shell script, but i am just doing some simple testing to figure it out
+22:27  PrestonConnors: cthuluh: what would?
+22:27  omes: is it only 127.0.0.0/8?
+22:27  cthuluh: I don't know how to express "not 127" in a 's/...' command
+22:27  cthuluh: I don't think it's possible
+22:28  cthuluh: also, '|' doesn't mean OR
+22:28  omes: aha, so any adress except for 127?
+22:28  cthuluh: \| does with GNU sed
+22:28  PrestonConnors: yes
+22:28  PrestonConnors: any ip address that doesn't start with 127
+22:29  PrestonConnors: tried echo "127" | sed 's/\(\([^127]\)\|\([0-9]\)\{1,3\}\)/1/' as well and that didn't do it either
+22:29  PrestonConnors: backslashes making my head spin!
+--- Log closed Wed Nov 17 22:35:34 2010
+--- Log opened Wed Nov 17 22:35:44 2010
+22:35 --- Users 101 nicks [0 ops, 0 halfops, 0 voices, 101 normal]
+22:35  waldner: 4# echo '127.0.0.10' | sed '/^127\./b; s/192/172/'
+22:35  shbot: waldner: 127.0.0.10
+22:36  waldner: but:
+22:36  waldner: 4# echo '192.10.0.10' | sed '/^127\./b; s/192/172/'
+22:36  shbot: waldner: 172.10.0.10
+22:36  PrestonConnors: waldner: got it - i tested this and it worked. echo "128.0.0.1" | sed '/^127\./b;s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/1.2.3.4/'
+22:36  PrestonConnors: 1.2.3.4
+22:36  waldner: yes
+22:37  waldner: and if you echo something beginning with "127." instead, you should get it unchanged
+22:37  PrestonConnors: waldner: yes, tested that as well
+22:37  PrestonConnors: didn't know about /b thanks!
+22:37  waldner: as "b" skips the replacement
+22:37 --- Channel ##sed was synced in 105 seconds
+22:37  waldner: ok
+22:37  waldner: yw
+22:39  waldner: alternatively, you can do
+22:39  waldner: sed '/^127\./! s/....../..../'
+22:39  waldner: another way to express the same thing
+22:39  PrestonConnors: got it
+--- Log closed Wed Nov 17 22:55:49 2010
+--- Log opened Wed Nov 17 22:56:16 2010
+22:56 --- Users 101 nicks [0 ops, 0 halfops, 0 voices, 101 normal]
+22:57 --- Channel ##sed was synced in 110 seconds
+23:11  evelyette: hi
+23:11  evelyette: need some help
+23:11  evelyette: echo "ca:12345:ctrlaltdel:/sbin/shutdown -r now" | sed 's/[^:]*:[^:]*:[^:]:\/sbin\/shutdown \(.*\)//'
+23:11  evelyette: I would like to replace "-r now" to "-h now"
+23:11  evelyette: is it possible to do that ?
+23:12  waldner: sed 's/-r now/-h now/'
+23:13  evelyette: echo "ca:12345:ctrlaltdel:/sbin/shutdown -r now" | sed 's/\([^:]*:[^:]*:[^:]*:\/sbin\/shutdown \)\(.*\)/\1-h now/'
+23:13  evelyette: mine also works :)
+23:13  evelyette: hehe
+23:13  evelyette: yours is betterđ
+23:13  evelyette: but mine ensures that only the line I need gets replaced
+23:13  evelyette: not all occurances
+23:13  waldner: it depends on how you define "better"
+--- Log closed Thu Nov 18 08:46:38 2010

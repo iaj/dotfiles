@@ -1,0 +1,394 @@
+--- Log opened Thu Dec 02 15:16:28 2010
+--- Log closed Thu Dec 02 15:16:28 2010
+--- Log opened Thu Dec 02 16:28:53 2010
+16:28 --- Users 292 nicks [0 ops, 0 halfops, 12 voices, 280 normal]
+16:28  devdvd: ok then yes, bitrate still affects audio files but in order id say loss > delay > bitrate.  However please note that in voip (and other udp based streaming) bitrate will directly affect loss and delay (mostly loss because there's no retransmission or acknowledgment with udp)
+16:28  devdvd: Jenda, the default gateway should be the LAN interface address on R1
+16:29  halloi: oh ok  i see, that makes sense. thanks :)
+16:30 +Kevin`: radio/youtube type stream is pretty tolerant of very bad network conditions since it's buffered
+16:30  Jenda: devdvd: also, I don't get which IP address I should assign - do I understand correctly that it shouldn't be in the DHCP range? I tried 192.168.1.99, since DHCP is from .100, but it doesn't work.
+16:30  ox3a: perhaps someone free now?
+16:31 --- Channel ##networking was synced in 239 seconds
+16:31 +Kevin`: ox3a: do you have a router?
+16:31  devdvd: Jenda, why doesn't it work?
+16:31  devdvd: what does it tell you
+16:31  Jenda: Destination IP address can not be in the same subnet with WAN or LAN IP address, please input another one.
+16:32  ox3a: no just a dsl wimax modem
+16:32  ox3a: Kevin`,
+16:32 +Kevin`: ox3a: check the ip the configuration on the modem reports
+16:32 +Kevin`: it might be acting as a router
+16:33  ox3a: and it is capable to connect wi-fi
+16:33  devdvd: ok Jenda, your R2 lan side needs to be on a differnt subnet
+16:33  devdvd: use like 10.0.0.x on the r2 lan side
+16:34  Jenda: devdvd: ok, I'll do that.
+16:36 +Kevin`: http://pastebin.com/5btV3hGj - well it's not MINE either ;p. I suspect I should add a null route for that. never been in a position to see it on the internets
+16:36  catphish: what is the best way configure linux to use 2 interfaces for the same subnet? the bridge driver will do this, but that's obviously not ideal for dumb switches due to the loops
+16:37 +Kevin`: catphish: why?
+16:37 +Kevin`: it's not easy because it's not common.. I can't think of a reason to do it personally
+16:37  catphish: well, i have a linux host connected to 2 switches, which in turn are connected to 2 routers providing a gateway VIP
+16:38 +Kevin`: vip?
+16:38  catphish: virtual IP
+16:38  Jenda: devdvd: alright, working on it - having trouble connecting through the wireless now for some reason.
+16:38 +Kevin`: catphish: are they connected to the same isp?
+16:39  devdvd: Jenda, ....go to the store, buy another router.  If you have the same issues take it back if not you know r2 is borked
+16:39  catphish: Kevin`: yes, i'm looking for ethernet redundancy, i am currently using bonding, but that only fails over if the link goes down
+16:39  catphish: Kevin`: i want to fail over to the second interface even if they're both still up
+16:40  catphish: depending on which one the upstream router is connected to
+16:40 +Kevin`: catphish: look up how to use multiple routing tables (also in concert with iptables connection tracking most likely). you will want a script to manage the failover part since you want to be able to TEST the links actively
+16:40  catphish: Kevin`: thats horrendously complicated
+16:41  catphish: can't i just use the bridge driver without reflecting packets?
+16:41  devdvd: cathode, look into VRRP/HSRP
+16:41 +Kevin`: catphish: yes, it is. tell me a logically more simple way of accomplishing the same thing
+16:41 +Kevin`: catphish: yes, you can, just filter them. that won't handle failover though unless the actual link dies or the router becomes non-responsive.. which it won't
+16:41  devdvd: wait...nm...you are looking to use 2 interfaces nm
+--- Log closed Thu Dec 02 16:45:47 2010
+--- Log opened Thu Dec 02 16:51:15 2010
+16:51 --- Users 294 nicks [0 ops, 0 halfops, 12 voices, 282 normal]
+16:51 --- Server: [calvino.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+16:51  devdvd: well on cisco its ip route x.x.x.x y.y.y.y null0
+16:51  devdvd: where x is the ip and y is the sm
+16:51  devdvd: though ive never tried it on linux id assume the interface would be /dev/null
+16:51 +Kevin`: I don't think linux uses a null0 device equivalent
+16:52  catphish: ip route add blackhole 192.168.32.128/32
+16:52 +Kevin`: smithers:~# ip route add 2001:470:c351::/48 dev /dev/null
+16:52 +Kevin`: Cannot find device "/dev/null"
+16:52 +Kevin`: always worth a try ;)
+16:52  Jenda: devdvd: I'm still not sure how to set the static IP, since that seems a great way to both diagnose the router and fix the problem. I gave R2 a LAN IP address of 10.0.0.138 and a subnet mask of 255.255.0.0; I gave it a WAN IP address of 192.168.1.99 and subnet mask of 255.255.255.0 (default gateway is 192.168.1.1 - R1's LAN IP)
+16:53 +Kevin`: smithers:~# ip route add unreachable 2001:470:c351::/48
+16:53 +Kevin`: smithers:~#
+16:53 +Kevin`: there we go :)
+16:53 +Kevin`: thanks catphish
+16:53  Jenda: devdvd: When I try to set a static route to 192.168.1.99 SM 255.255.255.0 and DG of 192.168.1.1, it gives me the above error message.
+16:53  devdvd: Jenda, what error message/ i do not see one in your above post
+16:53 --- Channel ##networking was synced in 165 seconds
+16:54  Jenda: Do I need three subnets? Thatt's weird...
+16:54  Jenda: "Destination IP address can not be in the same subnet with WAN or LAN IP address, please input another one."
+16:54  devdvd: no, you only need 2
+16:55 +Kevin`: Jenda: that static route is meaningless
+16:55 +Kevin`: if 192.168.1.1 is reachable so is 192.168.1.99 (unless you aren't using /24, in which case you wouldn't get the odd helpful message)
+16:56  devdvd: yea what Kevin` the static route should look something like 0.0.0.0 0.0.0.0 192.168.1.1 (point all traffic that doesn't have a known route to 192.168.1.1 which is the lan ip of r1)
+16:56  devdvd: but
+16:57  devdvd: you have to ensure you can reach r1 from r2 first which might be rough if you dont have anyway to ping from r2
+16:57  Jenda: telnet?
+16:58  [diecast]: is it possible to historical pull a traceroute for forensic purposes
+16:58  Jenda: nope, that doesn't work
+16:58  Jenda: nope, that doesn't work
+16:59 +Kevin`: [diecast]: explain
+16:59  Jenda: What "default gateway" should I give R1, if I gave R2 R1's IP address?
+17:00  [diecast]: Kevin`: i want to determine where a host existed geographically that is no longer online
+17:00  devdvd: Jenda, r1 shoudl already be set up with a default route to its wan interface
+17:00 +Kevin`: [diecast]: you can still do a traceroute to the host, which will get NEAR it, or you can just look up who owns the ip
+17:01  Jenda: devdvd: yes, but it asks that for the static route as well
+17:01  devdvd: r1 shouldnt
+17:01  devdvd: r1 doesn't care at this point
+17:01  Jenda: It wants destination IP, subnet mask and default gateway
+17:01 +Kevin`: [diecast]: at the law enforcement level and higher you should then ask the owner of the ip who was using it when it was online
+17:02 +Kevin`: (or do that anyway if you are feeling lucky)
+17:03  Jenda: I'll be damned
+17:03  Jenda: I think R2 just got a DHCP address from R1
+17:04  [diecast]: Kevin`: this site was forced to switch hosts and the last time i know that it was at the host i need info on was last monday
+17:04  [diecast]: traceroute now obviously gives me the new host
+17:05 +Kevin`: [diecast]: the actual ip address was moved to a new location?
+17:05  [diecast]: new hosting company, new ip, same domain
+17:05 +Kevin`: or does the hostname just point to a new ip
+17:05 +Kevin`: do you know the old ip?
+17:05  [diecast]: no i dont =/
+17:05  [diecast]: thats basically what im after
+17:06 +Kevin`: the owner of the site might. I bet everyone else has forgotten the link between them
+17:06  [diecast]: its a huge company and id never get through to someone who would even consider telling me
+17:06  Jenda: devdvd: yep, it's fixed
+17:06  Jenda: I switched R2 from static IP to dynamic IP, and it suddenly got it.
+17:07  Jenda: Which didn't happen through several reboots and even a factory reset...
+17:07  [diecast]: so there is no 'this domain was last using x.x.x.x' type repository in the internet your aware of
+17:07 +Kevin`: hmm
+17:07  [diecast]: with historical data of significance
+17:08  dkr: netcraft
+17:10  dkr: [diecast]: that was an answer for " 'this domain was last using x.x.x.x' type repository in the internet"  if that wasn't obvious. :)
+17:10  [diecast]: dkr
+17:10  [diecast]: yes, thank you
+17:10  [diecast]: i see at the bottome, great report
+17:10  [diecast]: i think this is all i need.
+17:11  devdvd: Jenda, fixed as in everything is working now/
+17:11  devdvd: ?
+17:11  devdvd: lol
+17:12  devdvd: imagine that
+17:12  devdvd: i think there's a problem with r2
+17:12  devdvd: but whatever, it works so good :)
+17:13  Jenda: devdvd: yep :{
+17:13  Jenda: *:)
+17:14  devdvd: Jenda, dont be surprised if you have the same issue if r2 gets restarted for whatever reason
+17:34  Jenda: devdvd: I'll keep that in mind.
+17:40  shadey_: I am trying to set up LAG/LACP between two Dell Powerconnect 5448 switches. I have configured the LAG groups but I am randomly losing network connectivity on the servers/hosts. Servers are DEll PE/Broadcom NIC's configured for 802.3ad. Not sure if the Adapters should also be set to this mode?
+18:09  user: http://www.mexico.spmgame.com/partner.php?ID=268787
+18:10  user: http://www.mexico.spmgame.com/partner.php?ID=268787
+18:11 --- unreal_ is now known as unreal
+18:23  sts: hello folks. does anybody know how cisco asa active/standby failover works in detail?
+18:25  sts: do i need to configure anything on the switch which is in front of the asa's?
+18:25  jrm`: sts: read about hsrp
+18:33  sts: so its using hsrp? because the active/standy failover config example on the cisco website doesn't mention hsrp: http://www.cisco.com/en/US/products/hw/vpndevc/ps2030/products_configuration_example09186a00807dac5f.shtml#ACT
+18:34  devdvd: i wouldnt think the a/s on the asa uses hsrp, i would think it works on a heartbeat principle but i could be wrong there as i've never used an asa
+18:36  Milos|Laptop: omg
+18:36  Milos|Laptop: I am going to kick something.
+18:37  Milos|Laptop: I feel like I'm 8 years into the past.
+18:37  Milos|Laptop: My wifi link is horrible.
+18:39  Milos|Laptop: how can I be uploading at 1.39MB/s on 802.11n
+18:39  nadav: that is pretty good
+18:39  Milos|Laptop: Changing channels isn't supposed to matter.
+18:39  nadav: I guess everything is relative :P
+18:39  Milos|Laptop: I don't have any others in my area.
+18:39  Milos|Laptop: But I learned the hard way not to use 11.
+18:39  Milos|Laptop: It ccccccccaaaauuuuusessssssss meeeee tooooooo tyyyypeeeee liiiikeeee thhhhissssssss
+18:40  Milos|Laptop: Bluetooth interferance. Go figure.
+18:40  Milos|Laptop: interference *
+18:41  nadav: Changing channels which wi-fi works on matters?
+18:41  Milos|Laptop: Why? If I have no other networks in my area why would it matter? Not including the bluetooth incident.
+18:42  Milos|Laptop: The channels have the same amount of bandwidth.
+18:42  Milos|Laptop: 1, 6 and 11 are completely exclusive of each other, but again, this doesn't matter because I'm the only person with wifi here.
+--- Log closed Thu Dec 02 18:46:49 2010
+--- Log opened Thu Dec 02 18:47:10 2010
+18:47 --- Users 295 nicks [0 ops, 0 halfops, 11 voices, 284 normal]
+18:47  Milos|Laptop: jacekowski, I was uploading at 5MB/s yesterday, I wouldn't rant if it were normal
+18:47  jacekowski: yeah, but you can have some intereferences
+18:47  jacekowski: microwave owens
+18:47  jacekowski: hidden wifi
+18:47  jacekowski: ovens*
+18:47  Milos|Laptop: it's 6am
+18:48  Milos|Laptop: hidden wifi I will accept
+18:48  jacekowski: other HF stuff
+18:48  Milos|Laptop: but I doubt it, and it shouldn't degrade it by over 500%
+18:48  jacekowski: GSM
+18:48  jacekowski: weather
+18:48  Milos|Laptop: GSM uses a completely different frequency!
+18:48 --- CMI-DOS_College is now known as CMI-DOS
+18:49  jacekowski: not completly different
+18:49  Milos|Laptop: 900MHz vs 2.4GHz
+18:49  jacekowski: yeah harmonics
+18:49  Milos|Laptop: or 2.1GHz for urban
+18:49  jacekowski: or 800MHz
+18:49  Milos|Laptop: not here
+18:49  Milos|Laptop: :P
+18:49 --- Channel ##networking was synced in 165 seconds
+18:49  jacekowski: well, you still have harmonics
+18:49  Milos|Laptop: sure
+18:49  Milos|Laptop: I guess.
+18:49  jacekowski: that may interfere with wifi
+18:49  netzapper: hey, I'm trying to do a simple two-network route from a VPN subnet to an ethernet subnet. Using a linux box as the router (and VPN host). I cannot for the life of me figure out what the issue is. I have routes set up for both the eth network and the tun network, but traffic won't travel between them.
+18:50  Milos|Laptop: but this is absurd
+18:50  jacekowski: no
+18:50  jacekowski: it's wifi
+18:50  Milos|Laptop: alright, if you say so.
+18:50  jacekowski: i have 5GHz spectrum analyser at work
+18:50  jacekowski: and even if there is no wifi in there
+18:50  Milos|Laptop: I'd like that.
+18:50  jacekowski: and there is so much shit in air
+18:51  Milos|Laptop: too bad we can't see it
+18:51  jacekowski: that i don't even have idea where is it coming from
+18:51  Milos|Laptop: without one of those, I mean
+18:51  Milos|Laptop: I really should invest in one of those, I'm sure it will answer all of my questions and I can stop blaming my poor wifi AP.
+18:51  jacekowski: yeah, you would have to sell your AP
+18:52  jacekowski: and hour house
+18:52  demonkeeper: If you can afford it
+18:52  jacekowski: to get decent spectrum analyser
+18:52  jacekowski: your*
+18:52  Milos|Laptop: it costs a million dollars?
+18:52  jacekowski: good one, 10-20k
+18:52  Milos|Laptop: hmph
+18:53  jacekowski: http://cgi.ebay.co.uk/Agilent-E4408B-9Khz-26-5Ghz-Spectrum-analyser-BNIB-/110510881962?pt=UK_BOI_Electrical_Test_Measurement_Equipment_ET&hash=item19baf63caa
+18:53  jacekowski: £12k
+18:53  Milos|Laptop: screw it I'll go live underground
+18:53  Milos|Laptop: encased in lead.
+18:53  jacekowski: http://cgi.ebay.co.uk/Advantest-R4131D-3-5GHz-Spectrum-Analyser-/220697886845?pt=UK_BOI_Electrical_Test_Measurement_Equipment_ET&hash=item33629e807d
+18:53  netzapper: Milos: a faraday cage is lighter, although you do have to ground it.
+18:54  jacekowski: 3.5GHz £2k
+18:54 +Kevin`: Milos|Laptop: you can get wifi-band spectrum analysers really cheap, btw. or use a wireless card, stick it on each channel, and watch the noise level.
+18:54  Milos|Laptop: yeah I was gonna say
+18:54  Milos|Laptop: that's like buying a ferrari as your first car
+18:54  Milos|Laptop: shees
+18:54  Milos|Laptop: I'm sure there are cheaper options available.
+18:54  jacekowski: not with test equipment
+18:55 +Kevin`: this is something that's uniquely available because it's easy to make and useful for wifi
+18:55  jacekowski: you either spend a lot or you get something that's barely usable
+18:55  jacekowski: because not many people buy it so it costs more per unit to make and so it costs more
+18:55  jacekowski: esspecialy if you need it to do 5GHz+ for wifi
+18:56  Milos|Laptop: why do you keep mentioning 5GHz
+18:56  Milos|Laptop: I only have a 2.4GHz wifi AP
+18:56  jacekowski: well, it's not so much cheaper to go up to 3GHz
+18:56  jacekowski: and it depends on what you are doing
+18:57  netzapper: if it would help y'all, here's my routing table: http://pastebin.com/S7ZZD8Sz  .  iptables is completely empty, and ip_forward is on.
+18:57 +Kevin`: Milos|Laptop: btw, hidden wifi-type stuff you can trivially find using your wireless card. non-wifi stuff will just show up as noise though.
+18:57  Milos|Laptop: hmmm
+18:58  Milos|Laptop: netzapper, I helped someone with a similar issue the other day. like, yesterday.
+18:58  Milos|Laptop: netzapper, except now it's 7am and I still haven't gone to bed, but I'll see if I can do anything.
+18:58  netzapper: I appreciate it. But, hey, if you're tapped, you're tapped.
+18:59  Milos|Laptop: :)
+18:59  Milos|Laptop: Is that the routing tables on the router?
+18:59  Milos|Laptop: s/Is that/Are those/
+19:00  netzapper: Milos: that is the routing table on the router, which is also the VPN host (the 10.10.13.0 is the VPN, the 10.1.10.0 is the local ethernet).
+19:01  Milos|Laptop: Is there any reason why your default route metric is 100?
+19:01  netzapper: man, I don't even know what that means. So, let's say "no"?
+19:02  netzapper: oh, I see. It's like a weight for the graph edge.
+19:02  Milos|Laptop: yeah
+19:02  Milos|Laptop: uh
+19:02  netzapper: no, I don't know why the metric is 100.
+19:02  Milos|Laptop: run `route del default gw eth0` on the router
+19:03  Milos|Laptop: then type `route add default gw 10.1.10.1 eth0`
+19:03  Milos|Laptop: then check if the metric is 0, if it's not type the same again but add metric 0 at the end
+19:03  netzapper: well... if I do that, then I'll lose access to it, since that's how it gets to the interwebz.
+19:03  netzapper: I'm ssh'd into it right now.
+19:03  Milos|Laptop: oh I thought you had console access
+19:03  netzapper: and there's nobody at that site who can fix it if I screw it up.
+19:04  Milos|Laptop: although I don't even know if that will do anything  to solve the problem, it just stood out to me
+19:04 +Kevin`: ok, what's the problem here
+19:04  netzapper: right. Let's assume that it's okay, since basic access to the internet works fine.
+19:04  Milos|Laptop: yeah
+19:04  Milos|Laptop: Kevin`, can't access VPN due to routing difficulties
+19:04 +Kevin`: Milos|Laptop: from where?
+19:05  netzapper: well, VPN can't access the eth0 subnet, and eth0 subnet can't access the VPN subnet.
+19:05  Milos|Laptop: yeah
+19:05  netzapper: the router can see them both. And both can see the router.
+19:05 +Kevin`: Milos|Laptop: show the routing table on each device involved in your testing
+19:05  Milos|Laptop: that two-way crap that happened a day ago with someone else
+19:05  Milos|Laptop: Kevin`, what?
+19:05  Milos|Laptop: Kevin`, netzapper is asking.
+19:05 +Kevin`: netzapper: same question :)
+19:05  netzapper: Kevin`: it's actually my problem, not his. Give me just a second to get those tables.
+19:06  Milos|Laptop: Kevin`, http://pastebin.com/S7ZZD8Sz - that's on the router.
+19:08 +Kevin`: netzapper: also iptables-save from anything with iptables rules
+19:08  netzapper: nah, there's nothing in the iptables. I've flushed those.
+19:09  Milos|Laptop: routes!
+19:09  Milos|Laptop: oh.
+19:09  Milos|Laptop: sorry, I misread. I'm rather tired.
+19:09 +Kevin`: netzapper: is your client-on-eth0 using 'offsite' as it's default gateway?
+19:09 +Kevin`: (that doesn't look to be possible)
+19:10 +Kevin`: or is that the client
+19:10  Milos|Laptop: according to what I've been told offsite is the router
+19:10 +Kevin`: the problem seems pretty clear then, but i'll wait until all the information is pasted
+19:10  netzapper: offsite is the router. I'm working on the rest of the tables... I had to fix an ssh misconfiguration along the way. Gimme just a sec.
+19:11  Milos|Laptop: yeah, it's very difficult to debug other people's networks when you don't know how they're laid out
+19:12  netzapper: wait a sec! I just solved it.
+19:12  netzapper: the gateway on the other eth0 machines was incorrect.
+19:12  Milos|Laptop: well that means I can have an early night
+19:12  Milos|Laptop: -_-
+19:12  netzapper: thanks y'all for the help!
+19:12  Milos|Laptop: haha, the default gateway should have been the first thing to check :-)
+19:12  Milos|Laptop: glad it's fixed.
+19:13 +Kevin`: netzapper: offsite isn't a router, it only has one attached network. why aren't you running the vpn server on 10.1.10.1?
+19:13  netzapper: you're actually right that it isn't the router.
+19:13  Milos|Laptop: o-o
+19:13 +Kevin`: setting the default gateway to something that's NOT the gateway isn't really the correct solution, although it may work
+19:14  netzapper: so, here was the issue. offsite is just another machine on a switch. So, I needed to add a "-net 10.10.13.0 gw 10.1.10.2 (offsite)" on the other machines on the eth0 network.
+19:15  netzapper: I was just straight wrong. I had been thinking about it as a router, when it's just another machine on the subnet.
+19:15  netzapper: which is why setting up the routes didn't actually solve it, because traffic wasn't passing through it automatically anyway.
+19:16 +Kevin`: netzapper: adding a static route to the vpn like that IS a valid solution, but I would expect it to be rather annoying if you have client systems on that network
+19:16  netzapper: it is going to be annoying, given that I'll have to add it to all the machines on the ethernet network.
+19:17  Milos|Laptop: that's why he mentioned
+19:17  netzapper: but, honestly, I just need this to work... and the router is a dumb Comcast consumer-level job, so it's not going to be helping me out any.
+19:18 +Kevin`: netzapper: you could add a static route on 10.1.10.1 to the vpn and it would redirect clients to it whenver they try to make a request, that's less annoying but still not perfect
+19:18 +Kevin`: netzapper: ideally you should have a fully functional router
+19:18  Milos|Laptop: which routes.
+19:18 +Kevin`: most consumer devices have the ability to add a static route at least
+19:19 +Kevin`: I doubt many would be able to do a dmz or whatever proper method you'd prefer
+19:19  Milos|Laptop: I ditched consumer-level over a year ago, but I remember both of those that I used had DMZ support
+19:19  netzapper: Kevin`: oh, yes, I absolutely should have real gear. That said, this is a startup, and this is the testing environment, and it's running from the CEO's basement. So, when we get a real office, I'm going to push for some real gear. And, actually, maybe I'll be back to just systems programming 'cause we'll have hired a sysadmin.
+19:19 +Kevin`: Milos|Laptop: consumer dmz != dmz
+19:20  Milos|Laptop: Kevin`, please elaborate?
+19:20 +Kevin`: Milos|Laptop: the dmz setting on a consumer router is just a default port forward, it's not something for creating a seperate network
+19:21  Milos|Laptop: oh, I believe that means I learned it incorrectly. I thought DMZ was just a default port forward...
+19:21  gparent: On home routers yet
+19:21  gparent: yes
+19:21  gparent: in real life no
+19:21  Milos|Laptop: alrighty. well I use a dedicated gentoo box as my router now
+19:21  Milos|Laptop: it's bliss
+19:21 +Kevin`: I use a debian virtual machine as a router
+19:21 +Kevin`: however.
+19:22  Milos|Laptop: however.
+19:22 +Kevin`: netzapper: get something that can run openwrt with reasonable specs and you'll have a very functional router for almost free
+19:23 +Kevin`: the with reasonable specs part is important. it will run on many things.
+19:23  netzapper: Kevin`: that's certainly an option. I think my real plan is to keep whining at the CEO until he hires a sysadmin, and then this stops being my problem. 'cause I keep making a mess of it.
+19:23  Milos|Laptop: no sysadmin?
+19:23  Milos|Laptop: that's rather unfortunate.
+19:24 +Kevin`: netzapper: I don't suppose you are in wisconsin or would mind work-from-home all the time
+19:24  Milos|Laptop: jesus, my alarm just went off, scared the life out of me
+19:24  Milos|Laptop: which is supposed to happen when I'm sleeping
+19:24  netzapper: nah, we're in Philadelphia. And work-from-home might be okay, but occasional face-time would be necessary.
+19:25 +Kevin`: well I doubt you'd want to pay for plane tickets for that :)
+19:25  netzapper: yeah, I'm pretty sure we don't. Any interest in relocating? (with no relocation bonus.)
+19:27 +Kevin`: i'm not sure i'd be able to. well I could, but i have stuff here I have to do physically, for now
+19:27  gparent: getting a job over IRC would be quite interseting
+19:28  gparent: interesting as well
+19:28 +Kevin`: it's happened quite a few times for single-task jobs
+19:31  netzapper: whoever we hire needs to know pacemaker/corosync as well.
+19:32  gparent: Kevin`: I only wish I lived in the US for job opportunities, but I doubt I'll ever move :P
+19:32  gparent: Apparently Google is opening a shop in Montreal..
+19:32  Milos|Laptop: .
+19:32  Milos|Laptop: a retail shop?
+19:32  Milos|Laptop: to sell what?
+19:32  Milos|Laptop: bytes?
+19:32  gparent: lol
+19:32  gparent: Nah an office.
+19:34  Milos|Laptop: hey, dead beef
+19:51  ecrane: dead beef? That's a hexing expression.....
+19:52 --- unreal_ is now known as unreal
+19:52  chipnt: anyone has experiences with 3g routers?
+20:08  OmNomSequitur: chipnt: my phone, yes.
+20:08  chipnt: ehh i need a 3g router not a phone :)
+20:38  OmNomSequitur: My phone is a 3G router.
+20:41  Prasmatnus: my phone is too.
+20:44  sshd: i think it's ver cool
+20:51  wolfric: Would anyone know if it's normal for a windows machine to be basically arp scanning the local network? This is something i've only seen a router do before and my media box is doing it
+20:52  wolfric: The problem is that when i'm running wireshark and having a look, it seems to be the only odd thing going on. I cant see anything obvious pop up such as a connection to the outside controlling it
+20:54  OmNomSequitur: wolfric, the whole network? No.
+20:55  OmNomSequitur: It's supposed to populate its own ARP cache with machines it's communicating with.
+20:55  OmNomSequitur: But an active scan? No.
+20:55  CartoonCat: wolfric: if you are running a upnp media server on it, then yes
+20:55  wolfric: CartoonCat: oh really?
+20:56  CartoonCat: wolfric: ive seen it happen
+20:56  wolfric: i'l check it out thanks
+21:10  wolfric: CartoonCat: http://technet.microsoft.com/en-us/library/bb457049.aspx haven't read it all yet  but it looks like you're right. Have you seen it a lot?
+21:10  wolfric: it seems like a fucking retarded implimentation. can't imagine what it'd do to a network with a couple of these machines on it on more than a /24
+21:10  CartoonCat: wolfric: ive seen it twice, from my own media server
+21:11  CartoonCat: wolfric: i reisntalled nad went with a different media server
+21:12  wolfric: Thinking about just getting rid of windows on the network completely
+21:12  wolfric: the only thing is that i doubt i could get the remote control that works with it to work on windows
+21:12  wolfric: on linux*
+21:12  wolfric: how often do you see the arp scan?
+21:13  CartoonCat: wolfric: i dumped it after seeing it twice
+21:13  CartoonCat: now i only see it when i tell something to go looking for other media servers
+21:13  wolfric: I was about to image it and start seeing what was infected on it
+21:14 +Kevin`: wolfric: the windows media center remote actually works very easily on linux
+21:14  wolfric: oh really?
+21:15  wolfric: I assume it needs extra drivers for the ir reader? Or do they ship with some distros?
+21:15 +Kevin`: yarly. almost any remote will work actually, but the windows one is COMMON so it works pretty easily out of the box
+21:15  wolfric: Guess i should try it out. That would make things a whole lot easier
+21:15 +Kevin`: the ir reader that normally pairs with the windows stuff has drivers in the common distro. other readers you'd have to check
+21:16 +Kevin`: they are usually supported though, it's a pretty simple device as far as devices go
+21:16 +Kevin`: fwiw the windows one also supports sending ir signals
+21:16  wolfric: O? :)
+21:16  wolfric: that should be fun
+21:17  CartoonCat: i was jsut thinking the same thing
+21:17  CartoonCat: what is it you use the remote for on the windows box?
+21:17  CartoonCat: do you play your media on the windows box?
+21:18 +Kevin`: i've actually never tried it in windows
+21:18  wolfric: yes
+21:18 +Kevin`: :o
+21:19  wolfric: I use boxee which has it's own version for ubuntu so i'm grand in that sense
+21:19  CartoonCat: wolfric: you dont have a console or such ?
+21:19  wolfric: CartoonCat: never had one
+21:19  CartoonCat: ah
+21:19 +Kevin`: wolfric: btw, also useful, and sometimes non-obvious, you can use a wiimote with a pc for media stuff. no light beam.
+21:19  wolfric: CartoonCat: plus it's my downloading box as well
+21:19  CartoonCat: i use my ps3 to paly everything
+21:19  CartoonCat: ive bene told my directtv box can play media too, but ive not tried it
+21:25  wolfric: CartoonCat: well i needed a box i could leave on all night so might as well make it the same box that i view everything on
+21:26  wolfric: CartoonCat: So at least i don't get any delays with indexing new media and streaming it from another location.
+21:44  Lars_G: this might not be entirely on topic here, but I can't think of a better place.... is there a good sane way to make both mDNS and netbios work between two adjacent network spaces? (connected via a router)
+21:47  devdvd: netbios over tcpip is the only way to make netbios work
+21:48  devdvd: as far as multicast dns...well..i have no idea...
+21:51 +Kevin`: for netbios name stuff you probably want a wins server equivalent
+21:56  Lars_G: hmmm
+21:56  Lars_G: I wonder if I can make a dns/wins server (under linux) on net A replicate the entries of the server in net B
+22:00 +Kevin`: with DNS you don't need that sort of thing
+22:00 +Kevin`: with wins, that's the purpose of such a server
+22:03 +xand: eurgh, wins
+22:03 +xand: disgusting
+--- Log closed Fri Dec 03 13:04:42 2010

@@ -1,0 +1,922 @@
+--- Log opened Sun Nov 28 00:57:11 2010
+00:57 --- Users 419 nicks [0 ops, 0 halfops, 0 voices, 419 normal]
+00:59 --- Channel ##javascript was synced in 123 seconds
+01:05  linusoleander_: Is for a closure ?
+01:05  linusoleander_: Like a function
+01:05  Maxdamantus: no.
+01:05  gkatsev: no blockscope
+01:06  linusoleander_: OKey, thanks!
+01:09  linusoleander_: How is it with functions, if I just use mySuperFunk function(){}, is it then global?
+01:09  Maxdamantus: If it's on the global scope.
+01:09  gkatsev: only functions create new scope in js
+01:10  Pilum: More like an error if you write it like that.
+01:10  linusoleander_: Okey, what is prefetred, to use
+01:10  linusoleander_: var myFunk = function(){}
+01:10  linusoleander_: or the other one I posted?
+01:10  Maxdamantus: It's a global if that code appears in the lexically global scope.
+01:12  Pilum: function mySuperFunc() {}
+01:14  l4rk: linusoleander_: preferred? they aren't identical
+01:14  l4rk: http://kangax.github.com/nfe/
+01:15  Maxdamantus: js> eval("4+5"); function eval(a){ return a; }
+01:15  gbot2: Maxdamantus: "4+5"
+01:15  Maxdamantus: js> eval("4+5"); var eval = function(a){ return a; }
+01:15  gbot2: Maxdamantus: Error: TypeError: eval is not a function
+01:16  Maxdamantus: Meh.
+01:16  Maxdamantus: Oh, oops.
+01:16  gkatsev: lol
+01:16  Maxdamantus: js> var e = eval("4+5"); var eval = function(a){ return a; }; e;
+01:16  gbot2: Maxdamantus: Error: TypeError: eval is not a function
+01:16  Maxdamantus: What?
+01:17  gkatsev: it has to do with code hoisting
+01:17  Maxdamantus: Are you allowed to declare a variable after you use it?
+01:17  gkatsev: s/code/var/
+01:17  gkatsev: you can declare a var after usage; however, you will not get the value of it.
+01:17  gkatsev: `ref mdc hoisting
+01:17  v8bot: gkatsev: Scope Cheatsheet - MDC Doc Center - https://developer.mozilla.org/en/JavaScript/Reference/Scope_Cheatsheet
+01:19  Maxdamantus: lol
+01:19  gkatsev: function statements get hoisted along with value
+01:19 * Maxdamantus never uses var anywhere but on the global scope, or at the top of a function.
+01:19  gkatsev: which is why it is recommended to declare all vars at the top of a function
+01:25  Maxdamantus: gkatsev: so what were you saying before regarding the global object, and `this`?
+01:26  gkatsev: what /was/ I saying?
+01:26  Maxdamantus: 12:44:03 < gkatsev> (function(){ return (function(){ return this;})();}() should return the context of the first function
+01:30  gkatsev: js> this ==  (function(){ return (function(){ return this;})();}()
+01:30  gbot2: gkatsev: Error: SyntaxError: missing ) in parenthetical:  this ==  (function(){ return (function(){ return this;})();}()  .............................................................^
+01:30  Auv5: Pastebin is your friend?
+01:30  Auv5: Oh, nvm :P
+01:30  Maxdamantus:  js> this ==  (function(){ return (function(){ return this;})();})()
+01:30  Maxdamantus: js> this ==  (function(){ return (function(){ return this;})();})()
+01:30  gbot2: Maxdamantus: true
+01:30  gkatsev: oh, yeah, forgot a paren
+01:33  kicken: js> function t(){ this.m=function(){ return (function(){ return this; })(); } }; var x=new t(); this==x.m();
+01:33  gbot2: kicken: true
+01:42 --- Unknown[NF] is now known as Unknown[OFF]
+01:43  gkatsev: js> this ==  (function(){ return (function(){ return this;}).call(this);}).call()
+01:43  gbot2: gkatsev: true
+01:43  gkatsev: v8> this ==  (function(){ return (function(){ return this;}).call(this);}).call()
+01:43  v8bot: gkatsev: true
+01:44  gkatsev: v8> this ==  (function(){ return (function(){ return this;}).call(this);}).call(this)
+01:44 --- eboyjr_ is now known as eboyjr
+01:44  dAnjou: hey, is document width always the same as window width? (or am i totally wrong here?)
+01:45  Maxdamantus: No.
+01:45  dAnjou: Maxdamantus: what could be the difference?
+01:45  Maxdamantus: If the body is thinner than the document.
+01:45  Maxdamantus: What do you mean by document width exactly, and window width?
+01:46  v8bot: gkatsev: true
+01:46  dAnjou: the objects in the dom tree
+01:46  gkatsev: v8: 'foo'
+01:46  v8bot: gkatsev: "foo"
+01:47  Pilum: Window width will almost always be wider than the document's width on account of the UI.
+01:47  Maxdamantus: Mmm, that too.
+01:47  Pilum: Assuming you didn't somehow design it so you have horizontal scrollbars (which is bad).
+01:48  dAnjou: Pilum: but i tested window and document width and height and both values were the same in google chrome
+01:48  Pilum: And how did you obtain those values?
+01:49  dAnjou: http://paste.pocoo.org/show/296859/
+01:49  dAnjou: jquery
+01:49  Maxdamantus: How does jQuery get them?
+01:50  Pilum: My question exactly.
+01:50  dAnjou: hmm, don't know .. will test it with plain js
+01:52  Maxdamantus: Try document.body.style.width = "5px";
+01:54  dabear: jquery uses currentStyle (ie) and getComputedStyle elsewhere
+02:02  dAnjou: hmm, seems to be a pretty messed up thing
+02:02  dAnjou: what should i use to get the width of the current viewport?
+02:03  dAnjou: i mean just the website, not the brower stuff around
+02:03  Maxdamantus: Why would you want to?
+02:05  Maxdamantus: I'd say usually the applications that want to know that would have zero padding on body, and try and ensure the size of body is greater or equal to the size of the viewport.
+02:05  Maxdamantus: Then you can use document.body.clientWidth
+02:06  Pilum: Totally pointless to use JS for that anyway. It's trivial to design for it using CSS.
+02:06  dAnjou: hmm, don't know if i got your point
+02:07  Maxdamantus: Why do you actually want to know?
+02:07  dAnjou: i need it, to move an element out of the visible area
+02:07  dAnjou: using jquery
+02:07  Maxdamantus: So they can still scroll to it?
+02:07  dAnjou: no
+02:07  Maxdamantus: So why not just make it hidden?
+02:07  gkatsev: display: none, visibility: false or something like that
+02:07  Maxdamantus: display: none
+02:08  Maxdamantus: Meh.
+02:08  dAnjou: i want to animate it
+02:08  Maxdamantus: While it's hidden?
+02:08  gkatsev: you can animate using css
+02:08  Maxdamantus: Oh, animate it in?
+02:08  Maxdamantus: Yeah, CSS, position: absolute
+02:08 --- perlite_ is now known as perlite
+02:08  Maxdamantus: Then change left/right depending on which way you want it to fly in.
+02:09  dAnjou: ok, let's start over again .. and be concrete
+02:09  dAnjou: i want to "fly out" a DIV
+02:10  dAnjou: and i don't want to move it to -3000px, cause this is not elegant
+02:11  dAnjou: and i can't do it with only CSS, because i want to have control over it
+02:13  dAnjou: and that's why i need to know the dimensions of the visible area
+02:14  dAnjou: hello?
+02:14  gkatsev: window.innerWidth window.innerHeight
+02:14  gkatsev: assuming you are not on IE, I think IE has different stuff
+02:16  dAnjou: gkatsev: and i can't take document.width?
+02:16  dAnjou: what's the difference?
+02:17  fruitwerks: IE sucks
+02:18  gkatsev: dAnjou: they are not the same thing. window.inneWidth/innerHeight will give you the size of the viewport. document will give you something else
+02:18  gkatsev: depending on whether you have scrollbars and stuff
+02:19  dAnjou: hmm
+02:20  gkatsev: though, it's possible that the only difference is scrollbars, i'm not terrible sure.
+02:20  gkatsev: terribly
+02:25  dAnjou: i don't care about scrollbare, cause they will almost never be hundreds of pixels broad
+02:25  gkatsev: `ref mdc document.width
+02:25  v8bot: gkatsev: document.width - MDC Doc Center - https://developer.mozilla.org/en/DOM/document.width
+02:25  gkatsev: dAnjou: do you care about IE support?
+02:26  gkatsev: `ref mdc window.innerWidth
+02:26  v8bot: gkatsev: window.innerWidth - MDC Doc Center - https://developer.mozilla.org/en/DOM/window.innerWidth
+02:27  houdini: How can I set focus event on body in iframe in designMode? Actually I need event when user set cursor in iframe
+02:30  dAnjou: gkatsev: i care about w3c compliance
+02:32  dAnjou: and unfortunatly both are not part of any w3c specification or standard
+02:33  dAnjou: but i will use jquery with the window object
+02:33  dAnjou: seems to be the best choice
+02:38  Maxdamantus: dAnjou: then set the body to no padding, 100% width/height.
+02:38  Maxdamantus: and use document.body.client{Width,Height}
+02:40  dAnjou: had almost the same idea by using a 100% div inside body
+02:42 --- joo is now known as joo|afk
+02:48  Carlitos__: hi all
+03:01  ExorcistToGo: Why is && referred to as the guard operator?
+03:01 --- joo|afk is now known as joo
+03:03  Carlitos__: is  this possible  to use  1 combo list and 2 input  for dates ?  I am using  3  combos list  here  http://pastebin.com/h2mhcj32,  how  can I  change  this thanks
+03:03  buubot: Carlitos__:  The 59 line paste h2mhcj32 has been copied to http://nopaste.snit.ch/26212  .
+03:07  hwk2|1: how can i include other js file from a single js file?
+03:08  preaction: hwk2|1: add a <script> tag to the current document
+03:08  hwk2|1: well got 5 of those. i want only one which includes all of them
+03:08  hwk2|1: is it possible?
+03:09  hwk2|1: <script src="base.js"></script>
+03:09  preaction: of course. create a file that creates the script tags in the document. or use a preprocessor to merge the files and maybe even minify them, or just concat them yourself
+03:09  hwk2|1: and that base.js would have include script1.js; include script2.js
+03:09 --- peshalto_ is now known as peshalto
+03:09  preaction: there's no such thing as "include"
+03:10  preaction: why not do what YUI 3's loader does, which is add <script> tags to the document
+03:10  hwk2|1: bleah
+03:10  hwk2|1: inside dom?
+03:10  preaction: or use a server-side language to concatenate files, or contcatenate them yourself
+03:10  preaction: three choices, that's it. three possible choices. choose one.
+03:11  hwk2|1: too complicated. ill stick to simpliest one
+03:11  hwk2|1: script for each file
+03:11  Carlitos__: is this possible  to get a  value  like a  date, ComboIdctaValue = ComboIdcta.options[ComboIdcta.selectedIndex].value  , because I use  a drop-down list any help to  change this ?
+03:11  preaction: Carlitos__: new Date( ComboIdctaValue )
+03:12  Carlitos__: but I want to change date like 2010-01-22 for  example I have  a input
+03:13  ExorcistToGo: I just read Eloquent Javascript, there is a good section on that Chapter 9: Modularity
+03:13  ExorcistToGo: http://eloquentjavascript.net/chapter9.html
+03:16  systemfault: Harmony looks nice... sucks that we won't get to use it before 2050...
+03:17  fatbrain: Harmony?
+03:17  hwk2|1: jquery help here?
+03:17  systemfault: The codename of the  next version of javascript
+03:17  systemfault: fatbrain: http://brendaneich.com/
+03:17  fatbrain: ok
+03:17  systemfault: See his last blog post.
+03:18  ExorcistToGo: systemfault: What was the war about that caused this?
+03:18  systemfault: v8bot: odds = [i for (i in range(20)) if (i % 2)]
+03:18  v8bot: systemfault: Use v8: <code> to evaluate code or "`v commands" for a list of v8bot commands.
+03:19  systemfault: v8:[i for (i in range(20)) if (i % 2)]
+03:19  v8bot: systemfault: SyntaxError: Unexpected token for
+03:20  systemfault: hwk2|1: I didn't check but.. you could check if there's a jquery channel on freenode.
+03:21  systemfault: Yea.... with 600 users.
+03:22  cheney: how can I use javascript to retrieve post data, I am already aware I will need a server side JS interpreter to execute the JS
+03:24  ExorcistToGo: Russell said what "died" with the announcement of the Harmony effort was not Adobe's attempt to "own" a specification. "What died was an assumption that the Web can evolve without implementations being out in front of the spec. ( This statement is pretty well ... critical of what worked in the past IMHO )
+03:25  systemfault: Well.. let's be honest, what good thing came out from the w3c? :P
+03:25  systemfault: There's.... none.
+03:25  systemfault: CSS sucks, html sucks.
+03:26  systemfault: Javascript sucks less.. but it's because it wasn't made by the w3c
+03:26  systemfault: afaik.
+03:26  Carlitos__: hi  all
+03:26  Carlitos__: is  this  correct ?
+03:26  Carlitos__: ComboYear = document.getElementById("year")
+03:26  cheney: systemfault: XML rocks
+03:26  Carlitos__: 	ComboYearValue = ComboYear.options[selIndex].text;
+03:26  systemfault: svg... it was invented.. like 15 years ago and it's still a dead technology
+03:26  systemfault: cheney: XML is a joke.
+03:27  systemfault: cheney: They managed to make a mess from something as simple as xml.
+03:27  cheney: systemfault: how so?
+03:27  systemfault: xpath... xslt.. etc.
+03:27  cheney: systemfault: xpath kicks ass
+03:27  cheney: systemfault: xml xchema kicks more ass
+03:27 * systemfault pukes.
+03:28  systemfault: Even JSON despite having no schema sucks far less than xml imho.
+03:28  cheney: I am guessing you have not written many original markup languages then
+03:28  ExorcistToGo: systemfault: I love xpath and xquery. :)  Well do I .... trying to see a better way to do things here.
+03:28  systemfault: I'm not a fan of markup languages :)
+03:28  cheney: json does not serve the same purpose as xml, which leads me to believe you do not understand xml as well you think you do
+03:29  systemfault: XML does more than JSON.
+03:29  cheney: systemfault: you are probably not a fan of markup languages because you have not been exposed to many
+03:29  systemfault: In fact, I think it does too much.
+03:29  Carlitos__: is  this correct ?
+03:30  ExorcistToGo: systemfault: You would really love XAML then!
+03:30  cheney: Carlitos__: you want .value instead of .text
+03:30 * ExorcistToGo goes on record as hating XAML.
+03:30  systemfault: cheney: I was avoiding the web like plague before finding a job as a web developper...
+03:30  systemfault: XAML is actually a "good idea"
+03:30  systemfault: Splitting GUI and code is a nice thing.
+03:31  Carlitos__: ok
+03:31  maushu__: I hate xml though.
+03:31  cheney: at any rate i wrote an original markup language that is capable of being reduced to raw data and has result in a patent application
+03:31  maushu__: With the fury of one thousand suns.
+03:32  cheney: as a result I love xml schema, because of what you can do with it from an analytical and application perspective
+03:32  cheney: good luck trying to reduce html to relational data with any amount of consistency
+03:32  maushu__: cheney, have you tried json?
+03:33  cheney: maushu__: what does json have to do with xml
+03:33  maushu__: Both can be used in similar ways.
+03:33  systemfault: cheney: XML can do everything JSON do
+03:33  maushu__: But XML is more verbose.
+03:33  Carlitos__: pls what's wrong with this? http://pastebin.com/WpFZQ2Hh
+03:33  buubot: Carlitos__:  The 26 line paste WpFZQ2Hh has been copied to   .
+03:33  cheney: json is an extensibly tiered key/value pair and nothing more
+03:34  Carlitos__: I can not make it work properly
+03:34  maushu__: cheney, it's also recursive and can have arrays.
+03:34  Carlitos__: sorry for  my english
+03:34  cheney: json != xml
+03:34  cheney: the two have nothing in common
+03:34  fatbrain: they are both langauges :P
+03:34  fatbrain: well played fatbrain... well played...
+03:34  cheney: when people attempt to make any such comparison they are exposing their ignorance
+03:34  ExorcistToGo: The idea that XML is just some sort of verbose S-Expression is something I cringe at everytime I hear it. Have not heard it yet here.
+03:35  cheney: maushu__: arrays are key/value pairs as well with the index being a positive integer opposed to a string
+03:35  maushu__: The difference is that json doesn't name the nodes.
+03:36  cheney: maushu__: actually, JSON does name the nodes if you assign a child object/array as a value to a key in an object literal
+03:37  maushu__: Wouldn't work for xml structure.
+03:37  ExorcistToGo: Does JSON have a way to represent nulls? ( I have not used JSON ) Just curious.
+03:37  cheney: maushu__: why not?
+03:37  Carlitos__: sorry this is my  code but no idea  where can I fix it ?   http://pastebin.com/Lk7UQeM4
+03:37  buubot: Carlitos__:  The 27 line paste Lk7UQeM4 has been copied to   .
+03:37  maushu__: ExorcistToGo, http://www.json.org/
+03:38  maushu__: Check the value section.
+03:38  cheney: ExorcistToGo: no, JSON is only capable of representing string and number data types
+03:38  cheney: and undefined if you count that as a third type
+03:38  maushu__: cheney, actually, it can use strings, numbers, true, false, nulls, arrays, and objects.
+03:39  maushu__: The type "object" allows recursion.
+03:39  ExorcistToGo: I see it in the spec. value can be string, number, object, array, true, faslt or yes even null.
+03:40  cheney: maushu__: at any rate JSON is only data, and xml is not
+03:40  Carlitos__: no idea :D
+03:40  cheney: apples and oranges
+03:41  Carlitos__: how  to fix it :)
+03:41  maushu__: json can also be metadata.
+03:41  cheney: how do you define a meta data structure in JSON apart from data values?
+03:41  systemfault: XML does way more than JSON.
+03:41  systemfault: It does TOO MUCH.
+03:42  maushu__: cheney, the way you want. There are no standards about it.
+03:42  systemfault: Oh.. And it's also weirdly hard to parse.
+03:42  cheney: maushu__: that is not a rational answer to a technical question
+03:42  systemfault: How would you store binary data with JSON?
+03:43  maushu__: BSON.
+03:43  systemfault: I know it can be done with XML
+03:43  maushu__: It can also be done the same way as xml.
+03:43  maushu__: But better use BSON.
+03:43  Carlitos__: thanks cheney
+03:47  ExorcistToGo: systemfault: Can you give me an example of the category of stuff in XML you think is too much? ( This does interest me) I realize this is a javascript channel though
+03:49  ExorcistToGo: Maybe they left too much of SGML in it? That sort of thing?
+03:49  systemfault: ExorcistToGo: Bah... You need tons of tools + languages to use it
+03:49  systemfault: XSL/XSLT/XPath/XQuery/XPointer/XLink...
+03:49  cheney: naw, xml displays in the browser
+03:49  systemfault: And probably other that I missed.
+03:50  cheney: and most foundational xml languages work in most browsers
+03:50  ExorcistToGo: systemfault: perhaps the way boundaries are defined between seperations of concern is the issue?
+03:54  ExorcistToGo: I myself do not think that XPath really should be a part of a standard. It is crazy that it is. I can only imagine the wars that there were over it.
+03:54  cheney: why? xpath absolutely rules
+03:55  cheney: it is so much faster and more specific than DOM methods and the craziness used in CSS
+03:55  ExorcistToGo: I agree that xpath rules. Just don't like the idea of a query language standard having to be specified as part of a data exchange specification.
+03:55  mauke: xpath sucks less than css selectors, that's about it
+03:56  ExorcistToGo: The sad thing is that xpath may be the best part of XML :)
+03:56  cheney: naw, i still put my money on schema
+03:59  ExorcistToGo: then again xpath injection is a problem also :/
+04:05  ExorcistToGo: Is there any JavaScript framework that implments something like xpath to do selector functions?
+04:06 --- dAnjou_ is now known as dAnjou
+--- Log closed Sun Nov 28 12:13:15 2010
+--- Log opened Sun Nov 28 12:13:42 2010
+12:13 --- Users 396 nicks [0 ops, 0 halfops, 0 voices, 396 normal]
+12:15  weng: why was promise removed from node.js+
+12:15 --- Channel ##javascript was synced in 127 seconds
+12:24  GoSox: webben: works in IE7
+12:24  GoSox: ill test them all but i think at this point that means i'm golden
+12:26  jgeerdes: complete: Did you try event.preventDefault()?
+12:26  complete: jgeerdes: no, let me look that up...
+12:28  complete: jgeerdes: wonderful! that helped!
+--- Log closed Sun Nov 28 14:34:44 2010
+--- Log opened Sun Nov 28 14:40:05 2010
+14:40 --- Users 405 nicks [0 ops, 0 halfops, 0 voices, 405 normal]
+14:42 --- Channel ##javascript was synced in 127 seconds
+14:56  philsturgeon: hi guys . i have a fairly confusing problem introduced to some stable code when I converted it over from procedural to OOP javascript. the method causing problems is here http://d.pr/KNPj
+14:57  philsturgeon: it can all be seen in action here http://travlrapp.com/philsturgeon/bristol-london-2010 you'll notice the console.debug running and outputting null on page load. more errors if you click "Bristol"
+14:57  philsturgeon: im basically failing to get the variable info set from the callback and assigned to this.places[place.id]['info']
+15:03  sonu: Hello
+15:03  sonu: I am getting this error
+15:03  Maxdamantus: philsturgeon: have you declared info?
+15:04  Maxdamantus: Because if not, it'll be using the "info" property of the global object
+15:04  sonu: I am using mootools slider
+15:04  sonu: but getting addEvent error
+15:04  sonu: error is window.addEvent is not a function
+15:04  sonu: any idea?
+15:04  Maxdamantus: which means if you've got multiple instances of this object, they're sharing the same `info` variable, and you do have `info = null;` at the top.
+15:05  molgrew: sonu: you haven't defined addEvent in the right place
+15:05  Pilum: sonu: You don't have addEvent declared at that point.
+15:06  philsturgeon: Maxdamantus: yeah im setting info = null, then i want to get the value from the callback, but of course im only defining the callback there not actually running it
+15:06  philsturgeon: i know its badly coupled code, but i dont know a better way to try and do it
+15:06  Maxdamantus: philsturgeon: but you're not declaring it afaics
+15:06  Maxdamantus: (Looking at that paste, I haven't bothered to look at the page yet)
+15:07  axscode: is there a way that i can disable the page for not to be clickable untill the page is totally loaded
+15:07  philsturgeon: Maxdamantus: the paste covers it
+15:07  philsturgeon: in the paste i was assigning it to a global array, but that was litteral so i could just call the array
+15:07  Maxdamantus: philsturgeon: again, if you've got two instances of whatever `this` is meant to be, they're sharing the same `info` variable.
+15:07  philsturgeon: now im having to use this to talk to the global properties, but ofc in a callback this becomes a refference to the callback
+15:08  philsturgeon: Maxdamantus: i dont thin i have two refferences of it
+15:08  Maxdamantus: The paste doesn't cover it, because I can't see where info is declared.
+15:08  philsturgeon: info is not a property of the class
+15:08  Maxdamantus: Meh, I'll look at the page.
+15:08  Pilum: `classes @ philsturgeon
+15:08  jsBot: philsturgeon: classes: There are *no* 'classes' in Javascript.  Javascript uses prototypical OO: objects are constructed directly, based on other objects, without a blueprint.  Thinking of constructor functions as classes is *wrong,* and will confuse you in the long term.
+15:08  philsturgeon: Maxdamantus: http://travlrapp.com/javascripts/trip.js?1290948540
+15:09  philsturgeon: Pilate: cool, im not using constructors
+15:09  Maxdamantus: Yeah, you're not declaring info
+15:09  philsturgeon: i'll admit that im a PHP guy trying this in a PHP way but i think i just about get the OO approach. im just crap with callbacks :)
+15:09  Pilum: Yes you are heh,
+15:09  philsturgeon: Maxdamantus: info is not meant to be a global property
+15:09  Maxdamantus: philsturgeon: then declare it.
+15:10  Pilum: You still need to declare it
+15:10  Maxdamantus: philsturgeon: if you don't declare it, it becomes a global property.
+15:10  philsturgeon: var info = null?
+15:10  Maxdamantus: Sure.
+15:10  philsturgeon: stil null, because the callback is not called at this point
+15:11  Maxdamantus: philsturgeon: where is place declared?
+15:11  philsturgeon: in the callback i have info = trip.map.info(marker, contentString) which i was hoping would grab it, but callbacks dont do that. i need to define the callback and assign the value of trip.map.info(marker, contentString) somewhere global
+15:11  philsturgeon: it used to be trip.places[id].info = trip.map.info(marker, contentString) in the callback, which put the value in a global property
+15:12  philsturgeon: but i cant get to the global property in the callback as this becomes a refference to the callback
+15:12  sonu: Pilum, how can I do this?
+15:12  Maxdamantus: Oh, place is a parameter of theu function.
+15:12  philsturgeon: and even though im doing var trip = this to READ the trip properties, i cant write to it
+15:13  philsturgeon: i miss references :)
+15:13  sonu: I am using this line : window.addEvent('domready', function(){
+15:13  Pilum: sonu: That line calls it. But it needs to be *defined* somewhere.
+15:13  philsturgeon: i know this is al probablt overcomplicating matters, but this will be JS heavy and i'll be repeating a LOT of code if i try it with simple procedural code
+15:13  sonu: Pilum , how and where can I define that?
+15:14  Maxdamantus: philsturgeon: I'm not sure what your objective is with the way you've written set_info
+15:14  sonu: sorry, I am bit new for Javascript?
+15:14  sonu: :(
+15:14  Pilum: Very new apparently.
+15:14  sonu: yup
+15:14  Maxdamantus: You declare and set info to null, then you set this.places[place.id]["info"] to null
+15:14  Pilum: `eloquent @ sonu
+15:14  jsBot: sonu: eloquent: Eloquent JavaScript is a comprehensive introductory Web-based book with examples and a built-in interpreter.  http://eloquentjavascript.net/index.html
+15:14  sonu: can you guide me for first time?
+15:14  Pilum: Learn.
+15:14  Maxdamantus: Then you return a function that sets info, pointlessly.
+15:14  philsturgeon: Maxdamantus: yeah, thats where its falling over heh
+15:14  Pilum: As for addEvent, I don't know whether mootools defines that or not.
+15:15  sonu: Pilum, they don't otherwise I don't have that error in firebug
+15:15  Maxdamantus: philsturgeon: maybe you meant to assign to trip.places[place.id].info inside the function, not info?
+15:15  philsturgeon: this line: info = trip.map.info(marker, contentString) is the problem. it needs to create a callback, and i need to assign the actual object to a global array so i can refference it later
+15:15  Maxdamantus: trip.places[place.id].info = trip.map.info(marker, contentString);
+15:15  philsturgeon: yes, but then it is only available once the callback is called
+15:15  Pilum: That depends on whether you include it properly. :-<9
+15:15  Pilum: :-)
+15:15  philsturgeon: i need it available from when the callback is defined
+15:16  Maxdamantus: philsturgeon: note that the code inside the callback function is not executed until after the code at the end of the set_info function.
+15:16  philsturgeon: Maxdamantus: besides, this.places[place.id]['info'] = trip.map.info(marker, contentString) would not worl
+15:16  philsturgeon: this is the callback, not the "class"
+15:16  Maxdamantus: philsturgeon: I said trip.places..
+15:16  philsturgeon: trip.places would modify the copy of the class
+15:16  philsturgeon: it wont write anything
+15:17  Maxdamantus: philsturgeon: copy of what?
+15:17  Pilum: Again, philsturgeon, don't think in terms of classes when you're writing JS.
+15:17  sonu: hmm
+15:17  Pilum: No wonder you're being confused if you do that.
+15:17  philsturgeon: var trip = this is used to read properties and methods
+15:17  sonu: which part i need to read for it
+15:17  philsturgeon: but, i cant change anything in trip and have it affect "this"
+15:17  Pilum: sonu: All of it. From beginning to end.
+15:17  philsturgeon: because it is just a copy
+15:17  Maxdamantus: philsturgeon: it will affect `this`
+15:17  Maxdamantus: Because they're the same object.
+15:18  Maxdamantus: An object's value does not represent the entire object.
+15:18  Maxdamantus: It's probably easiest to think of an object's value as a reference to a set of key-value pairs.
+15:18  philsturgeon: ahh right
+15:18  Maxdamantus: So when you do `trip = this` you're just copying a reference. They both point to the same set of key-value pairs.
+15:19  philsturgeon: well thats progress, just getting "this.open_info is null" now >.<
+15:19  philsturgeon: so out of my depth its not even funny!
+15:22  Maxdamantus: philsturgeon: in show_place?
+15:23 * Maxdamantus can't see where show_place is called.
+15:24  Maxdamantus: Ah, trip.show_place($(this).closest('tr').attr('id').replace(/place-/, ''))
+15:24  philsturgeon: Maxdamantus: yeah show_place will have that error. i am outputting the place = this.places[id] and .info property is missing
+15:24  philsturgeon: and its called from outside
+15:24  philsturgeon: yeah :)
+15:24 --- qFxo is now known as qFox
+15:25  philsturgeon: its confusing as hell. i need to create callbacks for all the actions and i need all the data available for reference from outside and by other functions
+15:25  Maxdamantus: Where is this.open_info assigned?
+15:26  philsturgeon: Maxdamantus: in show_info. it is the currently open object
+--- Log closed Sun Nov 28 15:32:07 2010
+--- Log opened Sun Nov 28 15:42:31 2010
+15:42 --- Users 410 nicks [0 ops, 0 halfops, 0 voices, 410 normal]
+15:42  Maxdamantus: Oh, open_info
+15:44 --- Channel ##javascript was synced in 126 seconds
+15:44  philsturgeon: Maxdamantus:  id is 12, it calls the correct item in place = this.places[id];
+15:45  philsturgeon: but place.info is missing
+15:45  Maxdamantus: Dunno, sounds like something with the Google Maps API, and I've never used it.
+15:45  philsturgeon: im handling the objects from them ok, its just the way im populating my global array that sucks
+15:46  Maxdamantus: global array?
+15:47  philsturgeon: this.places
+15:47  philsturgeon: thats all the problem comes down to
+15:47  philsturgeon: me not setting info right
+15:47  philsturgeon: reference.places[place.id]['info'] is never set right
+15:48  Maxdamantus: Did you try checking what place is in show_place?
+15:48  philsturgeon: before i was seeing null, now im just not getting it called, ever
+15:48  Maxdamantus: You said the error was that this.open_info was null iirc
+15:48  philsturgeon: on load it should set all of them. none of them contain the info key
+15:50  philsturgeon: that seems to be another issue. im lost in this spaghetti code >.<
+15:50  philsturgeon: seems like that might be error #2, but error #1 is that i never set the info key properly in that array
+15:53  philsturgeon: think im just going to start that file again a little differently
+15:54  philsturgeon: its such a mess i cant even see how it works
+16:00  symtab: hello
+16:00  symtab: how can i find out if a string ends in /somethinghere/ ?
+16:00  Pilum: Regexp would probably be the easiest way.
+16:01  Pilum: `js ref test
+16:01  jsBot: js ref test: Executes the search for a match between a regular expression and a specified string. Returns true or false. (http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Objects:RegExp:test)
+16:02  symtab: erm
+16:02  symtab: the word is always
+16:02  symtab:  /community/
+16:02  symtab: would indexof work in this case?
+16:03  Pilum: For finding out if it's in the string, yes. Wouldn't tell you if it's at the end of the string.
+16:03  molgrew: lastIndexOf is better
+16:03  Pilum: Strictly speaking anyway. Nor would lastIndexOf.
+16:04  Pilum: You could run some comparisons but, as I said, that'd be more work than a regexp test.
+16:04  Maxdamantus: js> let (s = "somethinghere and somethinghere", m = "somethinghere") s.lastIndexOf(m) == s.length - m.length
+16:04  gbot2: Maxdamantus: true
+16:05  molgrew: compare the return value with what it would be if it was the end of the string
+16:05  Teratogen: what the hell is ga.js that I keep seeing in my apache log?
+--- Log closed Sun Nov 28 16:11:09 2010
+--- Log opened Sun Nov 28 16:11:33 2010
+16:11 --- Users 408 nicks [0 ops, 0 halfops, 0 voices, 408 normal]
+16:12  symtab: hmm
+16:12  symtab: works for me
+16:12  symtab: doesnt throw any errors here
+16:12  Maxdamantus: js> var myStr = ''; myStr = myStr.slice(0, -1); print(myStr);
+16:13  gbot2: Maxdamantus:
+16:13  symtab: yeah
+16:13  molgrew: then myStr is not null but just empty, there's a difference there
+16:13  symtab: yeah
+16:13  symtab: sorry...you are right
+16:13 --- Channel ##javascript was synced in 127 seconds
+16:13  symtab: thanks
+16:14  ofaurax: hello
+16:17  ofaurax: I tried to use a simple xmlhttprequest in a webpage : http://pastebin.ca/2004600
+16:17  buubot: ofaurax:  The 42 line paste 2004600 has been copied to http://nopaste.snit.ch/26219  .
+16:17  ofaurax: :)
+16:18  ofaurax: and so, I don't understand why I keep getting "0" error response rather than 200
+16:18  ofaurax: `help
+16:18  jsBot: help: Paste the Javascript (only the portions relevant to your problem) in a pastebin (see `paste), and tell us what you expected, what else you tried and what actually happened. You might also consider reading: http://diveintomark.org/archives/2003/05/05/why_we_wont_help_you/
+16:19  ofaurax: you can copy/paste the code from the pastebin, it will work like for me
+16:20  ofaurax: I just tried, and I get the same "0" using chromium
+16:26  molgrew: ofaurax: something called "same origin policy" is responsible, you can't send xml http requests for 'foreign' resources just like that
+16:26 --- Naked is now known as Hadaka
+16:26  axscode: is there a way that i can disable the page for not to be clickable untill the page is totally loaded
+16:27  ofaurax: molgrew: thank !
+16:27  ofaurax: i'm so dumb.... if it worked it should possible to do whatever...
+16:32 --- Naked is now known as Hadaka
+16:35  webben: axscode: One could probably trap all click events and cancel the default action, but it's likely a very bad idea.
+16:35  webben: axscode: What makes you think you need to do that in this case?
+16:41 --- Naked is now known as Hadaka
+--- Log closed Sun Nov 28 17:10:42 2010
+--- Log opened Sun Nov 28 17:11:05 2010
+17:11 --- Users 415 nicks [0 ops, 0 halfops, 0 voices, 415 normal]
+17:13 --- Channel ##javascript was synced in 125 seconds
+17:13  Spektrum: hello
+17:15  Spektrum: When I try to change the inner html of a node with a cyrillic text I'm getting question marks instead of proper characters. Is there any way to fix that?
+17:17  joelennon: Have you set the correct character set for your HTML document?
+17:18  webben: Spektrum: Got a http://sscce.org/ ?
+17:23  Spektrum: joelennon: do you mean a "<script type="text/javascript" src="script.js" charset="utf-8"></script>"?
+17:23  Spektrum: if so, yes
+17:24  joelennon: What about the HTML document itself? Do you have a <meta charset="utf-8"> or equivalent tag in there? Remember that any changes you make using innerHTML are applied to the DOM, which will take the character set of the HTML document, not the <script> block.
+17:26  Spektrum: when i open script in a browser all cyrillic strings are displayed incorrectly
+17:26  Spektrum: http://searchandwatch.appspot.com/script.js
+17:30  joelennon: That's because your browser is set to use a Latin encoding. Try change your browser's text encoding setting to Cyrillic and it should look right. It should work fine if you use that script in a UTF-8 HTML document.
+17:31  joelennon: If it doesn't you could set your HTML document to use a cyrillic character set.
+18:11  swine__: hey, how can i populate a pulldown menu without using an onchange event ?
+18:12  swine__: i want to do stuff to it as soon as the page is loaded
+18:15  swine__: oh, i got it
+18:57  swine__: how can i pass in a particular pulldown with javascript ?
+18:58  molgrew: what do you mean?
+18:59  swine__: i want javascript to populate a pulldown within a webpage
+18:59  swine__: so i stuck in an empty image within the gif
+18:59  swine__: er within the div
+18:59  swine__: and attached an onLoad handler
+18:59  swine__: how do i pass the onload handler a reference to the pulldown menu that's contained within the div ?
+19:01  molgrew: you can't, you have to get one inside it
+19:01  swine__: so how do i generate an event for the menu ?
+19:02  swine__: i want it populated before anything happens
+19:02  swine__: the only thing i could find was 'onclick'
+19:02  swine__: but you have to click the thing first
+19:02  swine__: which kind of sucks
+19:02  molgrew: could you explain in some more detail what you mean now?
+19:03  swine__: i would like to populate a pulldown menu from javascrip
+19:03  swine__: t
+19:03  swine__: that's pretty clear isn't it ?
+19:03  Pilate: why not populate it when the document is done loading
+19:03  molgrew: pulldown menu = select? yes, so much is clear
+19:03  swine__: Pilate, that's fine. i just don't understand how to pass in a reference to the pulldown to a js function
+19:04  swine__: unless i'm actually in the pulldown itself
+19:04  swine__: i don't understand how to reference the pulldown. it's probably a really basic question
+19:05  Pilate: the easiest way of getting it is adding an id, and refrencing via getElementById
+19:05  molgrew: just to be clear, you do mean a select element?
+19:05  swine__: molgrew, yes
+19:06  l4rk: comp.lang.javascript is useless in google groups
+19:06  swine__: Pilate, that's within the js code itself though
+19:06  swine__: Pilate, how do i tie it in with the html
+--- Log closed Sun Nov 28 19:12:10 2010
+--- Log opened Sun Nov 28 19:12:31 2010
+19:12 --- Users 417 nicks [0 ops, 0 halfops, 0 voices, 417 normal]
+19:13  swine__: molgrew, what's that ?
+19:13  l4rk: lol
+19:14  swine__: molgrew, i'm a little confused by this. i can get the div element. how do i get the select within it ?
+19:14  webben: swine__: https://developer.mozilla.org/En/DOM/Node.appendChild
+19:14  molgrew: a snippet of code
+19:14  molgrew: oh, there already is a select inside?
+19:14 --- Channel ##javascript was synced in 125 seconds
+19:14  swine__: molgrew, yes
+19:14  molgrew: can you say some more about it? does it have an id?
+19:15  molgrew: or does it have a name and is inside a form?
+19:15  swine__: molgrew, it has a name
+19:17  molgrew: is there more to it? could you give a rough description of the whole context perhaps?
+19:17  webben: swine__: http://dev.opera.com/articles/view/traversing-the-dom/ ; http://www.w3.org/TR/html5/dom.html#dom-document-forms
+19:18  swine__: molgrew, what do you mean ?
+19:19  swine__: webben, can't names be shared across multiple elements ?
+19:19  swine__: webben, if i juet call get elementbyname on the selector is that guaranteed to unambiguously return the selector ?
+19:19  molgrew: I mean "everything", or at least "enough", not just bits and pieces of the html+code+goal
+19:20  swine__: molgrew, it looks like getElementsByName may do it
+19:20  swine__: but it returns a linked list
+19:20  swine__: i don't understand how to manipulate this stuff in js
+19:21  webben: swine__: "can't names be shared across multiple elements". They can.
+19:21  swine__: so how do i use this function
+19:21  swine__: grrrr
+19:22  swine__: webben, can i call getElementById first
+19:22  webben: swine__: You can combine the many DOM traversing functions and properties to walk and filter the DOM however you like.
+19:23  swine__: webben, i don't understand how to deal with linked lists in javascript
+19:23  swine__: let's say i call getElementsByName
+19:23  webben: swine__: Without knowing the particular constraints of your particular DOM, suggesting the optimal way to query the DOM is fairly futile.
+19:23  swine__: how do i traverse this data ?
+19:23  webben: swine__: Learn how to deal with arrays in JS.
+19:23  swine__: webben, well the select lives within a div
+19:23  swine__: webben, it's an array or a linked list ?
+19:23  webben: swine__: (It's not an actual array, but it behaves similarly.)
+19:23  swine__: the documentation implies that it's a linked list
+19:24  webben: swine__: Which documentation?
+19:24  swine__: the link you sent me
+19:24  webben: swine__: The HTML5 link?
+19:25  swine__: webben, whatever documentation link you sent me
+19:25  swine__: it says it's a NodeList
+19:25  swine__: that sounds like some kind of linked list to me
+19:25  webben: swine__: Well, it's a NodeList. I don't think calling it a linked list helps.
+19:25  swine__: wtf is a NodeList ?
+19:25  webben: I suspect it's not an accurate name for it.
+19:25  swine__: that's some kind of data structure isn't it ?
+19:25  webben: swine__: http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-536297177
+19:26  webben: swine__: You can iterate through them using a normal JS for loop.
+19:26  webben: swine__: Note the point about it being "live".
+19:27  webben: swine__: E.g. if you delete a node from the DOM, the NodeList can change and so the node at given index in the nodelist can be different.
+19:28  webben: swine__: I don't think it's correct to call a NodeList a linked list, since individual items don't have a pointer to the next item in the list (in general).
+19:28  webben: swine__: https://developer.mozilla.org/En/DOM/NodeList is a nice writeup
+19:29  swine__: it should be item 0 in this case ...
+19:29  swine__: so i wouldn't even need to loop
+19:30  webben: Can't answer that without knowing your DOM and how it varies, but your statements are not implausible.
+19:33 --- Auv5 is now known as Auv5[Away]
+19:36  swine__: webben, it worked
+19:36  swine__: webben, thanks
+19:38  noobie25: i'm having trouble telling javascript that it is a "variable" rather than a string.   http://pastie.org/1330370
+19:38  webben: yw
+19:39  webben: noobie25: data: Data to be sent to the server. It is converted to a query string, if not already a string. It's appended to the url for GET-requests. See processData option to prevent this automatic processing. Object must be Key/Value pairs. If value is an Array, jQuery serializes multiple values with same key based on the value of the traditional setting (described below).
+19:39  webben: http://api.jquery.com/jQuery.ajax/
+19:39  webben: noobie25: just build an object literal hashing your keys to the variable values
+19:40  Teycho: noobie25: it's a string. concatenate.
+19:40  Teycho: "literal" + variable + "literal"
+19:40  Teycho: etc
+19:40  noobie25: webben: thanks...i'll take a look.
+19:41  noobie25: Teycho: when i refer to the variable, do i need to append $ like i php?
+19:41  webben: noobie25: No.
+19:42  Teycho: I just gave you an example above
+19:42  webben: noobie25: https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Core_Language_Features
+19:42  noobie25: webben: ok.   then i think i am slowly understanding what you meant by serializing my data.... i can create my object and just pass in one object into "data: myojbect"
+19:43  noobie25: Teycho: thanks Techo ...:)
+19:43  james13433: Hi guys, I need to convert a line of jquery into prototype but cant seem to get it to work, any ideas. I did ask in the #prototype irc but its dead.http://pastebin.com/hR6Z5D7E
+19:43  buubot: james13433:  The 13 line paste hR6Z5D7E has been copied to   .
+19:44  webben: noobie25: Concatenating the values is not safe unless you escape them for combination in a query string. Rather simpler to let JQuery do that for you.
+19:47  james13433: anyone? its wrekking my head this.
+19:47  darkangel: Is there any way to make the execution of a function block further execution (without using callbacks for everything)?
+19:47  noobie25: webben: i think eventually, i need to send some kind of authentication string so that I can see "which user" is saving the data....
+19:48  noobie25: webben: so, i think you advice is perfect in letting jquery do that for me:).   I'm new to serializing the data, so i'm reading the docs you have sent me.
+19:55  noobie25: webben: thank you.  successfully made my first json serilization
+19:59  noobie25: if i am sending data using javascript to persist data for multiple users using my website,   is there a recommended security structure i should use?
+20:12  noobie25: #cryptology
+20:18  james13433: I've had to stop using .bind(this) so that I can use the new this, however now I don't know how to access the old this.. is there away I can say like alert(this.path) to find out how I can get to it?
+20:21  eboyjr: var that = this;
+20:24  swine__: Exception: changeList is not defined
+20:24  swine__: what does this mean ?
+20:24  swine__: the function is bloody defined
+20:24  systemfault: You're doing something wrong.
+20:24  swine__: why is firefox complaining that it's not defined
+20:24  swine__: how can i debug this ?
+20:24  swine__: the fucntion is THERE
+20:24  systemfault: Perhaps a scope problem...
+20:25  FireFly|n900: swine__, correct scope?
+20:25  swine__: FireFly, it's in the same document
+20:25  FireFly|n900: yes?
+20:25  swine__: FireFly, the javascript stuff is at the top of the page
+20:25  FireFly|n900: each function is a different scope
+20:25  swine__: FireFly, it was working before too
+20:25  eboyjr: paste your code
+20:25  eboyjr: `code
+20:25  gbot2: Show some code.  Code examples should be complete (sufficient to show the problem) and minimal (as short as possible while remaining complete).
+20:25  swine__: FireFly, i don't undersstand what happened
+20:25  FireFly|n900: I'm no magician either
+20:25  swine__: eboyjr, there is a lot of code to paste
+20:26  swine__: but i'm callin git like this:
+20:26  swine__: <select name=wavelength onchange="changeList(this)">
+20:26  eboyjr: wait
+20:26  eboyjr: `pastebin
+20:26  FireFly|n900: Mhm
+20:26  swine__: eboyjr, pastebin what ? there's way too much code to pastebin the whole thing
+20:26  eboyjr: Go to pastie.org and paste all of it there
+20:26  FireFly|n900: And it's defined like how?
+20:26  carlocci: `minimal @ swine__
+20:26  gbot2: swine__: A minimal test case should contain precisely the HTML and JavaScript necessary to demonstrate the problem, no more and no less.  If it is more than 32 lines, it is probably not a minimal test case.
+20:26  swine__: <script language="javascript">
+20:26  swine__: function changeList( box ) {
+20:26  swine__:  
+20:26  swine__: etc
+20:26  eboyjr: swine__: Do it anyway :p What about a URL?
+20:27  swine__: if i could make a minimal test case i would understand the problem
+20:27  webben: swine__: Exactly!
+20:27  swine__: the code was working 10 minutes ago
+20:27  webben: And that's why one should make a minimal test case.
+20:27  FireFly|n900: Well, what did you do?
+20:27  swine__: i didn't do anything that in my understanding would break anything
+20:27  swine__: i don't get it
+20:28  eboyjr: hrm well too bad
+20:28  FireFly|n900: ctrl+z?
+20:28  eboyjr: !next
+20:28  swine__: FireFly|n900, what could possibly cause this error ?
+20:28  FireFly|n900: Go on from a working copy, one thing at a time?
+20:28  webben: swine__: Revert your changes. Make each individual change until you produce the error.
+20:28  swine__: FireFly, how could the function not be in scope
+20:28  james13433: eboyjr I did that but got "that is not defined" do I have to pass it in ?
+20:28  FireFly|n900: That it isn't defined
+20:28  swine__: this doesn't make SENSE
+20:28  FireFly|n900: is all I could imagine
+20:28  carlocci: script language="javascript" ?
+20:29  eboyjr: not sure
+20:29  swine__: carlocci, what's wrong with that ?
+20:29  FireFly|n900: swine__, it could be deletes
+20:29  FireFly|n900: d*
+20:29  FireFly|n900: global scope == window == this in global scope
+20:30  swine__: FireFly|n900, this isn't helping
+20:30  swine__: FireFly|n900, it should be globally scopted
+20:30  swine__: FireFly|n900, why is it giving me this stupid error ?
+20:31  FireFly|n900: Take it easy
+20:31  carlocci: <script type="text/javascript">
+20:31  FireFly|n900: I can't really guess your code
+20:31  swine__: carlocci, i already changed it. doesn't matter
+20:31  olasol: how I can know how are ordered the elements, I mean, know to wich place the elements where moved from his original positions in something like this http://pastebin.com/uq1AL7xD
+20:31  buubot: olasol:  The 9 line paste uq1AL7xD has been copied to   .
+20:31  FireFly|n900: The only tip I can give you is to ctrl+z back and go on slowly from a working copy
+20:31  carlocci: What do you expect?
+20:31  carlocci: that we guess your problem?
+20:32  swine__: FireFly|n900, i'm not asking you to guess my code. i'm asking someone to explain is how it can be anything but global ?
+20:32  swine__: it's the first things after <body>
+20:32  webben: swine__: Speculating wildly is a waste of time.
+20:32  FireFly|n900: I told you it could be deleted
+20:32  swine__: isn't this going to be  f*cking global ?
+20:32  FireFly|n900: I told you it could be deleted
+20:32  swine__: FireFly|n900, deleted ?
+20:32  swine__: FireFly|n900, what does that mean /
+20:32  webben: swine__: Maybe you have an error, maybe you overwrite the function variable, maybe you've actually defined it inside another scope.
+20:33  swine__: webben, it's only defined in one place
+20:33  webben: swine__: Try removing everything after the <script> in question, then calling the function.
+20:33  FireFly|n900: js> var foo = 42; delete this.foo: foo // swine__
+20:33  gbot2: FireFly|n900: Error: SyntaxError: invalid label:  var foo = 42; delete this.foo: foo // swine__  ..........................^
+20:33  systemfault: Anyway.. that kind of onClick handler sucks.
+20:33  james13433: eboyjr if I pass that in it messes us this "this.readAttribute is not a function"
+20:33  swine__: webben, why would i do that. it's definitey going to be undefined if i do that
+20:34  webben: swine__: After the script that defines it I mean, not just after the opening tag.
+20:34  swine__: webben, what are you suggesting that i do ?
+20:35  webben: swine__: <!doctype html><title></title><body><script>your script here</script><script>try to call the function here</script>
+20:35  webben: you might need more for a minimal test, but I can't see your code and I ain't clairvoyant.
+20:35  swine__: ok, i'll try
+20:38 --- johannes__ is now known as johanness
+20:41  apeiros: what's the canonical way to check whether an object is an Array? `obj instanceof Array`, `obj.constructor == Array` or even something else?
+20:41  swine__: it was an extra curly bracket
+20:41  swine__: holy f*ck
+20:48  noobie25: if i have multiple scripts,   i'm unclear how i can access variables/functions "across the different scripts.   i posted a sample:  http://pastie.org/1330526
+20:52  james13433: if I have both $('image').writeAttribute("src",src); 	and	         that.scale(1); will the first always complete before running the second line?
+20:52  kicken: noobie25, script tags aren't isolated.  You can think of them as just one giant script tag.
+20:53  noobie25: kicken: so i should be able to access all variables from above right?
+20:53  kicken: yes
+20:53  carlocci: no
+20:54  noobie25: kicken: do i have to declare a function before using it...or just append them at the end still works fine?
+20:55  kicken: It's good pratice to declare it before using it.  I dont think it's necessarily required.
+20:55  carlocci: after the first script is run, the identifier a refer to the function object, the same happens with the second script
+20:55  Pilum: Sometimes it is required.
+20:55  noobie25: kicken: i thin i had ran into a situation where i cannot access a variable....it should work....... let me post a pastie.
+20:55  carlocci: also you can't access b from the first script
+20:56  kicken: noobie25, in your particular example, what carlocci said is true.  you can't have a function and a variable of the same name, they conflict.
+20:56  carlocci: because the interpreter doesn't even know that the second script exists, let alone what's inside it
+20:57  noobie25: thanks carlocci and kicken...
+21:15  B|ackPanther: hi, am writing some code that will be shared with someone else so am looking for a tool that can help me document everything, Any suggestions ?
+21:17  eboyjr: jsdoc
+21:19  eboyjr: http://code.google.com/p/jsdoc-toolkit/
+21:21 --- pleeby is now known as bleepy
+21:21  B|ackPanther: I have been looking around and jquery has nice documentations, what do they use ?
+21:22 --- JNSamuel is now known as 84XABBMR5
+21:23 --- sid3k` is now known as sid3k
+21:33 --- Putr|Away is now known as Putr
+22:00  RenderFx: Hello, Im having trouble when drawing over an image in a canvas.  If i draw rect's over the image things are fine, drawing circles over the image makes the image disappear. Anyone happen to know why?
+22:05 --- Auv5[Away] is now known as Auv5
+22:11  draginx: Why does my .length report a different length than PHP's strlen() function?
+22:12  eboyjr: Because the string is different
+22:13 --- James is now known as Guest8698
+22:16  Guest8698: I have a script that updates the src of an image, I need to wait till the new images is loaded before running some more code, how would I do that?
+22:16  draginx: eboyjr: how can I make them the same?
+22:16  eboyjr: draginx: I don't know why they are different...
+22:16  eboyjr: `code
+22:16  gbot2: Show some code.  Code examples should be complete (sufficient to show the problem) and minimal (as short as possible while remaining complete).
+22:16  eboyjr: Guest8698: img.src = "blah"; img.onload = function() { blah(); this.onload = null; }
+22:17  draginx: eboyjr: http://pastie.org/private/junnf0jtndjxlcdzxdnjdg
+22:17  Guest8698: "that.imageEl.onload is not a function" thats what I thought but got that error for some reason
+22:18  eboyjr: You don't call onload()
+22:19  Guest8698: ahh ok I see now thanks eboyjr
+22:19  eboyjr: draginx: you absolutely NEED to use json_encode() to pass PHP variables to Javascript, always.
+22:19  draginx: eboyjr: I'm not passing json data..
+22:19  draginx: just simply an integer
+22:21  eboyjr: draginx: Still, use json_encode... what if it is undefined? You will get var blah = ;
+22:21  draginx: it will *never* be undefined
+22:21  draginx: the code is right
+22:21  draginx: the functions calculate differently
+22:21  draginx: im trying to figure out exactly *where*
+22:22  eboyjr: One is mb_strlen and one is strlen
+22:23  eboyjr: What does h() do?
+22:23  draginx: Right mb_strlen is only when dealing with utf8- i utf8_decode
+22:23  draginx: h = htmlspecialchars
+22:23  draginx: but im not using h to calculate >< only to present data
+22:24  draginx: http://www.lettercount.com/ when I copy + paste the var_dump of $sql->data[1] I get "301" rather than "308"
+22:25  Guest8698: eboyjr you made my life much easier twice today - so thank you very much.
+22:25  eboyjr: You want htmlentities() instead for that
+22:25  eboyjr: twice? np
+22:25  eboyjr: youre welcome
+22:25  draginx: eboyjr: that doesnt solve the current problem that i'm dealing with though
+22:25  Guest8698: boyjr - yer before you told me to add this as a var ethat
+22:26  eboyjr: draginx: What is and contents of $sql->data[1]
+22:26  eboyjr: ah
+22:26  draginx: eboyjr: string(308) "Never really had a problem with this before but ... Your message may only be up to 4,000 characters long. Would be good to have a character counter next to the "Post New Thread" button just so we can know we aren't going over the max characters. Spent ages cutting down my post and ended up giving up."
+22:26  eboyjr: s/and/the/ what am i thinking
+22:26  draginx: as u can see PHP says 308 but JS everywhere says 301 with that
+22:26  eboyjr: draginx: I recommend not calculating the length in PHP, just javascript
+22:27  draginx: hmm so then I'd have to do a calculate onload meh
+22:27  draginx: but then i need to process the data in PHP after I post
+22:27  eboyjr: Just do var data = (<?php echo json_encode($sql->data[1]); ?>);
+22:28  eboyjr: Will be much simpler
+22:28  draginx: which would give me innacurate results *sighs* why cant they just play nicely? is that *really* to hard to ask
+22:28  eboyjr: You already have $() in jquery for that
+22:28  draginx: hmm
+22:28  draginx: i dont see how this fixes my problem but ill give it a shot
+22:28  kicken: draginx, if I copy/paste that into both JS and PHP I get 301 from both
+22:29  draginx: kicken: theres two newlines in there… ugh
+22:29  eboyjr: so 303
+22:29  eboyjr: weird
+22:29  eboyjr: This is a PHP issue
+22:29  Dantman: draginx, do you think you have any multibyte characters in there?
+22:29  draginx:   var data = ("Never really had a problem with this before but ... \r\n\r\nYour message may only be up to 4,000 characters long.\r\n\r\nWould be good to have a character counter next to the \"Post New Thread\" button just so we can know we aren't going over the max characters. Spent ages cutting down my post and ended up giving up.");
+22:29  draginx: just newlines
+22:29  draginx: I got #php telling me its a #js issue and #js telling me its a #php issue lol
+22:30  eboyjr: Ohhh \r is your problem
+22:30  eboyjr: Its a js issue
+22:30  Dantman: It's probably more of a difference in correct functionality issue... or whitespace not being transfered
+22:30  draginx: :P ok when I encode it in JSON it works fine
+22:30  eboyjr: More specifically a browser issue
+22:30  draginx: Dantman: it's trimmed
+22:30  eboyjr: I bet it would work in Opera
+22:31  draginx: eboyjr: it works with the JSON data
+22:31  Dantman: draginx, I meant by the \r\n
+22:31  eboyjr: Yes because json properly encodes \r\n
+22:31  eboyjr: Always use json_encode
+22:32  Dantman: You may want to be wary about multibyte characters too
+22:32  draginx: eboyjr: ok so…. when I'm doing the keyup() function what should I use?
+22:32  draginx: and does ]r]n count is 4 chars or just 1?
+22:32  eboyjr: Almost better to just use javascript and never use things like <input value="<?php echo htmlentities($d, ENT_QUOTES, "utf-8"); ?>" />
+22:32  eboyjr: \r\n is 2
+22:32  draginx: hmmm for both php and js?
+22:32  eboyjr: Yes
+22:34  draginx: eboyjr: new problem http://pastie.org/private/x3pi1jdf3ohbdc6slqo3q both initially get the correct data
+22:34  draginx: but then when I do the .leyup() it does the math wrong O_o
+22:35  draginx: it gets "308" and when I do keyup it gets "305"
+22:35  eboyjr: $("#message").keyup(function() { $("#chars_left").text(format(6000-$(this).val().length)) });
+22:35  draginx: im assuming it has to do with the \r\n issue again would I have to parse the .val() into json again?
+22:35  eboyjr: Don't regex out the value of #chars_left
+22:35  draginx: im not
+22:35  draginx: its a new pastie
+22:36  daedhel: i'm having a problem with a particular script, autoheght.js . My problem must be fairly simple. I tansfered a site from a server to another, and the script stopped working. here is the adress:
+22:36  daedhel: http://cdcsherbrooke.org/blogue.html
+22:36  daedhel: the script uses jquery
+22:36  Pilate: thats because the addresses in the source are relative, not absolute
+22:36  daedhel: http://www.lost-in-code.com/programming/jquery-auto-iframe-height/
+22:37  daedhel: Pilate, I "sed"ed all the sources to the new adress
+22:37  Pilate: well wheres the new address
+22:38  eboyjr: draginx: http://pastie.org/private/qxtbqy7yrh60yjgoaxmpfa
+22:38  eboyjr: .keyup() is the way to trigger keyup() right?
+22:38  daedhel: Pilate, if you look at the source and try to load the scripts adresses, you will see that the new adresses work
+22:39  draginx: eboyjr: wow that worked O_o ok thanks :)
+22:39  draginx: yup
+22:39  eboyjr: Great :)
+22:39  draginx: u got a PP addy? buy you  abeer
+22:39  eboyjr: no need, it was too small of help
+22:39  draginx: thanks :) appreciate it
+22:39  eboyjr: mhm.
+22:40  daedhel: Pilate, do you see any adress that would be faulty?
+22:41  Pilate: not without the actual page, nobody can help you
+22:48  daedhel: Pilate, I posted it higher
+22:48  daedhel: http://cdcsherbrooke.org/blogue.html
+22:51  apeiros: sorry to ask again, but I didn't get an answer 2h ago...
+22:51  apeiros: what's the canonical way to check whether an object is an Array? `obj instanceof Array`, `obj.constructor == Array` or even something else?
+22:52  eboyjr: v8> typeof []
+22:52  v8bot: eboyjr: "object"
+22:52  eboyjr: not that ;)
+22:53  apeiros: yeees, with typeof you'd even confuse it with null :-p
+22:53  eboyjr: isntanceof is probably the way to go.
+22:53  apeiros: js> typeof(null)
+22:53  gbot2: apeiros: "object"
+22:53  kicken: I use instanceof
+22:53  eboyjr: typeof null
+22:53  eboyjr: Why would you need to check if an object is an array?
+22:53  Alex3000: instanceof return Array?
+22:53  apeiros: eboyjr, because the behaviour is entirely different eboyjr
+22:54  Guest8698: is there a problem with ie and .onload ?
+22:54  apeiros: with a non-null, non-array object I iterate using for(property in object) and test for own property
+22:54  eboyjr: arrays don't do* anything, apeiros
+22:54  apeiros: eboyjr, why do you ask if you don't want to listen (read) the whole answer? :)
+22:55  apeiros: anyway, rest of the answer: with arrays, I use length and iterate with for(i=0; i<len; i++), no further checks.
+22:56  apeiros: it's for the implementation of a hashmap that accepts arbitrary objects as key, not just strings.
+22:56  eboyjr: Ah I just think you should haven to check... you should know ahead-of-time whether something is an array or object, but that's just me
+22:56  Alex3000: [] instanceof Array == true
+22:57  apeiros: eboyjr, for the common case I concur. one should normalize the input.
+22:57  eboyjr: v8> var a = []; a.foo = 'bar'; a.push(3); a.push(4); a;
+22:57  v8bot: eboyjr: [3, 4]
+22:57  eboyjr: v8> var a = []; a.foo = 'bar'; a.push(3); a.push(4); a.foo
+22:57  v8bot: eboyjr: "bar"
+22:58  apeiros: hrm, good point.
+22:58  Alex3000: console.dir(a)
+22:58  Alex3000:  	
+22:58  Alex3000: 0
+22:58  Alex3000: 	3
+22:58  Alex3000: 	
+22:58  Alex3000: 1
+22:59  eboyjr: Alex3000: ?
+22:59  Alex3000: using firebug
+22:59  Alex3000: console.dir(a)
+22:59  Alex3000: return all
+23:00  daedhel: Pilate, did you see the link?
+23:00  Alex3000: such as arrays and properts
+23:02  daedhel: then i'll reask the question, maybe someone else can answer
+23:02  daedhel: i'm having a problem with a particular script, autoheght.js . My problem must be fairly simple. I tansfered a site from a server to another, and the script stopped working. here is the adress:
+23:02  daedhel: http://cdcsherbrooke.org/blogue.html
+23:03  daedhel: the script uses jquery
+23:03  daedhel:  here is the instruction for the script : http://www.lost-in-code.com/programming/jquery-auto-iframe-height/
+23:08  eboyjr: `doesn't work
+23:08  jsBot: doesn't work: What do you mean it doesn't work?  What happens when you try to run it?  What's the output?  What's the error message?  Saying "it doesn't work" is pointless.
+23:14  daedhel: that's really driving me crazy
+23:14  daedhel: it just makes no sense
+23:15  daedhel: all the links are ok, the scripts are there, acessible
+23:15  daedhel: they are loaded
+23:15  daedhel: but the scripts don't work
+23:15  daedhel: while they were working in the previous server
+23:17  kicken: daedhel, if you check the page in firefox you have errors
+23:17  kicken: Error: illegal character
+23:17  kicken: Source File: http://cdcsherbrooke.org/blogue.html
+23:17  kicken: Line: 1
+23:17  kicken: Source Code:
+23:17  kicken: ”resizeFrame(document.getElementById(‘blog’))”
+23:18  daedhel: kicken, thanks for checking
+23:18  kicken: You also seem to have a random HTML link in your script tag
+23:18  kicken: <a href="./contacts.html"">Contacts<span>Les coordonnées pour nous joindre.</span></a>
+23:20  eboyjr: You need to use ' and " for quotes, not ” and ‘
+23:20  daedhel: kicken, how is that a random HTML link ?
+23:20  kicken: it doesn't belong there.
+23:21  daedhel: omg
+23:21  daedhel: I don't understand
+23:21  kicken: in your piwik script block
+23:21  daedhel: ok
+23:22  kicken: you have that html link in there inside the script tags.
+23:22  kicken: it shouldn't be t here
+23:22  daedhel: well piwik is not really critical... in fact I should remove it altoghether
+23:23  daedhel: there, no more piwik
+23:23  daedhel: http://cdcsherbrooke.org/blogue.html
+23:23  daedhel: my problem is still there tho
+23:24  kicken: You still have the error from the quotes.
+23:24  kicken: and also a permission denied error
+23:24  kicken: Error: Permission denied for <http://cdcsherbrooke.org> to get property HTMLDocument.body from <http://www.cdcsherbrooke.org>.
+23:24  kicken: Source File: http://cdcsherbrooke.org/js/autoHeight.js
+23:24  kicken: Line: 13
+23:26  daedhel: kicken, omg thanks
+23:26  daedhel: kicken, what do you use to see that?
+23:26  kicken: firefox error console.
+23:27  kicken: Tools -> Error Console (CTRL+SHIFT+J)
+23:30  daedhel: kicken, do you have an intuition on what it would mean?
+23:30  kicken: the permission denied error?
+23:30  daedhel: yes
+23:32  daedhel: kicken, it works if you use www.cdcsherbrooke.org but not if you use cdcsherbrooke.org
+23:32  kicken: that's what the permission denied error means
+23:33  kicken: google the same origin policy for javascript
+--- Log closed Mon Nov 29 08:19:23 2010

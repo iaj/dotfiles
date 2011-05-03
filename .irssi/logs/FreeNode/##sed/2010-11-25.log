@@ -1,0 +1,56 @@
+--- Log opened Thu Nov 25 08:25:10 2010
+--- Log closed Thu Nov 25 08:25:10 2010
+--- Log opened Thu Nov 25 08:30:32 2010
+08:30 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+08:32 --- Channel ##sed was synced in 112 seconds
+09:22  sabat: I need to add "blacklist nouveau" to the file /etc/modprobe.d/blacklist.conf using a script, is there a way I can do that with sed? I am assuming so
+09:22  sabat: I tried doing it myself, but it just added it to the end of the last line, instead of adding a line and entering it.
+09:23  sabat: I'm amazed with the power of sed, but it's a pain to tame :)
+09:24  sabat: for a rookie like me at least
+10:22  geirha: sabat: echo "new line" >> file
+15:38  grepper: I have a log containing lines like: "frame=   16 fps=  0 q=2.0 size=     126kB time=0.48 bitrate=2150.4kbits/s dup=2 drop=0"
+15:39  grepper: how would I extract just the numerical value after the bitrate= ?  ( in this case 2150.4 )
+15:43  Riviera: 4# sed '/.*bitrate=\([.[:digit:]]*\).*/!d;s//\1/' <<< 'frame=   16 fps=  0 q=2.0 size=     126kB time=0.48 bitrate=2150.4kbits/s dup=2 drop=0'
+15:43  shbot: Riviera: 2150.4
+15:47  grepper: wow, thanks
+15:47  Riviera: :)
+15:47  grepper: sed is black magic to me
+15:48  Riviera: Maybe because its syntax is very minimalistic; apart of that, it's quite a trivial tool.
+15:49  grepper: maybe someday things will sink in
+15:50  Riviera: the question maight rather be if it's worth bothering, which at least I'd definitely answer with "no, other, more powerful tools are easier"
+15:52  grepper: what other tool would you use for the parsing above ?
+15:52  Riviera: python for example
+15:52  grepper: with re ?
+15:52  Riviera: either with re or with simple string routines
+15:52  grepper: well, its a bash shell script, so probably sed is preferable
+15:52  Riviera: or maybe just awk
+15:53  Riviera: also easier, but sadly also a bit limited
+15:53  Riviera: let's try
+15:53  grepper: I was doing it with awk before, but ffmpeg changed the syntax of the line, so my expression was failing.
+15:53  grepper: bitrates=$(awk -F= '/^frame=/ {gsub("kbits/s", ""); print $NF}' "$LOG_FILE")
+15:54  grepper: but then they added some fields beyong the bitrate= part, so I was getting 0's for the result
+15:54  Riviera: 4# awk 'match($0, /bitrate=[[:digit:].]*/) { print substr($0, RSTART + length("bitrate="), RLENGTH - length("bitrate=") }' <<< 'frame=   16 fps=  0 q=2.0 size=     126kB time=0.48 bitrate=2150.4kbits/s dup=2 drop=0'
+15:54  shbot: Riviera: awk: match($0, /bitrate=[[:digit:].]*/) { print substr($0, RSTART + length("bitrate="), RLENGTH - length("bitrate=") }
+15:54  shbot: Riviera: awk:                                                                                                                 ^ s
+15:54  shbot: Riviera: yntax error
+15:54  Riviera: Damn!
+15:54  Riviera: :)
+15:54  Riviera: 4# awk 'match($0, /bitrate=[[:digit:].]*/) { print substr($0, RSTART + length("bitrate="), RLENGTH - length("bitrate=")) }' <<< 'frame=   16 fps=  0 q=2.0 size=     126kB time=0.48 bitrate=2150.4kbits/s dup=2 drop=0'
+15:54  shbot: Riviera: 2150.4
+15:55  grepper: hm, not sure that is more simple :P
+15:55  grepper: nice though
+15:55  Riviera: hehe, well, it's at least a bit less cryptic 8)
+15:56  grepper: oh, is it possible to fine tune that sed expr so that it only works on lines beginning with 'frame=' ?
+15:56  Riviera: sure
+15:56  grepper: probably not needed, but who knows what will be in the log
+15:56  Riviera: sed '/^frame=.*bitrate=\([.[:digit:]]*\).*/!d;s//\1/'
+15:59  grepper: awesome, thanks so much Riviera
+15:59  Riviera: welcome, welcome :)
+--- Log closed Thu Nov 25 17:22:01 2010
+--- Log opened Thu Nov 25 17:22:23 2010
+17:22 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+--- Log closed Thu Nov 25 23:41:49 2010
+--- Log opened Thu Nov 25 23:47:20 2010
+23:47 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+23:49 --- Channel ##sed was synced in 117 seconds
+--- Log closed Fri Nov 26 00:00:49 2010

@@ -1,0 +1,241 @@
+--- Log opened Mon Nov 22 00:00:51 2010
+00:08 --- mren is now known as mren|off
+01:56  Valodim: oh awesome, someone finally did the syntax hilighting thing from fish
+02:00  teratorn: Valodim: where?
+02:02  Valodim: https://github.com/Valodim/oh-my-zsh/commit/ed64bd9efeee5f96e321a1933ca23e139c13de89
+02:03  Valodim: it's not mine, I just couldn't find the link to the original commit within 30 seconds :P
+02:14  teratorn: pretty nifty
+03:22  rogutes: Hi. Is there a completion command/option which lets one expand =ls into /bin/ls?
+03:23  rogutes: Sorry, forget the question, there is some permission issue here...
+03:23  fow: rogutes, you mean setopt equals ?
+03:23  fow: ah
+--- Log closed Mon Nov 22 11:20:31 2010
+--- Log opened Mon Nov 22 11:20:52 2010
+11:20 --- Users 154 nicks [0 ops, 0 halfops, 0 voices, 154 normal]
+11:21 --- Channel #zsh was synced in 69 seconds
+--- Log closed Mon Nov 22 12:38:06 2010
+--- Log opened Mon Nov 22 12:38:33 2010
+12:38 --- Users 157 nicks [0 ops, 0 halfops, 0 voices, 157 normal]
+12:39 --- Channel #zsh was synced in 74 seconds
+13:27  cYmen: I don't have history-incremental-pattern-search-backward bound to any key. Can I execute it some other way?
+13:31  ft: M-x
+13:31  ft: (if you're using emacs like keys)
+13:39  cYmen: why is there no beginning search for pattern?
+13:39  cYmen: Not that I'm entirely sure what the difference is...
+13:54  bapt: is there a way to get a file descriptor from a fifo 
+13:54  bapt: to be able to use zselect for example
+14:00  cYmen: I'm still sad that ssh host completion is gone. Are there any new methods to use it?
+14:07  tlonim: cYmen: why/how gone ?
+14:07  tlonim: i just define it based on a file which has all my hostnames
+14:08  cYmen: tlonim: Well, names used to be added automatically because ssh put them in the known_hosts file.
+14:09  tlonim: cYmen: what  changed now ?
+14:09  tlonim: the known_hosts file is crypted ?
+14:09  cYmen: It doesn't store plaintext hostnames anymore..
+14:09  tlonim: in mine it is a plaintext
+14:09  tlonim: cYmen: that is configurable 
+14:09  cYmen: Yeah, there's a config switch for that.
+14:10  cYmen: Do you know why they changed it?
+14:10  cYmen: I assumed there was a reason and it shouldn't be changed back. ;)
+14:10  tlonim: cYmen: who they ? it is configured by distros generally...
+14:10  tlonim: it is a choice made by maintainers of your openssh package...
+14:10  cYmen: I should probably read up on that before going on. :)
+14:11  et: cYmen: the purpose is that you can't look at the hosts you've been connecting to by looking at the known hosts ...
+14:12  cYmen: Hm.
+14:12  tlonim: but generally known_hosts should be protected more by unix perm than cryption..IMO
+14:12  cYmen: I also have the machine in question in my .ssh/config but it includes a wildcard. Can I make zsh understand that?
+14:14  et: tlonim: the point is, if someone broke your account he shouldn't be able to try your keys on the machines you've connected to
+14:14  et: cYmen: understand it how?
+14:14  tlonim: et: aha.. makes sense.. to prevent propagation of vuln..
+14:15  cYmen: et: I get the point, yes. Thanks for the explanation.
+14:16  cYmen: Any idea about getting .ssh/config to work?
+14:16  et: cYmen: the question was about < cYmen> I also have the machine in question in my .ssh/config but it  includes a wildcard. Can I make zsh understand that?
+14:17  et: what do you want zsh to do? it's hard to complete something that has a wildcard in it
+14:17  cYmen: True.
+14:18  cYmen: I was thinking it could match whatever I type to the options in there and complete as soon as only one is availabe.
+14:18  et: you could just put something into .ssh/config that stops it from hashing the hostnames
+14:19  et: (if you want completion, you'll store them somewhere in plaintext anyway)
+14:19  cYmen: Both true.
+14:19  cYmen: And of course it would be easier.
+14:19  cYmen: I'll ask on the mailing list. I'm curious about it now. :)
+14:19  cYmen: Maybe I should figure out how to write completion scripts...
+14:49  bapt: humm anyone knows about zselect
+14:50  bapt: when I use zselect on a tcp socket it works greate 
+14:50  bapt: great
+14:50  bapt: but when I use it on a fifo it always return saying there is data to be read on the fd 
+15:09  teratorn: bapt: how are you getting an fd for an open()'ed fifo?
+15:10  bapt: integer myfd
+15:10  bapt: exec {myfd}<~/my/patch/to/fifo
+15:10  bapt: it works as I can read -eu ${myfd}
+15:14  cYmen: I think I have a problem. I don't even have ssh's HashKnownHosts set.
+15:15  cYmen: Ah, found it.
+15:15  teratorn: bapt: sounds like you might want to use a real programming language
+15:15  teratorn: bapt: what are you trying to do?
+15:17  bapt: teratorn: to make a cuses frontend to some daemon
+15:17  bapt: teratorn: I want to do it in zsh it would too much easy in other language
+15:18  teratorn: good reasoning
+15:18  teratorn: you are sure that it *is* a fifo, not a unix domain socket?
+15:18  teratorn: I guess you are
+15:19  bapt: yes this is a fifo
+15:20  bapt: I would have loved unix socket 
+15:40  cYmen: bapt: You want to program curses with zsh?
+15:42  teratorn: cYmen: he is a crazy person
+15:47  ft: what do you mean "want to"?
+15:47  ft: bapt wrote a feed reader using the zsh/curses module. :)
+15:49  bapt: this time it is a frontend for ii
+15:49  bapt: cYmen: programming curse with zsh it just <3
+15:50  bapt: got my problem with zselect (not the fix) the problem is from select(2) and fifo
+15:50  ft: bapt: using ircII or something else is too easy again, huh? :)
+15:51  bapt: ft: I use irssi but I'm fed up with the glib dependency
+15:52  ft: okay. :)
+15:52  cYmen: No, not okay! :)
+15:54  bapt: cYmen: why not okey ?
+15:54  bapt: :)
+15:54  bapt: it more important it is fun
+15:54  ft: he's right. just okay is not enough. :)
+15:55  ft: yay! go ahead! post screenshots and code when you're done! :)
+15:55  bapt: sure I will
+15:55  bapt: cYmen: I also wrote a mixer (for freebsd) with zsh/curses
+15:56  cYmen: You mean like alsamixer?
+15:56  bapt: ft: do you know how opening a file in read/write with zsh (like open(...,O_RDWR)
+15:56  bapt: cYmen: I mean http://blog.etoilebsd.net/resources/zmixer.png
+--- Log closed Mon Nov 22 16:05:28 2010
+--- Log opened Mon Nov 22 16:11:23 2010
+16:11 --- Users 155 nicks [0 ops, 0 halfops, 0 voices, 155 normal]
+16:11  bapt: cYmen: and funny to do
+16:12 --- Channel #zsh was synced in 121 seconds
+--- Log closed Mon Nov 22 16:41:52 2010
+--- Log opened Mon Nov 22 16:42:11 2010
+16:42 --- Users 152 nicks [0 ops, 0 halfops, 0 voices, 152 normal]
+16:43 --- Channel #zsh was synced in 70 seconds
+--- Log closed Mon Nov 22 17:41:43 2010
+--- Log opened Mon Nov 22 17:42:07 2010
+17:42 --- Users 156 nicks [0 ops, 0 halfops, 0 voices, 156 normal]
+17:42 --- Server: [card.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+17:43 --- Channel #zsh was synced in 73 seconds
+18:03  Mikachu: bapt: you're aware there is a zsh irc client too?
+18:07  cYmen: MADNESS!
+18:10  bapt: Mikachu: yes I am but it is not UI friendly 
+18:10  bapt: Mikachu: I've dropped ii and uses the zirc code and add curses on top of if (basically)
+18:10  bapt: it begins to work quite whell
+18:14  bapt: and add multiserver features
+18:22  Mikachu: heh
+18:22  bapt: it will be irssi like ui
+18:22  Mikachu: i guess adding scripting support will be pretty easy ;)
+18:24  bapt: :)
+18:24  bapt: Mikachu: I'll a recode feature using iconv
+--- Log closed Mon Nov 22 18:31:26 2010
+--- Log opened Mon Nov 22 18:31:48 2010
+18:31 --- Users 154 nicks [0 ops, 0 halfops, 0 voices, 154 normal]
+18:31  cYmen: bapt: So how far along are you?
+18:32  bapt: cYmen: I think tomorrow I will connect here :)
+18:32 --- Channel #zsh was synced in 72 seconds
+18:44  cYmen: hm..zirc is a pretty cool hack
+18:47  bapt: :)
+18:56  glphvgacs: hello,
+18:56  glphvgacs: i've this in .zshrc
+18:56  glphvgacs: zle-line-init(){
+18:56  glphvgacs:        zle history-incremental-search-backward }
+18:56  glphvgacs:        #zle -K vicmd;}
+18:56  glphvgacs: zle -N zle-line-init
+18:56  glphvgacs: bindkey -M isearch "^I" vi-repeat-search
+18:56  glphvgacs: # bindkey -M isearch "^I" history-incremental-search-forward
+18:56  glphvgacs: 1. it _almost_ does what i want it to do which is to start off on bck-i-search. the idea is that with cli as the main interface, user have issued his most commonly used commands already and so it makes more sense to look into .histfile (or whereever) first. as a result the system is now screaming. well, it's all great util user wants to issue a never-issued-before command. one way to do this is to get out of bck-i-search and do it there (viins, vicmd
+18:56  glphvgacs: 2. the commented lines are what i had before. with all my _elegant_ solutions there are still situations when i would still want to edit a command and that's when i would prefer to go back to vicmd (it's a matter of muscle mm really). but with my current setting:
+18:56  glphvgacs:        bindkey -M isearch '^[' send-break
+18:56  cYmen: tl;dr
+18:56  glphvgacs: hitting esc gets me out of bck-i-search and dumps me into emacs! i even tried with
+18:56  glphvgacs:        bindkey -v
+18:56  glphvgacs: but that's half-baked because i esc bck-i-search into viins and not vicmd. i would appreciate any help with this one also and thanks in advance.
+18:56  cYmen: go pastebomb somebody else
+18:57  glphvgacs: sorry
+18:57  ft: heh, somebody just pasted his Email. :)
+18:58  cYmen: ft: Did the mailinglist not reply fast enough? How dare they!
+18:58  ft: btw. break lines at 70 characters or so. :)
+19:10  jrm222: Hi, I'm trying to update all symbolic links that point to a certain path (because the top directory name in the path pointed to has been changed).  This is what I have so far:  find -L . -type l -lname "/home/joey*" -exec echo {} +.  This will print all the links.  I can | this to xargs to execute ln for each link found, but that's where I'm a little stuck.  Can anyone suggest a good way to do this.  
+19:11  jrm222: Note, I'm on FreeBSD so the find utitlity might be a little different than on linux or other OSes.
+19:14 * cYmen pokes around.
+19:17  cYmen: jrm222: So you want to delete the old links and create new ones?
+19:19  jrm222: Yeah, with the updated path, so I'll have to have a sed in there somewhere I guess.
+19:19  cYmen: hm...I was hoping to get somewhere from this:
+19:19  cYmen: for file in **/*(@); do echo $file; echo $file(:A); done;
+19:19  cYmen: but :A always gives a full path
+19:27  jrm222: cYmen: Your zsh way was very helpful.  I'm very close. I have: for i in **/*(@); do POINTS_TO=`readlink $i`; NEW_POINTS_TO=`echo $POINTS_TO | sed 's/\/home\/joey/~\//'`; echo $i $POINTS_TO $NEW_POINTS_TO; done
+19:29  jrm222: This actually would work if I just put the ln in there, but I'd like to include a conditional to test if POINTS_TO contains "/home/joey/".  Suggestions?
+19:31  thrig: | grep ... | or use a conditional (man test)
+19:32  jrm222: thanks thrig
+19:33  jrm222: test doesn't seem to support pattern matching though..
+19:34  thrig: sure it does. run a shell command, or use the ZSH pattern matching in a conditional.
+--- Log closed Mon Nov 22 19:41:31 2010
+--- Log opened Mon Nov 22 19:41:52 2010
+19:41 --- Users 158 nicks [0 ops, 0 halfops, 0 voices, 158 normal]
+19:42 --- Channel #zsh was synced in 70 seconds
+19:47  cYmen: jrm222: Here is an example of using pattern matching: http://paste.lisp.org/display/116920
+20:00  glphvgacs: cYmen: i just wanted to be explain correctly. (can't type and think english very fast :)
+20:01  glphvgacs: ft: i though i would leave it up to reciever's mail client to break the line. obviously not a good idea
+20:11  thrig: whatever you do, Outlook will do something wrong with the e-mail
+20:13  ft: glphvgacs: yes, my mua does support breaking likes on its own. but most newsgroups and mailing lists I know consider manually breaking lines somewhere around 70 - 75 characters good practice.
+20:13  Mikachu: it's annoying when the client breaks a word earlier than the sender did
+20:14  Mikachu: so
+20:14  ft: Also, you're saving me the trouble of hitting two keys (W Q). :-)
+20:14  Mikachu: you end up with paragraphs like this
+20:16  ft: That usually happens when broken muas try to quote messages.
+20:24  glphvgacs: ft: i shall :set wrap in vi. that should save *nix people some headache. for outlook users, my apologies in advance
+20:25  ft: :)
+20:40  jrm222: Thanks cYmen.  I just saw your example now, but I did something very similar with a case statement.  Hopefully my final question is this: Can I negate the case match?  I think it would be something in the regular expression otherwise I use an if-statement.  for i in **/*(@); do POINTS_TO=`readlink $i`; case !($POINTS_TO in /home/joey/*)) continue;; esac; NEW_POINTS_TO=`echo $POINTS_TO | sed 's/\/home\/joey/~\//'`; echo $i $POINTS_TO $NEW_POINTS_TO; don
+20:49  jrm222: That's not quite what I meant to paste in.  The !($POINTS_TO in /home/joey/*) doesn't work.  I need to negate the /home/joey/*, so in pseudo code something like $POINTS_TO NOT_IN /home/joey/*
+20:57  jrm222: nevermind.. I'm an idiot.
+20:57  jrm222: :)
+21:06  jrm222: So.. finally got it.  Thanks for you help cYmen.  If you ever want to update all symbolic links in a directory pointing to some pattern: for i in **/*(@); do POINTS_TO=`readlink $i`; if [[ $POINTS_TO == /home/joey/* ]]; then; NEW_POINTS_TO=`echo $POINTS_TO | sed 's/\/home\/joey\//~\//'`; ln -fs $NEW_POINTS_TO $i; fi; done;
+21:06  cYmen: Well, I would do it without sed, of course. ;)
+21:11  jrm222: How cYmen ?
+21:12  cYmen: Oh, basically zsh can do everything that sed does as well. I do however not have a clue what the easiest way would be in this case.
+21:12  cYmen: I usually only ask questions in here. ;)
+21:12  jrm222: ah.. :)
+21:53 --- buntfalke_ is now known as buntfalke
+22:16  hagabaka: I have two packages which both provide precmd and preexec definitions. what's an elegant way to combine them rather than letting one override the other?
+22:17  hagabaka: the packages both provide zshrc files, so I wonder if I can write my own zshrc to combine them without copy/pasting code from them
+22:18  hagabaka: for example can I do something to store the current precmd() to a different name, then define a new precmd() and call the stored one in it?
+22:20  ft: precmd_functions[]
+22:20  ft: ditto for preexec
+22:21  hagabaka: with precmd_functions do I have to copy/paste code from the existing zshrc files, or modify them?
+22:22  ft: both packavges should define a function and stick it in there.
+22:23  hagabaka: can I do "source zshrc1; precmd_functions += precmd; source zshrc2; precmd_functions += precmd"?
+22:24  ft: nope
+22:24  hagabaka: aww
+22:25  hagabaka: I wonder why they didn't use precmd_functions in the beginning, is it a new feature?
+22:25  ft: newish.  not brand new.
+22:26  ft: you could maybe source the files and then do something like:
+22:27  ft: source foo; functions[precmd_foo]=${functions[precmd]}
+22:27  ft: source bar; functions[precmd_bar]=${functions[precmd]}
+22:27  ft: unset "functions[precmd]"
+22:28  ft: precmd_functions+=( precmd_{foo,bar} )
+22:28  ft: untested.
+22:28  hagabaka: let me try
+22:29  peth: unfunction?
+22:29  ft: unfunction is a good idea. :)
+22:30  hagabaka: unfunction precmd?
+22:30  ft: yes
+22:30  ft: instead of the unset
+22:33  hagabaka: cool, it works :)
+22:36  hagabaka: and for two files, just "source foo; precmd_functions+=precmd; source bar" works too
+22:39  ft: does it? because precmd_functions only tracks names, not code, AFAIR.
+22:40  hagabaka: it's working for me
+22:44  hagabaka: oh never mind, it's because one of my packages puts its zshrc in /etc/zsh/zshrc, so it was used even if my ~/.zshrc didn't use it
+22:49  hagabaka: and if I move it from /etc/zsh/zshrc and source the new path, your solution didn't work either :(
+22:58  ft: hagabaka: I'd have to try myself, but I can't right now.
+22:59  hagabaka: actually yours still works, I was writing the precmd_functions+={precmd_foo} as precmd_functions+=precmd_foo
+23:00  hagabaka: *(precmd_foo)
+23:01  hagabaka: but why wouldn't precmd_functions+=(${functions[precmd]}) work?
+23:01  ft: precmd_functions is an array of names, not code.
+23:02  hagabaka: oh
+23:07  hagabaka: is it not possible to have an array of code?
+23:07  ft: not really.
+23:07  hagabaka: all right
+23:08  hagabaka: thanks a lot for your help
+23:08  ft: you're welcome.
+--- Log closed Mon Nov 22 23:41:24 2010
+--- Log opened Mon Nov 22 23:41:49 2010
+23:41 --- Users 151 nicks [0 ops, 0 halfops, 0 voices, 151 normal]
+23:42 --- Channel #zsh was synced in 73 seconds
+23:57 --- mren is now known as mren|off
+--- Log closed Tue Nov 23 00:00:02 2010

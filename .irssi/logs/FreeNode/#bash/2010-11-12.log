@@ -1,0 +1,801 @@
+--- Log opened Fri Nov 12 00:50:48 2010
+--- Log closed Fri Nov 12 00:57:32 2010
+--- Log opened Fri Nov 12 01:10:34 2010
+01:10 --- Users 502 nicks [0 ops, 0 halfops, 0 voices, 502 normal]
+--- Log closed Fri Nov 12 01:10:42 2010
+--- Log opened Fri Nov 12 01:12:31 2010
+01:12 --- Users 502 nicks [0 ops, 0 halfops, 0 voices, 502 normal]
+01:13 --- Channel #bash was synced in 84 seconds
+01:15  mattcen_: Hi all, is it possible to prevent Tilde Expansion from being displayed on the command line when tab is pressed? That is, I would like 'ls ~/Mu<TAB>' to be displayed (and more importantly stored in history) as 'ls ~/Music/' instead of 'ls /home/mattcen/Music/'
+01:19  krzie: mattcen_, http://lmgtfy.com/?q=suppress+tilde+expansion
+01:21  krzie: =]
+01:22  usman: just a quick question, i use the read command in the script and when user type the input and press enter it takes the input, can it be possible that user have to press ctrl+d to finish his input
+01:23  usman: what i ment is like user might press enter more than once so is there some way on handling it
+01:24  Tramp: usman: read -d$'\004'
+01:24  geirha: usman: echo "Input your text. Ctrl+d to end."; while read -r line; do lines+=("$line"); done
+01:27  geirha: printf "You wrote:\n"; printf "%s\n" "${lines[@]}"
+01:28  geirha: In bash4 you can use readarray/mapfile instead of a loop.
+01:29  usman: Tramp: This d$'\004' works but when i press ctrl+d it displays ^D in the next line
+01:29 * mattcen_ feels slightly silly. Thanks krzie :-). For anybody interested, my proposed solution is to do the following in ~/.bashrc, so I don't have to edit any system files:   __expand_tilde_by_ref() { :; }
+01:30  Tramp: usman: sure, you type it, so it appears
+01:31  Tramp: if you type a <return> a newline appears. Why would it be different with Ctrl-D?
+01:31  usman: ahan hmm
+01:32  usman: well its not necessary that ctrl+d be needed for the input, i was thinking that maybe user can press multiple times enter key to go to new line, but i guess there is not that much i can do about this
+01:33  usman: because there is something for the input command to terminate the sequence either Enter key or ctrl+d
+01:33  usman: or someother
+01:34 --- mattcen_ is now known as mattcen
+01:37  Deltachaos: hi @all
+01:37  burntoutlamp: Hi Deltachaos
+01:37  Deltachaos: is there a tool like "tail -f" for binary files
+01:37 --- Muzer is now known as MuzerAway
+01:38  Deltachaos: i download a file and want to echo it while downloading
+01:38  Deltachaos: cat only shows the current data in the file
+02:10 --- Yvemath_ is now known as yve`
+02:25  karsten-nr: I'd like to read a bunch of lines from a here doc into a variable.  It's a list of directories to be used in a backup.
+02:26  karsten-nr: How do I get that as an environment variable?  "cat <<EOF | read ANS" didn't do it.
+02:30  usman: is this the write sytanx for adding OR is bash while $ch='q' || $ch='Q'
+02:36  Bushmills: ANS=$(cat ...  <newline> ... <newline>EOF<newline>)    would be one way,  though  using read ANS < <(cat ...    ... )  might work too
+02:37  geirha: usman: while [[ $ch = q || $ch = Q ]]; do    or just    while [[ $ch = [qQ] ]]; do
+02:38  Bushmills: but why the heredoc then, instead of assigning to variable directly?
+02:56  karsten-nr: Bushmills: Yeah, I worked around it differently.
+02:57  karsten-nr: Bushmills: foo="  <multiline string >"; bar=$(echo "$foo" | sed '/^#/d')
+02:58  geirha: Sounds like you want an array instead.
+02:58  Bushmills: why not     foo=( <newline>dir1<newline>dir2<newline>...<newline>)
+02:59  Bushmills: and then,  echo "${foo[@]}"
+03:00  Bushmills: http://scarydevilmonastery.net/snap/1289527193365227044d.png like this
+03:00  karsten-nr: Bushmills: TMTOWTSAC
+03:00  karsten-nr: Bushmills: But sure.
+03:01  karsten-nr: Next question is how to turn: /bin /sbin /usr /var/cache /var/log, etc., into the same (note different path depths) via rsync.  If I say "copy /var/log", I want to create 'var/log', not 'log/', on the target.
+03:01  K350: I want to use regular expression to read certain lines from a file in the shell. But I don't know that tool to use. For example: cat file.txt | tool <regexp> . Anyone?
+03:01 * karsten-nr is tempted to go running back to tar.
+03:02  karsten-nr: K350: "grep"
+03:02  karsten-nr: K350: grep, sed, egrep, or awk would all work.
+03:02  K350: karsten-nr: Ah, yes...thanks a lot!:-)
+03:02  karsten-nr: ... and perl, python, ruby, etc. as well if you really want to be sick.
+03:03  K350: karsten-nr: Thanks a lot. Reallly appruciated!:-)
+03:03 * karsten-nr likes the hard questions.
+03:03  K350: karsten-nr: ok I've to go. Have a nice day/evening!:-)
+04:29  avis: could anyone modify this desktop clean up script for improvements http://pastebin.com/X9wQnCwB
+04:30  twkm: probably.
+04:32  Snowie: hi all, im a noob and i beleive i finally have a script to rename all the tracks from my iphone by their mp3 metadata. it works on single tracks, but before i run it across 4G worth i was hoping someone could check it for me
+04:33  cthuluh: avis: use mkdir -p instead of checking if the directory already exists. learn how to use find instead of parsing file names
+04:33  cthuluh: !find > avis
+04:33  greybot: avis: http://mywiki.wooledge.org/UsingFind
+04:33  Snowie: Its well commented even
+04:34  cthuluh: Snowie: make a backup of your data, then read the script twice, then apply the script
+04:34  twkm: Snowie: echo mv ...
+04:34  Snowie: cthuluh, ok mate, im game, in the end, the tracks are all still on my iphone anyway. ok, here goes
+04:36  Snowie: woops, not catastrophic, but i see my mistake    for File in ../*; do  how do i set the var as the files in the pwd?
+04:37  twkm: any particular reason you wrote a script to do it, instead of using any of the hundreds of existing utilities (some of which are scripts)?
+04:37  Snowie: twkm, education, and as well as that, when i google around, none of the apps really seemed suited to what i wanted
+04:38  twkm: ahh.
+04:39  Snowie: twkm, so any way i can set the files to all in pwd?
+04:39  twkm: i don't even know what that might mean.
+04:40  Snowie: i think i get it now anyway. i need to use ./* not ../*
+04:40  cthuluh: for file in ./*; do [[ ! -f $file ]] && continue; ...; done   <  will give you only plain files
+04:41  twkm: fixing symlinks being somewhat trickier, though there's no particular reason not to rename them.
+04:42  cthuluh: the iPhone's filesystem does support symbolic links? wow, how modern! :>
+04:43  Snowie: cthuluh, it worked for me, there where no subdir in the directory i was working from. It just did it. Took me 2 days to work it out but right now it's a celebratory beer. Any recommended noobie projects?
+04:43  twkm: happily i have no idea.
+04:44  cthuluh: Snowie: projects? projetcs for whom?
+04:44  Snowie: haha, the iphone renames all the tracks to 4 capital letters. pain in the but
+04:44  Snowie: projects for someone wanting to learn some more bash
+04:44  Snowie: im feeling empowered
+04:45  cthuluh: write scripts to backup your data
+04:47  Snowie: dont really have anywhere to back up to. one disk with one lvm partition. i have attempted to resize one before and lost (luckily nothing too important) everything
+04:50  cthuluh: Snowie: remember this one: "it's when you need backups that you see that you have forgotten making backups."
+04:55  Snowie: cthuluh, lol, yup. well i might see what i can do about setting a compressed backup of all my media
+05:02  yitz_: OT: We got this setup with ~130 servers that we'd like to keep all pretty much in sync and identical and whatnot. Does anyone know of some cluster management tools that'd help manage them? Someone mentioned puppet which I gotta look into
+05:12  Snowie: i think i made my script too complicated. every time i strip junk from a var, i create a new one, but am i right in thinking that var=$var-1 will rewrite var?
+05:14  twkm: tias.
+05:17  edogawaconan: hello
+06:08  sec^nd: hello
+06:11  sec^nd: I have an array vals1=(stuff this that) and another array vals2=(somethign else this), in a for loop I have for i in 1 2; do for z in "${vals$i[@]}"; do ... done, bash says thats a bad substitution, how can use substitution like I wan tto ? (this is just a bad example, code is big and somewhat secret :3 )
+06:12  sec^nd: hmm wonder if everyone is asleep
+06:13  sec^nd: brabo: Bryanstein :D what are you doing here ?
+06:13  yitz_: !faq indirect > sec^nd
+06:13  greybot: sec^nd: http://mywiki.wooledge.org/BashFAQ/006 -- How can I use variable variables (indirect variables, pointers, references) or associative arrays?
+06:17  sec^nd: yitz_: I dont see what I'm trying to do on that page, and why do they use ${!homedir[@]} and not ${homedir[@]} ?
+06:18  sec^nd: yitz_: i'm trying to do something like this "${$box[@]}"
+06:18  yitz_: Exactly what that code does
+06:18  sec^nd: the $box is a variable holding a string and one of them is an array
+06:18  yitz_: ${!homedir[@]}
+06:18  sec^nd: ?
+06:18 * sec^nd looks again
+06:18  yitz_: Erm. ${!var} at least
+06:19 * yitz_ tries
+06:19  geirha: var=$box[@]; ... "${!var}"
+06:19 * sec^nd tries
+06:20  yitz_: Indirection doesn't work on arrays?
+06:20  yitz_: Indirection is usually a bad idea, anyhow
+06:20  sec^nd: didn't know that -.-
+06:21  sec^nd: to bad wrote code already, there should be a way around it though ^_^
+06:22  pcard: eval: ( test1() { local v="$@"; echo "[$v]"; }; test1 "abc" "123" "xyz"; )
+06:22  pcard: # ( test1() { local v="$@"; echo "[$v]"; }; test1 "abc" "123" "xyz"; )
+06:22  evalbot: pcard: [abc 123 xyz]
+06:22  pcard: why are there spaces in between each?
+06:23  sec^nd: test=(a b c); a=(1 2 3); b=(2 3 4); c=(3 4 5); for i in ${test[@]}; do echo ${$i[@]}; done
+06:23  sec^nd: bash: ${$i[@]}: bad substitution
+06:23  geirha: Because you put all args into a string
+06:23  pcard: geirha: can it be done in a simple way so that there is nothing in between
+06:24  geirha: # test() { (IFS=; echo "[$*]"; }; test abc 123 xyz
+06:24  evalbot: geirha: bash: syntax error near unexpected token `}'
+06:25  sec^nd: eval: ( test=(a b c); a=(1 2 3); b=(2 3 4); c=(3 4 5); for i in ${test[@]}; do echo ${$i[@]}; done )
+06:25  geirha: # test() { (IFS=; echo "[$*]"); }; test abc 123 xyz
+06:25  evalbot: geirha: [abc123xyz]
+06:25  geirha: !$*
+06:25  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+06:26  sec^nd: my example looks almost like my code
+06:27  pcard: yes thanks
+06:27  geirha: # test() { printf %s "$@"; }; test abc 123 xyz
+06:27  evalbot: geirha: abc123xyz
+06:28  sec^nd: ...
+06:28  geirha: !matrix
+06:28  greybot: You can simulate simple 2-dimensional matrices in bash (which only has 1-dimensional arrays) using tricks, like ${array[i*100+j]} (where "100" can be any suitably large constant).
+06:32  sec^nd: geirha: this isn't a matrix
+06:34  geirha: Too bad. Would've made it easier.
+06:35  sec^nd: test=(a b c); a=(1 2 3); b=(2 3 4); c=(3 4 5); for i in ${test[@]}; do echo $(eval echo \${$i[@]}); done
+06:35  sec^nd: :D
+06:36  geirha: err, use variable indirection rather than eval
+06:36  sec^nd: http://www.linuxquestions.org/questions/programming-9/bash-loop-over-variable-array-names-705702/
+06:37  geirha: for i in "${test[@]}"; do v=$i[@]; echo "${!v}"; done
+06:37  sec^nd: ?
+06:37  geirha: Like I showed earlier ...
+06:38  sec^nd: didnt work
+06:48  Inst: hi
+06:48  Inst: excuse me
+06:49  Inst: i'm trying to back-up files from a partition in bash
+06:49  Inst: before i have technicians reformat the disk
+06:49  Inst: i'm trying to get diff to work
+06:49  Inst: diff -r directory1 direct2 should work, right?
+06:50  Guest51149: right
+06:50  Inst: also
+06:50  Inst: i just need to confirm that the file structure is the same
+06:51  Inst: also, cp copies hidden files as well, right?
+06:52  Guest51149: no, not as far i know.
+06:52  tecnico: cp -a
+06:52  Inst: uh oh
+06:52  tecnico: I prefer rsync -a
+06:53  Inst: i'd have to use -a to copy everything?
+06:53  tecnico: -a  = archive
+06:53  tecnico: man cp
+06:54  tecnico: or you try it on a small scale test directory before you touch your important files or think you are backing up all your files... it's easy to make a simple test
+06:55  Inst: yeah
+06:55  Inst: not used to command line, or bash... just came in to arch a few days ago and only managed to get it to install 2 days ago
+06:55  tecnico: cp .hidenfile targe  works  , the cp -a is for the directory.. just in case you were trying to do cp dir/* target ... that wouldn't copy the hidden files
+06:56  Inst: yeah
+06:57  Inst: actually i need more help to remember what i need to copy right now
+06:57  Inst: and no one on freenode can help me with that
+06:57  Inst: haha
+06:57  Inst: copying personal files
+06:57  tecnico: disk space is cheap .. just sync or tar the whole thing
+06:58  geirha: # test=(a b c) a=(1 2 3) b=(2 3 4) c=(3 4 5); for i in "${test[@]}"; do v=$i[@]; echo "${!v}"; done
+06:58  evalbot: geirha: 1 2 3
+06:58  evalbot: geirha: 2 3 4
+06:58  evalbot: geirha: 3 4 5
+06:58  geirha: sec^nd: ^
+06:58  Piratero: # echo
+06:58  evalbot: Piratero: no output
+06:58  Piratero: Nice
+06:58  Inst: not that cheap :(
+06:59  tecnico: ?? are you using Panasas or something that $$$ ?
+07:01  geirha: Inst: man rsync  and/or  /join #rsync
+07:09  susenj: Hi Everyone..my question is about the commands 'whoami' and 'who am i'.  What's the difference between these two?
+07:10  twb: susenj: the former exists
+07:10  twkm: the commands are whoami and who, the latter with two arguments "am" and "i".
+07:10  twkm: both exist in some places.  neither should be assumed to exist.
+07:11  twkm: though who is at least posix.
+07:11  susenj: twkm: so what does those 2 arguments 'am' and 'i' depict?
+07:11  twkm: convenience.  use who -m if it bothers you.
+07:11  twb: If ARG1 ARG2 given, -m presumed: `am i' or `mom likes' are usual.
+07:12  twkm: if you don't like whoami use id -un instead.
+07:13  susenj: see i am finding this: http://codepad.org/ie3iu9GV
+07:14  susenj: why the outputs are different?
+07:14  twkm: they are supposed to be.
+07:15  twkm: why do you feel they should be the same?  merely because they share some characters?
+07:15  susenj: both are different users
+07:15  twb: I want a pony
+07:16  twkm: is it easier to understand they produce different results if we use their more modern names: ''who -m'' vs ''id -un''.
+07:16  twkm: have you used an suid program recently?
+07:17  susenj: didn't get you..
+07:17  susenj: i am not root
+07:17  twkm: i didn't ask if you are root.
+07:24  susenj: you said if i provide any argument (in my case : am i), -m is presumed which shows only hostname and user associated with stdin.
+07:24 --- Guest51149 is now known as tornow
+07:25  susenj: but if you consder the output, it shows the hostname..fine! but the user associated with stdin is different that what it supposed to be
+07:41 --- Nemphilis is now known as Guest46437
+--- Log closed Fri Nov 12 08:40:36 2010
+--- Log opened Fri Nov 12 08:40:59 2010
+08:40 --- Users 507 nicks [0 ops, 0 halfops, 0 voices, 507 normal]
+08:42 --- Channel #bash was synced in 83 seconds
+09:07  Cyber_Beast: How to know overall size of a folder through terminal?
+09:11  strull_: Cyber_Beast: du -s folder
+09:18  SNow_: hi guys, i have two files: /root/id1 and /root/id2 both of them consists of numeric ids. I need to find all ids in /root/id2 that are not in /root/id1
+09:19  twkm: diff
+09:23  SNow_: hmm, doesn't work like that
+09:23  SNow_: /root/id1 consists of 80k lines
+09:23  SNow_: /root/id2 conists of 380k
+09:23  SNow_: after sorting both of them and doing diff i have found still 380k lines
+09:24  twkm: if diff's output isn't handy enough, try comm.
+09:34  pgas: !faq subtract
+09:34  greybot: http://mywiki.wooledge.org/BashFAQ/036 -- How can I get all lines that are: in both of two files (set intersection) or in only one of two files (set subtraction).
+09:43  SNow_: twkm: http://p.defau.lt/?8xCk98xeQUa_JrEA5NmJPw
+09:43  twkm: problems with line noise?
+09:44  SNow_: what do you mean?
+09:44  pgas: like one file has \r\n dos line endings but not the other
+09:45  pgas: or one has spaces, the other tabs. things like that
+09:45  SNow_: I got both of the lines from echo "select ids from..." | mysql
+09:45  twkm: SNow_: the url, seems to have some line noise in it.
+09:46  pgas: SNow_: paste 2 lines that should not be in the output
+09:46  SNow_: 753876
+09:46  SNow_: 753877
+09:48  geirha: SNow_: You want comm -23 (or -13)
+09:48  SNow_: Thanks
+09:49  SNow_: doesn't help geirha the same
+09:49  SNow_: I don't see te difference
+09:49  geirha: Then there's no equal lines...
+09:51  SNow_: cat /root/domobetz.txt | grep 14987
+09:51  SNow_: 14987
+09:51  geirha: grep 14987 /root/file1.txt /root/file2.txt | cat -e
+09:52  SNow_: http://p.defau.lt/?YY8EuRzRLv9GmR7POTYdJg
+09:53  geirha: Right, so you have at least 3 identical lines
+09:54  SNow_: yeah :)
+09:54  geirha: comm -13 /root/domobet_recv_sorted.txt /root/domobetz_sorted.txt | wc -l
+09:54  SNow_: 388915
+09:54  SNow_: wc -l /root/domobetz_sorted.txt
+09:54  SNow_: 388915
+09:55  TorrBY: hi. I have a problem with this script:  http://p.defau.lt/?3f_C3uw7daTY2LbKFPccig
+09:55  TorrBY: it works in centos and doesn't in kubuntu 10.10
+09:55  TorrBY: case always return "unknown"
+09:56  pgas: problem is most likely elsewhere, anyway run your script with: bash youscript and you should be ok
+09:56  geirha: comm -13 <(sort /root/domobet_recv_sorted.txt) <(sort /root/domobetz_sorted.txt) | wc -l
+09:56  pgas: TorrBY: and sh -x yourscript will show you the problem
+09:56  SNow_: geirha: worked ;D
+09:57  TorrBY: pgas, same problem
+09:57  geirha: SNow_: That means they weren't sorted equally.
+09:57  SNow_: I did sort -n, maybe that's because of that?
+09:57  pgas: TorrBY: also your script fails for filename with spaces
+09:57  SNow_: not sort, but sort -n
+09:57  TorrBY: if I pass FNAME directly i.e. FNAME=blablabla.gz ir works
+09:57  TorrBY: it works
+09:58  geirha: TorrBY: How is the $FLIST file generated?
+09:58  pgas: TorrBY: yeah, I told you the problem is not in what you pasted
+09:58  SNow_: geirha: thank you very much!
+09:59  TorrBY: ahr, I see ^M at the end of FLIST
+10:00  pgas: TorrBY: but be aware that for doesn't loop on lines
+10:00  TorrBY: pgas, realy?
+10:01  TorrBY: geirha, it generated with:
+10:01  TorrBY:     expect -c "spawn ssh -p $RPORT $RLOGIN@$RHOST \"ls -1 $RDIR/*\"; \
+10:01  TorrBY:     expect assword; send -- \"$PASS\r\"; \
+10:01  TorrBY:     expect eof" | grep -v spawn | grep -v assword >$FLIST
+10:01  TorrBY: pgas, but it does in CentOS
+10:03  geirha: Holy crap
+10:04  TorrBY: ok, i'v found. problem is in ^M at the end of each line of FLISH
+10:04  TorrBY: geirha, yes. here is only password authorization, not by keys
+10:05  geirha: 1. Why not keys? 2. Don't ever do ls | grep | ...
+10:06  TorrBY: geirha, how to cut it from flist?
+10:06  pgas: TorrBY: no it doesn't on centos either, it loops on words separated by space tabs or newlines by default
+10:07  TorrBY: pgas, problem is in ^M at the end of each line of FLISH
+10:08  TorrBY: looks like I need to cut it
+10:08  TorrBY: or how to generate flist w/o ls | grep?
+10:08  TorrBY: in my case
+10:09  geirha: !faq 20
+10:09  greybot: http://mywiki.wooledge.org/BashFAQ/020 -- How can I find and deal with file names containing newlines, spaces or both?
+10:28 --- Knirch_ is now known as Knirch
+10:46  kotique: How do I eval a string with ${var} in it?
+10:47  erlingre: I have some problems with a bash script. The issue is explained here: http://pastebin.com/AGe1W1ue I appreciate if anyone can help!
+10:47  kotique: screw that, echo "${JOBDEF}" | sed s,\${client},${client},
+10:48  Knirch: # a='echo ${foo}' ; foo=bar ; eval $a
+10:48  evalbot: Knirch: bar
+10:48  kotique: oh, quotation again!
+10:49  kotique: Knirch, yep, thanks
+10:49  snappy: 1
+10:49  kotique: 2
+10:49  Knirch: 3
+11:00  complete: Hello everybody! So far, i use this to check if a mountpoint is active: www.gibney.org/check_if_a_mountpoint_is_active/
+11:00  complete: I wonder: wouldnt it be easier to just test /proc/mounts for a regular expression? So the whole thing can be done in a oneliner?
+11:03  taylanub: it all depends on the exact OS
+11:03  taylanub: ugh
+11:03  taylanub: !quotes
+11:03  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+11:04  complete: taylanub: ubuntu
+11:04  taylanub: the quotes around the /some/mount/point are unnecessary. but you should use them around the $mount (or not if you're sure that that variable will _never_ include whitespace etc.)
+11:05  complete: taylanub: ok added the quotes
+11:05  complete: but im more interested in making it a one-liner
+11:05  complete: maybe that look is overkill
+11:06  complete: s/look/loop
+11:06  taylanub: so ubuntu has a /proc/mounts?
+11:06  taylanub: i also can't know if it has the same format as mine
+11:06  bolt: i've opened a fifo with "exec 4<>"fifo"". is there a way to close that in one command, or do I have to close input and output separately with 4>&- and 4<&- ?
+11:07  complete: taylanub: you make things too complicated.
+11:07  taylanub: complete: ???
+11:07  taylanub: how am i supposed to know what will work on your OS
+11:07  taylanub: the script will in no way be portable anyway
+11:07  taylanub: so we'll make it shorter by relying on things specific to ubuntu
+11:08  complete: taylanub: yes, thats fine.
+11:08  taylanub: i guess grep would be the best option
+11:09  taylanub: but ubuntu might just have a tool to directly find out if a mountpoint is mounted or not
+11:10  taylanub: also, in the code you sent, you probably want 'break' instead of 'continue'
+11:10  taylanub: putting continue at the end of the loop has basically no effect at all anyway...
+11:11  complete: taylanub: ok, changed to break
+11:11  taylanub: do you know how to use grep?
+11:11  complete: yes
+11:11  complete: but im not sure how to put an if around it
+11:11 --- Inst_ is now known as Inst
+11:11  complete: # if (echo abc | grep ab)
+11:11  evalbot: complete: Missing terminating quote, bracket or keyword
+11:11  taylanub: if grep -q foobar; then bar; done
+11:12  taylanub: also, in your sample code, i would have used 'read' instead of the 'cut' stuff
+11:13  complete: # if grep -q something /proc/mounts; then echo yeah; done
+11:13  evalbot: complete: bash: syntax error near unexpected token `done'
+11:13  srakin: if - fi
+11:13  srakin: # ls /proc/mounts
+11:13  evalbot: srakin: /proc/mounts
+11:13  taylanub: it's fi, my bad
+11:14  taylanub: s/done/fi/
+11:14  complete: # if grep -q something /proc/mounts; then echo yeah; fi
+11:14  evalbot: complete: no output
+11:14  complete: interesting
+11:14  taylanub: that's how if;then;elif;fi works
+11:14  srakin: #cat /proc/mounts
+11:14  taylanub: the [ ] stuff has _nothing_ to do with it
+11:14  taylanub: # cat /proc/mounts
+11:14  evalbot: taylanub: rootfs / rootfs rw 0 0
+11:14  evalbot: taylanub: none /proc proc rw 0 0
+11:15  taylanub: # grep -q ' /proc ' /proc/mounts && echo yeah
+11:15  evalbot: taylanub: yeah
+11:15  complete: this gets better by the minute
+11:17  srakin: # IFS=$'\n' a=(</proc/mounts); for i in "${a[@]}"; do IFS=' ' b=($i); for j in "${b[@]}"; do echo -n "'$j' "; done echo; done
+11:17  evalbot: srakin: bash: syntax error near unexpected token `<'
+11:17  srakin: # IFS=$'\n' a=($(</proc/mounts)); for i in "${a[@]}"; do IFS=' ' b=($i); for j in "${b[@]}"; do echo -n "'$j' "; done echo; done
+11:17  evalbot: srakin: bash: syntax error near unexpected token `echo'
+11:18  srakin: # IFS=$'\n' a=($(</proc/mounts)); for i in "${a[@]}"; do IFS=' ' b=($i); for j in "${b[@]}"; do echo -n "'$j' "; done; echo; done
+11:18  evalbot: srakin: 'rootfs' '/' 'rootfs' 'rw' '0' '0'
+11:18  evalbot: srakin: 'none' '/proc' 'proc' 'rw' '0' '0'
+11:18  srakin: # IFS=$'\n' a=($(</proc/mounts)); for i in "${a[@]}"; do IFS=' ' b=($i); do echo "${b[1]}"; done
+11:18  evalbot: srakin: bash: syntax error near unexpected token `do'
+11:18  srakin: # IFS=$'\n' a=($(</proc/mounts)); for i in "${a[@]}"; do IFS=' ' b=($i); echo "${b[1]}"; done
+11:18  evalbot: srakin: /
+11:18  evalbot: srakin: /proc
+11:19  taylanub: what the hell are you guys doing O_O
+11:19  srakin: listing the mountpoints
+11:19  taylanub: # while read -r _ mountpoint _; do echo $mountpoint; done < /proc/mounts
+11:19  evalbot: taylanub: /
+11:19  evalbot: taylanub: /proc
+11:20  taylanub: you're reinventing the wheel ... using metal
+11:21  complete: # true && echo 1
+11:21  evalbot: complete: 1
+11:22  complete: ^ how do i do this, when the part after && is multiline?
+11:22  srakin: taylanub, and what if mountpoint path will contain space?
+11:22  dman777: do history -a and shopt -s histappend do the same thing?
+11:22  koala_man: complete: the same way you do "echo 1" when it's multiline
+11:23  complete: koala_man: so how do i do echo 1 multiline?
+11:23  koala_man: wait, you mean you have multiple statements and not one statement on multiple lines?
+11:24  koala_man: if so, true && { a; b; c; }
+11:24  complete: koala_man: yes
+11:24  complete: koala_man: ok, but i would like to have a b and c on different lines.
+11:24  koala_man: true && { a;
+11:24  koala_man: b;
+11:24  koala_man: c; }
+11:24  complete: maybe better use "if" instead of &&?
+11:24  complete: oh
+11:24  complete: interesting
+11:24  koala_man: yes, this is definitely a case where 'if' is more readable
+11:25  complete: ok, using if.
+11:33  taylanub: sorry, i was phone
+11:33  dman777: does shopt -s histappend matter if PROMPT_COMMAND="history -a"?
+11:34  taylanub: srakin: i think /proc/mounts gets encoded or something
+11:34 * taylanub tries
+11:34  taylanub: 'foo bar' has turned into foo\040bar
+11:37  srakin: taylanub, yes, that's true.
+11:49  Sonderblade: how do you find all files in a tree except for directories and files in .svn directories?
+11:49  twkm: with find.
+11:49  Sonderblade: that i know
+11:50  Sonderblade: then you have to formulate a complicated find expression too
+11:50  twkm: indeed.  get to work!
+11:51  Sonderblade: thank you idiot
+11:52  taylanub: Sonderblade: did you read documentation?
+11:52  taylanub: no one will want to spoon-feed questioners while they can read the docs and find out for themselves
+11:53  mar77i: !faq find > Sonderblade
+11:53  greybot: Sonderblade: http://mywiki.wooledge.org/BashFAQ/020 -- How can I find and deal with file names containing newlines, spaces or both?
+11:53  taylanub: !find > rather:
+11:53  greybot: rather:: http://mywiki.wooledge.org/UsingFind
+11:54  mar77i: Sonderblade: to make it difficult, don't tell us what your problem is in the future. let us figure that out right here :-)
+11:55  Sonderblade: taylanub: rather nobody knows, because people on irc prefer to give stupid answers to questions they dont know themselves
+11:56  taylanub: Sonderblade: i do, and i'm sure twkm does too. we're just trying to teach you to read documentation so we won't have to solve your every freaking problem
+11:57  Sonderblade: i doubt it
+11:57  Sonderblade: amateurs
+11:58  taylanub: lol, what a troll
+11:59  mar77i: -path blah -prune is explained in the manpage, and it has to do with the solution... </doing-other-peoples-homework>
+12:27  pgas: !svn
+12:27  greybot: If you're considering removing .svn directories, first read "svn --help export". If you're still convinced: find . -depth -name .svn -exec rm -rf {} \; To remove everything but the svn directories: find . -name .svn -prune -o -exec rm -rf {} \;
+12:33  geirha: !svngrep
+12:33  greybot: svngrep() { find . -name .svn -prune -o -type f -exec grep "$@" /dev/null {} +; }
+12:35  nettie: Hi guys, what's the best place to put return code checks? in a function or in the main program? I would say it depends on the functions lenght and complexity? In this particular case functions are mostly a single command with couple of vars and options.. thanx in advance
+12:41  mar77i: # false || echo "this is a non-zero return code, it can be tested directly"; [[ $? ]] && echo "or indirectly..."
+12:41  evalbot: mar77i: this is a non-zero return code, it can be tested directly
+12:41  evalbot: mar77i: or indirectly...
+12:42  nettie: mar77i I get it but the question is more if I should check the RC (I do: RC=$? if [ $RC == 0
+12:42  mar77i: oops, use (( )) for arithmetic values, otherwise "0" returns true. the second line shouldn't be visible iirc. :)
+12:42  nettie: and so on..
+12:42  nettie: damn
+12:42  nettie: bot
+12:42  nettie: eheh
+12:42  mar77i: ![[
+12:42  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+12:42  nettie: eheh
+12:43  mar77i: !(( > nettie
+12:43  greybot: nettie: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+12:45  mar77i: !faq 2 > nettie
+12:45  greybot: nettie: http://mywiki.wooledge.org/BashFAQ/002 -- How can I store the return value/output of a command in a variable?
+12:49  Ulfalizer: how can i find the length (number of assigned indices) in an array?
+12:49  Ulfalizer: *of
+12:49  pgas: ${#array[@]}
+12:50  Ulfalizer: thanks
+12:52  nettie: mar77i, OK this saves me from doing the if/else/fi and it's clear -- thanx. The question is more related to programming style than how to handle the return value
+12:53  nettie: I pastedbin an example one sec
+12:56  mar77i: what makes more sense? it's usually not necessary to use variables for stuff you only need once. instead of if/else you can just write
+12:57  mar77i: # false && echo true || echo false
+12:57  evalbot: mar77i: false
+12:57  nettie: mar77i: http://pastebin.com/KsgKYrgD
+13:00  mar77i: nettie: you know that this gigantig pipe chain can be done in just one short line of awk code?
+13:00  mar77i: -ig oops :)
+13:00  mar77i: *gigantic
+13:02  mar77i: btw, (( )) is for arithmetical comparisons, NOT STRINGS...
+13:04  nettie: mar77i I'm sure.. :) eheh
+13:04  nettie: mar77i but I would rather cocnentrate on one thing
+13:04  nettie: I get (( and [[
+13:04  nettie: it's clear
+13:05  nettie: what is not clear is the exit status checks, I mean, makes more sense having them in the main program or built inside the functions?
+13:06  nettie: if I build them inside the functions the maint program is limited to a simple functions list because the script will stop when a single function fails
+13:06  nettie: so I don't need to check the function exit status again right?
+13:07  nettie: it all ends up to: ping_mysql && stop_slave && check_temp_tables && start_dump && start_slave && check_slave_status
+13:07  nettie: which seems pretty crowded and unflexible but maybe I'm wrong..
+13:08  Ulfalizer: what's a good way to get the name of a random subdirectory?
+13:08  Ulfalizer: currently i'm initializing an array with the names of all subdirectories and then using RANDOM, but thought there might be a neater way
+13:09  mar77i: net  http://pastebin.com/F1DFVfS4
+13:09  mar77i: nettie: http://pastebin.com/F1DFVfS4
+13:10  mar77i: or the same with a function and "return" instead of exit
+13:18 --- cli is now known as Guest37399
+13:18 --- Guest46437 is now known as Nemphilis
+13:20  geirha: if command; then echo "success"; fi
+13:21  geirha: Oops, was scrolled up.
+13:23  nettie: mar77i thanx a mil checking..
+13:25  nettie: mar77i thanx  a lot, that's the whole function ok?
+13:25  nettie: in the main program I just call it
+13:25  nettie: it/them
+13:25  nettie: one after the other?
+13:30  k1k0: hi all
+13:32  k1k0: see that http://pastebin.com/fqUK0Pj4  , why this try valid ip when i click cancel button on dialog input box ?
+13:33  disposab1e: how do i read content of a file downloaded by wget without saving it to disk? I just want a for loop to iterate through lines of a file that's downloaded every time the script is run. so something like: for line in $(cat $(wget http:/xx/file)); do xxx; done
+13:34  Bushmills: -O -
+13:34  srakin: k1k0, echo $? >... sets $? to 0
+13:34  k1k0: when i click cancel , $? set 1
+13:34  disposab1e: Bushmills: is that a crippled smiley or a hint for me?
+13:35  srakin: k1k0, after 'echo $? >out.txt' $? is 0 again.
+13:35  Bushmills: disposab1e: that's the option for wget, to send downloads to standard out
+13:35  disposab1e: Bushmills: thank you
+13:35  melmothX: wget -O-
+13:36  k1k0: cat out.txt   return 1
+13:36  melmothX: ah, sorry
+13:37  k1k0: srakin i create this just check output
+13:38  srakin: k1k0, but *after* echo call $? is 0 again. try to write 'echo $? >output.txt; echo $? >>output.txt'
+13:38  srakin: k1k0, you will see '1 0'
+13:39 --- Inst_ is now known as Inst
+13:39  k1k0: srakin ok i try this
+13:39  srakin: k1k0, if you want to save $? for using in multiple commands, use temporary variable for it
+13:40  srakin: k1k0, t=$?; echo $t; if [ $t ...
+13:40  mar77i: nettie: yeah, you can also use \ line continuation if your line becomes a bit longer :)
+13:43  k1k0: srakin thx , its works now :)
+13:46  k1k0: srakin but i dont understand why echo $? change 0 again, but now i use with a var thx a l0t
+13:47  trash: !if > k1k0
+13:47  greybot: k1k0: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause # http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+13:47  srakin: k1k0, 0 is the return code of last echo command.
+13:58 --- Laynef_ is now known as Laynef
+13:58  k1k0: greybot the problem not was use if/else, but value return $? dialog inputbox
+14:00  trash: if only you'd know how if and $? are related.
+14:00  k1k0: greybot then when i crate a file to test output $? the output change 0
+14:00  trash: No.
+14:00  trash: !if > k1k0
+14:00  greybot: k1k0: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause # http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+14:02  k1k0: sorry i see the second link now rsrsrsr
+14:02  k1k0: thx
+14:19  matjas: I’m trying to use `while read` to read a file line by line, but I noticed it doesn’t read the last line unless there’s a new line at the end of the file. I found a solution on a forum but I don't really understand it. Could any of you guys help? Here’s the code: http://paste.pocoo.org/show/AfHlJMNGsGaDHsusbSAM/
+14:19  matjas: The first 3 lines == the while loop I wrote
+14:19  matjas: Below is the proposed solution, which I don't understand
+14:20  matjas: If anyone could tell me how to rewrite the solution so it does exactly the same as the while loop I had before, that'd be great
+14:27  r420r: i want use multi files , just like that echo -e "a\ra" > test1;echo -e "b\nb" > test2 i want print that like that a b \n a b
+14:27  r420r: how i can do thaT ? awk ?
+14:27  r420r: echo -e "a\na"
+14:29  r420r: i want print just like that print $file1 $file2
+14:29  r420r: like that
+14:29  r420r: is that possible ?
+14:30  goldfish: # echo 'a a' > test1; echo 'b b' > test 2; paste -d\\n test1 test2
+14:30  evalbot: goldfish: bash: paste: command not found
+14:30  goldfish: :'(
+14:30  goldfish: r420r: i'm not quite sure if that's what you're after or not
+14:32  r420r: yes goldfish paste is nice
+14:42  matjas: okay, i've posted my question on Stack Overflow, maybe that clears things up: http://stackoverflow.com/questions/4165135/how-to-use-while-read-bash-to-read-the-last-line-in-a-file-if-theres-no-newl
+14:44  pgas: matjas: check the value of the variable your read after the loop
+14:49  pgas: while read var || [[ $var ]];do echo $var;done <file
+14:52  nettie: mar77i okie thanx a lot
+14:52  richardbronosky: Pardon the vicarious bash question, but I do need this for a bash script.
+14:52  richardbronosky: Is there anyway to extend the sudo timeout temporarily for the execution of my bash script? I don't want to run it as root. However, it does need to do several sudo commands throughout its run. It is a long running script as it downloads and compiles many things.
+14:53  koala_man: no
+14:54  falconindy: richardbronosky: nothing involving downloading or compiling should ever be done as root. perhaps you're looking at solving the problem in the wrong way
+14:56  richardbronosky: falconindy: you are correct about the first statement.
+14:56  richardbronosky: and that is why I clearly stated that I do not want to run the script as root.
+14:57  falconindy: i don't think it was very clear. you've neglected to mention what _does_ need to happen as root. this probably also falls under the category of nabq
+14:57  richardbronosky: falconindy: However, outside of the downloading and compiling, there are other things that I do need root for.
+14:59  richardbronosky: but, I do appreciate the filter of:
+14:59  richardbronosky: !b1
+14:59  greybot: bashphorism 1: the questioner's first description of the problem/question will be misleading.
+14:59  richardbronosky: !b6
+14:59  greybot: When given a choice of solutions, the newbie will always choose the wrong one.
+14:59  richardbronosky: it's not my first day here. ;-)
+15:11  nettie: mar77i: if you have a sec could you check this http://pastebin.com/XXZ2YQNn I'm trying to use your suggestions/tecniques but it seems a bit complex to track..
+15:25  CyberDomovoy: hi there
+15:26  wuffi600: is there a simple solution to replace all strange chars (äáàâ...) with its bae-chars (a...)? I hoped tr could do it but did not find a way.
+15:26  wuffi600: s/bae/base
+15:27  CyberDomovoy: i want to .tar.bz2 ./foo/*, but i'd like that when i extract the archive it don't create "foo" dir, but instead it creates "foo-$(date +%Y%m%d)", how can i do that?
+15:27  cuznt: in vim to run in konsole can one write a script to open a web browser to a specific url?
+15:28  trash: CyberDomovoy: Extract it, move it.
+15:29  CyberDomovoy: trash> the point is that it should be done at archive time, so that i just "tar -xvvjf file.tar.bz2" and the directory gets the right name
+15:29  CyberDomovoy: tried using --transform, but can't get it to work, and don't even know if it's the right option to use
+15:29  wuffi600: CyberDomovoy, the name of the archive and the names of its contents have nothing to do with each other. i would extract it and then mv i to the wished destination by changing its name...
+15:29  dxdemetriou: hi, I need an advice about bash functions. Subshells I read that is not a good idea. What I need is to have one function for copying files to multiple computers then to start a backgroud process and continue to the next.
+15:30  dxdemetriou: It's like function funct { job1 ; (job2 &) ; }
+15:30  dxdemetriou: but wait does not work. this is why I'm searching for better solution
+15:30  CyberDomovoy: wuffi600> can't i say to tar that it should replace "./foo/*" by "./foo-$(date ...)/*" when creating the archive?
+15:31  CyberDomovoy: wuffi600> don't care the name of the archive, just what is in it
+15:32  wuffi600: CyberDomovoy, i guess, if you change something inside the tar-file this will lead in checksumproblem when extracting. but this is only a guess
+15:33  wart___: hi i'd like to get this to run in the background but i can't figure out how: while ! notmuch tag $* id:$id ; do : ; done
+15:33  wart___: the context is a script run from mutt: http://pastebin.com/bMbeCD9b
+15:38  CyberDomovoy: wuffi600> found how to do what i want, maybe i wasn't clear, what i needed was 'tar -cj --transform "s/foo/foo-$(date ...)/" -f "archive.tar.bz2" ./foo/*'
+15:42  AlexC_: morning
+15:43  AlexC_: could someone please look over the Bash scripts I've written at https://github.com/openzula/ozsrvutils (biggest is ~270 lines long, there is really only 3 files) and comment on what is crap and could be done better?
+15:43  wuffi600: CyberDomovoy, it there sureness that it does not transform to much? e.g. filename in subdirectories that were named foo too?
+15:44  Knirch: !.sh > AlexC_
+15:44  greybot: AlexC_: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+15:44  CyberDomovoy: wuffi600> good catch, i should use "s/^foo/foo-.../"
+15:44  AlexC_: a ha :) thanks for the info
+15:45  Knirch: AlexC_: list.sh seems odd, cfgVarStateDir is not set anywhere, $1 seems ignored, .. etc
+15:46  Knirch: oh, they're sourced..
+15:46  AlexC_: Knirch: sorry yeah, they are sourced from the main 'ozmanage.sh' (which is now 'ozmanage')
+15:47  dxdemetriou: Is there a better solution than "(command &)" subfunctions which can accept "wait"?
+15:47  Knirch: AlexC_: I'd probably say, get rid of the main wrapper (ozmanage) and make it different commands
+15:47  Knirch: AlexC_: or just stick with one script and split it up if the need actually arises
+15:48  AlexC_: Knirch: well, the only reason I split it up was to make it easier to manage and to see exactly what was doing what
+15:48  Knirch: AlexC_: personally I find it harder, to make sense of your script I have to read two files at once to follow it
+15:48  AlexC_: true
+15:49  Knirch: AlexC_: h) in domain, use a here document instead of a bazillion echos
+15:49 --- jzacsh is now known as jzacsh_
+15:49  AlexC_: to make the source easier to read?
+15:50  Knirch: AlexC_: sure, and easier to change, cleaner diffs whatnot, and you won't have to add: echo "" to every line
+15:50  Knirch: AlexC_: nothing I say is a rule, just how I'd do it
+15:50  AlexC_: sure, it's all helping though :) I just want to get these as good as I can get them
+15:50  Knirch: AlexC_: line 130 in domain could just as easily be done with one awk statement
+15:51 --- Inst is now known as Inst|Netbook
+15:51 --- Inst|Netbook is now known as Inst
+15:51  AlexC_: do you can have example of this? I've played around with getting it to work with awk but never could
+15:51  Knirch: AlexC_: the scariest part are your unquoted paths though
+15:51  AlexC_: what lines are you looking at here?
+15:51  Knirch: AlexC_: awk '/^password=/{print $3}' file
+15:52  AlexC_: oh, simple =3
+15:52  Knirch: AlexC_: oh, the unquoted paths are all over the place
+15:52  Knirch: AlexC_: 154 for example
+15:52  AlexC_: hum yes that's true
+15:53  AlexC_: I'll get those fixed up
+15:53  Knirch: AlexC_: optUser is unquoted everywhere aswell, and that's taken from user interaction
+15:53  AlexC_: Knirch: what about line 124, should I quote this as well?
+15:53  Knirch: AlexC_: instead of silently stripping - from the username, I'd say fail instead and tell the user of his error
+15:55  Knirch: AlexC_: you could, there's no difference between var=$var and var="$var", it might be easier to get the habit of quoting your variables by using var="$var"
+15:55  AlexC_: ok cool
+15:56  Knirch: AlexC_: could be interesting to feed your script .* as username
+15:56  Knirch: or not, it wouldn't get to the grep, nm :)
+15:58  Knirch: AlexC_: you understand why you should quote optUser etc right?
+15:59  AlexC_: yes, I was kind of relying on the fact it would only ever be used by people that know what they're doing, but you're right they do need quoting
+16:00  Knirch: AlexC_: I have a petpeeve against stderr hiding like the one that takes place in email:129
+16:00  AlexC_: Knirch: true, I can't say I'm a massive fan however Postfix messages that IMO are not errors are outputted to stderr =(
+16:01  Knirch: AlexC_: most sane programs shut up except actual errors with --quiet or such, I don't know postfix so can't say if it's one of the nice ones or if it does unspeakable things to various parts of an animal
+16:02  AlexC_: ah, why didn't I think of this. Let me check
+16:03  AlexC_: it has no such option =(
+16:04  AlexC_: question, domain:154 currently not quoted. If I quote it here, do I need to quote line 155?
+16:04  AlexC_: (the last mkdir part, not the entire thing obviously)
+16:05  Knirch: # touch "foo bar" ; rm -r foo bar
+16:05  evalbot: Knirch: rm: cannot remove `foo': No such file or directory
+16:05  evalbot: Knirch: rm: cannot remove `bar': No such file or directory
+16:05  AlexC_: that'll be a yes =)
+16:09  AlexC_: so, apart from the quotes there isn't anything major that is jumping out at you?
+16:27  _pingu: How can I store the errormessage of a  cp a b in a variable?
+16:28  AlexC_: _pingu: foo=$(cp .... )
+16:28  AlexC_: misread, ignore
+16:28  AlexC_: actually no, that would work
+16:30  _pingu: AlexC_: That does not work: foo=$(cp a b); echo 'ddd'; echo $foo
+16:31  AlexC_: $(cp .... 2>&1)
+16:32  _pingu: AlexC_: works, thank you. what does &1 mean?
+16:33  AlexC_: _pingu: http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-3.html
+16:33  _pingu: ok
+16:33  trash: No.
+16:33  trash: !guide
+16:33  greybot: http://mywiki.wooledge.org/BashGuide
+16:33  Linex: regexp Regular Expression syntax is standard everywhere ?
+16:33  trash: Linex: No.
+16:34  Linex: trash:  I see.
+16:34  Linex: trash: but close ?
+16:34  trash: Depends on your definition of close.
+16:34  trash: !regex
+16:34  greybot: Some people, when confronted with a problem, think ``I know, I'll use regular expressions.'' Now they have two problems. -- jwz
+16:34  trash: !regexp
+16:34  greybot: Regular Expressions are used to *match* certain patterns of occurances in strings. There are several different "dialects" of regex syntax. Bash only supports EREs (using [[ string =~ pattern ]]). Sed uses BREs. Perl uses PCREs. (See !ere, !bre or !pcre)
+16:36  Linex: what about php, what it uses ?
+16:36  trash: Linex: #php
+16:45  CyberDomovoy: is there a short notation for ${string:0:1} ?
+16:46  trash: CyberDomovoy: No.
+16:46  trash: That is short.
+16:47  _pingu: Why can I do: touch a; chmod 000 a; mv a b            but not: touch a; chmod 000 a; cp a b
+16:47  CyberDomovoy: trash> ok, just in case ^^
+16:49  erUSUL: _pingu: move depends on the permissions on the containing dir. cp depends on being able to actually read the file ?
+16:50  _pingu: erUSUL: ok. again learned something
+16:58  paxl: How can we force to word split on a variable ?
+16:59 --- MuzerAway is now known as Muzer
+16:59  paxl: IE i fill a variable like this :
+16:59  paxl: _retval="$(<somefile) $(<somefile) ..."
+16:59  paxl: and then after if I use $_retval I get the word splitted version ( IE nothing more than spaces ).. and if I use the "$_retval"
+17:00  paxl: I get the newline and formatting trash
+17:00  paxl: is there a way to do like _retval=$_retval to force bash to forget all about formating ?
+17:05 --- Natch is now known as Natch|
+--- Log closed Fri Nov 12 20:31:58 2010
+--- Log opened Fri Nov 12 22:39:26 2010
+22:39 --- Users 551 nicks [0 ops, 0 halfops, 0 voices, 551 normal]
+22:39  TheBonsai: (and check if you want to write to Makefile instead of makefile)
+22:39  greycat: (and put an extra \n on the end of the data)
+22:40  Eiler: why put an extra \n?
+22:40  Eiler: i dont have any alias with the same name
+22:40  greycat: so you don't create a text file that's missing its final newline
+22:40 --- Channel #bash was synced in 85 seconds
+22:40  Eiler: -Wextra\n then
+22:40  TheBonsai: the error is in the code, it's not an alias
+22:41  TheBonsai: missing space after *.cpp
+22:41  greycat: ah.
+22:41  Eiler: ooh
+22:41  retrospectacus: ssh
+22:41  greycat: It's too late on Friday to catch that.
+22:42  Eiler: yey it works
+22:42  Eiler: im still unfamiliar with this syntax
+22:42  TheBonsai: hm, work is nearly over, no? afair in 20min you (always) quit
+22:42  greycat: even later in Germany, but obviously TheBonsai has magical tree powers
+22:42  retrospectacus: can someone make the bot recite the thing to run a command over ssh
+22:42  greycat: !sshtar
+22:42  greybot: When you want to duplicate an entire directory hierarchy onto a remote host, you use: cd /source; tar cf - . | ssh me@remotebox 'cd /target && tar xf -'
+22:42  Eiler: doesnt make recognize both Makefile and makefile?
+22:43  TheBonsai: yes. magic mini tree
+22:43 --- neuro_sys is now known as Guest29437
+22:43  TheBonsai: Eiler: i don't know, i just saw it
+22:43  greycat: the traditional name is Makefile, but I don't know how portable the 'makefile' alternative is.  you could ask ##workingset.
+22:43  retrospectacus: !nohup
+22:44  noesc: Is it to wierd to first check "if [ -f "$FILE" ]" to see if it exists and is a normal textfile, then check that file is readable: "if [ -r "$FILE" ]"?
+22:44  greycat: you can combine them if you wish:     if [ -f "$file" ] && [ -r "$file" ]
+22:45  noesc: the point was to seperate so I could have seperate errors for both
+22:45  greycat: ok, then you're doing fine
+22:45  Eiler: ok
+22:45  TheBonsai: -r doesn't imply -f, you need it separately
+22:45  noesc: is there a better way? :)
+22:46  greycat: if you want separate errors, then what you have is already the best way
+22:47  noesc: nice! Do not know if this would be useful at all, but hey, why not give error-descriptions that says something.
+22:49  TheBonsai: ?
+22:49  greycat: Helpful errors are good.
+22:51  noesc: It really is a simple script, it is just going to invoke "iptables-restore" on if-pre-up. Is it better to supply a separate documentation/README file, or echo the error-description from the script?
+22:52  greycat: you're probably overthinking this.  do whatever makes the most sense.
+22:53  noesc: greycat: Ofc I am, I could just do: "iptables-restore /path/to/file". But that does not teach me anything =)
+22:54  Guest29437: ]pron smiley
+22:56 --- dagni_ is now known as dagni
+--- Log closed Fri Nov 12 23:06:34 2010
+--- Log opened Fri Nov 12 23:11:55 2010
+23:11 --- Users 545 nicks [0 ops, 0 halfops, 0 voices, 545 normal]
+23:13 --- Channel #bash was synced in 85 seconds
+23:17  spud_: when i execute CTRL+ALT+R and type "scp" to look in my history, how can i scroll between matching resultss? than kyou
+23:21  TheBonsai: do you mean Ctrl-R? or do you have an individual config?
+23:21  retrospectacus: spud_: it's just ctrl-r, and keep pressing ctrl-r
+23:21  spud_: oh.. thanks
+23:24  lamdk`: hmm im trying to run a 'find -f' that formats an xml file and it writes it back to the same file but it's not working.... anyone see whats wrong?  http://fpaste.org/5kpX
+23:24  spud_: if i wish to ask info about a specific linux command (rsync) where 's the best place to ask? thanks
+23:26  TheBonsai: if you have linux questions, check ##linux i'd guess
+23:26  retrospectacus: there is #rsync as well
+23:27  retrospectacus: and #networking
+23:29  juanmabc: lamdk`, the exec quotes, and check that this command does not garbage your files (mostly sure)
+23:30  fission6: is it possible to create a tar archive with full file path names instead of relative, so that when i extract it will land in the folders expected
+23:32  lamdk`: juanmabc: yeah without the quotes it writes it to a file named {}    ...but i want it to write the original file
+23:32  TheBonsai: just tar with the right names, and tell it to not wipte out the /
+23:32  lamdk`: maybe you cant redirect output in the -exec part using 'find' =\
+23:32  TheBonsai: -exec sh -c '....'
+23:33  TheBonsai: redirection with > is a shell feature
+23:33  TheBonsai: nothing find or the inner operating system will do for you
+23:33  TheBonsai: so, start a shell
+23:34  fruight: is there a variable for the last line in sed?
+23:35  fruight: i want to get the middle part of a file and want something like "sed '1,x d;$-y,$ d'
+23:35  roger_: hello
+23:35  HawkI: fruight: tell us what you are doing, we will tell you how.  sed uses the symbol $ for last line but only in the line address fields/contexts
+23:36  fruight: HawkI: i want to chop of x lines from the beginning and y lines from the end
+23:37  HawkI: fruight: head and tail are the easiest way, but not the most efficient, if you know the line number you can do it in one pass with sed .
+23:37  juanmabc: lamdk`, use  \> to mean its not part of find command but part of -exec command
+23:37  lamdk`: oooo
+23:37  fruight: HawkI: the problem is that i just know the length of header and footer, the content length varies, so i dont know absolute linenumbers
+23:38  lhunath: juanmabc: it isn't that simple.
+23:38  roger_: I have a script that does MYID=$(id -u 2> /dev/null)
+23:38  lhunath: find does not execute bash code.
+23:38  roger_: $MYID returns nothing
+23:38  lhunath: don't give it bash code
+23:39  lhunath: listen to TheBonsai.  he's wise.
+23:39  HawkI: fruight: ok say head is 4 and foot is 5, tail -n -5 somefile | head -n -6         Note the use of negative numbers - and -6
+23:39  HawkI: *-5 and -6
+23:39  lhunath: # MYID=$(id -u 2> /dev/null); echo "$MYID"
+23:39  evalbot: lhunath: no output
+23:40  lhunath: uh.
+23:40  lhunath: # MYID=$(id -u); echo "$MYID"
+23:40  evalbot: lhunath: bash: id: command not found
+23:40  lhunath: right.
+23:40  lhunath: roger_: show real code.
+23:41  juanmabc: lamdk`, test it first, you are not wanting to loose datatrue
+23:41  lhunath: $ MYID=$(id -u 2> /dev/null); echo "$MYID"
+23:41  lhunath: 501
+23:41  lhunath: roger_: it works fine.
+23:42  lamdk`: juanmabc: hmm adding \> seems to print all the stuff to stdout instead of changing the files
+23:42  lamdk`: ima noooob
+23:42  helo: i typically have 20 or so bash sessions open in different windows/tabs/desktops, but with so many sessions the chance of any command i type being in my history is pretty small
+23:42  lhunath: roger_: echo "$UID" may be more sensible than relying on 'id'
+23:42  roger_: lhunath: I'll try that
+23:43  lhunath: lamdk`: you don't have to believe me.
+23:43  lhunath: if you prefer to learn through failing rather than listening.
+23:43  helo: is there any way to get bash to store all of my concurrent bash session histories for reverse-i-search?
+23:44  lhunath: helo: that would be bad and annoying.
+23:44 --- Muzer is now known as MuzerAway
+23:44  retrospectacus: helo: you'd have to get bash to write its history after every command entered
+23:44  lhunath: helo: but you can store each command in the history file as you type it and load the history file in another shell explicitly if you want it with history -r
+23:45  lamdk`: ohhh i didn't read what you wrote lhunath up there ^^
+23:45  lhunath: forcibly reloading the history file each time is nasty.  then suddenly "up-arrow" doesn't mean "the last command I typed here" anymore, but rather, the last command I typed since I showed this shell's prompt.
+23:45  helo: i frequently remember a command (usually a one-liner loop) from a few days prior that i'd like to recall, but it is almost never there
+23:45  HawkI:  /j #android-dev
+23:46  roger_: http://pastebin.com/CZ8UMCqk
+23:46  lhunath: lamdk`: > is bash syntax.  it means "redirect output to stderr to this file".  find is not bash.  find does not run bash syntax.
+23:46  helo: i agree it would have drawbacks... but it sounds like bash's history handling would have to be rewritten to get up-arrow to behave
+23:46  roger_: lhunath:
+23:46  lhunath: tell find to run bash with some bash code involving >
+23:47  helo: separate reverse-i-search history from normal history
+23:47  lhunath: helo: history -r
+23:47  lhunath: roger_: did you read my comment about "$UID"?
+23:48  HawkI: helo:  you can lose history if you run multiple shells at the same time.
+23:48  lhunath: stop using `id`
+23:48  HawkI: !history > helo
+23:48  greybot: helo: To keep all your shell history when running multiple shells: add two lines to your .bashrc; shopt -s histappend and PROMPT_COMMAND="history -a;$PROMPT_COMMAND" You may also want to increase the value of HISTSIZE.
+23:48  roger_: lhunath: I just did try it
+23:48  lhunath: excellent.
+23:48  lhunath: !tests
+23:48  greybot: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+23:48  helo: HawkI: thanks!
+23:49  lhunath: that does what I suggested: "store each command in the history file as you type it"
+23:49  lhunath: it won't load the history file
+23:49  lhunath: fyi
+23:49  juanmabc: lamdk`: your first trouble is that if you are writing to the file you are reading the file could and will be mangled (?), i.e. messed
+23:49  HawkI: lhunath: is there an advantage to not usinf the old  "[" style tests, or is this trying to produce uniform style coding? (which is desirable too, for readability)
+23:50  HawkI: *using
+23:50  helo: so several days later i should be able to do a history -r and then find any command i've typed lately
+23:50  lhunath: HawkI: [[ has a great many advantages, as does ((
+23:50  lhunath: !faq [[
+23:50  greybot: http://mywiki.wooledge.org/BashFAQ/031 -- What is the difference between test, [ and [[ ?
+23:51  lhunath: [ has only disadvantages
+23:51  retrospectacus: roger_: if (( $UID )); then echo "you are not root"; exit 1; fi
+23:51  lhunath: you could even leave out the $
+23:51  HawkI: lhunath: yes i know they have better and more operations.  is that the reason for the statement to not use the old style? Are there any performance issues?
+23:52  lhunath: [[ is a keyword; perhaps that matters.  not that performance really matters.
+23:52  lhunath: the countless advantages and consistency matters a lot more than performance.
+23:52 --- MuzerAway is now known as Muzer
+23:53  juanmabc: lamdk`, so in a no brain task: -exec bash -c 'xmllint --format $0 > $1; mv $1 $0' {} {}.tmp \;
+23:54  roger_: retrospectacus: from within that script?
+23:54  lhunath: juanmabc: quotes
+23:54  retrospectacus: roger_: that can be the entirety of your function
+23:56  juanmabc: lhunath: yes!, now *i'm* in #bash
+23:56  lhunath: :-)
+23:57  retrospectacus: roger_: http://pastebin.com/36DJkzdQ
+23:58  helloren: Could some one point me in the right derection, i would like to make a AI in a Bash Script file, could some tell me what to look for on google, or where to go on the net to find some help?  I have googled "bash AI scripts" "bash AI" "Artificial intelligence in bash scripts" and lots more, but have not found what i am looking for, anyone help is needed.
+--- Log closed Sat Nov 13 00:00:04 2010

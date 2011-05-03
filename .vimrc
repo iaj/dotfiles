@@ -19,14 +19,16 @@ filetype plugin indent on
 set t_Co=256
 syntax enable
 "set cpoptions+=$                       " not directly change a word-mark a $
-set lazyredraw                          " Avoid redrawing the screen mid-command.
+"set lazyredraw                          " Avoid redrawing the screen mid-command.
 set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
 let maplocalleader = "\\"
 set guioptions=Aci
 set antialias
-set guifont=Monaco:h12
+set guifont=Monaco:h12.00
+"set guifont=Menlo:h12.00
+"set guifont=Inconsolata-g:h14
 set title
 set isfname-=\=
 "set macmeta
@@ -35,7 +37,7 @@ set isfname-=\=
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
 " (http://www.derekwyatt.org/vim/the-vimrc-file/).
 if has('syntax')
-    set synmaxcol=200
+    set synmaxcol=2000
     " Highlight lines longer than 85 characters. Thanks to Tony Mechelynck
     " <antoine.mechelynck@gmail.com> from the Vim mailing list. It can easily be
     " disabled when necessary with :2match (in Vim >= 700).
@@ -49,19 +51,19 @@ if has('syntax')
         call matchadd('Todo', '\(TODO\|FIXME\|CHANGED\|XXX\)')
     endif
 endif
-
 "dont load csapprox if no gui support - silences an annoying warning
-if !has("gui")
-    let g:CSApprox_loaded = 1
-endif
+"if !has("gui")
+    "let g:CSApprox_loaded = 1
+"endif
 
-""" Sourcing ~/.vimrc
+""" Sourcing ~/.vimrc and own scripts
 "source $HOME/.vim/personal/scripts/error_handling
 source $HOME/.vim/personal/scripts/remappings
 source $HOME/.vim/personal/scripts/mappings
 source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
 source $HOME/.vim/personal/scripts/galal
+source $HOME/.vim/personal/scripts/objctagjump
 
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
@@ -105,7 +107,7 @@ set complete=.,w,b,t
 
 " Folding
 set foldmethod=syntax           " By default, use syntax to determine folds
-set foldlevelstart=0            " All folds open by default
+set foldlevelstart=99            " All folds open by default
 set foldopen=block,insert,jump,mark,percent,quickfix,search,tag,undo
 
 " Text Formatting
@@ -151,21 +153,14 @@ set report=0                    " :commands always print changed line count.
 set shortmess+=a                " Use [+]/[RO]/[w] for modified/readonly/written.
 set shortmess+=A                " Don't show message on existing swapfile
 set ruler                       " Show some info, even without statuslines.
-"set laststatus=2                " Always show statusline, even if only 1 window.
+"set laststatus=2               " Always show statusline, even if only 1 window.
 set autoindent
 "typoscript indent fix?
 set cink-=0#
+set cino=(0                     " line up sublines with first (
 "set cindent
 "set smartindent
 set notimeout ttimeout ttimeoutlen=200
-
-function! SlSpace()
-    if exists("*GetSpaceMovement")
-        return "[" . GetSpaceMovement() . "]"
-    else
-        return ""
-    endif
-endfunc
 
 " Tabs/Indent Levels
 set tabstop=8                   " keep tabspaces at 8 by default if there
@@ -179,7 +174,7 @@ set mousem=popup
 
 "Print options
 set printoptions+=syntax:n      " Print syntax highlighting.
-set printoptions+=header:0
+set printoptions+=header:0      " Don't print that annoying file info
 "set printoptions+=number:y     " Print line numbers.
 
 " Tags
@@ -221,9 +216,9 @@ set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 " Per-Filetype Scripts
 " NOTE: These define autocmds, so they should come before any other autocmds.
 "       That way, a later autocmd can override the result of one defined here.
-"filetype on                     " Enable filetype detection,
-"filetype indent on              " use filetype-specific indenting where available,
-filetype plugin indent on              " also allow for filetype-specific plugins,
+"filetype on                    " Enable filetype detection,
+"filetype indent on             " use filetype-specific indenting where available,
+filetype plugin indent on       " also allow for filetype-specific plugins,
 syntax on                       " and turn on per-filetype syntax highlighting.
 set grepprg=grep\ -nH\ $*
 """ Plugin Settings
@@ -273,6 +268,7 @@ let g:Tlist_Show_One_File = 1
 let Tlist_WinWidth=50
 let Tlist_GainFocus_On_ToggleOpen = 1
 let g:Tlist_Ctags_Cmd = "~/bin/ctags" "user defined ctags command
+let tlist_objc_settings = 'objc;i:interface;c:class;m:method;p:property'
 "let g:SuperTabLongestHighlight = 1
 let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
@@ -300,11 +296,11 @@ let delimitMate_excluded_ft = "mail html"
 let g:yankring_history_dir = '~/.vim/'
 let g:tex_flavor='latex'
 
-let g:CommandTCancelMap = ['<C-c>']
+"let g:CommandTCancelMap = ['<C-c>']
 let g:CommandTMaxHeight = 20
 let g:CommandTMaxFiles=3000
-"let g:CommandTAlwaysShowDotFiles=1
 let g:CommandTScanDotDirectories=1
+"let g:CommandTAlwaysShowDotFiles=1
 "let g:CommandTMatchWindowAtTop=1
 
 " netrw settings
@@ -354,7 +350,8 @@ if has('gui_running')
     "Molokai Settings
     let g:molokai_original = 1
     colorscheme sjl
-    
+    "colorscheme lucius
+    "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
     "colorscheme neverland2
@@ -378,7 +375,10 @@ if has('gui_running')
     "hi search ctermbg=223 ctermfg=238
 else
     "colorscheme molokai
-    colorscheme kellys
+    " for now we use that fricken sjl everywhere possible
+    "let g:molokai_original = 1
+    "colorscheme sjl
+    colorscheme lucius
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
@@ -405,8 +405,8 @@ if has('statusline') && has('gui_running')
     "on some colorschemes (kw: reversing) its necessary to s/fg/bg
     fun! UpdateStatuslineColorCodes() "{{{
         " themes differ here - replace bg with fg or the other way around ;)
-        let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
-        let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+        let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
+        let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
     endfunction "}}}
     function! SetMyStatusLine()
         " TODO fix that stuff
@@ -484,17 +484,6 @@ if has('statusline') && has('gui_running')
         let &titlestring=$PWD
     endif
 endif
-""" Miscellaneous - to check out
-" Netrw explorer
-if has("eval")
-    let g:netrw_keepdir = 1                       " does not work!
-    let g:netrw_list_hide = '.*\.swp\($\|\t\),.*\.py[co]\($\|\t\)'
-    let g:netrw_sort_sequence = '[\/]$,*,\.bak$,\.o$,\.h$,\.info$,\.swp$,\.obj$,\.py[co]$'
-    let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
-    let g:netrw_use_noswf = 1
-endif
-
-
 """ Remapping the <TAB> key to something useful
 function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
@@ -508,10 +497,6 @@ function! MyTabComplete()
         endif
     endif
     
-    "echom getline('.')[col('.')-1]
-    "if getline('.')[col('.')-1] == ' '
-        "return "\<tab>"
-    "endif
     let b:complType=0
     "let line = getline('.')                         " curline
     "let substr = strpart(line, -1, col('.')+1)      " from start to cursor
@@ -520,19 +505,20 @@ function! MyTabComplete()
     " locate the start of the word
     let line = getline('.')
     let col = col('.')
-    let start = col - 1
-    "if start == 0; return "\<tab>"
-    while start > 0 && line[start - 1] =~ '\S'
-        let start -= 1
+    let current = col - 1
+
+    while current > 0 && line[current - 1] =~ '\S'
+        let current -= 1
     endwhile
     "return substr
 
     " debugging...
-    echom 'Indexes: '.start.':'.col
-    let substr = substitute(line[(start-1):(col-1)], '^\s*', '', '')
-    echom 'Substring before the cursor: '.string(substr)
+    "echom 'Indexes: '.current.':'.col
+    let substr = substitute(line[(current-1):(col-2)], '^\s*', '', '')
+    "echom 'Substring before the cursor: '.string(substr)
 
-    if substr =~ '^\s*$'                          " nothing to match on empty string
+    "echom 'current: '.current.', '.'line: '.string(line[: current - 1])
+    if col == 1 || substr =~ '^\s*$'
         return "\<tab>"
     endif
 
@@ -541,6 +527,9 @@ function! MyTabComplete()
 
     "if (&dictionary != '' && !has_slash)
         "return "\<C-X>\<C-K>"
+    "endif
+    "if (&filetype == 'objc')
+        "return "\<C-X>\<C-O>"
     "endif
     if (!has_period && !has_slash)
         let b:complType=1
@@ -569,6 +558,15 @@ function! MyShiftTabComplete()
 endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+""" Miscellaneous - to check out
+" Netrw explorer
+if has("eval")
+    let g:netrw_keepdir = 1                       " does not work!
+    let g:netrw_list_hide = '.*\.swp\($\|\t\),.*\.py[co]\($\|\t\)'
+    let g:netrw_sort_sequence = '[\/]$,*,\.bak$,\.o$,\.h$,\.info$,\.swp$,\.obj$,\.py[co]$'
+    let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
+    let g:netrw_use_noswf = 1
+endif
 
 " Remap the tab key to do autocompletion or indentation depending on the
 " context (from http://www.vim.org/tips/tip.php?tip_id=102)

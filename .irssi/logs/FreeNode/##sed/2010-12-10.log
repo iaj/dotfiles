@@ -1,0 +1,581 @@
+--- Log opened Fri Dec 10 00:00:03 2010
+--- Day changed Fri Dec 10 2010
+00:00  cthuluh: 4# printf %s\\n a b c d | sed ': label; $!{ N; b label;}; s/\n//g'
+00:00  shbot: cthuluh: abcd
+00:00  cthuluh: first, thanks to the loop, sed's buffer contains "a\nb\nc\nd"
+00:01  cthuluh: then me replace the newline with nothing
+00:01  cthuluh: we*
+00:02  cthuluh: ldfsilva: is that alright? I may very well explain badly, I'm getting tired
+00:03  ldfsilva: I'm trying to understand..  the b get the new buffer so in the first interaction it would bring the a or the d ?
+00:04  cthuluh: hem
+00:04  cthuluh: the 'b' command?
+00:04  ldfsilva: yes
+00:04  cthuluh: 'b' for "branch". it's just a goto
+00:04  cthuluh: it doesn't do anything to the data
+00:04  ldfsilva: so instead of doing something it just add in the buffer (label)
+00:04  ldfsilva: ?
+00:05  cthuluh: no no.
+00:05  cthuluh: well, we should learn how to use goto more frequently :)
+00:05  ldfsilva: agree,do you know any good knowledge base to get that ?
+00:05  cthuluh: it's just that when sed sees the 'b' command, it jumps to the label after the 'b' command
+00:06  cthuluh: to get used to goto? :)
+00:06  ldfsilva: yep :)
+00:06  cthuluh: you souldn't use them a lot, you know
+00:06  cthuluh: people were hung for using gotos
+00:06  cthuluh: (at least that's what I heard)
+00:07  ldfsilva: hum
+00:07  ldfsilva: because this is like, the initial part rsrs.. the situation is that I have blocks of 4 lines that need to be joined in one unique line.. but the whole file has lots of data all divided in 1st line empty, then 4 lines that I need to join; then 1 more line empty then 4 lines that i need to join
+00:08  cthuluh: well
+00:09  ldfsilva: could use other tools, but sed would be perfect as it works in environments which some other commands do not.. like HMCs, VIOs
+00:09  ldfsilva: all have sed
+00:09  cthuluh: dunno what those systems are
+00:10  ldfsilva: basically they are environments with limited commands
+00:10  ldfsilva: then sed would be something generic that could work fine
+00:10  cthuluh: ok
+00:10  cthuluh: so, you have lines where you do something
+00:10  cthuluh: (non empty lines)
+00:11  cthuluh: where you have to remove the trailing newline
+00:11  cthuluh: and then empty lines
+00:11  cthuluh: will you delete them?
+00:11  ldfsilva: yes
+00:12  ldfsilva: 4 lines will be joined in one line separeted in comma, like a csv file
+00:17  sabat: so, I am using diff filename1 filename2 |grep < |sed [What do I put here to remove the < from the output line] I figure sed will work to remove the < ?
+00:18  Riviera: diff file1 file2 | sed '/^< /!d;s///'
+00:18  sabat: used sed a lot to add lines, make changes, never done it to remove
+00:18  ldfsilva: diff filename1 filename2 | sed '/^</!d;s/<//'
+00:19  sabat: ok, which one lmao
+00:19  sabat: or do they both work
+00:19  ldfsilva: i think riviera just missed < in the end, to remove this character
+00:19  Riviera: no
+00:20  sabat: they are clearly different
+00:20  Riviera: They are equivalent, only that mine also removes the spaces that follows the <
+00:20  sabat: Aah, Riviera I was wanting the space removed also
+00:20  sabat: ty for doing that without me asking specifically
+00:20  Riviera: 8)
+00:20  Riviera: 4# sed '/ldf/!d;s///' <<< ldfsilva
+00:20  shbot: Riviera: silva
+00:21  sabat: diff file1 file2 | grep < |sed '/^< /!d;s///' look good to you guys?
+00:21  Riviera: ldfsilva: when the regex part is empty, the former regex is used.
+00:21  Riviera: sabat: no
+00:21  Riviera: sabat: for two reasons: 1) you don't need the grep, sed already does that part
+00:21  sabat: oh, ok
+00:21  ldfsilva: one more learned . ty riviera
+00:22  Riviera: sabat: 2) you'd need to quote the < (like \< or "<" or '<' or $'<'), otherwise the shell would think it's meant as a redirection operator
+00:22  sabat: aah, good point
+00:22  ldfsilva: cthuluh.. here it goes, echo -e "\na\nb\nc\nd\n\na\nb\nc\nd\n"    ... then in the end I'd expect 2 lines, each one with a,b,c,d
+00:26  ldfsilva: Riviera: sed '/\(Riv\)/!d;s//French \1/' <<< Rivie
+00:26  ldfsilva: :)
+00:26  sabat: Riviera: Worked like a charm, had to change the < to >, but that was my own doing.
+00:26  sabat: your command did perfect, I just asked using the wrong "<"
+00:27  sabat: kudos to you
+00:28  Riviera: :)
+00:28  sabat: I swear, every time I use sed, I feel like I know it all over again... but then I get something new, and it's like starting over again.
+00:29  sabat: Now i am reading into that command, and it's opening new doors... I love the power in sed, but it's hard to realize sometimes HOW MUCH sed can do, without already knowing how
+00:29  Riviera: 4# echo -e "\na\nb\nc\nd\n\na\nb\nc\nd\n" | sed -e '/^$/d' -e :a -e '$bb' -e N -e '/\n$/!ba' -e :b -e 's/\n\([^\n]\)/,\1/g' -e P -e D
+00:29  shbot: Riviera: a,b,c,d
+00:29  shbot: Riviera: a,b,c,d
+00:30  Riviera: Which is unfortunately extremely ugly code.
+00:30  sabat: Sed is like a hidden mystery box full of answers, you just have to know the answers before the question.
+00:30  ldfsilva: jesus.. let me see that
+00:31  Riviera: sabat: my idea is that if something is not easy to do in sed, with the most basic commands, then it should not be done in sed
+00:31  ldfsilva: the point is, what do you consider to be the basic commands Riviera ?
+00:32  sabat: riviera, ok I was wrong again
+00:32  sabat: Aparrently it's | not < or >
+00:32  sabat: so, I need to get the lines containing a PIPE [|]
+00:33  Riviera: ldfsilva: only s
+00:33  Riviera: ldfsilva: maybe b
+00:33  Riviera: err
+00:33  Riviera: ldfsilva: maybe d
+00:33  Riviera: ldfsilva: but actually nothing else
+00:33  Riviera: :)
+00:33  sabat: diff file1 file2 | sed '/^| /!d;s///' will that work? with a |
+00:33  sabat: or will the pipe break it
+00:33  Riviera: sabat: yes, it should work
+00:33  sabat: ok, thanks
+00:36  ldfsilva: really complex that expression for the 4 lines grouped with comma... at least for me
+00:36  Shu: could someone assist me with a command
+00:37  Shu: trying to compare 2 files with sed
+00:37  sabat: Riviera: shu is the person I was trying to help with your sed line.
+00:37  Shu: and only display what is diffrent
+00:37  Riviera: ldfsilva: that honestly only is so complex because it's not the sanest way to do that
+00:37  sabat: but it ended up failing somehow
+00:37  Shu: this is what i have currently
+00:37  Riviera: ldfsilva: I'm absolutely sure there's a more elegant and easier way to do the same
+00:37  sabat: shu, it might help if you fpaste/pastebin the output of diff and/or the 2 files your comparing
+00:37  Riviera: ldfsilva: but that'd require thinking, which I am not really able anymore tonight :)
+00:38  sabat: I gotta take off tho, hopefully they can help you here
+00:38  Riviera: :)
+00:38  Shu: . diff file1.txt file2.txt  | sed '/^| /!d;s///'
+00:38  sabat: I've never had a sed problem for more than 5 minutes after joining and asking here.
+00:38  ldfsilva: rsrs.. understood Riviera, I'll try something else here then I'll check with you folks later...
+00:38  Riviera: ldfsilva: ok :)
+00:38  Riviera: ldfsilva: in awk that should be trivial too
+00:38  ldfsilva: elegant or not  that was a really good start
+00:39  Shu: any ideas
+00:41  Riviera: Shu: Does the order of the lines in the files matter?
+00:41  Shu: no I just need to see what is dffrent from file1 and file 2
+00:41  Shu: and only display that output
+00:42  Riviera: Shu: okay, that sed thing that you have, that does not work?
+00:42  ldfsilva: same question as sabat isn't it ?
+00:42  Shu: yeah its just blank
+00:42  Shu: doesn't return anything
+00:43  Riviera: Shu: oh
+00:43  Riviera: Shu: i already wondered, because diff normally rather outputs < or > preceded lines
+00:43  Riviera: Shu: if you change that | to < or >, it does not do what you want?
+00:44  Shu: i do < it outputs file1 if do > it outputs file 2
+00:44  Riviera: the whole?
+00:44  Shu: yep
+00:44  Riviera: then diff thinks they are completely different :)
+00:44  Shu: humm
+00:45  Shu: does the format of each file matter
+00:45  Shu: ?
+00:45  Shu: one of the file has numbers in front of the names the other doesnt
+00:45  Riviera: am not sure what you mean with "format", but I guess it matters:)
+00:46  Riviera: yes, that matters :)
+00:46  Riviera: diff works line-wise
+00:46  Shu: crapo let me try and remove them
+00:46  Riviera: if only one character differs between two lines, it thinks they are completely different
+00:46  Riviera: okay
+00:47  sabat: shu, once again I say, paste the 2 files if you can, it WOULD HELP even if it's only a few lines of each, but again, am taking off, right now. Just grabbed my keys off my desk
+00:50  Shu: thank i got it
+00:50  Shu: that was the issue
+00:50  Riviera: cool
+00:50  Shu: I had 1 file with number in front of the is like 1,2,3,
+00:50  Shu: the other didnt
+00:50  Riviera: :)
+00:50  Shu: it wasnt total accurate but close enough
+00:51  ldfsilva: Riviera
+00:51  ldfsilva: 4# echo -e "\na\nb\nc\nd\n\na\nb\nc\nd\n" | sed ': label; $!{ N;b label;}; s/\(a\)\n\|\(c\)\n\|\(b\)\n/\1\3\2,/g'
+00:51  shbot: ldfsilva:
+00:52  shbot: ldfsilva: a,b,c,d
+00:52  shbot: ldfsilva: etc... ( http://pastebin.com/qv1SHMpX )
+00:52  ldfsilva: :(
+00:52  ldfsilva: just a sec
+00:52  Shu: Hey riviera
+00:52  Shu: thanks a lot
+00:52  Shu: much appreciated
+00:52  Riviera: welcome Shu :)
+00:52  Shu: sed is actually pretty cool
+00:52  Shu: going to read up on tha
+00:54  ldfsilva: #4 echo -e "\na\nb\nc\nd\n\na\nb\nc\nd\n" | sed ': label; $!{ N;b label;}; s/\(a\)\n\|\(c\)\n\|\(b\)\n/\1\3\2,/g;'|sed '/^$/d'
+00:55  ldfsilva: 4# echo -e "\na\nb\nc\nd\n\na\nb\nc\nd\n" | sed ': label; $!{ N;b label;}; s/\(a\)\n\|\(c\)\n\|\(b\)\n/\1\3\2,/g;'|sed '/^$/d'
+00:55  shbot: ldfsilva: a,b,c,d
+00:55  shbot: ldfsilva: a,b,c,d
+00:55  ldfsilva: could we avoid the last | sed :-z
+00:56  Riviera: well it should only matter for the beginning of the input
+00:56  Riviera: maybe just try prepending your script (before :label) with /^$/d
+00:57  ldfsilva: tried.. dropped just the first line
+00:58  Riviera: ah well
+00:58  Riviera: misread your examples
+00:59  Riviera: just a minute please
+00:59  ldfsilva: sure
+01:06  Riviera: sorry, re
+01:07  Riviera: ldfsilva: i again don't see a clever way for doing that, only something like adding [..]\3\2,/g; s/^\n\n*//; s/\n\n*$//; s/\(\n\)\n\n*/\1/g'
+01:07  Riviera: but that admittedly sucks a lot
+01:08  ldfsilva: yeah.. it gets hard for other understanding as well
+01:08  ldfsilva: I mean to put in a script
+01:09  Riviera: an awk solution really should be best
+01:10  cthuluh: hmmm
+01:10  cthuluh: not much better, but...
+01:10  cthuluh: sed '/./ { H; x; s/^\n//; x; d;}; x; s/\n/,/g; p; s/.*//; x; d'
+01:10  cthuluh: seems to do the job too :-]
+01:11  cthuluh: dunno if it can be improved or not
+01:12  ldfsilva: really works,, i'll look for those commands H ; x .. need to understand what that is doing :)
+01:12  cthuluh: sed '/./ { H; d;}; x; s/^\n//; s/\n/,/g; p; s/.*//; x; d'   simpler
+01:13  Riviera: cthuluh: nice
+01:13  Riviera: cthuluh: am waiting for the awk solution
+01:13  Riviera: cthuluh: and please use nifty re-definitions of FS, OFS and RS if possible
+01:13  Riviera: ;-)
+01:14  cthuluh: :>
+01:23  cthuluh: ldfsilva: something like: awk 'BEGIN { RS="\n\n"; ORS="\n"; FS="\n"; OFS="," }; { $1=$1; print}'
+01:23  cthuluh: but it prints a trailing comma
+01:23  cthuluh: if you're also interested in awk... :)
+01:23  ldfsilva: wow.. impressive
+01:24  ldfsilva: let me see if awk works in the enviroment i'm working on
+01:24  cthuluh: hey, don't forget that you already have nice sed solutions ;)
+01:25  ldfsilva: for sure, an elegant one
+01:26  cthuluh: if you manage to get two trailing newlines in your file, then it should be ok
+--- Log opened Fri Dec 10 02:27:36 2010
+02:27 --- Users 101 nicks [0 ops, 0 halfops, 0 voices, 101 normal]
+02:29 --- Channel ##sed was synced in 98 seconds
+--- Log closed Fri Dec 10 03:40:32 2010
+--- Log closed Fri Dec 10 03:41:08 2010
+--- Log opened Fri Dec 10 03:46:05 2010
+03:46 --- Users 101 nicks [0 ops, 0 halfops, 0 voices, 101 normal]
+--- Log opened Fri Dec 10 03:46:32 2010
+03:46 --- Users 102 nicks [0 ops, 0 halfops, 0 voices, 102 normal]
+03:47 --- Channel ##sed was synced in 109 seconds
+03:48 --- Channel ##sed was synced in 103 seconds
+--- Log closed Fri Dec 10 04:21:49 2010
+--- Log closed Fri Dec 10 04:22:15 2010
+--- Log opened Fri Dec 10 04:27:11 2010
+04:27 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+--- Log opened Fri Dec 10 04:27:41 2010
+04:27 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+04:28 --- Channel ##sed was synced in 104 seconds
+04:29 --- Channel ##sed was synced in 109 seconds
+--- Log closed Fri Dec 10 07:41:05 2010
+--- Log closed Fri Dec 10 07:41:35 2010
+--- Log opened Fri Dec 10 07:46:28 2010
+07:46 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+--- Log opened Fri Dec 10 07:47:02 2010
+07:47 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+07:48 --- Channel ##sed was synced in 100 seconds
+07:48 --- Channel ##sed was synced in 110 seconds
+07:51  pyoor_: Is there anyway I can all occurences of string from a file except between 2 delimeters, with multiple occurences of those delimeters?  I.e: several-lines-of-text...start...data...end...more-lines...start...data...end..even-more-lines
+07:51  pyoor_: Is there anyway I can all occurences of string from a file except between 2 delimeters, with multiple occurences of those delimeters?  I.e: several-lines-of-text...start...data...end...more-lines...start...data...end..even-more-lines
+07:54 --- pyoor_ is now known as pyoor
+07:54 --- pyoor_ is now known as pyoor
+08:30  probonono: pyoor, you can exclude lines (inclusively) between delimiters from processing with something like:  sed -e '/start/,/end/b' -e '<other processing>'
+08:30  probonono: pyoor, you can exclude lines (inclusively) between delimiters from processing with something like:  sed -e '/start/,/end/b' -e '<other processing>'
+08:31  pyoor: What if there are multiple occurences of start and end?  Will it only do that based on the first instance of start and first instance of end or will it treat each as a block?
+08:31  pyoor: What if there are multiple occurences of start and end?  Will it only do that based on the first instance of start and first instance of end or will it treat each as a block?
+08:33  probonono: They will be treated as blocks, but only up to the first instance of each marker found in the stream.
+08:33  probonono: They will be treated as blocks, but only up to the first instance of each marker found in the stream.
+08:34  pyoor: awesome, I just tested it and it works great
+08:34  pyoor: awesome, I just tested it and it works great
+08:34  pyoor: thanks
+08:34  pyoor: thanks
+08:34  probonono: yw
+08:34  probonono: yw
+10:34  nimred: hello all
+10:34  nimred: hello all
+10:34  nimred: is there a better way to do :
+10:34  nimred: is there a better way to do :
+10:35  nimred: find . -name "index" -type f | while read i ; do
+10:35  nimred: find . -name "index" -type f | while read i ; do
+10:35  nimred: sed -e "s/foo/bar/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: sed -e "s/foo/bar/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: sed -e "s/Foo/Bar/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: sed -e "s/Foo/Bar/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: sed -e "s/fOo/bAr/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: sed -e "s/fOo/bAr/g" "$i" > "$i".tmp && mv -f "$i".tmp "$i" ;
+10:35  nimred: ...
+10:35  nimred: ...
+10:35  nimred: done
+10:35  nimred: done
+10:35  nimred: ?
+10:35  nimred: ?
+10:36  nimred: is it possible to run an only sed instance ?
+10:36  nimred: is it possible to run an only sed instance ?
+10:42  geirha: find . -name index -type f -exec sh -c 'sed -e "s/foo/bar/g" -e "s/Foo/Bar/g" -e "s/fOo/bAr/g" "$1" > "$1.tmp" && mv "$1.tmp" "$1"' _ {} \;
+10:42  geirha: find . -name index -type f -exec sh -c 'sed -e "s/foo/bar/g" -e "s/Foo/Bar/g" -e "s/fOo/bAr/g" "$1" > "$1.tmp" && mv "$1.tmp" "$1"' _ {} \;
+10:43  nimred: that's it !
+10:43  nimred: that's it !
+10:43  nimred: geirha: what is  "_ {} \" for ?
+10:43  nimred: geirha: what is  "_ {} \" for ?
+10:44  geirha: 4# sh -c 'echo "arg0 is $0, arg1 is $1"' _ foo
+10:44  geirha: 4# sh -c 'echo "arg0 is $0, arg1 is $1"' _ foo
+10:44  shbot: geirha: arg0 is _, arg1 is foo
+10:44  shbot: geirha: arg0 is _, arg1 is foo
+10:45  geirha: {} \; is part of the syntax for find's -exec, see ''man find'' and http://mywiki.wooledge.org/UsingFind
+10:45  geirha: {} \; is part of the syntax for find's -exec, see ''man find'' and http://mywiki.wooledge.org/UsingFind
+10:46  nimred: ok coll :)
+10:46  nimred: ok coll :)
+10:46  nimred: thanks geirha
+10:46  nimred: thanks geirha
+10:46  pyoor: can't you do sed -i instead of mv
+10:46  pyoor: can't you do sed -i instead of mv
+10:47  pyoor: or can't you do -i on a variable?
+10:47  pyoor: or can't you do -i on a variable?
+10:47  geirha: Only if his sed has -i
+10:47  geirha: Only if his sed has -i
+10:47  nimred: why not !
+10:47  nimred: why not !
+10:47  nimred: pyoor: what is it intended to do ?
+10:47  nimred: pyoor: what is it intended to do ?
+10:47  pyoor: does inline edits
+10:47  pyoor: does inline edits
+10:48  nimred: i run GNU sed version 4.2.1
+10:48  nimred: i run GNU sed version 4.2.1
+10:48  pyoor: makes your changes directly to the file instead of having to >
+10:48  pyoor: makes your changes directly to the file instead of having to >
+10:48  nimred: on Arch Linux
+10:48  nimred: on Arch Linux
+10:48 10:48  geirha: It doesn't do inline edit geirha: It doesn't do inline edit
+
+10:48  nimred: but this sed command will perhaps be ran on aother system such as BSD one one day
+10:48  nimred: but this sed command will perhaps be ran on aother system such as BSD one one day
+10:48  geirha: It writes to a tempfile, then overwrites the original, like you're doing now, but it does it transparently.
+10:48  geirha: It writes to a tempfile, then overwrites the original, like you're doing now, but it does it transparently.
+10:48  geirha: nimred: Then you can't use -i
+10:48  geirha: nimred: Then you can't use -i
+10:49  pyoor: yeah listen to geirha, i'm thinking outloud
+10:49  pyoor: yeah listen to geirha, i'm thinking outloud
+10:49  geirha: BSD sed also has -i, but it uses a different syntax.
+10:49  geirha: BSD sed also has -i, but it uses a different syntax.
+10:49  nimred: geirha: ok np. good to know for next time anyway
+10:49  nimred: geirha: ok np. good to know for next time anyway
+10:49  nimred: np pyoor. many thanks
+10:49  nimred: np pyoor. many thanks
+10:49  pyoor: thank that guy ^ :)
+10:49  pyoor: thank that guy ^ :)
+10:51  nimred: yes i meant thanks pyoor and geirha of course ;)
+10:51  nimred: yes i meant thanks pyoor and geirha of course ;)
+10:53  geirha: If you want to edit files though, you should consider ed
+10:53  geirha: If you want to edit files though, you should consider ed
+10:54  nimred: geirha: sed is what i need i think
+10:54  nimred: geirha: sed is what i need i think
+10:55  geirha: ed_script=$(printf '%s\n' 'g/foo/s//bar/g' 'g/Foo/s//Bar/g' 'g/fOo/s//bAr/g' w); find ... -exec sh -c 'printf "%s\n" "$1" | ed -s "$2"' _ "$ed_script" {} \;
+10:55  geirha: ed_script=$(printf '%s\n' 'g/foo/s//bar/g' 'g/Foo/s//Bar/g' 'g/fOo/s//bAr/g' w); find ... -exec sh -c 'printf "%s\n" "$1" | ed -s "$2"' _ "$ed_script" {} \;
+10:55  geirha: No tempfiles involved
+10:55  geirha: No tempfiles involved
+10:57  nimred: are tempfiles problem ?
+10:57  nimred: are tempfiles problem ?
+10:58  geirha: If you need to retain links, they are.
+10:58  geirha: If you need to retain links, they are.
+10:58  nimred: to retain links ? what do you mean ?
+10:58  nimred: to retain links ? what do you mean ?
+10:59  geirha: 4# echo foo > file; ln -s file link; sed 's/foo/bar/g' link > link.tmp && mv link.tmp link; ls -l
+10:59  geirha: 4# echo foo > file; ln -s file link; sed 's/foo/bar/g' link > link.tmp && mv link.tmp link; ls -l
+10:59  shbot: geirha: total 8
+10:59  shbot: geirha: total 8
+10:59  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 09:59 file
+10:59  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 09:59 link
+10:59  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 09:59 file
+10:59  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 09:59 link
+11:00  geirha: 4# echo foo > file; ln -s file link; printf 'g/foo/s//bar/g\nw' | ed -s link; ls -l
+11:00  geirha: 4# echo foo > file; ln -s file link; printf 'g/foo/s//bar/g\nw' | ed -s link; ls -l
+11:00  shbot: geirha: total 4
+11:00  shbot: geirha: total 4
+11:00  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 10:00 file
+11:00  shbot: geirha: -rw-r--r-- 1 root root 4 Dec 10 10:00 file
+11:00  shbot: geirha: lrwxrwxrwx 1 root root 4 Dec 10 10:00 link -> file
+11:00  shbot: geirha: lrwxrwxrwx 1 root root 4 Dec 10 10:00 link -> file
+11:01  nimred: ah you mean if i need to let file unchanged ?
+11:01  nimred: ah you mean if i need to let file unchanged ?
+11:02  geirha: With the sed, link is no longer a symlink to file, it's a new file
+11:02  geirha: With the sed, link is no longer a symlink to file, it's a new file
+11:03  geirha: 4# echo foo > file; ln -s file link; sed 's/foo/bar/g' link > link.tmp && mv link.tmp link; cat file; cat link
+11:03  geirha: 4# echo foo > file; ln -s file link; sed 's/foo/bar/g' link > link.tmp && mv link.tmp link; cat file; cat link
+11:03  shbot: geirha: foo
+11:03  shbot: geirha: foo
+11:03  shbot: geirha: bar
+11:03  shbot: geirha: bar
+11:03  nimred: hmm i didn't know ; and already ran sed on set of files/links without having paied attention links became files
+11:03  nimred: hmm i didn't know ; and already ran sed on set of files/links without having paied attention links became files
+11:03  geirha: 4# echo foo > file; ln -s file link; printf 'g/foo/s//bar/g\nw' | ed -s link; cat file; cat link
+11:03  geirha: 4# echo foo > file; ln -s file link; printf 'g/foo/s//bar/g\nw' | ed -s link; cat file; cat link
+11:03  shbot: geirha: foo
+11:03  shbot: geirha: foo
+11:03  shbot: geirha: foo
+11:03  shbot: geirha: foo
+11:04  geirha: It may not be a problem. I'm just telling you so you're aware.
+11:04  geirha: It may not be a problem. I'm just telling you so you're aware.
+11:05  nimred: it is a problem
+11:05  nimred: it is a problem
+11:05  nimred: if i created symlink it is because i need symlink
+11:05  nimred: if i created symlink it is because i need symlink
+11:05  nimred: if sed makes them become files...
+11:05  nimred: if sed makes them become files...
+11:06  geirha: <greybot> ed is a command-based file editor. See http://bash-hackers.org/wiki/doku.php?id=howto:edit-ed - http://sdf.lonestar.org/index.cgi?tutorials/ed - http://wolfram.schneider.org/bsd/7thEdManVol2/edtut/edtut.pdf
+11:06  geirha: <greybot> ed is a command-based file editor. See http://bash-hackers.org/wiki/doku.php?id=howto:edit-ed - http://sdf.lonestar.org/index.cgi?tutorials/ed - http://wolfram.schneider.org/bsd/7thEdManVol2/edtut/edtut.pdf
+11:06  geirha: Some useful links from the bot in #bash
+11:06  geirha: Some useful links from the bot in #bash
+11:06 * TheBonsai feels highlighted
+11:06 * TheBonsai feels highlighted
+11:06  geirha: TheBonsai: :)
+11:06  geirha: TheBonsai: :)
+11:07  geirha: TheBonsai: You highlight on your site?
+11:07  geirha: TheBonsai: You highlight on your site?
+11:07  TheBonsai: yep :_)
+11:07  TheBonsai: yep :_)
+11:08  nimred: ok so let's use ed
+11:08  nimred: ok so let's use ed
+11:08  nimred: geirha: thanks for your advice
+11:08  nimred: geirha: thanks for your advice
+11:08  TheBonsai: geirha: i want to be informed if it is of interest or not
+11:08  TheBonsai: geirha: i want to be informed if it is of interest or not
+11:08  TheBonsai: :D
+11:08  TheBonsai: :D
+11:10  nimred: ah what is find arg ... ?
+11:10  nimred: ah what is find arg ... ?
+11:11  geirha: ... is "same as before, but I can't be bothered retyping it"
+11:11  geirha: ... is "same as before, but I can't be bothered retyping it"
+11:11  nimred: lol
+11:11  nimred: lol
+11:11  nimred: ok thanks
+11:11  nimred: ok thanks
+11:21  nimred: geirha: is there a way to make ed be verbose ?
+11:21  nimred: geirha: is there a way to make ed be verbose ?
+11:22  geirha: nimred: Yes, see the bash-hackers link
+11:22  geirha: nimred: Yes, see the bash-hackers link
+11:23  geirha: It has a section on debugging ...
+11:23  geirha: It has a section on debugging ...
+11:24  nimred: i get "Newline appended" :/
+11:24  nimred: i get "Newline appended" :/
+11:25  nimred: hopefully i have a backup
+11:25  nimred: hopefully i have a backup
+11:26  nimred: it would be good if ed told me on which file newline has been appended
+11:26  nimred: it would be good if ed told me on which file newline has been appended
+11:27  nimred: any idea geirha ?
+11:27  nimred: any idea geirha ?
+11:42  nimred: geirha: ?
+11:42  nimred: geirha: ?
+11:54  nimred: lol
+11:54  nimred: lol
+12:16  geirha: nimred: Have the script print it
+12:16  geirha: nimred: Have the script print it
+12:17  geirha: nimred: -exec sh -c 'echo "Editing $2"; printf "%s\n" "$1" | ed -s "$2"' _ "$ed_script" {} \;
+12:17  geirha: nimred: -exec sh -c 'echo "Editing $2"; printf "%s\n" "$1" | ed -s "$2"' _ "$ed_script" {} \;
+12:18  geirha: Newline appended just means that the file didn't end with a newline, so ed "fixed" it.
+12:18  geirha: Newline appended just means that the file didn't end with a newline, so ed "fixed" it.
+12:21  nimred: geirha: ok so there are no problem ?
+12:21  nimred: geirha: ok so there are no problem ?
+12:24  geirha: vi/vim does the same thing. It automatically appends a newline at the end of a file if it didn't end with one.
+12:24  geirha: vi/vim does the same thing. It automatically appends a newline at the end of a file if it didn't end with one.
+12:25  Riviera: With GNU ed you can create files that are not newline-terminated.
+12:25  Riviera: With GNU ed you can create files that are not newline-terminated.
+12:25  geirha: For a text file, it makes sense for it to end with a newline, so I'd say it's no problem.
+12:25  geirha: For a text file, it makes sense for it to end with a newline, so I'd say it's no problem.
+12:26  Riviera: I did not pay attention, no idea what that was about, but yes, textfiles should be \n terminated, for many tools have problems processing them if they are not :)
+12:26  Riviera: I did not pay attention, no idea what that was about, but yes, textfiles should be \n terminated, for many tools have problems processing them if they are not :)
+12:26  Riviera: So geirha, you don't want to know how to create non-\n-terminated files with GNU ed?
+12:26  Riviera: So geirha, you don't want to know how to create non-\n-terminated files with GNU ed?
+12:26  Riviera: :-(
+12:26  Riviera: :-(
+12:27  geirha: Riviera: It doesn't sound useful, but go ahead and tell me :)
+12:27  geirha: Riviera: It doesn't sound useful, but go ahead and tell me :)
+12:27  Riviera: ha!
+12:27  Riviera: ha!
+12:28  Riviera: That'S exactly the point, it's not really useful, so I never had to use it.
+12:28  Riviera: That'S exactly the point, it's not really useful, so I never had to use it.
+12:28  Riviera: So the *only* thing I can do with that knowledge is to tell you.
+12:28  Riviera: So the *only* thing I can do with that knowledge is to tell you.
+12:28  Riviera: hence bothering you ;-)
+12:28  Riviera: hence bothering you ;-)
+12:28  Riviera: geirha: r /dev/null
+12:28  Riviera: geirha: r /dev/null
+12:29  Riviera: 4# ed
+12:29  Riviera: 4# ed
+12:29  shbot: Riviera: no output within the time limit
+12:29  shbot: Riviera: no output within the time limit
+12:29  Riviera: so let's see
+12:29  Riviera: so let's see
+12:29  Riviera: 4# echo test > file1; od -t x1 file1
+12:29  Riviera: 4# echo test > file1; od -t x1 file1
+12:29  shbot: Riviera: 0000000 74 65 73 74 0a
+12:29  shbot: Riviera: 0000000 74 65 73 74 0a
+12:29  shbot: Riviera: 0000005
+12:29  shbot: Riviera: 0000005
+12:29  geirha: 4# printf 'test' > file; ed -s file <<< 'r /dev/null'; od -An -tx1 file
+12:29  geirha: 4# printf 'test' > file; ed -s file <<< 'r /dev/null'; od -An -tx1 file
+12:29  shbot: geirha: Newline appended
+12:29  shbot: geirha: Newline appended
+12:29  shbot: geirha:  74 65 73 74
+12:29  shbot: geirha:  74 65 73 74
+12:30 12:30  Riviera: 4# echo test > file1; ed file1 <<< $'r /dev/null\nw'; od -t x1 file1 Riviera: 4# echo test > file1; ed file1 <<< $'r /dev/null\nw'; od -t x1 file1
+
+12:30  shbot: Riviera: 5
+12:30  shbot: Riviera: 5
+12:30  shbot: Riviera: 0
+12:30  shbot: Riviera: 0
+12:30  shbot: Riviera: etc... ( http://pastebin.com/UjgdtsJF )
+12:30  shbot: Riviera: etc... ( http://pastebin.com/UjgdtsJF )
+12:30  geirha: 4# printf 'test' > file; ed -s file <<< 'r /dev/null\nw'; od -An -tx1 file
+12:30  geirha: 4# printf 'test' > file; ed -s file <<< 'r /dev/null\nw'; od -An -tx1 file
+12:30  shbot: geirha: Newline appended
+12:30  shbot: geirha: Newline appended
+12:30  Riviera: well.
+12:30  Riviera: well.
+12:30  shbot: geirha: ?
+12:30  shbot: geirha:  74 65 73 74
+12:30  shbot: geirha: ?
+12:30  shbot: geirha:  74 65 73 74
+12:30  geirha: 4# printf 'test' > file; ed -s file <<< $'r /dev/null\nw'; od -An -tx1 file
+12:30  geirha: 4# printf 'test' > file; ed -s file <<< $'r /dev/null\nw'; od -An -tx1 file
+12:30  Riviera: geirha: missing $
+12:30  Riviera: geirha: missing $
+12:30  shbot: geirha: Newline appended
+12:30  shbot: geirha: Newline appended
+12:30  shbot: geirha:  74 65 73 74 0a
+12:30  shbot: geirha:  74 65 73 74 0a
+12:30  Riviera: damn.
+12:30  Riviera: damn.
+12:30  Riviera: this is just mean.
+12:30  Riviera: this is just mean.
+12:30  geirha: DOESNT WORKZ!!1
+12:30  geirha: DOESNT WORKZ!!1
+12:30  Riviera: Fucking GNU.
+12:30  Riviera: Fucking GNU.
+12:31 12:31  Riviera:     Similarly, to remove a newline from the end of binary `file': Riviera:     Similarly, to remove a newline from the end of binary `file':
+
+12:31  Riviera:       $ ed file
+12:31  Riviera:       $ ed file
+12:31  Riviera:       r /dev/null
+12:31  Riviera:       r /dev/null
+12:31  Riviera:       wq
+12:31  Riviera:       wq
+12:31  Riviera: :-(
+12:31  Riviera: :-(
+12:31  geirha: 4# printf 'test\n' > file; ed -s file <<< $'r /dev/null\nwq'; od -An -tx1 file
+12:31  geirha: 4# printf 'test\n' > file; ed -s file <<< $'r /dev/null\nwq'; od -An -tx1 file
+12:31  Riviera: That's it. I'll install Windows.
+12:31  Riviera: That's it. I'll install Windows.
+12:31  shbot: geirha:  74 65 73 74 0a
+12:31  shbot: geirha:  74 65 73 74 0a
+12:32  geirha: 4# ed --version
+12:32  geirha: 4# ed --version
+12:32  shbot: geirha: GNU Ed 0.9
+12:32  shbot: geirha: GNU Ed 0.9
+12:32  shbot: geirha: Copyright (C) 1994 Andrew L. Moore, 2008 Antonio Diaz Diaz.
+12:32  shbot: geirha: etc... ( http://pastebin.com/xYwYW2Z1 )
+12:32  shbot: geirha: Copyright (C) 1994 Andrew L. Moore, 2008 Antonio Diaz Diaz.
+12:32  shbot: geirha: etc... ( http://pastebin.com/xYwYW2Z1 )
+12:32  Riviera: Same with the version installed here: 1.4
+12:32  Riviera: Same with the version installed here: 1.4
+12:32  Riviera: I guess I should file a bug report :/
+12:32  Riviera: I guess I should file a bug report :/
+12:32  Riviera: But I am too shy, so I won't!
+12:32  Riviera: But I am too shy, so I won't!
+12:34  geirha: I'm disappointed that the useless feature you promised me isn't working. :(
+12:34  geirha: I'm disappointed that the useless feature you promised me isn't working. :(
+12:35  Riviera: sorry geirha
+12:35  Riviera: sorry geirha
+12:35  Riviera: I wish I knew how to fix this situation.
+12:35  Riviera: I wish I knew how to fix this situation.
+--- Log opened Fri Dec 10 13:05:29 2010
+13:05 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+13:07 --- Channel ##sed was synced in 92 seconds
+13:22  ptl: is there 'or' in the original UNIX version of sed? (Not GNU sed)
+13:22  ptl: |
+13:22  ptl: couldn't make it work.
+13:22  Riviera: ptl: no
+13:22  Riviera: ptl: there's not
+13:22  ptl: too bad :(
+13:23  Riviera: yes
+13:23  Riviera: :)
+14:10  nimred: geirha: my files are html sources. Is there a way to exclude texte between href tags ?
+14:10  nimred: <A HREF="texte to exclude">
+14:28  geirha: s/<A HREF="[^"]*/<A HREF="/
+14:28  geirha: Though tools like sed and ed are not a good choice for editing html
+14:34  nimred: geirha: sure so what do you recommand else than ed and sed to do what i need ?
+14:42  geirha: <greybot> You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+14:46  nimred: geirha i agree with you and am thinking about using lxml
+14:47  nimred: just need some time to become familiar with xml and lxml
+14:52  geirha: I've never attempted editing html with anything but an interactive editor, so I wouldn't know what's best to use.
+14:58  nimred: geirha: which way to include s/<A HREF="[^"]*/<A HREF="/ in your command ?
+14:58  nimred: i mean :
+14:58  nimred: ed_script=$(printf '%s\n' 'g/foo/s//bar/g' 'g/Foo/s//Bar/g' 'g/fOo/s//bAr/g' w); find ... -exec sh -c 'printf "%s\n" "$1" | ed -s "$2"' _ "$ed_script" {} \;
+15:01  geirha: For ed, you need 'g/<A HREF="[^"]*/s//<A HREF="/'
+15:01  geirha: Just add it before the w
+15:02  geirha: It's an idea to test it out manually first.  ''ed file''
+15:02  geirha: Then run g/<A HREF="[^"]*/s//<A HREF="/  in the ed prompt
+15:09  nimred: geirha: by "exclude" i meant ignore. i just do not want ed to work on text between <A HREF=" and >. Is it what you understood ?
+15:12  geirha: Ah. No.
+15:13  geirha: This is where you switch to some more applicable tool.
+15:15  nimred: ok. Anyway sed is great.ed also is !
+15:15  nimred: great thanks geirha and others
+16:04 --- maxim is now known as Guest61043
+16:15 --- Vorpal_ is now known as Vorpal
+19:28  ptl: echo 'aaa aaa cc ddd' | sed '/\([a-z]\)\1\1/s///' --> prints ' aaa cc ddd'
+19:28  ptl: can't understand why
+19:29  waldner: it deletes the first "aaa", that's all
+19:29  ptl: oops
+19:29  waldner: [a-z] matches the first "a", and \1\1 the following two
+19:29  ptl: it should have /g for erasing all three repeats
+19:29  ptl: is that it?
+19:30  waldner: try it and see
+19:42  ptl: tried, thanks, waldner
+19:42  waldner: np
+--- Log closed Fri Dec 10 19:46:41 2010

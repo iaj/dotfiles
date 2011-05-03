@@ -1,0 +1,1164 @@
+--- Log opened Thu Oct 07 08:33:08 2010
+08:33 --- Users 639 nicks [0 ops, 0 halfops, 0 voices, 639 normal]
+08:33  aLemmer: See line 62.
+08:34  aLemmer: Anyone looking at it?
+08:34 --- Channel #python was synced in 75 seconds
+08:34  w4r: wouldn't inside hero class have an _init_(): that has self.defn = 0
+08:35  KirkMcDonald: aLemmer: Some string formatting would make this somewhat clearer.
+08:35  aLemmer: I'm a n00b, please elaborate.
+08:35  KirkMcDonald: aLemmer: Also, you don't need any of those semicolons.
+08:35  kerio: aLemmer: still that game? :)
+08:35  aLemmer: Yeah. ;3
+08:35  aLemmer: Rewrote it.
+08:35  KirkMcDonald: aLemmer: Which of these is easier to read:
+08:35  w4r: have you come from another language background. there's alot of semicolons
+08:35  KirkMcDonald: aLemmer: foo + ' - ' + bar
+08:35  KirkMcDonald: aLemmer: '%s - %s' % (foo, bar)
+08:36  aLemmer: Removed the semicolon.
+08:36  aLemmer: (s)
+08:38  KirkMcDonald: aLemmer: Or, really: '* TROLL STR (%s) - %s DEF (%s) = DAMAGE (%s)' % (str, hero.name, hero.defn, str-hero.defn)
+08:38  Gorroth: KirkMcDonald: '%s - %s' % ('%s' % foo, '%s' % '%s' % bar) # should be a lot cleaner
+08:38  time_squatter: dash: I like the way Python is clean and easy to read.  I'm also interested in creating web applications.  I don't want to learn about using the diffrent framworks like django before I have a real understanding of Python.
+08:38  Gorroth: KirkMcDonald: i do it because i like the %
+08:38  dash: time_squatter: Ah.
+08:39  dash: time_squatter: well, can't help you there, i don't do web applications
+08:39  Gorroth: oh, i just started with django
+08:39  Gorroth: very nice thus far
+08:39  time_squatter: dash: not just web applications, thats just later down.  What do you use python for?
+08:39  dash: django is nice until you want to do something it doesn't make easy, as far as I can tell
+08:39  dash: time_squatter: calendars
+08:40  dash: time_squatter: i've done various stuff in the past, but my day job currently involves CalDAV.
+08:40  KirkMcDonald: time_squatter: Write a Diplomacy adjudicator.
+08:40  Gorroth: well, from the best i can tell, it should make making any kind of website easy, but i guess i won't know until i run into some weird situtation
+08:40  Gorroth: anyway, for my website, it'll be just fine
+08:40  dash: Gorroth: not any kind, just some kinds :)
+08:40  Gorroth: any kind i care about
+08:40  KirkMcDonald: Gorroth: It makes things easy right up until it stops making things easy.
+08:41  Gorroth: right...
+08:41  KirkMcDonald: Gorroth: And then it makes things maddening.
+08:41  KirkMcDonald: I, for one, perfer my madness up front, where I can see it.
+08:41  KirkMcDonald: prefer*
+08:41  Gorroth: man, after years of writing code, i do not
+08:41  Gorroth: i like it easy as long as possible
+08:42  KirkMcDonald: Depends on your priorities.
+08:42  Gorroth: yeah.
+08:42  _habnabit: Gorroth, and then a spate of nightmarish difficulty?
+08:42  Gorroth: _habnabit: no, probably just good coding
+08:42  KirkMcDonald: If your top priority is to have easily written code, that is one thing.
+08:43  dash: if you're writing relatively simple CMS-type code, django is probably fine.
+08:43  aLemmer: How can I get the hero.defn value to update once attack(str) is called?
+08:43  dash: But there are plenty of other good choices.
+08:44  Gorroth: dash: yeah, that's probably mostly what it will be
+08:44  w4r: aLemmer: I like to use a setter method. def setDefn(self, newDef): self.dfn = newDef
+08:45  w4r: and viceversa with getDefn
+08:45  KirkMcDonald: aLemmer: I have a design suggestion.
+08:45  aLemmer: Go on.
+08:45  _habnabit: w4r, setters are silly in python.
+08:45  Gorroth: indeed they are
+08:45  KirkMcDonald: aLemmer: You probably want these things to be instances of classes, rather than classes in their own right.
+08:45  w4r: hanabit, Gorroth: why ?
+08:46  _habnabit: w4r, 'cause python doesn't have access modifiers, and does have properties.
+08:46  Gorroth: i know it "feels right" to have them, but really, there is no point in python, since everything is public anyway, unless you use name-mangled stuff, which is a hack
+08:46  aLemmer: Oh, I guess I should read into that.
+08:46  KirkMcDonald: aLemmer: To think on: Consider what would happen if you wanted the hero to fight more than one troll at once.
+08:47  w4r: so setting objB.value = c is more suitable than having a function within class B doing the same thing
+08:47  KirkMcDonald: w4r: Yes.
+08:47  w4r: alright
+08:47  aLemmer: Could you give me an example of how that'd look?
+08:48  aLemmer: Would I just have a template class, with objects as a customized character?
+08:48  KirkMcDonald: aLemmer: You would have a troll class, and each troll would be an instance of that class.
+08:48  Gorroth: why can't we just have lady classes?
+08:48  w4r: the way I was taught classes is using def __init__(): \n self.name = name
+08:49  KirkMcDonald: aLemmer: Another thing to think on: Consider the function for the troll attacking the hero. Consider the function for the hero attacking the troll.
+08:49  KirkMcDonald: aLemmer: How are these different? Is it possible to make them identical?
+08:55  kerio: KirkMcDonald: hmm, they *should* be different
+08:55  kerio: the player should have it easy
+08:55  kerio: and monsters are less complicated
+08:56  kerio: no reason to have trolls attacking players different from dragons attacking players though
+08:57  KirkMcDonald: I predict a base "character" class, perhaps then with separate "NPC" and "PC" subclasses.
+09:15  ozzloy: http://pastebin.com/ferHnrn3 how do i count the number of classes in a module?  these are both giving me 182, when the answers according to http://nltk.googlecode.com/svn/trunk/doc/api/index.html are 5 and 20
+09:15  infobob: http://paste.pocoo.org/show/272090/ (repasted for ozzloy)
+09:16  ozzloy: you have a bot to ninja pastes?
+09:21  shylent: no, we employ a living person to do that
+09:22  hemanth: :)
+09:24  ozzloy: heh
+09:25  ozzloy: well infobob is a very fast living person
+09:25  kerio: for various degrees of "person"
+09:27  lyrae: i have a list of image paths....say 5 paths in there, and im opening each and picking random pixels and getting their rgb values. I want to find out all the images that have the same rgb values...whats the best way to do this? take pathA and compare it with pathB, pathC, pathD, pathE
+09:27  lyrae: and then take pathB and compare with pathC, pathD, pathE, etc
+09:27  lyrae: seems like a lot of work.
+09:34  mtx_init: lyrae: theres an infinite number of ways to do what you want.  I would open each image, get data, store data and repeat, then compare stored data.
+09:35  lyrae: mtx_init, yea that seems more efficient than the way in my question. thank you
+09:36  mtx_init: lyrae: if you have a lot of images and as a result a lot of data, there may be ways in which you can compare while you abstract.  But that just adds complexity to your program,
+09:37  lyrae: this way is fine for now. I will see how it works out. thanks :)
+09:38  superjoe: I'm doing a presentation on Python, and I'm brainstorming simple problems that you can solve differently with object oriented, imperative, and functional approaches. Does anything come to mind?
+09:39  kerio: functional?
+09:39  kerio: python is not a functional language
+09:39  superjoe: it has functional aspects
+09:39  kerio: it has map()
+09:40  superjoe: I would argue that a solution in a functional language can map directly to python without modifying the logic
+09:40  mtx_init: you can use pretty much any language as declarative if you want to.
+09:41  kelp1: Hello, if I have a file called Class.py which initiates a class, how do I run it in the interactive python console so I can test out the class?
+09:41  _habnabit: kelp1, import it.
+09:41  kelp1: Is that as simple as going into the interactive console and typing "import class.py"?
+09:42  Habbie: 'import Class'
+09:42  Habbie: if the name is Class.py
+09:42  kerio: modules should be in lowercase
+09:42  kerio: :(
+09:42  kelp1: Thank you, I will try it!
+09:42  kerio: also class.py will not work right
+09:42  _habnabit: kelp1, did you try reading the python tutorial?
+09:42  w4r: kelp1: import Class
+09:43  kelp1: I am reading an external book called Beginning Python: Python 2.6 and 3.1 by wrox, do you recommend the official python doc?
+09:43  kerio: nobody is telling him that having a module named Class is a stupid idea?
+09:43  kelp1: Sorry, it's not actually named Class, it was just a placeholder
+09:44  w4r: my suggestion is that, I'm sure the book will cover more on how to import and use those classes.
+09:44  mtx_init: superjoe: maybe give this a read http://en.wikipedia.org/wiki/Functional_programming   I have no exact examples, but pretty much anything can be forced to work in both
+09:44  Habbie: kelp1, don't do that. don't use placeholders. you'll get confused and then we'll get confused and then we can't help you. use the actual names of your files and identifiers.
+09:44  superjoe: mtx_init, I get that you can "cheat" in functional languages. I was talking about programming the "right" way
+09:45  superjoe: hmm, quick sort might be a good example
+09:45  _habnabit: How would you write quicksort in an 'object-oriented' way ?
+09:46  superjoe: yeah good point
+09:46  kerio: _habnabit: L.sort()
+09:46  kerio: there
+09:46  superjoe: it works for functional and imperative though. look how haskell does it: http://www.haskell.org/haskellwiki/Introduction#Quicksort_in_Haskell
+09:46  _habnabit: Yes, I know
+09:47  superjoe: it's kind of a silly question. I was trying to think of a fun way to illustrate that you can use any of those paradigms in Python
+09:47  mtx_init: superjoe: I took a whole class in University where we had to write the same program over multiple paradigms.  It wasn't very easy.
+09:47  kerio: what program?
+09:47  superjoe: yeah that's my question
+09:48  mtx_init: superjoe: One was a scheme interpretor.
+09:48  superjoe: hmm
+09:49  superjoe: I got it
+09:50  superjoe: FunctionalQuickSorter and ImperativeQuickSorter, which both inherit from AbstractQuickSorter
+09:52  kerio: superjoe: eeew
+09:52  kerio: just... no
+09:54  superjoe: :D
+09:55  Alberth: superjoe: you are missing the AbstractComparatorFactory hierarchy to compare objects
+09:55  superjoe: haha I know
+09:57  superjoe: I can honestly say I've never made a factory in my life
+10:08  barfster: How can I make the script wait for 1 sec? Is there sleep(1)?
+10:08  Alberth: in the time module
+10:08  barfster: Thanks
+10:12  blubbi: hej, whats the smartest way to split a string like this: aaaabbbcccc -> bbb (remove first 4 chars and all chars after the 7 char)?
+10:13  jorrit: blubbi, use slices
+10:14  Kylarr: If it's always removing the first 4 and all after the 7th, then text[4:7] works.
+10:14  blubbi: mmh, wondering...
+10:16  blubbi: indeed...
+10:16 * blubbi is wondering what I did wrong... now it works...
+10:17  barfster: blubbi: sometimes affirmation helps
+10:17  barfster: Maybe you did not dare to hit enter?
+10:18  blubbi: hehe, or just thinking round the corner :)
+10:21  blubbi: aahh, I tried to remove from 0:5 and then crom 7: instead of simply using 4:7
+10:21  blubbi: ;-)
+10:21  Alberth: blubbi: you cannot change existing strings, you always have to create new ones
+10:22  blubbi: i just realized it :-) value = float(line[30:43].strip())
+10:22  blubbi: works fine now
+10:22  mercutio22: Can someone tell me how to remove the first item of a list every run of a for loop?
+10:22  mercutio22: it should be easy.. but I didn't find how
+10:23  Alberth: L = L[1:] ; for x in L: ...   ?
+10:23  mercutio22: Alberth: lemme try..
+10:23  Alberth: not sure what 'every run' means
+10:23  blubbi: pop?
+10:24  mercutio22: Alberth: yeah, thats it
+10:24  blubbi: or del list[i]
+10:24  mercutio22: its a simple slice really
+10:24  mercutio22: its just I had never done it properly
+10:24  Alberth: mercutio22: it is pretty expensive though, also for the alternatives suggested by blubbi
+10:25  Alberth: mercutio22: dropping the last item is much cheaper if that is an option.
+10:25  mercutio22: for blubbi's solution would I have to know i?
+10:26  mercutio22: I need to drop the first
+10:26  blubbi: first is 0
+10:26  blubbi: last is ()
+10:26  zzz: Hi, is there any ?: like function in python?
+10:27  blubbi: list.pop() removes last
+10:27  mercutio22: blubbi: ok, so how do I do it? del list[i]?
+10:27  Kylarr: true_value if condition else false_value
+10:27  blubbi:  list.pop(0) removes first
+10:27  mercutio22: ok I get it
+10:27  blubbi: ah, okay with del
+10:27  mercutio22: thanks
+10:27  verte: true_case if condition else false_case
+10:27  zzz: Kylarr: thanks, i check it.
+10:27  blubbi: del list[0]
+10:27  neumaennl: blubbi: what are you trying to do? If you gave us the complete picture maybe someone would find a better solution to your actual problem than deleting the first element of a list until the list is empty.
+10:28  blubbi: or list.remove(item)
+10:28  mercutio22: Oh... I had a tuplr
+10:28  mercutio22: Oh... I had a tuple
+10:28  neumaennl: mercutio22: what are you trying to do? If you gave us the complete picture maybe someone would find a better solution to your actual problem than deleting the first element of a list until the list is empty.
+10:28  zzz: Kylarr, verte: thanks, it works fine.
+10:28  Alberth: mercutio22: http://codepad.org/R0RApkFR
+10:28  neumaennl: blubbi: sorry
+10:28  blubbi: neumaennl: Not me, ask mercutio22
+10:28  blubbi: :-)
+10:29  blubbi: yes, why not iterate on the list and in each round skip the first item
+10:30  Alberth: mercutio22: and a lot less advanced: http://codepad.org/Rgxgs6HM
+10:30  mercutio22: http://codepad.org/R0RApkFR#comment-bqMgNwGS
+10:31  verte: you could write a skip1() that advances the iterator and returns it
+10:31  xro: hi, is there a function to remove duplicate value?  a=['aa', 'bb', 'cc', 'cc', 'aa']   -->> a=['aa', 'bb', 'cc'] ? thanks
+10:31  mercutio22: oops
+10:31  mercutio22: lost indentation
+10:32  Alberth: mercutio22: also, you don't use L other than pop()
+10:32  Alberth: xro: sets
+10:33  Alberth: xro: as in   set(a)     you loose order of the elements though
+10:34  xro: Alberth>, not important for me... so transform list into a set... then can i iterate the set like for i in set?
+10:34  verte: yes
+10:34  Alberth: xro: yes
+10:34  xro: Alberth>, ok thanks.... that is exactly what i need...
+10:35  Alberth: xro: I can recommend to read about sets, they are pretty useful
+10:35  xro: Alberth>, i'll do it...
+10:35  mercutio22: Alberth: yeah.. what the hell was I thinking
+10:36  mercutio22: let me ammend that
+10:42  mercutio22: got it I guess
+10:46  mercutio22: I wanted to show it but codepad is killing indentations
+10:46  mercutio22: oh damn
+10:46  mercutio22: its cuz I am posting in the comments field
+10:46  pantsman: heh
+10:50  clemme: I'm having a rather weird problem with python 2.6 on an ubuntu 10.04 machine, if I write http://pastebin.com/LfXbJi9G into a .py file, it does not work, but if I write it in the python console, it works just fine. (Used to send a value to an arduino board telling it to turn on a LED). Anyone got an idea about what the cause could be?
+10:50  infobob: http://paste.pocoo.org/show/272115/ (repasted for clemme)
+10:50  mercutio22: http://codepad.org/gse336qn
+10:51  Fodder: clemme: and your backtrace says what?
+10:52  clemme: Fodder, not that experienced with python yet, so don't quite know what a backtrace is? The code runs just fine both places (.py file and python console), but the console makes the LED light up and the .py file does not, so I'm guessing it's an encoding issue of some sort?
+10:52  verte: clemme: what did you name the python program?
+10:53  verte: oh.
+10:53  clemme: verte, on.py
+10:53  Kylarr: clemme the trackback is the stuff shown when an exception is raised and not caught.
+10:53  clemme: the really weird part is that it works on another ubuntu 10.04 machine
+10:53  clemme: both with the python console and the on.py file
+10:53  Kylarr: Try 1/0 or something in the console.
+10:54  verte: anyway, the only encoding issues you could have are around stdio
+10:55  verte: which seems not to be involved
+10:56  Kylarr: Oops, I meant "traceback" not "trackback".
+10:56  clemme: Kylarr, the code does not cause an exception, so no traceback is shown
+10:57  clemme: it simply writes that one value to the serial port and exits, but it seems like what actually gets written differs on the python console and the on.py file
+10:57  Kylarr: Yeah, but at least now you know what people mean when they say "and your traceback says what?". =)
+10:57  aaron____: hi, i dont know where else to ask this, but does anyone know where ican get a comprehensive list of action verbs?
+10:57  clemme: Kylarr, hehe yeah :)
+10:59  mercutio22: I am so glad I solved it =]]
+10:59  clemme: If i plug the arduino into my other computer, running ubuntu 10.04, it works fine, rather odd. I guess I'll try to start ubuntu from a usb stick on the weird computer and see if it works from there
+10:59  mercutio22: bliss is the word
+11:00  verte: clemme: are you sure on.py is getting run? adding debug output etc works correctly
+11:00  clemme: verte, yeah, if I add prints to the file, they get printed to the console when run
+11:01  clemme: and something is actually sent to the serial port, as I can see the tx LED on the arduino blinking
+11:03  Alberth: mercutio22: you can do that faster. If an intermediate result is bigger than numberNuggets already, you can stop that loop. If you loop the bigger multiplication factors first, you will reach such a point faster.
+11:04  Kylarr: Could it be anything to do with the interpreter exiting immediately when you run file.py but not when you're manually doing it in the console?
+11:04  Kylarr: (Just a wild guess!)
+11:04  verte: it could not.
+11:05  clemme: don't think so, as it works fine on another pc running the same ubuntu version
+11:06  clemme: but the weird thing is I have the same problem on this computer when running java as well
+11:06  clemme: using java to communicate with the serial port that is
+11:08  verte: does repr(struct.pack(...)) look the same on both?
+11:08  clemme: 2 secs, I'll try
+11:11  clemme: verte, yeah, they both print "\x81\xff\xff\xff"
+11:12  verte: not sure then :(
+11:13  mercutio22: Alberth: how do you propose I do that exactly?
+11:13  clemme: same here, I'm getting grey hairs >_<, I'll try ubuntu 10.10 and see if that makes a difference, maybe this install of ubuntu is "#%&& somehow
+11:15  zzz: Hi, i' ve a unicode string. How can i convert it to "normal string"?
+11:15  zzz: If i wouldn' t want to use str()
+11:15  zzz: ?
+11:15  zzz: .encode()
+11:15  pantsman: zzz: with .encode
+11:17  Alberth: mercutio22: after line 10:      if 6*a + 9*0 + 20*0 > numberNuggets: break        after line 11: if 6*a + 9*b + 20*0 > numberNuggest: break      (you can drop the x*0 terms of course, but it makes the idea more clear).
+11:19  Alberth: mercutio22: ie if that condition holds, you will never get == any more, whatever the values of the other loop variables, so there is no point in trying them all
+11:20  Alberth: mercutio22: Another optimization: as you see, it computes eg 6*a more than once. You can compute it one time, and save it, and then use that value the next times.
+11:23  coulix_greg__: Hello what would be the shortest way of converting a dic {"a":1; "b":"foo"} to GET query str params: ?a=1&b=foo ?
+11:23  TheSheep: coulix_greg__: the urlparse module
+11:24  coulix_greg__: urlibe urlencode, right thjks !
+11:30  mercutio22: Alberth: thanks man!
+11:34  halfie: hi, is it possible to benchmark the multiplication operation in Python?
+11:34  Yhg1s: halfie: sure.
+11:34  Yhg1s: halfie: why do you want to, though?
+11:35  halfie: Yhg1s, for experimentally determining the time complexity of the multiplication operation implementation.
+11:36  Yhg1s: halfie: well, the multiplication is generally a very simple operation.
+11:36  Yhg1s: but if you don't want me to spoil the ending, see the timeit module.
+11:37  halfie: Yhg1s, yes but do you know the exact algorithm behing using in CPython? http://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations
+11:37  Yhg1s: halfie: for multiplying what?
+11:37  halfie: Yhg1s, two big integer numbers
+11:38  Yhg1s: halfie: longs use the karatsuba algorithm.
+11:39  halfie: Yhg1s, how did you figure that out? Reading sources? :)
+11:39  Yhg1s: I remembered.
+11:41 --- CoconutCrab is now known as KokonutKrab
+11:43  nitneiht: hi! all
+11:43  timh____: hi
+11:43  nitneiht: how can i add content to an existed file by python
+11:44  Yhg1s: nitneiht: open it in 'a' or 'r+' mode, depending on how you want to add the content.
+11:44  nitneiht: if i want to add at the end of file?
+11:45  Yhg1s: still either of those. You should read up on what they do.
+11:48  nitneiht: i got it thanx Yhg1s
+11:48 --- DrunkY is now known as Andrijeski
+11:48  thm: when using an var of the outer method in a lmabda expression, when is the var evaluated?
+11:53  ivazquez|laptop: When the lambda is run.
+11:53  ivazquez|laptop: http://code.activestate.com/recipes/502271/
+11:53  Yhg1s: the same as when you define a function with 'def' instead of 'lambda'. (There's no difference in behaviour, lambda's basically useless.)
+11:54  ivazquez|laptop: Except that a function creates a new scope, and lambda uses its container's scope.
+11:54  Yhg1s: ivazquez|laptop: no.
+11:54  thm: yeah, I should have known. lambda using a loopvat is dangerous...
+11:54  Yhg1s: ivazquez|laptop: lambda creates a new scope as well.
+11:54  Yhg1s: ivazquez|laptop: it's just that you won't notice because you can't do assignments in lambda.
+11:55  Yhg1s: (except when you use list comprehensions and check for the leaked loop variable. You'll see lambda's really do introduce a new scope.)
+11:56  ivazquez|laptop: I should have been more clear and mentioned "when using variables from outside".
+11:56  ivazquez|laptop: Or for, rather.
+11:57  Yhg1s: I'm still not sure why you think there's a difference between 'def' and 'lambda'.
+12:02 --- KokonutKrab is now known as JujubeCrab
+12:05  barfster: How can I remove white space from start and end of string?
+12:05  barfster: is there a string.trim()?
+12:06  Yhg1s: barfster: s.strip()
+12:07  Yhg1s: barfster: you should read docs.python.org/tut and the first couple of chapters of docs.python.org/lib
+12:07  barfster: Yhg1s: I was here: http://docs.python.org/library/string.html and found whitespace
+12:08  barfster: but after all strip != trim
+12:08  barfster: but which module is strip from?
+12:09  barfster: string?
+12:09  w4r: barfster: are you just after a whitespace remover?
+12:09  barfster: yes
+12:09  barfster: annoying trailing space on some records, but not all...
+12:09  Yhg1s: barfster: yeah, pay more attention to the start of that module's documentation.
+12:09  w4r: string.rstip()
+12:09  w4r: woops
+12:09  w4r: string.rstring()
+12:09  Yhg1s: use string methods instead. See chapter 5 of docs.python.org/library
+12:10  Yhg1s: w4r: almost!
+12:10  Yhg1s: but you asked for 'both ends' before, and s.strip() does that.
+12:10  barfster: I thing I’ll do strip just in case
+12:10  barfster: Never know what these people are capable of
+12:11  w4r: .strip() is what you seek. :)
+12:11  barfster: from string import strip?
+12:11  Yhg1s: no.
+12:11  Yhg1s: barfster: it's a *string method*.
+12:11  barfster: string.strip()
+12:12  Yhg1s: barfster: this is covered in the tutorial, and explained in the first paragraph of the string module docs you were looking at.
+12:12  preaction: reading is hard. let's go shopping!
+12:13  barfster: So tlike this: print ' test '.strip()+'|'
+12:13  barfster: ?
+12:14  barfster: preaction: some people like to read essays, some people like to learn
+12:14  fasta: Is there an easy way to modify an existing regular expression to an equivalent one that also accepts the empty string?
+12:14  Yhg1s: barfster: sure, although adding '|' suggests you may be dealing with csv data, and you should consider the csv module.
+12:14  preaction: barfster: s/like to learn/like to be spoon fed because they can't be bothered to read/ <- ftfy
+12:15  Yhg1s: barfster: "learning" python by trying random things and ignoring documentation is a colossal waste of time for everyone.
+12:15  barfster: Yhg1s: That was just to see that the space was removed after ' test '
+12:15  confluency: fasta: stick a |^$ at the end?
+12:15  Yhg1s: barfster: the interactive interpreter is your friend.
+12:16  fasta: confluency, | has the lowest precedence then?
+12:16  fasta: confluency, thanks.
+12:16  confluency: fasta: I can't remember if you need to put the whole thing in a group or not.
+12:16  Yhg1s: fasta: put the rest in ()'s if you're in doubt.
+12:16  Yhg1s: you do not have to have a group around the whole thing, no.
+12:16  fasta: Yhg1s, are there also nested groups?
+12:16  Yhg1s: fasta: if you have nested groups then there'd be nested groups, sure.
+12:17  pist0l-fish: py2exe question: my directory structure is that i have a run.py file that bootstraps the project and a directory called lib with a bunch of other py files that are used by the project. how do i get py2exe to compile and include those files?
+12:17  confluency: When in doubt, just try it in the interpreter and see what happens.
+12:17  Yhg1s: pist0l-fish: it should do so automatically, but you can tell it which modules to include explicitly as well.
+12:19  pist0l-fish: Yhg1s: it doesn't. I've tried using 'includes': ['lib/somefile.py', etc] and i've tried inputting it as lib.somefile, or lib/somefile as well, and got nothing. suggestions?
+12:20  pist0l-fish: Yhg1s: I should say I get a "No module named..." error
+12:23  Yhg1s: pist0l-fish: yeah, 'includes' would not be the right option, since that's for C include files to build extensions against.
+12:23  Yhg1s: pist0l-fish: I forget what py2exe has for you to tell it what modules to add (unconditionally), sorry.
+12:24  Yhg1s: pist0l-fish: it's been a long time since I bothered with py2exe.
+12:24  Yhg1s: IIRC it was some command line option, but perhaps it changed.
+12:24  pist0l-fish: Yhg1s: I'll play around, see what happens
+12:28  pist0l-fish: Yhg1s: it is the packages option. except i don't know how to specify that a package is in a different directory
+12:30  Yhg1s: pist0l-fish: the 'packages' option to py2exe is for packages, not paths, yes. The package has to be in sys.path so py2exe can find it. 'import thepackage' should be able to import it.
+12:33  neumaennl: pist0l-fish: http://docs.python.org/distutils/setupscript.html maybe package_dir will work?
+12:33  pist0l-fish: Yhg1s: in run.py i was changing sys.path and then importing
+12:34  Yhg1s: pist0l-fish: but py2exe won't see that. you have to do it in the setup.py. Or, better yet, change your layout to be more suitable to Python.
+12:36  pist0l-fish: Ygh1s: what is more suitable?
+12:37  pist0l-fish: Ygh1s: the page you linked me to mentions a foo/__init__.py, what is __init__'s job?
+12:37  mercutio22: Sorry, I had to leave in a rush
+12:37  mercutio22: where were we?
+12:39  Yhg1s: pist0l-fish: __init__.py is for making packages. See the docs.python.org/tut chapter on modules and packages.
+12:39  pist0l-fish: Ygh1s: thank you :D i think i'm on the right track now
+12:40  Yhg1s: pist0l-fish: also, http://jcalderone.livejournal.com/39794.html
+12:42  patrakov: Hi. I want instances of my class to be iterable. Also, I can write a generator member function that yields exactly what I want.
+12:43  patrakov: so now I can iterate over the result of "calling" this member function, but I want the object itself to be iterable (i.e., get rid of the requirement to call the member function)
+12:43  patrakov: how to do it?
+12:44  Yhg1s: patrakov: implement the __iter__ method. It should return an iterator. A convenient way is to make the __iter__ method be a generator.
+12:44  patrakov: i.e., just rename my generator to __iter__?
+12:44  Yhg1s: probably.
+12:52  patrakov: Yhg1s: thanks, it worked
+13:25  aljosa: is there any difference if i subclass "object"  ( class MyClass(object): ) or if i don't ( class MyClass: ) ? if yes, can somebody point me to the docs?
+13:26  xro: hi, i have to parse a file with python then store some test into mysql db... what is the best way? create a string?
+13:30  neumaennl: aljosa: read about old style classes vs. new style classes
+13:30  Yhg1s: xro: for what part? For accessing the MySQL database, use the oursql module.
+13:31  winterweaver: how can I create a time object from an "time since epoch" string I have, like 1309478400
+13:31  xro: Yhg1s>, i have to create a blob in mysql? and just send a string to mysql?
+13:31  Yhg1s: aljosa: new-style classes have some features that classic classes do not (specifically, setter support in property(), and super()), and behave more consistently in multiple-inheritance situations.
+13:31  Yhg1s: xro: depends on what you want to store it as.
+13:32  winterweaver: I want to format that string into a more human readable format
+13:32  Yhg1s: winterweaver: the time or datetime modules.
+13:33  winterweaver: Yhg1s, I've tried time.strftime
+13:33  winterweaver: but it doesn't accept my string as the second argument
+13:33  Yhg1s: winterweaver: well, you need to turn it into an integer first.
+13:33  xro: <Yhg1s>, the result of a dns zone transfer....
+13:33  winterweaver: Yhg1s, and I've tried that as well :)
+13:34  winterweaver: argument must be 9-item sequence, not int
+13:34  Yhg1s: xro: if you want to store this in MySQL as a single blob of binary data, then you need a blob. If you want to store it as text, you need to store it as text. IF you want to properly normalize the data, you need a more complex database layout. It depends on what you want to store in the MySQL database.
+13:34 --- nanomachine is now known as Evoken
+13:34  Yhg1s: winterweaver: as the documentation covers. It needs a timetuple. Use time.localtime or time.gmtime to turn it into a timetuple.
+13:35  xro: Yhg1s>, you answered me... there are blob in python....
+13:35  Yhg1s: xro: no
+13:36  Yhg1s: xro: there's just *data* in Python.
+13:36  Yhg1s: xro: 'blob' is a SQL thig.
+13:36  xro: Yhg1s>, ouchh... so to create a sql blob what kind of data should i send? a string?
+13:36  Yhg1s: xro: that's the usual thing, yes.
+13:37  xro: Yhg1s>, ok... thanks... tie to code it now...
+13:48  winterweaver: Yhg1s, thanks, I didn't know that gmtime and localtime actually created a time tuple from an int. problem solved :)
+13:57  lvh: time handling is such a mess everywhere
+13:58  Hadronn: hmm, using try except for exception handling doesn't rub me the right way, anyone else?
+13:59  pantsman: what would you prefer to use?
+13:59  Hadronn: I'd rather spend the time making sure the errors don't happen in the first place.
+14:00  Hadronn: course that's slower.
+14:00  lvh: Hadronn: Then Python is not the language for you
+14:00  figure002: hello. how do i list all methods of an object?
+14:00  pantsman: Hadronn: slower and often pointless anyway
+14:00  lvh: Hadronn: Yes, it's slower, it also doesn't actually work most of the time
+14:00  lvh: Hadronn: Just because an operation would've worked when you checked doesn't mean it will work when you actually do it
+14:01  lvh: figure002: Why?
+14:01  lvh: figure002: You can! Not sensibly though
+14:01  Hadronn: lvh: no doubt, but that's what testing is for, and I can see the use of some exception handling, so at least the app doesn't crash.
+14:02  pantsman: Hadronn: exceptions are *the* way to do a lot of things in Python, for example, raise StopIteration, or except GeneratorExit
+14:02  figure002: lvh: i used itertools.product, but it returns an object, though it's iterable, i would just want to get the list, but the doc doesn't say anything about it.
+14:02  lvh: Hadronn: Testing will not solve these problems
+14:02  Hadronn: lvh: so far I've seen exception handling for things like.. user input.. when that could be validated instead.
+14:03  lvh: Hadronn: Why are you duplicating behavior that already exists?
+14:03  lvh: Hadronn: Also, consider opening a file
+14:03  lvh: Hadronn: When you check, the file exists
+14:03  lvh: When you open it for writing, someone's deleted it
+14:03  lvh: Yay, error!
+14:04  lvh: figure002: It says it's equivalent to a genexp
+14:04  Hadronn: lvh: do you mean in the milliseconds between the check and the open it's been deleted?
+14:04  lvh: figure002: In the docs
+14:04  lvh: Hadronn: Please do not try and trivialize race conditions by saying "it's only milliseconds"
+14:05  lvh: Hadronn: Race conditions caused the massive brownout in the US
+14:05  Hadronn: lvh: hmm, yes exceptions like that are.. well awesome.. I should have been clearer.. I don't like when I see people using exceptions for easily avoided errors.
+14:05  figure002: lvh: i'm not familiar with a generator expression
+14:05  lvh: figure002: 9.10 and 9.10 of the tutorial
+14:05  lvh: err, 9.10 and 9.11
+14:05  lvh: Hadronn: You understand the difference between an exception and an error?
+14:05  Hadronn: lvh: I won't be trivialising it lvh, I think it's valid, I can see it being very important : )
+14:06  pantsman: Hadronn: interesting you should suggest replacing exception handling with validation, because validation libraries that I've seen report validation failures as exceptions
+14:06  lvh: Hadronn: Can you give a practical example of a problem you would've avoided?
+14:06  lvh: pantsman: Yes, because they are sane pieces of software
+14:07  pantsman: because catching the exceptions is better than weaving a load of if/elses into your code
+14:07  lvh: figure002: It's fairly simple though: it's public API is "being iterable", nothing else
+14:07  Hadronn: I didn't come here for an argument, or to examine it in detail, I think exception handling is vital. Is that clear?
+14:07  lvh: Hadronn: Okay, so what's the problem
+14:07  figure002: lvh: i don't see 9.10 here: http://docs.python.org/library/index.html
+14:08  lvh: figure002: because that's not the tutorial
+14:08  lvh: figure002: http://docs.python.org/tutorial/classes.html#generators
+14:08  Hadronn: what I don't like is when my lecturer says to "just throw an exception" in a case where I don't think it's necessary.
+14:08  lvh: Hadronn: Right, okay, but I've already asked you for an example where you don't think it's necessary
+14:08 --- time_squatter is now known as Mr_Blue
+14:08 --- Mr_Blue is now known as time_squatter
+14:08  lvh: if you were talking about raising *Errors*, now, that would've been something else
+14:08  Alberth: Hadronn: opinions on when to throw an exception differ between people
+14:09  Hadronn: lvh: no problem, I'm thinking about how to implement format checking for a user entry box.
+14:09  lvh: Errors are generally far less recoverable than Exceptions
+14:09  lvh: Hadronn: Easy! Don't
+14:09  Hadronn: lvh: I wanted to know if anyone else felt like that, that is all.
+14:09  figure002: lvh: site's not available :( http://docs.python.org/tutorial/
+14:09  Hadronn: Alberth understands : )
+14:09  lvh: figure002: Heh awesome, it worked three seconds ago
+14:09  lvh: Hadronn: Alberth said that people disagree
+14:09  lvh: Hadronn: I agree that people disagree
+14:10  lvh: I disagree that these people are right
+14:10  cob: hello, I'm looking for something like CouchDB for Appengine in Python. Have anyone played around with couchdb-python and appengine?
+14:10  lvh: My motivation for this is simple: longjmp
+14:10  lvh: cob: You can't really run external processes on AppEngine reliably
+14:10  figure002: lvh: i'll just do a for loop to create a list then
+14:11  lvh: figure002: If you want, I can explain how product works manually
+14:11  lvh: figure002: It's just an iterable that returns product tuples
+14:11  lvh: cob: You can host couchdb yourself, but not on appengine
+14:13  cob: lvh: it doesn't have to be couchdb. I'm only using it as a reference for data consitency, push updates, all the tech goodies.
+14:13  lvh: cob: couchdb doesn't really give you consistency
+14:14  cob: oh? mmm
+14:14  figure002: lvh: site's up again.. reading..
+14:14  soreau: Is there any guide on migrating to python 3? I'm on arch and recent updates broke python here. A common error I'm seeing is "TabError: inconsistent use of tabs and spaces in indentation" while other python apps segfault
+14:15  lvh: soreau: Python won't segfault on indentation inconsistencies
+14:15  lvh: soreau: regardless of the version
+14:15  cob: okay, I'll go read some more
+14:15  NelleV: segfault <3
+14:15  lvh: soreau: It's generally borderline impossible to make Python segfault with pure Python
+14:16  soreau: lvh: I know that, I'm saying these are problems I'm having with various python apps
+14:17  lvh: soreau: Aha! Well, like I said, Pure Python generally doesn't segfault, it's most likely a C extension
+14:17  lvh: soreau: Also, semantics of indentation hasn't really changed for a long time, so that's probably unrelated as well
+14:17  soreau: With gentoo, there was python-updater IIRC.. not seeing anything like this in arch though
+14:17  lvh: soreau: Yeah, it's generally a tool for hosing your system
+14:18  soreau: python 3?
+14:18  soreau: it feels like it
+14:18  lvh: soreau: switching to it for the system interpreter
+14:18  lvh: soreau: is a great way of hosing your system, yes
+14:18  lvh: soreau: gentoo is a bad example because they wrote a lot of craptacular code, mostly in Portage, to make the same software work in 2.x and 3.x
+14:20  figure002: lvh: thanks for the help. if i understand correctly, that there's just one way to get thelist , and that's to make a for-loop.
+14:20  lvh: soreau: i don't understand why anyone would ever touch their default system interpreter
+14:20  lvh: soreau: we invented virtualenv so this would stop being a problem
+14:20  lvh: figure002: What? No
+14:20  lvh: figure002: Why do you even want the list? The thing you have now is already iterable
+14:21  lvh: figure002: The reason it's not a list is because cartesian products get *really* big really quickly
+14:21  figure002: lvh: ohh right, of course -_-
+14:21  figure002: lvh: i feel kinda stupid :P
+14:21  lvh: figure002: Anyway if you want to turn it into a list you just do list(that_thing)
+14:22  figure002: lvh: alright, thanks
+14:22  lvh: figure002: why do you want a list anyway
+14:22  __gilles: hi
+14:23  __gilles: i have a python script that does i/o multiplexing for a socket and stdin using select on a unix system
+14:23  figure002: lvh: i want to hard-code that list in my code, as it remains the same in my application.
+14:23  __gilles: i tried porting it to windows and select() doesnt work on stdin
+14:24  figure002: lvh: to make it faster..
+14:24  __gilles: i googled for a while and found all kinds of dirty hacks
+14:24  __gilles: anyone has an elegant solution or should i go with a dirty hack ?
+14:24  lvh: figure002: have you measured how fast it is now?
+14:25  lvh: __gilles: twisted
+14:25  figure002: lvh: nope, haven't figured out how to do that yet. it's probably very fast, as the product is just 25 items long, but it'll also save me some imports (not sure if that really matters).
+14:25  lvh: figure002: so how do you know you won't be making it *slower*?
+14:26  figure002: lvh: because then it doesn't have to import extra stuff and do the calculations?
+14:27  figure002: lvh: but that's totally subjective
+14:27  lvh: figure002: And instead it gets to parse a significantly more complex ast
+14:28  lvh: figure002: don't optimize blindly especially if it'll turn your code into unreadable junk like that :(
+14:28  figure002: lvh: didn't think of that one
+14:29  figure002: lvh: i'll keep that in mind
+14:29  lvh: figure002: yes that's the problem, humans are overall pretty dumb
+14:29  lvh: figure002: always measure everything
+14:29  lvh: figure002: empiricism is awesome
+14:29  lvh: figure002: (also, see the timeit module)
+14:29  figure002: lvh: hahaha, alright, thanks for all the advice, i appreciate it :)
+14:29  lvh: figure002: If you're worried about micro-optimization, python simply isn't the language for you
+14:31  figure002: lvh: speed is a very important factor in my to-be workfield, but at the moment i just know python, and some java
+14:31  figure002: lvh: what language would be better then?
+14:31  Wild_Cat: figure002: which makes it *very* important to learn *proper* optimization techniques, then
+14:31  Wild_Cat: like profiling. And profiling.
+14:32  lvh: figure002: I wrote a bunch of very high-performance number crunching stuff
+14:32  lvh: figure002: Most of it is Python, since it doesn't matter when Python is a glue language between stuff that does actual heavy lifting
+14:33  lvh: figure002: (What's your field?)
+14:33  lvh: figure002: We processed datasets of around 50 to 70TB worth of geospatial data
+14:33  figure002: Wild_Cat: too bad we never learned those in our classes
+14:34  figure002: lvh: i'm studying bioinformatics
+14:34  lvh: figure002: pft
+14:34  lvh: figure002: don't worry then
+14:35  thm: is there a split iterator?
+14:35  Wild_Cat: isn't that mostly IO-bound?
+14:35  lvh: figure002: All of the heavy machinery has already been written by boring bearded people
+14:35  lvh: figure002: In boring bearded languages
+14:35  figure002: lvh: hehe, guess it could be worse
+14:35  lvh: thm: itertools.tee
+14:36  thm: lvh: no, I meant split() returns a list, do I use iter(split(s)) or is there a better way?
+14:36  figure002: lvh: but there's lots of tools to be developed to analyze large amounts of biological data..
+14:36  Kylarr: Just: for item in mystring.split():
+14:36  thm: Kylarr: I want to manually call next()
+14:37  figure002: lvh: analysis that could take months if not programmes properly
+14:37  lvh: thm: Why
+14:37  thm: parsing
+14:37  NelleV: figure002: I'd use python at first, and then, if you really need to optimize it, either cython, or writing the hard processing bits in C/C++
+14:37  figure002: lvh: anayway, that's a different discussion
+14:37  lvh: thm: so why aren't you using maxsplit?
+14:37  lvh: figure002: All of these problems can generally be described in terms of fast tools that already exist
+14:37  NelleV: figure002: I wouldn't bother about optimization just yet
+14:38  figure002: NelleV: alright, good thing i started learning C then
+14:38  lvh: figure002: (My ex was doing some bioinformatics stuff -- everything got done in perl because all of the fast libraries already exist)
+14:38  thm: ? not all elements are treated the same way. I doo foo() with the first, bar() with the second, and so on
+14:38  figure002: lvh: alright, interesting
+14:38  muraii: figure002: Is there room to use off-the-shelf stuff apps, even if they're C/C++, and wrap them in Python, a la Sage?
+14:39  bjarni: Hi guys.  How do you abort the program?
+14:39  muraii: ...or is that too slow, not optimized for the particular task?
+14:39  muraii: Of course, Sage is more than a wrapper, but still.
+14:39  figure002: muraii: as far as i know, that would be fine, i think that's one of the things Python is handy for
+14:40  lvh: thm: I don't understand how that's relevant
+14:40  figure002: muraii: haven't heared about Sage though
+14:40  Wild_Cat: thm: data = s.split(); foo(data[0]); bar(data[1]); etc.
+14:40  lvh: thm: one, two, rest = s.split(":", maxsplit=3)
+14:40  lvh: Wild_Cat: right, depending on what you know the data will look like
+14:40  lvh: thm: What are you parsing anyway
+14:44  tpratt: s.split(":", 3) could give you a list of size 4
+14:45  muraii: figure002: Sagemath.org. The general idea is to provide a single programming environment for all kinds of mathematical tasks, which environment bundles lots of open-source tools, some highly specialized, with interfaces to Matlab, Mathematica, etc.  Additionally, the team's implemented improved tools themselves, but still allow the user to choose which is most appropriate. </ramble>
+14:45  thm: lvh: all I was asking whether there is a variant of str.split() that returns an iterator instead of a list.
+14:46  lvh: thm: Uhuh.
+14:46  lvh: thm: #python is about helping people write better software, not about being a fast human glossary
+14:46  ki113d: Hey guys. The only information I can find about python key events is related to windows. Does anyone know about key events or where I could find some info?
+14:46  jorrit: ki113d, python doesn't know anything about that.
+14:46  lvh: thm: If you don't like that, you probably won't like #python -- consider using a search engine instead
+14:46  jorrit: ki113d, that's the task of the UI toolkit you use. So first choose a UI toolkit.
+14:47  thm: lvh: keep cool.
+14:47  lvh: thm: the reason we do this is because people often write code that sucks because they don't know python very well yet
+14:47  lvh: thm: I'm perfectly calm
+14:47  Hadronn: using Tkinter and TkMessageBox, I produce a showerror dialog, once the user presses OK, I would like to reset the focus to a Toplevel widget. I am doing this using grab_set() and focus_set() to repoint the focus onto an entrybox. The focus is given to the root window instead once I click ok, is there something special about TkMessageBox dialogs?
+14:48  figure002: muraii: that sounds very interesting, i'll add that to my bookmarks
+14:48  thm: lvh: of course I searched first. if you have a long string, which needs to be split at, say \0, and then act on its parts in some not-so-repeated fashion, an iterator would be more performant than a list.
+14:48  ki113d: jorrit: Oh really? Dang. I many wanted to make my program recognise when I pressed control and f or something like that to make it change the output as I am too busy learning as much about the language as possible before I move onto UI
+14:49  jorrit: ki113d, well you'll have no choice if you want to do that.
+14:49  saml: is there glob that matches .DS_Store in subdirectories too?  **/.DS_Store?
+14:49  lvh: thm: The answer is "no, because practically all use cases are covered by maxsplit and tuple unpacking"
+14:49  lvh: thm: I understand the problem: Python has a way to do this, and it's generally done with maxsplit
+14:50  lvh: thm: if maxsplit does not cover what you want, you most likely want a real parser
+14:50 --- elpargo_ is now known as elpargo
+14:50  lvh: thm: such as pymeta or pyparsing
+14:50  ki113d: jorrit: Well thanks anyway. I will try to figure out what key combinations triger errors like control+d does for EOFError
+14:50  thm: lvh: I see now, maxplit is the way to go. do something on the first n elements, next round, cope with the rest.
+14:51  lvh: thm: Exactly, so what's the problem?
+14:51  thm: lvh: no problem anymore. thanks for the help.
+14:51  lvh: thm: okay, do you now understand why #python does stuff this way
+14:51  Hadronn: solved my issue, by reading "parent (widget):Which window to place the message box on top of. When the message box is closed, the focus is returned to the parent window."
+14:51  lvh: thm: if I just answered your question, I'd have just said "No" twenty minutes ago
+14:51  lvh: thm: and that would've been a completely useless answer
+14:51  lvh: entirely correct, but still useless
+14:52  thm: lvh: it's finished.
+14:52  lvh: thm: Sorry? I don't understand. What is?
+14:53  ki113d: Thanks heap jorrit :)
+14:54  lvh: tpratt: (there are only two difficult problems in CS, etc)
+15:01  Alberth: saml: I don't remember seeing one in the glob module docs. You can find them with an os.walk though
+15:01  tpratt: lvh: huh?
+15:02  nosklo: os.walk + fnmatch
+15:04  lvh: tpratt: You haven't heard that one?
+15:04  tpratt: lvh, oh, right.
+15:04  lvh: tpratt: There's two hard problems: cache invalidation, naming things, and off-by-one errors
+15:04  Alberth: nosklo: a bit overkill for s.endswith()     :)
+15:06  tpratt: lvh, I only brought it up because that code could work for 10 years and then blow up when someone throws anther delimiter into the input string.
+15:06  Alberth: or perhaps even equality
+15:06  tpratt: lvh, although, if they don't test it...
+15:12  chronos: guys, have some way of with psycopg2, do a update in db that if don't update raise me some error or I can get info if update updated some row or not?
+15:12  bjarni: Hi again.  How can I escape output?  I cannot > the output from the program into a file (textfile).  It displays on the screen though
+15:13  bjarni: a lot of crazy characters in there
+15:13  Habbie: bjarni, what output?
+15:13  bjarni: from my program
+15:13  bjarni: print
+15:13  Habbie: bjarni, > normally works. what are you doing wrong?
+15:14  bjarni: Nothing is written in the textfile and the execution is halted cause the characters cannot be encoded
+15:15  Habbie: bjarni, show us your issue with a pastebin
+15:15  magicblaze0071: is there a better way to make a const object than this -> http://code.activestate.com/recipes/59878-constant-object-passing/ ?
+15:16  Habbie: magicblaze0071, the better way is "don't"
+15:16  magicblaze0071: Habbie: I've a thread thats not supposed to modify a variable. How can I ascertain that?
+15:16  Habbie: magicblaze0071, why?
+15:16  magicblaze0071: because of consistency issues?
+15:17  Habbie: are you asking me?
+15:17  magicblaze0071: no i'm asking, why are you asking my motive?
+15:17  magicblaze0071: I had a python question, not a motive question.
+15:17  Habbie: because you're trying to go against a basic python principle
+15:17  papna-work: magicblaze0071: You don't understand #python. #python is about writing better software.
+15:18  magicblaze0071: papna-work: Better python means no constant objects?
+15:18  Habbie: i have never seen a good reason to require constant objects
+15:18  papna-work: magicblaze0071: We don't usually enforce immutability programatically in Python. We do it by writing programs that dnn't modify the wrong things.
+15:18  papna-work: magicblaze0071: The recipe you linked doesn't work.
+15:19  lvh: pffft!
+15:19  magicblaze0071: papna-work: how does this work with large teams? If many people are developing , how does one tell them not to modify an object in a particular thread?
+15:19  lvh: immutable things are perfectly pythonic
+15:19  lvh: self._v = v, later: @property def v(self): return self._v
+15:20  magicblaze0071: lvh: Thanks
+15:20  lvh: magicblaze0071: a test suite and code review
+15:20  magicblaze0071: lvh: Its going to be very hard to test if a thread modified a constant...(and not the other thread)
+15:20  papna-work: lvh: Immutable user types aren't enforced by programatic means in Python. Your property sucks.
+15:20  papna-work: magicblaze0071: Documentation.
+15:21  papna-work: magicblaze0071: Right, threads do harm testability, I agree.
+15:21  lvh: papna-work: what
+15:21  papna-work: lvh: You heard me.
+15:21  lvh: papna-work: it does a perfectly normal thing for python
+15:21  lvh: "here's the public api"
+15:21  lvh: it lets you touch the internals, but when stuff touches internals everything goes to hell in practically every language
+15:21  lvh: at some point you're going to have to assume other people aren't insane
+15:22  lvh: "programmatical enforcing" rarely works
+15:22  papna-work: lvh: Using property to make an attribute non-settable is silly. It doesn't keep someone from screwing up your objects.
+15:22  lvh: papna-work: so what?
+15:22  magicblaze0071: papna-work: I just want the first barrier...
+15:22  lvh: papna-work: it keeps people from *unintentionally* screwing up your objects
+15:22  magicblaze0071: not a fool proof solution...dont want it to be wide open for modification
+15:22  papna-work: lvh: It makes your design more complicated.
+15:23  papna-work: magicblaze0071: Why are you using threads?
+15:23  lvh: papna-work: if you think a property is complicated, please consider using visual basic
+15:23  magicblaze0071: papna-work: Again a motive question.
+15:23  lvh: magicblaze0071: yes, #python is all about why
+15:23  lvh: magicblaze0071: if you want a glossary use google
+15:24  magicblaze0071: lvh: Thanks.
+15:24  lvh: magicblaze0071: why are you using threads?
+15:24  papna-work: magicblaze0071: #python isn't for answering your questions. #python is for helping people write better programs.
+15:25  bjarni: Habbie: here is the output pasted: http://fpaste.org/0Cvk/
+15:25  magicblaze0071: papna-work: thanks. I think discussing things like these should help everyone.
+15:26  efphe: hello
+15:26  lvh: magicblaze0071: I'm glad you agree with our methodology! Now, why are you using threads
+15:26  efphe: if I have: f= 1.00001001
+15:26  magicblaze0071: Why threads -- because I'm using pyQt and Twisted in the same application?
+15:26  efphe: how can i take 1.0
+15:26  efphe: ?
+15:26  papna-work: magicblaze0071: You don't need threads for that.
+15:26  efphe: (not as a string)
+15:26  lvh: efphe: round() sounds like a good candidate
+15:26  lvh: magicblaze0071: that's not something you need threads for
+15:26  lvh: magicblaze0071: use the appropriate Qt reactor
+15:27  nickjohnson: Can anyone tell me why I'd see this behaviour with method decorators? http://pastebin.com/hRANg7nv
+15:27  papna-work: magicblaze0071: You can have twisted run PyQt's mainloop.
+15:27  infobob: http://paste.pocoo.org/show/272208/ (repasted for nickjohnson)
+15:27  efphe: lvh, no it isn't (i think)
+15:27  nickjohnson: That is, why is the object passed to the decorator a function object, rather than an unbound method? And where does it come from?
+15:27  magicblaze0071: papna-work: do you know of a simple example somewhere?
+15:27  lvh: efphe: why not
+15:27  Habbie: bjarni, your issue is not with >, your issue is with trying to print a name that can't be encoded in ascii
+15:27  magicblaze0071: My network blocks at times, and i dont want my UI to suffer when it does.
+15:27  KirkMcDonald: nickjohnson: A 'def' statement defines a function object.
+15:28  lvh: magicblaze0071: the whole point of twisted is making your network not block
+15:28  efphe: lvh, a= 1.1000000.1, round(a)= 1.0
+15:28  KirkMcDonald: nickjohnson: It only becomes an unbound method object when accessed as an attribute of a class.
+15:28  lvh: efphe: isn't that what you asked for?
+15:28  neumaennl: magicblaze0071: there is a simple example in the twisted tut/docs
+15:28  efphe: sorry
+15:28  nickjohnson: KirkMcDonald: Ah, right, of course.
+15:28  efphe: lvh, a= 1.10000001, round(a)= 1.0
+15:28  efphe: no
+15:28  papna-work: magicblaze0071: Google "pyqt twisted reactor"
+15:28  efphe: i would like to have:
+15:28  efphe:   a= 1.10000001, round(a)= 1.1
+15:28  neumaennl: magicblaze0071: you could also google for twisted qt
+15:28  papna-work: magicblaze0071: Twisted never gives you stuff that blocks.
+15:28  lvh: efphe: so, it's still round
+15:28  lvh: efphe: you just need to supply the second argument
+15:29  efphe: i tried
+15:29  efphe: it behaves in the same way
+15:29  Alberth: efphe: a lot of nice decimal floating point numbers are not representable exactly in a computer
+15:29  efphe: Alberth, yes I know
+15:29  KirkMcDonald: efphe: Note that 1.1 cannot be precisely represented in a double.
+15:29  efphe: yes ok
+15:29  papna-work: neumaennl: When you look up a function that is a class attribute on the class, you get an unbound method.
+15:29  efphe: maybe it's better to worki with a string
+15:29  KirkMcDonald: >>> print round(a, 1)
+15:29  KirkMcDonald: 1.1
+15:29  papna-work: neumaennl: This has nothing to do with the decorator.
+15:30  lvh: efphe: works fine for me: http://bpaste.net/show/9985/
+15:30  efphe: with %.2f for example
+15:30  papna-work: nickjohnson rather ^^^^
+15:30  lvh: KirkMcDonald: you've got a more recent python than i do then :-p
+15:30  KirkMcDonald: efphe: Note, too, the difference between str(some_float) and repr(some_float).
+15:30  magicblaze0071: so you guys think that I should move twisted and qt in the same thread? What happens if a network event happens and qt is blocked? Vice Versa? I think running them in two threads is much cleaner than borrowing that 100 line reactor that mixes the two. Just my thoughts thou.
+15:30  efphe: yes KirkMcDonald thank you
+15:30  lvh: magicblaze0071: yes, it is far better
+15:30  Alberth: efphe: depends on what the number represents.  There is also Decimal
+15:30  neumaennl: papna-work: o.Ô
+15:30  KirkMcDonald: efphe: Although explicitly specifying the precision when formatting it is good, too.
+15:30  papna-work: nickjohnson: Try it without your decorator and you'll see it's the same.
+15:30  lvh: magicblaze0071: your UI generally never blocks
+15:30  lvh: magicblaze0071: it *becomes* blocked
+15:30  lvh: magicblaze0071: and avoiding blocking IO is pretty much the entire point of twisted
+15:31  papna-work: nickjohnson: Why is this a problem?
+15:31  bjarni: Habbie: Everthing is dumped on screen - a lot of crazy characters - but everything is shown.  Only when I redirect this error pops up.
+15:31  magicblaze0071: lvh: Thank you. BTW, I did try the reactor, my code was brittle. I don't recommend it at all.
+15:31  lvh: magicblaze0071: if particular IO operations necessarily block, use deferToThread/callInThread/...
+15:31  Habbie: bjarni, when you redirect, python doesn't know it can use any encoding other than ascii
+15:31  nickjohnson: KirkMcDonald: So, supposing I have a decorated function, and a class (or an instance), is there a better way to get the bound/unbound method than looking up the function's name in the class/instance's dict
+15:31  lvh: magicblaze0071: I'm confused. *your* code was brittle because you ran PyQt and Twisted in different threads
+15:31  nickjohnson: ?
+15:32  magicblaze0071: lvh: no, because i used a reactor that someone else wrote that i did not understand
+15:32  bjarni: That's what is confusing me Habbie.  Thought I'd try to escape the string somehow and try that way
+15:32  lvh: nickjohnson: C.f.im_func
+15:32  papna-work: magicblaze0071: This is strange. You said that you didn't know this existed just a couple minutes ago.
+15:32  papna-work: magicblaze0071: Now you're saying you tried it?
+15:32  lvh: nickjohnson: Although generally it's better to just not do it
+15:32  nickjohnson: lvh: That's the other way around from what I want to do
+15:32  KirkMcDonald: nickjohnson: If you have the function, why do you need an unbound method?
+15:32  magicblaze0071: papna-work: I worked with it for at least a few days.
+15:33  nickjohnson: KirkMcDonald: My decorator adds a 'defer' capability to a function. To defer execution, I need to pickle the method reference, which only works if I pickle the method, rather than the function (which pickle can't find)
+15:33  papna-work: magicblaze0071: You JUST acted like you didn't know it EXISTED.
+15:33  magicblaze0071: sorry - my acts can be deceiving...
+15:33  papna-work: magicblaze0071: You have been asking for /days/ how to do very basic operations with threads.
+15:33 --- stoned is now known as ajavid
+15:33  papna-work: And without using the appropriate shit to do it either.
+15:33  magicblaze0071: papna-work: because i want to get it right?
+15:33  lvh: nickjohnson: ugh :(
+15:34  lvh: nickjohnson: In that case: it can't *really* be done; you want to enforce a superclass or a metaclass
+15:34  nickjohnson: lvh: It's not pretty, but "foo.defer(some_args)" is neater than "defer(foo, some_args)"
+15:34  KirkMcDonald: nickjohnson: Not really.
+15:34  lvh: nickjohnson: the problem is that the class doesn't *exist* yet when the decorator is applied
+15:34  nickjohnson: lvh: I don't want to do that at all
+15:34  nickjohnson: Right, I don't need the reference when the decorator is applied
+15:34  nickjohnson: Only when I try to pickle it
+15:35  lvh: nickjohnson: Well, if you call your thing on an instance it'll still be called with "self" as a first argument
+15:35  lvh: you can get the class out of that
+15:35  KirkMcDonald: You can get a class out of that.
+15:35  KirkMcDonald: It may not be that class.
+15:36  nickjohnson: lvh: Right. So now I have a class and a function. I could get the unbound method by doing something like cls.__dict__[fun.__name__], but I'm wondering if there's a better way
+15:36  lvh: nickjohnson: However, if you have the function you can't go to the unbound method simply because the function may be on N classes
+15:36  lvh: nickjohnson: that wont get you the unbound method
+15:36  nickjohnson: lvh: I'm aware of that, and I don't expect to get the class at function-definition time.
+15:36  nickjohnson: Sorry, getattr(cls, fun.__name__) rather
+15:36  lvh: better
+15:37  papna-work: nickjohnson: So you *want* an unbound method?
+15:37  nickjohnson: It just seems like an ugly way to do it.
+15:37  lvh: nickjohnson: Well, that's one way of doing it, it's not pretty but it's not entirely disgusting either
+15:37  papna-work: Unbound methods are never worth having.
+15:37  lvh: at least it's not the biggest problem with what you're describing
+15:37  arkanes: it wont work in some cases, although probably not ones that you care about
+15:37  nickjohnson: papna-work: Or a bound method, depending on context.
+15:37  lvh: (the biggest problem is pickle)
+15:37  nickjohnson: Although, I seem to recall discovering you can't pickle bound method references, you have to pickle the unbound method and the object separately
+15:37  arkanes: but you can make it work in those cases and also make getting the unbound method less disgusing by just creating the unbound method directly
+15:38  nickjohnson: Yup, you can't pickle bound method references.
+15:38  arkanes: nickjohnson: do you realize taht you don't actually need a boundmethod to make a method call, and that you can just pickle self and the function in a tuple and you're done?
+15:38  KirkMcDonald: nickjohnson: You can't pickle unbound methods or function objects, either.
+15:38  nickjohnson: arkanes: Yes, but I can't pickle the function - Pickle complains that it can't find a function by that name.
+15:38  nickjohnson: KirkMcDonald: You can pickle references to them
+15:38  KirkMcDonald: nickjohnson: I don't know what you mean by that.
+15:39  arkanes: nickjohnson: pickle doesn't store code, only data
+15:39  nickjohnson: Sorry, my mistake, I'm internally pickling the object and the name of the method already.
+15:39  arkanes: when I said "the function" I meant "a name by which you can find the function"
+15:39  arkanes: or you could use marshal
+15:39  lvh: arkanes: john mccarthy is rolling in his grave
+15:39  arkanes: lvh: heh
+15:39  nickjohnson: Actually, pickle.dumps(a_function) works just fine, and pickles a reference to the function
+15:39  KirkMcDonald: nickjohnson: Why are you employing pickle at all?
+15:39  lvh: arkanes: and he's not even dead yet
+15:40  nickjohnson: You're right that I can't pickle unbound methods either; I forgot that I'm pickling the name of the method alongside the object
+15:40  nickjohnson: KirkMcDonald: Because I'm writing a library that supports 'deferring' a function call onto a task queue
+15:40  KirkMcDonald: nickjohnson: You said that already. It doesn't really answer my question.
+15:40  nickjohnson: KirkMcDonald: What would you suggest?
+15:41  KirkMcDonald: nickjohnson: I need to know more about what you're talking about.
+15:41  KirkMcDonald: nickjohnson: Where do the pickles go?
+15:41  nickjohnson: KirkMcDonald: They get sent as the payload of a task, which gets executed later in the same environment
+15:41  nickjohnson: (Though possibly on another instance of it)
+15:41  nickjohnson: This: http://code.google.com/appengine/articles/deferred.html
+15:41  KirkMcDonald: nickjohnson: Where is the queue?
+15:42  nickjohnson: KirkMcDonald: What do you mean by 'where'?
+15:42  lvh: return maybeDeferred(self.strategy.method(*a, **kw)) # yay
+15:42  KirkMcDonald: Oh, app engine.
+15:43  Brend: Woah, deferreds in GAE?
+15:43  nickjohnson: Brend: Not the same as a twisted deferred. I take full responsibility for the naming clash. :P
+15:43  bjarni: Habbie (others too): I pasted a program + out put from execution with and without redirection.  http://fpaste.org/pQTP/  I have no clue why the error shows up when redirecting.  Nothing is in the file redirected to.  I have Ubuntu 9.10
+15:43  lvh: nickjohnson: you named something on appengine?
+15:43  nvictor: yo!
+15:43  nickjohnson: lvh: I wrote bits of App Engine.
+15:44  nvictor: lvh: Nick is da boss :)
+15:44  nickjohnson: hah
+15:44  Habbie: bjarni, my last answer stands
+15:44  lvh: oh wow, I'm telling people at big G what to do
+15:44  lvh: I feel very important now :-p
+15:44  nickjohnson: lvh: As long as it's helpful ;)
+15:44  nvictor: lvh: you work for big G too?
+15:44  arkanes: using pickle for this sounds like a bad idea
+15:44  nvictor: puleasse hire >:(
+15:45  nickjohnson: arkanes: If you have a suggestion, I'm all ears.
+15:45  arkanes: of course, using pickle for almost anything sounds like a bad idea. Why not use marshal and ship the actual code
+15:45  nickjohnson: Because marshal isn't available on App Engine
+15:45  arkanes: well
+15:45  arkanes: thats a pretty good reason
+15:45  nickjohnson: I agree that it'd be handy, though sometimes you don't _want_ to ship the code
+15:45  papna-work: nickjohnson: Sounds like your fault.
+15:45  nickjohnson: papna-work: That's a bit I didn't write. ;)
+15:45  papna-work: =p
+15:45  lvh: if only pickle wasn't available either
+15:45  arkanes: you could reinvent it
+15:45  nickjohnson: More seriously, it's one of the modules that provides too much access to Python internals to be safe.
+15:46  arkanes: pull out the bytecode from the function, store that, recreate the funciton on the other side
+15:46  nickjohnson: Can't get the bytecode - same reason.
+15:46  arkanes: then you're kinda stuck
+15:46  arkanes: there's no way you can find an authoritive name for an arbitrary python object, function or not
+15:46  nickjohnson: So far, deferred has generally worked pretty well. It's a good alternative to setting up explicit handlers for small tasks.
+15:46  Brend: Wait, what's this? Serializing code? Why?
+15:47  nickjohnson: Right, there are limitations, but that doesn't make it not useful.
+15:47  NoobFukaire: is there a generic python exception type
+15:47  NoobFukaire: would that be RuntimeError
+15:47  nvictor: Brend: partly because appengine has constraints
+15:47  nickjohnson: NoobFukaire: Exception.
+15:47  arkanes: you'd have to make it a precondition of using the API that there's a consistent environment with authoritive names for the things you're shipping
+15:47  Brend: arkanes: You can require things that have a FQN, and then just use that name
+15:47  nvictor: brend: 30s for a request
+15:47  Yhg1s: NoobFukaire: there's no *generic* exception, no.
+15:47  nickjohnson: arkanes: Yup.
+15:47  NoobFukaire: ?????/
+15:48  NoobFukaire: Yhg1s: looks like you fail it from the docs
+15:48  Alberth: NoobFukaire: there is an Exception base class, but you never use it
+15:48  Yhg1s: NoobFukaire: 'fail it'?
+15:48  Yhg1s: NoobFukaire: Exception is the exception baseclass you should use for your own exceptions, but it's not a *generic* exception. You shouldn't just raise it directly. Subclass it to convey the type of exception it should represent, or use one of the existing concrete exception types.
+15:49 --- kakazza is now known as temp
+15:49  NoobFukaire: yeah but if you need a catch all for some reason
+15:49 --- temp is now known as temp23
+15:49  Yhg1s: then you don't want a generic exception type, you want the baseclass. Exception would be that, yes.
+15:49  arkanes: not that you should do that, of course
+15:49  Yhg1s: (there's actually exceptions not derived from Exception, but you shouldn't handle those anyway.)
+15:50  Alberth: NoobFukaire: but you hide *everything*, making debugging impossible
+15:50  NoobFukaire: man python is so fucking retarded, they should have called it Moron
+15:50  Yhg1s: NoobFukaire: is there a point to this, or are you just trolling?
+15:50  helo: NoobFukaire: NO DOUBT!!!!
+15:50  NoobFukaire: I'm just trolling
+15:50 --- ChanServ sets modes [#python +o Yhg1s]
+15:50 <-- Yhg1s has kicked NoobFukaire from #python (NoobFukaire)
+15:50 --- Yhg1s sets modes [#python +b *!*asd@unaffiliated/noobfukaire]
+15:50  Vorrin: XD
+15:50  helo: heh
+15:50  luist: how do i remove an item from a list?
+15:50 @Yhg1s: luist: depends on the situation.
+15:51  lvh: luist: Can you describe the rest of your algorithm
+15:51  nvictor: luist: del
+15:51  nvictor: luist: oh and remove too
+15:51  arkanes: both of those things are almost always the wrong choice
+15:51  binarymutt: ls
+15:51  lvh: binarymutt: wrong window
+15:51  Noen: Hi, anyone familiar with unicode encoding troubles + sqlobject? I keep getting the following error message when trying to create new SQLObject objects: UnicodeEncodeError: 'ascii' codec can't encode character u'\xcd' in position 0:, even though my database field is an UnicodeCol()
+15:51  luist: lvh: app = App(category, name, path)       	apps.append(app)      this is how i build the list
+15:52 --- Yhg1s sets modes [#python -b *!*asd@unaffiliated/noobfukaire]
+15:52 --- Yhg1s sets modes [#python +b $a:NoobFukaire]
+15:52  nvictor: arkanes: why so?
+15:52 --- Yhg1s sets modes [#python -o Yhg1s]
+15:52 * nvictor shivers
+15:52  Yhg1s: Noen: and what is it you're doing, exactly?
+15:53  nickjohnson: luist: list.remove() will remove the first matching value
+15:53  Noen: Yhg1s: I scrape some norwegian webpages, and some of the data I get contains æøå
+15:53  nickjohnson: Bear in mind that it's O(n) with respect to the number of elements after it in the list
+15:53  Yhg1s: Noen: no, show your code and the traceback, is what I mean.
+15:53  Noen: :)
+15:54  Noen: ill put it on pastebin
+15:54  Yhg1s: nickjohnson: it's O(n) with respect to the number of elements before it in the list as well.
+15:54  Yhg1s: nickjohnson: since it'll have to search the list.
+15:54  lvh: nickjohnson: He's already gone :-(
+15:54  pk4r: Anyone read Foundations of Agile Python Development ? Worth to invest.. ?
+15:55  nvictor: pk4r: i will guess not
+15:55  nickjohnson: Yhg1s: Er, right. Good point. :P
+15:55  lvh: luist: nickjohnson just gave you a few answers but you had vanished
+15:55  Yhg1s: luist: so why are you removing something from the lsit again? Why is it a list at all?
+15:55  lvh: luist: Why are you removing something?
+15:56  pk4r: Ha, just looked for some reading on the techniques in addition to what's already in official Python documentation.
+15:56  luist: lvh: because im looping over the list again later some times and i want it to go faster
+15:56  nickjohnson: Hm. My next stupid question: Is there any way for a function to determine if it's being called as a method?
+15:56  lvh: luist: Okay. Is the order of the list important?
+15:57  lvh: nickjohnson: Negative
+15:57  nickjohnson: luist: Are you removing just the one element, or several?
+15:57  lvh: nickjohnson: Wellllllll. You *can* of course. Just not sensibly.
+15:57  nickjohnson: lvh: suspected as much.
+15:57  nickjohnson: lvh: Sensible is probably out the window at this point. Though I draw the line at inspecting stacks :P
+15:57  lvh: nickjohnson: Warning, here be dragons: sys._getframe
+15:57  nvictor: luist: make a generator and do the filtering inside the generator
+15:57  nickjohnson: Yeah, that.
+15:58  KirkMcDonald: nickjohnson: You can always implement your own descriptor.
+15:58  lvh: nickjohnson: That reminds me of an ASM comment
+15:58  nickjohnson: KirkMcDonald: Hm? I thought I was.
+15:58  lvh: nickjohnson: "yes, I know the stack pointer is supposed to go the other way"
+15:58  luist: nickjohnson: several... but one each time
+15:58  nickjohnson: lvh: heh.
+15:58  nickjohnson: luist: What do you mean by 'each time'?
+15:58  Noen: Here is the traceback of my sqlobject error: http://pastebin.no/323v
+15:58  Noen: along with relevant code
+15:59  lvh: luist: Is the order in the list important?
+15:59  Noen: A possibility might be that DownloadURL() does not unicode the data... ?
+16:00  nickjohnson: KirkMcDonald: Er, sorry, misread 'descriptor' as 'decorator'. What did you have in mind?
+16:00  nickjohnson: Oh, hm, I think I know. That would require replacing the decorated function with my own one, though, which introduces a whole new set of pickle-can't-find-this issues.
+16:01  KirkMcDonald: nickjohnson: If you implement your decorator as a descriptor, it will allow you to distinguish between attribute access on the class and attribute access on the instance.
+16:01  luist: this is an example: http://pastie.org/1205321    all the app in apps that are used already, should be removed because i wont need them again!
+16:01  luist: lvh: nickjohnson: Yhg1s ^
+16:01  KirkMcDonald: nickjohnson: And if your descriptor type is just a Python class, you should be able to pickle it.
+16:02  nickjohnson: KirkMcDonald: Not if that class was defined by my descriptor, because pickle won't find it by looking up its name
+16:02  lvh: holy.... line 7 is so long not even the pastebin puts it on a single line
+16:02  Yhg1s: luist: I'm not sure what "used already" means, but perhaps you should build a new list of apps to replace the old one. Or perhaps you should use something other than a list for these things -- something that has fast removal the way you want to, like a set of a dict.
+16:02  KirkMcDonald: nickjohnson: I don't know what you mean by the class being defined by the descriptor.
+16:03  lvh: Yhg1s: or*
+16:03  Yhg1s: yes, a set or a dict.
+16:03  Yhg1s: luist: using list.remove while you iterate over the list won't do what you want anyway.
+16:03  nickjohnson: KirkMcDonald: If I replace the decorated method with my own, rather than returning the (possibly modified) input method
+16:04  nickjohnson: Then there's no canonical name for the original, undecorated function, so I can't pickle a reference to it
+16:04  KirkMcDonald: Oh. Of course.
+16:04 --- temp23 is now known as kakazza
+16:04  nickjohnson: I'm beginning to think I've got myself into a bit of a quagmire with this convenient decorator syntax :P
+16:05  KirkMcDonald: I'm beginning to think of awful ideas.
+16:05  nickjohnson: uhoh
+16:06  Noen: I think I spot the problem, got unicode data in a field where I didnt expect it :)
+16:06  luist: Yhg1s: used already doesnt really matter... i just want to remove app from apps in that place
+16:07  lvh: luist: you can't sensibly mutate lists while iterating over them
+16:07  lvh: Don't do it.
+16:07  luist: lvh: ok ill just build another list... that should work too
+16:07  lvh: consider building a new list as you iterate
+16:07  nickjohnson: It won't make any difference anyway - the only place you're reading apps is in the loop itself
+16:07  lvh: right
+16:10  KirkMcDonald: nickjohnson: So if I understand correctly: In one context, calling the method adds the call to a queue.
+16:11  KirkMcDonald: nickjohnson: And in another context, the call is removed from the queue and executed.
+16:12  nickjohnson: KirkMcDonald: So, what I'm doing at the moment is modifying the function object, so func.defer(foo, bar) executes func(foo, bar) on the task queue
+16:13  nickjohnson: So the original function is intact, and usable as a normal function (and can be found by pickle, importantly)
+16:14  KirkMcDonald: But you're accessing the function as a method.
+16:14  nickjohnson: Well, that's when it becomes problematic, yes
+16:14  KirkMcDonald: And what was wrong with defer(foo, arg, arg, arg)?
+16:15  KirkMcDonald: Well, defer(func, arg, arg, arg)
+16:15  nickjohnson: Nothing, but I was hoping for a more compact and readable syntax
+16:15  nickjohnson: Also, I added in support for checking the arguments are valid at call time, though that could be added to the regular defer function.
+16:15  Brend: Stop the madness.
+16:16  KirkMcDonald: What does "valid" mean? Pickleable?
+16:16  nickjohnson: No, ensuring that the argument list passed to defer is valid for the function being called
+16:17  nickjohnson: Eg, with the current defer, defer(a_func, 1, 2), where we have "def a_func(foo)" would succeed, but throw an exception when trying to execute the deferred task
+16:17 --- kakazza` is now known as kakazza
+16:18  Brend: I'm not sure catching it earlier is really any better. Presumably tasks can still throw exceptions when they run anyway, so now you have two different ways they could fail
+16:18  nickjohnson: Brend: Right, but now the exception is thrown to the caller, rather than on the task queue, where nothing can catch it
+16:19  nickjohnson: In the latter case you have an exception that's being reported in the logs, with no easy way to find the caller that caused it
+16:19  dalaiLamer: hello guys, can someone tell me how i get emacs editor that is made for python 2 and not 3 ?
+16:19  Yhg1s: dalaiLamer: just getting emacs would do that.
+16:19  Brend: nickjohnson, oh right, these aren't tasks with callbacks
+16:20  dalaiLamer: Yhg1s I dont know what to download for my windows xp. Can you help me ? im rly going crazy its so annoyning.
+16:20  Aufwind: A question to XPath and lxml.html I want to parse a certain link from a <a>-Element whose name="p191". I tried it this way, bit it doesn't work. Where is my fault? http://fpaste.org/tcy5/
+16:20  nickjohnson: Brend: correct
+16:20  Brend: Still, is passing the wrong number of arguments really a common enough problem to have special handling for it?
+16:21  nickjohnson: I don't have firm evidence, but I think it's worth handling. Especially given how much of a pain it could be to track down when it does happen
+16:21  Yhg1s: dalaiLamer: You seem to think there's a distinction between "emacs for python 3" and "eamcs for python 2". There isn't.
+16:21  Yhg1s: dalaiLamer: It's just "emacs".
+16:22  dalaiLamer: but what version i need ?
+16:22  lvh: dalaiLamer: a recent one
+16:22  dalaiLamer: and what is this damn  libXpm for ?
+16:22  dalaiLamer: what have it lost in emacs downloads ???
+16:22  pantsman: the newest stable one? is there going to be a particular reason why you should choose some old build for writing Python?
+16:22  nickjohnson: Still, the syntax improvement was my primary motivating factor
+16:23  Brend: nickjohnson, I think you should go with the simplest thing, like KirkMcDonald suggested ... easier syntax isn't easier if it's a surprise to everyone
+16:23  Yhg1s: dalaiLamer: you seem to have issues with emacs here, not Python. Perhaps you shouldn't get Emacs for Windows.
+16:24  dalaiLamer: germans need to be happy that i got no ak 47 right now under my bed, this emacs such a annoyning thing
+16:24  nickjohnson: Brend: If it were possible to get it working without so many caveats, it wouldn't be any more surprising than the regular defer syntax
+16:24  Yhg1s: dalaiLamer: threats hardly have a place here.
+16:24  dalaiLamer: im fcking shaking
+16:24  Brend: nickjohnson, the regular defer syntax is pretty surprising too, but has better reasons to be :)
+16:25  nickjohnson: Brend: I don't think some_func.defer(some_args) is particularly surprising, though
+16:25  dalaiLamer: can sooomeone please give me a link to download stabil emacs for windows ?
+16:26  dalaiLamer: the GNU website sucks in ordering and naming.
+16:26  dalaiLamer: ok i found.
+16:26  Yhg1s: dalaiLamer: google for 'windows emacs download'. Notice how there's no 'python' anywhere in that query. There's no 'python' anywhere in your request. If you can't figure it out, don't download Emacs for Windows.
+16:26  dalaiLamer: there was a readme file inside ....
+16:26  Brend: nickjohnson, attributes being accessed on function objects always surprises _me_
+16:27  confluency: dalaiLamer: why do you want emacs?
+16:27 * Brend goes for coffee
+16:27  torpedotux: nice -> memoryview in py3k! :)
+16:27  nickjohnson: Brend: More than passing one and its arguments to a function to 'call' them asynchronously, though?
+16:28  pantsman: dalaiLamer: you don't look right now like the sort of person who will love emacs
+16:28  KirkMcDonald: nickjohnson: No, that's fairly typical.
+16:30  dalaiLamer: confluency because everyone says original python editor sucks, and they cant help me because they use other editor.
+16:30  shubalub: ??? IDLE is fine
+16:30  dalaiLamer: pantsman you are right.
+16:30  dalaiLamer: so why noone uses it ?
+16:31  shubalub: I do
+16:31  shubalub: esp compared to emacs, if you need something that IDLE doesn't offer be prepared to put in a chunk of time making it work
+16:32  confluency: dalaiLamer: Emacs is just an editor.  You can use any editor you want.  Personally, I wouldn't recommend emacs to you.
+16:33  confluency: IDLE is not just an editor, it's a basic IDE.  It does certain things for you automatically, and other people who don't use it will probably not be too keen to help you.
+16:33  dalaiLamer: hmm...
+16:33  confluency: I don't think you need an IDE for python at all; just a goot txt editor which can do syntax highlighting and indentation.
+16:34  torpedotux: just use nano and be done
+16:34  confluency: torpedotux: it's Windows.
+16:34  torpedotux: oh
+16:34  torpedotux: there should be nano port for windows
+16:34  d0ugal: confluency: Need? Certainly not but some people prefer an IDE.
+16:34  torpedotux: a*
+16:34  dalaiLamer: I need some editor that is like original IDE, where i can test my functiones LIVE, i dont need to compile.
+16:35  confluency: You don't need to compile anyway; this is python.
+16:35  bahamas: dalaiLamer: use the python interpreter
+16:35  Yhg1s: dalaiLamer: nope, you don't.
+16:35  Yhg1s: dalaiLamer: just start the interactive interpreter. No editor needed.
+16:35  Yhg1s: dalaiLamer: just like the tutorial shows you.
+16:35  RenatoSilva: dalaiLamer: notepad++ or eclipse+pydev
+16:35  confluency: You can run your code straight away without compiling, and you can test out code fragments in the interpreter.
+16:36  Yhg1s: You can use whatever editor you like.
+16:36  shubalub: IDLE has an interpreter :D
+16:36  confluency: I remember UltraEdit from my mercifully brief Windows days.
+16:36  dalaiLamer: damn im to shaking atm, to much infos , i will go crazy. Do someone get few minutes of time, and can private with me ?
+16:36  bahamas: shubalub: it does but sometimes it messes things up
+16:36  confluency: Look, just download a bunch of editors, try them all, and pick the one you like.
+16:37  d0ugal: dalaiLamer: I'd probably suggest trying pydev. Quite a few people like it as “feature rich” IDE. I used it for a while but moved to a much simpler editor after a while but for getting started it was good.
+16:37  RenatoSilva: dalaiLamer: editor? you just need notepad++
+16:37  RenatoSilva: dalaiLamer: IDE? you just need eclipse + pydev
+16:38  shubalub: bahamas: i guess but that didn't really happen for me unless I was trying to do tk (doh)
+16:38  dalaiLamer: people told me to avoid eclipse
+16:38  pantsman: try out notepad++ then
+16:38  confluency: I strongly suggest that you use a plain editor if you really want to learn.  IDEs may be useful shortcuts once you know what you're doing, but they hide things from you, and you can't see what is actually happening behind the scenes.
+16:39  RenatoSilva: dalaiLamer: these are people who don't like it, but it's the biggest IDE in the world, thousands of developers, like me, would certaintly disagree
+16:39  bahamas: shubalub: try this in IDLE and then in the python interpreter and tell me if you get the same result: import string; print string.letters
+16:39  pantsman: for a start, you want to learn how importing and the path works, and an IDE with a magical "run" button will stop you learning that
+16:39  dalaiLamer: ok i got enough ... ill stick with original python.
+16:40  shubalub: bahamas: for now I'll take your word that they're different...i *like* IDLE and *use* vim
+16:40  dalaiLamer: thats to much Jungle with all that ides
+16:41  dalaiLamer: who is IDLE ?
+16:41  nickjohnson: http://en.wikipedia.org/wiki/Eric_Idle
+16:41  nickjohnson: ;)
+16:41  RenatoSilva: dalaiLamer: no idea what's IDLE either, just use notepad++ and python in console
+16:42  bahamas: shubalub: i use IDLE too, just that i want to use it less and less
+16:42  pantsman: I thought the continued presence of IDLE was just an endearing quirk, I didn't realise people actually use it
+16:42  bahamas: dalaiLamer: if you're using python on windows, you should have IDLE as well
+16:42  dalaiLamer: IDLE , is that the original Python , where you can write funktions without compiling it ?
+16:42  pragma_: Haw, haw, have fun using a plain text editor with python's nonsensical indentation requirments.
+16:42  pantsman: "the original Python" what?
+16:42  CountDown: I recently changed the default system umask to 077. I'm now having trouble with python packages I've installed since the umask change. What's the best way around this? Reset the system default to 022 and change my account's umask to 077?
+16:42  dalaiLamer: pantsman yeah the python 2.7 from python dot org
+16:42  pantsman: IDLE is just a basic IDE which comes with your Python installation
+16:43  Yhg1s: dalaiLamer: the 'original Python' is just Python. Any Python you can 'write functions without compiling it'.
+16:43  Yhg1s: dalaiLamer: that's how Python works.
+16:44  dalaiLamer: oh ok.
+16:44  dalaiLamer: use functions without compiling it too ?
+16:44  Alberth: CountDown: you probably don't want to mess with the x bit in umask  (I use 006)
+16:44  confluency: You don't compile it at all.  It's an interpreted language.
+16:44  Yhg1s: dalaiLamer: without explicitly compiling yes. That's how Python works.
+16:44  RenatoSilva: dalaiLamer: there's no compilation in python at all, except for performance
+16:45  confluency: You can write some code and then run it.
+16:45  Yhg1s: (well, Python compiles behind the scenes, just not to native code.)
+16:45  Yhg1s: RenatoSilva: not for performance either.
+16:45  RenatoSilva: Yhg1s: for what
+16:45  Yhg1s: dalaiLamer: this is covered in any tutorial.
+16:45  confluency: Or you can run the interpreter and get a shell in which you can define things and run them on the fly.  Which is good for testing.
+16:45  Yhg1s: RenatoSilva: Well, there's the compiling Python does, which is done to make things work in the first place, and then there's no other form of compiling even for performance.
+16:46  RenatoSilva: Yhg1s: like bytecode?
+16:46  confluency: dalaiLamer: have you read the tutorial which is linked in the topic?
+16:46  pragma_: I'm always amused when newcomers spout their theories about compiled vs interpreted.
+16:46  Yhg1s: RenatoSilva: the compiling Python does is to bytecode, yes.
+16:46  CountDown: Alberth: I'll probably just switch the system default back to 022 and change my own to 077. Can't think of any reason anyone else would need to execute my files.
+16:46  RenatoSilva: Yhg1s: but how about those projects where we have those .pyo? it's just a cache?
+16:47  dalaiLamer: confluency im reading " think python "
+16:47  Alberth: CountDown: by default files get no x bit. your mask enables that.
+16:47  confluency: dalaiLamer: please read the tutorial.  The beginning explains all of this in detail.
+16:47  dalaiLamer: Think Python
+16:47  dalaiLamer: How to Think Like a Computer Scientist
+16:47  dalaiLamer: okeay, i do it.
+16:48  CountDown: Alberth: Ah, the umask is actually the bits you don't want to be set.
+16:48  Alberth: CountDown: no, it is the bits you want to toggle
+16:48  CountDown: Alberth: So my 077 umask means that the default permissions are rwx------
+16:49  RenatoSilva: CountDown: right
+16:49  RenatoSilva: Alberth: wrong
+16:49  CountDown: Though, I agree that its silly and confusing to do it that way.
+16:50  Alberth: RenatoSilva: http://paste.pocoo.org/show/272260/    so why are my 'other' bits 0 ?
+16:50  Yhg1s: RenatoSilva: .pyo files are bytecode compiled with -O. There's no significant difference in them. For most files, they're identical.
+16:50  RenatoSilva: Alberth: 022 is a mask for 755 (dirs) and 655 (files)
+16:51  RenatoSilva: Yhg1s: why generate them
+16:51  RenatoSilva: Yhg1s: I assume it's for caching, and hence performance
+16:51  Yhg1s: RenatoSilva: once upon a time, they *were* a little optimized. The optimizations were made obsolete by optimizations in the 'normal' mode. At some point in the future, they might be different again.
+16:52  Yhg1s: RenatoSilva: .pyc files are for caching. .pyo files are for hysterical raisins. They don't offer any significant benefit.
+16:52  RenatoSilva: Yhg1s: sorry Yhg1s, I mean pyc, thanks
+16:52  CountDown: Alberth: Your paste is the expected behavior.
+16:53  Alberth: CountDown: yes, it seems so, setting the umask to 007 does not make a difference. Sorry for the confusion
+16:53  CountDown: Alberth: default permissions = 777 & ~umask
+16:53  CountDown: No worries.
+16:54  Alberth: CountDown: but 'system wide 077' is not useful, as you cannot install anything usable for everybody then.
+16:54  CountDown: Alberth: Acutally, default permissions = 777 & ~umask for directories and 666 & ~umask for files.
+16:54  luist: hey guys... if i have a list with ['AAABBB', 'CCCAAA', 'DAAADD']  how can i check if AAA is inside some item of the list...  if 'AAA' in list:  wont work for me
+16:54  CountDown: Alberth: Yeah, that's what I just discovered. :)
+16:54  luist: for item in list:  if 'AAA' in item:    i mean
+16:55  Yhg1s: luist: why won't that work?
+16:55  CountDown: Alberth: I just figured that distutils might change the permissions for me, but that doesn't appear to be the case.
+16:55  RenatoSilva: Alberth: 006 means don't remove permission for user, group, and for files remove permission to read/write files from others (for dirs it removes read/write only too, but if it was 007 for dirs it'd remove execute too)
+16:55  luist: Yhg1s: if 'AAA' in list wont work because it will check if AAA matches an item, not a substring of the item
+16:55  Alberth: CountDown: install can be persuaded to do that, but not all installers set bits explicitly
+16:55  papna-work: luist: That for loop works.
+16:55  Yhg1s: luist: yes. But 'for item in list: if 'AAA' in item:' will work fine.
+16:56  CountDown: Alberth: Rather than worry about it every time I install something, I'll revert the system default and change my account default. Seems like the right thing to do.
+16:57  Alberth: RenatoSilva: apparently, thanks for correcting.  My group is used only by me, so it makes little difference what I use there :)
+16:57  gilaniali: where are the files for the python installation stored  on a Mac
+16:57  Alberth: CountDown: that sounds like a good solution :)
+16:57  gilaniali: which python gives me where the interpretator is and not the files which make up python
+16:58  CountDown: Alberth: Where do you set your umask? .bashrc?
+16:58  Alberth: CountDown: if you use bash as shell, indeed
+16:58  Yhg1s: gilaniali: start python, import sys, print sys.prefix. The library will be in $prefix/lib/python$version/
+16:59  Yhg1s: gilaniali: alternatively, import the module of which you are interested in the file, and print its __file__ attribute.
+16:59  Brend: nickjohnson, more surprising to me, yeah. Then again, I'm used to Twisted, and to functional languages where some form of apply(func, args) is commonplace
+16:59  CountDown: Alberth: Cool, thanks. Time to reboot.
+17:00  Brend: (Coffee took a while, my motorbike died halfway there and I had to push it back :( )
+17:00  Alberth: CountDown: bash uses .bash_profile for the login shell, best source .bashrc from that file too
+17:00  gilaniali: Yhg1s: found it thanks
+17:01  ngirard: Hi all. Is there anywhere in the standard library something that would unescape such %3a sequences into ':', for instance ?
+17:01  CountDown: Alberth: I was looking for that one, but apparently my system (Ubuntu 10.04) doesn't use it.
+17:01  Yhg1s: ngirard: urllib.unquote
+17:01  RenatoSilva: urlencode? I think there's something standard
+17:02  ngirard: Yhg1s, RenatoSilva: thanks very much for your answers, i'll check them out
+17:02  RenatoSilva: ngirard: I'd rather tell that to Yhg1s?
+17:02  ngirard: all right RenatoSilva, thanks again !
+17:03  RenatoSilva: ngirard: now I see, you just did, sorry
+17:04  CountDown: Alberth: Turns out .profile is the right place.
+17:05  CountDown: Alberth: Actually, it's more complicated than that, but we're starting to get off topic.
+17:09  torpedotux: where's IRC!! http://xkcd.com/802_large/
+17:11  pragma_: torpedotux: die unoriginal xkcd link spammer
+17:11  pragma_: "I spam xkcd links, I am a nerd and hacker and romantic!"
+17:11  torpedotux: pragma_: heh
+17:12  gilaniali: is there a ruby equivalent of method_missing() in python
+17:12  Yen: torpedotux: IRC is there, next to troll bay...
+17:13  moreati: gilaniali: depends what missing_method() does. What does missing_method do?
+17:13  torpedotux: Yen: yay!
+17:14  Aufwind: How do I get the value of an attribute (I want the value of href in this case)by XPath? I tried it this way, but it doesn#T work: paper = parsed_html.xpath('//table/tr/td/a[@name=p191]/attribute::href')
+17:14  gilaniali: moreati: If you try to call an object method that is not defined, ruby will first try to see if a missing_method is defined and execute that before giving an error
+--- Log closed Thu Oct 07 19:00:41 2010
+--- Log opened Thu Oct 07 19:00:52 2010
+19:00 --- Users 755 nicks [0 ops, 0 halfops, 0 voices, 755 normal]
+19:01  FRockstock: how do I tell this code that I don't want to add any files or folders from .svn to be added to my list http://dpaste.com/254576/
+--- Log closed Fri Oct 08 02:19:36 2010

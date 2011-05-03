@@ -1,0 +1,174 @@
+--- Log opened Mon Jan 17 10:36:59 2011
+10:36 --- Users 542 nicks [0 ops, 0 halfops, 0 voices, 542 normal]
+10:37 --- Channel #mysql was synced in 2 seconds
+10:39  kelye: jink: are you sure it's that?
+10:39  kelye: groupwise max ?
+10:41  kelye: i'm not getting any max, just a count on products
+10:42  redguy: upgrade
+10:43  redguy: !tell redguy about upgrade
+10:44  KarateKip3: I have a date field and a time field. These should be considered as one datetime field. How to do this in MySQL? For example: SELECT ... WHERE mydate > '2010-02-04' AND mytime > '08:30:00'
+10:44  KarateKip3: is that the best way?
+10:46  drautert: why are they not one field?
+10:46  drautert: DATETIME 0000-00-00 00:00:00
+10:47  KarateKip3: that's how i found the database. I have to continue where someone else left off
+10:48  jink: kelye: throw in a group_concat on the column that changes from 0 to 1 (or v.v.).  You'll see there is more than one possility for MySQL to choose from.
+10:48  jink: possibility*
+10:48  VoVo64: !m redguy upgrade
+10:48  ubiquity: redguy: Sorry, I have no idea about that manual entry.
+10:49  VoVo64: :)
+10:49  VoVo64: !tell redguy about upgrading
+10:49  ubiquity: redguy: For information about upgrading, read http://dev.mysql.com/tech-resources/articles/choosing_mysql.html
+10:49  kelye: i did, in the pastebin there are 2 result sets
+10:50  kelye: one with group_concat and one without
+10:50  redguy: thanks VoVo64
+10:51  jink: kelye: I meant a group_concat on only_vendor.
+10:51  kelye: aha
+10:52  redguy: though the article given by ubiquity refers to 5.0 as being beta and was last updated in august 2005 :-)
+10:53  kelye: AHAAAMZ
+10:53  jink: Hmm? :)
+10:53  kelye: now that's a real thank you :d
+10:53  jink: Good for you. ;)
+10:53  VoVo64: redguy: oh.
+10:53  jink: thumbs: Where's archivist and his bot?
+10:54  VoVo64: !m redguy upgrading
+10:54  ubiquity: redguy: See http://dev.mysql.com/doc/refman/5.1/en/upgrading.html
+10:54  VoVo64: redguy: this one? :)
+10:54  VoVo64: jink: that is a question I'm interested in as well
+10:56  _raymond_: who own ubiquity ?
+10:56  _raymond_: s/own/owns/?
+10:56  VoVo64: _raymond_: atm me
+10:56  redguy: VoVo64: yep, tahnks again
+10:56  _raymond_: VoVo64: Ok.
+10:56  _raymond_: VoVo64: /msg ?
+10:56  VoVo64: _raymond_: but the code base already went to thumbs
+10:56  VoVo64: _raymond_: yes
+10:57  redguy: VoVo64: why didn't it answer me? Is there some kind of access list?
+10:59 --- salle_ is now known as salle
+11:02  soa2ii: If you have a look at this query, could you tune it somehow? I got indexes on (meter,  category, date)
+11:05  _raymond_: wow... Oracle has let people keep using the mysql.com domain? :)
+11:06  salle: _raymond_: People?
+11:06  _raymond_: salle: mattiasj
+11:06  mattiasj: ?
+11:06  VoVo64: redguy: you asked for !tell redguy about upgrade    the factoid is   upgrading
+11:08  _raymond_: mattiasj: just commenting on your hostmask
+11:09  Multiply: I have three tables, containing information about users. table1 and table2 always contain a users information, such as login, and real name. The third table(table3) doesn't always contain information for a specific user (such as age), is there a way to select from all three tables, even if table3 doesn't contain a row for some users? (There's only 1 row in each table, per user)
+11:09  mattiasj: _raymond_ OK, sitting in the old mysql headquarter in Uppsala, Sweden right now...
+11:09  _raymond_: mattiasj: there still business function left there?
+11:10  mattiasj: _raymond_: yes, some developers and IT people...
+11:11  _raymond_: mattiasj: Ah, ok.
+11:19  soa2ii: How do you select a year as a subset of a datetime column? BETWEEN 'yyyy-01-01 ...' or is there something special for this?
+11:20  soa2ii: I did this: WHERE `date` BETWEEN '2011-01-01 00:00:00' AND '2011-12-31 23:59:59' but it does not look so nice :/
+11:23  kelye: where  year(date) = year(now())
+11:24  salle: kelye: Definitely BETWEEN
+11:24  soa2ii: kelye: Is this as fast as BETWEEN?
+11:24  salle: soa2ii: Nope
+11:24  salle: soa2ii: column BETWEEN ... can use index
+11:24  salle: soa2ii: DATE(column) can not use index
+11:25  kelye: if you have index on date :)
+11:25  soa2ii: salle: Fine. So there is no nicer approach?
+11:25  soa2ii: kelye: I have an index.
+11:25  salle: soa2ii: Just like with any other expression which does involve column
+11:25  salle: soa2ii: WHERE x + 1 = 2; <- can not use index. WHERE x = 2 - 1; <- can use index
+11:26  salle: kelye: Do your homework again
+11:26  soa2ii: salle: http://pastebin.com/mjPm5XD4 could you maybe have a look at this? Could I improve thsi query more?
+11:26  kelye: i read just the last two rows before answering, sorry
+11:27  salle: soa2ii: What does the EXPLAIN say?
+11:27  soa2ii: It's taking forever and I don'T know what to do.
+11:27  soa2ii: wait
+11:27  soa2ii: salle: EXPLAIN <query>? Even if it's an INSERT?
+11:27  kelye: and the last two rows didn't mention anythigng about 'tuning the query' :)
+11:27  salle: soa2ii: for SELECT part
+11:27  soa2ii: fine
+11:28  salle: soa2ii: Also you have user defined variable there. Are you sure it can rely on it in ON DUPLICATE KEY part?
+11:28  soa2ii: salle: http://pastebin.com/eR189PT9
+11:29  soa2ii: salle: Yeah, that's why I introduced the user variable
+11:29  salle: soa2ii: Are you sure you can rely user defined variable in ON DUPLICATE KEY part?
+11:29  soa2ii: salle: Uhm, yes.
+11:29  soa2ii: The query works fine on a small test table.
+11:29  salle: soa2ii: Assigning and using user variable in same statement can give unpredictable results as clearly explained in the manual
+11:30  soa2ii: Hm.
+11:30  soa2ii: So what would you do?
+11:30  soa2ii: If I do SELECT ... AS `c` it does not work in ON DUPLICATE
+11:30  soa2ii: But first: does my EXPLAIN look ok to you?
+11:31 --- Bjelleklang is now known as bjelleklang_alt
+11:31  salle: soa2ii: At a glance yes, but it leaves the feeling something is wrong in genetal. It seems to scan too many rows
+11:32  _raymond_: !tell _raymond_ about reset root
+11:32  ubiquity: _raymond_: See  http://dev.mysql.com/doc/refman/5.1/en/resetting-permissions.html
+11:32  salle: soa2ii: Are you sure you can't rewrite that as a join so it only reads necessary rows?
+11:32  soa2ii: salle: Hm. Foe explenation: I got a table with meterreadings for different users and times. Now I want to compute their annual consumption (basically highest - lowest metterreading in one year)
+11:33  soa2ii: salle: Hm. The I would have to use MIN(`date`) don't I?
+11:33  BlaDe^: can I format UNIX_TIMESTAMP() as d-m-y h:i:s  somehow in a select query ?
+11:33  _raymond_: goodnight
+11:33  salle: soa2ii: Why do you need subqueries for that?
+11:33  salle: BlaDe^: DATE_FORMAT()
+11:33  BlaDe^: thanks
+11:33  _raymond_: !tell _raymond_ about goodnight
+11:33  ubiquity: _raymond_: sleep tight <nick>
+11:34  salle: soa2ii: Your dependent subqueries are executed for each row in main table meaning 30 million times
+11:34  soa2ii: salle: For what? The first one is to resolve the meterID to the userID, the second is to resolve the highest/lowest date to the meterreading (I just got an index on date)
+11:34  soa2ii: salle: Oh ... so how could you avoid this?
+11:34  salle: soa2ii: Rewrite it as join
+11:35  ch077179: what is th best place to find help with squirrel (sql client)? I am having troubles to connect to a remote database.
+11:35  soa2ii: salle: Could you give me a hint how you would do this?
+11:36  salle: soa2ii: No I can not if you have not idea what join is. You use subquery even for ((SELECT `id` FROM `user` WHERE `meter` = `m`.`meter`) AS `user` which is much more efficient as inner join
+11:37  BlaDe^: salle:  DATE_FORMAT only accepts DATE fields it seems
+11:37  soa2ii: more efficient?
+11:37  salle: BlaDe^: wrong
+11:37  salle: BlaDe^: It accepts DATE, DATETIME and TIMESTAMP
+11:37  BlaDe^: I mentioned I was trying to convert a UNIX_TIMESTAMP ..
+11:38  BlaDe^: FROM_UNIXTIME
+11:39  salle: BlaDe^: You know about UNIX_TIMESTAMP() finction, but you don't knwo about FROM_UNIXTIME()? :)
+11:39  BlaDe^: had forgotten it
+11:39  salle: BlaDe^: If you need that in WHERE clause you better store your data in DATETIME or TIMESTAMP
+11:39  BlaDe^: I use it in a where sometimes, but the application just subtracts from it to find ranges or uses between
+11:40  salle: BlaDe^: And if you need it for date/time calculation you better don't use UNIX_TIMESTAMP() at all
+11:40  BlaDe^: I find it much better to use unix_timestamp -- it's consistent between all systems and I don't run into issues bringing a DATETIME object into my app
+11:40  BlaDe^: I don't have to convert it to use it in json, etc
+11:41  soa2ii: salle: How do you JOIN two tables on `date` where you take thw highest and lowest dates?
+11:48  salle: soa2ii: Join against derived tables perhaps depending on what exactly do you mean
+11:49  salle: soa2ii: "highest and lowest dates" sound like SELECT user, MAX(date), MIN(date) ... GROUP BY user; to me
+11:56  zzz: Hi! I' ve a table dump from a database. Is there any way to restore back only one column from that table? How?
+11:56  BlaDe^: zzz:  copy the table toa  temp, restore it
+11:57  BlaDe^: then update that specific column
+11:57  zzz: BlaDe^: oh, You mean to a temp table?
+11:57  BlaDe^: yeah
+11:57  BlaDe^: sorry - tired
+11:57  BlaDe^: copy your table, restore your table, update table, rename table, drop your scrap table
+11:58  zzz: BlaDe^: what is the best way to update the act table' s COL column from the temp table' s COL column?
+11:59  BlaDe^: update table2 t2 set t2.col1=t1.col1 inner join table1 t1 on t1.id=t2.id
+11:59  BlaDe^: I guess
+12:01 --- _serg is now known as serg
+12:15  Accelerator: ERROR 1396 (HY000): Operation DROP USER failed for 'adam_templus'@'%' <- I don't understand why.
+12:15  Accelerator: The user exists.
+12:15  Accelerator: I'm super user.
+12:15  Accelerator: What's wrong here?
+12:16 --- Putr is now known as Putr|Away
+12:17 --- Putr|Away is now known as Putr
+12:18  Accelerator: Now I got it to work..
+12:20  silv3r_m00n: what does this mean >> Qcache_free_blocks  1  ?  and Qcache_free_blocks  21  ?
+12:22 --- Putr is now known as Putr|Away
+12:23  salle: silv3r_m00n: It means the number of contiguous block in qcache
+12:23  salle: silv3r_m00n: The bigger the number the bigger the fragmentation of the qcache
+12:24  silv3r_m00n: salle: a certain query is taking .07 seconds everytime , no tables are changing , so the 2nd time onwards isn't it suppoed to fetch from query cache ?
+12:24  silv3r_m00n: salle: here are some specifics : http://pastebin.com/QGpxTZjA
+12:24  silv3r_m00n: the query returns only 20 rows
+12:25  Naktibalda: pastebin query
+12:25  silv3r_m00n: http://pastebin.com/peXUT8b3
+12:26  Naktibalda: NOW() BETWEEN
+12:26  silv3r_m00n: let me change it
+12:26  Naktibalda: it can't be cached because you use a time function
+12:26  Naktibalda: change it to literal string, e.g. '2011-11-17'
+12:26  silv3r_m00n: OH
+12:27 --- bjelleklang is now known as bjelleklang_away
+12:27  silv3r_m00n: good idea , let me try
+12:29  silv3r_m00n: can I do '2011-11-17' BETWEEN a and b
+12:29  Naktibalda: yes
+12:31  silv3r_m00n: yah, now its cached
+12:31  silv3r_m00n: thanks
+12:32  salle: silv3r_m00n: And you learned that non-deterministic functions can't be cached
+12:33  salle: silv3r_m00n: Which is common sense if you think about it
+12:39  silv3r_m00n: salle: :(
+12:41  VoVo64: !tell me about bot
+12:41  ubiquity: VoVo64: If I weren't just a RAM entity I'd kick your carbon-based butt.
+12:44  salle: VoVo64: No wench around :(
+12:45  VoVo64: salle: correct. but her step daugther

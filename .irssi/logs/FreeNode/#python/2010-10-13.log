@@ -1,0 +1,1019 @@
+--- Log opened Wed Oct 13 08:40:13 2010
+08:40 --- Users 706 nicks [0 ops, 0 halfops, 0 voices, 706 normal]
+08:40  qwebber: Alberth: so you cant instantiate a module, then pass args to it?
+08:41 --- Channel #python was synced in 80 seconds
+08:43  Alberth: no, modules can be imported only
+08:47  econdudeawesome: Anyone know scipy pretty well?
+08:50 --- gyaresu_ is now known as gyaresu
+09:02 --- fif0_afk is now known as fif0
+09:06 --- gyaresu__ is now known as gyaresu
+09:14  econdudeawesome: :-(
+09:14 --- esmaxwill is now known as esmaxwill|z
+09:14 --- esmaxwill|z is now known as esmaxwil|z
+09:14  Alberth: perhaps at #scipy ?
+09:17  econdudeawesome: none active there either
+09:20  xr: Hi, I am looking for a Python/Javascript developer to assist me. It is a remote, part-time job
+09:21  krikulis: for what ?
+09:23  xr: development for web (Pylons, Postgre, Mongo DB, maybe something in erlang if interested)
+09:25  disappearedng: Anyone know if I could apply a title for SMTP.sendmail
+09:26  _habnabit: disappearedng, I'm sure you can send e-mails with titles, yes.
+09:26  disappearedng: well I am looking at the docs and I can't seem to find it
+09:26  _habnabit: Yes. It's not a part of the SMTP protocol.
+09:26  _habnabit: It's a part of the e-mail headers.
+09:27  xr: msg = MIMEText("")
+09:27  xr: msg['Subject'] = "Subj"
+09:27  Goldy: do i have to download anything to get profile/cProfile to work?
+09:27  disappearedng: ok my bad I was looking at sendmail
+09:27  xr: and so on
+09:27  Goldy: im getting a 'no module named pstats' error right now for cProfile
+09:28  _habnabit: Goldy, are you on debian?
+09:28  Goldy: ubuntu
+09:28  _habnabit: Goldy, there's some wacky separate package you have to install.
+09:28  Goldy: *sigh* thanks
+09:29  Goldy: found it
+09:29  Goldy: python-profiler
+09:45  econdudeawesome: what does this error mean:
+09:45  econdudeawesome: n [81]: scipy.optimize.fmin_powell(probit,b,(inlf,nwifeinc,educ,exper,expersq,age,kidslt6,kidsge6))
+09:45  econdudeawesome: ---------------------------------------------------------------------------
+09:45  econdudeawesome: ValueError                                Traceback (most recent call last)
+09:45  econdudeawesome: /home/rod/<ipython console> in <module>()
+09:45  econdudeawesome: /usr/lib/python2.6/dist-packages/scipy/optimize/optimize.pyc in fmin_powell(func, x0, args, xtol, ftol, maxiter, maxfun, full_output, disp, retall, callback, direc)
+09:45  econdudeawesome:    1741         direc = asarray(direc, dtype=float)
+09:45  econdudeawesome:    1742
+09:45  econdudeawesome: -> 1743     fval = squeeze(func(x))
+09:45  econdudeawesome:    1744     x1 = x.copy()
+09:46  econdudeawesome:    1745     iter = 0;
+09:46  econdudeawesome: /usr/lib/python2.6/dist-packages/scipy/optimize/optimize.pyc in function_wrapper(x)
+09:46  econdudeawesome:      95     def function_wrapper(x):
+09:46  econdudeawesome:      96         ncalls[0] += 1
+09:46 --- ChanServ sets modes [#python +o _habnabit]
+09:46 <-- _habnabit has kicked econdudeawesome from #python (econdudeawesome)
+09:46  econdudeawesome: I know it was a lot of pasting, but the question remains...
+09:46  NelleV: econdudeawesome: use bpaste next time
+09:46  econdudeawesome: fair enough
+09:47 @_habnabit: econdudeawesome, it says right in the /topic "don't paste in here"
+09:47  NelleV: actually, don't... I like to see _habnabit kick people out :p
+09:47  econdudeawesome: my apologies
+09:48  econdudeawesome: http://fpaste.org/idnA/ is the link
+09:50  sig^: econdudeawesome: have you tried asking google about "ValueError"?
+09:51  econdudeawesome: I haven't--mostly because I'm a total python newb trying to figure out this optimize routine ;-) Do you reckon that provides something useful?
+09:51  sig^: without knowledge of scipy's squeeze function it's very hard to guess what ValueError might mean
+09:51  sig^: it's not really a python question, you know  I:
+09:52  econdudeawesome: I figured this was my best bet--it appears #scipy is dead
+09:53 --- cncfanatics is now known as cnc-away
+09:53  sig^: well, apparently your func returns some crap that squeeze cannot process
+09:54  sig^: http://docs.scipy.org/doc/numpy/reference/generated/numpy.squeeze.html  check the func and see if it returns something that fits "a : array_like"
+09:55  sig^: if you had had one more step in the backtrace, I could've actually given an educated guess.
+09:55  sig^: maybe one of the arrays you're giving to probit is malformed?
+09:58  econdudeawesome: sig^: potentially, though probit returns the values just fine
+09:58  econdudeawesome: sig^: my thought is it might be a data-type issue?
+10:03  sig^: ValueError is usually something you get from ... surprise ... bad input values, such as  log(-1) -> ValueError: math domain error
+10:04  sig^: maybe you have something negative in probit where you shouldn't?
+10:04 --- cna_ is now known as cna
+10:05  sig^: it's actually likely the func that gives the error
+10:05  sig^: maybe you should break there and see what the func is
+10:09  econdudeawesome: sig^: I think thats the right thought. I'm looking into it
+10:10  econdudeawesome: yep, that's it. Now just gotta figure out how to pass it in right... ;-)
+10:10  econdudeawesome: Mind taking a look at another pastebin?
+10:12  econdudeawesome: http://fpaste.org/d3DQ/
+10:13  sig^: you should break it down to intermediate variables to see where it goes wrong...
+10:13  sig^: you're probably trying to add a scalar to vector
+10:13  sig^: or maybe element-wise multiply scalar and vector?
+10:14  sig^: multiply((1-my_data[0]),1-scipy.stats.norm.pdf(my_data[1:]*b))  quaintly looks like it
+10:14  econdudeawesome: ah
+10:14  sig^: what you should do when debugging is to write all those separately into  tmp1 = ...  tmp2 = ...   and add print(tmp1)  print(tmp2)  in between
+10:15  industrial: If I do a sudo python setup.py install of eg Django-1.2.3, is there an easy way to uninstall everything that got installed later? Do I need to keep the archive containing the setup.py?
+10:16  econdudeawesome: I've done that along, but I left out the constant :-)
+10:22  Wild_Cat: is there a read-made module somewhere (hopefully in the stdlib) that can parse Python strings and return format string parameters?
+10:22  Wild_Cat: s/read/ready/
+10:27  kerio: Wild_Cat: that can do what?
+10:28  Wild_Cat: kerio: well, given a string like "Hello, %(name)s. It is %(time)s. Do you know where your meat body is?" I'd like to get a return value of ["%(name)s", "%(time)s"]. Or something in those lines.
+10:29  kerio: hmm, i thought there was a way to do that, for str.format
+10:29  Wild_Cat: (likewise with positional format strings)
+10:29  Wild_Cat: kerio: no, str.format is how you *replace* those placeholders, e.g. my_str.format({"name": "Dave", "time": "23:59"})
+10:30  kerio: i mean, there was a way to get a list of parameters
+10:30  pk4r: That's other way round, I suspect you're looking for something like sscanf, right ?
+10:31  kerio: hmm... string.Formatter.parse() maybe
+10:32  kerio: no, wait, you want the % formatting
+10:32  pk4r: Use regular expressions or split() for input parsing.
+10:33  Wild_Cat: well, right now I'm planning to go with regexes, but I'd rather offload the work to the stdlib ;)
+10:34  pk4r: Python has regex library included.
+10:34  Wild_Cat: pk4r: I'm aware of that.
+10:36  pk4r: Otherwise you could split/tokenize your string and use converters to get these variables.
+10:37  Wild_Cat: figures. What I'd have liked to is defer to the exact same logic the Python VM is using to extract that stuff.
+10:38  Wild_Cat: mind you, maybe I could rape it horribly by defining custom tuple and dict subclasses that-- No, that's a recipe for trouble.
+10:49  barfster: How can I change . as decimal separator to ,?
+10:51  RobbieThe1st: um, string.replace?
+10:52  RobbieThe1st: Just convert the number to string, then replace all instances of . with , It'll work, perhaps not the "official" way though
+10:56  stanlekub: barfster: locale.format() with appropriate locale settings maybe
+10:57  pk4r: You cannot in number. Convert it to string ^^
+10:59  barfster: str()?
+11:01  pk4r: Yes.
+11:02  hgb: If I have a file pointer, and I want to read the first space-separated word, how do I do that?
+11:03  hgb: (I don't know how long it is)
+11:05  verte: keep reading till you get a space
+11:05  verte: it would be nice to have convenience for that
+11:07  kerio: i think there's a way to set the "line" separator
+11:10  RobbieThe1st: Either that, or just read the first line, then use string functions to find the first space etc.
+11:10  RobbieThe1st: Slightly wasteful, yes, but it would get the job done
+11:13  Yhg1s: kerio: not in Python, no.
+11:15  stanlekub: how is it possible that the result of unicodedata.normalize('NFC', mystring) is different between operating systems and/or python versions ?
+11:15  isaqual: Is there way to do something like -> for i in integers \n(ewline) varname + i = something etc
+11:15  Yhg1s: stanlekub: sure, the unicode database can be different between Python versions. Also, unicode can have a slightly different internal representation (UTF-16 versus UCS-4) depending on the build of Python.
+11:16  Yhg1s: isaqual: that sounds like "Python code", so sure, you can have that.
+11:16  Yhg1s: isaqual: it's not clear what you're trying to ask.
+11:16  stanlekub: Yhg1s: so, even with unidata_version that are equal, this is "normal" ?
+11:16  verte: assignment to an operator invocation?
+11:16  Yhg1s: stanlekub: depends on what difference you're seeing, exactly.
+11:17  isaqual: Yhg1s: :D I'm trying to ask is there way to name variables with other variables
+11:17  Yhg1s: isaqual: no.
+11:17  Yhg1s: isaqual: use a dict or a list instead.
+11:17  verte: isaqual: variables are not dynamic, use a list instead.
+11:17  isaqual: Thanks, I'll try rethink my problem :)
+11:18  isaqual: acutally thats not gonna work
+11:18  ousado: isaqual: what do you mean, "name variables with other variables"
+11:18  Yhg1s: ousado: he means having 'var' + i = ... make a variable 'var1'.
+11:18  isaqual: If I have variables tip_1 tip_2 tip_3... tip_200
+11:19  isaqual: how can i read them all in for loop ?
+11:19  Yhg1s: isaqual: you use a list instead.
+11:19  isaqual: but I already have those variables
+11:19  Yhg1s: isaqual: then make it a list instead.
+11:19  ousado: Yhg1s: so why do you tell him that's not possible then?
+11:20  Yhg1s: ousado: because it's not possible in any meaningful way. The way to do it is with a list or a dict.
+11:20  isaqual: Yhg1s: I get the point :)
+11:21  stanlekub: Yhg1s: running this : http://fpaste.org/Hn7G/
+11:21  ousado: Yhg1s: it's possible, maybe not good, maybe even stupid, but possible
+11:21  Yhg1s: ousado: nope.
+11:21  stanlekub: Yhg1s: on debian/sueeze python 2.6.5 in get u'\u092e\u093e\u0931\u094d\u0915 \u091c\u0941\u0915\u0947\u0930\u092c\u0930\u094d\u0917'
+11:22  stanlekub: Yhg1s: on sunos python 2.6.5 I get u'\u092e\u093e\u0930\u094d\u0915 \u091c\u093c\u0941\u0915\u0947\u0930\u092c\u0930\u094d\u0917'
+11:22  Yhg1s: ousado: there are lots of situations where it's not even stupidly possible.
+11:22  Yhg1s: stanlekub: and what is sys.maxunicode on both those systems?
+11:22  stanlekub: checking
+11:22  CcxCZ: how can I tell whether object is iterable?
+11:23  Yhg1s: CcxCZ: try to iterate over it.
+11:23  Yhg1s: CcxCZ: you can also try to get an iterable with iter(), but that can succeed even when the object isn't iterable.
+11:23  Yhg1s: (you'll just get a TypeError when you try to use the iterator, instead.)
+11:24  CcxCZ: Yhg1s: I thought using exceptions in normal program flow was frowned upon (for performance reasons iirc)
+11:24  stanlekub: Yhg1s: oh, they are different ! 111411 vs 65535
+11:24  Yhg1s: CcxCZ: well, why don't you know, in normal program flow, whether an object is iterable?
+11:25  Yhg1s: stanlekub: the first one uses UCS-4 internally, the second one UTF-16. the result is that some unicode characters are represented using UTF-16 "escape sequences".
+11:26  Yhg1s: stanlekub: they should still behave the same if you encode them both to, say, UTF-16 or UTF-8.
+11:26  xr: CcxCZ: read about __iter__() and next() methods
+11:26  Yhg1s: xr: no, iter() is what you should call, not obj.__iter__().
+11:26  Yhg1s: xr: and as I already said, it can still falsely succeed.
+11:26  kerio: CcxCZ: remember that two otherwise equal unicode strings may be represented in a different way
+11:26  Yhg1s: kerio: wrong person.
+11:26  kerio: er
+11:27  kerio: that was to stanlekub
+11:28  CcxCZ: Yhg1s: checking hasattr(obj, '__iter__') might be enough for me, all builtin iterable types seem to have that
+11:28  Yhg1s: CcxCZ: yeah, don't use that.
+11:28  kerio: stanlekub: u"\u00e8" and u"e\u0300" look exactly the same, but they are different
+11:29  Arbo: Hi, Is it possible that there is an issue with the currency() function in the locale module in 2.6.x (as well as 2.7 as 3.1) with some monetary regional settings in dutch (Belgium)?
+11:29  kerio: (e grave and e + combining grave accent)
+11:29  Yhg1s: CcxCZ: the right way to do this is to not be in doubt whether something is iterable. Make it be an error. Why don't you know?
+11:29  stanlekub: kerio: I'm not sure I understand. That's the goal of normalization, no ?
+11:29  Yhg1s: Arbo: the locale module uses the system locale, so sure, it could be that the system locale database is wrong.
+11:30  blubbi: Hi, I am using optparse and would like to show the help it the program was startet wthout arguments. How ould I do that?
+11:30  kerio: stanlekub: try NFKD
+11:30  Arbo: Yhg1s, the system locale database is the one that is controlled by Windows, right?
+11:30  Yhg1s: Arbo: on Windows, yes.
+11:31 --- cna_ is now known as cna
+11:31  Yhg1s: blubbi: when you receive no arguments, call parser.print_help()
+11:31  Arbo: Yhg1s, sorry, I forgot to mention it is only a problem on Windows Vista and 7.  XP seem to be allright...
+11:31  blubbi: Yhg1s: thanks that was what I was looking for
+11:32  Arbo: Yhg1s, Would it be of any help if I submitted a 'bug issue' to bugs.python.org for this?
+11:33  Yhg1s: Arbo: hard to say. As I said, the locale module just uses the system locale database. If the system locale database is wrong, Python won't be able to do much about it. I'm not sure how the same Python binary could produce different behaviour on the two systems without it being a difference on the platform itself.
+11:34  CcxCZ: Yhg1s: Extending api while maitaining backward compatibility.
+11:34  Yhg1s: CcxCZ: that doesn't mean much, unfortunately.
+11:34  Yhg1s: are you trying to have a function do different things based on the type of the argument passed in?
+11:34  Arbo: Yhg1s, That's indeed a very valid line of thought :)  I'm wondering why Windows itself can use that same locale database correctly then...
+11:35  Yhg1s: Arbo: it may use a different database, or a different interface to it. You can of course file a bug with bugs.python.org and see if someone knowledgeable of Windows will take a look at it.
+11:35  stanlekub: Yhg1s, kerio : so, now, on the same os (sunos), with identical sys.maxunicode, I have a difference in the result between 2.6.5 and 2.7
+11:36  Arbo: Yhg1s, Thanks, I believe I will.  Thanks for the input!
+11:36  kerio: what *are* those strings anyway
+11:36  Yhg1s: stanlekub: with the same unidata version?
+11:36  stanlekub: Yhg1s: no, that's the reason ?
+11:36  stanlekub: Yhg1s: 5.1.0 versus 5.2.0
+11:37  Yhg1s: stanlekub: I would guess so.
+11:37  Yhg1s: stanlekub: different rules on how to normalize and combine, perhaps.
+11:37  ousado: Yhg1s: well, you're wrong, but it's bad style and always superfluous to discuss the obvious, so I won't argue
+11:37  Yhg1s: ousado: nope, I'm not wrong. All the ugly hacks you're thinking of fail in one situation or another, like in functions.
+11:40  amagee: does anyone know how i can ungracefully/instantly stop a cherrypy server, if i have the CherryPyWSGIServer instance?
+11:41  kerio: amagee: killall -9 python
+11:41  amagee: kerio: ..without killing the python process that started it
+11:41  kerio: ;)
+11:41  stanlekub: Yhg1s, kerio : well, I think that I don't understand enough how all these things work, and I have to dig myself a little more
+11:41  kerio: stanlekub: unicode is a huge mess
+11:41  stanlekub: Yhg1s; kerio : thanks for the hints, anyway
+11:41  Yhg1s: stanlekub: what are you trying to do with this, anyhow?
+11:41  stanlekub: kerio: yes, i see :)
+11:44  stanlekub: Yhg1s: well, we're working for wikipedia bots. we have input strings that come from various sources, and we need to recover the proper title
+11:44  stanlekub: Yhg1s: that according to the doc is normalized to NFC
+11:44  stanlekub: Yhg1s: but it sometimes fails and redirects to an non-existing page, although the input title exists
+11:45  stanlekub: I don't know if this is very clear, sorry for my english :(
+11:45  ousado: Yhg1s: so you're not only wrong, but also overconfident
+11:45  Yhg1s: no, I think I understand. Doesn't sound like something easily solved, other than by getting your input as already-normalized and identically-encoded titles.
+11:47  stanlekub: I have to go for now, thanks
+11:50  mage_: I have a method 'def foo' in class A, how can I do to bound this method to class B ?
+11:50  mage_: if I do B.foo = A.foo I get an unbound method
+11:51  Yhg1s: mage_: it's generally a bad idea, but you can get at the original function with A.foo.im_func.
+11:51  Yhg1s: reconsider what you're doing, though.
+11:52  mage_: it's a very specific case
+11:52  Yhg1s: all the more reason to suspect there's a better approach.
+11:53  mage_: what do you suggest to replace it ?
+11:53  mage_: I just want to take some methods from class A to class B
+11:53  mage_: behalve inheritance I don't seen another way
+11:53  mage_: *see
+11:54  Yhg1s: why are they separate classes? why do you want to copy them? why aren't you using inheritance? why aren't you use a common baseclass? why are they methods of the A class at all? What if the method or instancedata in A changes, should B's implementation change as well?
+11:54  mage_: Yhg1s: do you know SQLALchemy in depth .. ?
+11:55  mage_: or at least it's inheritance model
+11:55  serverhorror: hi, say I have this: «data = (Foo(1), Foo(2), )»  will the elements of data only be evaluated when I access them or are they evaluated at the time of declaring data? (and if the latter how would I go to have lazy evaluation?)
+11:55  Yhg1s: mage_: some of it.
+11:55  Yhg1s: serverhorror: it's evaluated right away, and the way to get lazy evaluation would be to use a function instead.
+11:56  mage_: in SQLAlchemy you have the possibility to subclass orm.Query
+11:56  mage_: I do this for each mapped class, so that each mapped class has it's own set of functions (filters)
+11:56  serverhorror: Yhg1s:  function == some generator? (for example)
+11:57  Yhg1s: serverhorror: a generator is also a function, yes.
+11:58  serverhorror: Yhg1s:  I know it is, but that would be lazy evaluation then «def g(input): for elem in input: yield Foo(elem)» right?
+11:58  mage_: now when you use Basecontent.query.with_polymorphic([ChildContent]) the functions or the custom orm.Query object of ChildContent aren't available, which is a non-sens since the table is LEFT JOINed
+11:58  serverhorror: ah of course...
+11:58  Yhg1s: serverhorror: just calling the function is 'lazy' already.
+11:59  Yhg1s: mage_: oh, this again.
+11:59  mage_: yep :p
+11:59  Yhg1s: mage_: I don't see how copying functions will help you then (just make utility functiosn somewhere, then have the methods of all classes call those utility functions.)
+12:00  Yhg1s: but if you want to copy methods, that's your cal[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[Dl.
+12:00  mage_: because then I can use Content.query.with_polymorphic([ChildContent]).child_filter()
+12:02  mage_: the other way to do it whould be to inherit from somethinkg like 8 classes
+12:08  torpedotux: hi #python!
+12:30 --- stanlekub is now known as stan|away
+13:16  solsTiCe: hi. I have added a custom excpetion in the C module using example from http://docs.python.org/extending/extending.html#intermezzo-errors-and-exceptions. But when Itry to use that exception from another file (after declaringit extern) I got  ImportError: ./pkgfile.so: undefined symbol: RegexError
+13:17  Alberth: 'extern' in C means 'defined elsewhere'
+13:17  solsTiCe: if I redeclare it static. there is no importError but when the exception is raised it gives SystemError: NULL result without error in PyObject_Call
+13:17  Alberth: 'static' in C means 'defined only in this file'
+13:18  solsTiCe: Alberth: yes. there 2 fiels for the modules. in the main file it is declared static. and the other extern no ?
+13:18  solsTiCe: either even with extern in both file that does not work
+13:18  Alberth: duh
+13:18  Alberth: in both files you say then 'it is not defined here, but elsewhere
+13:19  Alberth: you need to have one global definition (without 'static' and without 'external')
+13:20  Alberth: perhaps read a bit more about C declarations ?
+13:20  solsTiCe: ok so removing extern in main file fix this
+13:21  Alberth: it should
+13:28  Solaris444: Hi guys.
+13:28  Solaris444: I wrote a series of programming tasks and solutions for an introduction to python and OOP.  Is this of any use to the community?
+13:29  mage_: is there a way to find if a method is decorated or not ?
+13:32  Brend: Solaris444, perhaps! You should put it on a website.
+13:32  solsTiCe: Solaris444: ask on the mailing list ?
+13:33  Solaris444: ok Brend.  I suppose I can upload it.  The 5 tasks only use simple language constructs as a gentle introduction.
+13:33  Solaris444: And the tasks encourage users to put their classes in separate files.
+13:33  Solaris444: Even though I know you can have multiple class declarations per file.
+13:34  Brend: Solaris444, see also http://www.greenteapress.com/thinkpython/html/index.html and http://learnpythonthehardway.org/index
+13:34  CcxCZ: mage_: not really if the decorator works properly
+13:34  mage_: ok
+13:35  aidan: Why is my regex matching the extra bit of the string here? http://codepad.org/0WIspATn
+13:36  Solaris444: Brend: thanks.
+13:36  GrIM147: i print out the date with datetime.date.today() how do i include the time
+13:37  Brend: aidan: Because the . in .+ matches anything, including '
+13:37  Brend: aidan: Perhaps you want (.+?)
+13:37  Brend: Or [^']+
+13:38  XaF: Bonjour.
+13:38  Solaris444: Brend:  Is it "preferred" or "better practise" to have multiple class definitions per python file?  When would you use single class per file as opposed to multiple class per file?
+13:39  mage_: is inspect.mro(cls) the same as cls.__mro__ ?
+13:39  Brend: Solaris444, there are no hard rules. I commonly have several classes in the same file, when they're things that are usually used together
+13:39  mage_: mmh getmro() sorry
+13:39  Brend: mage_: It sounds like you are doing something you will later regret
+13:40  mage_: maybe, maybe
+13:40  mage_: Brend: I've to choose between inheritance of 10+ classes, or copying methods of each class in a new class
+13:42  Solaris444: ok thankyou.
+13:42  Solaris444: I'll upload my tasks to my site shortly and you can have a look and see what you think if you like.
+13:43  Brend: mage_: I bet you can also choose to not do either of those things
+13:43  Brend: mage_: Just because SQLa thinks magic is clever doesn't mean you have to
+13:46  aidan: thanks Brend
+13:46  mage_: Brend: I don't know if what I am doing is "good" or not. What's clear is that some features are missing, and bug present when you use the .with_polymorphic() function (see for example http://www.sqlalchemy.org/trac/ticket/1900 which I reported)
+13:47  mage_: the thing is that I'm pretty sure that having a custom Query per class is the right way to do it (and I'm not the only one to do it)
+13:47  Brend: See, functions called "with_polymorphic" are exactly what I'm talking about
+13:47  mage_: I use it a lot in my application
+13:47  mage_: (I use inheritance a lot)
+13:49  mage_: also it seems very logical to me that when you have a custom query per class, and that you use the base class query with .with_polymorphic(), methods of those custom query classes should be available, as the tables are LEFT JOINed, so the columns are _always_ present
+13:49 --- stan|away is now known as stanlekub
+13:50  Brend: See in Storm, you'd just be like store.find((A, B), A.id == B.b_id, *B.filterConditions())
+13:50  Brend: And you'd be done
+13:51  mage_: so I could either 1) as Yhg1s suggest create utility functions, but then I have to redefine them everywhere 2) built a custom Query class which inherits of all the custom query objects 3) make a custom query class with inherits from the root Query object, and that copy the filtering methods
+13:51  mage_: mmh that's completly different
+13:52  mage_: .with_polymorphic() is used with *inheritance*, it's not just a simple JOIN .. ON a.id = b.a_id
+13:52  Brend: I don't know what inheritance means in the context of a RDB
+13:53  mage_: yeah .. that's probably why you don't understand what I'm trying to do :)
+13:53  Brend: Probably. I'm looking at the docs for with_polymorphic and they just sound like nonsense
+13:54  mage_: nonsense in which way ?
+13:54  Brend: In the "not containing any sense" way
+13:55  Brend: Seriously, what does it mean for one ORM class to subclass another ORM class?
+13:56  zxww: When I run time.sleep(60) on IDLE, the shell blocks and I can't read my output until the sleep times out. Anyone know how to get around this?
+13:56  papna_: zxww: That's what sleep is for.
+13:56  Yhg1s: zxww: don't run time.sleep().
+13:56  Brend: zxww: Base your program around an event loop
+13:56  Brend: Also, don't use IDLE.
+13:56  papna_: zxww: Perhaps you want to *not* run time.sleep.
+13:56  ronny: zxww: not using the idle shell :P it runs in the event loop :P
+13:56  zxww: ok ill look into how event loops work
+13:57  papna_: zxww: What are you actually trying to do?
+13:57  mage_: Brend: mapped classes, queries and table are three separate things in SQLAlchemy
+13:57  zxww: Simple program which parses a webpage every minute then notifies me of any changes
+13:57  Brend: zxww: What you want is twisted.web.client.getPage
+13:58  mage_: you can have a base class and put a single delete() method, and let SQLALchemy handles the cascading stuff for you
+13:58  mage_: this is one example why it's usefull to subclass things
+13:58  Brend: mage_: Wait I'm confused
+13:58  Brend: By "cascading stuff", you mean deleting rows in other tables that have foreign keys back to you, like "ON DELETE CASCADE"?
+13:59  mage_: yes
+13:59  Brend: What does that have to do with subclassing
+13:59  zxww: what benefit does it have over urllib?
+13:59  Brend: zxww: It doesn't block
+13:59  papna_: zxww: It is suited to running a task every minute and doing whatever you want else.
+14:00  zxww: OK, ill look into it
+14:00  mage_: ok it was a wrong example
+14:01  mage_: Brend: does Storm supports inheritance ?
+14:02  Brend: mage_: Storm doesn't know or care about your class structure at all, really
+14:02  GrIM147: I want to use inspect, inspect.getframeinfo(inspect.currentframe())[:3] but in a module , but i want the information to come from the script that calls the method ? what arguments does it need ?
+14:02  Brend: There's an idiom for having a single ORM class map across several related tables: https://storm.canonical.com/Infoheritance
+14:02  Brend: But I don't think that's relevant
+14:03  Brend: (And I still don't understand what use inheritance is in an ORM class, beyond the normal mix-in-some-utility-methods sort of thing, which requires no strange magic)
+14:03  sevard: _habnabit: are you around?
+14:04  nosklo: Brend: inheritance in ORM is very useful
+14:04  Brend: nosklo: Give me an example
+14:04  nosklo: Brend: basic employee example: you define a Employee class and further specialize it in Engineer and Director
+14:04  mage_: Brend: I'm building a CMS-like webapp
+14:05  nosklo: Brend: so the Engineer class will have whatever attributes employee have, plus specifics for engineers
+14:05  mage_: in my CMS webapp every content (Page, Events, News, etc) inheritcs from Content
+14:05  nosklo: Brend: sqlalchemy will handle it automatically and create the necessary glue
+14:05  Brend: nosklo: This is mapping over some huge table that has a union of the columns for every kind of employee?
+14:05  nosklo: Brend: you can do a query on Employee and get Engineer and Director instances
+14:06  mage_: I have a special Content which is called "Folder" which contain other Content
+14:06  smurfke: tables in the database usually get the same primary key for inheritance to work (you can also use discriminator column)
+14:06  nosklo: Brend: forget table, this is orm. You're dealing with objects here
+14:06  Brend: nosklo: Objects which represent rows in a database
+14:06  Brend: The "r" in ORM.
+14:06  mage_: so in the relational model I have a table content and a table news for example
+14:06  nosklo: Brend: not necessarily -- a single object can represent more than one row, or a single row can be represented by more than one object
+14:06  nosklo: it's a complete abstractioopn
+14:06  mage_: with a relation from news to content
+14:07  Brend: nosklo: Well, that sounds like a terrible idea.
+14:07  nosklo: Brend: Why? I use it all the time
+14:07  Brend: nosklo: Because abstractions are leaky, and the more abstract, the more leak
+14:07  mage_: in content I have some columns which are specific to all content (last_modified, added_date, owner, etc)
+14:07  VSpike: Hi. Just trying to understand some mechanisms. why is it that if add a method to an object outside the class definition, it doesn't get the automatic implicit "self" when called...
+14:07  VSpike: but if I add it to the class outside the class definition, it does?
+14:07  mage_: if you don't use inheritance you've to add those columns to all your tables
+14:08  nosklo: Brend: I don't care, it's still useful. It doesn't leak most of the time, it's a great abstraction
+14:08  mage_: + the code in Python
+14:08  Brend: mage_: So? All your tables do actually have those columns, right?
+14:08  mage_: no.
+14:08  mage_: only _one_ table
+14:08  nosklo: Brend: it has 3 ways of working -- create separate tables, create two tables and do a join, or put all in a single table
+14:08  Brend: You said you have a table content and a table news.
+14:08  mage_: but I can make query on the other tables with filter on those columns
+14:10  mage_: Brend: in the news table I have only columns specific to a news object
+14:10  Brend: mage_: So where are your last_modified, added_date, and owner values kept?
+14:11  mage_: in the content table
+14:11  Brend: So it's a join.
+14:11  mage_: it is
+14:11  aidan: ... I hate my life
+14:11  aidan: sel = CSSSelector('body table table table table table table table')
+14:11  Brend: It's a has-a relationship, not an is-a relationship, and inheritance makes no sense
+14:11  Brend: You want containment: news.content.last_modified
+14:12  aidan: That's the only way I can select the table I want ... not a single class in the whole document.
+14:12  nosklo: unless News is subclass of Content
+14:12  VSpike: e.g. http://paste.pocoo.org/show/274915/
+14:12  mage_: which is
+14:12  Brend: And, as I originally said, store.find((Content, News), Content.id == News.content_id, *News.filterConditions)
+14:12  mage_: Brend: I have this http://www.pastie.org/1217957
+14:12  Brend: nosklo: It shouldn't be.
+14:12  nosklo: that's no sqlalchemy
+14:12  nosklo: why? Isn't News a kind of content?
+14:13  Brend: No, it isn't. To both.
+14:13  Brend: My example is Storm, but I'm certain SQLa can do the same thing
+14:13  Brend: (Although probably not as well)
+14:13  nosklo: Storm sucks, it doesn't support inheritance right
+14:13  Brend: Are you just trolling me now?
+14:13  nosklo: not really
+14:14  mage_: Brend: I think you should take a look at how SQLALchemy does inheritance
+14:14  Brend: Then re-read the last twenty minutes of conversation and take that as my reply to your comment.
+14:14  nosklo: we're helping mage_ on a inheritance-specific problem, so storm examples won't help here
+14:14  Brend: mage_: I think you should consider just not doing that.
+14:14  nosklo: since storm can't do it the way sqlalchemy does
+14:14  mage_: http://www.sqlalchemy.org/docs/orm/inheritance.html#single-table-inheritance
+14:14  Brend: nosklo: But SQLa can do it the way Storm does, which is a better way
+14:14  mage_: Brend: read before criticize please ..
+14:14  Brend: More transparent, more maintainable, more flexible, more explicit
+14:15  mage_: inheritance in SA is *very* usefull
+14:15  Brend: mage_: So you keep saying, but no-one has yet provided an example that makes sense
+14:15  nosklo: sqlalchemy uses inheritance a lot -- I'm under the impression that you like non-inheritance more given your familiarity with storm instead of sqlalchemy
+14:15  Brend: nosklo: I like non-inheritance more because non-inheritance is better, for the reasons I have laid out above.
+14:16  Brend: If you want to argue with me, argue with the reasons I gave, don't just keep restating your position
+14:16  mage_: http://www.sqlalchemy.org/docs/orm/inheritance.html#joined-table-inheritance sorry
+14:16  Brend: mage_: Just because it's there doesn't mean you have to use it.
+14:16  nosklo: your reasons are "abstractions are leaky" and "objects represent rows in a database"
+14:17  Brend: nosklo: Those, and also "not using inheritance makes this trivially simple"
+14:17  nosklo: python itself is an abstraction, and objects don't represent rows in sqlalchemy
+14:17  nosklo: Brend: using inheritance with sqlalchemy is trivially simple
+14:17  nosklo: my argument is that you lack the experience with sqlalchemy to see the usefulness
+14:17  nosklo: I've worked with both sqlalchemy and storm
+14:18  Brend: Sure, that's why mage_ has spent the last like six hours struggling with something that should be one line of code.
+14:18  mage_: Brend: when http://lucumr.pocoo.org/2009/1/3/sqlalchemy-patterns-in-zine get's back I suggest that you look at it
+14:18  nosklo: yeah, maybe. I didn't have that problem, it just works here
+14:19  nosklo: mage_: where's your code, again?
+14:19  mage_: nosklo: do you know the thing I want to do ?
+14:20  nosklo: mage_: I think I don't understand what you want fully yet, that's why I'm asking for the code
+14:20  mage_: I use inheritance with one orm.Query per child class
+14:21  nosklo: I don't know what that means
+14:21  mage_: ok, wait
+14:21  zx10k1: hi, could anyone enlighten me on how to do the equivalent of list[i+1 % len(list)] for the negative direction?
+14:21  moldy: VSpike: show us how you are doing what you are doing
+14:22  mage_: nosklo: this is my mappers : http://www.pastie.org/1217972
+14:22  nosklo: huh
+14:22  nosklo: mage_: why aren't you using declarative?
+14:22  ivazquez|laptop: -i % len(list)
+14:23  zx10k1: hm
+14:23 * zx10k1 is embarassed
+14:23  mage_: because I don't like it
+14:23  mage_: anyway, that's not the problem
+14:23  nosklo: mage_: that makes things a lot harder
+14:23  mage_: nosklo: http://www.pastie.org/1217975 here is my base model, Content is the base class for _all_ contents
+14:24  mage_: nosklo: and this is one example of subclass http://www.pastie.org/1217983
+14:24  nosklo: mage_: ok, in my experience, I'd avoid using a query object, even more subclassing it
+14:25  mage_: every other item (Page, News, ...) follow the same pattern
+--- Log closed Wed Oct 13 14:25:04 2010
+--- Log opened Wed Oct 13 14:25:37 2010
+14:25 --- Users 747 nicks [1 ops, 0 halfops, 0 voices, 746 normal]
+14:25  nosklo: query objects are stuck to the class
+14:25  nosklo: so they don't work well with polymorphism
+14:26  mage_: that's the problem !
+14:26  mage_: when I use Content.query.with_polymorphic([Event]) method form the EventQuery aren't available
+14:26  nosklo: just use explicit session.query instead
+14:26 --- Channel #python was synced in 85 seconds
+14:26  mage_: no
+14:27  mage_: it doesn't resolved the problem
+14:27  nosklo: can you reduce that code to a small example with 2, 3 classes that show the problem?
+14:27  nosklo: one I can run against sqlite
+14:28  mage_: nosklo: the thing its that when you use Session.query() it uses the defautl orm.Query object
+14:28  mage_: of course you can pass a query_cls= argument, but it's the same
+14:28  nosklo: mage_: yeah, I'm still unsure why you're trying to force your behavior into a subclass of Query
+14:29  nosklo: mage_: subclassing your mapped class is a great idea, subclassing Query is not
+14:29  mage_: mmh a lot of people do that
+14:29  mage_: what do you suggest instead ?
+14:29  nosklo: why are you subclassing Query? What's wrong with default behavior
+14:29  mage_: I can add class-specific filters
+14:29  GrIM147: will / work with windows ? or must i use \ when writing to a file ?
+14:30  GrIM147: in terms of path
+14:30  mage_: like News.query.a_news_filter()
+14:30  Alberth: GrIM147: there is os.pathsep
+14:30  mage_: of course I could make one big query with the methods
+14:30  GrIM147: Alberth, oh ok thanks
+14:30  mage_: but it's less proper imho
+14:30  nosklo: mage_: just put your filter in a normal method of News
+14:31  Alberth: GrIM147: and os,.path.join() will do the right thing too when making paths
+14:31  nosklo: mage_: x = News.my_news_filter(session)
+14:31  mage_: I like to separate the query-specific methods from the model itselfs
+14:31  nosklo: but they're not query specific
+14:31  mage_: some are not
+14:31  nosklo: they're news-specific
+14:31  nosklo: "a_news_filter"
+14:31  nosklo: so it should be in the News class, not in Query
+14:32  GrIM147: Alberth, so i use os.path.join(/example/dir) ?
+14:32  mage_: then you've to do News.filter(News.a_news_filter()) instead of News.query.a_news_filter()
+14:32  nosklo: mage_: no, I do9 News.a_news_filter() directly
+14:32  Kylarr: GrIM147 if this is for open() then using / will work.
+14:33  GrIM147: Kylarr, yea it is , and thanks
+14:33  nosklo: mage_: I don't use query objects, at all
+14:33  mage_: mmh
+14:33  nosklo: mage_: just the one that come with session
+14:33  aidan: How can I convert this into a datetime with the minimum fuss? <strong>13-Oct-10<br>02:50</strong>
+14:33  mage_: nosklo: I'll think about it
+14:34  nosklo: aidan: use lxml.html to parse html code, then use datetime.datetime.strptime to parse the date
+14:34  mage_: at the beginning I thought it was a nice way to do it, especially after reading http://lucumr.pocoo.org/2009/1/3/sqlalchemy-patterns-in-zine
+14:34  Alberth: GrIM147: os.path.join('example', 'dir')   but you do not get the initial / then.  You could add that yourself. Alternatively, you could use os.path.abspath() to compute the absolute path from a relative path.
+14:34  nosklo: mage_: that link is down :(
+14:34  aidan: nosklo: how do I go further than that with lxml?
+14:34  mage_: yep unofrtunately
+14:35  Alberth: GrIM147: read the docs of os.path, it may contain other useful functions for you
+14:36  mage_: nosklo: http://webcache.googleusercontent.com/search?q=cache:J3i2f3NeVmQJ:lucumr.pocoo.org/page/10+sqlalchemy+patterns+zine+site:.lucumr.pocoo.org&cd=2&hl=fr&ct=clnk&gl=be
+14:37  mage_: look at the "SQLAlchemy “Patterns” in Zine" title
+14:37 --- cnc-away is now known as cncfanatics
+14:38  aidan: time data '<strong>13-Oct-10<br>02:50</strong>' does not match format '<strong>%d-%b-%y<br>%H:%I</strong>'
+14:38  aidan: does so :(
+14:39  nosklo: aidan: what's %I ?
+14:40  aidan: oh, too much PHP
+14:41  nosklo: aidan: drugs are bad for your health
+14:41  prgmrBill: I see what you did there.
+14:41  nosklo: mage_: looks like he wanted to immitate django
+14:41  nosklo: mage_: django is not a healthy thing to imitate IMO
+14:42  mage_: I use Django 5 years ago for 2 weeks ..
+14:43  nosklo: the whole post seems django-audience-oriented
+14:43  mage_: perhaps, but I found the idea elegant
+14:44  nosklo: it seems unnecessarly convoluted
+14:44  mage_: especially in SQLAlchemy, since everything is well splitted in it
+14:44  nosklo: query is a core part of sqlalchemy orm - I don't think it's worth to have a new Query class just to do some filter
+14:44  Swatto: Afternoon All - How can I append a file extension to the end of an arguement given to my own function? like if someone puts word then my function would open word.txt?
+14:45  mage_: nosklo: I'll launch a thread on the SQLAlchemy ML
+14:45  nosklo: Swatto: yes, you can use string concatenation
+14:45  nosklo: mage_: I follow that list
+14:45  nosklo: Swatto: argument + '.txt'
+14:45  Swatto: nosklo: ahh ok thankyou, i should have thought of that really duh :(
+14:45  mage_: nosklo: I don't know if it's "wrong" or "good", I think it depends of the situation
+14:46  nosklo: mage_: yeah, I don't use "wrong" or "good", I use "worth"
+14:46  mage_: in my case (with the .with_polymorphic() function) it looks bad
+14:46  mage_: nosklo: thanks for the discussion :)
+14:46  nosklo: it's too much magic, just to have some arguably nicer syntax (News.query)
+14:46  Swatto: whats the difference between a method and a function? because they both look the same? is a method a function that is used on an object?
+14:47  nosklo: Swatto: they're exactly the same. The difference is that the method is a function in a class
+14:47  lvh: Swatto: a method belongs to an object
+14:47  mage_: Swatto: a method is bounded to an object
+14:47  lvh: sometimes a class, sometimes an instance of a class
+14:47  Swatto: ok thankyou :_
+14:48  Magicblaze007: is there a python library to read/process PPT files?
+14:48  nosklo: Magicblaze007: you can script openoffice
+14:51  Magicblaze007: nosklo: thanks
+14:55  GrIM147: ok whats up with the %s ? in python is that inline containation ?
+14:55  GrIM147: how do i use it ?
+14:55  lvh: GrIM147: String interpolation.
+14:55  lvh: GrIM147: The tutorial explains how to use it.
+14:55  GrIM147: ok atleast i have the right word now
+14:55  GrIM147: lvh, thanks
+14:56  lvh: GrIM147: Also known as "string formatting", mind you
+14:56  aidan: How can I strip the opening tag when doing a html.tostring() in lxml?
+14:57  aidan: e.g. : >>> html.tostring(story)
+14:57  aidan: would output '<td><p> stuff I want</p> sdfsdf</td>' ... I just don't want the <td>
+14:57  tavish: hi! i am doing something for realtime audio ssignal processing,  and using tkinter for the interface, i'm using scale widget, but doing app.sc.get() at 48000Hz makes the audio stutter, so i tried accessing app.sc.get() after say every 200 calls. But now the problem is that tkinter outputs *all* the values in between from first position of slider to the final position slided, can something be done in this regard?
+14:57  kerio: aidan: do you know what tag it is?
+14:57  kerio: because slicing a string is easy
+14:57  kerio: [4:]
+15:01  lvh: kerio: egad no.
+15:02  lvh: kerio: parsing html is lxml's job
+15:02  kerio: good point
+15:02  kerio: but it's not like what he wants to do makes sense anyway
+15:02  aidan: why doesn't it make sense?
+15:03  lvh: aidan: the stuff you want is a child of the thing you have
+15:03  lvh: sounds like you want to change the xpath expression you used to get that thing :)
+15:03  lvh: or .find("p")
+15:04  kerio: lvh: he wants half html
+15:04  aidan: ah okay, just descendant::* I guess.
+15:04  aidan: that'll get my cdata as well
+15:04  lvh: kerio: I think he wants the content of the <p>
+15:04  aidan: thanks
+15:04  lvh: but that's from his example, not from what he said
+15:04  kerio: lvh: no, he wants just the closing tag
+15:05  lvh: but english is confusing
+15:05  lvh: aidan: is that true?
+15:05  aidan: I want '<p> stuff I want </p> sdfsf'
+15:05  aidan: Sorry for the confusing english :/
+15:06  lvh: don't elements have text attributes?
+15:06  lvh: (additionally, .tail)
+15:07  GrIM147: how do i import a module from a higher directory ?
+15:08  lvh: GrIM147: Absolute imports
+15:08  lvh: GrIM147: That question leads me to believe you are currently using relative imports, probably implicit ones
+15:08  lvh: stop doing that
+15:08  lvh: GrIM147: instead, create a package
+15:08  lvh: and then import packagename.subpackage.module
+15:08  GrIM147: lvh, iam using the __init__.py system
+15:09  lvh: GrIM147: right, okay, that's packages
+15:09  GrIM147: lvh, ok cool
+15:09  lvh: GrIM147: so, import starting from the toplevel package name
+15:09  lvh: always
+15:09  lvh: (there is also import ..spam, but I dislike it)
+15:09  lvh: (that's explicit relative, the .. works like you would expect it in a path)
+15:11  GrIM147: lvh, i have to folders same lever config and generic , and from a file inside generic iam trying to import config.database , also trying from config import database
+15:11  GrIM147: level*
+15:11  GrIM147: neither works
+15:12  lydgate: what's a simple way to do an rDNS request in python to a specific server? for example what you get from dig @<server> -x <addr>
+15:13  lydgate: I've figured out how to do rDNS using socket or dnspython but they just use what's in /etc/resolv.conf
+15:14  lvh: GrIM147: try running 'tree' or something so I can see the structure
+15:15  apansover: How do I install an older version using easy_install?
+15:15  nosklo: lydgate: twisted
+15:15  lvh: apansover: step one is not using easy_install
+15:15  Alberth: GrIM147: are 'config' and 'generic' the start of the packages, and are they findable by python?
+15:15  lvh: apansover: instead, use pip
+15:15  apansover: lvh: he he ok thanks :)
+15:15  lvh: apansover: pip install SomePackage==6.6.6
+15:16  GrIM147: lvh, iam not sure how to run that
+15:16  lvh: GrIM147: what operating system are you on
+15:16  GrIM147: Alberth, well they folders and packages , and both work
+15:16  apansover: lvh: Brilliant! Works like a charm
+15:16  GrIM147: lvh, linux
+15:16  lvh: GrIM147: which kind?
+15:17  GrIM147: lvh, Arch
+15:17  tavish: aircraft acrobatics are stupid
+15:17  tavish: oh sorry, wrong chan
+15:18  GrIM147: lvh,  installing tree
+15:18  GrIM147: i thought it was a python command
+15:18  Alberth: GrIM147: I don't understand that, like lvh says, a tree-like list of the package(s) would be useful to understand what you are trying to do
+15:18  lvh: GrIM147: okay, so, I'm going to guess "pacman -S tree"
+15:20  GrIM147: lvh, http://pastebin.com/vnf7r366 iam trying to import datebase from config , in the generic/database file
+15:20  infobob: http://paste.pocoo.org/show/274957/ (repasted for GrIM147)
+15:21  nosklo: GrIM147: http://jcalderone.livejournal.com/39794.html
+15:21  lvh: GrIM147: yeah, your package structuring is wrong
+15:21  lvh: nosklo: beat me to it :-)
+15:22  GrIM147: lvh,ahh ok :P i better look into that
+15:27  GrIM147: lvh, ok but if i want to test a section with out running a top level script wont that structure get annoying :S or am i thinking wrong
+15:29  lvh: GrIM147: it's super annoying now because it *doesn't work*
+15:30  GrIM147: lvh, touche'
+15:51  aidan: how can I convert &amp; to & in a URL I pulled from a website?
+15:52  aidan: urllib.unquote doesn't do it
+15:55 --- elpargo_ is now known as elpargo
+15:59  ronnie_vd_c: how to list all files (but not folders) in a directory?
+15:59  seeg: hello
+15:59  seeg: i would like to print the source code of my python app, it contains a bunch of .py files
+16:00  seeg: is there a tool that will help me to print this out nicely? :)
+16:08  aidan: How can I get todays date when parsing a time? e.g. I have "14:37", and I want that to be today in a time tuple.
+16:08  bahamas: ronnie_vd_c: os.listdir and os.path.isfile
+16:08  ronnie_vd_c: thx bahamas:
+--- Log closed Wed Oct 13 21:58:57 2010
+--- Log opened Wed Oct 13 21:59:19 2010
+21:59 --- Users 791 nicks [0 ops, 0 halfops, 0 voices, 791 normal]
+21:59  Vinetou: this really looks a no-go
+21:59  Yhg1s: why is not ignoring errors a no-go?
+21:59  _habnabit: Also, whoops, I forgot a ;; after do_something.
+21:59  ahojnnes: Hi
+21:59  ahojnnes: I tried parsing large xml files with lxml
+21:59  Vinetou: i'll use 'except Exception' in a worst-case.scenario and *never* a bare 'except'
+22:00  Yhg1s: Vinetou: 'except Exception' is almost as bad.
+22:00  Yhg1s: because there are buckets of exceptios that you must not ignore.
+22:00  _habnabit: Vinetou, why are you trying to catch all exceptions?
+22:00  Vinetou: just laziness mostly
+22:00  Vinetou: :)
+22:00 --- Channel #python was synced in 77 seconds
+22:00  Yhg1s: If you want to ignore particular exceptions, handle those explicitly, and make sure there's never a case where you odn't want to ignore them.
+22:00  Sudden_: can i start python.exe under windows with some flag that doesnt make it close down after my code has terminated?
+22:00  entil: it will always bite you, vinetou
+22:00  KirkMcDonald: Sudden_: -i
+22:00  Vinetou: like how?
+22:00  KirkMcDonald: Sudden_: Or: Just use the command prompt.
+22:01  entil: if you're lazy with that stuff, you will either crash later on or go crazy figuring out what state you're in
+22:01  Yhg1s: Vinetou: like how what?
+22:01  entil: the code and the flow will become unmaintainable
+22:01  GrIM147: _habnabit, how would you do it ? security wise, login then after match found , create dictionary with user data then pass that to every constructor of every object ?
+22:01  Vinetou: like how would that always bit me
+22:01  Vinetou: ?
+22:01  Vinetou: catching all exceptions that is
+22:01  zx10k1: can anyone have a look at this snippet and tell me why it evaluates -1 to >= 0 ??
+22:01  zx10k1: http://pastebin.com/2P490cPz
+22:01  infobob: http://paste.pocoo.org/show/275134/ (repasted for zx10k1)
+22:01  Yhg1s: Vinetou: you'll have a code bug you won't ever see because you're always eating the exception. Your data will get more and more corrupt but you'll never notice because you're always ignoring the exceptions it causes. Your code will silently stop working without ever notifying you.
+22:02  entil: you have a problem that causes an exception, you catch and ignore, and now your software is in a broken state, and you keep using it
+22:02  Sudden_: KirkMcDonald ty, im adding it as a custom run thing to notepad++
+22:02  _habnabit: zx10k1, you forgot about the 'or'
+22:02  zx10k1: i have found brainf*ck to give me less headaches than this thing....
+22:02  _habnabit: zx10k1, 1 <= 9
+22:02  Vinetou: Yhg1s thanks
+22:02  zx10k1: ... or I am too tired
+22:02  entil: zx10k1: hey, nothing causes headaches like PyObject_New which segfaults every call ;)
+22:03  Vinetou: you said it in a way that convinced me
+22:03  Vinetou: i will never catch all exceptions
+22:03  Vinetou: thank you for your lovely answers
+22:03  Vinetou: cheers
+22:03  zx10k1: thanks guys, maybe i should take a break
+22:03  Yhg1s: Catching all exceptions isn't so bad, just *ignoring* them is.
+22:03  zx10k1: %-)
+22:04  twomashi: Yhg1s: Ignoring isnt the same thing as not catching
+22:05  Yhg1s: twomashi: I'm pretty sure I never claimed it was.
+22:05  twomashi: perhaps i missed some context
+22:05  Yhg1s: twomashi: in fact, not catching is entirely different.
+22:05  twomashi: nevermind!
+22:05  Vinetou: so catching all exceptions is not that bad afterall
+22:05  Yhg1s: I'm guessing you did.
+22:05  KirkMcDonald: twomashi: Catching an exception just to suppress it is ignoring the exception.
+22:05  Yhg1s: Vinetou: as long as you don't ignore the exceptions, yes. For example, by re-raising them if it turns out you can't handle them.
+22:05  KirkMcDonald: twomashi: And is bad.
+22:05  Vinetou: what ever exception happens, a message dialog box says something
+22:05  Vinetou: is that bad?
+22:05  Yhg1s: Vinetou: catching them *just* to raise them again is pointless, though.
+22:05  gjvc: hihi
+22:06  GrIM147: _habnabit, is that a yes ? :P
+22:06  twomashi: Vinetou: catching all exceptions is not bad, as long as you are handling each one appropriately.
+22:06  Yhg1s: Vinetou: sometimes, yes. what if the exception prevents you from showing a dialog?
+22:06  KirkMcDonald: Catching an exception to display it somewhere than stderr can also be acceptable.
+22:06  Vinetou: huh
+22:06  Vinetou: i never thought of that
+22:06  KirkMcDonald: other than*
+22:06  Vinetou: :)
+22:06  Yhg1s: twomashi: yes, that's what we've been saying.
+22:15  kwoodson_: Is there a good cross platform method of seeing if a pid exists?
+22:16 --- elpargo_ is now known as elpargo
+22:21  teratorn: kwoodson_: posix, or win32 also?
+22:21  kwoodson_: teratorn, win as well as posix
+22:21  lemiffe: Quick question: How can I remove the newline char after a string guys?
+22:22  teratorn: kwoodson_: OK, well, either way the answer is "no"
+22:22  kwoodson_: teratorn, what's the standard way? os.kill(pid,0) and catch the exception?
+22:23  KirkMcDonald: Does signal 0 work on Windows?
+22:23  kwoodson_: KirkMcDonald, I'm not sure
+22:23  KirkMcDonald: It is reasonably easy to find out.
+22:24  ssbr: Man, I was going to say os.kill doesn't work on windows so this discussion is weird
+22:24  ssbr: except apparently 2.7 added that.
+22:25  KirkMcDonald: The docs suggest that signal 0 is not a thing on Windows.
+22:26  KirkMcDonald: I suspect that the Windows solution will involve a Windows API call.
+22:26  jwhisnant: lemiffe: mystring.rstrip() # removes all trailing whitespace, not only carriage returns
+22:26  PythonNub: o/ all
+22:27  lemiffe: cheers :)
+22:29 --- mukul is now known as mukul_afk
+22:29  kwoodson_: KirkMcDonald, ssbr, teratorn thanks
+22:29 * ssbr didn't even do anything. But, thanks.
+22:30  ssbr: er, s/tahnks/yer welcome/
+22:30  PythonNub: Heh.
+22:30  ssbr: Thanking people for thanking you is probably excessively submissive
+22:30  kwoodson_: ssbr, the effort of looking it up is enough, heh
+22:30  PythonNub: ^^ Probably. But hey, it's polite :]
+22:32  kerio: PythonNub: it's counterproductive
+22:32  kerio: it leads to an infinite loop
+22:33 --- lv is now known as Aphelion
+22:33  PythonNub: True. But nevertheless, someone will have the sense to stop, eventually, so I still consider it polite. =)
+22:35  Treyno: BOOYA, just wrote my first script thing
+22:35  Treyno: i feel accomplished
+22:35  Treyno: i love my python book.
+22:35  kerio: Treyno: what does it do?
+22:35  tavish: i think i have done everything right, spent 3 hours confirming it but i cant get http://paste.ubuntu.com/512642/ to work. alsaaudio keeps saying ALSAAudioeroor: input/Output error. i was using ossaudiodev earlier, now i changed to alsaaudio
+22:35 * DigitalKiwi never seen someone so excited over seeing the words "Hello world!" printed to their screen
+22:36  Treyno: kerio
+22:36  deepy: I love my girlfriend, she is way superior to your book
+22:36  Treyno: you enter your monthly income
+22:36  tavish: can someone please chech that :(
+22:36  kerio: deepy: i can confirm that
+22:36  Treyno: then enter your monthly outgoings, and it gives you the grand total of whats left
+22:36  kerio: Treyno: hmm
+22:36  Treyno: very simple, i know.
+22:36  kerio: it does... a subtraction
+22:37  DigitalKiwi: oh yeah well YOUR MOM is superior to his book!
+22:37  Yhg1s: is there a need for this?
+22:37  Treyno: basically ye
+22:37  Treyno: i started python yesterday
+22:38  Treyno: learning to put int(input("blah") etc with my memory
+22:38  Treyno: is an accomplishment
+22:38 * DigitalKiwi didn't know python could do subtraction
+22:38  kerio: Treyno: you mean raw_input
+22:38  kerio: unless you're on python3
+22:38  DigitalKiwi: kerio: beat me :(
+22:38  Treyno: pyhton3
+22:38  Treyno: my tutorial book is using it =/
+22:38  Treyno: i had 2.7 previously
+22:38  kerio: it's not a bad thing
+22:38  DigitalKiwi: is it the one by dusty phillips?
+22:38  Treyno: Michael Dawson
+22:39 --- Treyno is now known as Treyno^Food
+22:40  tavish: also, i can confirm that alsaaudio is otherwise working, i have another script that uses it and works fine
+22:42 --- cncfanatics is now known as cnc-away
+22:43  jhl: I'd like to conditionally import one of, say, 20 modules and refer to whichever module is imported by a generic name, like parser_module. What's the best way to do this?
+22:44  KirkMcDonald: jhl: Modules are objects, like any other.
+22:46  jhl: KirkMcDonald: I guess I should be more concrete. I'm trying to decide between using an exec statement and using a long if else statement to import a variably named module.
+22:47  KirkMcDonald: jhl: Perhaps __import__ is a thing.
+22:47  jhl: Ah, never heard of that. Will look into it now. Thanks!
+22:48  jhl: KirkMcDonald:  Yep, __import__ looks like what I want.
+22:49  tavish: can someone try my script to confirm if its on other systems too? http://paste.ubuntu.com/512648/
+22:49  tavish: needs tkinter
+22:49  jhl: tavish: It will be on other systems as soon as people put it there. :)
+22:50  jhl: tavish: Or do you mean works/doesn't work on other systems?
+22:50  tavish: jhl: the latter
+22:50  tavish: alsaerror: input/output error
+22:51  lvh: dash: Ping
+22:52  lvh: dash: Have you done anything about the Twisted extreme talk proposal thing
+22:52  dash: lvh: Oh! nope i'v ebeen kind of crazy busy
+22:53  dash: on the east coast this week
+22:53  lvh: dash: okay no problem
+22:54  lvh: dash: but I'm going to give a talk proposal on the CI/CD thing
+22:54  Bonaparte: jhl, I have similar problem here. I want to import a module from a package where the module name is known at run time
+22:54  lvh: dash: And hopefully deploybot
+22:55  Bonaparte: I can't get my head around it
+22:55  dash: lvh: neat
+22:55  lvh: dash: deploybot is like buildbot except s/deploy/build/
+22:55  dash: sure :)
+22:55  lvh: except the other way around!
+22:56  Bonaparte: http://fpaste.org/UCnf/ is my tree
+22:56  Bonaparte: How can I import 'fusion' module given the name is in a variable like, module_to_import = 'fusion'
+22:56  Bonaparte: ?
+22:57  lvh: Bonaparte: __import__
+22:58  melvster: anyone know why 'import dbus' works from my home directory but not from a subdirectory?
+22:58  jhl: Bonaparte: KirkMcDonald's suggestion of using __import__ seems to fit the bill.
+22:59  jhl: melvster: Do you have a python module called dbus.py in your home directory?
+22:59  melvster: jhl: no, i dont
+23:00  disappearedng: Given a time delta objects, how do I extract the total time out?
+23:00  KirkMcDonald: melvster: What is the error? Is dbus.__file__ what you expect it to be?
+23:01  jhl: melvster: import dbus works from both my home directory and other directories. What doesn't work about it from other directories?
+23:01  melvster: let me pastebin the error
+23:01  melvster: http://python.pastebin.com/SS9j5V8H
+23:01  infobob: http://paste.pocoo.org/show/275165/ (repasted for melvster)
+23:01  melvster: works absolutely fine from ~
+23:02  papna-work: melvster: Don't name your file dbus.py
+23:02  melvster: ohhh
+23:02  melvster: ok thanks
+23:02  melvster: doh!
+23:08  Bonaparte: http://fpaste.org/AhSR/ - I was expecting m to be module merchant.fusion
+23:10  Bonaparte: I still don't know how to import module when the module name is in a variable
+23:14  twomashi: Bonaparte
+23:14  Bonaparte: Apparently, getattr('merchant', input) works
+23:14  twomashi: __import__(mymod)
+23:15  kerio: Bonaparte: you shouldn't do that, really
+23:15  Bonaparte: kerio, what is a better way of doing it?
+23:16  kerio: how can you *not* know what you're going to import
+23:16  Bonaparte: kerio, I don't want to maintain a big list of module names.
+23:17  kerio: what are you trying to do by importing a module whose name is in a variable?
+23:17  Bonaparte: kerio, there are literally more than 100 modules in the package merchant
+23:17  twomashi: kerio: you know full well sometimes it's reasonable to want to do it
+23:17  kerio: Bonaparte: wait, you need to import them all?
+23:17  twomashi: let him shoot himself in the foot, if that's whats going to happen :p
+23:17  Bonaparte: kerio, no. Only one depending on input
+23:18  Bonaparte: I will know which one depending on input
+23:20  Vinetou: hello
+23:21  Vinetou: i am having some issues using the 'g' format specifier
+23:22  KirkMcDonald: Vinetou: If this is about a precision of 2 not doing what you want for numbers 10 and larger, I told you that was the case.
+23:22  Vinetou: i need my outputted decimal to be xx.x so i do %.3g
+23:22  Vinetou: but when a number like 2.06 occurs, that's bad
+23:22  Vinetou: i need it to be 2.1
+23:23  Habbie: Vinetou, why?
+23:23  Vinetou: is that possible using g?
+23:23  KirkMcDonald: Vinetou: No.
+23:23  Vinetou: then back to the drawing board
+23:23  Habbie: Vinetou, what is the criterium for switching to one decimal?
+23:23  Vinetou: uhm, my boss :)
+23:23  Habbie: no
+23:23  kyl3: Hi, Could someone please help me with something Really basic. I want to read a file into a and the look a substring. I have no idea why I am failing so hard. Thanks In advance <3
+23:23  Habbie: you don't understand the question
+23:23  KirkMcDonald: Habbie: ("criterion")
+23:23  Vinetou: oh
+23:24  Habbie: KirkMcDonald, thanks
+23:24  Vinetou: please rephrase it
+23:24  Habbie: Vinetou, in what situation do you want your %.3g to behave like you wrote %.2g ?
+23:24  kyl3: Into a string*
+23:24  KirkMcDonald: Habbie: The precision for the 'g' specifier is the number of digits to use both before and after the decimal point.
+23:24  Vinetou: i could just used .1f but that would output 3.0 as 3.0 and not as 3 (which 'g' does)
+23:25  papna-work: kyl3: Perhaps you want    with open(filename, "r") as f: data = f.read();; sub = data[3:6]
+23:25  KirkMcDonald: Vinetou: I would use %.1f, and then special-case it when it is an integer.
+23:25  Vinetou: in a situation where the integer part is only one digit long
+23:25  Habbie: oh i misread the original question :>
+23:25  Habbie: i'll just go away now ;)
+23:25  papna-work: kyl3: What are you doing? How big is the file? What are you looking for? What format is the file?
+23:26  Vinetou: KirkMcDonald please do help me with that
+23:26  Vinetou: i need that special case thing
+23:26  KirkMcDonald: Vinetou: if x % 1 == 0: s = str(int(x))
+23:26  kyl3: Super simple. It is a list of names and I just want to check if the name exists in the test file
+23:26  papna-work: Vinetou: Ignore your boss and work on something more worthwhile.
+23:27  sherl0ck: when/why is it good to use unicode? should i make all my strings unicode??! whats the gerneral rule of thumb on unicode?
+23:27  Vinetou: if x % 1 == 0: s = str(int(x))  so concise, I love it
+23:28  papna-work: sherl0ck: Textual data should be represented internally using unicode
+23:28  Vinetou: so where do I need to put this baby in my app?
+23:28  twomashi: sherl0ck: when dealing with user data, use unicode
+23:28  KirkMcDonald: Vinetou: It's your code.
+23:28  papna-work: twomashi: That doesn't seem like at all the deciding factor.
+23:29  Vinetou: can i put in the format method?
+23:29  sherl0ck: twomashi: and thats because of different character sets like chinese???
+23:29  papna-work: Chinese, French, English...
+23:29  twomashi: sherl0ck: yes, one day your app may need to support it.
+23:29  sherl0ck: got it sweet
+23:29  kyl3: Sorry Vinetou, could you link to an example xD
+23:29  Vinetou: oh sorry
+23:30  Vinetou: right away
+23:30  papna-work: sherl0ck: The line isn't user/non-user. The line is textual/non.
+23:30  sherl0ck: and things just got more complicated --- again ;)
+23:30  KirkMcDonald: sherl0ck: Read this: http://www.joelonsoftware.com/articles/Unicode.html
+23:30  twomashi: papna-work: what do you mean textual
+23:30  papna-work: sherl0ck: Whenever you're representing TEXT, user or not, you use unicode.
+23:30  papna-work: twomashi: Words. Phrases. Human language or stuff written with human language characters.
+23:30  sherl0ck: papna-work: got it, great advice
+23:30  KirkMcDonald: There is unicode data and there are bytes, and never the twain shall meet.
+23:31  twomashi: papna-work: should I write the field names in an associative array with unicode literals?
+23:31  sherl0ck: papna-work: no
+23:31  papna-work: twomashi: It is good practice to use unicode strings for dict keys if they represent things like words or letters.
+23:32  twomashi: papna-work: so you're saying that this: "user" is an obsolete way to represent the word user
+23:32  twomashi: and it should be done like this: u"user"
+23:32  KirkMcDonald: twomashi: Maybe. Depends on context, I think.
+23:33  twomashi: ok, are we gonna have a massive discussion to answer the guy's question, or just give him a nice starting point that wont be too much of a pain in the ass
+23:33  twomashi: so much pedanticism in this channel
+23:33  Vinetou: here it is: http://pastebin.com/1EMVj7Gt
+23:33  infobob: http://paste.pocoo.org/show/275192/ (repasted for Vinetou)
+23:33  KirkMcDonald: twomashi: I gave him a link.
+23:34  Vinetou: so this is my code snippet
+23:34  lvh: I love the Pycon US 2011 "Extreme" track explanation
+23:34  lvh: Talks should focus on a single subject, e.g. "threads" or "twisted".
+23:34  lvh: Very apt dichtomy ;-)
+23:34  KirkMcDonald: Vinetou: if calculatedYears % 1 == 0: s = str(int(calculatedYears))
+23:34  KirkMcDonald: Vinetou: else: s = '{0:.1f}'.format(calculatedYears)
+23:35  lvh: KirkMcDonald: % 1 ?
+23:35  moldy: can i retrieve the formatting field names from a string by introspection?
+23:35  KirkMcDonald: Vinetou: Then substitute s into your string.
+23:35  KirkMcDonald: lvh: Yes?
+23:35  dash: twomashi: if you don't want to have a considered discussion of the right way to do stuff, why even join an IRC channel at all?
+23:35  lvh: KirkMcDonald: x % 1 is always 0, isn't it?
+23:35  KirkMcDonald: lvh: Not if it's a float.
+23:35  vieira: How can I asynchronously make a thread X notify thread Y (that may be blocked for e.g. recv something from socket)?
+23:35  lvh: Oooh. My bad, didn't read the stuff in front.
+23:35  Vinetou: KirkMcDonald but that is not possible to implement this code into the str.format() method?
+23:36  KirkMcDonald: Vinetou: Not sensibly.
+23:36  twomashi: dash: maybe im busy and I want a quick answer to a question and perhaps I'll help someone else out if I can. If I wanted considered discussion I'd go to a mailing list
+23:36  lvh: vieira: Preferably by using Twisted instead
+23:36  Vinetou: what do you mean?
+23:36  KirkMcDonald: Vinetou: You can do *anything* with a sufficiently ugly expression.
+23:36  dash: twomashi: yeah, that's not what #python is for
+23:36  vieira: lvh: I would love but that's not an option :(
+23:36  KirkMcDonald: Vinetou: But an if statement is by far the clearest way to do it.
+23:36  Vinetou: KirkMcDonald i hate ugly, so i'll use your way
+23:36  dash: vieira: threads aren't a suitable choice for I/O management
+23:36  vieira: lvh: any other idea?
+23:37  Vinetou: thank you
+23:37  vieira: dash: I'm extending ThreadingTCPServer and ThreadingUDPServer
+23:37  dash: vieira: Yikes! why?
+23:37  KirkMcDonald: vieira: At the same time
+23:37  KirkMcDonald: ?
+23:39  vieira: dash: Yep. Let me try to explain...
+23:39  lvh: vieira: Why is it not a suitable option
+23:39  lvh: vieira: (It's important to understand the restrictions before you can build something)
+23:40  vieira: dash: I have a some servers that talk with each other via UDP. Each server also talks with clients via TCP. Some messages sent from client via TCP to server A will then make server A notify server B via UDP. That notification may cause server B to notify one of it's client via TCP.
+23:41  vieira: vieira: It's a poor design. But not my choice. I don't get to decide xD
+23:41  vieira: *dash, lvh
+23:41  Vinetou: thank you KirkMcDonald
+23:41  disappearedng: Anyone here knows if there are some implementation to identify effeciently certain words, i.e. offensive or racist in a chat system?
+23:41  dash: vieira: who chose this?
+23:42  vieira: I don't even know, they handed me a protocol specification and now I have to implement it :X
+23:42  dash: vieira: who's they
+23:43  dash: vieira: and did the protocol specification say "use ThreadedUDPServer" in it?
+23:44  vieira: dash: No, it said servers communicate via UDP (with each other) and using TCP (with clients). Please do this for yesterday.
+23:44  dash: vieira: twisted sound slike the ideal choice then
+23:44  pirx: hi! i am writing a script which will start severel threads, and i want to be able to stop them all gracefully with a ctrl-c. my first attempt is here: http://pastebin.com/1DknU7bG but the wait_for() function seems so ugly. any other ideas?
+23:44  infobob: http://paste.pocoo.org/show/275195/ (repasted for pirx)
+23:44  papna-work: vieira: SocketServer is so bad it's not worth using.
+23:45  papna-work: pirx: Nope.
+23:46  vieira: dash: I understand that, but this must be deployed on servers and clients that have only python2.4+. Can't assume twisted is installed :X
+23:46  dash: vieira: so bundle it
+23:46  teratorn: yay use Twisted have fun or DIE
+23:46  dash: teratorn: you're so constructive
+23:46  papna-work: pirx: That code is pretty insane and I'm not sure it works, strictly speaking. Why are you using threads?
+23:46  teratorn: wooo stealing source codes is soo fun
+23:46  papna-work: pirx: And why do you want to use signals with them?
+23:46  papna-work: Mostly the first.
+23:47  IsopropylAlcohol: how hard is it to decrypt crc32 hashes?
+23:47  vieira: dash: Can I? :O
+23:47  KirkMcDonald: IsopropylAlcohol: It's a hash.
+23:47  teratorn: IsopropylAlcohol: there isn't anything to decrypt
+23:47  papna-work: IsopropylAlcohol: They aren't encrypted.
+23:47  Habbie: IsopropylAlcohol, that question does not make a lot of sense
+23:47  lvh: vieira: Sure
+23:47  IsopropylAlcohol: >.>
+23:47  pirx: papna-work: it does seem to work. why many threads? i want to do several things simultaneously:)
+23:47  lvh: vieira: *YOUR* code doesn't come with Python2.4 either
+23:48  lvh: vieira: The only difference between code *you* write and code from Twisted is who wrote it, in terms of deployment it's pretty much identical
+23:48  papna-work: pirx: Threads are not the only way to do asynchronicity. They aren't really an especially good one.
+23:48  pirx: papna-work: do you have some other idea to stop all threads?
+23:48  dash: pirx: what things do you want to do?
+23:48  pirx: papna-work: they are easy enough... :)
+23:48  papna-work: pirx: What things do you want to do concurrently?
+23:48  IsopropylAlcohol: ohh right lemme rephrase
+23:48  pirx: dash: http requests
+23:49  IsopropylAlcohol: how hard is it to reverse a crc32 checksum
+23:49  vieira: lvh: I'll take a look at it. Thanks :)
+23:49  dash: pirx: ah yes. use twisted.web
+23:49  papna-work: pirx: No, they are deceptively simple, easy to mess up, nearly impossible to debug, and unpredictable
+23:49  dash: pirx: you can handle multiple http requests in a single thread
+23:50  teratorn: IsopropylAlcohol: what does "reverse" mean? recover the original input that resulted in the particular hash value?
+23:50  papna-work: pirx: If you used a non-threaded asynchronous framework like twisted, you would have a stable, predictable, more-scalable way to do multiple HTTP requests concurrently.
+23:50  IsopropylAlcohol: teratorn: yes
+23:50  teratorn: IsopropylAlcohol: if so, that is very difficult
+23:50  KirkMcDonald: IsopropylAlcohol: It is non-reversible.
+23:50  sirtophat: how could I make a script that would log in to a website and make a post with my account?
+23:50  teratorn: IsopropylAlcohol: finding random collisions, however, might not be so hard
+23:50  papna-work: IsopropylAlcohol: Not easy. Why? How are you imagining using it?
+23:50  pirx: dash: well, there are sessions and stuff, and all that is already written
+23:51  ssbr: I'd been under the impression it was fairly easy to reverse CRC32.
+23:51  ssbr: Something something insecure something never ever use it for anything serious something.
+23:51  KirkMcDonald: Is it?
+23:51  KirkMcDonald: Hmm.
+23:51  ssbr: (well, anything cryptographic and serious)
+23:51  teratorn: its not considered a secure hash function
+23:51  papna-work: Erm, I mixed up my intent to say "not hard" and "easy".
+23:51  GrIM147: sirtophat, maybe try curl
+23:52  tedoc2000: sirtophat or mechanize
+23:52  teratorn: that doesn't mean you can find "the one" original input out of an infinite field of possible inputs that generate the same hash
+23:52  pirx: papna-work: there is already a class written that handles certain http sessions, so i dont think its that easy to just throw out httplib
+23:52  GrIM147: sirtophat, but iam not sure , used it ages ago , just cant remember what for
+23:52  ssbr: sirtophat: lots of ways. something like mechanize, perhaps.
+23:52  teratorn: *nearly infinite
+23:52  dash: pirx: well, you've gone done the wrong direction; it shouldn't be too much work to redo it properly
+23:53  ssbr: teratorn: you can reduce the set of possible (valid) inputs to something very small if you know stuff about it other than the hash
+23:53  teratorn: yeah, knowing things always helps
+23:54  teratorn: IsopropylAlcohol: what are you actually concerned about?
+23:55  pirx: dash: its too much work to learn twisted, havent even heard about it before:)
+23:55  IsopropylAlcohol: teratorn: I just want to read checksums
+23:56  papna-work: IsopropylAlcohol: That isn't a goal.
+23:56  dash: pirx: Oh well.
+23:56  IsopropylAlcohol: papna: how is that not a goal?
+23:56  GrIM147: I asked this earlier with no response  , for a desktop app what would be the best way to handle security ? create a dictionary with user info on a successful login and then just pass it to ever constructor for ever object i create and then have the security module loaded in every class that deals with it ?
+23:57  pirx: dash: besides, its not just the requests that should be done at once, there is a bunch of logic around them that should run in parallell too
+23:57  dash: pirx: such as?
+23:57  papna-work: pirx: Python threads don't run in parallel.
+23:57  papna-work: There was a time when I hadn't heard of Twisted.
+23:58  pirx: dash: such as building an answer and doing IO
+23:58  papna-work: There was a time when I hdan't heard of bacon.
+23:58  papna-work: There was a time when I hdan't heard of sex.
+23:58  papna-work: There was a time when I hdan't heard of Bob Dylan.
+23:58  papna-work: Twisted isn't as good as bacon, sex, or Bob Dylan, but I can hardly blame any of these for my not hearing of them.
+23:58  dash: pirx: sure, twisted is an ideal choice for that
+23:58  papna-work: The loss was mine.
+23:59  kerio: bacon <3
+23:59  kerio: Bob Dylan <3
+23:59  kerio: Twisted <3
+23:59  pirx: oh, ok, i guess no one knows how to stop a bunch of threads with a ctrl-c :)
+23:59  kerio: pirx: don't use threads
+23:59  ssbr: What is this even for? http://docs.python.org/library/autogil.html
+23:59  papna-work: pirx: You're asking the wrong question. One of the things that sucks about threads are how they deal with signals.
+--- Log closed Thu Oct 14 00:00:02 2010

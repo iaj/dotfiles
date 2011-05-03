@@ -1,0 +1,87 @@
+--- Log opened Mon Oct 18 01:28:53 2010
+01:28 --- Users 149 nicks [0 ops, 0 halfops, 0 voices, 149 normal]
+01:29 --- Channel #zsh was synced in 84 seconds
+01:36  rudi_s: np
+02:58 --- estragib_ is now known as estragib
+03:21  manukall: hi everyone! is there a way to undeclare a function in zsh?
+03:21  Nomexous: unfunction
+03:23  manukall: Nomexous, thanks, that worked. but didn't have the result i hoped. i just switched from bash to zsh and am using oh-my-zsh. I just want cd ..<TAB> to expand to cd ../
+03:24  manukall: i thought this didnt work because of a cd() function defined in one of the oh-my-zsh files, but it now expands to directories that contain two dots.
+03:26  manukall: any ideas how to get to that behaviour?
+03:40  manukall: or at least how to not have a space after an alias is auto completed
+--- Log closed Mon Oct 18 04:24:22 2010
+--- Log opened Mon Oct 18 04:24:44 2010
+04:24 --- Users 144 nicks [0 ops, 0 halfops, 0 voices, 144 normal]
+04:25 --- Channel #zsh was synced in 75 seconds
+--- Log closed Mon Oct 18 08:26:24 2010
+--- Log opened Mon Oct 18 08:26:46 2010
+08:26 --- Users 143 nicks [0 ops, 0 halfops, 0 voices, 143 normal]
+08:27 --- Channel #zsh was synced in 75 seconds
+08:35 --- wuehlmau1 is now known as wuehlmaus
+09:58  remyo: Is it possible to make zsh autocomplete things with periods in front of them, without typing the period.
+10:00  fow: something like zstyle ':completion:*' matcher-list 'l:|=* r:|=*' # should do it
+10:02  remyo: Hm. It doesn't :(
+10:04  fow: Have you loaded compinit?
+10:04  remyo: Yes
+10:04  fow: oh wait, I misunderstood. you meant dotfiles, didn't you?
+10:05  remyo: Yes
+10:05  remyo: If I type cd i<tab> I was to get results like .irssi, etc
+10:05  remyo: As I don't always remember what does and doesn't have a . in front of it
+10:10  remyo: fow: Does that make sense?
+10:11  Mikachu: i have my completion set up so i can write the part after a dot, however, it still doesn't complete files starting with a dot
+10:11  fow: It does, but I'm not sure how to go about doing it. It's not really something I'd ever want, and I'm having trouble finding something in man zshcompsys
+10:11  Mikachu: ie if i mkdir a.irssi and irssi<tab> i get that, but not .irssi
+10:12  Mikachu: so i don't think any tricks with matcher-list will help
+10:14  remyo: :(
+10:16  Mikachu: which is not to say some other trick won't, i just don't know it
+10:16  remyo: I wasn't having much luck on Google
+10:17  remyo: I'm sure SOMEONE out there is doing this too
+--- Log closed Mon Oct 18 15:43:00 2010
+--- Log opened Mon Oct 18 15:48:20 2010
+15:48 --- Users 158 nicks [0 ops, 0 halfops, 0 voices, 158 normal]
+15:49 --- Channel #zsh was synced in 73 seconds
+16:25  b6: can i set $? without executing anything? i'd kind of like to set $? to 0 when i ctrl-l.
+16:30  derdon: well, you could execute a safe command like "echo" before ctrl+l is called
+16:30  derdon: this would also be fast anough so you'll don't really notice it
+16:31  Yorokobi: or use 'clear' in lieu of ^l
+16:31  ehamberg: “true” is probably better.
+16:32  b6: Yorokobi: yeah, that's what i did at first. but i found out that doesn't have the same behavior, because it clears the line. if you type blah^L, blah will still be there. or is for me.
+16:32  b6: but not so if i execute clear in my ctrl-l handler.
+16:33  Yorokobi: b6, that's the typical behaviour of ^l; somecommand^l will clear the screen and leav 'somecommand' in place.
+16:34  Yorokobi: *leave
+16:34  b6: Yorokobi: yeah, that's what i want. i'm saying that executing clear is different.
+16:34  b6: executing clear fixed $?, but doesn't leave the line intact.
+16:36  zuez: Which one of the sources above would you folks recommend for someone who's savvy with other shells and looking to dive into zsh? :-)
+16:36  zuez: s/sources/resources/
+--- Log closed Mon Oct 18 19:10:02 2010
+--- Log opened Mon Oct 18 19:10:22 2010
+19:10 --- Users 161 nicks [0 ops, 0 halfops, 0 voices, 161 normal]
+19:11 --- Channel #zsh was synced in 73 seconds
+20:17 --- mren|off is now known as mren
+20:50  larsivi: what is the zsh equivalent of this bash command:  hg diff "${@}" | view -
+20:50  fow: the exact same thing
+20:51  larsivi: fow: hmm, I get an error from vim if I give a filename (works with no parameters)
+20:52  larsivi: "Too many edit parameters"
+20:52  fow: Is this by chance the contents of an alias?
+20:52  larsivi: fow: yes :)
+20:53  fow: That's the problem. It needs to be a function
+20:53  fow: foo() { command hg diff "$@" | command view -; }
+20:54  fow: (command is mainly needed to prevent recursion if you name the function hg or view)
+20:54  larsivi: fow: thanks - the bash example did that actually - why doesn't it work with an alias?
+20:54  fow: because that's not how aliases work
+20:54  larsivi: ok :P
+20:55  fow: What you want is something that takes arguments, and aliases don't take arguments
+20:55  larsivi: ah - makes sense :)
+21:19  ft: aliases are just text replacements, which are done very early in the expansion process. nothing more.
+21:20  ft: (this is not #csh)
+21:20  ft: :-)
+22:52  nimred: must zsh configuration files be appended with #!/bin/zsh ?
+22:53  ft: no
+22:53  fow: That's only used when you try to execute a file. Since zsh configuration files are sourced, not executed, they don't need that
+22:56  nimred: is there any emacs mode for editing zsh configuration files ?
+23:00  thrig: emacs ~/.zshrc
+23:01  ft: shell-script-mode
+23:06  oddmunds_: nimred: emacs defaults to ‘Shell-script[zsh]’ when you open .zshrc or any file with ‘#!/bin/zsh’ and it might possibly have other ways of identifying them as well
+23:07 --- pattern_ is now known as pattern
+23:33 --- mren is now known as mren|off
+--- Log closed Tue Oct 19 00:00:59 2010

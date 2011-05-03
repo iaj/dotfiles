@@ -1,0 +1,295 @@
+--- Log opened Thu Dec 09 00:00:18 2010
+00:36 --- probably_ is now known as probablycorey_
+03:39 --- dive is now known as Guest35660
+03:41 --- Guest35660 is now known as dive
+03:41 --- dive is now known as Guest32407
+03:42 --- Guest32407 is now known as dive
+04:00 --- dive is now known as Guest35281
+04:02 --- Guest35281 is now known as dive
+06:17  harryv: anything like bash' C-x-e in zsh?
+06:50  accel: suppose someone does a "chmod 0644 / -R" , and all you have is a zsh shell, how can you fix this? I almost have a fix: umask ... ; echo 'blah' > my_chmod; cp /usr/bin/chmod my_chmod; <-- gets the permissions ; however, I can't exec "cp" since it's not a shell builtin
+07:06  teratorn: cat /usr/bin/chmod > newchmod ?
+07:07  teratorn: with your fixed umask, of course
+07:07  teratorn: accel: ping.
+07:07  accel: actually
+07:07  accel: "my" umask fix doesn't work
+07:07  accel: since files are created at 066
+07:07  accel: err, at "666"
+07:08  accel: so even "umask 000; touch blah" <-- blah is 666, not 777
+07:08  accel: also, "cat" is a command, not a shell builtin
+07:08  accel: so we can't execute it
+07:08  teratorn: oh
+07:08  teratorn: right
+07:10  teratorn: jesus H, the zsh/files module has *everything* except chmod
+07:10  teratorn: so first you need to figure out how to create an executable file... I don't see why you can't do that with an appropriate umask, but I dunno
+07:11  accel: teratorn: I tried it; it didn't work
+07:11  accel: teratorn: does umask work for you?
+07:12  accel: umask 000; echo "hello" > blah; ls -l blah; <-  rw-rw-rw-
+07:12  accel: not rwxrwxrwx
+07:12  teratorn: accel: how are you running zsh? is this just a shell that was active before the big screwup?
+07:13  accel: yeah
+07:13  accel: i'm assuming you have a zsh shell running
+07:13  teratorn: yes
+07:13  accel: this is all very hypotehtical
+07:13  teratorn: can't get umask to produce executable files
+07:14  accel: but maybe one day, someone will be on a mission to mars
+07:14  teratorn: right
+07:14  accel: and some machine, say the one with life support has been chmodded
+07:14  accel: so it'd be best to not reboot it + hold breath
+07:14  teratorn: "You are in a dark room."
+07:14  teratorn: "A Z-shell blinks in the corner"
+07:14  teratorn: "There are no ways out"
+07:15  accel: and earth just got nuked
+07:15  accel: so actually all of humanity depends on this spacecraft making it to mars
+07:15  teratorn: ok lets thinkg
+07:15  teratorn: think
+07:15  accel: http://www.cims.nyu.edu/cgi-comment/info2html?%28zsh%29The%2520zsh%2Fzftp%2520Module
+07:15  accel: is there a built in zsh ftp server?
+07:16  accel: can we run a ftp server in zsh; then when reading it back set the permissions? :-)
+07:16  teratorn: ftp does support the "SITE CHMOD" command, but I'm sure it's not implemented in zsh
+07:16  teratorn: and I think zftp is client only
+07:17  accel: http://www.cims.nyu.edu/cgi-comment/info2html?%28zsh%29The%2520zsh%2Fsystem%2520Module <-- this has read/write
+07:17  accel: but how do we open files?
+07:18  accel: I think this takes care of the "cp" issue
+07:18  teratorn: well, zmodload zsh/files
+07:19  teratorn: should give you a 'cp'
+07:19  teratorn: or not
+07:19  accel: how?
+07:19  teratorn: it gives you a mv, not cp
+07:20  teratorn: well
+07:20  teratorn: you could look up an ext 3 reference ;)
+07:20  teratorn: hmm, but you need a hex editor
+07:21  teratorn: I keep forgetting you can't run anything
+07:21  accel: i think zsh needs a patch
+07:21  teratorn: a chmod built-in would be nice
+07:21  teratorn: in the zsh/files module
+07:23  teratorn: if you could find a buffer overflow in the zsh prompt, you could explit it to run arbitrary code and set up a call to chmod(2) with int 80h
+07:23  teratorn: this is a remote machine I take it?
+07:23  teratorn: what services are running on it?
+07:26  accel: lol
+07:29  teratorn: int 80h assumes linux, but yeah
+07:30  accel: yeah; maybe gdb should be built into zsh
+07:31  teratorn: yep, then you could just assemble some stuff in to an already-running process
+07:32  teratorn: accel: I'm starting to think booting off a recovery disk might be your only out
+07:33  accel: my system is not at stake; a potential stake holding the last remenants of humanity ... taht's at stake
+07:33  teratorn: accel: is this linux? are you at a root shell? I wonder if there is something in /proc that could be "exploited"
+07:34  accel: i'm actually convinced that it can't be done with what we've looked at so far
+07:34  accel: hmm
+07:34  accel: interesting
+07:34  accel: yea, linux, root
+07:34  teratorn:  /proc might be your last hope
+07:34  accel: http://www.linux.com/archive/feature/126718
+07:34  accel: time I start reading
+07:35  accel: in case i ever become an astronaut
+07:39  accel: teratorn: i give up on this; but thanks for your time
+07:39  accel: it's kinda weird; but having used zsh for 1+ years (used to be bash); I never looked at zsf modules
+07:39  accel: however today, i poked around & kinda get the point of zsh modules after you pointed out zsh/files ... so thanks for that :-)
+07:40  teratorn: cheers
+07:40  teratorn: looks like humanity is doomed
+07:41  teratorn: it's too bad zsh doesn't have any way to hijack it
+07:46  teratorn: accel: do you have any directories that have their execute bit still set?
+07:46  Jerub: hi, i heard there was an interesting problem going on here to do with stripping execute bits.
+07:47  teratorn: I think he might have left
+07:50  accel: umask 000; mkdir blah; 
+07:50  accel: sets "blah" to be 777 iirc
+07:51  accel: Jerub: ping
+07:51  Jerub: accel: pong
+07:51  Jerub: accel: did you manage to recover?
+07:52  accel: it's all hypotehtical
+07:52  accel: i'm not stuck with this problem; to me it's purely an intellectual puzzle
+07:53  accel: but no, i have not yet solved it
+07:53  teratorn: Jerub: luckily if you zmodload zsh/files you will get a built-in 'mkdir'
+07:53  teratorn: but does it actually help?
+07:53  Jerub: yes.
+07:53  Jerub: also, you'll have a built in echo and redirect
+07:53  Jerub: is cat built in?
+07:54  accel: it's easy to built an equiv of cat
+07:54  accel: it's _possible_ to buid a equiv of cat
+07:54  accel: using zfs/system
+07:54  accel: there's read/write from fd there
+07:54  Jerub: accel: there's an option to open() that makes it an executable.
+07:54  Jerub: so if you can call that from zsh with th eright args..
+07:55  Jerub: hm, maybe i'm thinking of smoething else
+07:55  Jerub: nope, it's there
+07:55  Jerub: open(const char *pathname, int flags, mode_t mode);
+07:56  accel: that's a zsh call or a syscall?
+07:56  Jerub: that's a libc call.
+07:56  Jerub: i'm looking into if you can make zsh call it
+07:57  accel: if you can make zsh execve gdb, that'd work too
+07:57  Jerub: nope. it has to have an execute bit
+07:57  Jerub: otherwise the execve call will fail
+07:58  teratorn: accel: do you have anything else to work with besides a zshell? what services run on this machine?
+07:59  Jerub: can't inject anything into an open() call in zsh
+07:59  Jerub: but you/can/ do a dlopen
+07:59  Jerub: if you can compile a zsh extension on another host and transfer it over, you can save the system
+08:00  teratorn: Jerub: FUCK!
+08:00  teratorn: why didn't I think of that
+08:00  teratorn: I've been using and reading about zmodload for 20 minutes
+08:00  Jerub: well, you need to be able to do a network transfer
+08:00  teratorn: zmodload zsh/zftp
+08:00  bobthemilkman: Jerub: You'd have to transfer it over.
+08:00  accel: how do you do a dlopen in zsh?
+08:01  teratorn: store the file in /usr/local/lib/zsh/4.3.10/zsh/
+08:01  teratorn: as foo.so
+08:01  Jerub: accel: that's what zmodload is
+08:01  teratorn: then zmodload zsh/foo
+08:01  teratorn: then you'll have a new built-in command
+08:01  accel: ah
+08:01  teratorn: implemented by your module
+08:01  accel: noted
+08:01  teratorn: called 'chmod' presumably :)
+08:02  accel: thanks
+08:02  bobthemilkman: accel: Do you have *anything* other than a zsh terminal open?
+08:02  accel: this is all hypotehtical
+08:02  bobthemilkman: Oh
+08:02  Jerub: dead restore is easier
+08:02  accel: it's an extension of the interview question
+08:02  Jerub: boot off usb
+08:02  teratorn: I'm 98% sure Jerub's idea can work
+08:03  accel: of "how to fix chmod 0644 chmod"
+08:03  accel: into "how to fix chmod 0644 / -R"
+08:03  bobthemilkman: Yeah, in this day and age, I'd choose the USB live-CD
+08:03  Jerub: accel: see, there's a problem here
+08:03  Jerub: accel: this will be a dead system and zmodload won't work
+08:03  Jerub: because without execute bits, you can't read directories
+08:03  bobthemilkman: Oh?
+08:03  bobthemilkman: in bash you can do echo *
+08:04  bobthemilkman: Admittedly, I don't know anything about zsh, but I was under the impression that it's remotely similar?
+08:04  Jerub: ls -la  
+08:04  Jerub: ls: cannot open directory .: Permission denied
+08:04  Jerub: i can read/write files, but i can't do a directory listing. it depends on if something checkss for existance before opening.
+08:05  bobthemilkman: Jerub: Yes you can. echo *
+08:05  teratorn: yeah
+08:05  teratorn: uhm
+08:05  teratorn: accel: does your zmodload not work? try 'zmodload zsh/zftp'
+08:05  Jerub: bobthemilkman: nope
+08:05  accel: it works
+08:05  Jerub: not if the directory that you're in doesn't hav execute
+08:05  Jerub: chmod -x .
+08:05  bobthemilkman: Jerub: Why not?
+08:06  teratorn: Jerub: he can make a new directory with mkdir
+08:06  Jerub: bobthemilkman: hi. i'm posix permissions. i have documentation everywhere on the internet and i've been around for a long time.
+08:06  teratorn: umask 000; mkdir /usr/.../crap
+08:06  teratorn: then zmodload crap/chmod
+08:06  Jerub: teratorn: it depends on if /usr/local/lib/zsh/4.3.10/zsh/ is required to be +x to load module sfrom it because zsh does fancy stuff before just blindly calling dlopen()
+08:07  Jerub: i.e. if it lists the directory to see the files in it before it loads the module.
+08:07  Jerub: it may not, i haven't tested.
+08:07  teratorn: well /usr/local/lib/zsh/4.3.10 might be the problem dir
+08:07  teratorn: i mean create 'crap' as a sibling of 'zsh'
+08:08  teratorn: let me try
+08:08  Jerub: teratorn: yes, you can create new directories
+08:08  Jerub: teratorn: but you can't list them
+08:08  Jerub: and i think, change them
+08:08  Jerub: yeah, you can't change dir into a dir without +x
+08:11  teratorn: yeah, the 4.3.10 directory bones you
+08:11  teratorn: without an execute bit zmodload is dead
+08:13  teratorn: actually, i'm lying
+08:14  teratorn: if you are *root* it doesn't matter!
+08:16  teratorn: the 4.3.10 dir without an execute bit breaks all kinds of things if zsh is running as a normal user
+08:16  teratorn: but if you are root you can zmodload just fine
+08:43  hpt: why zsh doesn't support array of arrays ...
+08:44  bapt: hpt: because no one coded it, but patches are welcome :)
+08:45  hpt: bapt: :)
+08:49  hpt: no one has written it yet, i think there must be some reasons
+09:04 --- insomnia1alt is now known as insomniaSalt
+09:25  teratorn: accels: cooooooom back I have a chmod-fixing zsh module!! :)
+09:29  hpt: what's the parameter of zsh which is similar to bash's BASH_COMMAND?
+09:30  teratorn: we've all had laser surgery to remove the bits of brain matter that ever knew anything about bash
+09:31  teratorn: so please explain :)
+09:33  teratorn: hpt: I'm *guessing* you want $0
+09:33  hpt: I am trying to echo the failed cmd in the 'trap func ERR's func
+10:03 --- insomnia1alt is now known as insomniaSalt
+11:08  hpt: trap 'CMD=$ZSH_DEBUG_CMD' DEBUG
+11:08  hpt: trap 'echo Failed in $CURRENT_FUNC, "$CMD"' ZERR
+11:09  hpt: I have got it 
+11:14  Fullmoon: Is it possible to have a history of all commands entered in all windows available to new shells, but limit the history of a single open shell to the past history + new ones entered in this very shell? I don’t want that [up] displays commands entered in another open shell, but like that the history of all shells is saved
+11:16  fow: just set HISTFILE (and probably look at the history related options)
+11:23  Fullmoon: fow: This will then append? Great. Is there a way to output the current complete ZSH config? (I am using oh-my-zsh)
+11:24  fow: ummm... not so much. maybe a combination of commands like alias, bindkey, setopt, set, ...
+11:34  kish_: how do i perform a while loop 100 times
+11:35  fow: you would probably just use a for loop: for ((i=0;i<100;i++)); do foo; done
+11:50  kish_: hm thanks
+11:51  Valodim: kish_: repeat 100 do stuff done
+11:52  fow: I always forget about repeat >_<
+14:09  noganex: aloha
+14:09  noganex: i've got this one in a bashrc: complete -o default -o nospace -F _git some_git_alias
+14:10  noganex: it seems to enable autocompletion for some_git_alias
+14:10  noganex: how can i do this with zsh?
+14:11  Mikachu: aliases complete what they're aliased to by default in zsh
+14:12  noganex: well, i've got something like alias cfgit="git --many-options" and it doesn't autocomplete
+14:12  noganex: i just want it to use that thingy from /usr/share/zsh/4.3.9/functions/_git
+14:16  Mikachu: it should
+14:16  Mikachu: try setopt nocompletealiases
+14:21  noganex: i've tried completealiases and it didn't work, but it doesn't work with nocompletealiases either...
+14:22  danielsh: I use 'export svn=/usr/local/bin/svn'. Can I make '$svn' have the same completion as 'svn'?
+14:22  noganex: the odd thing is: it works for other aliases...
+14:28  noganex: maybe because i'm using --work-tree in the alias in this isn't listed in /usr/share/zsh/4.3.9/functions/_git?
+14:30  noganex: jap. even normal completion doesn't work then. how do i get around this?
+14:39  noganex: mhja.. if i add --work-tree to git in /usr/share/zsh/4.3.9/functions/_git it all works
+14:39  noganex: hm
+15:12  Semikolon: When I tab complete, the two first characters that I typed get stuck where I typed them, can't be edited, but don't influence anything either
+15:13  Semikolon: Seems like something to do with encoding, I have a special character in my prompt - maybe I need a reset char or something like that
+15:14  Semikolon: function precmd() { PROMPT="%{${fg[yellow]}%}%~%{$reset_color%}$(parse_git_branch) ‣ %{$reset_color%}" }
+15:14  Semikolon: That's my prompt. The arrow character is probably the guilty one here, right?
+15:15  Mikachu: you forgot %{ %} around reset_color
+15:15  Mikachu: no wait you didn't
+15:15  Mikachu: well, try without it and you'll know
+15:15  Semikolon: Yeah...
+15:18  jdstroy: Aha
+15:19  jdstroy: How do I enable job control? setopt monitor results in setopt: can't change option: monitor
+15:19  jdstroy: I am guessing that this is a compile-time option
+15:22  Mikachu: are you noninteractive?
+15:26  jdstroy: Mikachu: No
+15:27  jdstroy: Using zsh -li
+16:57  jdstroy: So is there a way to enable job control, if setopt monitor gripes about "can't change option"?
+16:57  jdstroy: I have jobcontrol in ksh, but then again, I am on an unusual platform.
+--- Log closed Thu Dec 09 20:00:34 2010
+--- Log opened Thu Dec 09 20:15:58 2010
+20:15 --- Users 168 nicks [0 ops, 0 halfops, 0 voices, 168 normal]
+20:17 --- Channel #zsh was synced in 75 seconds
+20:34  swtaarrs: whenever I try to use tab completion with a git command, zsh freezes and uses 100% cpu for a few minutes before coming back with the correct response.  has anyone seen this?
+20:36 --- mren|off is now known as mren
+--- Log closed Thu Dec 09 20:41:09 2010
+--- Log opened Thu Dec 09 20:46:35 2010
+20:46 --- Users 169 nicks [0 ops, 0 halfops, 0 voices, 169 normal]
+20:47 --- Channel #zsh was synced in 73 seconds
+21:18  cYmen: Is it possible to turn off the meaning of =?
+21:19  fow: setopt noequal
+21:19  fow: err, noequals
+21:34  cYmen: my co-admin is complaining
+21:35  cYmen: I need to figure out a way for him to use su but get a bash
+--- Log closed Thu Dec 09 21:41:05 2010
+--- Log opened Thu Dec 09 21:46:28 2010
+21:46 --- Users 167 nicks [0 ops, 0 halfops, 0 voices, 167 normal]
+21:47 --- Channel #zsh was synced in 68 seconds
+21:55  danielsh: (thanks)
+--- Log closed Thu Dec 09 22:00:15 2010
+--- Log opened Thu Dec 09 22:05:36 2010
+22:05 --- Users 166 nicks [0 ops, 0 halfops, 0 voices, 166 normal]
+22:06 --- Channel #zsh was synced in 72 seconds
+22:34  anon33_: i'd like to write a function that doesn't take any arguments (as an alternative to a simple alias) that does two different commands... but I'm quite the beginner and don't know how
+22:35  anon33_: all i'm looking to do is create a command (in my zsh profile) that issues two mount commands
+22:35  anon33_: any help would be really appreciated
+22:37  ft: function foo() { echo $2; echo $1; }; foo bar baz
+22:37  thrig: but that takes arguments!
+22:37  ft: oh
+22:37  ft: *doesn't*
+22:37  ft: I don't read carefully enough.
+22:37  thrig: function foo() { echo look ma; echo no arguments }
+22:39  anon33_: man, just playing around in linux has really taught me a lot - thanks for your help guys
+22:39  anon33_: Also trying to do everything from the command line (which does lead to frustrations) has helped as well
+22:43  anon33_: If $ is the last argument of some command, is !$1 and $2 the first and second arg? 
+22:44  thrig: there's a great HISTORY EXPANSION section somewhere in the docs that cover those rules
+22:47  anon33_: whoa - "mv" actually moves the files to a mount instead of copying them? 
+22:51  ianp: what else would it do...
+22:57  anon33_: well, in a GUI application it usually just copies it
+--- Log closed Thu Dec 09 23:18:41 2010
+--- Log opened Thu Dec 09 23:19:06 2010
+23:19 --- Users 165 nicks [0 ops, 0 halfops, 0 voices, 165 normal]
+23:20 --- Channel #zsh was synced in 75 seconds
+23:25 --- mren is now known as mren|off
+--- Log closed Thu Dec 09 23:42:11 2010
+--- Log opened Thu Dec 09 23:47:34 2010
+23:47 --- Users 166 nicks [0 ops, 0 halfops, 0 voices, 166 normal]
+23:48 --- Channel #zsh was synced in 74 seconds
+--- Log closed Fri Dec 10 00:00:09 2010

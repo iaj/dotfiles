@@ -1,0 +1,610 @@
+--- Log opened Wed Jan 05 00:00:09 2011
+--- Day changed Wed Jan 05 2011
+00:00 --- Guest9994 is now known as share
+00:00 --- ChanServ sets modes [#irssi +v eerie]
+00:00 --- share is now known as Guest82445
+00:01 --- ChanServ sets modes [#irssi +v Mechanim1l]
+00:06 --- ChanServ sets modes [#irssi +v Mechanimal]
+00:08 --- ChanServ sets modes [#irssi +v peeaivo]
+00:09 +Ziber: Whats the best way to count the number of items shown by Window::items()?
+00:11 +Zed`: fingers?
+00:12 +Ziber: ha ha.
+00:12 +Ziber: Seriously, apparently its not a normal array...
+00:12 +Ziber: Though it seems like a hash, its not quite that either, because scalar didnt work.
+00:13 --- ChanServ sets modes [#irssi +v peeaivo]
+00:13 +Zed`: heeh sorry I ma not a programmer, stick around, someone will answer :)
+00:13 +Ziber: haha, alright. and yeah, sooner or later someone will probably answer, but i tend to be impatient when trying to figure something out.
+00:15 +Nei: probably just a list?
+00:16 --- ChanServ sets modes [#irssi +v agentgasmask]
+00:16 +Nei: that you could count with something like scalar @{[ ...->items() ]}
+00:17 +Ziber: Well, or loop through it, keep an iterator and return it. :D
+00:17 +billnye: is there an acronym for There's More Than One Way To Do It But Your Way Is Wrong! ? ;)
+00:18 +Ziber: Hm?
+00:19 +agentgasmask: Hi folks, Irssi pauses when connecting to freenode after saying "xxx..freenode.net *** Found your hostname" then says "xxx..freenode.net *** No Ident response". Is there something I need to do so it will send a response? Or is there something else I can do to make this move faster?
+00:19 +Ziber: My way does give the correct value.
+00:20 +billnye: I didn't mean to imply that it'd be inaccurate
+00:20 +billnye: just Wrong(tm)
+00:21 +billnye: (and it was a /bit/ tongue-in-cheek... "ha-ha-only-serious")
+00:21 +Ziber: well, your way works too :P thanks.
+00:21 +billnye: I didn't have a way
+00:22 +Ziber: oh, whoever it was.
+00:22 +Ziber: Nei: thanks.
+00:22 +billnye: hehe BillNei
+00:22 +billnye: (the sceince gei)
+00:23 +Ziber: how do you use hilight levels in conjunction with others, btw?
+00:23 +agentgasmask: Any help?
+00:24 +billnye: agentgasmask: run identd?
+00:24 +billnye: Ziber: can you just apply a list of levels instead of one?
+00:25 +agentgasmask: billnye: what is identd?
+00:26 +Ziber: billnye: well... how would you do that, with Channel::printformat()?
+00:26 +billnye: a server-ish program (hence the "blahblahblah...d" name format) that answers identity queries
+00:27 +agentgasmask: billnye: so your saying that I should write my own? What is freenode/irssi looking for?
+00:28 +billnye: agentgasmask: not suggesting anything of the sort
+00:28 +billnye: Ziber: doesn't http://irssi.org/documentation/perl give info on printing to a certain level(s)?
+00:28 +agentgasmask: billnye: So identd exists?
+00:28 +billnye: I'm not sure what you mean exactly by "use" levels
+00:28 +Ziber: doesnt seem to help with trying to use multiple ones.
+00:28 +billnye: agentgasmask: in many different incarnations
+00:30 +billnye: agentgasmask: if you're in charge of the computer running irssi, it should be trivial to install and run an appropriate identd program for your system
+00:30 +Ziber: with printformat, you can specify the level of the message, such as "MSGLEVEL_ACTION"...
+00:30 +agentgasmask: ok, I see what your talking about now.
+00:30 +agentgasmask: billnye: ok, I see what your talking about now. Thanks :)
+00:30 +billnye: Ziber: and you see nothing at all, perhaps very nearby, about printing to more than one? ;D
+00:30 +billnye: agentgasmask: np
+00:31 * Ziber looks again... 
+00:31 +Ziber: I'm seemingly missing something obvious, but no, I dont.
+00:32 +billnye: perhaps in the paragraph introducing levels, which would seem a very salient part to read? ;D
+00:33 +Ziber: $server->print("#channel", 'Hello, world', MSGLEVEL_CLIENTCRAP); <-- The only example of the command that they give in that paragraph only uses one level.
+00:34 +billnye: your claim is not incorrect, as worded
+00:34 +Ziber: HILIGHT_CLIENTCRAP?
+00:35 +Ziber: instead of 'msglevel_'?
+00:35 +billnye: Ziber: read the darn intro paragraph ;D ;D ;D
+00:35 +Ziber: i am...
+00:35 +Ziber: Oh.
+00:35 +Ziber: :/
+00:35 * Ziber feels stupid and goes to apply that
+00:35 --- ChanServ sets modes [#irssi +v Mechanim1l]
+00:35 +billnye: don't feel stupid... feel unobservant :)
+00:37 +Ziber: but... does that apply to the "special levels" as well? ACTIONS+HILIGHT?
+00:38 +billnye: I'm not able to answer that, but I'm guessing you have the tools necessary to try it and see
+00:38 +billnye: which also makes me curious, speaking of tools, how printlevels.pl handles multi-level messages
+00:38 +Ziber: It would appear not.
+00:38 +Ziber: [18:38:09] Bareword "ACTIONS" not allowed while "strict subs" in use at /home/ziber/.irssi/scripts/multi_action.pl line 29.
+00:38 +Ziber: [18:38:09] Bareword "NOHILIGHT" not allowed while "strict subs" in use at /home/ziber/.irssi/scripts/multi_action.pl line 29.
+00:39 +Ziber: Line 29: $chan->printformat(ACTIONS+NOHILIGHT, "action_public_channel", $nick, $chan->{name}, $data);
+00:39 +billnye: wouldn't you need the MSGLEVEL_ like in your pasted example?
+00:40 +Ziber: Seemingly not.
+00:40 +billnye: ...
+00:40 +Ziber: "like ACTION+PUBLIC"
+00:40 +Ziber: or MSGLEVEL_ACTION+MSGLEVEL_PUBLIC"?
+00:40 +Ziber: the above was quoted from that intro paragraph.
+00:41 +Ziber: Oh.
+00:41 +Ziber: MSGLEVEL_ needs to preceed them both.
+00:43 +Ziber: Alright, now the question becomes how to make it trigger as normally channel activity, since it didnt seem to before?
+00:43 +Ziber: Like, the opposite of NOACT?
+00:44 +Ziber: Ah. MSGLEVEL_ACTIONS+MSGLEVEL_PUBLIC
+00:44 +Ziber: Thanks for that hint. :)
+00:45 +billnye: wouldn't ACTIONS be fine for notification even without PUBLIC?
+00:45 +Ziber: Seemingly not. Though I would think so, yes.
+00:45 +Ziber: But, through experimentation, ACTIONS+PUBLIC got me the result I wanted.
+00:53 +Ziber: and now, ofc, comes the next problem. what if the text should be hilighted?
+00:54 --- ChanServ sets modes [#irssi +v mingdao_]
+00:56 --- ChanServ sets modes [#irssi +v keith]
+00:59 +billnye: are your prints invisible to /hilight ?
+00:59 +Ziber: Hm?
+00:59 +Ziber: I tried triggering a hilight (when I'm hilighted in my current setup, the window activity number changes color), and it didnt work.
+01:01 --- Guest82445 is now known as share
+01:01 +billnye: "triggering" in what sense?
+01:01 --- share is now known as Guest48617
+01:02 +mow: if anyone is interested in what I was talking about earlier, this works => /exec -o tail -f ~/.irssi/logs/blah/blah  | grep --line-buffered blah
+01:02 +Ziber: Well, I'm running this script on a second irssi, and I tried saying the nickname of that in an action, which would trigger a highlight, usually.
+01:02 +billnye: mow: what syntax wasn't working?
+01:03 +mow: tail: cannot open `/home/mow/.irssi/logs/blah/blah' for reading: No such file or directory
+01:03 +mow: tail: no files remaining
+01:03 +mow:  /exec -o tail -f ~/.irssi/logs/blah/blah  | grep blah
+01:03 +billnye: "the nickname of that"?
+01:04 +Ziber: the nickname that im using in that irssi.
+01:04 +billnye: FROM that irssi?
+01:04 +billnye: I know nothing you say will trigger your own hilight, I don't know if the same applies to everything you print
+01:05 +Ziber: No, from this one.
+01:05 +Ziber: Specifically because I'm displaying the text with the PUBLIC level, not the hilight level. But I dont know of a way to check to see if the text should be hilighted or not.
+01:06 +Ziber: Hang on.
+01:06 +billnye: this is all too short on detail and too long on speculation... I'm going to respectfully bow out
+01:07 +Ziber: sorry.
+01:14 --- ChanServ sets modes [#irssi +v richo]
+01:15 +richo: shabble: I think I just made a whoopsie.
+01:17 +richo: Maybe I should have stuck with my fork and sending you pull requests. Anyway, ping me when you get this so we can get it fixed. I can't find any undo button on github, but I don't want to just commit a patch putting it back because that would be even kludgier I think? I thought git had support for winding stuff back.
+01:24 +billnye: richo: nothing helpful in google for "git undo"?
+01:25 +billnye: I'm no git'r (dun!) but http://book.git-scm.com/4_undoing_in_git_-_reset,_checkout_and_revert.html looks informative at least
+01:26 +richo: tried that
+01:26 +richo: I think that's meant ot be before you do a git push
+01:26 +richo: but also, it looks like shabble merged some of my changes into master which I'm not sure was deliberate either
+01:26 +billnye: I... don't think that link is /a/ "that"
+01:26 +billnye: I think it's a whole suite of various "thats"
+01:27 +richo: so I'm waiting to herre back from him
+01:27 +richo: billnye: I mean, I've already found that guide and tried it's git incantations
+01:27 +billnye: at least some of which seemed to be suitable for post-push, if I'm translating "made public" properly
+01:27 +richo: sounds like I need to just do another commit with the reverse
+01:27 +richo: it would really help if git didn't use the word
+01:27 +richo: "commit" in like 5 different contexts.
+01:28 +billnye: does it ever in its syntax?
+01:28 +shabble: richo: hey
+01:28 +shabble: what's the problem?
+01:30 +richo: shabble: Couldn't work out how to get it to commit to richoH-dev, wound up accidentally committing to master, but there's also a commit from 3 days ago from "me", which was the result of that pull request
+01:30 +richo: but I thought that was meant to go into richoH-dev too?
+01:30 * richo is confused now
+01:55 +shabble: richo: I'm a tad busy just now, but will have a look at it shortly
+01:57 +richo: shabble: No rush mate. I just didn't want you to login two days down the track and go "ZOMGWTF. What has richo done?!"
+02:01 --- ChanServ sets modes [#irssi +v tonsofpc1]
+02:01 --- Guest48617 is now known as share
+02:02 --- share is now known as Guest73132
+02:04 --- ChanServ sets modes [#irssi +v rcn]
+02:06 --- ChanServ sets modes [#irssi +v Kraftwerk]
+02:07 +Ziber: Is there any built in irssi function, in a script, to see whether or not some text should trigger a highlight?
+02:08 --- ChanServ sets modes [#irssi +v keith]
+02:16 --- ChanServ sets modes [#irssi +v Big_Death]
+02:16 --- ChanServ sets modes [#irssi +v Dice-Man]
+02:17 --- mingdao_ is now known as mingdao
+02:17 --- anthony.freenode.net sets modes [#irssi +v mingdao]
+02:17 --- ChanServ sets modes [#irssi +v supercos1onaut]
+02:18 --- supercos1onaut is now known as przem
+02:18 +billnye: *some text you printed yourself
+02:19 +billnye: (right?)
+02:19 +Ziber: eventhough im planning to just use this for my own purposes, so i can hardcode my own hilights, but, if i wanted to distribute it, id have to compile a list of the hilights that whoever set up.
+02:20 +richo: when you do a whois, you can see if the nick is identified
+02:20 +Ticho: su
+02:20 +Ticho: oops :>
+02:21 +billnye: Ticho: INVALID PASSWORD PLEASE TRY AGAIN
+02:21 +richo: does irrsi store that data locally, if a nick is ID'd?
+02:21 +richo: or do I need to whois every nick...
+02:21 +Ticho: billnye: damn, but i was so sure that y0urm0m is the correct password
+02:22 +billnye: YOUR MOM IS THE CORRECT PASSWORD...! OHHH
+02:22 +billnye: oh wait...
+02:23 +Ticho: :>
+02:33 +Guest73132: hello
+02:36 * richo changes all his passwords to "yourmom" folloowed by 32 asterisks
+02:38 +Ziber: billnye: any suggestions on how to do that?
+02:40 +richo: Ziber: I can think of a really hideous way I think?
+02:41 +Ziber: Well, feel free to share, I guess.
+02:41 +richo: hook the print function
+02:41 +richo: print the text
+02:41 +richo: inspect the return value
+02:41 +richo: ie, in the hooked print function, have a look at the flags with which it's printed
+02:41 --- tonsofpc1 is now known as tonsofpcs
+02:41 +richo: I think there's a HILGIHT flag or somesuch?
+02:42 +richo: but, it's REALLY ugly and only occurs to me because I did it a few days ago
+02:42 +billnye: richo: that sounds like it fits the spirit of the request but not the letter
+02:42 +Ziber: yes, there is. but thats only triggered when some piece of code decides that the shown text matches what should be hilighted based on hilight settings, etc.
+02:42 +richo: Ziber: Where does that happen though? After the print hook?
+02:42 +billnye: Ziber: correct me if this paraphrase isn't accurate: "How can I enable hilights for things that my scripts say, not just things other people say?"
+02:43 +Ziber: billnye: in a sense, but my script is printing things that people say...
+02:43 +richo: billnye: afaik he's wanting to test whether or not a string will set off a highlight? No?
+02:44 +billnye: Ziber: the source doesn't matter.
+02:44 +billnye: richo: that sounds like it'd fit
+02:44 +billnye: but not "whether it would", "whether it should"
+02:44 +richo: ah
+02:44 --- ChanServ sets modes [#irssi +v vincent_wang]
+02:44 +richo: good point
+02:44 +richo: I will have a play with this tonight.
+02:44 +Ziber: im a bit lost...
+02:45 +billnye: Ziber: irssi doesn't care where you get the things that you print()
+02:45 +billnye: it doesn't care if it's the pledge of allegiance or the russian launch codes
+02:45 +billnye: it's just printin' stuff
+02:46 +Ziber: yes, i figured that. i just want a way to check whether or not im supposed to print it with hilight or not, depending on the text itself.
+02:46 +billnye: you want to trigger hilights BECAUSE you're echoing what would otherwise be normal IRC traffic (if I'm gathering your aforementioned-short-on-detail intentions correctly), but the why doesn't actually factor in
+02:47 +billnye: I'm just trying to help you articulate (to richo and anyone else who cares to lend a brain) what your request is
+02:48 +Ziber: alright, to fill you in on my short-on-detail stuff. my script's intention is to print the channel name when someone (including myself, eventually) does an action, if the window has multiple items.
+02:49 +billnye: I take it print_active_channel doesn't handle ACTIONS?
+02:50 +Ziber: it does not, no.
+02:50 +Ziber: http://ziber.org/multi_action.pl.txt <-- what i have so far.
+02:51 +Ziber: list items was a way to test how to get the number of items in a window.
+02:51 --- ChanServ sets modes [#irssi +v share]
+02:52 +richo: Ziber: my brain is not in a state to deal with this at the moment
+02:52 +richo: However, if you email me about it, it sounds interesting and I would like to take a look
+02:52 +share: :)
+02:52 +Ziber: sure. feel free to PM/notice/whatever an email address.
+02:53 --- ChanServ sets modes [#irssi +v share_]
+02:53 +richo: richo@psych0tik.net
+02:54 +Ziber: alright.
+02:54 +richo: Cheers
+03:00 +Ziber: sent an intro :p
+03:02 +Ziber: honestly, i could just write a hardcoded highlighting for my own nickname...
+03:03 +richo: Pfft
+03:03 +richo: That would bad bad
+03:03 +richo: would be bad
+03:03 +richo: I spent god knows how long hacking at shabble's script just because I didn't want to have to have my channel configs in two places..
+03:03 +Ziber: yeah. but is there a prebuilt way to do what im trying to do?
+03:03 +richo: dunno. Probably not
+03:04 +richo: a lot of "obvious
+03:04 +richo: stuff seems to be missing from the API
+03:04 +billnye: I think a better question is "is there a good reason why actions don't trip the print_active_channel formatting change?"
+03:04 --- ChanServ sets modes [#irssi +v hpt]
+03:05 +Ziber: yep, that is a better question. and considering it doesnt, i guess i have no way to do it but write one myself.
+03:06 +Ziber: and, additionally, why doesnt own_action_target trigger either?
+03:06 +billnye: what's own_action_target ?
+03:07 +Ziber: a format option, seemingly for formatting a /me in a window with multiple items.
+03:07 --- ChanServ sets modes [#irssi +v nhandler]
+03:08 +billnye: it's an abstract... is it ever called?
+03:08 +Ziber: havent investigated that... not quite sure how to.
+03:09 --- ChanServ sets modes [#irssi +v share]
+03:11 --- ChanServ sets modes [#irssi +v share_]
+03:11 +billnye: looks like ownaction_target is the abstract, and called in own_action_target on my in-use theme
+03:11 +Ziber: in mine:
+03:11 +Ziber: [21:11:42] own_action = {ownaction $0}$1
+03:11 +Ziber: [21:11:42] own_action_target = {msgchannel $2} {ownaction_target $0}$1
+03:12 --- ChanServ sets modes [#irssi +v share]
+03:12 +Ziber: own_action_target never seemed to get called, which is why i decided to write this script in the first place.
+03:12 +billnye: as I said, own_action_target calling ownaction_target, which is likely (in yours as it is in mine) defined above
+03:13 +share_: later
+03:13 +billnye: doesn't EXPLAIN anything, it's just useful overview
+03:13 +Ziber: yes, and considering everything is defined... shouldnt it be triggered?
+03:13 +billnye: nothing in the theme dictates WHEN the theme elements are use
+03:13 +billnye: used*
+03:14 +billnye: aside from abstracts being called, etc. etc.
+03:14 +Ziber: right.
+03:15 +billnye: so a) it appears the theme expects the feature we see missing, b) is this a bug?
+03:16 +Ziber: i imagine it might be a bug, yes.
+03:16 +Ziber: i suppose what im planning will be the solution?
+03:16 +Ziber: and considering i doubt im the first one to write a script to intercept and print differently incoming text, someone has to have run into the highlighting problem before, right?
+03:17 +billnye: Ziber: pardon the french but fuck no it's not going to be THE solution
+03:17 +billnye: :)
+03:17 +Ziber: a/the/a
+03:17 +Ziber: s/a/mine
+03:17 +Ziber: :)
+03:17 +billnye: :) that's up to you
+03:18 +billnye: my first inclination would be "how bad would it be if every action had a channel label...?"
+03:18 +Ziber: this is only going to be used in windows with multiple items, first of all.
+03:18 +Ziber: in a multi-item window, "how bad would it be if every action DIDNT have a channel label...?"
+03:19 +billnye: I understand your aim, yes
+03:19 +billnye: just stating that my approach would be to work with the theming rather than subvert irssi's message handling ENTIRELY
+03:20 +Ziber: it would be an easier, more direct way of dealing with things, i guess. but you just said the theme wouldnt be much/any help because all the abstracts just call each other...
+03:20 +Ziber: itd be an internal trigger some where in the source.
+03:20 +billnye: no, I said the theme itself isn't any help at fixing the bug
+03:21 +billnye: nor is your script
+03:21 +billnye: anything aside from fixing the bug (source edit) in this case is a hack
+03:21 +Ziber: where would i start looking in the source, then?
+03:21 +billnye: mine just as hacky as your proposal... I claim no high ground, just stating my own perspective
+03:22 +Ziber: yours is a more solid solution, though.
+03:22 +Ziber: if i found it in the source, i could simply just add the channel name somehow.
+03:22 +billnye: mine is also not without side effects
+03:22 +billnye: if you found it in the source, you could just fix the bug :P
+03:23 +billnye: assuming (nobody else has commented) there's not some Good Reason(tm) that it behaves as it does now
+03:26 +Ziber: i find it hard to believe that this was intentional, but yes, that is a possibility.
+03:26 --- ChanServ sets modes [#irssi +v mroconnor]
+03:26 +billnye: I think I'm as incredulous as you are that it's DESIRED
+03:27 +billnye: but don't know enough to be sure it's not INTENDED (in the sense that it may be a compromise with other factors), if that makes sense
+03:27 +Ziber: yes, nor do i, but from what i do know, it makes no sense at all.
+03:28 +billnye: well actions are funky messages
+03:28 +Ziber: technically CTCPs, yes.
+03:30 +billnye: <nod> "messages" but not PRIVMSGs
+03:30 +Ziber: exactly. but, irssi, seemingly in other areas, as most irc clients, treat and display them the same.
+03:31 +billnye: ...ish
+03:31 +billnye: ;)
+03:31 +Ziber: well yes, which is why im still convinced this wasnt intended.
+03:35 +richo: Ziber: is the reason for this some glaring hole in irssi's core functionality?
+03:35 +richo: is it because it already puts the channel name before everything else, but not ACTION?
+03:35 +richo: Seems like effor would be better spent just fixing that upstream
+03:36 +Ziber: which is why billnye and i are now talking about how to fix this in the core, yes.
+03:36 +richo: oh
+03:36 +richo: I didn't look up
+03:36 +richo: my bad
+03:37 +Ziber: not that i have the faintest clue where to start looking, though.
+03:37 --- ChanServ sets modes [#irssi +v share]
+03:38 +billnye: grep the source for own_action_target perhaps?
+03:38 +richo: just start editing random files
+03:38 +richo: million monkey principle
+03:38 +billnye: richo: dammit, you beat me to the monkeys :<
+03:38 +Ziber: haha, i'll start grepping.
+03:38 +Ziber: but, first, brb.
+03:38 +Ticho: getting a typewriter? :>
+03:38 +richo: can only assume
+03:38 +limon: is there anyway to command to connect another server, from irssi client to irssi proxy-server?
+03:39 +billnye: limon: ssh <_<
+03:39 +limon: billnye: is not an easy way :(
+03:39 +Gryllida: why
+03:39 +Gryllida: blah
+03:40  Gryllida: why difficult?
+03:41 +limon: open another shell, and connect, and connect. I'm looking 1 step command :)
+03:41 +billnye: limon: why is it something that's happening often enough that it matters how many steps?
+03:42 +billnye: (as opposed to connecting on the proxy to where you'd want to connect, and then mix and match on the client end as you like)
+03:43 +limon: billnye: ok, for example, i connected A and B servers on proxy. I want to join B/C channel not A/C. How can i do that?
+03:44 +billnye: limon: /help join ?
+03:44 +billnye: that's basic irssi functionality, not proxy/client level
+03:47 +limon: billnye: ok but i tried /join #C. it joins A/C not B/C.
+03:48 +billnye: that's nice. /help join some more
+03:48 +limon: i'm trying join on client side not proxy side.
+03:49 * billnye desperately resists the urge to hit the up arrow again
+03:51 +billnye: if you're phobic about using the /join command, you might try reading the bars in the status window (or any other itemless window)
+03:51 +billnye: TIM TOWTDI, after all
+03:53 * richo prods the channel
+03:53 +billnye: richo: is that a euphemism? :<
+03:53 +richo: depends
+03:55 +limon: billnye: when i tried /join with -<server tag>, it says not connected to server...
+03:56 +billnye: limon: you're using your LOCAL server tag names, not the remote ones?
+03:56 +limon: in my local irssi, i have just one tag Proxy, i'm using this
+03:57 +billnye: then in your local irssi you are connected to only one remote network.
+03:57 +billnye: fix that.
+03:57 +billnye: :)
+03:57 +limon: yes, just my irssi-proxy. But in my irssi-proxy i have 2 server
+03:58 +billnye: your local irssi is only connected to one of those.
+04:00 +richo: you local one knows nothing of the other remote one
+04:00 +billnye: of one of the remote ones
+04:02 +limon: ah, crap. I need one port every remote server. Thanks for help
+04:02 +billnye: limon: yep, np
+04:03 +billnye: once you have that set up, the rest of the advice should fall into place :)
+04:04 +billnye: although if you like, I could probably come up with at least one or two other ways to join a particular channel on a particular network :D :D:D
+04:05 +richo: Hah
+04:06 +richo: I can think of one
+04:06 +richo: :P
+04:06 +billnye: off the top of my head I might be stuck at the /tag alias as a 3rd
+04:07 +richo: join+
+04:07 +richo: the script that shabble wrote and I hacked at
+04:07 +richo: does exactly what you want :D
+04:07 +billnye: then 4 ;)
+04:31 --- ChanServ sets modes [#irssi +v icbh]
+04:49 --- ChanServ sets modes [#irssi +v drbean]
+04:55 --- ChanServ sets modes [#irssi +v McYukon]
+04:57 --- ChanServ sets modes [#irssi +v Mechanimal]
+05:01 --- ChanServ sets modes [#irssi +v zz5-ux]
+05:02 +zz5-ux: hi there, is there an alternate to switching frames besides alt+arrows? i have a keyboard on this system that requires another key to activate arrows, and irssi doesn't seem to change frames/windows
+05:02 +mauke: alt+numbers?
+05:03 +zz5-ux: ±²³±³´µ¶
+05:03 +richo: ctrl +n , ctrl +p?
+05:03 +richo: it's what I use.
+05:03 +mauke: zz5-ux: configure your terminal to send <esc> for alt
+05:04 +zz5-ux: alt+numbers doesn't work on this keyboard either, but ctrl+n and ctrl+p does , thanks
+05:04 +zz5-ux: mauke: thank you, that could be it.
+05:06 --- ChanServ sets modes [#irssi +v dschingis]
+05:07 --- ChanServ sets modes [#irssi +v Ipozya]
+05:08 +Ipozya: Hello, could anyone take a look at my configurations and see why I am not able to identify this username automatically? I have what I believe is the appropriate command with a wait clause: http://pastebin.com/zV7NZYKG
+05:11 +tmr: Are you using autosendcmd method?
+05:11 +Ipozya: yes
+05:11 +Ipozya: autosendcmd = "/msg nickserv identify PASSWORDHERE;wait 2000";
+05:11 +tmr: Paste '/network' output.
+05:11 +Ipozya: ok
+05:12 +Ipozya: http://fpaste.org/BNTN/
+05:13 +tmr: Looks valid, does your password include $?
+05:13 +Ipozya: no it does not
+05:14 +Ipozya: when I start irssi, I get the following: http://pastebin.com/XUcx7CLe
+05:15 +richo: What is in the other field of an Irssi::Irc::Nick object?
+05:15 +richo: I'm trying to find out if a nick is auth'd to nickserv without having to do a whois
+05:16 +tmr: Ipozya, try using server password instead "Ipozya:yourpass".
+05:16 +Ipozya: tmr: i'm sorry, what do you mean?
+05:17 +tmr: Ipozya, drop that autosendcmd and use server password, /help server.
+05:19 --- ChanServ sets modes [#irssi +v Ipozya]
+05:27 --- ChanServ sets modes [#irssi +v matu]
+05:28 +matu: Hi, is it possible to redirect the join and leave message of the channel to the server page ?
+05:28 +matu: s/message/messages
+05:29 +tmr: Yes. http://wouter.coekaerts.be/site/irssi/wclf
+05:30 +matu: oh thanks a lot tmr, i always did hope it was possible
+05:32 +matu: even when i was using mirc a long time ago lol
+06:03 --- ChanServ sets modes [#irssi +v whitedragon]
+06:03 --- ChanServ sets modes [#irssi +v Big_Death]
+06:03 --- whitedragon is now known as Guest9177
+--- Log closed Wed Jan 05 06:25:08 2011
+--- Log opened Wed Jan 05 06:25:30 2011
+06:25 --- Users 388 nicks [1 ops, 0 halfops, 379 voices, 8 normal]
+06:25 --- ChanServ sets modes [#irssi +v iaj]
+06:26 --- Channel #irssi was synced in 93 seconds
+06:28 --- ChanServ sets modes [#irssi +v Geert]
+06:29 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+06:32 --- SpitfireWP_ is now known as SpitfireWP
+06:39 --- ChanServ sets modes [#irssi +v Death4Li1e]
+06:49 --- ChanServ sets modes [#irssi +v rlinuxguy2]
+06:59 --- ChanServ sets modes [#irssi +v adama_]
+07:04 --- ChanServ sets modes [#irssi +v vincent_wang]
+--- Log closed Wed Jan 05 08:50:20 2011
+--- Log opened Wed Jan 05 08:50:44 2011
+08:50 --- Users 388 nicks [1 ops, 0 halfops, 379 voices, 8 normal]
+08:50 --- ChanServ sets modes [#irssi +v iaj]
+08:52 --- Channel #irssi was synced in 89 seconds
+08:53 --- ChanServ sets modes [#irssi +v jaacoppi]
+08:54 +jaacoppi: how to set autolog on EXCEPT for a few channels? Currently I got /set autolog ON, but if I try to /log close/stop #X to stop logging a certain channel nothing happens. What's the right way to do it?
+09:10 --- ChanServ sets modes [#irssi +v ycas]
+09:13 --- ChanServ sets modes [#irssi +v kody_]
+09:20 +tmr: jaacoppi, /set autolog
+09:20 --- ChanServ sets modes [#irssi +v SolarisBoy]
+09:24 --- ChanServ sets modes [#irssi +v kody]
+09:27 --- ChanServ sets modes [#irssi +v preller_]
+09:50 --- ChanServ sets modes [#irssi +v gemelen]
+09:51 --- fluf^arr is now known as fluffle
+10:02 --- ChanServ sets modes [#irssi +v kody]
+10:02 --- ChanServ sets modes [#irssi +v r4]
+10:06 --- ChanServ sets modes [#irssi +v FrozenKnight]
+10:07 --- ChanServ sets modes [#irssi +v FrozenKnight]
+10:08 --- ChanServ sets modes [#irssi +v r4_]
+10:11 --- ChanServ sets modes [#irssi +v elkng]
+10:11 +elkng: hi all
+10:13 +elkng: I am using irssi over "ssh" and with "screen" and from console, and now I cant change channel with "Alt+left/right" it changed console tty's, what I have to do?
+10:13 --- ChanServ sets modes [#irssi +v jaacoppi]
+10:13 +Remco: Change the console to not capture those shortcuts
+10:14 +elkng: are there any "/command" to change next or prev channel
+10:14 +Rhonda: elkng: see /bind meta-left
+10:14 +Rhonda: An /help bind along that path, you can choose to bind that command to whatever you like.
+10:16 +tmr: Also default binds ctrl-n/p.
+10:17 +elkng: tmr: thanks =)
+10:28 --- ChanServ sets modes [#irssi +v Weust`]
+10:28 --- ChanServ sets modes [#irssi +v petrux]
+10:30 --- ChanServ sets modes [#irssi +v r4_]
+10:40 --- ChanServ sets modes [#irssi +v ajavid]
+10:46 --- ChanServ sets modes [#irssi +v nomad_fr]
+11:14 --- ChanServ sets modes [#irssi +v nomad_fr]
+11:14 --- ChanServ sets modes [#irssi +v kingkong_]
+11:19 --- ChanServ sets modes [#irssi +v supercosmonaut]
+11:19 --- ChanServ sets modes [#irssi +v przem]
+11:40 --- alip_ is now known as alip
+11:41 --- pratchett.freenode.net sets modes [#irssi +v alip]
+11:41 --- alip is now known as alip_
+11:41 --- alip_ is now known as alip
+11:42 --- ChanServ sets modes [#irssi +v Qvist_]
+11:55 --- ChanServ sets modes [#irssi +v lysanderslair]
+12:09 --- ChanServ sets modes [#irssi +v supercosmonaut]
+12:24 --- ChanServ sets modes [#irssi +v MinceR_]
+12:31 --- ChanServ sets modes [#irssi +v PhilipPhilip]
+12:32 +PhilipPhilip: Yo, sup homies? ne way to copy &Paste in irssi?
+12:33 +PhilipPhilip: I mean, Hi guys - is there any way to copy and paste in irssi?
+12:35 --- ChanServ sets modes [#irssi +v SS3]
+12:35 +Myrtti: PhilipPhilip: you are aware that as irssi is an application running in a terminal window, copy and pasting are usually dependant on that particular terminal
+12:35 --- MinceR_ is now known as MinceR
+12:35 +Myrtti: right?
+12:36 +PhilipPhilip: Myrtti: I'm not running irssi in a window - I don't have a GUI
+12:36 +jaacoppi: a terminal is not a window
+12:37 +Myrtti: s/window//
+12:37 +Myrtti: better? ;-)
+12:37 +jaacoppi: if you're inside gnu screen just use screen copypaste
+12:38 +PhilipPhilip: Ah, so I should use irssi in screen?
+12:38 +jaacoppi: if in console, use gpm or something similiar
+12:38 +jaacoppi: irssi as such doesn't have copy/paste functionality, it's implemented in whatever terminal you use
+12:39 +PhilipPhilip: i just in run level 3
+12:39 --- ChanServ sets modes [#irssi +v Patt]
+12:40 +tmr: Ask channel supporting your OS.
+12:42 +jaacoppi: checkout gpm and screen for starters
+12:45 --- ChanServ sets modes [#irssi +v shamrock]
+12:48 --- ChanServ sets modes [#irssi +v peeaivo]
+12:49 --- ChanServ sets modes [#irssi +v Ironnads]
+12:58 --- ChanServ sets modes [#irssi +v Mechanimal]
+13:14 --- ChanServ sets modes [#irssi +v Mechanim1l]
+13:25 --- ChanServ sets modes [#irssi +v Mechanimal]
+13:30 --- ChanServ sets modes [#irssi +v Mechanimal]
+13:31 --- ChanServ sets modes [#irssi +v Axius]
+13:38 --- ChanServ sets modes [#irssi +v Axius_]
+13:40 --- ChanServ sets modes [#irssi +v Axius]
+13:41 --- ChanServ sets modes [#irssi +v Mechanimal]
+13:42 --- ChanServ sets modes [#irssi +v {Nathan}]
+13:57 --- ChanServ sets modes [#irssi +v alip]
+14:05 --- ChanServ sets modes [#irssi +v alip_]
+14:06 --- alip_ is now known as alip
+14:07 --- ChanServ sets modes [#irssi +v hyperair]
+14:09 --- ChanServ sets modes [#irssi +v kody]
+14:22 --- ChanServ sets modes [#irssi +v Mechanimal]
+14:40 --- ChanServ sets modes [#irssi +v vincent_wang]
+14:51 +billnye: technically n/p aren't the same as left/right </quibble> ;D
+14:51 --- ChanServ sets modes [#irssi +v pif]
+14:51 +billnye: (re: window changing)
+14:53 --- ChanServ sets modes [#irssi +v craiggles]
+14:54 +tmr: Same commands for me, could have changed 'em at some point though.
+14:57 --- ChanServ sets modes [#irssi +v craiggle1]
+15:06 --- ChanServ sets modes [#irssi +v pete_]
+15:06 --- ChanServ sets modes [#irssi +v tdn]
+15:10 +harrisonk: what command is it to display the channels on a server?
+15:12 +billnye: harrisonk: the /list command isn't usually the best method if any other options are available
+15:12 +harrisonk: okay
+15:13 +billnye: i.e. channel listings through chanserv or another service (alis here on freenode), an official or unofficial web listing (http://netsplit.de), etc.
+15:13 +harrisonk: why is it not a good idea?
+15:14 +billnye: harder on the network, and it could flood you offline :)
+15:14 +harrisonk: billnye: what command is it on chanserv then
+15:14 +billnye: harrisonk: that's up to each network's services package
+15:14 +billnye: there is no standard I'm aware of
+15:14 +harrisonk: freenode for example
+15:14 +billnye: /msg alis help
+15:15 +harrisonk: ah okay
+15:15 +billnye: tmr: window_left vs. window_next, in the default binds
+15:15 +billnye: it wouldn't surprise me if you rebound the arrows to get around the unsticky-skip "bug"
+15:17 +tmr: Both are previous/next_window here.
+15:18 +tmr: Ah, on another irssi meta binds are different.
+15:21 --- ChanServ sets modes [#irssi +v jk4]
+15:22 +jk4: hi how to list all channels
+15:22 +jk4: ?
+15:24 +Nei: "all"?
+15:24 +jk4: I'm looking for a strength training channel
+15:26 --- ChanServ sets modes [#irssi +v mroconnor]
+15:26 +Zed`: Why does this not work? /alias fbon window goto 20; say account 1 on - they 'say' seems to happen before the window command....
+15:26 +Nei: on freennode (this network) you can /msg alis list *substring* to search for channels containing that part, but I doubt they have strength training here
+15:27 +Nei: http://irc.netsplit.de has a lot of public channels listed
+15:28 +jk4: awesome
+15:30 --- ChanServ sets modes [#irssi +v psychonautlib]
+15:35 +psychonautlib: Hi. Connection to a irc network sometimes automaticly joins channels. Only these channels are NOT defined in the config. Can I prevent these unwanted joins?
+15:36 +Nei: is it a script causing them? or is the server joining you to these channels?
+15:36 +Zed`: psychonautlib: check /channel list
+15:38 +psychonautlib: Server is causing the joins
+15:38 +Nei: then see if the server is offering some way to disable that
+15:38 +psychonautlib: Can't I block it from within irssi?
+15:38 +Nei: otherwise you can only "work around" this issue eg by parting them
+15:39 +billnye: my question is WHY is the server joining you to channels you didn't intend
+15:39 +psychonautlib: Zed`: channel list is not the problem. Not defined here
+15:40 +psychonautlib: billnye: good question :) I don't know, but it does
+15:41 +billnye: what are the channels?
+15:42 +billnye: is this a bug? a policy? a redirect channel? an overflow channel?
+15:42 +Zed`: how else can irssi auto connect to a channel unless it is in the channle list or a script?
+15:42 +Zed`: channel*
+15:42 +psychonautlib: network is anonops
+15:43 +Zed`: what is your /set join_auto_chans_on_invite ?
+15:43 +billnye: Zed`: they'd still be in /channel list.
+15:43 +psychonautlib: Zed`: I don't know
+15:43 +tmr: Zed`, server can force join.
+15:44 +psychonautlib: Ah, join_auto_chans_on_invite is on
+15:45 * psychonautlib testing now with off
+15:45 +tmr: That doesn't make any difference _unless_ you've configured that channel as -auto and you're invited to it.
+15:46 +psychonautlib: I see, still auto joined
+15:47 --- ChanServ sets modes [#irssi +v keith]
+15:50 --- ChanServ sets modes [#irssi +v ryzer]
+15:53 +catsup: psychonautlib: yeah, irssi can't prevent the join.  irssi just receives notification that you have been joined, from the server.  the server joins you.
+15:53 +catsup: the closest irssi could come is to not report that you have been joined
+15:53 +catsup: which you could probably hack in there by intercepting the event but i don't recommend it ;)
+15:54 +psychonautlib: Very anoying this server behaviour :(
+15:54 --- ChanServ sets modes [#irssi +v peeaivo]
+15:55 +psychonautlib: is it possible to exec any script after the connect. This scrip can then part the channels.
+15:59 +catsup: sure you could also part on join
+15:59 +catsup: better to trigger on the join than the connect, of course
+16:01 +psychonautlib: okay, I'm going to try somethings. Thanks guys!
+16:01 +catsup: see the irssi events doc
+16:01 +psychonautlib: ok
+16:02 +catsup: you'll be writing a two line script
+16:02 +catsup: fuck i should just do it for you...
+16:02 +psychonautlib: I would like that
+16:02 +catsup: s/events/signals
+16:05 +psychonautlib: where is this event doc
+16:06 +Nei: you listen on the join and stop the signal & reply with a part
+16:06 +billnye: I still want to know what's being joined and why :)
+16:07 +catsup: Irssi::signal_add('channel joined', sub { my $crec = shift; $crec->command('part '.$crec->{name}) if $crec->{name} eq "#whatever"; });
+16:07 +catsup: i guess that should work
+16:07 +catsup: channel_rec is undocumented
+16:08 --- ChanServ sets modes [#irssi +v supercosmonaut]
+16:09 --- ChanServ sets modes [#irssi +v rusak]
+16:11 +catsup: psychonautlib: got that?
+16:17 +psychonautlib: billnye: connection to the anonops network automatic joins #News and #Lobby
+16:17 +psychonautlib: catsup: Yep, got it
+16:18 +catsup: oh
+16:19 +catsup: you'll want $crec->{name} =~ m/#news|#lobby/i
+16:19 +catsup: instead of eq
+16:23 +psychonautlib: Where to put this code. In config?
+16:23 --- ChanServ sets modes [#irssi +v anon33_]
+16:23 +anon33_: if I type /connect <some address> and it's incorrect, it'll keep trying to connect over and over until it succeeds. how do I cancel this behavior?
+16:24 +catsup: /rmreconns
+16:24 +anon33_: catsup: Thanks a bunch :)
+16:30 +psychonautlib: catsup: Got it working. Thanks.
+16:30 +catsup: great
+16:31 +catsup: btw the signals doc is http://irssi.org/documentation/signals
+16:32 +psychonautlib: Interesting, will look into it
+16:39 +psychonautlib: catsup: one little drawback. If I try to join the defined channel, it wil also part :) Not really a problem.
+16:54 --- ChanServ sets modes [#irssi +v otherside]
+16:57 --- ChanServ sets modes [#irssi +v orafu]
+17:03 --- ChanServ sets modes [#irssi +v o_____O]
+17:07 +Ziber: billnye: when grepping around the source for "action_public_channel", the only thing that i see is the default format being set, in fe-common/irc/module-formats.c
+17:12 +Ziber: hm, might've found something, on second thought.
+17:13 --- ryzer is now known as ryzer-afk
+17:23 --- craiggle1 is now known as Craig`
+17:24 --- Craig` is now known as Guest48883
+17:24 --- Guest48883 is now known as craiggles
+17:36 --- ChanServ sets modes [#irssi +v vokoda]
+17:38 +vokoda: how do I write everything in a window to log? /LOG commands all seem to start the log when you execute the command, what I want to log has already been written
+17:41 +tmr: /help lastlog
+17:42 +vokoda: tmr: just figured it out, thanks though
+17:45 --- ChanServ sets modes [#irssi +v joneal]
+--- Log closed Wed Jan 05 18:27:29 2011
+--- Log opened Wed Jan 05 18:32:39 2011
+18:32 --- Users 398 nicks [1 ops, 0 halfops, 389 voices, 8 normal]
+18:32 --- ChanServ sets modes [#irssi +v iaj]
+18:34 --- Channel #irssi was synced in 90 seconds
+18:48 --- ChanServ sets modes [#irssi +v o_____O]
+18:48 --- ChanServ sets modes [#irssi +v bars0]
+18:49 --- ChanServ sets modes [#irssi +v gemelen]
+18:50 --- ChanServ sets modes [#irssi +v Dice-Man]
+18:52 --- ChanServ sets modes [#irssi +v {Nathan}]
+18:54 --- ChanServ sets modes [#irssi +v kh31d4r]
+18:57 --- ChanServ sets modes [#irssi +v fadein]
+--- Log closed Wed Jan 05 19:29:13 2011
+--- Log opened Wed Jan 05 19:29:23 2011
+19:29 --- Users 403 nicks [1 ops, 0 halfops, 394 voices, 8 normal]
+19:29 --- ChanServ sets modes [#irssi +v iaj]
+--- Log closed Wed Jan 05 19:33:06 2011

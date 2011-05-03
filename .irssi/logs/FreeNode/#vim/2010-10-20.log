@@ -1,0 +1,1234 @@
+--- Log opened Wed Oct 20 00:00:31 2010
+00:04  akosch: can i use groups in vim substitute commands?
+00:04  akosch: like &, but not the whole pattern, just parts of it
+00:04  gkatsev: yes
+00:05  akosch: how do they work?
+00:05  gkatsev: :h regex
+00:05  akosch: thx
+00:31  jerojasro: akosch: http://vimregex.com/
+00:31  jerojasro: specially section 4.5
+00:32  akosch: thx, works really great
+00:34  og01: vim is messing my html indenting up - how can i just turn it off?
+00:36  og01: i've tried things like :set noai
+00:40 --- chocoby is now known as CHOCOBY
+00:48  spiiph: og01, what does ':filetype' say?
+00:49  og01: detection:ON plugin:ON indent:ON
+00:50  spiiph: :filetype indent off should do it, then
+00:50  og01: thanks spiiph
+01:17  nimred: mbyte.txt says :
+01:17  nimred: ":set encoding=utf-8 fileencodings=" forces using UTF-8 for all files.
+01:17  nimred: fileencodings=
+01:17  nimred: ?
+01:17  spiiph: What's your question?
+01:18  nimred: spiiph i am surprised about fileencodings setting
+01:21  nimred: fileencodings=
+01:21  nimred: without any value ?
+01:21  spiiph: If 'fileencodings' is empty, 'fileencoding' is not used, and thus the value of 'encoding' will be used for the file.
+01:29  nimred: so if i want everything be utf8, that's what i have to do :
+01:29  nimred: :set encoding=utf-8 fileencodings=
+01:29  nimred: ?
+01:32  spiiph: Yes
+01:32  spiiph: But if you have any iso8859-1 or otherwise encoded files, they'll be interpreted as utf-8 without conversion, iirc
+01:33  nimred: spiiph no fileencoding nor termencoding to set ?
+01:33  nimred: just :
+01:33  nimred: :set encoding=utf-8 fileencodings=
+01:33  nimred: ?
+01:33  spiiph: I've already answered your question.
+01:33  nimred: spiiph no i want iso8859-1 or otherwise encoded files to be converted
+01:34  spiiph: Then you should use :set encoding=utf-8, and leave 'fileencoding' at its default
+01:35  nimred: i want EVERYTHING in utf-8. What interest to read or save iso8859-1 interpreted as utf-8 without conversion ?!
+01:35  spiiph: But note that Vim will always write a file in the format they were read, unless you explicitly tell it to convert it during writing.
+01:36  spiiph: Then you'll have to convert files in another format manually.
+01:36  nimred: leave fileencoding  to default ?
+01:36  nimred: what's default ?
+01:36  spiiph: Sorry, 'fileencodings'
+01:36  spiiph: Just don't change it.
+01:36  spiiph: :h 'fileencodings' will tell you about its default value
+01:36  nimred: don't change from what ?
+01:36  spiiph: 'fileencodings'
+01:37  nimred: mbyte.txt tells vim can convert files...
+01:38  spiiph: Yes, Vim converts to utf-8 internally, if that's your 'encoding', then it converts back to 'fileencoding' upon writing the file.
+01:39 --- second is now known as sec^nd
+01:40  spiiph: If you want all your files to be in utf-8, I suggest using iconv
+01:42  nimred: which way to "repair" files that were latin1 but have been interpreted as utf-8 and saved as utf-8 without being converted ?
+01:46 --- skizzhg_ is now known as skizzhg
+01:46  nimred: iconv doesn't work for that
+01:54  DHulme: nothing works for that
+01:54  DHulme: you can't convert from "has things in different encodings in the same file"
+01:54  manhunter: hi
+01:55  manhunter: kwrite shows many characters of a line,vim breaks that line,can't show all characters in one line,
+01:55  manhunter: why?
+01:55  manhunter: how can it be fixed?
+01:57  spiiph: manhunter, what does :set wrap? say?
+02:01  manhunter: spiiph, :set wrap doesn't say anything
+02:01  manhunter: same result
+02:02  nimred: DHulme so which way to "repair" file ?
+02:04  spiiph: manhunter, you missed the question mark. Try :set nowrap
+02:07  nimred: so i am fucked with those unconverted to utf-8 but saved as utf-8 files ?
+02:07  manhunter: spiiph, now it's ok,but how can i display the whole line in one window,
+02:08  manhunter: now i am to scroll right to see the rightmost column
+02:08  spiiph: uh, yeah, wasn't that what you wanted?
+02:09  thumbs: spiiph: I thought so as well.
+02:13  dekomote: Is it a good idea to map :W to :w? i seem to miss-type it a lot.
+02:14  manhunter: spiiph, but i had to scroll right
+02:14  manhunter: spiiph, ok,thanks
+02:21 --- sora_h is now known as sorah_off
+02:22  spiiph: Just, wow.
+02:23  okayzed: dekomote, remap :W and ;w, IMO
+02:23  dekomote: okayzed: thanks
+02:30 --- sorah_off is now known as sora_h
+02:32 --- shikamaru is now known as Guest26234
+02:33  shirtless: How do I stop vim from doing special things when it opens a file type?
+02:33  shirtless: just temporarily
+02:34  shirtless: herp
+02:34  shirtless: I just realized something, never mind.
+02:39 --- sora_h is now known as sorah_off
+02:39 --- sorah_off is now known as sora_h
+02:40 --- sora_h is now known as sorah_off
+02:40 --- sorah_off is now known as sora_h
+02:41 --- sora_h is now known as sorah_off
+02:41 --- sorah_off is now known as sora_h
+02:43 --- sora_h is now known as sorah_off
+02:43 --- sorah_off is now known as sora_h
+02:46  Patric3: Brand new to vi and have a question regarding undo (u). If I yank the current line (yy), and then paste this mutiple times (with p) then I've noticed the u (undo) will only undo the most recent paste (pressing u again appears to result in a redo). How do I make u undo all changes (due to the multiple pastes) ?
+02:49  azoic: does basic vi even have multiple undos?
+02:51  lumgwada: vim will behave like old vi in regards to undo if it has :set compatible
+02:51  Patric3: ah - looks like uu results in no-op in "vi-compatible way"
+02:51  Patric3: http://vimdoc.sourceforge.net/htmldoc/undo.html
+02:52  lumgwada: :set nocompatible should fix this. You might want to check your distro guide to setting up a full version of vim
+02:52  Patric3: thx
+02:56 --- estragib_ is now known as estragib
+03:00 --- sora_h is now known as sorah_off
+03:04  ChrisBuchholz: rson, spiiph: guess what. I just reinstalled my whole computer. Then i installed screen and vim and the problem was there yet again!
+03:05  estragib: ChrisBuchholz: what is your problem?
+03:06  rson: ChrisBuchholz: :(
+03:07  ChrisBuchholz: rson: its making me nutts!
+03:07 --- sorah_off is now known as sora_h
+03:07  ChrisBuchholz: estragib: i cant get the right coloring in GNU Screen
+03:07  ChrisBuchholz: i believe its about 36 hours since i started to dig in to this problem, and even a hard re-install couldnt fix it
+03:08  ChrisBuchholz: i'm going mad.
+03:08  azoic: what's your TERM in screen ?
+03:08  azoic: $TERM
+03:08  estragib: ChrisBuchholz: i just fixed that on my system. did you install ncurses-term and set all the $TERM envs right?
+03:09  ChrisBuchholz: estragib: yeah, i bet so!
+03:09  estragib: ChrisBuchholz: please give the output of "echo $TERM; echo $COLORTERM; tput colors" in- and outside of screen
+03:09  rson: hah! i bet ncurses-term installs the termcaps you need.
+03:11  ChrisBuchholz: estragib: in screen it is: screen-256color, gnome-terminal, 256. Out of screen it is: gnome-256color, gnome-terminal, 256.
+03:12  azoic: try screen-bce for TERM
+03:13  estragib: ChrisBuchholz: what isn't "right" about the colors in screen?
+03:13  ChrisBuchholz: estragib: the colors are different from out-of screen
+03:13  azoic: also , http://codepad.org/a86SKt3G in your .screenrc will help.
+03:14  ChrisBuchholz: azoic: screen-bce made vim not use my colorscheme at all
+03:14  estragib: ChrisBuchholz: have you pasted your *current* .vimrc somewhere?
+03:14  azoic: well you sure your .vimrc is not doing anything funky based on TERM?
+03:15  azoic: did you try :colorscheme myspecialcolorscheme ?
+03:15  ChrisBuchholz: estragib: lots of times;) 2sec
+03:15  ChrisBuchholz: azoic: doesnt do anything
+03:15  ChrisBuchholz: azoic: and yes.
+03:16  ChrisBuchholz: gonna post my .vimrc - 2sec
+03:17  ChrisBuchholz: estragib and azoic: http://gist.github.com/635570
+03:17  azoic: what does :echo &t_Co say ?
+03:18  ChrisBuchholz: azoic: just tried with the stuff you pasted before - no different
+03:18  ChrisBuchholz: difference*
+03:20  ChrisBuchholz: azoic: hmm? 'set t_Co?'
+03:20  azoic: :echo &t_Co
+03:20  azoic: in vim
+03:20  ChrisBuchholz: ah, no questionmark!
+03:21  ChrisBuchholz: azoic: 256
+03:21  ChrisBuchholz: it seems now, and did before also, that everything is set correctly
+03:21  estragib: ChrisBuchholz: weird. that *should* work. did you try with different schemes.
+03:21  ChrisBuchholz: estragib: thats one thing i havent, actually :P
+03:22 --- sora_h is now known as sorah_off
+03:22 --- sorah_off is now known as sora_h
+03:23  estragib: ChrisBuchholz: i use zenburn, personally, and so i know it works for all gui, term and screen
+03:23  estragib: ChrisBuchholz: in case you're looking for one to try out
+03:24  ChrisBuchholz: estragib: just tried with delek that ships with vim. Not the same, no.
+03:24  ChrisBuchholz: this makes me crazy
+03:24  azoic: how different is it?
+03:25  ChrisBuchholz: estragib: the thing was - before i reinstalled my system, i tried creating another user on my computer and with the same .screenrc and .vimrc and theme, it worked perfectly but not on this user. So we figured it was something misconfigured SOMEWHERE.
+03:25  azoic: I know not having bold colors in screen can cause such issues. but attrcolor b "I" thing in my paste should take care of that. You killed scren and restarted it after that, right?
+03:25  ChrisBuchholz: Then i reinstalled my whole system after pundering around for 30 hours. And dont you think the problem is there still???
+03:27  ChrisBuchholz: azoic: well, i did a Ctrl+a-k-y, if thats what you mean when you say kill
+03:27  azoic: umm a quit of vim and exit
+03:27  azoic: from screen session
+03:27  azoic: just to be sure
+03:28  spiiph: If you make changes to your .screenrc, I'm guessing you have to restart screen entirely.
+03:28  azoic: yep
+03:28  estragib: ChrisBuchholz: could you paste screens of the difference in eg. delek somewhere? also your .*shrc?
+03:38  ChrisBuchholz: estragib: well, i can tell you that its different, just as it is different with the molokai theme which i do have pictures of
+03:38  ChrisBuchholz: wouldnt that be easier
+03:38  ChrisBuchholz: spiiph: how do you do that, then?
+03:38  ChrisBuchholz: estragib: just as a side note. In the delek colorscheme, the only difference i see is, that the orange color that gets used for e.g. the line-numbers are not orange in screen but red.
+03:38  ChrisBuchholz: But in molokai, the difference is bigger
+03:38  ChrisBuchholz: estragib: http://dl.dropbox.com/u/168187/current-other-gt-screen.png
+03:38  azoic: umm one more thing
+03:39  azoic: you don't have that plugin … umm CSApprox plugin installed, right?
+03:39  ChrisBuchholz: nope - sessionman and nerdtree only
+03:39  azoic: do me a favor and remove sessionman for the time being and try again?
+03:39  ChrisBuchholz: azoic: sure
+03:39  ChrisBuchholz: azoic: no difference
+03:39 --- ceej_ is now known as ceej
+03:39 --- axiom is now known as majoh
+03:39  azoic: I still think your .screenrc are not equivalent since I see the statusline/caption in one of your screenshots and not in the other
+03:40  estragib: %#!%#! net split. could i get the urls too :)
+03:40  azoic: for?
+03:41  estragib: the screens
+03:41  azoic: http://dl.dropbox.com/u/168187/current-other-gt-screen.png
+03:41  azoic: and also I still can;t till is you :q and then % exit the screen session compleltey
+03:41  azoic: if
+03:41  ChrisBuchholz: azoic: yeah, at the moment it wasnt, but i checked later and the result was the same
+03:42  ChrisBuchholz: azoic: i would exit screen but it doesnt wanna play along
+03:42  azoic: eh?
+03:43 --- stuffcorpse_ is now known as stuffcorpse
+03:43  azoic: doesn't make sense. but you can do a <C-a>:source ~/.screenrc<Enter> to have it source the new rc
+03:43  azoic: from within
+03:43  azoic: then start a new window <C-a>c and play in that
+03:44  ChrisBuchholz: azoic: i read in the manual that C-a C-\ terminates screen, but it doesnt ...
+03:44  azoic: just exit the shell by doing exit
+03:44  ChrisBuchholz: azoic: i did <C-a>:source ~/.screenrc no different
+03:44  azoic: on your shell's prompt
+03:44  ChrisBuchholz: azoic: exit, i did all the time :P
+03:45  ChrisBuchholz: and still, no difference, i'm afraid
+03:45  azoic: well then I guess the only way left is to let someone ssh in to your box and look at what you are looking at …
+03:45  estragib: those suspiciously look like screen is doing its color emulation :/
+03:45  azoic: or another local vim/screen guru
+03:46  azoic: those look like screen doesn't think it has 256 colors, yes
+03:46  ChrisBuchholz: azoic: i believe i have talked with the greatest these 38 hours, but none could help me
+03:46  azoic: so most probably the TERM definition is not right
+03:47  ChrisBuchholz: azoic: cb@cb-laptop:~$ echo $TERM
+03:47  ChrisBuchholz: screen-256color
+03:47  azoic: yeah I use screen-bce for a reason
+03:47  ChrisBuchholz: yeah...
+03:47  azoic: because screen-256color did not work for me  right
+03:47  estragib: ChrisBuchholz: try to run color test scripts in- and outside of screen
+03:47  azoic: so something is amiss
+03:48  ChrisBuchholz: estragib: color test scripts?
+03:48  spiiph: There are some that come with xterm
+03:48  spiiph: Also, you should try xterm, and see if the differences are visible there too.
+03:48  ChrisBuchholz: azoic: yes, it seems like it
+03:48  ChrisBuchholz: spiiph: it was on the old system
+03:48  ChrisBuchholz: i bet it is here also
+03:48  ChrisBuchholz: 2sec
+03:49 --- tmz_ is now known as tmz
+03:49  ChrisBuchholz: spiiph: major difference in xterm
+03:50  estragib: ChrisBuchholz: eg: http://www.frexx.de/xterm-256-notes/ . look under "xterm's 256 color extension"
+03:51  ChrisBuchholz: spiiph: just tried the vim color test - big difference
+03:55  ChrisBuchholz: i'm starting to think this in infixable
+03:56  ChrisBuchholz: brb
+04:11  ChrisBuchholz: estragib, azoic maybe i should just create a new user and migrate my settings over there and delete this user. That would 'solve' the problem for me
+04:11  ChrisBuchholz: though, we wouldnt know why the problem existed
+04:11  azoic: life is too short to figure out all problems ;)
+04:12  estragib: well, it might be a troubleshooting strategy as well. create a new user, no config, set everything up step by step and see when/if it happens?
+04:12  ChrisBuchholz: yeah...
+04:12  ChrisBuchholz: estragib: i think i'm gonna do that
+04:13  estragib: good luck anyways, my heartfelt sympathies :)
+04:13  ChrisBuchholz: do you know if it is possible to change this users name and create a new user with this users name without getting any conflicts?
+04:14 --- sora_h is now known as sorah_off
+04:14  azoic: do the simpler thing
+04:14  estragib: that will be troublesome as eg. file permissions depend on uid, not name
+04:14  ChrisBuchholz: azoic: yeah?
+04:15  azoic: yeah just remove it and create a new one
+04:15  azoic: like estragib said, perms / uid is the issue
+04:15  ChrisBuchholz: azoic: as in, log in as root, delete this user and create new one. I didnt think of that
+04:15  azoic: yep
+04:16  ChrisBuchholz: well, bye for now
+04:16  azoic: good luck
+04:16  ChrisBuchholz: hope it is gonna work!
+04:18 --- sorah_off is now known as sora_h
+04:24 --- sora_h is now known as sorah_off
+04:27 --- sorah_off is now known as sora_h
+04:42  jamessan: godlygeek: since you're one of the few people I know that uses vim-lesstif, could you try building use --enable-gui=athena (needs libxaw7-dev) and let me know if that's an equitable replacement for vim-lesstif?
+04:43  jamessan: godlygeek: I'm looking to drop lesstif in favor of athena so there's one fewer diversion between the Ubuntu and Debian packages
+04:44  jamessan: godlygeek: obviously, "equitable replacement" being in the scope of how you make use of the gui
+04:48 --- sora_h is now known as sorah_off
+--- Log closed Wed Oct 20 05:01:46 2010
+--- Log opened Wed Oct 20 05:02:08 2010
+05:02 --- Users 534 nicks [0 ops, 0 halfops, 0 voices, 534 normal]
+05:02  gkatsev: das keyboard
+05:02  gkatsev: ibm model 8 keyboards
+05:03 --- Channel #vim was synced in 63 seconds
+05:03  brettgoulder: typematrix!
+05:03 --- sora_h is now known as sorah_off
+05:03  Raimondi: I switched two days ago to an old white Apple keyboard, hating it right now. I got to go out and buy the aluminum one :(
+05:04  Jerub: Raimondi: the one with large keys?
+05:04  brettgoulder: Typematrix is a really good one to consider
+05:04  Raimondi: The same.
+05:04  Jerub: yeah, i have one of those on my gaming machine at home, hanging out till i replace it.
+05:04  Jerub: gkatsev: meh. i typed a model M to death
+05:04  Jerub: i blame it for a lot of my RSI in my early life.
+05:04  gMinuses: gkatsev: I noticed das keyboard before. is it mechanical? It's really pricey.
+05:05  Jerub: gMinuses: das keyboard is the same heritage as the model M, same key mechanism, and very clicky.
+05:05  Jerub: long travel keys.
+05:05  Jerub: gMinuses: don't use it in a cubicle environment, your officemates will complain
+05:06  gMinuses: Jerub: lol, i'm looking for one for home.
+05:06  Jerub: this is my current pick of the bunch:
+05:06  Jerub: http://shopap.lenovo.com/SEUILibrary/controller/e/auweb/LenovoPortal/en_AU/catalog.workflow:item.detail?GroupID=38&Code=55Y9003&current-category-id=E9ADAEB6787146E29B78400A33E7FE8A&&hide_menu_area=yes
+05:06  Jerub: only missing a scrollwheel
+05:07  brettgoulder: http://typematrix.com/
+05:07 --- sorah_off is now known as sora_h
+05:08  gMinuses: typematrix's layout is really unique.
+05:13  gkatsev: Jerub: yeah, i meant model m not 8.
+05:13  brettgoulder: gMinuses: yea, I'm a fan
+05:13  Patric3: Is it possible to insert a linkbreak (where the cursor is) without having to enter insert mode ?
+05:13  brettgoulder: and you can really nerd out with blank keys :D
+05:14  gkatsev: das keyboard was the first with blanks no? or at least it is the more well known one
+05:14  gkatsev: das keyboard's keys are easily rearranged as well
+05:14  gkatsev: also, MS keyboard are pretty good
+05:15  gkatsev: brettgoulder: don't like the matrix layout, but otherwise, looks great.
+05:16  gMinuses: brettgoulder: blank keys will be a good way to keep people off your computer. lol
+05:16  brettgoulder: haha
+05:16  gkatsev: also, dvorak
+05:16  gkatsev: also, dvorak with blank keys
+05:16  gkatsev: apparently blank keys really make you figure out how to type well and fast
+05:18  gMinuses: i'm planning to buy an imac, do you guys think I should wait for the touch screen version?
+05:19  gkatsev: gMinuses: why not go for the macbook wheel? http://www.youtube.com/watch?v=9BnLbv6QYcA
+05:24  gMinuses: gkatsev: is it an april fool's joke or something like that? Typing like that is .... absurd.
+05:24  gkatsev: gMinuses: the onion news network
+05:24  gMinuses: gkatsev: you got me..
+05:25  gkatsev: also brought to you the internet crash of 2007
+05:25  gkatsev: http://www.youtube.com/watch?v=lvpuT3aoypE
+05:25  gkatsev: the onion news network is amazing.
+05:26  ChrisBuchholz: God damn it
+05:27  Raimondi: "everything is just a few hundred clicks away" :D
+05:27  gMinuses: gkatsev: it's hilarious.
+05:27  gkatsev: it was hard trying to IRC while the internet was crashing
+05:28  gkatsev: at first there was mad lag, but then you couldn't do anything
+05:28  gkatsev: you were essentially just talking with yourself at that point
+05:28  gkatsev: :P
+05:28  gMinuses: :D
+05:30  ChrisBuchholz: estragib, azoic: no luck, i'm afraid
+05:30  azoic: sorry dude
+05:30  ChrisBuchholz: yeah...
+05:33 --- squiggy_ is now known as squiggy
+05:44 --- sora_h is now known as sorah_off
+05:46  infid: how do you make it so typing 'gf' on a url downloads the html into vim?
+05:46 --- sorah_off is now known as sora_h
+05:48  Patric3: What's the most efficient way of cutting a line and pasting it elsewhere in a document ?  Currently, I'm using "yy" followed by "dd", navigating to where I want the line and then pasting ?  Is there any easier way ?
+05:48  Raimondi: skip yy
+05:49  gkatsev: yeah, just dd
+05:49  Patric3: oh - sorry, didn't realised dd puts the line on the buffer
+05:50  Raimondi: Not buffer, register.
+05:50  Patric3: errr.. yeah
+05:50  Patric3: :-)
+05:50 --- sora_h is now known as sorah_off
+05:52 --- sorah_off is now known as sora_h
+05:57  Patric3: What's the equivalent to Ctrl-k in emacs ? (i.e. delete to the end of the line and bring the following line up)
+05:58  estragib: DJ
+05:58  lumgwada: Patric3: DJ
+05:58  Raimondi: Maybe DJ
+05:58  estragib: hm
+05:58  Patric3: Hmmm... that seems to kill the current line I was on
+05:59  Patric3: it does, however, bring the following line "up" :-)
+05:59  Patric3: My current (inefficient) method is to enter insert mode and delete the line break
+06:00  estragib: D should not delete the entire line if you haven't remapped it
+06:00  Patric3: ok
+06:00  Patric3: Capital D
+06:00  Patric3: doh
+06:00  Patric3: Ah yes
+06:00  Patric3: Thx
+06:11  jeffszusz: so I grabbed the .vimrc example from a vim tips page
+06:11  jeffszusz: it was recommended by someone in here earlier, maybe last night
+06:12  jeffszusz: I really like it so I started comparing it to my current crappy .vimrc which was based on the default example with vim
+06:12  jeffszusz: and I have a bunch of lines in here that i really don't know what they do, or whether I should leave them in.
+06:13  remyo: jeffszusz: Are they commented?
+06:13  jeffszusz: http://paste.pocoo.org/show/277805 is what's left of my current .vimrc after removing everything that's already in the new one
+06:13  jeffszusz: some are, some are not. but even commented ones are confusing. i've looked at some in help and i don't really grep what the terminology means all the time.
+06:14  jeffszusz: like Ex mode,
+06:14  remyo: Try to, as your vimrc evolves overtime to comment EVERYTHING.
+06:15  jeffszusz: I'm commenting as much as I can as I add things now
+06:16  remyo: You can also find lots of good vimrc's on google that will probably explain some of the things you're unclear about
+06:16  jeffszusz: example of something i'm not sure about: should i use 'nobackup' if i'm using Mercurial for version control anyway?
+06:16  remyo: Yep
+06:17  remyo: You could also add set nowritebackup and set noswapfile
+06:17  jeffszusz: but does it automatically turn some sort of vim versioning thing on? my comment says "use versions instead" but I didn't write that there.
+06:19  remyo: Yeah, vim will create these backup files by default. So far as I know most people don't use them.
+06:20  jeffszusz: yeah
+06:20  jeffszusz: it is worded in a way that suggests if you turn off the backup files, it suggests that there is an alternate vcs in place
+06:20  jeffszusz: which i don't see being the case
+06:20  remyo: Na :D
+06:21  Rakko: jeffszusz: that thing about versions is only for vim running on VMS (which has versioning built into the OS)
+06:21  jeffszusz: (i got it from a 'what's in your .vimrc' thread on stackoverflow)
+06:21  jeffszusz: vms?
+06:21  remyo: jeffszusz: I PMed you my vimrc if you're interested
+06:23  Rakko: jeffszusz: http://en.wikipedia.org/wiki/VMS
+06:25  jeffszusz: is there any reason to leave the swapfile writing?
+06:25  jeffszusz: or is that an old holdover, unnecessary at this point?
+06:27  Patric3: Any tips when using vim on tex files ?  e.g. delete word (dw) doesn't work so well when you have braces etc...
+06:29  jeffszusz: dW will delete more
+06:29  jeffszusz: hello{world} for example is a WORD even though it's not a word.
+06:29  fritzophrenic: Patric3, text-objects
+06:29  jeffszusz: i think.
+06:29  fritzophrenic: and I leave with that
+06:29  jeffszusz: i could be wrong.
+06:29  Patric3: Thanks
+06:31  Patric3: jeffszusz: Thanks - this is useful
+06:34  sente: what command line argument can i pass to vim so it open file.txt when it's called like "echo file.txt | vim -"
+06:35  Patric3: vim file.txt ?
+06:35  sente: the bigger picture is i have a shell script which loops through files within a directory, for each file it prompts for user input, if i type "rm" i "rm $file", if i type vim, i want open the file with vim
+06:36  jhaddad: vim $file
+06:36  sente: if i simply try vim "$file" it complains about input coming from a terminal, etc
+06:36  jhaddad: ?
+06:36  sente: but i can 'echo "$file" | vim -' without any issues
+06:37  jhaddad: i should have kept quiet.  no idea on that one.
+06:42  Raimondi: sente: What's the content of $file? file name or file content? I think I'm missing something there...
+06:43  Rakko: what do I need to do to change text object mappings? e.g. I use a plugin that defines ,w so you can do i,w; but I want iw to be mapped to i,w
+06:45  sente: Raimondi: ls -1 *.txt| wihle read line; do vim "$line"; done #  <--- does not work
+06:45  Raimondi: Rakko: I think this could help  :h omap-info
+06:47  Rakko: thanks
+06:47  jhaddad: sente: just a note, you don't have to do -l when piping
+06:47  sente: jhaddad: yeah i know, this is just a simple example to illustrate my problem
+06:47  Patric3: An observation - I notice that if I leave insert mode (e.g. Esc) then the cursor moves back one space.  Currently I find that if I use the arrow keys (while in insert mode) to get to a character / word that I want to "do" something to then I'm always one space out!  What's the advantage of the "back one space" on exiting insert mode ?  I'm guessing that there must be some reason for it.
+06:47  Rakko: Raimondi: I thought operator pending mapping was covered my :map.
+06:48  infid: Patric3: being back one space because there's no space inserted
+06:48  infid: unless you want vim to insert a spce everytime you escape :X
+06:48  Raimondi: sente: It works for me, vim shows a warning, but it works.
+06:49  sente: Raimondi: does your while loop output multiple files?
+06:51  Raimondi: sente: Now I tried with multiple files and it doesn't work.
+06:51  Patric3: infid: I'm sure I'll get used to that behaviour
+06:51  Rakko: Patric3: There's discussion on the wiki about that issue, and ways to get around it. Apparently the rationale is consistency of some sort.
+06:52  Patric3: Thanks Rakko
+06:52  sente: this works:
+06:52  sente: ls -1 *.txt | while read line; do echo "" | vim - -c "edit! $line"; done
+06:55  jeffszusz: I've got some weird things in my vimrc... what does "don't use Ex mode" mean?
+06:56  Rakko: Raimondi: I'm still not getting how to make mappings for text objects.
+06:57  Raimondi: Rakko: Never tried myself, sorry.
+07:01  sir_lewk: building vim with "--enable-pythoninterp=yes" should build vim with python support... right?
+07:02  Rakko: not sure
+07:02  Rakko: what does ./configure --help say?
+07:03  sir_lewk: seems to indicate that's what I should do
+07:03  sir_lewk: didn't seem to work though
+07:03  Rakko: oh:(
+07:03  sir_lewk: could it be because I also used --prefix?
+07:04  sir_lewk: trying this again with a make clean first
+07:05  sir_lewk: yeah, :version still has -python -python3
+07:06 --- nchaimov_ is now known as nchaimov
+07:07 --- incubus is now known as Guest93347
+07:08  etherealite: Can't get a hung gvim to die with kill -9 how can i find out whats keeping it from dying?
+07:08  godlygeek: sir_lewk: are you on a debian-based system
+07:08  etherealite: yes
+07:08  etherealite: godlygeek Ubuntu 10.04 atm.
+07:08  godlygeek: etherealite: the usual solution for a problem like that would be strace, i think...
+07:10  Rakko: godlygeek: please see my modified vimcat at http://rakko.homeunix.com:8089/~eric/vimcat.vim
+07:10  godlygeek: heh, what a crazy script.  whadja change?
+07:10  sir_lewk: godlygeek: F13
+07:10  Rakko: I don't know you have a newer version
+07:11  Rakko: I changed a few things, like the piping to FD 9 didn't quite work for me (on a Mac)
+07:11  Rakko: and I found that if any highlighting changed the background color, it would not get reset
+07:12  Patric3: If I use "DJ" on the end of a line, the last character will be deleted (so it's not quite like Ctrl-k in emacs which is what I'm after)
+07:12  sir_lewk: do I need to use --with-python-config-dir too?  I'm not sure what I'd put for that
+07:13  sir_lewk: neither ./configure nor make seem to output any error messages
+07:13  sir_lewk: unless I'm just missing them in the noise..
+07:13  godlygeek: sir_lewk: look in config.log, that should tell you why it doesn't think you have the python build-deps.
+--- Log closed Wed Oct 20 07:19:51 2010
+--- Log opened Wed Oct 20 07:20:11 2010
+07:20 --- Users 533 nicks [0 ops, 0 halfops, 0 voices, 533 normal]
+07:20  Patric3: Is there an easy way to kill whitespace between the cursor and the next word ?
+07:20  godlygeek: Patric3: diw
+07:20  Patric3: Hmmm.... no dice
+07:21 --- Channel #vim was synced in 66 seconds
+07:21  Rakko: is there a way to map something but specify that it *not* be silent?
+07:21  godlygeek: Patric3: was your cursor on whitespace when you typed it?
+07:21  Patric3: yeah
+07:21  godlygeek: Rakko: that's the default...
+07:21  Patric3: oh
+07:21  lumgwada: Patric3: multiline?
+07:21  godlygeek: Patric3: you didn't do something crazy like put a colon in front, did you?
+07:22  Rakko: I know but I have a mapping that's silent and isn't supposed to be
+07:22  Rakko: viz. I have :cnoremap <A-Backspace> <C-w>
+07:22  Rakko: and when I hit A-BS, it doesn't update the command line until I type something else
+07:22  godlygeek: <C-w> is silent... what do you expect it to print?
+07:23  Patric3: no colon - just vanilla command mode.  (Have tried on actual whitespace along with a character - doesn't seem to work for me)
+07:23  Rakko: godlygeek: I want it to visually erase the word immediately
+07:23  godlygeek: Patric3: then you're either running vi, or an ancient vim.
+07:23  godlygeek: Rakko: pretty sure that's a map timeout issue
+07:24  Patric3: godlygeek: vim --version gives VIM - Vi IMproved 7.1
+07:24  Rakko: oh, lemme see
+07:24  sir_lewk: got it :D
+07:24  Rakko: godlygeek: no, it never times out
+07:26  godlygeek: Rakko: :verb set timeout? ttimeout? timeoutlen? ttimeoutlen?
+07:26  godlygeek: Patric3: ok.  then i really have absolutely no idea why text objects wouldn't be working for you.
+07:27  Rakko: timeout, ttimeout, 1000, 100
+07:27  Patric3: godlygeek: Hmm.... everything else I've tried so far (vim specific) seems ok.  Perhaps this is the first text object op that I've tried
+07:27  sir_lewk: ok, gundo.vim is officially awesome
+07:28  godlygeek: Rakko: hm.  what happens if you :cnoremap <Tab> <C-w>   just for testing?
+07:28  Rakko: that's fine
+07:29  Rakko: there must be something going on due to the fact that A-BS is <Esc>^?
+07:30  godlygeek: that's what i was assuming - that the <Esc> is causing the problem.
+07:30  godlygeek: does :cmap <Esc>  show any other maps?
+07:31  Rakko: oh, got it
+07:31  Rakko: no, I use keycodes instead of mapping for <Esc>
+07:32  Rakko: but there are some other intermediate mappings that were <silent>
+07:34  Rakko: I've been overzealous with applying <silent> I see
+07:34  Rakko: I might just take them all out
+07:35  sir_lewk: if I didn't already know it was a stupid idea, I think I'd just switch to using persistent_undo and gundo.vim as my VCS :D
+07:36  Rakko: godlygeek: does your version of vimcat work for you?
+07:36  Rakko: I seem to recall that I got it from you a year or two ago but never got it working until recently
+--- Log closed Wed Oct 20 08:37:01 2010
+--- Log opened Wed Oct 20 08:37:24 2010
+08:37 --- Users 536 nicks [0 ops, 0 halfops, 0 voices, 536 normal]
+08:37  ggergely: they also have thtat extension
+08:37  ggergely: they are the docs os a program
+08:37  Rakko: ohhh, ok
+08:37  ggergely: or will be. i set up the project page and shared an rfc with my friends
+08:37  Rakko: vimwiki automatically takes control of any .wiki file
+08:38  ggergely: yesyes
+08:38 --- Channel #vim was synced in 67 seconds
+08:41  Rakko: let me look
+08:45  brettgoulder: how do I sudo edit things if I am already in vim?
+08:47  jeffszusz: brettgoulder:
+08:47  apokryphos: is there a syntax file that provides syntax/color for java log files?
+08:47  brettgoulder: yo
+08:47  Rakko: ggergely: what config line did you use to set auto_export?
+08:47  jeffszusz: :w !sudo tee %
+08:47  Rakko: I'm a little unsure of the dictionary syntax
+08:48  jeffszusz: i just read that like ten minutes ago on stackoverflow brettgoulder :D
+08:48  Rakko: or I'm doing it wrong
+08:49  brettgoulder: it's weird, I tried that, but it asks for my password 3 times but doesn't let me input anything
+08:53  jeffszusz: hey anyone remember who it was that made the "ubiquitous vim" settings for KeyRemap4MacBook ?
+08:53  ggergely: Rakko: "let wiki.auto_export = 1
+08:53  ggergely: let g:vimwiki_list = [wiki]
+08:53  ggergely: i also had these
+08:53  ggergely: in addition to the previously pasted 3
+08:54  Rakko: what file did you set that in, ggergely ?
+08:54  Rakko: not offhand, jeff
+08:55  ggergely: .vimrc
+08:55  ggergely: wait, i post it
+08:55  Rakko: ok
+08:55  ggergely: Rakko:  http://sprunge.us/QDdO
+08:55  Rakko: oh, you first did let wiki = {}
+08:55  ggergely: yes
+08:55  ggergely: i did
+08:57  Rakko: It just refuses to auto-export for me :(
+08:58  Rakko: oh, wait
+08:59  Rakko: I was wrong
+08:59  Rakko: Now, to make it so it doesn't always do it.
+09:07  Rakko: ggergely: I can't even succeed in saving files that aren't in my vimwiki dir
+09:07  ggergely: Rakko: strange
+09:08  ggergely: don't ask me, as vimrc files are mostly magic for me
+09:08  Rakko: I'm learning slowly
+09:08  Rakko: I just wrote something that I thought would fix it... but it didn't
+09:09  Spidey01: vimrc files are only magic if they crash vim.... :-P
+09:09  Spidey01: Black magic, if they crash my toaster lol
+09:14  Rakko: I dunno, ggergely. I don't get this either.
+09:27  Rakko: I can't get this autocmd to work
+09:27  Rakko: au BufWritePost <buffer> if expand('%:p:h') == '/Users/eric/vimwiki' | Vimwiki2HTML | endif
+09:28  Rakko: it says Trailing characters:  Vimwiki2HTML | endif
+09:28  Raimondi: Try using exec
+09:29  Raimondi: To run the Vimwiki command
+09:29  Rakko: ok
+09:29  Rakko: Raimondi: this is strange, because the original -- au BufWritePost <buffer> Vimwiki2HTML -- works fine
+09:30  Raimondi: It's not strange, the Vimwiki command laks the -bar argument, so it can't be followed by a |
+09:30  Rakko: Oh! OK :)
+09:30  Rakko: It fixed it, as you said.
+09:31  Raimondi: The workaround in those cases is to use exec.
+09:31  Rakko: So, ggergely ...
+09:31  Rakko: Look in .vim/ftplugin/vimwiki.vim
+09:32  Rakko: Use zR to expand folds. Near the end, change this:    au BufWritePost <buffer> Vimwiki2HTML    to this:    au BufWritePost <buffer> if expand('%:p:h') == '/path/to/my/wiki' | exec 'Vimwiki2HTML' | endif
+09:34  Rakko: That is a
+09:34  Rakko: oops
+09:34  Rakko: Cat on the keyboard.
+09:35  Rakko: That is a hack that *should* make it only generate HTML when the file is in /path/to/my/wiki... but I modified the plugin itself, so it will be lost if you update it
+09:35  Rakko: It also doesn't look to see if you're in a *subdirectory* of /path/to/my/wiki, although that could be done.
+09:35  Tama00: Who new the vimperator plugin got forked? Now called pentadactyl?
+09:36  Rakko: not I
+09:37  Tama00: check it out http://dactyl.sourceforge.net/home seams like the main developers forked the plugin cause some older developers where splitting the donations evenly and not doing any work
+09:37  Tama00: It is already better than vimperator
+09:37  Rakko: Raimondi: What I did was modify an autocmd in an ftplugin. It is a buffer-specific autocmd. Would there be a way to move that modification into .vimrc instead?
+09:40  Raimondi: Rakko: If there's a load guard in the ftplugin you could use it to stop it.
+09:40  Rakko: if exists("b:did_ftplugin") ?
+09:40  Rakko: I don't think we want to stop the ftplugin, though. Just override its autocmd.
+09:43  Rakko: ggergely: I think alternately you could create another wiki dictionary variable, point that at your bitbucket wiki, and set the dictionary specifically not to auto_export
+09:43  Raimondi: Rakko: You might be able to remove it with a after/ftplugin
+09:43  Rakko: oh, thanks
+09:44  ggergely: Rakko: i see. btw althoug vimwiki is useful, when i'll have time to desing it properly i'll write a a wiki solution that better suites my needs
+09:44  Rakko: ggergely: well, I hope this helps a little in the meantime
+09:45  ggergely: sure it does
+09:45  Rakko: good :)
+09:45  ggergely: vimwiki is nice. just not totally what i'd like
+09:47  Rakko: yes, after/ftplugin works well
+09:52 --- _mathrick is now known as mathrick
+09:58 --- Piflechien is now known as GoTee
+09:59 --- GoTee is now known as sendpass
+09:59 --- sendpass is now known as Piflechien
+10:05  Rakko: no, I was wrong... after/ftplugin isn't doing it
+10:14  Rakko: Raimondi: one last questiong for tonight: My after/ftplugin script seems to be executed only for the first tab loaded. How can I change that?
+10:14  Raimondi: Rakko: HAve you tried with  au! filetypeplugin BufWritePost <buffer> ...
+10:15  Raimondi: So it does work.
+10:15  Rakko: Actually the first buffer, not just tab
+10:15  Rakko: Hmm, no, I didn't know about the 'filetypeplugin' argument
+10:16  Rakko: I just have au! BufWritePost <buffer>
+10:16  Rakko: but it's within an augroup
+10:16  Raimondi: I think ftplugin autocommands are tied to that group by default.
+10:16  Raimondi: Oh!
+10:17  Raimondi: Then use that augroup name
+10:17  Rakko: http://rakko.homeunix.com:8089/~eric/vimwiki.vim is it
+10:17  Raimondi: I haven't tried any of that myself :)
+10:20  Raimondi: 3am here, I'm going to bed
+10:20  Raimondi: Good luck with that
+10:20  Rakko: Hmm, nope
+10:20  Rakko: Here too. Night.
+10:40 --- silex is now known as Silex
+10:41 --- Evanlec_ is now known as Evanlec
+10:43  Linux-CLI: hi
+10:43  Linux-CLI: What's the vim command to go to the previously opened file?
+10:44  the_isz: Linux-CLI: <c-6>     ?
+10:44  the_isz: Linux-CLI: command would be        :b #
+10:44  Linux-CLI: the_isz: More detail please!
+10:44  the_isz: Linux-CLI: hold control, then press 6
+10:45  Linux-CLI: Thanks->ppl
+10:45  Silex: :bp would probably work too
+10:47  Linux-CLI: Silex: What's the p for?
+10:49  LordMetroid: Linux-CLI: :previous
+10:49  LordMetroid: Sorry, I just saw someone posted that on #linux the second after you left
+10:49  Silex: LordMetroid: there's :h :bp you know ;)
+10:49  Linux-CLI: Thanks LordMetroid
+10:50  Silex: s/LordMetroid/Linux-CLI /
+10:58  Silex: is there a difference between vaw and vw ?
+10:59  Silex: there doesn't seem to be one, I'm not sure why the doc mentions this "a" char at all in visual mode
+11:00  strull: Silex: you see the difference if you are not on the first character of the word
+11:00  Silex: strull: oh, right cool
+11:01  Silex: smart
+11:02  marlun: How do I set the current buffers height in a script?
+11:03  the_isz: marlun: a buffer doesn't have a height. do you mean window?
+11:04  marlun: the_isz: yes, sorry :)
+11:05  the_isz: marlun: :resize N
+11:15  marlun: the_isz: Thanks, worked great! Had "exec 'n' . a:height" before, don't remember why but it didn't work.
+11:15  marlun: Can I clear a buffer without using "normal" in a script? I don't want key mappings to be triggered.
+11:15  the_isz: marlun: you're welcome
+11:16  DHulme: marlun: :%d
+11:17  DHulme: or :enew if you just want a blank file
+11:20  iaj: do you guys map capslock to escape, or rather to control?
+11:20  the_isz: iaj: capslock to esc and vice-versa
+11:22  iaj: the_isz: hm yeah.. I'm thinking of switching back to that setup - but since I use screen a lot.. I need to use CONTROL much more now
+11:23  the_isz: iaj: i don't see the problem. i use screen, too.
+11:23  sqz: normally I yank a line with 'yy', however, if I want to yank a line into register 'q' (by performing "qy ), the first character misses while pasting with @q
+11:23  sqz: please advice
+11:24  DHulme: you don't paste with @
+11:24  DHulme: see :h @
+11:24  Silex: you want "qp
+11:24  DHulme: it's lucky the first character is i
+11:24  DHulme: (or a)
+11:25  sqz: hehe aaah...I remember using @
+11:25  sqz: 'macro-style'
+11:25  Silex: and I think taht to yank the line to register q you need "qyy, not "qy
+11:25  sqz: but I needed 'p' thnx!
+11:25  sqz: hmmm here "qy works
+11:25  sqz: strangely enough
+11:26  Silex: do you use a motion key after it?
+11:27  Silex: by my "qy shows it's waiting for me to tell it what to you (line, word, right, left, etc)
+11:27  Silex: *by me
+11:27  Silex: *what to yank
+11:31  marlun: DHulme: Thanks :)
+11:31  marlun: I keep forgetting your in command mode in scripts.
+11:34  strull: aha
+11:41  sqz: this yanking/pasting into registers is great!..lots of times I got annoyed by overwriting the same register with yy and p
+11:42  sqz: in fact!..I think I will yank the whole alfabet into different registers, and will code by pasting only! :P
+11:43  sqz: (talking about overautomation) :)
+11:44  Silex: sqz: you could also use :reg
+11:44  Silex: see the history of cutting/yankings
+11:44  Silex: and choose the register to paste with "2p
+11:44  Silex: or "4p, etc
+11:44  sqz: hohoooooooooo
+11:44  sqz: very very very nice
+11:44  Silex: indeed :)
+11:45  sqz: I don't need this yankring tool anymore
+11:45  sqz: tool=plugin
+11:45  sqz: anyways..also what I like about register is executing it
+11:46  sqz: with @
+11:46  sqz: I have for each language some 'startup' registers..for example in php when my cursor is on a var, and I press @p, it wraps a die( vardump( thevar ) ); around it
+11:47  iaj: a
+11:48  Silex: sqz: yeha it's convenient... check snipmate as well
+11:49  stev3n: if I wrote a patch for Vim (added option "space" to 'listchars'), then does it make sense to send the patch to the developer, and if so, where?
+11:50  stev3n: see new features: http://i5.fastpic.ru/big/2010/1020/b2/82fcd11d584c28ba54ef6d14d33383b2.png
+11:59  nimred: My locale are all "en_US.UTF-8" except LC_ALL ; i use rxvt-unicode as terminal emulator with "URxvt*imLocale : en_US.UTF-8" in my ~/.Xdefaults ; i use a unicode font (efont --> http://openlab.ring.gr.jp/efont/unicode/) ; in my ~/.vimrc i have : "set termencoding=utf-8" + "set encoding=utf-8" + "set fileencoding=utf-8" + "set fileencodings=". But i cannot get "+p working when pasting X clipboard into vim with such characters as "é" or "œ" or "Æ" while pas
+12:02  kenda: stev3n: i have no aswer, but thats a nice patch! thats the only feature i ever missed in vim
+12:18  kongo: stev3n: you may want to post that patch to the vim_dev mailing list
+12:21  stev3n: ok
+12:21  amagee: hey does vim have some kind of "trace" function?  say i have some plugin that has bound to the % key, and it does something i don't want, but i don't know which plugin it is, is there some way i can step through what happens when i press % in order to find which one it is?
+12:23  strull: amagee: try :map %
+12:23  kongo: amagee: or :verb map %
+12:24  amagee: oh, that's beautiful.. thanks!
+12:27  kongo: stev3n: btw, that patch looks great to me - I would love to see that in vim
+12:27  stev3n: )
+12:27  stev3n: thanks
+12:28  nimred: any idea ?
+12:29  Silex: s  <Tab>       * <Esc>i<Right><C-R>=TriggerSnippet()<CR>
+12:29  Silex: 	Last set from ~\vim-addons\snipmate\after\plugin\snipMate.vim
+12:29  Silex: the s there means select mode right?
+12:30  Silex: how come it happens in insert mode then?
+12:30  kongo: Silex: try :verb imap <tab>
+12:31  Silex: right, thanks
+12:31  Silex: thought :map would show all mappings
+12:31  nimred: does it work for you ? if so wich way ?
+12:32  kongo: Silex: no, see :h map-modes
+12:33  iaj: is there a way to delete buffers who match a certain pattern?
+12:33  iaj: eg those buffers who end in a slash?
+12:33  Silex: kongo: ah, those modes are tricky :)
+12:35  kongo: iaj: I suppose you would have to write a function for that
+12:37  Silex: when I go in visual mode and move around with hjkl, no problem it works. When I move with the arrow keys, it quits visual mode. Any idea why that happens?
+12:37  Silex: hint: I think I have "behave mswin", I'm tempted to remove it
+12:38  Silex: not sure if it's related
+12:39  strull: Silex: what gives :map <down>
+12:40  kongo: Silex: you answered your own question - it's because of :behave mswin
+12:41  Silex: strull: nothing, that's the problem
+12:41  Silex: kongo: alright, I'll test it
+12:41  Silex: thanks
+12:41  Silex: I guess if I really want mswin's feature I could always remap <down> and friends to do what I want on top of it
+12:42  kongo: that's true - you can look at :h :behave to see what settings are influenced by :behave
+12:43  Silex: thanks
+13:13  nimred: o_O
+13:14  ChrisBuchholz: Holy smoke, guys! It seems like i have fixed the bug where GNU screen didnt show my vim-coloring right! I dunno if any of you online remember the problem, but i just wanted to led you know, since you have been helping me for rougly three days
+13:17  rdpate: ChrisBuchholz: you can't say that without mentioning how you fixed it...
+13:18  rdpate: (I've not helped, but I have been roughly following)
+13:19  strull: rdpate: he said it. It was the "holy smoke"
+13:23  kongo: ChrisBuchholz: I am interested in your solution as well
+13:26  ChrisBuchholz: kongo: Well, originally, i was running ubuntu 10.10 RC which should, according to #ubuntu be the same as final. There was no 'big' changes or anything in this cycle. I reinstalled RC twice, having the same problem and as you might know - nobody could figure out what was wrong. 3 hours ago i took my bike and rode down to the local DVD pusher and bought some empty discs, then burned the 10.10 final image on it, installed and then carefully set up everyth
+13:27  ChrisBuchholz: things seems like i think they should be all the way through, so i am glad
+13:27  ChrisBuchholz: very glad, indeed
+13:32  rdpate: cut off at "...and then carefully set up everyt"
+13:34  kongo: ChrisBuchholz: ok, glad to hear that it seems to work finally
+13:36  ChrisBuchholz: kongo: me too
+13:51  nimred: My locale are all "en_US.UTF-8" except LC_ALL ; i use rxvt-unicode as terminal emulator with "URxvt*imLocale : en_US.UTF-8" in my ~/.Xdefaults ; i use a unicode font (efont --> http://openlab.ring.gr.jp/efont/unicode/) ; in my ~/.vimrc i have : "set termencoding=utf-8" + "set encoding=utf-8" + "set fileencoding=utf-8" + "set fileencodings=". But i cannot get "+p working when pasting X clipboard into vim with such characters as "é" or "œ" or "Æ" while pas
+14:04  rson: chrischambers: who hoo
+14:04  rson: chrischambers: my bad, fail tab.
+14:04  chrischambers: :)
+14:09  PlasmaHH: hi, when a plugin talks about a keymap being set to <A-r>e what does it exactly mean?
+14:09  mgedmin: alt-r, followed by e
+14:09  mgedmin: with the caveat that alt-r will *not* work in a terminal
+14:10  mgedmin: because the world moved on, and vim stayed in the 1970s
+14:10  PlasmaHH: ah, that probably explains why I am confused and everything I tried did not work... why doesnt alt+r work in a terminall vim?
+14:11  mgedmin: because every terminal in the 21st century sends <esc>r when you press alt-r
+14:11  mgedmin: and vim thinks terminals should send a single 8-bit character that is ASCII r with the high-order bit set
+14:11  mgedmin: vim is wrong
+14:13  djmccormick: blasphemy
+14:14  strull: mgedmin: most terminals can be configured what to do when alt-r is pressed
+14:15  PlasmaHH: yeah, unless they are as buggy as kde4 konsole :/
+14:17  PlasmaHH: hm, maybe I can do it the other way round, is there a way to make vim convert ESCr to alt+r ?
+14:17  mgedmin: :map <esc>r <A-r>
+14:17  mgedmin: or, better yet, never map <A-r>, map <esc>r
+14:17  mgedmin: no, wait, <A-r> does work in gvim
+14:17  jamessan: mapping <A-...> works fine for me
+14:18  jamessan: and in vim
+14:18  PlasmaHH: I would rather leave the plugin and the mappings it does alone, so mapping ESCr -> alt+r is waht I will try
+14:19  strull: for me <m-r> also works. But I specifically have set the resource *metaSendsEscape:true
+14:20  jamessan: ah, right. I did that too since otherwise I couldn't switch irssi windows with <A-1>, <A-2>, etc.
+14:21  PlasmaHH: mgedmin: thanks a lot, mapping escr to a-r works for me now
+14:21 * mgedmin thinks he should start drinking
+14:22  robgleeson: mgedmin: it's never too late to become an alcoholic :P
+14:22  mgedmin: which is why I keep postponing the date
+14:23  PlasmaHH: my doctor always says I don't drink enough...
+14:27  nimred: My locale are all "en_US.UTF-8" except LC_ALL ; i use rxvt-unicode as terminal emulator with "URxvt*imLocale : en_US.UTF-8" in my ~/.Xdefaults ; i use a unicode font (efont --> http://openlab.ring.gr.jp/efont/unicode/) ; in my ~/.vimrc i have : "set termencoding=utf-8" + "set encoding=utf-8" + "set fileencoding=utf-8" + "set fileencodings=". But i cannot get "+p working when pasting X clipboard into vim with such characters as "é" or "œ" or "Æ" while pas
+14:28  mgedmin: nimred, your long utterance was truncated at "while pas"
+14:41  nimred: mgedmin :
+14:42  nimred: My locale are all "en_US.UTF-8" except LC_ALL ; i use rxvt-unicode as terminal emulator with "URxvt*imLocale : en_US.UTF-8" in my ~/.Xdefaults ; i use a unicode font (efont --> http://openlab.ring.gr.jp/efont/unicode/) ; in my ~/.vimrc i have : "set termencoding=utf-8" + "set encoding=utf-8" + "set fileencoding=utf-8" + "set fileencodings=".
+14:42  nimred: But i cannot get "+p working when pasting X clipboard into vim with such characters as "é" or "œ" or "Æ" while pasting using middle click works fine... What's the problem ?
+14:42  nimred: is it ok ?
+14:42  mgedmin: sanity check: is your locale supported by the system?
+14:42  mgedmin: run 'locale charmap' in a terminal, what does it say?
+14:44  nimred: [~]->> locale charmap
+14:44  nimred: UTF-8
+14:44 * mgedmin scratches head
+14:44  nimred: mgedmin what's wrong ?
+14:45  mgedmin: normally you only need to make sure LC_CTYPE is correct (if LC_ALL is empty)
+14:45  mgedmin: and everything else just works
+14:45  nimred: mgedmin sorry i didn't understand
+14:46  nimred: [~]->> locale|grep LC_CTYPE
+14:46  nimred: LC_CTYPE="en_US.UTF-8"
+14:46  James147: how can you delete (or select/change) the contents of a bracket?  (ie "foo {bar}" to "foo {}")?
+14:46  mgedmin: what I mean is that setting 'encoding', 'fileencoding','termencoding' is not necessary
+14:46  mgedmin: vim should autodetect those correctly from the locale
+14:46  mgedmin: and it does, for me
+14:46  mgedmin: ok, sanity check #2: is vim compiled with --enable-multibyte?
+14:46  mgedmin: check: version
+14:46  nimred: mgedmin so i have to comment it in my ~/.vimrc ?
+14:46  anon33_: Where are the vim header files located in a UNIX filesystem?
+14:46  mgedmin: er, I mean, check :version
+14:47  mgedmin: see if it says +multi_byte
+14:47  mgedmin: nimred, having that in your .vimrc shouldn't break anything either
+14:48  nimred: mgedmin i have : +multi_byte
+14:48  mgedmin: hm
+14:48  mgedmin: ok
+14:48  mgedmin: hm
+14:48  nimred: i run ArchLinux
+14:48  mgedmin: from what application did you copy that text?
+14:48  nimred: [~]->> uname -a
+14:48  nimred: Linux vohfi 2.6.35-ARCH #1 SMP PREEMPT Wed Sep 29 08:45:18 CEST 2010 x86_64 Intel(R) Core(TM)2 Duo CPU T9500 @ 2.60GHz GenuineIntel GNU/Linux
+14:49  nimred: mgedmin it doesn't work from any application
+14:49  nimred: i tried from terminal emulator, web browser (jumanji)
+14:49  mgedmin: I don't know what the problem could be
+14:50  mgedmin: I use Ubuntu; non-ASCII characters work just fine out of the box
+14:50  rson: James147: di{ or ci{
+14:51  James147: rson: thanks :)
+14:51  nimred: for example i just double clicked on "éééééé" in terminal ; ran vim ; then "+p" ; it inserted "??????"
+14:52  FernandoBasso: nimred: Oh. That is not the proper way, I think.
+14:52  FernandoBasso: No. I'm wrong.
+14:52  nimred: mgedmin but doing : insert "éééééé" in vim ; select "éééééé" in vim using visual mode ; then "+y" ; and then paste it in terminal emulator using middle mouse works fine
+14:53  mgedmin: what terminal emulator is this?
+14:53  mgedmin: oh, rxvt-unicode
+14:53  mgedmin: let me try
+14:53  nimred: rxvt-unicode as said above
+14:53  FernandoBasso: nimred: Instead of double clicking try actually copying it.
+14:54  nimred: FernandoBasso works fine when copying instead of clicking
+14:54  mgedmin: works for me -- but pasting is "*p (selection), not "+p (clipboard, which doesn't change when you double-click)
+14:54  nimred: but that's not what i need to do
+14:54  nimred: i need using X buffer
+14:55  FernandoBasso: I'm not sure if just clicking actually sends content to the clipboard in a proper way.
+14:55  nimred: mgedmin ah should be error yes
+14:55  mgedmin: selecting contents puts it into the PRIMARY selection; copying puts it in the CLIPBOARD selection
+14:55  mgedmin: X cut buffers are obsolete and no longer relevant
+14:55  nimred: yes it is
+14:55  nimred: works fine with *
+14:55  nimred: great !
+14:56  nimred: thanks mgedmin
+14:56  mgedmin: if your clipboard had something else than question marks, you'd have figured it out sooner
+14:56  mgedmin: what a coincidence ...
+14:56  nimred: mgedminwhat do you mean ?
+14:57  FernandoBasso: mgedmin: Thanks for the piece of information about PRIMARY selection and CLIPBOARD selection. I was not aware of them.
+14:58  mgedmin: http://www.jwz.org/doc/x-cut-and-paste.html is a good description
+15:00  FernandoBasso: Thanks.
+15:01  nimred: thanks mgedmin FernandoBasso :)
+15:12  heeen: can a script maintain a custom side margin/column?
+15:12  heeen: like a custom foldmargin/linenumber thing
+15:18  Silex: where can I find the help for <C-o> ? :h <C-o> talks about registers stuffs
+15:18  Silex: I'm trying to find the opposite of <C-o> when in help, to rejump where you were
+15:19  the_isz: Silex: <C-i>
+15:19  Silex: the_isz: thanks, any idea about the :h question?
+15:19  mgedmin: :h CTRL-O
+15:19  mgedmin: finds the right one
+15:20  kurkale6ka: Silex: ^o then c-d
+15:20  kurkale6ka: I mean :h^o...
+15:21  Silex: Ah, smart. Thanks
+15:25 --- CHOCOBY is now known as chocoby
+15:35  mcantor: Is there an existing way for Vim to "know" which class, function or method my cursor is currently "in"?
+15:36  mgedmin: for python there's pythonhelper.vim
+15:36  mgedmin: I would love to have this for C
+15:39  the_isz: doesn't taglist.vim do something like that (disclaimer: haven't tried)
+15:39  kongo: yeah, I think that taglist can do something like that too
+15:40  mcantor: I'll dive into the vimscript and see how closely it's coupled to the rest of the stuff...
+15:43  kongo: mcantor: maybe some of the global functions of taglist might help you - see :h taglist-functions
+15:51  sgronblo: Anyone know a colorscheme that has decent colors for vimdiff?
+15:51  sgronblo: mcantor: isnt that what some cscope is for?
+15:51  iaj: I got a question, I got a html file which doesn't have any wrapping and (thus) no indenting at all.. just a 1liner... is there any easy way to split those lines and make that whole beast readable?
+15:52  kurkale6ka: :s/>\zs\ze</\r/g
+15:52  mgedmin: iaj, no easy way, but there are some not-terribily-difficult ways
+15:52  mgedmin: kurkale6ka suggested a good one
+15:52  mgedmin: piping to an external html beautifier (tidy?) might work
+15:52  strull: i'd use htmltidy or something equivalent
+15:54  iaj: htmltidy the commandline app?
+15:54  strull: yes
+15:56  sgronblo: iaj: after I installed rails.vim the auto-indentation for html seems to have gotten pretty good
+15:57  sgronblo: mcantor: http://www.vim.org/scripts/script.php?script_id=610 heres a plugin which uses ctags
+15:57  iaj: sgronblo: yeah. actually I'm currenlty using ItsAllTExt firefox plugin to get the contents to Vim, in order to indent them, and make them readable
+15:57  iaj: strull: tidy is expecting a whole HTML file, with HEAD<BODY and stuff correct?
+15:58  strull: iaj: probably. don't know. You have to try yourself
+15:59  iaj: just grabbed the most recent version for osx.. but its not really working as I expected :\ dang
+16:01  iaj: Strasse<br>D   why isn't that one matched with %s/<br>/\r<br>\r/ ?
+16:05  _Ludwig_: Hi y'all! Would someone be willing to solve a mystery for me here? Well, two actually. First one relates to my Pathogen sufferings (kidding ;-) I have pathogen in /autoload directory, and a plugin in bundle/plugin_name_directory/ with its help file in /plugin_name_directory/doc. However, pathogen#helptags() fails to load tags.
+16:06  _Ludwig_: Or to be more precise it figures out that there is a help file (when :help it shows the name of the file), but cannot "jump" to it.
+16:06  mcantor: iaj: Check out "tidy".
+16:11  rson: _Ludwig_: can you explain that last line some more?
+16:11  mcantor: kongo: I'll download taglist and check it out, thanks.  sgronblo: Never heard of cscope before!  I see that it's bundled with vim itself.  Thanks for the suggestion.
+16:12  mcantor: I've been wondering, actually, how to set vim up such that it only cares about tags that are *actually* imported in the given file.
+16:12  mgedmin: what do you mean?
+16:12  mgedmin: is this about python and ctags indexig 'from foo import X' statements under X?
+16:12  mcantor: mgedmin: Basically, yes!
+16:12  momentum_: is there any bulletproof case for a laptop?
+16:12  mgedmin: for that you want --python-kinds=-i in ~/.ctags
+16:12  mcantor: mgedmin: The hell you say.
+16:12  mgedmin: (a seriously broken default IMHO)
+16:13  _Ludwig_: rson: Sure. Although it's exactly like I said. When i go to :help, under "Local additions" (y'know, where the plugins list is usually) there are csexplorer.txt and rainbow_parentheses.txt (in this case). However, if I go Ctrl-] on them (I checked, they're not remapped) Vim says "E149: Sorry, no help for rainbow_parentheses.txt".
+16:13  mcantor: mgedmin: That default isn't in my ctags manpage.
+16:14  mgedmin: the manpage mentions kinds, and you can see them for python with ctags --list-kinds=python
+16:14  mgedmin: and then you can guess that 'imports' is something you don't want
+16:15  mgedmin: but it's basically irritating voodoo
+16:15 * mgedmin is very irritable today for some reason
+16:15  mcantor: mgedmin: My --list-kinds=python says only classes, functions & members; no imports.
+16:16  rson: _Ludwig_: hmm, i don't seem to have that issue with any of my plugins using pathogen.. where did you get rainbo_parens from, i'll try it and see if i can reproduce
+16:16  mgedmin: ctags version?
+16:16 * mgedmin has 5.8
+16:16  mcantor: mgedmin: Exuberant Ctags 5.7
+16:16  mgedmin: I don't think 5.7 indexed import statements
+16:16  mgedmin: so the workaround shouldn't be necessary
+16:17  mcantor: mgedmin: Hmm... the more I think about it, the more I suspect that I did not communicate my needs successfully.
+16:17  sgronblo: hmm what's the hl for these ugly tourqoiseish empty lines in vimdiff?
+16:17  mcantor: Let me explain better:
+16:18  graywh: sgronblo, there's DiffAdd DiffDelete DiffChange and DiffText
+16:18  mgedmin: sgronblo, :h :diffu, then page down
+16:18  _Ludwig_: rson: It's not just rainbow. The behaviour is the same for any plugin. In any case, http://bitbucket.org/sjl/dotfiles/src/tip/vim/bundle/rainbow/
+16:18  mcantor: mgedmin: What I really want is, let's say I define two "User" classes; one in common.model and one in view.templates.  Now, if I'm in a file that has "from common.model import User" at the top, or "from common import model" and later, "model.User", then when I do a tag search on User, it should ONLY consider the one in common.model.
+16:19  mcantor: Does that make sense?
+16:19  sgronblo: so which one is the non-existing line?
+16:19  rson: _Ludwig_: are you running :call pathogen#helptags() manually or is it in your vimrc?
+16:20  sgronblo: is it supposed to be diffdelete?
+16:20  sgronblo: oh seems like it is
+16:20  _Ludwig_: rson: In my vimrc. There was some discussion of whether it should go before or after ...append_all_bundles, so I tried both versions. Currently it is behind.
+16:21  rson: _Ludwig_: what happens if you call it manually, then try to jump?
+16:22  _Ludwig_: rson: well, nothing! I mean, the same thing, of course.
+16:22  mgedmin: mcantor, that would be a clever thing to do, certainly
+16:22  mgedmin: mcantor, I don't know how to achieve that
+16:22  mgedmin: I've made a habit of using unique names project-wide
+16:22  mgedmin: e.g., User and UserTemplate
+16:23  rson: _Ludwig_: are the scripts actually being loaded? e.g. are they in :scriptnames
+16:23  mcantor: mgedmin: A fine idea, but I have a very specific use case: I am working with a 10-year-old codebase containing almost a million lines!
+16:23  _Ludwig_: rson: yes, all of them
+16:23  rson: hmm
+16:24  mgedmin: mcantor, learn to love :tsel, maybe
+16:24  mcantor: mgedmin: Oh, I have.  ;-)
+16:24  mgedmin: write a smart piece of vimscript that parses import statements
+16:24  rson: _Ludwig_: and if you look in the rainbow_parentheses/doc folder there exists a tags file?
+16:25  mgedmin: it should be possible, I think
+16:25  mcantor: mgedmin: That's what I am currently considering.
+16:25  mgedmin: with taglist() etc.
+16:25  mcantor: mgedmin: Certainly... there's no reason vim couldn't figure it out.
+16:25  _Ludwig_: rson: there exists a .txt file.
+16:25  mcantor: mgedmin: If the Python interpreter can figure it out, so can Vim.  :-)
+16:26  rson: _Ludwig_: that means the call to helptags is not working, it should create a tags file.
+16:26  mcantor: mgedmin: Actually... I wonder if I could do a cheap trick, and actually use a Python file to parse the file and find which files are imported?
+16:26  rson: which would explain the behavior
+16:26  Shapeshifter: How can I open a file in an existing vim instance from outside vim? As in, I have an open vim instance, and then I want to open another file using -p filename but not in a new window but inside the existing vim.
+16:26  mcantor: Is there a way to tell Vim "use this tag file, but only consider tags that are in a subset of files?"
+16:26  mgedmin: mcantor, maybe steal the idea from python's omni-completion, which I think imports the actual objects and inspects them for __module__ etc.
+16:27  rson: _Ludwig_: do you have the application 'tree' installed?  if so can you pastebin the output of tree in your .vim directory?
+16:27  strull: Shapeshifter: :he --remote
+16:27  Shapeshifter: strull: thanks
+16:27  _Ludwig_: rson: "tree" as in a listing of dirs and subdirs?
+16:27  rson: yes
+16:27  mcantor: mgedmin: Is "omni-completion" the thing used in ipython?
+16:27  _Ludwig_: rson: yes, I have it. give me a second.
+16:28  mgedmin: no, it's the thing in vim when you press ^x^o
+16:28  rson: _Ludwig_: and your vimrc as well
+16:28  mcantor: mgedmin: Oh, so you meant vim's omni-completion for Python.
+16:28  mcantor: mgedmin: Wait... vim's omni-complete can do that?!?!?
+16:28  mgedmin: it handles standard library modules and classes nicely
+16:28  mgedmin: and almost nothing else
+16:28  mcantor: Hahaha, why nothing else?
+16:28  mgedmin: type inference is _hard_ in python
+16:29  mgedmin: def my_function(f): f.^x^o --> what's the class of f? nobody knows!
+16:29  mcantor: Oh, well, of course.  I see what you mean now.
+16:29  mgedmin: import os; os.^x^o -> easy
+16:29  sgronblo: How do I write an if statement to set a certain colorscheme only in diff mode?
+16:30  mcantor: I've literally never used ^x mode before.
+16:30  mgedmin: I find it rarely useful
+16:30  mgedmin: well, ^x^f is handy
+16:30  mgedmin: and ^x^o for stdlib interfaces
+16:31  mgedmin: but usually ^p/^n works best
+16:32  _Ludwig_: rson: http://www.pastey.net/141877 and http://www.pastey.net/141878 (watch out for some wierd encoding)
+16:33  heeen: can a script maintain a custom side margin/column?
+16:34  sgronblo: Can't i just use "if diff"?
+16:34  strull: "if &diff" rather
+16:34  rson: _Ludwig_: this is a complete shot in the dark, but what happens if you move filetype off below the pathogen calls?
+16:34  mcantor: mgedmin: Yeah, I'd love to find a way to make ^p/^n ignore tags that aren't imported to the current file.
+16:35  mgedmin: no, no, no, that would totally break my use case
+16:35  mgedmin: some_obj.long_method_name -> you never import methods, but you want to complete them
+16:35  _Ludwig_: rson: same thing.
+16:35 --- chocoby is now known as CHOCOBY
+16:35  mcantor: mgedmin: That's what I meant, actually
+16:36 --- CHOCOBY is now known as chocoby
+16:36  mcantor: mgedmin: If I do "from common import Obj" and then "some_var.what^n", and there's a "whatever" method on Obj, it should complete that
+16:36  rson: _Ludwig_: last question, what version of pathogen? it's at the top of the script
+16:37  mcantor: But if there's a "whatever" function in some other module that I didn't import, ignore it.
+16:37  mgedmin: mcantor, if I do from unrelated import func, and then func().some_method where func() returns an object defined in another_module, I want tags from another_module even if I don't import it directly
+16:37  mgedmin: top-level functions could be skipped, aggreed
+16:38  mgedmin: unless func() returns a module object ...
+16:38  sgronblo: strull: thanks
+16:38  mgedmin: python is flexible
+16:38  mgedmin: which is why tool support is so threadbare
+16:38  _Ludwig_: rson: That I don't even have to watch - the current one. I downloaded it yesterday off vim.org's page. (1.2)
+16:38  mcantor: mgedmin: Of course.  You could also be defining __getattr__() anywhere!
+16:38  mcantor: mgedmin: But just because we can't do it perfectly doesn't mean we shouldn't do it at all.
+16:39  mgedmin: oh, absolutely!
+16:39  rson: _Ludwig_: i've got no clue then..  i'm not on windows so i can't test if it's a windows thing or not
+16:39  marlun: Whats the name of the plugin which let you send debug messages to a specific window from scripts?
+16:39  rson: _Ludwig_: sorry
+16:39  mcantor: Every time I talk about type inference in dynamic languages, people love to throw their hands up and say "Anything could be anything!" which is true, but... not always.  :-)
+16:39  _Ludwig_: rson: 'tis okey. You did your best. (Really appreciate helping me out with this)
+16:39  mcantor: (I wasn't accusing you of that, btw, mgedmin.  Just a soapbox moment!)
+16:40  mgedmin: looking at how long you still have to go tends to discourage people
+16:40  mcantor: mgedmin: Not necessarily--we only need to take one step at a time, you know?
+16:40  rson: _Ludwig_: a work around would be to manually run helptags on those directories, but that's annoying.
+16:40  mgedmin: that was my next point: it helps if the steps are small
+16:40  mcantor: If I write my little import-munger script, and put it out there, anyone can come along and improve it.
+16:40  marlun: Decho was the one.
+16:40  mgedmin: I don't think they are when we're talking Python and type inference
+16:40  _Ludwig_: rson: of course. That was the reason the plugin is here.
+16:40  _Ludwig_: rson: I'll send a mail to the author, with the _vimrc and vimfiles, to see whether he can reproduce the problem. Just thought I'd check in with you guys first.
+16:41  mcantor: Python & Ruby are my main concerns
+16:41  mcantor: mgedmin: Actually you know what would work?
+16:41  rson: _Ludwig_: in fact, that's the exact reason i use the plugin
+16:41  marlun: Anyone know if I can extract the content from a vimball without installing in vim?
+16:41  mgedmin: mcantor, you may want to look at a few Python plugins I've at http://mg.pov.lt/vim/plugin/
+16:41  rson: _Ludwig_: he has a repo on github, let me see if he has any related issues open
+16:41  mgedmin: sadly I've no time to properly maintain them (put them on vim.org, etc.)
+16:42  mgedmin: I had a description of them here: http://mg.pov.lt/blog/unix-is-an-ide.html
+16:42  mcantor: mgedmin: Have ^n use "pessimistic" inference at first--only show tags in imported packages.  Then, if you're working with some dynamic code, you could hit something else which would tell it "do ^n again, but this time with all tags."
+16:42  rson: _Ludwig_: http://github.com/tpope/vim-pathogen/issues#issue/7
+16:42  mcantor: mgedmin: Based purely on that second url, I posit that we could be bros.
+16:42  mgedmin: user interface concern: ^n is a simple text-based completion that works the same in all file types
+16:42  mgedmin: I'd rather use a different key for something smarter
+16:43  _Ludwig_: rson: Yup. Just watching it myself. Seems this is a standing issue, after all.
+16:43  mgedmin: maybe just go an improve omnicompletion?
+16:43  mcantor: mgedmin: Sure, that makes sense too.
+16:43  mcantor: Hmmm.  Yeah.
+16:43  mcantor: I'll have to read up on omnicomplete.
+16:43  mgedmin: if it doesn't know anything, you could make it fall back to a list of tags, filtered by import statements
+16:43  mcantor: Yeah.
+16:43  mcantor: So, omnicomplete actually fires up a one-shot python interpreter to examine the modules you've interpreted?
+16:43  rson: _Ludwig_: the posted fix is probably not going to be accepted (if i had to guess) because it forces the directory to be called bundle
+16:44  mgedmin: mcantor, runtime/autoload/pythoncomplete.vim
+16:44  mgedmin: 600 lines of code
+16:44  mcantor: Hell *yes*.
+16:44  mgedmin: yep, exec(src) in self.compldict
+16:45  mgedmin: wait, or does it only exec the current line of code?
+16:45  mgedmin: at least it has a import statement parser you could reuse
+16:46  _Ludwig_: rson: well, personally, i don't mind what's it called. as long as it works. uhmm, (not used to github's interface) - how do you get an updated pathogen.vim (with the fix), instead of just the fix lines?
+16:47  _Ludwig_: rson: nwm
+16:47  mcantor: outstanding.
+16:47  _Ludwig_: rson: will check now whether it works.
+16:47  rson: _Ludwig_: the fix hasn't been accepted.  you could manually make that change in your pathogen.vim though if you wanted
+16:48  mcantor: mgedmin: Thanks so much for the input; I gotta run for a bit.
+16:52 --- chocoby is now known as CHOCOBY
+16:52  _Ludwig_: rson: I downloaded the (new) pathogen.vim (you can click upper rightish to get a modified version, although it hasn't been updated apparently) and it works. Help file tagged.
+16:53  _Ludwig_: rson: as long as it works ... (I'm mostly a windows guy).
+16:53  rson: _Ludwig_: glad it works
+16:54  _Ludwig_: rson: although I'm pretty sure tpope will figure it out when he gets the time.
+16:55  _Ludwig_: rson: Just another thing if I may ... this one will be more painless, I promise. I'm a sucker for esthetics :-/ How did this guy get indent lines and tabs like in the picture? http://leetless.de/images/vim/phd.png
+16:55  _Ludwig_: rson: I know I'm annoying, but ... ;-)
+16:55  rson: _Ludwig_: using :set list with listchars set to something like listchars=tab:\|-
+16:55  graywh: _Ludwig_, :set list lcs=|·
+16:55  graywh: _Ludwig_, :set list lcs=tab:\|·
+16:56  _Ludwig_: graywh: yes, but how did he get the "verticals" to not have a "split" between them.
+16:56  graywh: it's a character that uses the full line height
+16:57  rson: probably by using the vv digraph
+16:57  mgedmin: it also depends on the font you have
+16:57  mcantor: mgedmin: Do you use GNU screen?
+16:57  rson: set listchars=<ctrl-k>vv-
+16:57  mgedmin: mcantor, I try to avoid it as much as possible
+16:57  graywh: the second character might be the 3- digraph
+16:57  mcantor: mgedmin: Oh my goodness.  why???
+16:58  graywh: or 4-
+16:58  rson: er, :set listchars=tab:<c-k>vv-
+16:58  mgedmin: mcantor, it complicates things and causes more problems than it solves (for me, anyway)
+16:58  rson: yeah, i can't really tell from the picture
+16:58  mcantor: mgedmin: Dude.
+16:59  _Ludwig_: mgedmin: do you know of an example ?
+16:59  _Ludwig_: rson: sorry? that doesn't seem to do anything.
+16:59  mcantor: I still have to run to a meeting, but I am going to bug you about GNU screen when I get back!  ;-P
+16:59  rson: _Ludwig_: you still need to :set list, and also must use tabs for indentation, not spaces
+17:00  _Ludwig_: rson: of course. but ... tab:<ctrl-k>vv- results in tab:--
+17:00  rson: bah, you're on windows, i dunno if digraphs are different on windows or not
+17:01  mgedmin: try <ctrl-v>u2502
+17:01  _Ludwig_: rson: in any case, I'll solve that somehow ... will try to find a nice char. combination.
+17:01  mgedmin: instead of <ctrl-k>vv
+17:01  mgedmin: if that comes out wrong, your font is broken
+17:01  mgedmin: or your vim doesn't support unicode
+17:01  mgedmin: is 'encoding' set to UTF-8?
+17:03  rson: _Ludwig_: i personally use set listchars=tab:⇥\ ,trail:·,extends:⋯,precedes:⋯ and find it quite nice, however i use spaces for indentation and only use this to show me when someone has put tabs in my files.
+17:03  _Ludwig_: mgedmin: encoding is on utf-8, but all that u2502 gets is a well, a broken symbol. i never did was able to get unicode to work in vim.
+17:03  mgedmin: well, you're on Windows ...
+17:04  mgedmin: my attempts to use nice unicode checkmarks in a web app crashed on the first encounter with a windows user ...
+17:04  _Ludwig_: mgedmin: I know ... I'm sorry ;-)))
+17:04  mgedmin: I think the renderer there has no fallback mechanism, so if one font doesn't support a character, you won't get it picked from a different one
+17:04  mgedmin: Arial Unicode has a lot of characters, IIRC
+17:05  mgedmin: but it's not a monospace font, and won't work with vim
+17:05  _Ludwig_: mgedmin: unfortunatelly, my job tools require windows ... I'm allowed, but cannot work on *nix or Mac, ...
+17:05  mgedmin: I suppose you could install dejavu sans mono on your system
+17:06  mgedmin: or try :set guifont=Andale-Mono
+17:06  _Ludwig_: dejavu sans mono ... gimme a sec, and i'll try.
+17:06  mgedmin: wait, I'm on Linux, so I have per-character substitution, so the fact that Andale Mono works for me doesn't actually prove that it'll work for you
+17:10  _Ludwig_: mgedmin: no, dejavu doesn't work also. my guess is andale won't work neither (will try it later) ... it seems to be a windows thing.
+17:10  mgedmin: does anyone know how to ask Pango, or whatever is responsible for this font substition, which font it actually picks?
+17:10  _Ludwig_: mgedmin: but nice font btw (dejavu).
+17:10  mgedmin: for a particular character?
+17:11  mgedmin: dejavu is quite not bad
+17:11  mgedmin: andale mono has better kerning for certain character pairs, though
+17:11  gkatsev: if you can get consolas, I would choose that. otherwise, I like dejavu mono
+17:12  mgedmin: I love all those Mac OS X screenshots that have beautiful fonts
+17:12  mgedmin: Monaco, I think?
+17:12  mgedmin: anyway, half of the way the font looks is determined by the rendering engine
+17:13  wwalker: Monaco - looks great with anti-aliasing.
+17:13  wwalker: ugly without anti-aliasing
+17:13  mgedmin: when I found monaco.ttf somewhere on the web and tried it here, it didn't look good
+17:13  mgedmin: there are all those hinting settings, etc.
+17:13  mgedmin: your screen dpi
+17:13  Shapeshifter: How can I use the -t and --remote options at the same time? if I do -t --remote it says missing arguments, if I do --remote -t it treats "-t" as a filename. I want it to open the specified files in a new tab in the remote vim
+17:13  mgedmin: any microsoft font looks bad if your dpi is not exactly 96
+17:13  _Ludwig_: mgedmin: i use cleartype on windows, and some fonts which used to look ugly, look real nice with it.
+17:14  mgedmin: Shapeshifter, vim --help
+17:14  mgedmin: then notice there's --remote-tab
+17:14  _Ludwig_: mgedmin: hmm, interesting. just installed andale font, and instead of a weird character for u2502 it gives me ^B ?!
+17:14  Shapeshifter: mgedmin: oh
+17:14  mgedmin: huh
+17:15  Shapeshifter: mgedmin: well, I looked at man vim and there's a few --remote-* stuff, but --remote-tab is not around that area
+17:15  mgedmin: maybe man vim is outdated
+17:15  Shapeshifter: as a matter of fact, --remote-tab isn't even in man vim at all
+17:15  mgedmin: vim --help mentions it
+17:15  patrick85: _Ludwig_: http://leetless.de/vim.html
+17:15  mgedmin: hm
+17:15  mgedmin: maybe you've an old version of vim?
+17:15  Shapeshifter: mhh maybe
+17:15  Shapeshifter: VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Sep  4 2010 19:49:36)
+17:16  Shapeshifter: anyway, indeed --help shows it.
+17:16  mgedmin: that's a new version
+17:16  Shapeshifter: thanks
+17:16  mgedmin: who maintains the manual page?
+17:16  mgedmin: upstream?
+17:16  Shapeshifter: my guess is upstream, arch packages wouldn't mess with something like this.
+17:16  Shapeshifter: gotta run now, thanks for the help
+17:17  Shapeshifter: *pacakgers
+17:17  Shapeshifter: oh well
+17:20  _Ludwig_: patrick85: yes, i know of the page. didn't work with that font, and that vimrc was showing garbage so ...
+17:20  graywh: --remote-tab *is* in the help
+17:21  graywh: another arch failure?
+17:21  patrick85: _Ludwig_: ah, you're right, the characters are broken… sorry
+17:21  mgedmin: it is in the help and it is in vim --help, but it is not in man vim
+17:21  mgedmin: on ubuntu either
+17:21  graywh: ah
+17:22  graywh: --remote-tab isn't listed in starting.txt either
+17:23  _Ludwig_: patrick85: nwm, appreciate the effort!
+17:24  belak: What's the difference between gvim and vim, apart from the fact that one has a little bit of gtk in it and the other one is all console based?
+--- Log closed Wed Oct 20 21:13:12 2010
+--- Log opened Wed Oct 20 21:13:32 2010
+21:13 --- Users 601 nicks [0 ops, 0 halfops, 0 voices, 601 normal]
+21:14 --- Channel #vim was synced in 93 seconds
+--- Log closed Wed Oct 20 21:21:39 2010
+--- Log opened Wed Oct 20 21:22:00 2010
+21:22 --- Users 601 nicks [0 ops, 0 halfops, 0 voices, 601 normal]
+21:23 --- Channel #vim was synced in 78 seconds
+21:31  mcantor: Does *anyone* have a copy of the thesaurus file that used to be on hyphenologist.co.uk?
+21:32  crankharder: using the Command-T plugin how do I open a new horizontal split?  It's supposed to be Command-h -- I'm using terminal in OSX if that matters
+21:36 --- wokka is now known as nock
+21:36 --- nock is now known as nocko_
+21:36 --- nocko_ is now known as wokka
+21:37  remi: crankharder: according to ":h command-t", <C-CR> or <C-s> open the selected file in a new split
+21:38  crankharder: that somehow doens't map well to the OSX keyboard :/  control-v works for vertical split
+21:39  crankharder: but controler+s doesn't do anything and control+return just opens it full screen
+21:40  ChrisPitzer: :help
+21:40  ChrisPitzer: hey - is there a way to say, for instance in my .vimrc, "apply these settings if i'm editing a file in ~/foo"?
+21:41  graywh: you just need an autocmd
+21:41  estragib: mcantor: this mail links a few replacement suggestions: http://www.mail-archive.com/vim_use@googlegroups.com/msg17820.html
+--- Log closed Wed Oct 20 21:49:15 2010
+--- Log opened Wed Oct 20 21:49:36 2010
+21:49 --- Users 607 nicks [0 ops, 0 halfops, 0 voices, 607 normal]
+21:49  mcantor: estragib: Amazingly, none of those worked out.
+21:50  estragib: mcantor: hrm :/
+21:50  mcantor: mcantor: The moby thesaurus seemed promising, but it only downloaded in some kind of braindead half-dos half-unix line-ending format, and I don't think the thesaurus file itself has ANY line endings.
+21:50 --- Channel #vim was synced in 78 seconds
+21:51  mcantor: Even if it did, it seemed like it wouldn't work out.  I'm sorry, but "a cappella" is not a synonym, nor is it even a related word, to "con amore" and "crescendo"... ;-)
+21:52  estragib: that does not sound very accurate, no :)
+21:53  mcantor: I just can't believe there isn't a sane default out there.  It'd be *so* convenient.
+21:55  estragib: i agree. there must be something out there, in the academical field at least.
+21:57  mcantor: I've given up for now ;-\
+21:57  mcantor: :-\
+21:57  rson: ChrisBuchholz: sorry to hear that
+22:01  estragib: mcantor: what about the one shipped with openoffice? it must be free and i'd guess in an open/processable format.
+22:03  mcantor: estragib: Could be.  I don't have it on this PC at the moment, though, and don't feel like downloading it... might try later
+22:05  estragib: mcantor: there's about a hundred million thesaurus files in my package manager; so you have options :)
+22:07  estragib: i exaggerated a little
+--- Log closed Wed Oct 20 22:15:49 2010
+--- Log opened Wed Oct 20 22:16:13 2010
+22:16 --- Users 605 nicks [0 ops, 0 halfops, 0 voices, 605 normal]
+22:17 --- Channel #vim was synced in 79 seconds
+22:23 --- skizzhg_ is now known as skizzhg
+22:28  mcantor: How can I ask vim what its list of included files is?  That is, the conceptual output of 'include' > 'includeexpr'
+22:32  mcantor: Interesting... there's almost a duplication of effort between omni-completion and ctags.
+22:33  ben10: is there anyway to test filename suffixes in vimrc
+22:34  Raimondi: if expand('%:e')
+22:35  Raimondi: :h expand()
+22:36  mcantor: ben10: also see :he :au
+--- Log closed Wed Oct 20 22:42:28 2010
+--- Log opened Wed Oct 20 22:42:52 2010
+22:42 --- Users 599 nicks [0 ops, 0 halfops, 0 voices, 599 normal]
+22:44 --- Channel #vim was synced in 76 seconds
+22:45  ben10: How does this look: if expand('%:e') == '.hs' || '.hls' ...
+22:46  jamessan: if expand('%:e') =~ '\.hl\=s'
+22:47  Raimondi: The dot is not part of expand() output
+22:48  jamessan: ah, even easier
+22:48  ben10: well actually i typoed its .hs or .lhs, so is it =~ '\=lhs
+22:48  jamessan: ben10: what's the end goal of this?
+22:49  ben10: well i usually code C which i like a 4 tabstop, but Haskell is finickky in tabs and uses an 8 tabstop, so yeah you get the idea
+22:49  marlun: Is there anytime where "resize <number>" wouldn't work? I'm having problems with my script. The window gets resized to 1 line and then it won't resize. http://j.mp/ayoqQo is the code on github.
+22:50  jamessan: ben10: well, Vim already knows that lhs is the lhaskell filetype and hs is the haskell filetype. so just put those settings in ~/.vim/after/ftplugin/lhaskell.vim and ~/.vim/after/ftplugin/haskell.vim
+22:53  jamessan: ben10: an alternative would be "au FileType haskell,lhaskell setl shiftwidth=8 ..." in your ~/.vimrc
+22:53  ben10: i don't have those files right now, i guess i could go that way and get some highlighting maybe...
+22:54  ben10: ok thats what i was looking for. Thanks, but i should use the lhaskell.vim etc... i guess
+22:56  ben10: if you don't mind jamessan just for reference what would have it been for expand()? the lhs or hs part?
+22:57  jamessan: ben10: \= means 0 or 1 of the previous atom, so you would want 'l\=hs'
+22:57  jhaddad: does anyone know if it's possible to get taglist to show just functions, and not every variable?
+22:57  ben10: ok thanks again!
+23:00  iaj: is there some way to extend the command history  a) when I close and restart vim   and with a much larger size?
+23:01  graywh: :h 'history
+23:04  iaj: woa its 20 only -_-
+23:04  iaj: what size can I chose that won't slow down vim
+23:05  strull: any
+--- Log closed Wed Oct 20 23:11:06 2010
+--- Log opened Wed Oct 20 23:11:27 2010
+23:11 --- Users 589 nicks [0 ops, 0 halfops, 0 voices, 589 normal]
+23:11  spiiph: You can't use Vim without using buffers.
+23:11  spiiph: Anyway, not really, you'd have to depend on .viminfo being written
+23:12  spiiph: The only workaround is to use the X clipboard
+23:12  jhaddad: or to write to a file
+23:12  jhaddad: then read it in
+23:12  spiiph: Or that
+23:12 --- Channel #vim was synced in 79 seconds
+23:12  spectie: hey all
+23:12  spectie: is there a bugzilla for vim ?
+23:13  spiiph: No
+23:13  dnoyes: thanks spiiph. and sorry if i had my terminology wrong in my question.
+23:13  spiiph: :h bugs
+23:14  spectie: where does one report bugs then ?
+23:14  spiiph: Read :h bugs, as I suggested
+23:15  spectie: :h bugs
+23:15  FernandoBasso: spectie: Open vim and type :help bugs as spiiph has suggested.
+23:15  spectie: oh, i thought :h was an emoticon :)
+23:15  spectie: sorry
+23:17  spectie: does anyone else here use vim to edit arabic text ?
+23:17  spiiph: vimgor, anyone
+23:17  vimgor: Please do not ask if anyone uses, knows, is good with, can help you with or is a guru/expert of <some program>. Instead, ask your real question. You'll probably get help faster that way.
+23:17  spectie: apologies
+23:18  FernandoBasso: spectie: Have you tried :help arabic ?
+23:18  spectie: i guess the easiest thing is to paste the gnome bug:
+23:18  spectie: https://bugzilla.gnome.org/show_bug.cgi?id=632355
+23:21  spectie: FernandoBasso, yes
+23:21  spectie: just tried it
+23:21  spiiph: spectie, the vim_use mailinglist may have some clues.
+23:21  spiiph: spectie, I also suggest that you try pasting in gvim, and see if it works correctly there
+23:22  spectie: let me try gvim now
+23:22  spectie: need to install it
+23:22  spiiph: Use "+p to paste
+23:25  spectie: Spidey01,
+23:25  spectie: yes
+23:25  spectie: same problem
+23:25  Spidey01: huh?
+23:25  spectie: sorry
+23:25  spectie: spiiph, same problem
+23:25  spectie: sorry
+23:26  Spidey01: np, some clients do that to me too... when talking to spiiph lol
+23:26  spectie: i should be more careful with my tab-complete in big channels
+23:26  Spidey01: I've actually learned to type spii<completion key> instead of spi when I want to say his/her/its name :-/
+23:26  spiiph: is the encoding the same in the two windows?
+23:27  spiiph: Err, in the two applications
+23:27  spectie: yes
+23:27  spectie: utf-8
+23:27  FernandoBasso: What is the difference between pasting with "+p and "*p ? Someone was having problems with "+p but worked with "*p.
+23:28  spiiph: Mmm, I suggest you take a peek in the vim_use and vim_dev archives.
+23:28  spiiph: FernandoBasso, in X, they represent the X clipboard and X selection respectively.
+23:29  spectie: i did look on google before i submitted the gnome bug report
+23:29  spectie: both in gnome-terminal and vim
+23:29  spiiph: Yes, well, I didn't suggest you look on google. I suggested you look at the vim_use and vim_dev archives, specifically.
+23:30  spiiph: Google very seldom has good answers to Vim questions.
+23:30  Spidey01: Compared to :help and #vim everything seldom has good answers for Vim questions
+23:30  FernandoBasso: spiiph: yeah. Thanks. I was actually reading this today: http://www.jwz.org/doc/x-cut-and-paste.html
+23:31  Spidey01: Although, that's not counting the ouija boards... but I can't speak for their accuracy on vimtacular matters
+23:31  spectie: spiiph, understood
+23:32  spectie: interestingly, vim_use appears to be on google groups :)
+--- Log closed Wed Oct 20 23:38:43 2010
+--- Log opened Wed Oct 20 23:39:05 2010
+23:39 --- Users 587 nicks [0 ops, 0 halfops, 0 voices, 587 normal]
+23:39  spectie: thanks
+23:40 --- Channel #vim was synced in 77 seconds
+23:54  amgarchIn9: hi, what was that command to increment a number under the cursor by one?
+23:55  jhaddad: http://vim.wikia.com/wiki/Increasing_or_decreasing_numbers
+23:56  jhaddad: amgarchin9: ^
+23:57  amgarchIn9: thanks, C-A. My bad that i am working in a "screen".
+23:59  amgarchIn9: ok, from within a screen that would be "C-a a"
+--- Log closed Thu Oct 21 00:00:08 2010

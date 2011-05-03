@@ -1,0 +1,143 @@
+--- Log opened Sun Dec 12 00:00:40 2010
+00:08  Bop: how to write at once for a replace in sed
+00:09  waldner: sed 's/.*/at once/'
+00:09  Bop: no waldner
+00:09  Bop: i mean , to make changes directly on file
+00:10  waldner: see if your sed has -i
+00:10  Bop: sed 's/bla/ble/g' file.txt
+00:10  Bop: hmm
+00:10  Bop: right , that's it
+00:10  Bop: thanks
+00:10  waldner: np
+00:10  Riviera: Bop: Your question has the quality of family of other questions.
+00:10  Riviera: Bop: Questions like "How can my car fly to the moon."
+00:10  Riviera: Bop: :)
+00:11  Bop: Riviera, im not following you
+00:12  Riviera: Bop: The particular car here (sed) does only fly to the moon if it's of two particular brands, GNU and BSD (thus also OSX),
+00:13  Riviera: Bop: because it was pimped to mimick the behaviour. What actually happens is that sed secretly creates a temporary file,
+00:13  Riviera: Bop: it's design is that of a car, not of a lunar rocket or whatever those thigns are called :)
+00:13  Riviera: Bop: sed does not edit files, but streams.
+00:14  Bop: well , it did , however it does
+00:14  Riviera: Bop: I know, I talk too much. Just be aware that sed is not particularly well in doing what you want it to do, consider just using temporary files.
+00:14  Bop: ok
+00:14  Riviera: like maybe not for now, but when you have to write reliable scripts or so.
+00:15  Bop: what can happen ?
+00:17  Riviera: Bop: You computer could crash, you could have neither a good version of the original nor the new file, or sed could try to perform actions that it is not allowed to do, your file losing certain state, like permissions, ownership
+00:18  Bop: damn
+00:18  Bop: lol
+00:18  Bop: that's a bad cenario
+00:19  Riviera: What?
+00:19  waldner: if you use -i, specify an extension so you have a backup
+00:19  Bop: u'r very negative lol
+00:19  waldner: or make a backup beforehand
+00:19  Riviera: Bop: A bad scenario is if your car falls down from trying to fly to the moon because you were too cheap to use a tempfil, err a lunar rocket instead.
+00:19  Riviera: :)
+00:20  Riviera: not some lost files, come on 8)
+00:20  waldner: when you lose a 2GB file because of "disk full" in the middle of a run, you'll start be less positive too
+00:20  waldner: s/be/to be/
+00:20  Bop: that never happen to me
+00:21  Bop: i always not more and less how much space i got
+00:21  waldner: I hope it never will
+00:21  waldner: but still...
+00:24  cthuluh: you never think that you need backups.
+00:24  cthuluh:  when you have lost / corruppted your files
+00:24  cthuluh: err
+00:24  cthuluh: until you lose your files
+00:29  Bop: i have a external usb disk for my needed files
+08:24 --- stockhol1 is now known as stockholm
+08:40 --- maxim is now known as Guest3968
+16:53  lilililili: can i do a bitwise not using sed?
+16:54  cthuluh: nope
+16:54  Riviera: yes
+16:54  Riviera: But you'd have to program it by yourself.
+16:55  cthuluh: please, Riviera :|
+16:55  lilililili: Riviera: you're saying i need to rewrite sed to support it ?
+16:55  Riviera: lilililili: no
+16:55  cthuluh: lilililili: just use dc.sed from the GNU sed distribution
+16:55  Riviera: lilililili: sed has no concept of numbers
+16:55  Riviera: lilililili: you'd have to implement numbers in sed, and then the operation "bitwise not" on them.
+16:56  Riviera: lilililili: well, actually only the latter
+17:08  lilililili: Riviera: ok... but im only looking for a way to perform bitwise NOT on a file, and someone suggested sed
+17:10  Riviera: ah, character-wise.
+17:11  Riviera: well, use tr for that.
+17:12  cthuluh: lilililili: do you know rot13?
+17:12  Riviera: as tr 'abc' 'def' < inputfile > outputfile" changes all characters "a," "b" and "c" from the input to "d," "e" and "f" respectively, you could use tr with two strings of all the possible input characters and the flipped output characters instead of the strings "abc" "def".
+17:13  lilililili: cthuluh: no, never heard of it
+17:14  lilililili: Riviera: hmmm seems interesting, ill have a go
+17:14  cthuluh: then read about it and try to implement it with tr, as Riviera  suggested. might be sufficient for your needs
+17:17  Riviera: lilililili: tr "$(printf '\\%03o' {0..255})" "$(printf '\\%03o' {255..0})"
+17:17  Riviera: lilililili: untested, though.
+17:19  gnomon: Riviera, ooh, nice!  That's an elegant idea.
+17:19  Riviera: hey gnomon :) thanks :)
+17:22  Riviera: (it be possible to just use '\0-\377' instead of the the first command substitution)
+17:31  Riviera: +might :)
+17:40  ldfsilva: folks, idea for how to copy the first line to the below lines
+17:40  ldfsilva: path1
+17:40  ldfsilva: 25_0661,Available,
+17:40  ldfsilva: 25_05DD,Available,
+17:40  ldfsilva: path2
+17:40  ldfsilva: 25_0661,Available,
+17:40  ldfsilva: 25_05DD,Available,
+17:40  ldfsilva: 25_05DD,Failed,
+17:41  ldfsilva: I'd like to have the following output
+17:41  ldfsilva:  
+17:41  ldfsilva: path1,25_0661,Available,
+17:41  ldfsilva: path1,25_05DD,Available,
+17:41  ldfsilva: path2,25_0661,Available,
+17:41  ldfsilva: path2,25_05DD,Available,
+17:41  ldfsilva: path2,25_05DD,Failed,
+17:42  Riviera: ldfsilva: the lines to copy would always be those not containing a comma?
+17:43  ldfsilva: yes, it is always that pattern, first line pathX then lines below until the next pathX+1
+17:44  Riviera: ldfsilva: sed '/,/!{h;d;};G;s/\(.*\)\n\(.*\)/\2,\1/'
+17:50  ldfsilva: wow.. !! it worked
+17:50  ldfsilva: thank you Riviera !
+17:52  Riviera: nice :)
+18:16  zumbi: hi
+18:16  zumbi: echo 7.0.1-2+b1 |sed 's/\(.*\)-[0-9]*$/\1/'
+18:16  zumbi: I am trying to get an output as 7.0.1-2
+18:16  zumbi: but i think my regex is wrong
+18:17  zumbi: # echo 7.0.1-2+b1 |sed 's/\(.*\)-[0-9]*$/\1/'
+18:17  jsz`: cut -d+ -f1
+18:17  zumbi: jsz`: i tried that, but it fails if echo 7.0.1-2 (without +)
+18:18  zumbi: hold on, it might not fail, just a parenthesis out of place
+18:21  zumbi: yeap - i think it is fine, but how would i do it with sed?
+18:21  cthuluh: 4# echo '7.0.1-2+b1' | sed 's/+.*/+/'
+18:21  Riviera: Instead of cut or sed use the parameter expansion features of your shell.
+18:21  shbot: cthuluh: 7.0.1-2+
+18:21  Riviera: (At least when the input is in a shell variable, what the echo somewhat suggested.)
+18:21 * zumbi googles parameter expansion
+18:21  Riviera: zumbi: /msg greybot pe
+18:24  jsz`: # var=7.0.1-2+b1; echo "${var/+*/}"
+18:24  jsz`: 4# var=7.0.1-2+b1; echo "${var/+*/}"
+18:24  shbot: jsz`: 7.0.1-2
+18:25  zumbi: thanks.. very interesting
+18:26  Riviera: 4# var=7.0.1-2+b1; echo "${var%+*}"
+18:26  shbot: Riviera: 7.0.1-2
+18:26  Riviera: for POSIX.
+18:27  jsz`: % for right and # for left, right?
+18:27  virus_found: Yes.
+18:27  jsz`: :)
+18:28  virus_found: Also, double %% or ## make "*" greedy. Correct me, if I'm wrong.
+18:28  virus_found: (in bash)
+18:28  zumbi: 4# var=7.0.1-2+b1; echo "${var#+*}"
+18:28  shbot: zumbi: 7.0.1-2+b1
+18:28  cthuluh: virus_found: in any posix shell
+18:28  virus_found:  4# var=7.0.1-2+b1; echo "${var#*+}"
+19:09 --- ltratcliff is now known as ApHeX321
+--- Log closed Sun Dec 12 19:36:44 2010
+--- Log opened Sun Dec 12 19:52:10 2010
+19:52 --- Users 104 nicks [0 ops, 0 halfops, 0 voices, 104 normal]
+19:53 --- Channel ##sed was synced in 114 seconds
+--- Log closed Sun Dec 12 20:18:37 2010
+--- Log opened Sun Dec 12 20:23:58 2010
+20:23 --- Users 104 nicks [0 ops, 0 halfops, 0 voices, 104 normal]
+20:25 --- Channel ##sed was synced in 118 seconds
+--- Log closed Sun Dec 12 21:18:55 2010
+--- Log opened Sun Dec 12 21:24:18 2010
+21:24 --- Users 104 nicks [0 ops, 0 halfops, 0 voices, 104 normal]
+21:26 --- Channel ##sed was synced in 111 seconds
+--- Log closed Sun Dec 12 23:19:05 2010
+--- Log opened Sun Dec 12 23:24:28 2010
+23:24 --- Users 105 nicks [0 ops, 0 halfops, 0 voices, 105 normal]
+23:26 --- Channel ##sed was synced in 111 seconds
+--- Log closed Mon Dec 13 00:45:14 2010

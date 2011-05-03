@@ -1,0 +1,339 @@
+--- Log opened Mon Nov 08 00:00:10 2010
+--- Day changed Mon Nov 08 2010
+00:00  jwillia3: then you don't have more than three records...
+00:00  ariston^: ok got it should have ''
+00:00  ariston^: ty
+00:00 --- Channel #awk was synced in 116 seconds
+00:01  ariston^: how about if N3>3 and $5
+00:01  ariston^: without using awk again like awk 'NR > 3'| awk '{print $5}'
+00:02  jwillia3: have you read anything on awk at all?
+00:03  ariston^: am yea im just learning
+00:04  jwillia3: use this as a learning oportunity.
+00:05  ariston^: thanks
+00:08  g0pher: awk is pattern action - awk '3<NR{print $5}'
+00:10  ariston^: thanks
+00:13  ariston^: hi is there a way i can print them and then add a " in the beging and end?
+00:15  ariston^: like if i use awk '3<NR{print $5}' and it would print "1" "2" "3" ..
+00:17  ariston^: pls help
+00:27  mmckinst: beginning and end of the line?
+00:28  g0pher: 042 is octal for " - so awk -v s=\\042  '3<NR {print s $5  s}'   would put quotes around field 5
+00:30  ariston^: thanks!
+00:34  g0pher: can test stuff via the bot eg
+00:34  g0pher: 4# awk --version
+00:34  shbot: g0pher: GNU Awk 3.1.5
+00:34  shbot: g0pher: Copyright (C) 1989, 1991-2005 Free Software Foundation.
+00:34  shbot: g0pher: etc... ( http://pastebin.com/JfGRJLtA )
+00:35  ariston^: wow
+00:35  ariston^: a=1;echo $1
+00:35  ariston^: 4#a=1;echo $1
+00:35  ariston^: 4#a=1;echo $a
+00:36  ariston^: 4# a=1;echo $a
+00:36  shbot: ariston^: 1
+00:36  ariston^: great
+00:36  g0pher: 4# a=1;echo $a
+00:36  shbot: g0pher: 1
+00:37  g0pher: 4# awk -v s=\\042  '3<NR {print s $5  s}'
+00:37  shbot: g0pher: no output within the time limit
+00:38  ariston^: 4# a="1 2 3 4 5 6 7"; echo $a| awk -v s=\\042  '3<NR {print s $5  s}'
+00:38  shbot: ariston^: no output
+00:38  ariston^: 4# a="1 2 3 4 5 6 7"; echo $a
+00:38  shbot: ariston^: 1 2 3 4 5 6 7
+00:38  ariston^: 4# a="1 2 3 4 5 6 7\n 1 2 3 4 5 6 7\n 1 2 3 4 5 6 7"; echo $a| awk -v s=\\042  '2<NR {print s $5  s}'
+00:38  g0pher: 4# awk -v s=\\042  '  {print s $5  s}'
+00:38  shbot: ariston^: no output
+00:38  shbot: g0pher: no output within the time limit
+00:40  ariston^: hmm im still having problems with what im trying to do... in some lines there are more than $5.. is there a way i can use print > $5 when there is 
+00:41  ariston^: cause if i use something like {print $5,$6...) it would output "5" "" "" or somthing if there are no more than $5 in a line
+00:43  ariston^: i would like to achive something like "5 6 7" or "5 6" instead of "5   " 
+00:45  g0pher: NF is number of fields in a line
+00:51  ariston^: is there a way i can use awk to see of there are more than $5 in a line?
+00:54  g0pher: if(NF < 5) ?? or if(5 < NF)
+01:00  ariston^: not nf but $1 $2 $3
+01:01  ariston^: ill use pastebin
+01:01  ariston^: waot
+01:01  ariston^: wait
+01:04  ariston^: http://pastebin.com/MV3NmXHX
+01:13  probonono: ariston^, as g0pher indicated, NF is a built-in awk var which returns the number of fields in the current record, so you can perform a comparison test with it, e.g. if(NF > 5) ...
+01:14  g0pher: wish there was good ONE page primer/start awk for newbies ?
+01:18  probonono: The tutorial page listed in the topic looks ok.
+01:20  g0pher: There is a \topic ? who knew ?
+01:21  g0pher: that page goes to http://www.grymoire.com/Unix/Awk.html - Hardly One page
+01:22  g0pher: eg http://xrl.us/awktut
+01:24  mmckinst: http://www.awktutorial.com/
+01:24  mmckinst: one page
+01:34  g0pher: nice - have bookmarked - But is way over one page for newbies ? imho
+01:39  mmckinst: probably. I think what people want is the awk one liners page but to have their specific problem listed on the one liners page so they can copy and paste and be done
+01:39  mmckinst: http://backreference.org/2010/02/10/idiomatic-awk/ is nice too
+01:40  mmckinst: I have no relation to either of the sites but backreference.org always has good stuff regarding awk on his blog
+--- Log closed Mon Nov 08 01:53:02 2010
+--- Log opened Mon Nov 08 02:03:28 2010
+02:03 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+02:05 --- Channel #awk was synced in 117 seconds
+--- Log closed Mon Nov 08 05:59:24 2010
+--- Log opened Mon Nov 08 05:59:49 2010
+05:59 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+06:02 --- Channel #awk was synced in 184 seconds
+08:38  krzie: i have a line like this:     agentnumber=$(awk "/ ${agent}$/"'{print $2}' "${agentmap}"|uniq)
+08:39  krzie: but when it gets to this line, it barfs
+08:39  krzie: 1392 13088 STV/1398
+08:39  krzie: because of the / in $agent
+08:39  krzie: is there a way to work around this besides mandating that no agent can have a / in it?
+08:42  {xmb}{bottz}man: sup
+08:43  {xmb}{bottz}man: a
+08:43  {xmb}{bottz}man: A
+08:44  {xmb}{bottz}man: umm
+08:48  pgas: moo
+08:48  {xmb}{bottz}man: mou
+08:48  {xmb}{bottz}man: cowards -> wards -> afterwards -> mooooo
+08:49  pgas: krzie: awk -v var="$agent" '$0 ~ var {print $2}'
+08:49  pgas: also uniq needs a sorted input, but you can uniq with awk:
+08:49  {xmb}{bottz}man: lab man
+08:49  pgas: awk -v var="$agent" '($0 ~ var) && (!a[$2]++) {print $2}'
+08:50  {xmb}{bottz}man: lab
+08:50  {xmb}{bottz}man: the ()s are optional yo
+08:50  {xmb}{bottz}man: just saying so
+08:51  {xmb}{bottz}man: mate, ill do a autopornget
+08:51  {xmb}{bottz}man: and a youtube-massdl
+08:52  {xmb}{bottz}man: what else man, owning all
+08:52  krzie: pgas, thank you =], uniq will end up with a single agentnumber, only using it to get rid of the dupes
+08:53  {xmb}{bottz}man: great blue nick u got krzie
+08:53  {xmb}{bottz}man: =p
+08:56  pgas: krzie: then it's even more simple:
+08:56  pgas: awk -v var="$agent" '($0 ~ var){print $2;exit}'
+08:56  krzie: AHH
+08:56  krzie: stop after the first
+08:56  krzie: good stuff
+08:56  {xmb}{bottz}man: pg why u do the ( )'s
+08:57  {xmb}{bottz}man: on xmb its like: g $agent| p 2; or p agent 2
+08:57  krzie: thank you for your time pgas 
+09:21  krzie: yay! that was the last step twords making this piece of my program more efficient... got it down from 7.9 sec to 0.46 sec
+09:21  {xmb}{bottz}man: gg
+09:22  krzie: and first piece i got from 17.6sec to 7.2sec
+09:23  {xmb}{bottz}man: thats like nlo
+09:23  {xmb}{bottz}man: nolossoptimization
+09:23  {xmb}{bottz}man: myinventation
+09:23  krzie: got a bunch more to do... but 1 step at a time =]
+09:24  {xmb}{bottz}man: two hands, one step
+09:45  kingsley: What would be a computationally efficient way to only print lines containing no blank fields?
+09:46  pgas: you really blank fields? ie a column with no value?
+09:46  pgas: *really mean
+09:47  kingsley: Yes, I mean blank fields. 
+09:47  krzie: kingsley, you could check for 2 input field seperators next to eachother
+09:47  krzie: so likely grep
+09:47  kingsley: But they'll be delimited by the "," character.
+09:47  pgas: I guess you need a look
+09:47  pgas: lopp
+09:47  pgas: errr
+09:48  krzie: grep ',,' <file>
+09:48  pgas: ah not a bad idea
+09:48  krzie: oh wait, i mean grep -v since you dont want those
+09:48  pgas: awk '!/,,|,$/'
+09:48  pgas: awk '!/^,|,,|,$/'
+09:49  {xmb}{bottz}man: awk \!\ /\ [\ \\t]+/
+09:49  krzie: ahh right, maybe he means to further process it with awk
+09:49  {xmb}{bottz}man: like that also :))
+09:49  kingsley: krzie: That's a clever idea. My only concern is that ",," wouldn't notice if the last field were blank.
+09:49  pgas: awk '{for (i=1;i<=NF;i++) if ($i="") next;print}'
+09:50  krzie: you can also check its not first or last
+09:50  pgas: that's the point of my last regexp
+09:50  krzie: grep -v -e ',,|^,|,$' file
+09:50  kingsley: {xmb}{bottz}man: Wow!
+09:53  krzie: oh meh i shoulda copied/pasted yours pgas, lol just saw it
+09:54  kingsley: krzie: I'll try to embellish your regular expression so it also also matches " "s,
+09:54  krzie: i thought you said the IFS was ,
+09:56  {xmb}{bottz}man: =:)
+09:56  kingsley: krzie: I may owe you an apology for being too terse. Maybe I should have said that I need to match the space character between commas. Ie: something like ', \+,'.
+09:58  krzie: http://eugeneciurana.com/pastebin/pastebin.php?show=43521
+09:58  kingsley: This seems to work...
+09:58  kingsley: echo -e "a,b,c\na,d,e" | grep -v '^ \+,\|, \+,\|, \+$'
+09:58  kingsley: # echo -e "a,b,c\na,d,e" | grep -v '^ \+,\|, \+,\|, \+$'
+09:59  krzie: wow man, ugly escapage
+10:00  kingsley: krzie: I agree and will document it.
+10:00  pgas: also \+ is a gnu extension
+10:01  krzie: for me that outputs:
+10:01  krzie: a,b,c
+10:01  krzie: a,d,e
+10:02  kingsley: Try...
+10:02  kingsley: # echo -e " ,b,c\na,d,e" | grep -v '^ \+,\|, \+,\|, \+$'
+10:03  pgas: 4# echo -e " ,b,c\na,d,e" | grep -Ev '^ +,|, +,|, +$'
+10:03  shbot: pgas: a,d,e
+10:03  krzie: same
+10:04  krzie: works on my bsd and osx box
+10:04  pgas: well, there is no empty field in a,b,c or a,d,e
+10:08  {xmb}{bottz}man: schbottz
+10:11  {xmb}{bottz}man: sh: s=[\ \t,\|]+ g -Ev "^$s|$s$s|$s$"
+10:20  {xmb}{bottz}man: # echo .. |s=[\ \t,\|]+ g -Ev ^$s\|$s$s\|$s$
+10:21  {xmb}{bottz}man: hmm a ; is required after the sep= definition
+12:04  matias: could anybody help me?
+12:05  waldner: it depends
+12:05  waldner: if you want money, no
+12:05  waldner: but for awk questions, maybe
+12:05  matias: hi again waldner  :)
+12:05  matias: im sure you can help me again
+12:06  matias: im trying to implement the script you gave me last time, but it doesnt work
+12:06  waldner: paste the code
+12:06  matias: can i dump the script here?
+12:06  matias: ok
+12:06  waldner: it was a single line IIRC
+12:06  krzie: mornin waldner 
+12:06  waldner: morning
+12:06  matias: BEGIN {FS = "##" }{ FNR==NR{a[$1]=$2;next} $1 in a {print $1 $2} }
+12:06  waldner: ah yes
+12:07  waldner: yes, that doesn't replace anything
+12:07  matias: i get a syntax error at print
+12:07  waldner: what was wrong with the code I gave you?
+12:08  matias: it replaces the wrong thing
+12:08  matias: and it just dumps the lines that are to be changed
+12:08  waldner: paste a sample input line that has to be replaced
+12:08  matias: ok
+12:08  matias: i dump a couple of lines ok
+12:09  waldner: if they're more than 3 use a pastebin
+12:09  matias: Text ## Match the material with the bonding type.
+12:09  matias: QUE_1013_A1  ## metallic
+12:09  matias: QUE_1014_A2  ## molecular
+12:09  waldner: right
+12:09  matias: i just want to change  the QUE_1013_A1
+12:10  matias: and  QUE_1014_A2
+12:10  pgas: you cannot use the: pattern{code}  inside  {  }
+12:10  waldner: and then in another file, you have "QUE_1013_A1 something"
+12:10  matias: yeah
+12:10  waldner: and you want to put something in the first file
+12:10  matias: QUE_1013_A1 ## Correct
+12:10  matias: for example
+12:10  waldner: what about the Text ## line? should it be printed unchanged?
+12:10  matias: yeah
+12:10  matias: those lines i want to be just printed as they are
+12:10  waldner: ok
+12:11  waldner: let me dig out my old one
+12:11  matias: so i need to get awk to understand 2  things: 1. that ## is a separator, and 2. that all lines should be printed
+12:11  waldner: yes, it was almost right
+12:11  waldner: except the separator
+12:11  matias: ah oh
+12:11  waldner: awk -F '##' -v OFS='##' 'NR == FNR { a[$1] = $2; next } $1 in a { $1 = a[$1] } 1'
+12:12  waldner: but no
+12:12  waldner: are you sure you want ## as separator?
+12:12  waldner: that way, $1 will become "QUE_1013_A1  "
+12:12  waldner: with the trailing spaces
+12:12  matias: oh hm
+12:12  waldner: why isn't the default separator fine?
+12:13  matias: i just wanted a separator that can later be used as a nice separator to import this sheet as an exel document
+12:13  waldner: I think excel can import space separated fields
+12:13  matias: in a spreadsheet i can later shoose a separator, and i want one that doesnt occur
+12:13  matias: yeah but at the same time i want to be able to use sentences
+12:14  matias: in 1 field
+12:14  matias: anyhow, unfortunately the script didnt work yet :(
+12:14  matias: it gives me
+12:14  matias: QUE_1136_A2 ## Incorrect
+12:15  matias: for all lines that are to be modified
+12:15  waldner: ok
+12:15  matias: and doesnt print the other ones
+12:15  waldner: paste the REAL thing on pastebin
+12:15  matias: the file that is to be changed?
+12:15  waldner: the input file, and the second file too
+12:15  matias: ok
+12:15  matias: ( how do i use pastebin?  )
+12:15  waldner: btw, my code above should be run with "file2 file1" as arguments
+12:16  waldner: are you sure you are not using "file1 file2" instead?
+12:16  matias: ok yes i did
+12:16  waldner: go to http://pastebin.com, and just paste your data, then paste the resulting URL here so people can look at it
+12:16  matias: now i tried file2 file1
+12:16  matias: ok
+12:16  waldner: does file2 file1 work?
+12:16  matias: nope
+12:16  matias: ill dump all results
+12:17  waldner: ok, go ahed with pastebin then
+12:20  matias: http://pastebin.com/rUXnGXf3
+12:20  matias: so nothing happends i think
+12:20  waldner: ok let me try
+12:21  matias: ops let me repost so that i actually include the answers, i just noticed file2 was from a different part
+12:21  waldner: ok
+12:22  waldner: also it seems that file2 doesn't contain any of the keys in file1, so no wonder nothing is changed
+12:22  matias: ok here 
+12:23  matias: http://pastebin.com/ej509zma
+12:23  matias: they are all included ( i think)
+12:23  matias: now file2 in the example contains the part where is to be changed
+12:24  waldner: don't use ## as separator
+12:24  matias: hm ok
+12:25  matias: can i use " ## " instead?
+12:25  waldner: awk 'NR == FNR { a[$1] = $3; next } $1 in a { $1 = a[$1] } 1' file2 file1
+12:25  waldner: this works with your input
+12:25  matias: wow!
+12:25  waldner: it just needed to save $2 instead of $2
+12:25  waldner: er, $3
+12:26  matias: i see
+12:26  matias: so what does that snipped do, i dont understand it at all
+12:26  waldner: it saves all the keys in an array
+12:26  matias: a?
+12:26  waldner: by reading file2
+12:26  waldner: yes
+12:27  waldner: so after reading file2 it will have a["QUE_1013_A1"] = "Correct" etc.
+12:27  waldner: one element for each key
+12:27  matias: ah ok
+12:27  waldner: then it reads file1
+12:27  matias: nice indexing
+12:27  waldner: when it sees that $1 is a key of the array, it replaces it with the value (eg, "Correct")
+12:27  waldner: finally, all lines are printed, regardless of whether a key was found or not
+12:28  matias: i have just one thing left
+12:29  matias: can i use regular expression for the match? some fields in file2 starts with some spaces and those lines doesnt work
+12:29  waldner: which match?
+12:29  matias: e.g  "  QUE_1122_A1 ## Incorrect"
+12:29  waldner: they should work
+12:29  matias: instead of "QUE_1122_A1 ## Incorrect"
+12:29  waldner: because in those cases $1 is still "QUE_1122_A1"
+12:29  waldner: with no leading spaces
+12:29  matias: hmm
+12:30  waldner: are they really spaces or some weird control characters?
+12:30  matias: dunno
+12:30  matias: they look like spaces with less
+12:31  waldner: what if you run them through od -c ?
+12:32  matias: like this? cat file2 | od -c
+12:32  pgas: I like 'sed -n l file2' for this
+12:33  matias: with sed -n l file2 it still look like spaces
+12:33  geirha: or cat -e file2
+12:33  matias: with cat -e as well
+12:34  pgas: if you don't change FS then the fields $1 $2 etc cannot contain spaces
+12:35  matias: hm ok
+12:35  matias: maybe easier to get rid of the spaces first..
+12:35  pgas: doubtful
+12:35  pgas: since they cause no problem as it is
+12:36  matias: wait a second, this actually look pretty good
+12:36  matias: i think it works
+12:37  matias: yes it works!
+12:37  matias: thanks all!
+12:37  matias: can i just put 'NR == FNR { a[$1] = $3; next } $1 in a { $1 = a[$1] } 1' in a script enclosed with {}?
+12:38  pgas: no
+12:38  geirha: No, just remove the shell quotes.
+12:39  pgas: what kind of script?
+12:39  geirha: And set #!/usr/bin/awk -f  as the shebang
+12:39  geirha: Or wherever the awk binary is located
+12:39  matias: i just want to use awk-f myscript
+12:39  matias: *awk -f myscript
+12:40  geirha: echo 'NR == FNR { a[$1] = $3; next } $1 in a { $1 = a[$1] } 1' > myscript; awk -f myscript datafile
+12:41  matias: thanks lol, im such a nob
+12:41  matias: but thanks to you all
+12:42  matias: i gotta think a bit about the syntax though
+13:08  matias: i got a more general question. my current task is to convert an xml document, with a lot of html-like tags, which defines questions with answers, points et cetera. now i manage to do this, by a quite cumbersome method where i use regular expressions to find all questions and shove em in a resulting file. is it possible to be a bit smart here, and declare like fields/records with respect to the html-like tags?
+13:09  matias: so that my fields contains the questions from start, and in each field i can remove the tags and so forth..
+13:11  matias: or should i stick to the line per line approach next time i encounter this type of problems
+13:16  pgas: well xml is best handled using an xml parser
+13:17  pgas: xmlgawk, xmlstarlet, xsltproc, perl, python, ruby etc....
+13:21  matias: xmlgawk.. cool beans!
+--- Log closed Mon Nov 08 18:38:51 2010
+--- Log opened Mon Nov 08 18:39:00 2010
+18:39 --- Users 104 nicks [0 ops, 0 halfops, 0 voices, 104 normal]
+18:40 --- Channel #awk was synced in 115 seconds
+--- Log closed Mon Nov 08 19:21:43 2010
+--- Log opened Mon Nov 08 19:26:57 2010
+19:26 --- Users 103 nicks [0 ops, 0 halfops, 0 voices, 103 normal]
+19:28 --- Channel #awk was synced in 105 seconds
+21:10  lisppaste: asdasdasdasd pasted "untitled" at http://paste.lisp.org/display/116401
+21:10  jwillia3: who is his mate?
+21:10  lisppaste: asdasdasdasd pasted "untitled" at http://paste.lisp.org/display/116402
+21:11  jwillia3: very clever. you can stop now.
+21:11  lisppaste: jwillia3 pasted "untitled" at http://paste.lisp.org/display/116403
+21:13  lisppaste: jwillia3 pasted "untitled" at http://paste.lisp.org/display/116404
+21:14  lisppaste: jwillia3 pasted "untitled" at http://paste.lisp.org/display/116405
+21:14  lisppaste: jwillia3 pasted "untitled" at http://paste.lisp.org/display/116406
+21:14  lisppaste: jwillia3 pasted "untitled" at http://paste.lisp.org/display/116407
+21:14  Cam: Rutrow :) - http://cl.ly/74dd8a0001a1b0fb8cb4 .. Nice job haha. time to switch to tor??
+--- Log closed Mon Nov 08 22:08:36 2010

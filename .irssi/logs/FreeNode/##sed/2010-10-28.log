@@ -1,0 +1,132 @@
+--- Log opened Thu Oct 28 00:00:37 2010
+--- Day changed Thu Oct 28 2010
+00:00  mooneyj: I removed the quotes from the filenames, aswell as changing the separator and it works
+00:19 --- galaxywatcher_ is now known as galaxywatcher
+03:19  dangerous77: Anyone know how I could go about getting rid of lines 3, 4, 5 from http://pastebin.com/sSuz1r7a ... basically I want the first column to be unique ... it is sorted by the first column, and within that, by the second column (time and date)
+03:19  dangerous77: I know sed has multiline stuff, if I could match the lines which have a "matching" line above, then I could put some text into that line that I could then pipe to grep -v
+03:22  mgriffin: i dont know how to do it in sed but with mysql it would be trivial, you didnt specify which record to keep in cases of a duplicate however
+03:25  dangerous77: I actually grokked that from an apache log not from a database
+03:25  dangerous77: I could also just make a perl / php / python script to do it too
+03:25  dangerous77: just when I realise I don't know how to do something, it bugs me
+03:25  dangerous77: mostly I just use sed / awk / grep for this kind of thing should be able to do it :)
+03:55  guther: dangerous77: how'bout uniq?
+03:59  guther: ..or if it has to sed, this might work: 'h;:b;$b;N;/^\(......\).*\1/{g;bb;};$b;P;D'
+04:01  guther: or: 'h;:b;$b;N;/^\([^ ]\).*\1/{g;bb;};$b;P;D' <= to make the 1st field uniqe.
+04:06  palhmbs: I have a little problem I'm working out... --- http://pastebin.com/2AMVNzs8
+04:06  palhmbs: I want to wget a certain image from a website based on a timestamp comparison
+04:17  guther: hmm - in case of -gt u could do DESIREDLINE=$(($(sed -n "/$DATA2READ/=" /tmp/finalpics.txt)-1))
+04:18  tengulre: how to using sed print lines 1000 to 2000 in file a?
+04:25  virus_found: tengulre: sed -n '1000,2000p' a
+04:25  virus_found: But I reckon, there are simplier ways.
+04:34  mgriffin: tengulre: probably you want something like sed -n '1000,2000p;2001q' file
+04:37  tengulre: I want to print lines 1000 to 2000 in file a , then output file b and append line seq no. how to do?
+04:41  tengulre: the file b like:    1, TEXTA
+04:41  tengulre:                                2, TEXTB
+04:41  tengulre:                              3,TXT
+04:41  tengulre: and so on.
+06:06  gpled: this worked, but put an extra space on the next line
+06:06  gpled: sed -e "s/\./\.\\n/g" book4.txt >book5.txt
+06:07  gpled: hmm, wait, think i know why
+--- Log closed Thu Oct 28 08:43:30 2010
+--- Log opened Thu Oct 28 08:43:54 2010
+08:43 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+08:45 --- Channel ##sed was synced in 103 seconds
+--- Log closed Thu Oct 28 08:58:00 2010
+--- Log opened Thu Oct 28 08:58:20 2010
+08:58 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+08:59 --- Channel ##sed was synced in 101 seconds
+--- Log closed Thu Oct 28 09:48:49 2010
+--- Log opened Thu Oct 28 09:49:13 2010
+09:49 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+09:50 --- Channel ##sed was synced in 101 seconds
+14:12  virus_found: How do I get a text between () ? Could be either one lined, or multilined.
+14:13  virus_found: (text) or (text end-of-line text end-of-line text ...)
+14:13  virus_found: I, ineed, have no problems with onelined.)
+14:18 * virus_found always sucks, when it comes to creating rules for more than one line.
+14:22  waldner: how many (...) things do you have in your input?
+14:22  waldner: are they nested?
+14:25 --- sitaktif is now known as sitaktif__
+14:29 --- sitaktif_ is now known as sitaktif
+14:29  virus_found: waldner: I'll just show you a few examples.
+14:31 --- sitaktif__ is now known as sitaktif_
+14:32  virus_found: waldner: http://sprunge.us/ATVg
+14:33  waldner: is either of those the complete input to sed?
+14:33  virus_found: waldner: yes.
+14:34  waldner: then you can just do sed ':a;$!{n;ba;};s/.*(//;s/).*//' assuming no other brackets appear elsewhere
+14:34  virus_found: Sorry :( I'm not correct.
+14:34  waldner: paste a real input then
+14:34  virus_found: There are other brackets in the input, but they are on other lines.
+14:35  waldner: you need only those following makedepend then?
+14:35  virus_found: Ye)
+14:35  virus_found: s
+14:35  waldner: sed ':a;$!{n;ba;};s/.*makedepend *(//;s/).*//' may still work
+14:35  virus_found: waldner:  http://sprunge.us/IHCS
+14:35  virus_found: :)
+14:36  waldner: right
+14:36  waldner: makedepends above, not makedepend
+14:36  waldner: but except that it should work
+14:36  virus_found: Oh thank you generously.
+14:37  waldner: seems it doesn't work on your sample
+14:38  virus_found: waldner: Ehm, but it won't work. Tried with that input, I gave a link to.
+14:38  waldner: let me see
+14:38  waldner: uep
+14:38  waldner: yes, it's N;a; not n;a;
+14:38  virus_found: waldner: but also the first link is applicable.
+14:38  waldner: change that and it works
+14:38  virus_found: Ok.
+14:38  waldner: er, n;ba;
+14:38  virus_found: N;ba?
+14:38  waldner: argh
+14:38  waldner: N;ba;
+14:38  virus_found: :)
+14:38  waldner: yes
+14:39 --- andrey1 is now known as krizz
+14:39  waldner: still, something tells me that even that isn't really what you want as final output
+14:39  virus_found: -_- yes
+14:39  virus_found: Won't work.
+14:40  waldner: so what do you wont as output?
+14:40  waldner: *want
+14:40 * waldner kicks the keyboard
+14:40  virus_found: 'boost' 'sane' 'perl-archive-zip' 'zip' 'unzip' 'xulrunner' 'unixodbc' 'hsqldb-java'
+14:40  virus_found:              'apache-ant' 'gperf' 'poppler' 'kdelibs' 'gconf' 'openjdk6' 'cppunit'
+14:40  virus_found:      'beanshell'  'vigra' 'libldap' 'lucene' 'libmythes' 'junit' 'libwpg' 'imagemagick'
+14:40  virus_found:      # for additional ooo-build features
+14:40  virus_found:      'mesa>=7.5' 'gstreamer0.10-base>=0.10.26'  'mono>=2.6.1'
+14:41  waldner: that's exactly what I get
+14:41  virus_found: Oh, sorry for flood:)
+14:41  virus_found: Really?
+14:41  virus_found: Hm.
+14:41  waldner: yes
+14:41  waldner:  sed ':a;$!{N;ba;};s/.*makedepends=*(//;s/).*//'
+14:41  waldner: actually, the star is useless so maybe sed ':a;$!{N;ba;};s/.*makedepends *= *(//;s/).*//'
+14:42  waldner: depends on whether there can be spaces around the =
+14:42  virus_found: Nope, it can't be.
+14:42  virus_found: Then sed ':a;$!{N;ba;};s/.*makedepends=(//;s/).*//' ?
+14:43  waldner: yes
+14:43  waldner: (mine allowed for no spaces either, but nevermind)
+14:43  virus_found: Btw, "makedepends" is always on the first position of the line. Maybe ^ somewhere?
+14:43  waldner: no, because that's a multiline thing
+14:43  virus_found: Ah, I see.
+14:43  waldner: so perhaps \nmakedepends
+14:44  waldner: unless it's the very first line in the file, in which case that will fail
+14:44  virus_found: I see.
+14:44  waldner: if there are no chances for false matches, I'd just leave it alone
+14:44  virus_found: Thank you so very much, waldner! :)
+14:44  waldner: yw
+14:44  virus_found: I could write the thing myself.
+14:44  virus_found: couldn't!
+14:52  waldner: gnu sed has a switch to make ^ match in multiline IIRC
+14:53  waldner: so that'd become sed ':a;$!{N;ba;};s/.*^makedepends=(//m;s/).*//' (untested)
+14:54  waldner: doesn't seem to be working
+14:54  virus_found: waldner: I'm glad with \n ;)
+14:55  waldner: cool
+--- Log closed Thu Oct 28 20:58:53 2010
+--- Log opened Thu Oct 28 20:59:18 2010
+20:59 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+21:01 --- Channel ##sed was synced in 117 seconds
+21:57  chasep_work: is there any way to do a replacement where Abc would be replaced with Xyz, and abc with xyz, and ABC with XYZ?
+22:11  ka1ser: just those specific patterns or basically transforming any a to x, A to X, b to y, B to Y, c to z, C to Z?
+22:12  ka1ser: in the second case, sed 'y/abcABC/xyzXYZ/' might work
+22:13  ka1ser: for first case I think you need specifically call three commands
+23:30  redcsc: sup
+--- Log closed Fri Oct 29 00:00:50 2010

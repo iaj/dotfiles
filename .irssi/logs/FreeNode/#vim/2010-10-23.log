@@ -1,0 +1,543 @@
+--- Log opened Sat Oct 23 00:00:14 2010
+--- Day changed Sat Oct 23 2010
+00:00 --- whitedragon is now known as Guest13125
+00:00 --- RICHIH is now known as RichiH
+00:03  kapu: ls
+00:08  FernandoBasso: mkdir
+00:08  FernandoBasso: :D
+00:15  FernandoBasso: What are the help sections related to regexp? I'm reading usr_27 and pattern. Are there others?
+00:19  bairui: FernandoBasso: that'll probably have all you need. There is also   :help search()   in eval.txt
+00:19  FernandoBasso: bairui: Thanks.
+00:19  bairui: np
+00:20  Raimondi: Good morning, bairui :)
+00:20  bairui: g'day, Raimondi :)
+00:23 --- DECO is now known as deco
+00:24  Patric3: Is there a way to reverse the line order of a visual block ?
+00:25  Patric3: e.g. foo1\nfoo2\nfoo3 (a selected visual block) will become foo3\nfoo2\nfoo1
+00:25  bairui: the venerable    :g/./m 0     comes to mind - but that's for the whole file... I'll have to play with visual blocks...
+00:26  jamessan: ":g/./m '<-1"   iirc
+00:26  bairui: yeah - I was just about say that - my tests were on '<   :)
+00:26  bairui: g'day, jamessan
+00:26  jamessan: hola
+00:26  Patric3: the venerable, lol
+00:27  bairui: well, when I first learnt that   :g   command, I thought it was worthy of some praise. :) It blew me away. It was from a great article called something like "A Heartwarming Edit"
+00:28  bairui: we're talking... 1999 here, when I read it...
+00:28  Patric3: yeah - I wasn't expecting vi to be able to do this actually.  Was thinking of a bash for loop and awk etc
+00:28  cemysce: is there a way to dump the complete state of vim, like what all the variables are set to and stuff?
+00:29  bairui: there is :mkvimrc  ...
+00:29  Patric3: bairui: Why does ":g/./m 0" work - can you explain this command to me (pretty please :-)
+00:29  bairui: dunno if that dumps *everything* though...
+00:30  cemysce: bairui: i'll try that.  basically i have 2 systems w/the same vim and .vimrc, but different behavior cause there are other, different config files on the respective systems
+00:30  bairui: Patric3:   :global/./move 0     means for every line in the file (the search pattern /./ will match all lines), move that line to the fictitious line 0 (effectively flipping the order of all lines in the file).
+00:30  Patric3: nice!
+00:32  Patric3: Is the visual block version supposed to have a single quote ?  (I haven't tried the command yet - just haven't seen the quote before like that in a vi command)
+00:32  bairui: yep - does your block have a spare blank line above it?
+00:32  Raimondi: cemysce: :h view-sessions
+00:32  bairui: if so, select the block including the blank line at the top and:    :'<,'>g/./m'<
+00:33  cemysce: heres another question.  is there a way, in visual mode, to use the selected text as input for a command and NOT replace the text with the command's output?
+00:34  khussein: Is there a way to send the current unsaved buffer to a shell command line through vim? I tried !mycommand % but this requires the buffer to be saved it seems.
+00:35  cemysce: khussein: you can select the whole buffer with ggVG, then run :!mycommand
+00:35  cemysce: not sure if there is a shorthand for representing the whole buffer
+00:36 --- BBURHANS is now known as bburhans
+00:36  jamessan: bairui: actually, it's "move that line to just after line 0"
+00:36  khussein: cemysce: Yeah, I guess I was wondering if there is such a shorthand. Thanks tho
+00:36  Patric3: bairui: ah no - no blank line
+00:36  jamessan: bairui: that's the same reason we have to use '<-1, so it moves it to just after the line before the start of the visual selection
+00:36  bairui: jamessan: yeah - hence the 0... I wasn't gonna split hairs. But thanks for the fix. :)
+00:37  Patric3: I can put one in though ?
+00:37  bairui: any number
+00:37  Patric3: k
+00:38 --- chocoby is now known as CHOCOBY
+00:39  FernandoBasso: What other operators can one use instead of only the 'substitute' in searches like :10,19s/this/that/ ?
+00:40  Raimondi: :h :s
+00:40  bairui: any ex command that takes a range...   :help [range]
+00:41  FernandoBasso: Okay. Thanks.
+00:43  domidimi: cemysce: :%!mycommand
+00:47  cemysce: domidimi: thanks! (actually khussein originally asked)
+00:47  khussein: domidimi: thanks
+00:47  FernandoBasso: What if instead of substitute (s) I want to delete the match of a search?
+00:48  fow: FernandoBasso, just substitute nothing
+00:48  nickmbailey: s/wordtodelete//
+00:48  bairui: FernandoBasso: maybe you want   :g/pattern/d
+00:48  fow: :s/foo//
+00:49  FernandoBasso: What is the difference between :s/foo// and :g/foo/d ?
+00:49  bairui: FernandoBasso: :g/foo/d will delete all lines containing foo
+00:50  FernandoBasso: Okay. I had just 'discovered' that by trying. :D
+00:50  FernandoBasso: Thanks.
+00:50  bairui: np
+00:50  FernandoBasso: And of course, :s/foo// does the trick :D
+00:50  bairui: :)
+00:50  agib: mgedmin: grepall is giving me trouble on osx -- maybe find on osx has different args?
+00:53  agib: getting: https://gist.github.com/142d918e222738775783
+00:55  Rakko: Hi
+00:55  bairui: g'day, Rakko
+00:58  Raimondi: agib: osx commands are based on BSD, maybe that's the reason. You could use macports/fink/homebrew/etc to get the linux ones.
+00:58  Raimondi: Hi there Rakko
+00:59  Rakko: hey
+00:59  Rakko: Raimondi: is homebrew a specific ports system? Or just the general term meaning "stuff you compile yourself"?
+01:00  Raimondi: Rakko: http://github.com/mxcl/homebrew
+01:00  Rakko: Oh, cool. Seems like an oddly incongruous name to use, though.
+01:01  agib: Ahh I was just running the command wrong
+01:02  agib: the grepall docs say you can do grepall foo but it seems to require grepall . foo
+01:02  bairui: so, not an argument error, but an operator error ;)
+01:02  agib: :)
+01:02  agib: precisely
+01:05  Rakko: I wish OS X could bind shift/cmd/opt/ctrl to Exposé functions, but only if you hold them down a certain length of time
+01:05  Araxia: Rakko: check out KeyRemap4MacBook.
+01:05  Rakko: no wai
+01:05  Rakko: it can do that? hehe
+01:06  Araxia: might not do exactly that out of the box, but it could be persuaded.
+01:06 --- AkiraYB is now known as akirayb
+01:07  Rakko: it's weird... I have been avoiding installing KR4MB because it's a kernel extension... but that seems irrational, since I used to install all sorts of kernel modules in Linux
+01:09  bairui: perhaps bricking a macbook carries more weight than a linux box...?         ;)
+01:09  Araxia: yeah, that put me off it for a while, too, but i really, really wanted to use my enter key as a another fn key. and things got out of control from there...
+01:09  Araxia: now i've done this ubiqvim thing with it.
+--- Log closed Sat Oct 23 09:51:10 2010
+--- Log opened Sat Oct 23 09:51:34 2010
+09:51 --- Users 523 nicks [0 ops, 0 halfops, 0 voices, 523 normal]
+09:52 --- Channel #vim was synced in 69 seconds
+10:02  itmorr: Ejsy
+10:02  itmorr: What's a good high contrast color scheme?  thanks
+10:06  patrick85: itmorr: http://www.vi-improved.org/color_sampler_pack/
+10:07  jbee: hi folks. in every file i open, every space between words is marked with a bright color. what is wrong?
+10:26  jbee: thanks
+10:44  FernandoBasso: I'm using this to remove 4 space tabs from the beginning of lines:  :%s:^\s\{4}::
+10:44  FernandoBasso: Is there a clever way?
+10:45  FernandoBasso: (I have expandtab set)
+11:02  tuyetnga: hi
+11:03  FernandoBasso: tuyetnga: Hi there.
+11:04  tuyetnga: anyone could recommend me how to use map so that when I type some_variable<F1> then,  vim will give me \begin{some_variable} \end{some_variable}
+11:13  bairui: tuyetnga: see how this goes: imap <F1> <esc>yawPa <esc>bi\begin{<esc>ea} \end{<esc>lxea}<esc>           it might need... refinement.
+11:14  bairui: and, having played with that for the sheer joy of it, it's at this point that I should mention that you're probably WAY better off looking into a plugin that specialises in this sort of thing, like SnipMate. Cheers for the exercise, though. :)
+11:16  tuyetnga: bairui, no result :(
+11:16  bairui: tuyetnga: um... you put a   :   before the   imap   yeah?
+11:17  bairui: and you typed    some_variable<F1>    all in insert mode, yeah?
+11:17  tuyetnga: bairui, no : before imap
+11:17  bairui: admittedly... I didn't practise with <F1> - but it *should* still rock...
+11:17  bairui: well, you need   :   to enter ex mode... so, ... ?
+11:18  bairui: what I gave you was an ex mode command... so   type  :   and then cut and paste my line, and then in insert mode, type   some<F1>
+11:18  tuyetnga: bairui, but I understand what you want t o do
+11:18  domidimi: tuyetnga: check the vim latex suite too
+11:18  bairui: vimgor vim-latex
+11:18  vimgor: Dunno.
+11:18  bairui: bah
+11:18  bairui: I've heard people gripe about that one...
+11:18  bairui: vimgor latex
+11:18  vimgor: Bugger all, I dunno, bairui.
+11:18  bairui: so be it
+11:19  domidimi: http://vim-latex.sourceforge.net/
+11:19  bairui: FernandoBasso: if your shiftwidth is set correctly (one assumes here that means 4), then you could do    :%<
+11:20  armence: Hello all, I want to prepend a character at the beginning of each line in a specific range, how do I do that?
+11:21  bairui: :10,20s/^/x/    will prepend x from lines 10 through 20
+11:21  okayzed: you can use a regex: :'a,'b s/^/char/
+11:21  okayzed: to go between marks a, b
+11:21  tuyetnga: how to insert the newline after the cursor ?
+11:21  armence: thanks
+11:21  bairui: tuyetnga: in a map, you can use   <CR>   IIRC... :-/
+11:22  bairui: yup
+11:22  tuyetnga: bairui, I'm making your idea to reality ;)
+11:22  bairui: tuyetnga: scary     ;)
+11:22  bairui: but seriously, check out SnipMate later...
+11:23  FernandoBasso: bairui: Works! Thanks.
+11:24  bairui: np
+11:25  bairui: vimgor latex-suite
+11:25  vimgor: An slightly-maintained, buggy, over-complicated plugin intended to make it easier to author (La)Tex files. Often, this is better served by using a standalone snippets plugin (like snipMate) to define the snippets you actually find useful as well as using the command ':compiler tex' to allow using Vim's quickfix feature when compiling TeX to an output format.
+11:25  bairui: *knew* he was in there somewhere... :)
+11:27  psycojoker: is there a way to autosav on vim when I'm idling (not typing) ? I know it's possible on gvim but I don't know if it's the case for vim
+11:27  bairui: vim = gvim
+11:28  psycojoker: it was a option specific for gvim
+11:28  bairui: psycojoker: :help autocmd   :help 40.3   :help CursorHold
+11:29  psycojoker: bairui: thanks
+11:29  bairui: np
+11:30  tuyetnga: bairui, now it works :P
+11:30  bairui: cool :)
+11:33  tuyetnga: bairui, map is really cool
+11:33  bairui: indeed it is. :)
+11:35  psycojoker: yeah, working ! :au! CursorHold *.py nested exe "silent! w"
+11:35  bairui: :)
+11:38  psycojoker: (and set updatetime=1000)
+11:39  bairui: fair enough - it would irk me to wair 4s every time too
+11:39  bairui: wait even... damn gin...
+11:40  psycojoker: oh, and :up instead of :w seems clever
+11:40  bairui: indeed
+11:42  bairui: oh... and while we're at it... I swear Vim has an autosave option. This is as good a time as any to shout to the channel about my undying love for the   :options   command again. Give that bad boy a shot and search for   autowrite   and see what joy you get. Of course, if you browse the TOC at the top, you'll see that it's in section 19 - reading and writing files.
+11:45  psycojoker: I've only found this one "autowrite    automatically write a file when leaving a modified buffer" not really what I'm looking for
+11:45  psycojoker: btw, thanks for the trick
+11:46  bairui: np - yeah... realised that... wonder how gvim's doing that... it'll just be sth similar to your map - bound up in a menu call, no doubt.
+11:46  bairui: anyway, time to say g'night. Later, guys. :)
+11:47  psycojoker: sleep well
+11:47  bairui: cheers
+11:47  tuyetnga: bairui, no
+11:47  tuyetnga: stop
+11:47  tuyetnga: ask one more questino
+11:47  tuyetnga: question
+11:47  bairui: hmm?
+11:48  tuyetnga: vim can actually does something more intelligent ?
+11:48  bairui: be more specific... :)
+11:48  tuyetnga: like 4i<F3> => \begin{itemize} \item \item \item \item \end{itemize}
+11:48  tuyetnga: understand the value of a variable
+11:49  bairui: right... I see... well, I'd need to play with the code again... you might need to put this in a function that can capture the initial count. But, seriously... TRY SNIPMATE. :D
+11:49  tuyetnga: .g snipmate
+11:50  tuyetnga: } snipmate
+11:50  tuyetnga: ! snipmate
+11:50  tuyetnga: there is no bot here :((
+11:50  bairui: vimgor snipmate
+11:50  vimgor: It has been said that snipmate is snipMate.vim aims to be an unobtrusive, concise vim script that implements some of TextMate's snippets features in Vim. See http://github.com/msanders/snipmate.vim for more info, bairui
+11:50  tuyetnga: bairui, wait
+11:50  tuyetnga: it's too complicated
+11:50  tuyetnga: I want things that are simple
+11:51  bairui: ok - give me 10 minutes...
+11:51  solars: hey, can anyone suggest some nice plugins for java dev? (besides eclim)
+11:52  tuyetnga: wow , this is cool
+11:54 --- daniel___ is now known as daniel
+12:01  tuyetnga: well bairui it's so good
+12:02  tuyetnga: I love it :)
+12:03  solars: is it worth changing from snippets.vim to snipmate? :)
+12:05  bairui: tuyetnga: ugly as it is... here's a start to your request...  4i\item^M^[ma`[O\begin{itemize}^['aO\end{itemize}^[         man, I'm out of practise... :(
+12:05  tuyetnga: bairui, i found snipmate really cool
+12:06  bairui: oh, the ^M and ^[ are normal chars here, so you can't just copy - you'll have to make them the real chars in your actual macro
+12:06  bairui: tuyetnga: YAY!
+12:06  bairui: then my job here is done :)
+12:06  bairui: g'night :)
+12:06  tuyetnga: ok
+12:06  tuyetnga: thanks bairui
+12:06  bairui: np
+12:09  tuyetnga: I love snipMATE :))
+12:09  tuyetnga: I LOVE IT
+12:10  tuyetnga: I LOVE THE GUY WHO CREATES IT
+12:18  iaj: bairui: im just taking a deep look into that A 
+12:18  iaj:                    Heartwarming Edit - its really interesting lecture :)
+12:38  solars: anyone compared snippetsEmu to snipmate?
+12:39  iaj: solars: id take a look at XPTTemplate
+12:40  solars: reasons being? :)
+12:41  solars: almost too many options haha :)
+12:41  solars: for snippets
+13:03 --- MinceR_ is now known as MinceR
+14:15 --- CHOCOBY is now known as chocoby
+14:16  rson: i've used snipmate for a long time and never really had any problems with it.  does what it needs to do.
+14:16  rson: jesus christ i'm way behind
+15:00  FernandoBasso: I can't notice difference between ?boo|\far to ?\(boo|\far\) <-- They seem to match the same thing.
+15:02  jamessan: they do
+15:02  jamessan: but if you had foo\|barbaz and \(foo\|bar\)baz then there's a difference
+15:04  FernandoBasso: jamessan: Oh. Of course. Thank you.
+15:05  FernandoBasso: jamessan: You are the maintainer of vim debian's package, aren't you?
+15:05  jamessan: yup
+15:05  FernandoBasso: :)
+15:06  FernandoBasso: Cool! Indeed!
+15:14  FernandoBasso: I need to read about referring a group, like when we use \1 in lines like: :%s/\(\s*.\)/\l\1/  I have been told that \1 refers back to the group. Where can I read about this?
+15:15  jamessan: :help sub-replace-special
+15:15  minh: FernandoBasso: :help regexp in general?
+15:16  FernandoBasso: Thank you guys.
+15:17  FernandoBasso: And to define a group, I always must enclose in inside \( ... \) ?
+15:17  minh: FernandoBasso: well...e.g. you can use 'vey magic'
+15:19  minh: FernandoBasso: that is, put a \v at the beginning of your regexp...you can learn about it somewhere in ':h regexp'
+15:19  FernandoBasso: minh: I guess regexp is the same as 'pattern'.
+15:20  FernandoBasso: I mean, in the help.
+15:20  minh: FernandoBasso: probably :-)
+15:21  FernandoBasso: Vim help is comprehensive. It takes a life time...
+15:23 --- chocoby is now known as CHOCOBY
+15:33  remyo: You could make a point of learning at least one new thing every day
+15:38  astrojp: Anyone know how to get this colorscheme to stop underlining the current cursor line and instead highlight the current cursor line? I've been able to do this pretty easily before with hi cursoline... but not with this scheme. http://paste.pocoo.org/show/279160/
+15:41  kongo: astrojp: you may want to add ctermfg=NONE guifg=NONE to the cursorline definition
+15:42  fgro: how can i "move" content marked in visual mode to an external application, e.g. the clipboard of my X desktop?
+15:42  kongo: astrojp: and an additional cterm=NONE gui=NONE
+15:42  jamessan: fgro: "+y  will yank the visual selection to X's clipboard
+15:44  fgro: jamessan: doesn't seem to work for me :-(
+15:51  rindolf: fgro: you can also do :!myapp
+15:51  rindolf: fgro: though this will filter it.
+15:58  jamessan: fgro: then either your Vim isn't built with X support or you're trying to paste the results the wrong way.  "+y yanks to the clipboard, so you would likely <C-v> in the other app.  "*y yanks to primary, so you can middle-click paste
+15:59  fgro: jamessan: my vim is build with +X11 and -xterm_clipboard
+16:00  astrojp: kongo: Wow, thank you! I could not figure that out to save my life. I'm thinking simple modify the ctermbg=xxx to highligh bg.
+16:00  astrojp: i'll tias. :)
+16:01  astrojp: that highlighted the line for me...thanks.
+16:02  kongo: np
+16:07  jamessan: fgro: you typically need +xterm_clipboard
+17:28  redscare: I'm compiling my own vim, and I was wondering if it was possible to compile vim with both python2 and python3?
+17:29  DHulme: see :h python3
+17:29  redscare: aight thanks
+17:45  accipter: what is the best way to check for type of operating system? windows/linux?
+17:51  Raimondi: accipter: Scroll down on  :h feature-list
+17:51  accipter: yeah, I just found it
+18:55 --- Walt_ is now known as Walt
+19:02  FernandoBasso: How to make gf open in a new tab?
+19:02  Hates_: my girlfriend doesn't have tabs :(
+19:08  strull: FernandoBasso: try :nnoremap gf gf<c-w>T
+19:09  FernandoBasso: strull: Thanks.
+19:09  strull: np. Have fun!
+19:13  torio: Hi, all! is it possible to move visible area inside of window by given amount of symbols. I have long non wrapping lines in file, and want to precisely control whay portion of screen is shown. Right now vim shows the whole screens only.
+19:16  torio: To answer my own question - :h scroll-horizontal I really like Vim
+19:23 --- Walt is now known as thepro4never
+19:43  Oleg_: where in gvim I can change its setting to utf8?
+19:45  fow: Oleg_, look at the enc and fenc options
+19:47 --- second is now known as sec^nd
+19:55  thepro4ever: how do I replace a character with newlines in vi??
+19:55  thepro4ever: my current replace isn't working when i put \n in it doesn't actually split the lines
+19:55  thepro4ever: its puts a ^@ symbol where i should have seen it split the line
+19:56  kongo: thepro4ever: use \r in the replacement
+19:56  thepro4ever: \r in place of the \n ??
+19:56  kongo: yup
+19:56  thepro4ever: ok
+19:58  thepro4ever: that is awesome
+19:58  thepro4ever: \r is not intuitive
+20:25  julesa: The html indentation logic drives me up the bloody wall. Example: I don't like tabs indenting right after <body>. Looked at cindent and smartindent but not having a lot of luck finding out how to tweak this. Still want autoindent but I don't want decisions made for me on indentation level. Any idea what to look at?
+20:26  rindolf: julesa: :set indentexpr=
+20:26  julesa: rindolf: Ah ha! Let me go peek at that. Thanks so much.
+20:26  rindolf: julesa: hope it works.
+20:30  akira42: Hello, does anyone know if there is a version of the "Common Lisp Hyperspec" in vim-help format? Alternatively, Is there a program to generate a vim-helpfile out of a HTML document?
+21:00  vaxerdec: hey try this: se tw=55 then make line: "this is a test)" and go to normal mode.  put cursor on ')' and then go to 'i'nsert mode.  keep typing: "of the emergency broadcast system.  this" (note two spaces).  and keep typing: "is only a test" but vim will not let you proceed.  pressing space after 'this' and vim will just keep going forever from one line to next without letting you type further characters.
+21:05  Raimondi: vaxerdec: It works for me. Have you tried with  vim -N -u NONE  ?
+21:05  vaxerdec: raimondi, i'll try that now.
+21:05  fow: works for me too
+21:06  vaxerdec: really, it lets you go to next line when you press space? mine goes to next line, but then another space goes back to previous line, and it loops.
+21:06  iaj: working for me as well
+21:06  iaj: thought it was an april joke or something at first ;)
+21:06  vaxerdec: no i'm serious.  thought it was bug
+21:06  vaxerdec: i mean it probably shouldn't do that regardless of my settings
+21:06  vaxerdec: i cannot proceed to next line when typing... can't be correct behavior
+21:08  vaxerdec: hmm, no, it doesn't do it with -N -u NONE
+21:08  Raimondi: Then it's a plugin or vimrc
+21:08  vaxerdec: i wonder what setting does it.  i guess i will bisect.
+21:08  Raimondi: vaxerdec:  Now try  vim -N -u NORC
+21:08  vaxerdec: ok
+21:08  Raimondi: That loads plugins but not your vimrc
+21:09  vaxerdec: wait, now it's not doing it in a new file even with all my config
+21:09  vaxerdec: maybe it depends on previous line? hmm
+21:11  vaxerdec: ok try to press two spaces after the "this" that wraps the line, and it does it.
+21:12  McManiaC: hey, how do I get gvim open maximized in windows?
+21:13  McManiaC: *to
+21:14  iaj: McManiaC: I got that with set lines=  set colums=  in my vimrc
+21:15  vaxerdec: argh, now i can't reproduce it anymore.
+21:16  McManiaC: iaj: ok, I guess that has to do
+21:16  vaxerdec: aha, it does it with my ft=mail
+21:17  iaj: what autocommands do you have with ft=mail set?
+21:18  vaxerdec: aha it does it with fo+=a
+--- Log closed Sat Oct 23 21:24:34 2010
+--- Log opened Sat Oct 23 21:35:32 2010
+21:35 --- Users 563 nicks [0 ops, 0 halfops, 0 voices, 563 normal]
+21:36  iaj: is there some way to 'style' vim.. in auto-completion senses - so if I do :Pr<tab> and there are several things starting with :Project... it shouldn't autocomplete to the first one, but to :Project only (like in zsh) so that I can then type another letter for guiding the autocompletion?
+21:36 --- Channel #vim was synced in 72 seconds
+21:36  iaj: + does someone know of any good vim coding videos/screencasts?
+21:37  fow: iaj, not as powerful as zsh, but :h 'wildmode
+21:39  vaxerdec: fow, wow, that does exactly what he wants, looks like.  didn't know about it
+21:39  redscare: if i am compiling vim, is there any way to point it to a specific python binary?
+21:39  redscare: on my system, /usr/bin/python2 is python 2.7 and /usr/bin/python is python3
+21:40  redscare: and I need python 2.7 support for plugins
+21:41  vaxerdec: i can't figure out which key to press to select a directory for completion so it will descend and keep the selection dialog open
+21:42  vaxerdec: i can use 'ctrl-y' looks like to select, but that closes the selection dialog
+21:43  Raimondi: vaxerdec: In command mode use <Down>
+21:43  iaj: fow: ohh.. so I think set wildmode=longest,list  is what I'm looking for right? but I need to press 2 tabs to see the list - can I have that directly as well?
+21:44  Raimondi: I have list:longest,full
+21:46  vaxerdec: redscare: maybe PYTHONHOME/PYTHONPATH ? probably that won't work, hmm.
+21:47  vaxerdec: Raimondi: that doesn't work, example: ":edit /etc/<tab><ctrl-n> (to a directory somewhere) then want to select a directory and descend but leave dialog open
+21:48  redscare: vaxerdec: I don't see that variable in the Makefile, so probs not
+21:49  vaxerdec: redscare: i am doing hg clone now but it's taking long time.
+21:49  kongo: vaxerdec: try <c-e> to descend into the dir
+21:50  vaxerdec: redscare: yeah python3 seems to have broken tons of code hasn't it
+21:50  Raimondi: vaxerdec: Once you select the item you want, press <Down> and a new list will appear. At least that's how it works with  :set wildmode=list:longest,full
+21:50  redscare: redscare: yeah python3's a bitch. not sure what the python people were thinking
+21:51  vaxerdec: kongo: hmm, that does not work on my system.  it does no yours?
+21:51  vaxerdec: kongo: ctrl-e that is
+21:51  kongo: yeah
+21:51  kongo: ctrl-e and then <tab> again I guess
+21:51  kongo: to continue selecting
+21:53  vaxerdec: kongo: right see that exits the dialog
+21:53  Patric3: <Patric3>How can I change a selected visual block to mixed case, i.e. first letter of each word capitalised ?
+21:53  vaxerdec: kongo: you are pressing tab again to re-enter it
+21:54  kongo: vaxerdec: hm yes, now said you say it :) sorry overlooked that
+21:54  vaxerdec: Patric3: i would record a macro and run it over the block manually
+21:55  vaxerdec: Patric3: i.e. "qw" then "W~q" then "@w" and then hold down "@"
+21:55  vaxerdec: Patric3: that won't work on a visual block though.  although there may be some way to do it
+21:55  Patric3: Hmmm... sounds like there's no easy way :p
+21:56  vaxerdec: Patric3: well the way i mentioned does work and it's easy, just kind of a hack
+21:56  Patric3: "Flip case" is easy (a tilde)
+21:56  vaxerdec: Patric3: right so just do the actions of flipping case of first char and advancing to next word, under a recording.  then repeat the recording over and over by holding down @
+21:57  vaxerdec: Patric3: or using <count>
+21:57  vaxerdec: Patric3: you could put the commands in a register too and use @<register>
+21:58  Patric3: ok - Thx for yr ideas (I haven't played with macros yet ;p)
+--- Log closed Sat Oct 23 22:04:10 2010
+--- Log opened Sat Oct 23 22:04:37 2010
+22:04 --- Users 559 nicks [0 ops, 0 halfops, 0 voices, 559 normal]
+22:05 --- Channel #vim was synced in 77 seconds
+22:06  vaxerdec: Patric3: actually, using sed may be easier: sed -r '\<\([[:alpha:]]{1}\),\U\1\E,g' maybe
+22:06  Patric3: wow
+22:07  vaxerdec: i wonder if that works
+22:08  vaxerdec: hmm, says unterminated address regex, but i don't see it
+22:09 * vaxerdec scratches head
+22:10  vaxerdec: ah
+22:10  redscare: vaxerdec: so any hints?
+22:10  redscare: vaxerdec: about the python3?
+22:11  vaxerdec: redscare: ah, it finished, hang on though trying to figure out the sed command
+22:11  vaxerdec: says \1 is invalid on sed RHS? that's not true?!?
+22:13  Patric3: Yeah - sorry, I'm not sure where the problem is....
+22:13  vaxerdec: of course \1 is valid in sed 's' that's what it's for! i don't get it.
+22:14  vaxerdec: ah it's the '-r' that doesn't like it.
+22:14  fow: The above command is missing the s, and may need -e. and note use -E instead of -r if BSD sed
+22:15  vaxerdec: fow, right once i added the 's' it was giving me that error.  it won't do a replacement with '-r' though for some reason, which seems dumb.
+22:15  vaxerdec: i mean a back reference
+22:15  fow: oh, it's ( and ) not \( and
+22:15  fow: \) when you use -r
+22:15  vaxerdec: oh really? hmm
+22:15  vaxerdec: perfect: sed -r 's,\<([[:alpha:]]{1}),\U\1\E,g' testfile
+22:16  vaxerdec: Patric3: that will work :) but not on a range.  although you can filter a visual block through a shell command i think
+22:17  vaxerdec: redscare: ok let me look,
+22:17  Patric3: vaxerdec: Thanks for your efforts - it's appreciated
+22:19  vaxerdec: redscare: it has both --enable-pythoninterp and --enable-python3interp
+22:19  redscare: yep i know
+22:19  redscare: it uses /usr/bin/python for --enable-pythoninterp though
+22:19  redscare: i think i found the sed line
+22:21  vaxerdec: redscare: configure.in says it checks the version of /usr/bin/python
+22:22  vaxerdec: redscare: it uses 'import sys; print sys.version[:3]'`
+22:22  vaxerdec: redscare: so i think it will "know" that your python version is 3, but not sure how to tell it to use /usr/bin/python2
+22:23  redscare: vaxerdec: i did it (i think) with these lines
+22:23  redscare: vaxerdec:   sed -i -e 's|vi_cv_path_python, python|vi_cv_path_python, python2|' src/configure.in
+22:23  redscare: cd src && autoconf
+22:24  vaxerdec: maybe you just need the line: AC_PATH_PROG(vi_cv_path_python, python)
+22:24  vaxerdec: to be python2
+22:24  redscare: yep it worked
+22:24  redscare: vaxerdec: that's what the sed line does
+22:24  vaxerdec: redscare: the sed line changes all of them
+22:25  vaxerdec: redscare: i think you may need to only change the single line for AC_PATH_PROG, but not sure.  in any case, if it works, you're golden :)
+22:25  redscare: well there just happens to be only one such line in configure.in i think
+22:25  infid: is there a way to put if i'm in a git or svn repo in my vim status bar?
+22:26  vaxerdec: redscare: ah, yes i think you are right.
+22:26  redscare: vaxerdec: yep. thanks for your help:)
+22:27  vaxerdec: infid: you can use %{}
+22:28  vaxerdec: redscare: did it actually work after you did that? successful after build?
+22:28  redscare: yep
+22:28  redscare: i've got both versions working great
+22:28  vaxerdec: sweet
+22:28  infid: vaxerdec: what do you mean?
+22:28  vaxerdec: redscare: so python3 is default now on your distro? which one?
+22:29  redscare: vaxerdec: only the best, arch linux
+22:29  vaxerdec: i think /usr/bin/python should be 2.7 for long time.  and /usr/bin/python3 available
+22:29  vaxerdec: redscare: maybe /usr/bin/python should somehow pretend it's 2 but switch to 3 if the code is v3
+22:29  vaxerdec: infid: in 'statusline'
+22:30  vaxerdec: redscare: it's a good way to force people to fix their code though.  with 2to3 should be easy enough.
+22:30  redscare: vaxerdec: probably a more portable solution
+22:30  redscare: vaxerdec: not sure how familiar you are with python, but do you know if the changes are really worth it?
+22:31  infid: vaxerdec: like http://www.vim.org/scripts/script.php?script_id=2258  ? i want it to detect if i'm in svn or git and tell me
+22:31  vaxerdec: redscare: i'm not familiar enough with python.  although it looks to me like it discards a lot of legacy kruft and i think it's good thing
+22:31  vaxerdec: redscare: it makes the interface to a lot of language features and OO stuff more consistent
+22:32  redscare: vaxerdec: not so sure removing legacy support is a great idea
+22:33  vaxerdec: infid: yeah i'm not sure about what eval you'd have to use, that would have to be written.  but %{} escape will let you put arbitrary stuff in your 'statusline' if you just figure out the 'eval' code to tell you what you need
+22:33  vaxerdec: redscare: makes code more readable and consistent.  if you want old, just use python2
+22:33  iaj: is someone using eclim here?
+22:34  vaxerdec: redscare: no reason language should have to keep kruft.  imo was good decision but i'm really not python person, only looked at it a little
+22:35  FernandoBasso: iaj: I tried some time ago...
+22:35  FernandoBasso: I couldn't stand an IDE. Also, we loose the code completion the IDE (I tried aptana) offers.
+22:36  iaj: FernandoBasso: were you happy with it?? aptana - which language is that?
+22:37  FernandoBasso: iaj: Aptana is an IDE for rails, php, javascript, python and the like. Actually it is another eclipse flavor. (imho)
+22:38  iaj: FernandoBasso: Oh.. I see.. and were you happy with it?
+22:38  FernandoBasso: iaj: I think it is cool. But, I found nothing that would be worth it yet.
+22:38  FernandoBasso: No.
+22:38  FernandoBasso: I wasn't.
+22:38  iaj: hmm.. so you switched back to an IDE?
+22:38  FernandoBasso: The editor sucks in such a way, that I can't stand it for more than 10 minutes.
+22:38  iaj: ohh...
+22:38  infid: vaxerdec: looks like vcscommand.vim has the ability
+22:38  iaj: I ment were you happy with the decision to give eclim a shot
+22:38  iaj: not if you liked the IDE :D
+22:39  FernandoBasso: I just stayed with vim.
+22:39  iaj: FernandoBasso: did you use any remappings in vim for having a good functionality?
+22:39  sie: How can I make vim indent ruby with 2 spaces?
+22:39  FernandoBasso: iaj: Eclim is cool. But unfortunately it doesn't interface with the ide code completion.
+22:39  iaj: id doesn't? Im using eclim - and do java editing.. the code completion seems quite nice
+22:40  FernandoBasso: iaj: No. I did nothing more than just installing it and using for two or three hours.
+22:40  iaj: Oh, I see.. well I need to do some more work with it :-)
+22:40  FernandoBasso: iaj: Is it not the default vim's omni completion?
+22:41  FernandoBasso: iaj: You have eclim interfacing with eclipse code completion?
+22:41  iaj: FernandoBasso: correct
+22:42  iaj: ^X^U is working with eclipse's code completion
+22:42  FernandoBasso: iaj: Well, perhaps a new version. I don't remember what version it was when I tried it.
+22:43  jmcantrell: is the only way to have function parameters with default values to define the function as foo(...) and check a:1, a:2, etc?
+22:44  iaj: FernandoBasso: yeah :-S If just I could java class and function names syntax highlighting I'd actually be happy already
+22:44  iaj: heh
+22:45  FernandoBasso: iaj: Do you use eclim headless or really inside eclipse?
+22:46  FernandoBasso: Hmm. Eclim in aur.
+22:46  iaj: ?!
+22:46  iaj: Eclim headless ofc... no eclipse at lal
+22:47  iaj: all*
+22:47  iaj: at least I try to.. just setting it up
+22:49  FernandoBasso: The IDE editors are meant to make us code with the mouse. I actually think they should provide and 'on screen keybord'.
+22:49  iaj: FernandoBasso: most do... well.. actually there are some cool plugins that enable vim mode for netbeans or eclipse
+22:49  iaj: still I want to try to stick to vim only.
+22:50  FernandoBasso: I believe java is the lang that most requires an IDE.
+22:50  iaj: FernandoBasso: unfort. it seems like that
+22:50  FernandoBasso: iaj: Have you tried xptemplate?
+22:51  iaj: FernandoBasso: yeah.. I'm using that one...
+22:51  iaj: the only problem is debugging stuff without an IDE.. i think
+22:51  FernandoBasso: Great!
+22:51  FernandoBasso: Yeah...
+22:52  FernandoBasso: I'm a beginner coder. For now I don't need debugging features that much.
+22:53  iaj: FernandoBasso: heh.. yeah!  Just have to do a 'larger' project for uni.
+--- Log closed Sat Oct 23 23:04:18 2010
+--- Log opened Sat Oct 23 23:04:39 2010
+23:04 --- Users 557 nicks [0 ops, 0 halfops, 0 voices, 557 normal]
+23:05 --- Channel #vim was synced in 74 seconds
+23:05  kongo: jmcantrell: I think you would use substitute() and matchstr() for that
+23:06  kongo: jmcantrell: but I think you know that already, what do you want to do?
+23:06  infid: :s/foo/bar ?
+23:07  etcetera: setting shortmess+=I does not seem to get rid of the welcome screen.
+23:07  etcetera: in _vimrc.
+23:22 --- skizzhg_ is now known as skizzhg
+23:26  iaj: hm I got a question, when I browse through filepaths with autocompletion, how do I 'say yes' gimme the next possible completitions?
+23:26  anr78: ooh. a few minutes with vim, and already it looks like a better choice for python-editing than emacs :)
+23:27  iaj: anr78: wise cho=ice!
+23:27  bairui: iaj: not sure I get your q... do you mean just the   /   character?
+23:27  iaj: bairui: hey man how are you
+23:27  iaj: :-)
+23:28  iaj: bairui: actually i ment 'ok take that folder.. lemme complete the next one'
+23:28  bairui: i'm good, iaj :). Busy though :(
+23:28  bairui: iaj - try /
+23:28  iaj: your name's popping up rarely here
+23:28  bairui: indeed :(
+23:28  iaj: makes another / for me :\
+23:28  rson: ye
+23:28  iaj: ./ makes another / for me 
+23:28  rson: yes, then hit tab
+23:29  iaj: but its writing two // there then
+23:29  iaj: still its working :\
+23:29  bairui: that's fine
+23:29  anr78: iaj: thanks. all I've done now is to enable autocompletion and correct indenting, so I have a bit of research to do :)
+23:29  iaj: bairui: but looks weird.. hmmm.. so that's the most common way?
+23:29  bairui: yep
+23:30  iaj: no plugin that will remove the two // to one?
+23:30  iaj: looks odd "\
+23:30  aep: iaj: down key?
+23:30  bairui: iaj: I got busy at work, so something had to stop - turned out that was #vim :'(
+23:31  iaj: bairui: not your sense of living :(
+23:31  bairui: no. :(
+23:31  aep: iaj: cant remember if its default or i did that, but I press down key to confirm current completion
+23:32  iaj: aep: yeah but well down key is just a no go for me :)
+23:32  aep: could bind that t something else
+23:32  iaj: too bad that CTRL-D isn't listing the whole bunch :\
+23:32  iaj: like it usually does.
+23:32  iaj: aep:  actually you can use CTRL-Y
+23:33  aep: well, there you go :)
+23:34  aep: hm, not working for me, but i'm happy with down key anyway
+23:34  iaj: hm theres no way to just show a list of autocomplete options, is there?
+23:34  aep: set wildmenu
+23:35  iaj: and how would I lemme show that wildmenu without completing to the first match already?
+23:35  aep: dunno. why care?
+23:36  iaj: im used to, that way - from my shell.
+23:36  Raimondi: iaj: <C-D>  works here
+23:36  Raimondi: For command line file path completions
+23:36  bairui: g'day, Raimondi :)
+23:37  iaj: <C-D> is indenting for me :\
+23:37  Raimondi: Hi there, bairui  :)
+23:37  iaj: command line is working yeah - but not in filename completion
+23:37  Raimondi: iaj: In command mode?
+23:37  iaj: nah in a buffer :-)
+23:37  iaj: but I guess that's its default behaviour there :-D
+23:38  bairui: iaj: you might get your desired behaviour by changing   'wildmode'   :help 'wildmode'
+23:38  aep: iaj: yeah, i'm not that happy with it either. i quit vim often to reopen a different file with my favorite shell completion
+23:38  iaj: btw how can I rm the current file?!
+23:38  iaj: bairui: tried that... but it doesn't work on filename completition does it?
+23:39  bairui: um... i was sure it did...
+23:41  iaj: when I'm on ~/java/ and hit CTRL_X_F .. it automatically completes to the first match there.
+23:41  iaj: I wish there was a plugin that shows up folder/ as completion and when you hit / it just goes on instead of placing anohter / afterwards ..
+23:43  bairui: ah, iaj, I missed that you wanted this from CTRL_X_F - the wildmenu won't help you there...
+23:43  iaj: yeah I thought so
+23:47  bairui: ok, now that I know what you're trying to do... (answering BC is still a bad idea... :p) You can just   ctrl_x_f nav to your dir and then press ctrl_x_f again to descend into it, nav again, etc...         no?
+23:57  tuyetnga: hi
+--- Log closed Sun Oct 24 00:00:09 2010

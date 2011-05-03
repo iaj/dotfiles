@@ -1,0 +1,536 @@
+--- Log opened Fri Jan 21 19:14:08 2011
+19:14 --- Users 572 nicks [0 ops, 0 halfops, 0 voices, 572 normal]
+19:15 --- Channel #bash was synced in 100 seconds
+19:17  flaccid: sorry about the disses. i always forget this one too.. i want to do some_command || echo 'you failed'
+19:18  flaccid: but i want to run more than 1 command in the right side, how to do that?
+19:19  cthuluh: flaccid: group commands with brackets: { ...; ...; }
+19:19  flaccid: sick, thanks cthuluh
+19:20  geirha: or do   if ! some_command; then ...; fi
+19:21  lunaphyte_: given a list of hostnames with an arbitrary number of dots, how can i print only the second level domain?  pe seems like it would be a natural fit for this, but i haven't yet found a working command.
+19:21  flaccid: ah yep thats compact too and readable
+19:22  lunaphyte_: sample strings: www.example.com us.www.example.com example.com - each should print only example.com
+19:24  cthuluh: lunaphyte_: you could use parameter expansions
+19:24  cthuluh: !pe
+19:24  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+19:24 --- penguinsrule is now known as ritztech
+19:24  The-Compiler: cthuluh: how could he print the second-to-last field with that?
+19:25  lunaphyte_: yes, that's what i thought, but i've not yet figure out how.
+19:25  The-Compiler: using awk or sed is probably the best option I think
+19:27  cthuluh: what about a bash loop?
+19:27  rickest: echo 'one.two.three.four.website.com' | perl -pe 's/^.*\.([^.]+\.[^.]+)$/$1/';
+19:28  geirha: while IFS=. read -r -a components; do (IFS=.; echo "${components[*]:(-2)}"; done
+19:28  cthuluh: 4# for name in www.example.com us.www.example.com example.com; do while [[ $name = *.*.* ]]; do name=${name#*.}; done; echo "$name"; done
+19:28  shbot: cthuluh: example.com
+19:28  shbot: cthuluh: example.com
+19:28  shbot: cthuluh: example.com
+19:28  geirha: # while IFS=. read -r -a components; do (IFS=.; echo "${components[*]:(-2)}"; done <<< $'www.example.com\nus.www.example.com'
+19:28  evalbot: geirha: bash: syntax error near unexpected token `done'
+19:28  geirha: d'oh
+19:29  geirha: # while IFS=. read -r -a components; do (IFS=.; echo "${components[*]:(-2)}"); done <<< $'www.example.com\nus.www.example.com'
+19:29  evalbot: geirha: example.com
+19:29  evalbot: geirha: example.com
+19:29  The-Compiler: # echo $'www.example.com\nus.www.example.com\nexample.com' | awk -F'.' '{ print $(NF-1)"."$NF }'
+19:29  evalbot: The-Compiler: example.com
+19:29  evalbot: The-Compiler: example.com
+19:29  evalbot: The-Compiler: example.com
+19:30  cthuluh: The-Compiler: I think that lunaphyte_ has already read this one, isn't it?
+19:30  The-Compiler: oh, whoops
+19:30  The-Compiler: getting confused :D
+19:33  falconindy: # for dom in www.example.com us.www.example.com example.com; do [[ $dom =~ [^.]+\.[^.]+$ ]] && echo ${BASH_REMATCH[0]}; done
+19:33  evalbot: falconindy: example.com
+19:33  evalbot: falconindy: example.com
+19:33  evalbot: falconindy: example.com
+19:42  Fatal: shortening all vars to one char and including the same three example inputs; 119 119 118 chars in the three working examples :P
+19:45  Fatal: (1000x) PE loop: 0.31s, IFS trick: 4.06s, REMATCH: 0.52s
+19:45 * Fatal is bored
+19:45  falconindy: wow, im surprised the regex is that fast
+19:46  falconindy: IFS trick only loses because of the subshell
+19:47  retrospectacus: !$?
+19:47  greybot: The special parameter ? (you use $? to expand it) contains the exit status of the previous command, an integer from 0 to 255 inclusive. In general, an exit status of 0 implies success (or "true") and non-zero implies failure ("false").
+19:50 --- Torpeo is now known as zz_Torpeo
+19:54  afuentes: what does the symbols for ls -F mean? (one of these -->append indicator (one of */=>@|) to entries)
+19:55  dualbus: afuentes, ls is not bash
+19:55  flaccid: um silly question.. echo a line break? just echo
+19:55  pgas: "Also, for regular files that are executable, append `*'.  The file type indicators are `/' for directories, `@' for symbolic links, `|' for FIFOs, `=' for sockets, `>' for doors, and nothing for regular files."
+19:55  afuentes: and a script that includes a ls -F is, dualbus ?
+19:56  afuentes: the man page tells nothing more :(
+19:57  pgas: info '(coreutils)General output formatting'
+19:57  pgas: instead of man
+19:57  afuentes: ops, nice pgas
+19:57  afuentes: thanks! :D
+20:13  flaccid: here is a good one. how to run a script like bash foobar and have it redirect both stdout and stderr to both console and a file?
+20:15  jordanm: flaccid: use tee and 2&>1
+20:16  cthuluh: I'm more used to >&
+20:16  flaccid: bash foobar | tee > 2&>1 ?
+20:16  falconindy: foobar |& tee file
+20:16  flaccid: danke!
+20:17  taylanub: bash doesn't have something like rc's |[fd] does it?
+20:20  mattymo: how can I use watch to view the output of a command with pipes
+20:20  flaccid: falconindy: returns -bash: syntax error near unexpected token `&'
+20:20  mattymo: for example: watch cmd1 | cmd2
+20:21  falconindy: !version
+20:21  greybot: greybot 2011-01-14
+20:21  falconindy: !faq version
+20:21  greybot: http://mywiki.wooledge.org/BashFAQ/061 -- Is there a list of which features were added to specific releases (versions) of Bash?
+20:21  falconindy: aha, |& is 4.0
+20:21  falconindy: foobar 2>&1 | tee file
+20:21  pgas: blah 2>&1 | tee file
+20:21  mattymo: nevermind! you just do watch 'cmd1 | cmd2'
+20:21  mjsilva: hi, how do I remove all files in a folder except the one with .css extension?
+20:22  mjsilva: rm !(*.css) got it
+20:22  pgas: mattymo: you can always use sh -c ' ' in cases like this
+20:22  mattymo: pgas, ah cool in case the cmd didn't support it
+20:24  taylanub: e.g. find's -exec
+20:31  afuentes: pgas, do you know what a door is? i run # find / -exec ls -F {} \; 2>/dev/null|grep ">" to find any door file in my system but I found nothing :S
+20:31  erUSUL: afuentes: is something only solaris supports afaik
+20:31  erUSUL: sunOS/solaris
+20:31  afuentes: oh, i see
+20:32  afuentes: ^^ thanks
+20:32  greycat: afuentes: if this is some Solaris thing, I'd expect Solaris's find command to have a special -type for it.
+20:32 --- [1]The-Bat is now known as The-Bat
+20:33  afuentes: greycat, its just it appears in the man ls and info coreutils... and i was just curious about it because i never heard of it
+20:34  afuentes: oh greycat you mean for my find instead of the weird thing i do
+20:35  erUSUL: afuentes: well those two documents mention that is solaris specific ( that's where i read about them too )
+20:35  afuentes: yeah... I found a kinda complicated way to find the file ^^
+20:35  greycat: Are you actually *on* solaris?
+20:35  afuentes: nop
+20:35  greycat: Then there are no such files.
+20:36  afuentes: yeah, it comes in the linux doc as well  because i guess its the same doc
+20:36  afuentes: and i was curious about it
+20:36  greycat: I'm sure you mean GNU docs.
+20:36  afuentes: mmm, yeah, i guess
+20:36  greycat: The GNU tools are older than Linux is.  They were originally written for all the myriad commercial Unix flavors of the world.
+20:37  greycat: So it's completely expected that a GNU tool like ls might have support for features that Linux does not have.
+20:37  afuentes: not much older tho ^^
+20:37  whoopky: Need help with OR operator -_-
+20:37  greycat: 5-10 years IIRC
+20:37  whoopky: http://pastebin.com/3kZ5utD4
+20:38  afuentes: gnu 86 i think and linux 91
+20:38  erUSUL: afuentes: 7 - 8 years or so ;P fsf was created in ~84 first linux kernel in 91
+20:38  taylanub: ![ > whoopky
+20:38  greybot: whoopky: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+20:38  taylanub: ![[ > whoopky
+20:38  greybot: whoopky: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+20:39  whoopky: wait what
+20:39  afuentes: xD
+20:39  taylanub: whoopky: [[ does parsing magic to twist the usage of && and ||. you don't have that with [, its arguments must be properly quoted and it has no && or ||
+20:39  afuentes: canned answer, you take it or leave it
+20:39  whoopky: I see
+20:39  whoopky: thanks
+20:40  whoopky: half canned afuentes
+20:40  whoopky: its so easy to be arrogant to a noob..
+20:40  afuentes: hey, im a noob as well
+20:40  afuentes: i was just joking
+20:40  greycat: I don't see arrogance in the last 2 minutes.
+20:40 --- [1]The-Bat is now known as The-Bat
+20:40  greycat: I'm sure there'll be some if you stick around long enough, though.
+20:40  whoopky: ^_^
+20:41  afuentes: ^^
+20:43  whoopky: Now my statement is always correct no matter what i type
+20:44  afuentes: now you are getting the right tone
+20:44  whoopky: :?(
+20:44  afuentes: wait, was that a question?
+20:44  taylanub: maybe you fell for  "a != b || a != c"
+20:45  afuentes: paste your if sentence
+20:45  whoopky: http://pastebin.com/zA1sWSV1
+20:45  greycat: *sigh*
+20:46  whoopky: its my first time im nervous mkay
+20:46  afuentes: 2 is always true
+20:46  taylanub: you needn't pastebin for something short like that. the relevant part fits in one line
+20:46  whoopky: avoiding the banhammer here
+20:46  whoopky: ok
+20:46  taylanub: whoopky: chill down :P
+20:46  afuentes: you have to type the whole || number !=....
+20:46  greycat: We almost never ban people here, unless they're spammers.
+20:47  whoopky: Oh so I can't be lazy
+20:47  afuentes: no if you want it to work
+20:47  taylanub: whoopky: you can use a pattern
+20:47  whoopky: makes sense
+20:47  afuentes: otherwise, you can
+20:47  pgas: they leave by themselves afte they get their t-shirt
+20:47  pgas: !t-shirt
+20:47  greybot: "You were treated harshly in #bash? well, it happens. Here's your T-shirt. It says: Been there, had that done to me."
+20:48  greycat: What's he trying to do?
+20:48  afuentes: if [[ "$number" !=  '1' || '2' ]]; then
+20:48  whoopky: trying to exit the script if number is not 1 or 2
+20:48  greycat: case $number in
+20:48  greycat:   1|2) : ;;
+20:48  greycat:   *)  echo "you suck";;
+20:48  taylanub: whoopky: leaving aside your wrong syntax, you ALSO fell for  "a != b || a != c"  :)
+20:48  greycat: esac
+20:49  whoopky: like i said its my first time
+20:49  afuentes: and these are your first answers
+20:49  afuentes: congrats
+20:49  taylanub: whoopky: something is always either not b, not c, or none of both
+20:50  whoopky: yes
+20:50  afuentes: haha, now i understand what taylanub mean
+20:50  afuentes: right
+20:50  whoopky: so its all wrong
+20:51  whoopky: err
+20:51  whoopky: ok fuck you guys
+20:51  whoopky: im going to make 2 ifs
+20:51  dualbus: if ((! (number == 1 || number == 2) )); then echo "learn2type"; fi
+20:51  whoopky: lol
+20:51  taylanub: "foo isn't bar OR foo isn't baz" is 'tautological'
+20:51  greycat: Logic is hard.
+20:51  taylanub: i.e. true no matter what
+20:52  whoopky: I understand
+20:52  greycat: dualbus's can be shortened to    ((number==1 || number==2)) || echo "learn2type"
+20:52  afuentes: a very nice lesson if you want to offuscate code in the future
+20:52  whoopky: ill use dualbus's for clarity's sake
+20:52  greycat: The case statement I gave is the most portable way.
+20:52  e36freak: or "if ! ((number==1 || number==2)); then... fi"
+20:52  dualbus: somewhere I read that if ... then... fi was better than chaining && and ||
+20:53  e36freak: dualbus: chaining, definitely
+20:53  whoopky: portable as in.. applicable to <?>
+20:53  greycat: Yes, but nobody chained && and || (yet).
+20:53  pgas: I like case too
+20:53  e36freak: dualbus: for like "command || return 1", not an issue
+20:53  greycat: Portable meaning "doesn't require bash".
+20:53  greycat: Many people here are secretly writing for POSIX or Bourne sh and don't bother to say so.
+20:53  whoopky: what is POSIX
+20:53  lazyliberal: is it possible in a script to prevent root from running it, something like 'if user = root exit 0'
+20:54  whoopky: or bourne
+20:54  greycat: Many MORE people here are writing #!/bin/sh on systems where that is not bash, and they don't know any better.
+20:54  taylanub: !posix > whoopky
+20:54  greybot: whoopky: The POSIX standard defines what any modern unix should supply. Sticking to the commands and options in http://www.opengroup.org/onlinepubs/9699919799/utilities/contents.html will do wonders for the portability of your scripts.
+20:54  greycat: Jesus...
+20:54  dualbus: e36freak, I see
+20:54  pgas: I like case even in bash script
+20:54  dodongo: I gotta say, this is the most responsive channel I've ever been in.  Wish every other one was like this
+20:54  whoopky: lazyliberal: if [ "$(whoami)" != 'root' ]; then
+20:54  whoopky: 	echo ""
+20:54  whoopky: 	echo "No permission; Not root."
+20:54  whoopky: 	echo ""
+20:54  whoopky: 	exit 1;
+20:54  whoopky: fi
+20:54  whoopky: change it
+20:54  lazyliberal: thanks
+20:54  whoopky: np
+20:54  e36freak: !pf 22 > dualbus
+20:54  greybot: dualbus: http://mywiki.wooledge.org/BashPitfalls#pf22 -- Don't do this! -- cmd1 && cmd2 || cmd3
+20:54  e36freak: that explains it
+20:54  taylanub: lazyliberal: check $UID or $(id -u) for 0
+20:55  greycat: lazyliberal: if [ -w / ]; then echo "Go away you root you"; fi
+20:55  whoopky: lol
+20:55  taylanub: lazyliberal: whoopky's solution is much worse... (no hard feelings :P)
+20:55  whoopky: lol
+20:55  lazyliberal: okie dokie
+20:56  greycat: Never trust $UID.  /usr/bin/id might be trustable, but really, file system permissions are the REAL thing.
+20:56  unop: until the unix system has had a windows administrator working on it
+20:56  greycat: If someone does a chmod 777 / then your script will abort, and you'll be alerted that something's wrong.
+20:57  greycat: Hopefully before further damage has been done...
+20:57  afuentes: greycat, nice way to find out about root!
+20:58  afuentes: greycat, i didnt understand that last part tho
+20:58  e36freak: afuentes: the user isn't really the issue anyway, it's whether you have the permission to do what you need to do
+20:58  afuentes: i see e36freak
+20:59  iso: 777 for all :)
+20:59  taylanub: by the way, root can have another name (and you can have multiple "root" users). what matters is the user id 0
+20:59  dualbus: e36freak, so I could fix that with... i=0; true && { ((i++)) || :; } || ((i--)); echo $i
+20:59  taylanub: my eyes are bleeding
+20:59  whoopky: why
+21:00  taylanub: dualbus's line...
+21:00  whoopky: thanks for the help im off
+21:00  greycat: I have no idea what dualbus is attempting to do there.
+21:00  e36freak: dualbus: wat
+21:00  dualbus: nothing
+21:00  e36freak: ohh, i see what you're saying
+21:00  taylanub: replace if;then with && { ... ; true; } || { ... }  greycat
+21:01  greycat: the extra "true" distorts the result.
+21:01  dualbus: I'm not saying it's ok, in fact I prefer if...then...fi
+21:01  e36freak: dualbus: theoretically, sure. i might have to track you down and beat you with a large blunt object if i had to work on your code though
+21:01  greycat: it's not equivalent.
+21:02  dualbus: e36freak, ouch, in python there is something like that, and to overcome the problem, you wrap your object in a list; a list with one element returns "True"
+21:03  dualbus: but don't hit me, just sayin'
+21:05 < greycat> if foo; then bar; else baz; fi   -- in the case where foo returns true, the resulting $? is the exit code of baz.  Not necessarily 0.
+21:05 < lupinstein> is there a good guide to explain how to use awk to break up output like this. corrupt-packets=50023,deferred-cache=189290, upd4-answer=90324123, I want to be able to change that from, to a new like, I guess sed might be better to replace that , with \r
+21:05  greycat: If you replace this with some ... && { bar; true; } || ... crap, then the resulting $? is always 0, and you've lost the exit code from bar.
+21:05  greycat: ... /me meant bar in the first one.
+21:06  greycat: lupinstein: #awk
+21:06  dualbus: lupinstein, maybe in #awk
+21:06  greycat: lupinstein: if the question is "How do I replace commas with newlines", then it's tr , '\n'
+21:06  dualbus: greycat, I get what you're saying, I'll stay away from the and-or construct
+21:07  lupinstein: as always greycat, thank you
+21:21  BBonifield: i'm putting together a script of commands to automate an upgrade/install procedure.  one of the commands is
+21:21  BBonifield: # bash < <( curl http://rvm.beginrescueend.com/releases/rvm-install-head )
+21:21  evalbot: BBonifield: bash: curl: command not found
+21:21  e36freak: BBonifield: install curl
+21:21  greycat: curl | bash    would be simpler.
+21:21  BBonifield: while this command works on the CLI, it is showing a syntax error when i try to run it from inside a bash script
+21:21  e36freak: BBonifield: PATH
+21:21  greycat: I bet you're NOT running it inside a bash script.  And that that's causing the issue.
+21:21  vkues: BBonifield: what's the syntax error?
+21:22  greycat: I bet you're running it inside an sh script.
+21:22  e36freak: greycat: ahh, touché
+21:22  greycat: Note that the curl|bash rewrite would work around it.
+21:22  taylanub: BBonifield: using #!/bin/sh maybe
+21:22  e36freak: or 'sh script'
+21:22  e36freak: greycat: but maybe not, because then it would give a syntax error, not 'curl not found'
+21:22  vkues: e36freak: read again.
+21:23  vkues: talk less, read more.
+21:23  greycat: e36freak: the BOT said that.
+21:23  e36freak: ohhhh
+21:23  e36freak: sorry, i'm dumb
+21:23  BBonifield: e36freak: sh script
+21:23  BBonifield: doh
+21:23 * e36freak goes back in his hole
+21:23  BBonifield: e36freak: you were right
+21:23  e36freak: that was greycat
+21:24  e36freak: i just elaborated
+21:27  BBonifield: any thoughts on why http://pastie.org/1485317 would be happening?
+21:27  malorie: I'm looking for something more elegant than "tail -f cmds.txt | someprog" combined with "cat > cmds.txt"
+21:27  e36freak: !wayttd > malorie
+21:27  greybot: malorie: What Are You Trying To Do?
+21:28  greycat: malorie: named pipes, possibly
+21:28  e36freak: BBonifield: just went over the whoami = root thing like 5 minutes ago. don't use that, just check permissions on whatever you need to  be root for
+21:29  malorie: basically trying to send comands to another program which expects them on stdin
+21:29  greycat: BBonifield: the real question is, "WHY do you feel you need to prevent ``root'' (whatever that means) from running the script?"
+21:29  greycat: malorie: cmd1 | cmd2
+21:30  e36freak: greycat: well is the opposite, needs to be root
+21:30  greycat: OK, whichever.
+21:30  BBonifield: greybot: because the full script requires it. http://pastie.org/private/2qxopny1y75wgfdugfsa
+21:31  greycat: "You have to be root because it's required" is not a good answer.
+21:31  malorie: greycat: I want to provide the "output" of cmd1 - so named pipes are possibly the solution. never really used them, though
+21:31  greycat: malorie: named pipes are the same as |
+21:31  greycat: | is just an anonymous pipe that requires both sides to be launched at the same time
+21:31 --- fabian is now known as tjholowaychuk
+21:31  malorie: greycat: ah. I see.
+21:33  malorie: greycat: would something like "master | slave > master" be reasonable?
+21:33  e36freak: no
+21:33  malorie: given slave provides functionality and master commands
+21:33  jck: i want a variable to be unset if the exit code of a command is 0, or set it to something if the exit code is 1. is there a better way to do this than an if else statement?
+21:33  greycat: malorie: > expects a *filename*, | expects a *command*
+21:34  e36freak: !pf 13 > maligree
+21:34  greybot: maligree: http://mywiki.wooledge.org/BashPitfalls#pf13 -- Don't do this! -- cat file | sed s/foo/bar/ > file
+21:34  e36freak: ah
+21:34  e36freak: malorie: ^
+21:34  e36freak: also, that
+21:34  greycat: jck: if/else would be the clearest, simplest way.
+21:34  malorie: greybot: of course :x
+21:34  greycat: jck: personally I'm somewhat fond of    foo=0; some command && foo=1
+21:35  jck: damn, why didnt i think of that!
+21:38  e36freak: BBonifield: run the script with "bash -x script", i'm not gonna try to debug the whole thing. but line 56 is obviously wrong from a quick glance
+21:39  e36freak: BBonifield: also, you're running "make" as root
+21:39  e36freak: ...wat
+21:39  greycat: Oh gods, is this yet another "I want to write a script to compile packages for my Linux-based OS"?
+21:39  e36freak: would appear so
+21:40  greycat: Ain't touchin' that.
+21:40  greycat: !nabq
+21:40  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+21:41  e36freak: heh
+21:42  e36freak: not only allowing 'make' to be ran as root, but requiring it
+21:43  Freeaqingme_: I have this command. But using it makes everything getting buffered first, before sending it to mysql, does anyone how to prevent that? `echo "SET sql_mode = '';" && ./mdb2mysql -e ProvLandschappen.vdb` | mysql  dbname
+21:44  greycat: Do not put `...` around things that don't need to be captured.
+21:44  BBonifield: greycat: seems the root of the actual problem was stupid \r's
+21:47  e36freak: BBonifield: your script has a lot more issues than that, though
+21:47  e36freak: BBonifield: running make as root, and trying to expand a var inside single quotes are the most obvious ones
+21:48  Freeaqingme_: greycat, you're right. But doing something like this, just displayes the "set mode" string on screen, rather than piping it to mysql: echo "SET sql_mode = ''" && ./mdb2mysql -e ProvLandschappen.vdb | mysql
+21:49  greycat: I believe what you're actually TRYING to do is    { echo; other thing; } | mysql
+21:50  greycat: That's called "command grouping".
+21:50  Freeaqingme_: ah, tnx
+21:50  BBonifield: e36freak: general question then, if your system is configured such that yum has to be ran by root, why is that bad?
+21:51  greycat: I'm not aware of any unix-like systems where the package manager cannot be run by regular users, to see what's installed.
+21:51  greycat: Usually you just need to have superuser privs to *change* what's installed.
+21:51  BBonifield: greycat: right, and that's exactly what this script is doing
+21:52  greycat: Fine, you want the super sloppy filthy answer?   (( $(/usr/bin/id -u) == 0 )) || { echo "this script requires superuser privileges" >&2; exit 1; }
+21:53  e36freak: BBonifield: the issue is not installing through yum as root. it's running "make"
+21:53  greycat: Though I'd still prefer checking for write permissions on whatever the package management system has to write to.
+21:54  greycat: e36freak: well, he should be doing "su makeuser -c make" for the compiles.
+21:54  e36freak: BBonifield: a quick google search: http://cboard.cprogramming.com/linux-programming/42383-never-compile-root.html
+21:54  e36freak: greycat: exactly. he was not
+21:54  greycat: Where makeuser is whatever unprivileged account is set up specifically for this purpose.
+21:54  greycat: Actually, I take all that back.
+21:55  greycat: What he SHOULD be doing is installing the packages provided by his OS.
+21:55  greycat: If for some reason there is no such package, he SHOULD be compiling it himself BY HAND after reading the documentation for it.
+21:55  greycat: There is no fucking way a script can compile everything out there.
+21:56  greycat: A lot of stuff requires manually editing text files (Makefiles, or *.h files).
+21:56  greycat: Nethack is a very good example.
+21:57  geirha: I bet when gentoo got started, someone thought. Hey, this configure && make && make install stuff is easy, I can script this!
+21:57  e36freak: heh
+21:57  e36freak: oh gentoo
+21:59  geirha: I've tried gentoo a couple of times, years ago. Always ended up with compilation errors from emerge at some point.
+21:59  e36freak: heh
+21:59  e36freak: i used it for a bit
+22:00  e36freak: and then went "wait a second, it's not worth 10 hours of compilation for a 1% increase in efficiency"
+22:02  geirha: I used a distro called coredistro for a long while. Just a small precompiled bundle of core utilities. Everything else I built from source, manually.
+22:04  e36freak: interesting
+22:04  e36freak: i just stick with arch now
+22:04  geirha: I got reaaally fed up
+22:04  e36freak: yeah
+22:04  e36freak: arch is like that, but with a nice binary package manager
+22:06  geirha: Especially annoying when the packages don't document its dependancies. Takes lots of googling.
+22:06  dualbus: is there a faster way to do reverse the chars in a list of lines than this?
+22:06  dualbus: { while read -r l; do s=; while read -rn1 c; do s="$c$s";     done <<< "$l"; printf "%s\n" "$s"; done; } <<< $'abcde\nfghi'
+22:06  geirha: I've really learnt to appreciate package managers :)
+22:06  greycat: dualbus: does your OS have rev?
+22:07  dualbus: greycat, yes
+22:07  e36freak: geirha: oh boy, dependency hell
+22:07  greycat: dualbus: then that's your answer
+22:07  dualbus: but... but... with bash? ok
+22:07  geirha: e36freak: XFree86 build failed because I was missing ed ^^
+22:07  greycat: 4# rev <<< $'abcde\nfghi'
+22:08  shbot: greycat: bash4: rev: command not found
+22:08  greycat: damn.
+22:08  dualbus: greycat, I made a rev function in bash
+22:08  greycat: arc3:~$ rev <<< $'abcde\nfghi'
+22:08  greycat: edcba
+22:08  greycat: ihgf
+22:08  dualbus: # rev () { declare r; r () { (s=; while read -rn1 c; do s=$c$s; done; echo "${s#$'\n'}"); }; if [[ -n "$1" ]]; then { exec 4<&0 <"$1"; } || return 1; fi; while read -r l; do r <<<"$l"; done; if [[ -t 4 ]]; then { exec <&4 4<&-; } || return 0; fi; }; rev <<<"dualbus"
+22:08  evalbot: dualbus: sublaud
+22:08  e36freak: ...'grats?
+22:08  greycat: that looks convoluted.
+22:08  e36freak: geirha: nice.
+22:08  geirha: function in a function?
+22:09  dualbus: that's the old one, but, I was thinking if there's a faster way of doing the reading part
+22:09 * e36freak has a function in a function, in .bashrc
+22:09  geirha: I've seen alias functions, so I shouldn't really be surprised :)
+22:10  geirha: They go like this:  alias foo='_() { function_body; }; _'
+22:10  e36freak: hahaha
+22:10  taylanub: anonymous function!
+22:11  vkues: similarly some people use aliases for mimicking "auto-load functions"
+22:11  e36freak: interesting
+22:14  taylanub: (erm no not anonymous function.  that'd be  foo(){ eval "_(){ $1 }"; shift; _ "$@"; }   )
+22:14  greycat: # rev() { local line i; while IFS= read -r line; do for ((i=${#line}-1; i--; i)); do printf %s "${line:i:1}"; done; echo; done; }; rev <<< $'abcde\nfghij'
+22:14  evalbot: greycat: dcba
+22:14  evalbot: greycat: ihgf
+22:14  greycat: Hmm, losing one character there.
+22:16  dualbus: -1
+22:16  geirha: switch i-- and i ?
+22:16  dualbus: that shouldn't be there
+22:16  dualbus: ${#line}-1
+22:17  dualbus: # rev() { local line i; while IFS= read -r line; do for ((i=${#line}; i--; i)); do printf %s "${line:i:1}"; done; echo; done; }; rev <<< $'abcde\nfghij'
+22:17  evalbot: dualbus: edcba
+22:17  evalbot: dualbus: jihgf
+22:17  dualbus: thanks greycat, I'll time it
+22:17  greycat: Oh, shit... I switched the 2nd and 3rd parts of the for.
+22:17  e36freak: yeah :)
+22:18  greycat: # rev() { local line i; while IFS= read -r line; do for ((i=${#line}-1; i>=0; i--)); do printf %s "${line:i:1}"; done; echo; done; }; rev <<< $'abcde\nfghij'
+22:18  geirha: # rev() { local line i; while IFS= read -r line; do for ((i=1; i<=${#line};i++)); do printf %s "${line:(-i):1}"; done; echo; done; }; rev <<< $'abcde\nfghij'
+22:18  evalbot: greycat: edcba
+22:18  evalbot: greycat: jihgf
+22:18  evalbot: geirha: edcba
+22:18  evalbot: geirha: jihgf
+22:18  greycat: geirha's is probably slower as it calculates ${#line} each iteration
+22:19  geirha: Good point.
+22:20  Geralt: Is there an easier way to get all file names in a directory quoted and separated by a space than for file in ~/Mail/geralt/*; do printf '"%s" ' "$file"; done ? And that's even going to break if a double quote is in a name
+22:21  e36freak: Geralt: why? just use an array
+22:21  greycat: Geralt: what are you doing, and why?
+22:21  Geralt: greycat: I need it for my muttrc
+22:21  greycat: putting double quotes before and after a filename serves no purpose, since that is not a guarantee of a reusable piece of information
+22:21  greycat: perhaps you want printf %q
+22:21  e36freak: files=( "$HOME"/Mail/geralt/* )
+22:22  e36freak: echo "${files[@]}"
+22:22  greycat: what on earth are you doing in your muttrc?
+22:22  Geralt: e36freak: I want that list as output, so that mutt can use it to set my mailboxes to it
+22:22  greycat: "my mailboxes"??
+22:22  Geralt: greycat: programatically adding all dirs in ~/Mail/geralt to mailboxes
+22:23  Geralt: so that mutt checks them for incoming mail
+22:23  greycat: dear gods.
+22:23  e36freak: haha
+22:23  greycat: why do you have more than one inbox?
+22:23  Geralt: greycat: because I use Gmails filtering to sort my mail
+22:23  greycat: why is the list of your inboxes not FINITE and STATIC?
+22:24  Geralt: greycat: sometimes I subscribe to a new mailing list, or a news feed etc. and give each of them a new folder
+22:25  greycat: I would ask the mutt channel how to deal with this.
+22:25  greycat: can't mutt do something like mailboxes = ~/mymailboxes/*  ?
+22:25  Geralt: greycat: I did, they suggested mailboxes `magic happens here`
+22:25  greycat: hahaha
+22:26  greycat: can the argument be  foo\ bar\ with\ extra\ bar  ?
+22:26  vkues: offlineimap can automatically create the mailboxes configuration for mutt
+22:26  greycat: Or does it have to be literally "foo bar with extra bar"  ?
+22:26  greycat: imadev:~$ printf '%q\n' 'foo bar with extra "bar" in'
+22:26  greycat: foo\ bar\ with\ extra\ \"bar\"\ in
+22:27  Geralt: greycat: backslashes are fine too
+22:27  greycat: then use %q
+22:27  greycat: putting "..." around a string fails if the string contains " in the first place.
+22:28  greycat: printf "set mailboxes"; printf " %q" ~/mymailboxes/*
+22:29  Geralt: greycat: I know, that's why I asked and as always you're a great help to me :) thanks, however I'll go with vkues suggestion and let offlineimap update my muttrc for me
+22:32  Freeaqingme_: This command (the pipe in specific) is too slow. Does anyone know a way to speed it up? { echo "SET sql_mode = '';" && ./mdb2mysql ProvLandschappen.vdb; } | mysql
+22:33  greycat: The pipe isn't inherently slow.  Sounds like a mysql question.
+22:33  greycat: or whatever that other thing is
+22:34  Freeaqingme_: it is
+22:35  Freeaqingme_: I thought it was the pipe because the mysql monitor was only showing slow input, but I'll investigate some more
+22:36  dualbus: using string concatenation seems to be a little bit faster than printing each char
+22:36  greycat: If the mysql process is sitting there waiting for input a significant amount of the time, then it's the writer being slow.
+22:37  geirha: Geralt: Of course, that'll fail if there are certain other characters in the filenames, like tab for example. The %q output is meant for bash, not <insert favorite program here>.
+22:38  geirha: Unless mutt actually supports the $'' quoting syntax
+22:52  TheBonsai: y0
+22:52  e36freak: o/
+22:54  geirha: yE
+22:55  geirha: Hum, why did shbot die...
+22:56 * yitz_ hides the gun
+22:56 * cthuluh hides yitz_ 
+22:56  geirha: 4# botsnack
+22:56  shbot: Core dumped.
+22:57  steve___: hahaha
+22:57  cthuluh: miâm
+22:57  yitz_: Minor bug? Maybe a lib update?
+22:57  e36freak: i broke it. i want my pony.
+22:58  yitz_: Pony if only for evalbot
+22:58  yitz_: *is
+22:59  e36freak: aww
+22:59  geirha: If you break shbot, you get Anthrax
+22:59  e36freak: oh noes!
+22:59  e36freak: it wasn't me, i swear!
+23:00  cthuluh: Anthrax is a nice band, though...
+23:00  steve___: e36freak: Yep and you have to listen to their entire discography!
+23:00  steve___: cthuluh: ha!
+23:01  steve___: ...if you're deaf.
+23:01  malorie: when I want to replace the first ':' in a var with a ' ' would ``var=$(echo $var | sed "s/:/ /")'' be the way to go?
+23:01  e36freak: um
+23:01  erUSUL: !pe > malorie
+23:01  greybot: malorie: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+23:01  e36freak: var=${var/:/ }
+23:01  geirha: "${var//:/ }"
+23:02  e36freak: geirha: asked for first, not all
+23:02  steve___: e36freak: !umq
+23:02  geirha: Oh, right, only first
+23:02  steve___: :)
+23:02  e36freak: steve___: not needed on assignment
+23:02  steve___: nice
+23:02  e36freak: doesn't hurt though, i'll give you that
+23:03  geirha: Just be consistent if you do.
+23:03  e36freak: !faq 100 > malorie
+23:03  greybot: malorie: http://mywiki.wooledge.org/BashFAQ/100 -- How do I do string manipulations in bash?
+23:03  malorie: e36freak, geirha: thanks. will consult the link from now on :)
+23:03  e36freak: to give you an idea of why:
+23:04  e36freak: # TIMEFORMAT="real: %E"; time var='foo:bar:baz'; var=$(echo "$var" | sed 's/:/ /')
+23:04  evalbot: e36freak: real: 0.000
+23:04  geirha: haha
+23:04  e36freak: oh wow, that was a lot faster than i thought
+23:04  e36freak: O.o
+23:04  geirha: You timed the wrong one
+23:05  e36freak: hmm?
+23:05  e36freak: # TIMEFORMAT="real: %E"; var='foo:bar:baz'; time var=$(echo "$var" | sed 's/:/ /')
+23:05  evalbot: e36freak: real: 0.045
+23:05  e36freak: ahh
+23:05  e36freak: # TIMEFORMAT="real: %E"; var='foo:bar:baz'; time var=${var/:/ }
+23:05  evalbot: e36freak: real: 0.002
+23:05  malorie: that's awesome, indeed
+23:05  geirha: # TIMEFORMAT="real: %E"; var='foo:bar:baz'; time var=$(sed 's/:/ /' <<< "$var")
+23:05  evalbot: geirha: real: 0.044
+23:06  e36freak: might be even faster with quotes
+23:06  e36freak: # TIMEFORMAT="real: %E"; var='foo:bar:baz'; time var="${var/:/ }"
+23:06  evalbot: e36freak: real: 0.003
+23:06  e36freak: hmm, guess not
+23:06  e36freak: one-offs are not really accurate though
+23:06  e36freak: way to time is to put it in like "time for i in {1..1000}; do command; done"
+23:07  geirha: Well, even from the one-offs, you clearly see there's a great improvement.
+23:08  e36freak: true that
+23:08  e36freak: same with basename vs PE
+23:08  e36freak: basename is something like 10 times slower
+23:12  TheBonsai: test it with a real basename emulation
+23:12  TheBonsai: basename can remove a named suffix from the string
+23:12  e36freak: ahh, true
+23:13  e36freak: even then though...
+23:14  TheBonsai: i guess yes
+23:16  e36freak: dj@medinvdj:~ » TIMEFORMAT=%E; foo=/home/foo/file.bar; time for ((i=0; i<1000; i++)); do basename "$foo" .bar >/dev/null; done
+23:16  e36freak: 1.221
+23:16  e36freak: dj@medinvdj:~ » TIMEFORMAT=%E; foo=/home/foo/file.bar; time for ((i=0; i<1000; i++)); do foo=${foo##*/}; echo "${foo%.bar}" >/dev/null; done
+23:16  e36freak: 0.050
+23:17  TheBonsai: forking is expensive, still
+23:29 --- BiCHiTo is now known as Bichito
+23:32 --- Bichito is now known as BiCHiTo
+23:44 --- pyoor_ is now known as pyoor
+23:54 --- Mike1_ is now known as Mike1
+--- Log closed Sat Jan 22 00:00:47 2011

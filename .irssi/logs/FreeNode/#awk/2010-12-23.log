@@ -1,0 +1,139 @@
+--- Log opened Thu Dec 23 00:00:55 2010
+00:53  waldner: http://en.literateprograms.org/Special:Downloadcode/Quicksort_%28AWK%29
+--- Log closed Thu Dec 23 01:30:08 2010
+--- Log opened Thu Dec 23 01:30:33 2010
+01:30 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+01:32 --- Channel #awk was synced in 118 seconds
+03:23  kingsley: How would you test if the first byte of $0 is not blank?
+03:26  kingsley: 4# echo "hello world" | awk '{if ( $0 !~ /^ / ) { print "not blank" } else {print "blank"}}'
+03:26  shbot: kingsley: not blank
+03:27  kingsley: 4# echo " hello world" | awk '{if ( $0 !~ /^ / ) { print "not blank" } else {print "blank"}}'
+03:27  shbot: kingsley: blank
+04:09  probonono: 4# echo -e " kingsley\nkingsley" | awk '{print /^ / ? "blank" : "not blank"}'
+04:09  shbot: probonono: blank
+04:09  shbot: probonono: not blank
+05:00  pr3d4t0r: kingsley: I'd use split() instead of a regexp.  "Blank" can mean either a space, or any non-printable character < UTF-8(32).
+--- Log closed Thu Dec 23 05:28:25 2010
+--- Log opened Thu Dec 23 05:34:15 2010
+05:34 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+05:36 --- Channel #awk was synced in 118 seconds
+--- Log closed Thu Dec 23 09:30:08 2010
+--- Log opened Thu Dec 23 09:30:38 2010
+09:30 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+09:32 --- Channel #awk was synced in 122 seconds
+--- Log closed Thu Dec 23 12:29:36 2010
+--- Log opened Thu Dec 23 12:29:58 2010
+12:29 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+12:31 --- Channel #awk was synced in 119 seconds
+--- Log closed Thu Dec 23 13:28:58 2010
+--- Log opened Thu Dec 23 13:34:28 2010
+13:34 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+13:36 --- Channel #awk was synced in 120 seconds
+16:43 --- maxim is now known as Guest72713
+17:26  axisys: how do I take input like this http://pastebin.com/a7PtNFLn and convert it to output in table format as shown in the same pastebin ?
+17:28  pgas: the number of fields is know in advance?
+17:28  gnubien: axisys: table format is last 3 lines of pastebin output?
+17:28  pgas: *known
+17:28  axisys: gnubien: yes
+17:28  axisys: pgas: no
+17:29  pgas: hmmm, then you either need 2 pass, or to store the whole thing into arrays
+17:31  waldner: maybe with RS=
+17:31  waldner: and then looping over lines
+17:32  waldner: assuming empty lines between paragraph, not sure that is the case though
+17:32  axisys: waldner: no empty lines 
+17:32  waldner: ok, then scratch that
+17:32  pgas: awk -F ' = ' '/^[]]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]}END {.... print the arrays....}
+17:36  axisys: {.... print the arrays....} -> { print indexes } ?
+17:36  axisys: pgas: i am still trying to get my head around it .. hehe
+17:37  pgas: ehe if it was shorter I would have typed it ;)
+17:37  axisys: pgas: lol
+17:37  axisys: man awk is soo powerfool.. i need to play with it a lot more
+17:38  pgas: for (i in indexes) { printf "%s", index ;for (f in fields) { print values[i,f]}}
+17:38  pgas: or something like that
+17:38  pgas: printf " %s",values[i,f] probably
+17:51  axisys: i get a syntax error here at the semicolon here  index ;for  
+17:51  axisys: awk -F ' = ' '/^[]]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]} END {for (i in indexes) { printf "%s", index ; for (f in fields) { printf " %s",values[i,f] }} }' input
+17:52  axisys: final version .. so far.. i dont understand how someone can actually read w/ brain like mine.. 
+17:52  axisys: read somethign like this that is
+18:27  probonono: axisys, the enclosing loop variable is "i", not "index" - NB: "index" is also a built-in function name.
+18:54  axisys: on i changed the `index' with `i' .. no more syntax error
+18:54  axisys: s/on/ok/
+18:54  axisys: awk -F ' = ' '/^[]]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]} END {for (i in indexes) { printf "%s", i ;for (f in fields) { printf " %s",values[i,f] }} }' input
+18:54  axisys: no output tho
+18:54  axisys: empty
+--- Log closed Thu Dec 23 19:45:30 2010
+--- Log opened Thu Dec 23 20:01:00 2010
+20:01 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+20:02 --- Channel #awk was synced in 114 seconds
+20:05  steve___: 4# awk -F ' = ' '/^[]]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]} END {for (i in indexes) { printf "%s", i ;for (f in fields) { printf " %s",values[i,f] }} }'  <(curl -Ls http://pastebin.com/raw.php?i=2wrmnseG)
+20:05  shbot: steve___: bash4: curl: command not found
+20:05  steve___: :(
+20:05  steve___: geirha: there is no output, fyi.
+20:06  steve___: 4# awk -F ' = ' '/^[]]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]} END {for (i in indexes) { printf "%s", i ;for (f in fields) { printf " %s",values[i,f] }} }'  <(wget -q -O - http://pastebin.com/raw.php?i=2wrmnseG)
+20:06  shbot: steve___: bash4: wget: command not found
+20:06  geirha: Well, there are no lines starting with ]
+20:06  steve___: Oh the shame.
+20:08  geirha: and values are never given any values except empty string
+20:08  geirha: s
+20:09  geirha: values[cur,$1]=$2
+20:10  geirha: And /^[]]/ -> /^[[]/
+20:12  steve___: 4# awk -F ' = ' '/^[[]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]=$2} END {for (i in indexes) { printf "%s", i ;for (f in fields) { printf " %s",values[i,f] }} }'  <(lynx -dump http://pastebin.com/raw.php?i=2wrmnseG)
+20:12  shbot: steve___: bash4: lynx: command not found
+20:14  geirha: 4# awk -F ' = ' '/^[[]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]=$2} END {for (i in indexes) for (f in fields) printf "%s,%s: %s\n", i, f, values[i,f]}' <<< $'[index1]\nfield1 = value1\nfield2 = value2\n[index2]\nfield1 = value3\nfield2 = value3'
+20:14  shbot: geirha: index1,field1: value1
+20:14  shbot: geirha: index1,field2: value2
+20:14  shbot: geirha: etc... ( http://pastebin.com/yWNwb3jX )
+20:14  geirha: The bot doesn't have a NIC
+20:17  axisys: oops.. i was away for a little bit.. 
+20:17  axisys: geirha: no line starts with ]
+20:18  steve___: axisys: he was pointing out a small error
+20:19  geirha: axisys: /^[]]/ matches lines starting with ]
+20:20  axisys: geirha: oh ok. i shoudl do ^[[] then
+20:21  geirha: axisys: Indeed. You also never assigned the values anywhere
+--- Log closed Thu Dec 23 20:26:18 2010
+--- Log opened Thu Dec 23 20:31:41 2010
+20:31 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+20:33 --- Channel #awk was synced in 119 seconds
+21:04  axisys: geirha: looks like that worked... 
+21:05  axisys: geirha, pgas thanks a lot guys..  still trying to get my head around it
+21:13  axisys: ok so this part {gsub(/[][]/,"") cleans up the []s .. in here indexes[cur=$0] indexes is the valiable that picks the the indexes and feed that into cur as array components. got that.. fields[$1] takes the field .. so cur is the index name in values[cur,$1] .. i think i got that too so far .. 
+21:14  axisys: now comes the hard part
+21:15  axisys: did not know you can have two for loops .. i only saw one for loop inside another for loop
+21:15  axisys: for (i in indexes) for (f in fields) printf "%s,%s: %s\n", i, f, values[i,f]} .. what is it saying ? then I will have question about the hardest part
+21:16  axisys: how come for loops in same line ?
+21:16  axisys: how come "two" for loops in same line ?
+21:18  geirha: You can write it as   for (i in indexes) { for (f in fields) { printf ...; }}
+21:19  axisys: geirha: oh ok. so second for loop is implied internal loop .. good to know
+21:19  geirha: But since the first for loop only contains one command (the second for-loop), and the second for-loop only contains a printf, you don't need the braces { } ... just like in C.
+21:19  axisys: geirha: oh ok
+21:20  axisys: geirha: now comes the hardest part .. 
+21:20  axisys: <<< $'[index1]\nfield1 = value1\nfield2 = value2\n[index2]\nfield1 = value3\nfield2 = value3' 
+21:20  axisys: what is this mean ?
+21:20  axisys: i dont follow it at all
+21:21  geirha: 4# cat <<< $'[index1]\nfield1 = value1\nfield2 = value2\n[index2]\nfield1 = value3\nfield2 = value3'
+21:21  shbot: geirha: [index1]
+21:21  shbot: geirha: field1 = value1
+21:21  shbot: geirha: etc... ( http://pastebin.com/ekXpHDyw )
+21:21  geirha: It's bash syntax for sending a string to a command's stdin.
+21:22  geirha: Could've used echo | awk or printf | awk instead
+21:23  geirha: And $'' is a special form of quoting that replaces escapes into characters. Like \n into a newline, \t into a tab etc
+--- Log closed Thu Dec 23 21:27:36 2010
+--- Log opened Thu Dec 23 21:33:08 2010
+21:33 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+21:34 --- Channel #awk was synced in 111 seconds
+21:35  krzee: meh!?  where can i read up on $''?
+21:39  pgas: man bash, quoting section
+21:56  axisys: geirha, pgas : thanks
+21:58  axisys: geirha: oh ok.. so I did not necessarily need to use it.. 
+21:59  axisys: awk -F ' = ' '/^[[]/{gsub(/[][]/,"");indexes[cur=$0];next}{fields[$1];values[cur,$1]=$2} END {for (i in indexes) for (f in fields) printf "%s => %s: %s\n", i, f, values[i,f]}' INPUT did it too
+21:59  geirha: axisys: You'd replace <<< $'foo'  with a filename probably. Or pipe some command.
+21:59  axisys: INPUT is the input file
+22:00  geirha: right
+22:00  axisys: geirha: right.. cool
+22:00  axisys: geirha: thanks a lot
+22:02  axisys: pgas: yep, man bash on quoting explained it too.. thanks
+--- Log closed Thu Dec 23 23:15:36 2010
+--- Log opened Thu Dec 23 23:31:04 2010
+23:31 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+23:32 --- Channel #awk was synced in 110 seconds
+--- Log closed Thu Dec 23 23:57:24 2010

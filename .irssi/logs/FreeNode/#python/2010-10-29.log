@@ -1,0 +1,247 @@
+--- Log opened Fri Oct 29 20:27:33 2010
+20:27 --- Users 780 nicks [0 ops, 0 halfops, 0 voices, 780 normal]
+20:27  dash: sure
+20:27  ssbr: Or do we keep a separate reference count for C-char-arrays?
+20:27  dash: but they hardly ever get sliced.
+20:28  joh: Hi, inside a module, is there any way to get a reference to the module itself? I'd like to do some introspection.
+20:28  ssbr: except then if you slice a really big string, it stays around in memory forever
+20:28  dash: joh: what do you want to do?
+20:28  dash: ssbr: right
+20:28  joh: dash: Something like inspect.getmembers(this_module, ...)
+20:28  ssbr: dash: is there any way in C to only free *parts* of malloc'd memory??
+20:28  dash: joh: well that's a how, not a what
+20:28  ssbr: (without, you know, changing malloc())
+20:28 --- Channel #python was synced in 89 seconds
+20:29  dash: ssbr: not as such
+20:29  joh: dash: I'd like to get a list of all instances of a certain class inside the module.
+20:29  dash: joh: so write your module to contain a list :)
+20:29  dash: joh: why do you want this?
+20:29  joh: dash: why maintain a list when I can just use introspection?
+20:29  ssbr: it could be done with relatively minimal memory overhead, but only by making collecting strings more expensive. Grr.
+20:29  joh: dash: does it matter? :P
+20:30  dash: joh: of course it matters.
+20:30  deepy: random's randint just gave me 25 "14" in a row when doing randint(1, 100)
+20:30  dash: joh: if you can do things in an obvious way or do them in a clever way, do them in the obvious way
+20:31  dash: ssbr: alas, the tradeoffs of language implementation
+20:31  joh: dash: maintaining a list of these objects will get tedious and error prone
+20:31  deepy: I hate randomness, because I can't tell if it's broken
+20:31  dash: joh: what are you going to do with it?
+20:31  dash: deepy: you can tell
+20:31 --- pr3d4t0r is now known as pr3d4k4t
+20:31  dash: deepy: but it takes time and effort.
+20:31  robd: Hey guys!
+20:32  deepy: dash: but with my naked eye?
+20:32  joh: dash: it's a collection of various metrics, and I'd like to be able to easily get a list of all of them for further processing.
+20:32  dash: deepy: probably not!
+20:32 --- barra_home is now known as barraAway
+20:33  dash: joh: so add them to the list as they're generated
+20:33  joh: dash: they're not generated, they are metric functions
+20:33  marienz: ssbr: you might know this already, but http://docs.python.org/dev/library/stdtypes.html#typememoryview
+20:33  joh: dash: i.e. metrics.foo(), metrics.bar()
+20:34  ssbr: marienz: I never really got the buffer protocol
+20:35  marienz: ssbr: memoryviews are (very roughly) a reference to an underlying buffer and an offset and length into it
+20:35  marienz: ssbr: so they give you those cheap slices if you use them explicitly (a slice of a memoryview is a new memoryview sharing the underlying buffer but with a different offset/size)
+20:36  marienz: ssbr: the combination of bytearray and memoryview can be used to do somewhat c pointer-to-char-like things
+20:36  dash: joh: ok so what do you want a list of, exactly...?
+20:37  marienz: ssbr: (because a memoryview of a mutable buffer, like a bytearray, supports (slice) assignment)
+20:37  ssbr: marienz: are 2.x strings buffers?
+20:38  neataroni: anyone know of a beautiful soup binary?
+20:38  joh: dash: all functions in the metrics module
+20:38  joh: dash: but from within the module itself, inside a module.all() function
+20:38  ssbr: dash: it looks like I was, in the end, thinking of something remarkably similar to ropes
+20:38  dash: joh: yeah that doesn't make any sense
+20:38  dash: ssbr: sure.
+20:38  ssbr: I think ropes are better, though. Less pain.
+20:38  dash: joh: just write an 'all' function in the normal fashion.
+20:39  ssbr: actually, I may be confused
+20:39  ssbr: I don't care enough anyway. I'm gonna go implement processes some more.
+20:39  bjgriffin4: how does one reload a module and then update an object that calls functions from that module to the new functions?
+20:39  joh: dash: You're saying I should write all(): return [fun1, fun2, fun3, ..., fun50] ?
+20:40  lazz0:  joh  dir() locals() globals()
+20:40  dash: joh: if that's what you want, yes
+20:40  dash: lazz0: no, no, no.
+20:41  dash: lazz0: those are for debugging, not for use in actual code.
+20:41  dash: bjgriffin4: restart the process
+20:41  bjgriffin4: :/ no way of doing it live dash?
+20:41  joh: dash: sigh, I know this can be done through introspection, but I don't know if it's possible within the module.
+20:41  dash: bjgriffin4: it's not a reasonable concept
+20:42  dash: joh: it's not a sensible idea.
+20:42  joh: dash: why not?
+20:42  marienz: ssbr: they're buffers, but they're not mutable.
+20:42  dash: joh: like i said earlier, obvious code is better
+20:43  ssbr: marienz: then memoryview objects successfully implement the simplest version of O(less-than-n) slicing
+20:43  marienz: yep
+20:43  _habnabit: bjgriffin4, you could have two processes and restart one of them.
+20:43  marienz: that's what I was saying, I think :)
+20:44  ivan`: can I delete a dict method on my subclass of dict?
+20:44  _habnabit: ivan`, that's not how subclassing works.
+20:44  ivan`: I want to do terrible things
+20:44  bjgriffin4: hmm, so waht does the reload() do then?
+20:44  ivan`: okay, is it better to raise AttributeError or NotImplementedError?
+20:44  ssbr: ivan`: calm your soul and have peace
+20:44  _habnabit: bjgriffin4, nothing useful.
+20:44  bjgriffin4: can i redifne the parts that are dependant on that module when i reload it?
+20:44  bjgriffin4: ohh
+20:44  bjgriffin4: haha
+20:44  ssbr: ivan`: have you a http://en.wikipedia.org/wiki/Liskov_substitution_principle !
+20:45  ivan`: heh
+20:45  ivan`: substitution with a surprise inside
+20:45  dash: ivan`: don't be terrible
+20:45  dash: ivan`: use frozendict instead :)
+20:46  Tau: what is the fastest way of getting the reverse of a number ? for example 12345 it returns 54321 ?
+20:46  ivan`: dict.__init__(stupidFrozenDict, {'ha': 'ha'})
+20:46  dash: Tau: are you working on project euler problems?
+20:46  Tau: dash: yes.
+20:46  dash: Tau: Don't work on project euler problems.
+20:46  _habnabit: bjgriffin4, is this for an IRC bot?
+20:46  dash: Tau: Do something fun or useful instead.
+20:46  bjgriffin4: _habnabit, yeah
+20:47  _habnabit: bjgriffin4, maaaan.
+20:47  Tau: dash: i am working on projecteuler causee i am practicing python. i am new to it.
+20:47  _habnabit: bjgriffin4, ampirc was written for that.
+20:47  Tau: cause it am using python to solve the problems.
+20:47  dash: Tau: Project Euler is for practicing math, not Python
+20:47  Tau: just to learn the language.
+20:47  Tau: dash: i know. i am practicing both skills.
+20:47  dash: Tau: yes. do this instead: http://learnpythonthehardway.com/
+20:47  bjgriffin4: _habnabit, yeah but id rather have my own irc classes
+20:48  dash: bjgriffin4: Why?
+20:48  _habnabit: bjgriffin4, welp,
+20:48  yebyen: bah, i'd rather have my own craps table classes
+20:48  _habnabit: bjgriffin4, good luck
+20:48  dash: yebyen: i'd rather have a sandwich
+20:48  Tau: dash: i will try that too.
+20:48  _habnabit: I could go for a sandwich.
+20:48  bjgriffin4: idk, as a learning process
+20:48  bjgriffin4: but thanks for your help
+20:48  Tau: but, i am addicted to solving problems from projecteuler.
+20:49  dash: bjgriffin4: reading and using other people's is more educational :)
+20:49  dash: Tau: OK
+20:49  yebyen: dash: can we get a sandwich delivered at my craps table, for a compromise?
+20:49  _habnabit: Tau, well, the first step to recovery is admitting you have a problem.
+20:49  dash: Tau: we won't help you with them, though.
+20:49  Tau: dash: i don't want help with the problems.
+20:49  dash: Tau: OK great
+20:49  ssbr: bjgriffin4: there's always more time to learn stuff
+20:49  Tau: i am just wondering if there is a better way of finding the reverse of a number.
+20:49  Tau: it isn't for projecteuler anyways.
+20:50  Tau: _habnabit: k
+20:50  dash: Tau: what's it for?
+20:50  yebyen: is there something like AJAX unit test runner in Python that someone might want to recommend?
+20:50  ssbr: bjgriffin4: if you re-use existing code, you won't learn less, you can learn by implementing more features for your bot.
+20:50  Tau: dash: i just wondered of it.
+20:50  dash: Tau: nobody needs to do this
+20:50  sumitkv2:  serial port connectivity ......i am getting the same error again and agian ....http://pastie.org/1258478
+20:50  yebyen: i am looking for something like PHPUnitWebUI
+20:50  ssbr: bjgriffin4: so reuse as much code as possible, so that you can create the biggest overlap between "work that isn't totally pointless otherwise" and "learning"
+20:50  ssbr: then you can both be productive, and learn!
+20:50  bjgriffin4: ssbr true, but i would like it to be very portable. And only using the built in python modules
+20:50  Tau: dash: why not ? i found the way of doing it a bit weird. so i asked for other better way.
+20:50  Tau: but, all right.
+20:51  bjgriffin4: though perhaps i will give ampirc a try
+20:51  _habnabit: bjgriffin4, unfortunately, you just contradicted yourself.
+20:51  Tau: k
+20:51  Tau: i gotta go.
+20:51  ssbr: bjgriffin4: I think ampirc is portable, and if it isn't, you can patch it
+20:51  dash: Tau: why would you need to? :)
+20:51  ssbr: bjgriffin4: and there is no reason to use only the built-in modules
+20:51  _habnabit: bjgriffin4, stdlib python isn't very portable. Especially not for doing networking.
+20:51  ssbr: bjgriffin4: that requirement will just mean that you do way too much work doing stuff that you don't need to and is crappier than the existing alternatives
+20:51  ssbr: bjgriffin4: i.e., that requirements means you'll wast your time, and lower the overlap between useful code and learning
+20:52  ssbr: s/lower/lessen/
+20:53  ssbr: anyone know of a way to graphically navigate a svn changelog? I want to see all the diffs one by one
+20:55  bjgriffin4: ssbr,  i have heard of epople using meld, but i never have. also i will give ampirc a try, i just wanted a really simple bot for a few things
+20:55  bjgriffin4: thanks for your help
+20:55  dash: ssbr: 'bzr vis' or 'bzr qdiff' is what i use :)
+20:55  dash: ssbr: but trac, websvn, viewvc, etc, all do it
+20:57  ssbr: it's too big for websvn style diffs. Let's see what the others do...
+20:57  arkanes_: dash: hey, do you have a preferred way of doing cherry-picking in bzr?
+20:57  ssbr: (the repo, that is. I don't want to navigate around for different files to see their diffs, I want to see the diffs all together)
+20:57  dash: arkanes_: i try not to do it at all :)
+20:57  dash: arkanes_: but 'bzr merge -c 12345 ../some-branch' is usually enough
+20:58  deepy: if doing something 10 times, is for time in range (1,11): the best way?
+20:59  arkanes_: dash: I meant cherry picking chunks when you commit, like hg record or that stuff that git perverts use
+20:59  lvh: deepy: why not just do for _ in range(10)
+21:00  deepy: If I want to start counting at 1?
+21:00  deepy: that makes more sense without the If at the start
+21:00  lvh: deepy: Well, you only said you wanted to do something ten times, you said nothing about actually using the count :)
+21:02  deepy: does using _ instead of something else have any specific benefits?
+21:03  mc_teo: hey
+21:03  mc_teo: what mode can i open() a path on windows, that will create the file if it doesnt exist
+21:03  dash: arkanes_: oh, like
+21:04  dash: arkanes_: not committing all your changes?
+21:04  dash: arkanes_: 'bzr shelve'
+21:04  TheSheep: mc_teo: 'w'
+21:04  lvh: deepy: It communicates to other people that you do not care about a value
+21:04  TheSheep: mc_teo: and
+21:04  MrElendig: deepy: it just makes it clear that you don't care about the value
+21:04  deepy: Ah
+21:04  arkanes_: dash: in hg and in git, when you commit, you can decide what specific changes (at a closer than file scope) you're committing
+21:04  dash: right
+21:04  TheSheep: unless you are using gettext :)
+21:04  arkanes_: I thought shelve did something different
+21:04  dash: arkanes_: it does
+21:04  arkanes_: I will double check my memories
+21:04  arkanes_: ok!
+21:05  dash: arkanes_: but it's usable for the same purpose :)
+21:05  lvh: arkanes_: bzr doesn't force you to commit the entire working tree either
+21:05  lvh: arkanes_: the difference is that the *default* is committing the working tree
+21:05  arkanes_: I can't decide if committing by chunks is awesome or dumb yet so I want to do it for a while
+21:05  dash: 'bzr shelve' prompts you for each diff hunk and asks "do you want to remove this diff and save it for later"
+21:06  arkanes_: dash: so you'd shelve the hunks, commit, then unshelve to get the unused ones back?
+21:06  dash: right
+21:06  arkanes_: little roundabout
+21:06  dash: i don't do that real often
+21:06  MindVirus: Is there a non-blocking subprocess.call?
+21:06  dash: i mostly use shelve for when i want to try a merge or something and don't want to lose my current work and don't want to commit it
+21:06  dash: MindVirus: subprocess.Popen
+21:06  lvh: MindVirus: reactor.spawnProcess
+21:06  lvh: MindVirus: Also subprocess.Popen ;-)
+21:07  MindVirus: So just constructing a Popen object will make the command run?
+21:08  lvh: MindVirus: Constructing a Popen object will create a new process
+21:08  lvh: MindVirus: If it runs or not is up to the OS, but generally: yes
+21:08  MindVirus: Sweet.
+21:08  MindVirus: That's kinda scary, but sweet anyways.
+21:09  MindVirus: I wouldn't expect any real action in a constructor.
+21:09  dash: MindVirus: it's a callable that starts a process
+21:09  dash: how's it any different from 'call' in that regard? :)
+21:09  MindVirus: dash: call is a function; Popen is an object.
+21:10  MindVirus: Functions are objects, too, I know, but they don't have constructors.
+21:10  yebyen: they don't?
+21:10  lvh: MindVirus: sure they do
+21:10  dash: MindVirus: how do you know Popen isn't a function?-)
+21:10  yebyen: constructors and runtime introspection to boot!
+21:11  yebyen: plus code mangling
+21:11  MindVirus: dash: It says "class" right before it says subprocess.Popen on the documentation.
+21:11  tos9: Why does assigning to self.__class__ on a subclass of a builtin type raise a TypeError? (yes I know this question is terrible for about 12 reasons)
+21:11  _habnabit: tos9, because you should never do that ever
+21:11  arkanes_: tos9: because you can't do it
+21:11  dash: MindVirus: heh
+21:12  lvh: tos9: Because you can't change the type of something that subclasses a builtin type
+21:12  arkanes_: MindVirus: more importantly, why do you *care* if its a class
+21:12  lvh: tos9: they are extra special
+21:12  _habnabit: MindVirus, why do you think that functions don't have constructors
+21:12  tos9: _habnabit: K. One step back. does type(obj) directly return obj.__class__?
+21:12  lvh: MindVirus: It's basically like a function, except it's more obvious what the return value is :-)
+21:12  MindVirus: arkanes_: I don't. It's just an irrational fear.
+21:12  _habnabit: tos9, not always
+21:12  MindVirus: _habnabit: Because I've never made one.
+21:12  lvh: tos9: sometimes, dont count on it
+21:12  tos9: lvh: I get why a builtin would be special, but why a subclass of one?
+21:12  MindVirus: lvh: That's what __init__ is.
+21:13  nosklo: tos9: the kind of magic you want seems awkward
+21:13  MindVirus: Hmmm...
+21:13  dash: tos9: what nonsense are you up to
+21:13  lvh: MindVirus: __init__ is not a constructor
+21:13  nosklo: tos9: if you stick to normal usage you won't see the specialness
+21:13  lvh: MindVirus: __new__ is
+21:13  tos9: dash: Oh you know me :)
+21:13  MindVirus: lvh: Ah.
+21:13  lvh: MindVirus: __init__ is an initalizer, this is why it's called init
+21:13  dash: tos9: not entirely :)
+21:13  MindVirus: lvh: Then is __new__ required to return self?
+21:13  nosklo: MindVirus: no. It can return any object.
+21:13  _habnabit: MindVirus, __new__ isn't passed self
+21:14  _habnabit: MindVirus, __new__ *creates* self
+21:14  MindVirus: I cracked my neck so hard I no longer know what you're talking about.
+--- Log closed Sat Oct 30 00:29:52 2010

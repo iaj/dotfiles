@@ -1,0 +1,826 @@
+--- Log opened Mon Jan 17 00:00:47 2011
+00:00  iaj: hmm, function s:LaunchPeepOpenViaVim()   why can't I call this one with   :call LaunchPeepOpenViaVim ?
+00:01  peter_w: from where?
+00:01  peter_w: you probably want to read :he s:var
+00:03  iaj: hmm so it makes no sense putting that into my vimrc :)
+00:04  iaj: http://pastebin.com/taY0W0h9   that's what I need to put in somewhere..
+00:13 --- elik_ is now known as elik
+00:36  kongo: iaj: to me that looks like a part of a vim plugin file
+00:37  kongo: iaj: probably you will want to save the whole file under .vim/plugin/
+00:41  iaj: yeh.. I figured it.. it was part of a plugin and just replaced it :)
+00:43  guns: Is there a builtin show-trailing-whitespace option in vim? I have my own setup using `syntax match' that I like better, but sometimes it's replaced by an annoying underbar instead.
+00:43  guns: I'd like to turn it off if that's the case
+00:44  Araxia_: guns: well, there's :set list with appropriate listchars, but that's probably not what you want.
+00:45  Araxia_: guns: you might just figure out what hl is getting the underbars and fix it.
+00:45  guns: Hi Araxia_ ; no that's not what I mean. It doesn't look like it's using a hi group to style the trailing ws, so I suspected there was a vim option
+00:46  guns: I've been tweaking my colors file, so that's probably the reason
+00:46  pattern: guns: this is how i show trailing spaces (and other useful stuff like tabs..):
+00:46  pattern: :set list
+00:46  pattern: :set listchars=tab:»·,trail:·,extends:→,precedes:←,nbsp:‗
+00:47  guns: pattern: I've got a happy setup using both listchars, and syntax match. but ty
+00:47  pattern: and you're not seeing trailing whitespace?
+00:48  guns: pattern: no, I am seeing it. I think I might be onto something now... It might be my Search higroup is somehow highlighting trailing ws
+00:49  pattern: how do i make vim not count parenthesis as part of a word (for doing things like cw) ?
+00:49  guns: thanks guys, I think that was it. I decided to create a new colors file that was a combination of jellybeans + xoria256, and I guess I'm just working out the kinks
+00:50  guns: pattern: iskeyword
+00:50  pattern: thanks
+00:50  guns: like ruby for instance: setlocal iskeyword+=-,?,!
+00:54  pattern: perfect
+00:57  pattern: hmm... weir
+00:57  pattern: weird even
+00:58  pattern: looks like :setlocal iskeyword+=(,)   worked when the word i want to delete is:  ...)
+00:58  pattern: it stops at the parenthesis
+00:58  pattern: but not when i have vvv)
+00:58  iaj: how would I insert the result from map ,a   to the current buffer?
+00:58  pattern: then it swallows the parenthesis when i do a dw or cw
+00:58  iaj: I tried   <C-R>=  map ,a    but that's not working
+00:59  guns: pattern: hmmm... i'm gonna try
+01:00  guns: pattern: works for me when there isn't an opening brace
+01:01  pattern: with or without one it eats the brace for me
+01:01  guns: pattern: isn't that what you want?
+01:01  pattern: i want it to stop at the ( and )
+01:01  iaj: Another issue, when im yanking something.. then delete something... which reg is the yanked stuff on then..?  "1 ?
+01:02  guns: pattern: oh I misunderstood then;  you don't want in iskeywords then
+01:02  pattern: so if i have:  abc)   and my cursor is on the a, and i type dw it should change to:   )
+01:02  pattern: ah
+01:02  guns: pattern: I thought you wanted to consume () with cw etc
+01:02  pattern: nope
+01:03  guns: pattern: confusing because I don't believe parens are consumed by default; maybe a plugin changed that for you
+01:03  pattern: i think it must have
+01:04  pattern: looks like i had 47-59 in my iskeywords
+01:05  pattern: ascii 50 and 51 are the parenthesis
+01:05  pattern: taking those out worked
+01:05  guns: ah; you can also express ASCII ranges like a-z i think
+--- Log opened Mon Jan 17 01:10:13 2011
+01:10 --- Users 578 nicks [0 ops, 0 halfops, 0 voices, 578 normal]
+01:11 --- Channel #vim was synced in 71 seconds
+01:45  EspadaV8: hey, does anyone know if you can set up a fixed width buffer in vim? i'd like a ~25 column wide buffer on the right that'll never change width
+01:46  Araxia_: EspadaV8: you could probably do that with a buffer local au.
+01:46  fow: the option you want is 'winfixwidth'
+01:47  Araxia_: or that. heh.
+01:47  iaj: how would a ifcheck look like looking if the path of the current file is the homedir?
+01:47  EspadaV8: hmm, that seems handy
+01:47  fow: if expand('%:p:h') == $HOME " or something like that, iaj
+01:47  EspadaV8: how would i resize a buffer to 25 columns (without guess work)?
+01:49  Araxia_: EspadaV8: :set columns=25
+01:49  Araxia_: though you might want to account for things like the fold column and number column, too.
+01:49  EspadaV8: :-S
+01:50  EspadaV8: that resized everything down to 25 columns
+01:50  Araxia_: ah, right. sorry.
+01:50  Araxia_: just buffer.
+01:50  iaj: fow: thanks:)
+01:50  EspadaV8: winwidth() doesn't seem to be what i want
+01:51  bairui: EspadaV8: are you expecting the physical width to change, or do you just want your text to wrap at 25?
+01:51  fow: you're welcome, iaj
+01:52  iaj: trying to get something running, can someone figure out what's going wrong?
+01:52  iaj: http://paste.pocoo.org/show/321856
+01:52  Araxia_: EspadaV8: so what's wrong with winwidth()?
+01:52  Araxia_: ah...you want to change, not get.
+01:52  Araxia_: i should just be quiet for awhile.
+01:53  EspadaV8: bairui: change the width to 25 columns and remain fixed at that size (i'm just using 25 as an example)
+01:59  bairui: iaj: something like:   http://paste.pocoo.org/show/321859/
+02:01  frogonwheels: EspadaV8: well you can  :25 winc |    (or 25 <c-w>|   )
+02:02  iaj: bairui: thakns.. testing
+02:02  bairui: EspadaV8: do you want to change the buffer width (:help 'textwidth) or the window width (what frogonwheels said  :help ctrl-w_|)
+02:02  iaj: bairui: hmm its not doing anything :)
+02:03  bairui: iaj: the if test there is asking - is the path of the file I'm editing == $HOME
+02:03  bairui: is that what you want?
+02:03  iaj: is the current working directory $HOME
+02:03  Raimondi: normal <Plug>PeepOpen  ???
+02:03  bairui: ah... that's different
+02:03  iaj: the thing that :pwd replies.
+02:04  iaj: bairui: but its not calling the plugin so far.
+02:04  frogonwheels: EspadaV8: but it only works if you have a vertical split at that point
+02:04  bairui: Raimondi: I didn't ask... actually, that's my code - I assumed there was a function it could call, but I used what I was given. :)
+02:05  EspadaV8: fastvimhead and bairui: bufferwidth is what i was after, and that 'c-w_|' thing did the trick nicely
+02:05  EspadaV8: now i've forgotten what i wanted it for though :-S
+02:06  bairui: mixing our terms here, but ok
+02:07  bairui: iaj: change line 2 to:     if getcwd() == $HOME
+02:07  iaj: how do I call a <Plugin> from within a script?
+02:07  bairui: iaj: you'd probably use   :call EquivalentPluginFunctionName()
+02:07  bairui: if the plugin author exposed that
+02:08  iaj: ahh I see yeah
+02:08  Raimondi: bairui: I see :)
+02:08  bairui: *guilty-grin*
+02:09  Raimondi: BTW, doesn't work, just tested :)
+02:09  bairui: hehe... ok - I thought I'd wing it. Gotta fail sometimes. :p I initially had it in an  exe   line, but that probably doesn't cut the mustard either. :S  So... how?
+02:10  Raimondi: Mmmm... you actually want me to think...
+02:10  bairui: ooh... and this late at night - my apologies. :)
+02:10  Raimondi: I asume there is some mapping accesible instead of the <Plug> one...
+02:10  Raimondi: lol
+02:11  bairui: ah, deus ex machina    nice
+02:11  iaj: bairui: hmm the function in the peepopen.vim looks like function s:LaunchPeepOpenViaVim()   can I call that one?
+02:11  bairui: nope. you're screwed.
+02:11  bairui: :)
+02:11  Raimondi: hahaha
+02:12  bairui: so - modify the plugin - provide a global func that calls that s: one
+02:13  iaj: ah global func... is just a function without the s: beforehand?
+02:13  bairui: yep
+02:16  iaj: hmm how do I call the s: one..?   
+02:16  bairui: call s:Blah()
+02:17  bairui: make sure you're marshalling any arguments too
+02:17  bairui: actually, you should use   return s:Blah()   if the s: function returns anything
+02:20  iaj: map <silent> <D-f> call PeepMeAround()    theres something wrong about that one... since a normal call is working but the mapping isn't
+02:20  iaj: thanks for all the help btw
+02:22  bairui: iaj: try putting : before call and <CR> after
+02:22  bairui: np, btw :)
+02:26  iaj: Working, yay.. ツ
+02:26  bairui: :)
+02:32  frogonwheels: iaj:  you using a tsu for a smily? I guess that works :)
+--- Log closed Mon Jan 17 02:52:47 2011
+--- Log opened Mon Jan 17 02:58:06 2011
+02:58 --- Users 565 nicks [0 ops, 0 halfops, 0 voices, 565 normal]
+02:59 --- Channel #vim was synced in 74 seconds
+03:06 --- rahult_ is now known as RahulT
+03:11 --- peth_ is now known as peth
+03:39  hagabaka: is there an easy way to write the visual selection to a file, and then delete the visual selection?
+03:40  bairui: make your visual selection and then   :w bar   then   gvd
+03:40  bairui: where bar is foo is blah is whatever filename you want
+03:41  hagabaka: but after :w, the selection is gone isn't it?
+03:41  bairui: yep - that's what   gv   does
+03:41  hagabaka: oh
+03:41  bairui: gets it back for you
+03:41  hagabaka: cool
+03:50  tprow: how do I copy to the X11 clipboard?
+03:50  bairui: :help clipboard
+03:50  bairui: but   "+   is the clipboard register, and   "*   is the primary X selection (what the mouse grabs)
+04:15  paleywiener: how do i change the default path of the viminfo file? set viminfo=whatever doesn't work, something about a 'char
+04:16  fow: paleywiener, looking at :h 'viminfo' you'll see it takes a set of key/value pairs. you can see how Vim determines the viminfo filename with :h viminfo-file-name
+04:17  fow: apparently it's the n flag in the 'viminfo' option
+04:21  paleywiener: yeah i'm doing this and it's not working: set viminfo-file-name=n/root/.vim/junk/.viminfo
+04:21  paleywiener: also tried viminfo=n/whatever
+04:22  fow: you want set viminfo+=n/whatever
+04:22  paleywiener: Must specify a ' value: viminfo=n/root/.vim/junk/.viminfo
+04:22  fow: if you just use =, you haven't told vim what you want stored in the viminfo file, so it doesn't put anything in it
+04:22 --- krz_ is now known as krz
+04:24  paleywiener: ah. okay.. so the + implies that all settings will be stored in viminfo? any idea where the += syntax is documented
+04:24  paleywiener: ah! worked. nice! thanks you guys!!
+04:24  fow: :h :set+=
+04:25  fow: The += more or less says "append the following to the viminfo option"
+04:28  paleywiener: fow, why the n/whatever ?? The 'n' flag in the 'viminfo' option can be used to specify another
+04:28  fow: /whatever is what you chose :P
+04:32  paleywiener: umm.. I don't understand.. n/whatever would be the value that viminfo is getting set to.. but why the extra n.. i get "Missing number after </>"
+04:32  paleywiener: without n..
+04:36  sigh: paleywiener: viminfo is a list of options - it does more than just specify the name of the file, it configures everything about viminfo. The "n" is the key that lets you set the filename
+04:37  paleywiener: ah! thanks got it! hash
+04:45  paleywiener: in vim -g (gnome and gtk) when i open a tab my window size changes and becomes longer but same number of columns(41) when i close a window it becomes smaller.. any way to fix this
+05:09  paleywiener: anyone use vim's Align to align perl statements? my $var = yuck;my   $dgfhf= alsld; I'd like the $'s and ='s aligned without splitting it into $ dgfhf
+05:35  Rakko: Is there a key for repeating the last :s?
+05:36  bairui: Rakko: :help &
+05:39  paleywiener: anyone use vim's Align to align perl statements? my $var = yuck;my   $dgfhf= alsld; I'd like the $'s and ='s aligned without splitting it into $ dgfhf
+05:39  bairui: paleywiener: I use Tabular
+05:39  bairui: vimgor Tabular
+05:39  vimgor: Tabular is godlygeek's plugin to align text in vim, http://github.com/godlygeek/tabular
+05:40  paleywiener: thank you :) lemme check it out
+05:40  bairui: np
+05:40  Rakko: thanks, bairui
+05:40  bairui: np
+05:42  bairui: paleywiener: to do that in tabular, use V to linewise visually select and then    :Tabular /\$\w\+
+06:17 --- dhruvasagar_ is now known as dhruvasagar
+06:19  dhruvasagar: hey
+07:10  Axioplase_: Can I send a "<leader>foo" (ie, "\foo") via "--remote-send"? It doesn't seem to work
+07:10  Araxia_: Axioplase_: tried feedkeys()?
+07:11  Axioplase_: Araxia_: no. I don't know it
+07:11  Axioplase_: And that works perfectly, thanks
+07:11  Araxia_: np
+07:12  Axioplase_: Now, can I run compilation *in the background* with vim-latex?…
+07:13  Araxia_: unfortunately, i don't think so. at least not easily.
+07:13  Araxia_: i think people have managed to hack around it by having the compilation spit out a parseable errorlist. don't know how they'd know it was done, though.
+07:16  Araxia_: maybe a remote-send "callback"?
+07:18  Axioplase_: hum…
+07:31  agib|home: if I have a blank line, is there a way for me to enter insert mode at the current level of indenting?
+07:35  Araxia_: i forget what the conventional wisdom is on this one, but try :help 'autoindent'
+07:36  agib|home: Araxia_: cool, thank you (again)
+07:36  dc5ala: agib: using o on a blank line to get a new line indents here
+07:37  dc5ala: agib: but that is if you want to keep the blank line, you want to write on same line?
+07:38  Araxia_: agib|home: hrm. do you mean you've got an indented line with text, then a blank line, and you want the line opened beneath the blank to have the same indent as the one with text?
+07:38  Araxia_: that might be trickier.
+07:38  agib|home: dc5ala: yeah, the same line
+07:38  agib|home: I noticed that o was close...
+07:38  agib|home: now I just do "I" then tab tab tab, etc.
+07:38  agib|home: was just curious if there's a shorter way
+07:38  Araxia_: what language/ft are you using?
+07:39  agib|home: ruby now
+07:39  Araxia_: have you installed a ruby-specific plugin yet?
+07:40  agib|home: I don't believe so
+07:40  agib|home: there's a ruby syntax built-in, no?
+07:40  Araxia_: most language plugins will take care of indent for you that way.
+07:40  agib|home: err well auto indent is fine
+07:40  agib|home: I mean it's working fine
+07:41  agib|home: but I was just saying, let's say I come to a blank line in the middle of a file... and I'm in normal mode
+07:41  agib|home: I was wondering what's the shortest way for me to begin typing at the current level of indent
+07:41  agib|home: o does it... but it inserts a newline first
+07:42  Araxia_: agib|home: the ruby support via plugins is better than the built-in.
+07:43  dc5ala: agib: im only beginner, but you could also just insert your text, then leave insert mode and hit == to format that line - or you could delete the blank line and use "o" like ddo, at least here "o" does the indent for me
+07:43  Araxia_: but, yeah, that's in interesting question. i have an idea...one sec.
+07:43  agib|home: ahh ddo is not bad
+07:43  agib|home: ddO
+07:45  Araxia_: heh. i was thinking 'virtualedit' with g[jk], but that's just getting ridiculous.
+07:46  Araxia_: and certainly not as efficient as ddO
+07:46  agib|home: :)
+07:46  Araxia_: agib|home: there's a plugin that allows you to address ruby blocks as text-objects, for example.
+07:47  agib|home: ahh nice
+07:47  agib|home: which one is that?
+07:47  Araxia_: textobj-rubyblock.
+07:48  agib|home: Araxia_: btw, I love the s+d+h/j/k/l
+07:48  Araxia_: agib|home: yeah, isn't that great? *everywhere* muhahaha!
+07:49  Araxia_: textobj-rubyblock does depend on matchit.vim and textobj-user, fwiw.
+07:49  agib|home: which other hacks do you use with that tool?
+07:50  Araxia_: <C-[> = <Esc>, Option_R = fn, simultaneous expose mode.
+07:51  Araxia_: if you do rails, too, rails.vim is pretty nice.
+07:52  agib|home: ah I think I have that one
+07:52  agib|home: man, there's so much!
+07:53  Araxia_: yeah. quite.
+07:53  agib|home: I just switched to vim
+07:53  agib|home: getting used to it
+07:53  agib|home: before textmate, I was an emacs guy
+07:53  Araxia_: interesting.
+07:53  agib|home: so it's all new
+07:53  Araxia_: well, there is the similarity that you can do *everything* with keybindings.
+07:54  Araxia_: it's just a matter of mastering these particular ones.
+07:54  Araxia_: not to trivialize that endeavor, of course.
+07:54  Araxia_: but if you approach it incrementally, it's not too bad.
+07:55  Araxia_: nice thing about macvim is that to a certain degree it lets you ease into things a bit, since you can use default mac bindings for a lot of common stuff until you master the vim ways.
+07:55  agib|home: that's what I'm trying to do, and if I'm struggling with a particular FT I can switch back to TM for a bit
+07:55  agib|home: for example, I haven't found a JS validator that I like as much as TM's JSLint
+07:57  Araxia_: might be a way to automate delegation of things like that via the textmate commandline and :!, too.
+07:57  agib|home: ahh interesting idea
+07:57  agib|home: Araxia_: I'll have to sleep on that one :) thanks again for the help -- night
+07:58  Araxia_: night
+07:58  dc5ala: it's a longer process to learn all the stuff available to you
+07:58  dc5ala: good night
+07:58  agib|home: thank you, dc5ala too!
+--- Log closed Mon Jan 17 08:39:29 2011
+--- Log opened Mon Jan 17 08:44:39 2011
+08:44 --- Users 561 nicks [0 ops, 0 halfops, 0 voices, 561 normal]
+08:45 --- Channel #vim was synced in 73 seconds
+--- Log opened Mon Jan 17 08:51:59 2011
+08:51 --- Users 559 nicks [0 ops, 0 halfops, 0 voices, 559 normal]
+08:53 --- Channel #vim was synced in 85 seconds
+09:28 --- Araxia_ is now known as Araxia
+09:31  paleywiener: could someone give me an example of an inclusive and exclusive motion
+09:42  strull: paleywiener: w is exclusive, e is inclusive
+09:42  thkoehler: paleywiener: consider a line "foo bar baz"
+09:42  thkoehler: paleywiener: Cursor on the f
+09:43  thkoehler: e => cursor on the last o of foo, w => cursor on the b of bar
+09:43  thkoehler: if you go to visual mode (v) and select "inner word" (iw), "foo" is marked, cursor on the o
+09:44  thkoehler: if you go to visual mode (v) and select "a word" (aw), "foo " is marked, cursor on the space between foo and bar
+09:44  paleywiener: When exclusive, the last character towards the end of the buffer is not included.
+09:45  thkoehler: paleywiener: yepp, consider "w"
+09:45  thkoehler: on foo, type w, end on the b of bar
+09:45  thkoehler: on the f of foo, consider dw (delete word)
+09:45  paleywiener: right but the end of buffer would be foo bar|
+09:45  thkoehler: => exclusive, end up on b of bar which is not being deleted
+09:47  paleywiener: i mean.. |foo bar (with w you go to: b) so umm.. which is the last char at the end of buffer which is not included?
+09:48  paleywiener: it doesn't make any sense :( :(
+09:48  paleywiener: i thought buffer was the whole file..
+09:48  peth: paleywiener: it only counts for operations on motions
+09:48  peth: if you just w there's no diff\
+09:49  peth: if you dw there is
+09:49  peth: or db, that is
+09:49  paleywiener: ah! a sec
+09:52  peth: $ = inclusive; 0 = exclusive. so 0d$ deletes everything on the line, $d0 leaves the last char.
+09:55  paleywiener: okay.. so inclusive/exclusive are in the context of command operators.
+09:55  paleywiener: okay now it makes sense i think lemme think some more! thanks you guys!
+09:59  paleywiener: |^foo bar baz$  okay so for d$ (inclusive) the start and end of the operation are included therefore you get ^$ but for d0 start is included but end and 1 char prior is not.. so you get: char$ :)
+10:32 --- mattisfreenode is now known as ma10s
+10:47 --- silex is now known as Silex
+11:27  havocologe: how do delete from cursor up to, but not including, a given character ?
+11:27  Silex: d?c?e
+11:27  Silex: I think
+11:27  Silex: maybe e+1
+11:27 * Silex tries
+11:28  kurkale6ka: havocologe: dv?x
+11:28  the_isz: dtx
+11:29  the_isz: with x being the character not to be deleted
+11:29  Silex: t doens't jump lines
+11:29  Silex: and you want T
+11:29  the_isz: then d/x
+11:29  Silex: wait, I think I misread "cursor up to"
+11:30  the_isz: Silex: you might be right, be didn't explicitly say the character is on another line
+11:30  the_isz: havocologe: you following?
+11:30  Silex: the_isz: I'm not sure wether he means from here to "previous match of x"
+11:30  Silex: or from here "up to x"
+11:30  kurkale6ka: :h o_v => dv?x
+11:31  the_isz: Silex: me neither, let's wait for his answer ;)
+11:31  Silex: kurkale6ka: I tried what you said, it still eats the caracter
+11:31  Silex: (even tho the doc says it shouldn't)
+11:32  kurkale6ka: no it doesn't
+11:32  Silex: we have different vims then
+11:33  kurkale6ka: start it without plugins you will see
+11:33  Silex: if I write 123456789, with cursor on 7, and type dv?3, it deletes the 3 as well
+11:33  Silex: but yeah maybe it's a plugin interfering
+11:35  Silex: still does it without plugins...
+11:35  Silex: weird
+11:35  kurkale6ka: hmmm
+11:35  Silex: did you actually try my example?
+11:36  kurkale6ka: yeah I was wrong but I can't see why...
+11:36  havocologe: the_isz: yepp, following and dtx was exactly what i looked for.
+11:36  Silex: anyway, d?x?e+1 works but it's long to type
+11:36  the_isz: havocologe: hooray :)
+11:36  havocologe: thanks again to #vim :)
+11:36  kurkale6ka: ? is exclusive so it becomes inclusive
+11:37  Silex: so d?x should work?
+11:37  Silex: (it doens't)
+11:39  Silex: anyway, that 'v' trick looks nice
+11:40  Silex: (if it works :)
+11:42  the_isz: kurkale6ka, Silex: ? is exclusive indeed, but that only means that the character you start the operation from is not included in the operation, as it is the end of the buffer. see  :he exclusive
+11:43  Silex: oh, that exclusive
+11:43  the_isz: at least, that's how i understand that...
+11:44  Silex: yeah, ?x keeps the 7, v?x deletes it
+11:44  kurkale6ka: ok, solved :)
+11:44  Silex: so we really need ?x?e+1
+11:44  Silex: well, "we"... in case somebody needs that
+11:45  the_isz: Silex: well, there's still  dTx  if it's on the same line.
+11:46  Silex: the_isz: sure, the challenge is somewhat different :)
+11:47  Silex: I wonder if d?x\zs works
+11:48  Silex: it does!
+11:48  Silex: nice
+11:51  kurkale6ka: excellent
+11:53  Fandekasp: do you know the opposite command of J in visual mode ?  I'd like to cut a line in visual instead of doing i-enter-esc. I made a macro for it, but I'm sure this visual command exist and I can'T find it in the help
+11:55  LeoNerd: There isn't
+11:55 * LeoNerd ponders on B, for break
+11:56  Fandekasp: ok
+11:56  Fandekasp: so let's go for a imap ^^
+11:56  LeoNerd: vmap  for visual mode
+11:56  Fandekasp: ok thx
+11:58  iaj: the basic for editing a netrw file would be :e ftp://user:pass@ftp.domain.org/  something wrong about it?
+11:58  Fandekasp: oh LeoNerd I confused, J is a normal mode command. I suppose there isn't my command in normal mode neither
+11:58  LeoNerd: Correct; no such command at all
+11:59  LeoNerd: iaj: Asides from FtpMustDie, nothing else wrong with that
+12:00  iaj: LeoNerd: heh.. I'm confused.. how would you edit ftp files on a remote server?
+12:00  LeoNerd: I'd be using ssh or scp or sshfs or somesuch
+12:02  iaj: Mhhh
+12:06  iaj: When I'm writing to an html file it does some weird :!xmllint action
+12:06  iaj: How can I find out why?
+12:19  frogonwheels: iaj: :au BufWritePre
+--- Log opened Mon Jan 17 13:25:07 2011
+13:25 --- Users 592 nicks [0 ops, 0 halfops, 0 voices, 592 normal]
+13:25 --- Server: [pratchett.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+13:26 --- Channel #vim was synced in 72 seconds
+14:22 --- shpaq` is now known as shpaq
+14:32 --- altamic_ is now known as altamic
+14:34  bosie: anyone using ack, ack-vim and knows how to avoid the automatic opening of the first file in the search results from the quicklist?
+14:36  Silex: bosie: usually adding ! to the command prevents that
+14:36  Silex: for the quickfix window I mean
+14:36  Silex: I guess it followed the same scheme
+14:36  bosie: Silex: command! -nargs=* -complete=file LAckAdd call LAckAdd(<q-args>)
+14:37  bosie: sorry
+14:37  bosie: Silex: command! -nargs=* -complete=file Ack call Ack(<q-args>)
+14:37  bosie: and the function is defined as
+14:37  bosie: function! Ack(args)
+14:37  Silex: bosie: try :Ack! bla
+14:38  Silex: but it doens't look like it
+14:38  bosie: Silex: says: "! not allowed"
+14:38  Silex: yeah, I suggest you read the ack plugin source
+14:38  jamessan: or you could just set 'grepprg' appropriately and not bother with ack-vim
+14:39  Silex: yeah, then :grep! would work as what you want
+14:40  bosie: hm
+14:40  bosie: but that doesn't give a quicklist at all
+14:40  Silex: bosie: wait,
+14:40  Silex: command! -bang -nargs=* -complete=file Ack call s:Ack('grep<bang>',<q-args>)
+14:40  Silex: apparently you use an outdated version of ack-vim
+14:41  Silex: I mean, the vim-ack I'm seeing handles :Ack! correctly
+14:41  bosie: let me update
+14:41  jamessan: bosie: sure it does.  that's the whole point of :grep
+14:41  Silex: https://github.com/mileszs/ack.vim/
+14:42 --- Alien_Freak is now known as csgeek
+14:45  kwtm: How come vim doesn't crash and show a GUI dialog saying "Want to tell Microsoft about this error?" like a *real* word processor should?  (I'm kidding!!  Just kidding!! Don't kill me, please!)
+14:45  bosie: Silex: ok, updated to this version, thanks
+14:47  Silex: yw
+14:49  bosie: oh, vimcast has a new cast out
+15:05 --- Unode is now known as _Unode
+15:07  Fandekasp: I have a weird character u'\xea'  in my file, but I can't find it... is there a command in vim to find the position of this char ?
+15:08  temoto: Fandekasp, /
+15:08  Fandekasp: temoto, I didn't write \xea in my file
+15:08  Fandekasp: ok my error should come from something else... vim can't hide some chars
+15:09  temoto: i don't know how to trick C-v to insert arbitrary char, but i would issue   python -c 'print "-\xea-"'   and copy that into clipboard, then paste inside vim.
+15:10  Fandekasp: ok thx
+15:24  bairui: temoto, Fandekasp: to enter unicode  :help utf-8-typing
+15:24  Fandekasp: ah cool :)  thx
+15:24  bairui: np
+15:31  raccoon_: hai guise, is it possible to save the current buffer into a new file of a given filename, and open that file into the current buffer?
+15:31  raccoon_: im thinking along the lines of :we but it doesnt seem to be that easy
+15:31  bairui: :saveas newname
+15:35  raccoon_: bairui: sweet, thanks!
+15:35  bairui: np
+16:00  quantumelixir: How do I go back to editing the previous file in the current buffer? ^O takes me through the list of edit locations in the current file before jumping to the previous file..
+16:00  graywh: you mean current window?
+16:00  graywh: ctrl-^, aka ctrl-6
+16:00  quantumelixir: oh yeah window sorry
+16:00  quantumelixir: wow awesome
+16:00  quantumelixir: thanks graywh
+16:25  WoodsDog: i use ctrl-v Shift I quite frequently to add characters to the before my column.
+16:25  Silex: adding comments that way is common
+16:25  WoodsDog: i want to do something similar to the end of the lines, with visual, where the end of the lines dont line up
+16:25  WoodsDog: is that possible
+16:25  Silex: shift-a ?
+16:26  Silex: do you want the inserted text to align or not?
+16:26  Silex: if yes, you want +virtualedit
+16:26  Silex: see the help for it
+16:26  WoodsDog: i've used virtual edit.
+16:26  WoodsDog: i have some programming that i'm using. I want to add commas to the end of the line, don't want them to line up.
+16:26  WoodsDog: just add them to the end of each line
+16:27  Silex: ctrl-v shift A does that
+16:27  WoodsDog: Silex: thanks, let me try
+16:27  Silex: without virtual edit
+16:27  Silex: otherwise, just use a macro
+16:28  Araxia: or <range>s/$/,/
+16:28  WoodsDog: Silex: that doesn't quite work
+16:28  WoodsDog: i can do search and replace
+16:28  WoodsDog: just wondering...
+16:28  WoodsDog: thanks
+16:28  strull: WoodsDog: try <c-v>3j$A,<esc>
+16:28  Silex: WoodsDog: what do you mean, "doens't work"
+16:29  strull: the key here is the $ before the A
+16:29  WoodsDog: Silex: if the end of my lines don't linux up
+16:29  WoodsDog: don't line up
+16:30  Silex: try what strull said
+16:30  WoodsDog: let me try that
+16:30  Silex: it'd just work
+16:30  WoodsDog: NICE!
+16:30  WoodsDog: strull, that worked
+16:30  WoodsDog: thanks
+16:31  strull: np, have fun!
+16:32  WoodsDog: strull: that was kick ass
+16:34  peth: oh. the help for :bd is inaccurate.
+16:44  the_isz: WoodsDog: i'd consider Araxia's suggestion a bit more elegant, though
+16:52  WoodsDog: the_isz: i completely agree, that's more elegant and realistic (and what i've used in the past).  but i was wondering about visual mode.
+16:53  the_isz: WoodsDog: :s works on visual, doesn't it?
+16:53  WoodsDog: yes, it does.
+16:53  WoodsDog: i use that frequently.
+16:54  rindolf: Hi all.
+16:54 --- RichiH is now known as R
+16:55 --- R is now known as RichiH
+16:55  the_isz: hi rindolf.
+16:55 * strull fails to see why 7 keystrokes should be more elegant than 4
+16:55  rindolf: the_isz: what's up?
+16:55  the_isz: strull: hmm... you're probably right. might have to get used to that approach first :)
+16:55  rindolf: Apparently, command-t.vim works fine on my laptop (while being crashy on my desktop machine)
+16:56  the_isz: rindolf: need to leave now, sorry.
+16:56  the_isz: see ya all
+16:58 * kurkale6ka uses http://www.vim.org/scripts/script.php?script_id=3237
+17:03 * ReinH uses :e **/
+17:04  ReinH: and, more often, ctags with +file
+17:04  rindolf: ReinH: instead of command-t.vim?
+17:04  ReinH: so I can just to filenames by regexp by using tags
+17:04  ReinH: yeah
+17:04  ReinH: don't know vim's navigation techniques until you know what they are :p
+17:04  ReinH: *knock
+17:04  ReinH: s/know/knock
+17:26  Combatjuan: Hello.  I'm looking for a way to make jumping to a tag work special for '#include <somefile>' and 'import <somemodule>'.  With #include, I can usually "gf", but this doesn't work with import statements.
+17:27  jerojasro: Combatjuan: what kind of file are you editing? that functionality works out of the box with (IIRC) C, Python, Java
+17:27  jerojasro: (and others I don't use...)
+17:28  Combatjuan: jerojasro: C++ and Python.  I'm using python 7.3.  When I have the line "import util" and I try to jump to "util", the taglist is the 80 files that util is imported from.  I'd like to just have it jump straight to the top of "util/__init__.py"
+17:29  Combatjuan: jerojasro: Err, I'm using VIM 7.3.
+17:29  mgedmin: Combatjuan, sounds like you want ctags --python-kinds=-i
+17:29  mgedmin: I put that into ~/.ctags
+17:29  mgedmin: because having import statements in the tags file is silly
+17:30  Combatjuan: mgedmin: Agreed.  But does that also someone make it know that "util" is actually the file "util/__init__.py" somehow?
+17:30  mgedmin: ah, no
+17:31  Combatjuan: I assume that this is a common problem, but I'm having trouble searching for an answer.  Figured someone in here had it solved.
+17:32  Combatjuan: I'm considering making a script that walks my source directory and manually appends tags entries...  But I really hate that solution.
+17:32  mgedmin: there are some hacks you can do to make 'gf' work with import statements
+17:32  mgedmin: (I don't like that myself)
+17:32  rindolf: ReinH: I also like FuzzyFinder.
+17:32  mgedmin: command-t might help, if util/__init__.py is in a subdirectory of $PWD
+17:33  mgedmin: it's like FuzzyFinder, I guess
+17:34  Combatjuan: mgedmin: Command-t?  As in Ctrl-t?
+17:34  mgedmin: vimgor, command-t
+17:34  vimgor: Rumor has it command-t is https://wincent.com/products/command-t, mgedmin
+17:34  mgedmin: it's a plugin
+17:34  Combatjuan: Ah.
+17:34  mgedmin: named after TextMate's command-t command
+17:34  mgedmin: is actually mapped to <leader>t
+17:35  Combatjuan: mgedmin: I'll take a look into the gf hacks and command-t.  Thanks.
+17:35  mgedmin: doesn't vim's default python.vim do the gf hacks, actually?
+17:36  mgedmin: something about includeexpr replacing dots with /
+17:36  mgedmin: and there's something about adding .py at the end, only I don't remember which option adds that
+17:37  mgedmin: it probably won't work with __init__.py too
+17:37  mgedmin: hey, another good reason to avoid putting code in __init__.py files :)
+17:42  craiggles: so it's not coming back til the 2nd feb, by tuesday i thought they meant tomorrow :(
+17:42  craiggles: oops wrong channel
+17:51  lucs: Can I set up something so that Vim emits a signal when it closes a given file?
+17:51  LeoNerd: Whatfor?
+17:52  LeoNerd: .oO( And are you instead looking for the CLOSE_WRITE inotify flag? )
+17:53  lucs: The file is created by another process, sent to a Vim server for reading, and I want the initial (forked) process to destroy the file when it gets closed in Vim.
+17:53  lucs: I'll look at CLOSE_WRITE.
+17:54  lucs: Hmm... No  :h CLOSE_WRITE
+17:54  LeoNerd: ?
+17:54  LeoNerd: It's not a vim thing
+17:54  lucs: Oh.
+17:54  lucs: LeoNerd: Where should I be looking?
+17:55  LeoNerd: Er.. I think you misunderstood my statement...
+17:56  lucs: I may have. googling is helping :)
+17:56  LeoNerd: man inotify
+17:56  lucs: Yep.
+17:57  lucs: Wow. That looks exactly like what I need.
+17:57  lucs: Thanks LeoNerd
+18:00  LeoNerd: \o/
+18:01  lucs: There's even a Linux::Inotify on CPAN :)
+18:01  foocraft: LeoNerd, that's a really cool thing ;) thanks
+18:02  LeoNerd: There is, but don't use; use Linux::Inotify2
+18:02  lucs: Oh, ok.
+18:02 * LeoNerd needs to IO::Async-ify wrap it sometime
+18:08  khamer: Is there a way to get something like :!date to just display it at the bottom of the window instead of switching to the terminal, kind of like how :echo does?
+18:09  peter_w: khamer: if you want what echo does then why don't you use echo?
+18:09  graywh: khamer, :echo strftime('%c')
+18:09  Silex: khamer: and for other commands, I think :echo !date works
+18:09  lucs: :echo system("date")
+18:10  Silex: what lucs said
+18:11  khamer: peter_w, graywh, Silex, lucs, thanks
+18:11  khamer: I'm really trying to do a couple commands like :echo system("svn info %") for example
+18:24  jerojasro: khamer: you'll need string concat. for that
+18:25  jerojasro: something like  echo system("svn info " . expand("%"))
+18:27  al79: Hi, I have installed latest vim from deb package in debian... i can't find .vim folder... any ideas?
+18:27  graywh: like ~/.vim ?
+18:28  al79: yes, can't see it in there.. do i have to create one myself?
+18:28  graywh: yes
+18:28  al79: aah ok, thanks
+18:53  kuhrt: Has anyone successfully unmapped the menu shortcut for "Open Tab..." in MacVim? I've tried three lines in my .gvimrc without success:
+18:53  kuhrt: macmenu &File.Open\ Tab... key=<nop>
+18:53  kuhrt: macmenu &File.Open\ Tab… key=<nop>
+18:53  kuhrt: macmenu &File.Open\ Tab key=<nop>
+18:55  kuhrt: the difference between the first two is that one is three dot characters and the second is an actual ellilsis character
+19:00  khamer: jerojasro, I ended up with echo system("svn info ".bufname("%")), but same thing
+19:00  kuhrt: nervermind, unexpected solution here: http://vim.1045645.n5.nabble.com/Unmapping-Command-T-and-friends-td1218775.html
+19:00  khamer: jerojasro, and then I rewrote it to be :command -nargs=1 -complete=file Info echo system("svn info <args>")
+19:22 --- gernot_ is now known as gernot
+20:01  Spreadsheet: What does :so do?
+20:01  peter_w: :he :so
+20:02  Spreadsheet: oh, right :P
+20:02  Spreadsheet: Cool
+20:03  Spreadsheet: So I can "reload" the .vimrc and not have to restart
+20:04  ReinH: ruby syntax hilighting is extremely slow for me. Anyone else noticing this problem?
+20:05  Spreadsheet: ReinH: what do you mean by slow?
+20:05  Spreadsheet: If you open a full page of ruby, can you see the editor highlighting?
+20:05  Spreadsheet: That is, in the process of highlighting?
+20:05  ReinH: sorry, typing is slow
+20:06  ReinH: typing is very laggy due to syntax hilighting redraw
+20:06  ReinH: probably inefficient regexp
+20:06  ReinH: might be a problem in vim-ruby HEAD as I'm not using the built-in syntax file
+20:07  ReinH: will try switching to built-in ruby.vim syntax hilighting
+20:08  ReinH: hmm
+20:08  WakiMiko: php is slow for me in the same way
+20:09  ReinH: it's fine in vim, super slow in MacVim :(
+20:10  ReinH: using 7.3 snapshot 53 of MacVim
+20:10  WakiMiko: nevermind, seems like it only happens in a file with super long SQL strings
+20:11  ReinH: weird
+20:11  Silex: is there a "gf" that doens't switch to the new file?
+20:12  Silex: just adds it to buffer list
+20:12  Spreadsheet: gf over a file name opens that right?
+20:12  Spreadsheet: It should open up the new file
+20:13  WakiMiko: ReinH: are you using cursorline?
+20:13  mgedmin: Silex, gf<C-^>
+20:13  Silex: mgedmin: thanks
+20:14  ReinH: ok it's something in my vimrc, just commented out most of it
+20:14  ReinH: time for binary search ;)
+20:14  ReinH: WakiMiko: have tried disabling it
+20:15  WakiMiko: i noticed vim is mucher slower with cursorline enabled
+20:15  WakiMiko: especially when scrolling
+20:15  WakiMiko: im on linux btw
+20:17  Raimondi: WakiMiko: That's mentioned in the help :h 'cul'
+20:18  WakiMiko: interesting, kinda strange that it has such a big impact
+20:18  ReinH: wow
+20:18  ReinH: it was syntax foldmethod
+20:18  ReinH: switching to indent
+20:21  ReinH: not to self
+20:22  ReinH: do not fucking use set fdm=syntax
+20:22  wide_awake: is there something faster than the "overlay" function for replacing 1 specific character at a given location in a string?
+20:27  wide_awake: sorry, wrong channel
+20:27  wide_awake: :)
+20:29  og01: not so wide_awake
+20:30  wide_awake: og01: that question was aimed at postgresql
+20:30  wide_awake: :-/
+--- Log closed Mon Jan 17 21:26:37 2011
+--- Log opened Mon Jan 17 21:32:04 2011
+21:32 --- Users 617 nicks [0 ops, 0 halfops, 0 voices, 617 normal]
+21:33 --- Channel #vim was synced in 82 seconds
+21:40  rindolf: Hi all.
+21:41  solars: hey, is there a plugin or something, that lets me jump from (c) where c is cursor, to ()c in insert mode? I have this nice plugin closing my brackets, but then I have to get into visual mode and move to behind the closing bracket after inserting params
+21:43  belak: Is there a way to remove the F1 shortcut to help? I never use it and I keep hitting it in place of my ESC key whivh is right above it...
+21:43  spiiph: :h :map
+21:43  graywh: belak, :map <F1> <Nop>
+21:44  graywh: and :imap <F1> <Nop>
+21:44  belak: What's the difference?
+21:44  graywh: imap is for insert mode
+21:44  graywh: :h map-modes
+21:44  belak: Thank-you SO MUCH
+21:46  mgedmin: solars, <right>, or <c-o>a
+21:48  Wolfsherz: hello, does the use of "set autoindent" and "set smartindent" together makes any sense?
+21:48  solars: hm ok I guess I'll just remap c-o a
+21:48  spiiph: vimgor, smartindent
+21:48  vimgor: Don't you mean stupidindent? In all seriousness, 'smartindent' is an obsolete option for C-like syntax. It has been replaced with 'cindent', and setting 'cindent' also overrides 'smartindent'. Vim has indentation support for many languages out-of-the-box, and setting 'smartindent' (or 'cindent', for that matter) in your .vimrc might interfere with this. Use 'filetype indent on' and be happy.
+21:49  Wolfsherz: now thats an answer, thanks spiiph.
+21:49  iaj: solars: which key are you chosing :D
+21:49  solars: not sure yet, open for suggestions
+21:49  solars: :)
+21:50  solars: my leader is ,
+21:50  solars: eventuallt ,.
+21:50  solars: y
+21:50  rson: solars: what plugin are you using to auto close brackets? delimitmate allows you to type the closing bracket to jump out of it
+21:51  solars: rson, good question... not sure which one actually does it haha... but I see delimitmate in my plugins dir
+21:51  solars: how exactly to you mean jump out of it?
+21:51  sleepynate: nicht möglich, sind Sie root?
+21:51  rson: solars: try just typing foo()) and see if you get foo()|
+21:51  solars: ahh understood, let me try
+21:51  sleepynate: erm... nothing...
+21:52  solars: rson, haha, awesome! and I didnt even notice :)
+21:52  rson: solars: delimitmate is pretty nice
+21:52 * rson hands Raimondi a cookie :)
+21:52  solars: hmm but thinking of it, ,. would be better :P
+21:53  Wolfsherz: anyone having suggestions for my .vimrc? this is it: http://pastebin.com/77VBw1Vk
+21:53  spiiph: Wolfsherz, autoindent is OK to use with 'filetype plugin indent on' too
+--- Log closed Mon Jan 17 21:57:19 2011
+--- Log opened Mon Jan 17 22:07:45 2011
+22:07 --- Users 621 nicks [0 ops, 0 halfops, 0 voices, 621 normal]
+22:08  Wolfsherz: as the following are not explained, what do showmatch showcmd and autowrite do? also is syntax sync fromstart useful?
+22:08  mgedmin: what do you mean "not explained"?
+22:08  peter_w: huh? how are they not explained
+22:08  mgedmin: what's wrong with :help 'showmatch'
+22:08  mgedmin: :help 'showcmd'
+22:08 --- Channel #vim was synced in 79 seconds
+22:08  mgedmin: and :help 'autowrite'?
+22:09  mgedmin: syn sync is generally something that people who write syntax files worry about
+22:10  Wolfsherz: mgedmin: sorry, yeah i should use :help ... i was referring to the example .vimrc where those commands are not used
+22:12  Wolfsherz: syntax files as perlcode eg?
+22:12 * somian[0] sees "syntax files" and "perl code" and get's mildly interested
+22:13  mgedmin: syntax files as in :h usr_44
+22:13  corecode: hi
+22:14 * homekevin sees "syntax files" and "perl code" and gets mildly nauseated
+22:14  corecode: i tried AutoClose, but I'm not happy with it
+22:15  corecode: i was thinking of a plugin that will allow you to close some (or all) outstanding parentheses/quotes
+22:15  corecode: does that sound reasonable?
+22:15  iaj: hrrm, what's the simple command for echoing something to message container out of a function?
+22:15  homekevin: iaj: echomsg?
+22:15  iaj: echomsg(foo) ?
+--- Log closed Mon Jan 17 22:19:44 2011
+--- Log opened Mon Jan 17 22:20:04 2011
+22:20 --- Users 621 nicks [0 ops, 0 halfops, 0 voices, 621 normal]
+22:21 --- Channel #vim was synced in 76 seconds
+22:21  caruso_g: hi, any RE expert to help me?
+22:21  caruso_g: I was trying to add a blank row between two rows like:
+22:21  caruso_g: some words randomly
+22:21  caruso_g: exactWord
+22:21  caruso_g: but I was not able to identify "exactWord" and add a blank link above it. Any idea how to do that?
+22:21  solars: can anyone help me with this? :( broke my vim http://pastie.org/1471389
+22:22  iaj: homekevin: sorry I got disced - is it echomsg(variable) ?
+22:22  peter_w: caruso_g: which part do you not get?
+22:22  iaj: where can I look such things up btw :)
+22:22  rindolf: solars: are you using command-t.vim?
+22:22  solars: got it, rubycomplete :/
+22:22  caruso_g: peter_w, I tried to look for the end of the preceding row and "exactWord" but with no luck
+22:22  peter_w: iaj: :he :echomsg
+22:23  somian[0]: Wolfsherz, I think that you are going to be noticing that people don't understand clearly what you mean to say ...but guessing at what you meant, don't be misinformed about "not being able to use Vim script functions from perl"
+22:24  peter_w: caruso_g: why are you looking for the end of the previous line?
+22:24  somian[0]: That was wrt {locally [16:15]} <Wolfsherz> i understand that i cant make any use of it when coding perl"
+22:24  iaj: peter_w: http://paste.pocoo.org/show/322401  what's wrong about that one:)
+22:24  caruso_g: peter_w: to add a \n between it and "exactWord" that I both grouped like /\1\n\2/
+22:25 * somian[0] 's not going to brag about the results, but has done some scripting with the embedded Perl interpreter in suitably built Vims. For the underinformed (on that obscure corner of Vim), that means "Perl code inside a .vim script"
+22:25  caruso_g: peter_w: btw, probably would have been better to add ^$
+22:25  caruso_g: peter_w: but still I was not able to identify them
+22:26  homekevin: caruso_g: For one thing, a line-break is represented as \r
+22:26  Wolfsherz: somian[0]: well, english is not my native language. i may have not been able to correctly express what i wanted to say. as i understand it, syntax sync from start does not make any sense when coding perl. it does not harm it, but doesnt help it either. that is what i wanted to tell.
+22:26  caruso_g: homekevin: right, sorry, I learned that too while trying to get the work done :)
+22:27  peter_w: Wolfsherz: huh? why would it make no sense for perl
+22:27  homekevin: Wolfsherz: It may depend on when you set :syn sync. If you do it in .vimrc, the syntax plugin will probably ignore it and use its own.
+22:27  homekevin: Wolfsherz: But you could do it after loading the syntax if you wanted to.
+22:28  homekevin: Wolfsherz: It which case whether it helps or not depends a lot on the syntax plugin and the language.
+22:28  Wolfsherz: i'm not sure what you mean with loading the syntax... doesn't vim do this automatically when i open a file?
+22:28  homekevin: Wolfsherz: Yes, it does.
+22:28  homekevin: Wolfsherz: And when that happens, :syn sync will be set by the plugin.
+22:28  mgedmin: (if you've turned on syntax and filetype detection)
+22:29  homekevin: Wolfsherz: Therefore, it doesn't matter what you set it to previously.
+22:30  homekevin: Wolfsherz: It's similar to what would happen if you set 'filetype' to "sh" then opened a perl file.
+22:30  Wolfsherz: ok, now i get it, the plugins will do this, so i dont need it in my .vimrc... i turned syntax and filetype on as in the example .vimrc from wikia.com
+22:31  somian[0]: Ok, Wolfsherz, my recent statement has nothing to do with your current chore then.
+22:31  somian[0]: It's noise ;-)
+22:34  peth: caruso_g: :g/exactWord/put!_
+22:34  mutante: can i have something like "append a line of text" or better "append a line of shell command output" - "on save" , so that it automatically happens on :wq
+22:35  spiiph: :h BufWrite
+22:35  mutante: the idea was from automatically adding a "Last modified ... line" at the end of all documents being saved
+22:35  mutante: looking at :h ...
+22:37  mutante: thanks spiiph
+22:38  caruso_g: peth: I CAN'T BELIEVE IT! :) where did you get that put!_ ? Btw, thanks a lot, since I got no answer, I was still trying myself and got :%s/\(^exactWord$\)/\r\1/ to work
+22:38  homekevin: caruso_g: put is an ex command. :h :put
+22:40  belak: How can you clear a hilight from a search?
+22:40  homekevin: belak: :noh
+22:40  peth: caruso_g: :%s/^exactWord/\r&/ would work too
+22:41  belak: Also, what's the recommended autoindent options? I seem to recall that there were a few options...
+22:42  caruso_g: homekevin: thank you guys, it's really difficult to remember all Vim's commands and ex commands without constant excercise (doh… the & shortcut!) :)
+22:42  peth: true, it's a lot and you mostly remember what you keep using
+22:42  homekevin: caruso_g: Especially the ex commands, which are rarely used in normal editing
+22:43  homekevin: At least the ones that have a normal-mode equivalent
+22:46  caruso_g: homekevin, peth: I agree, in fact, today, I had a situation where ex commands are invaluable, editing a long, long, long, text for a client website's page content. Anyway, Vim, as always, helped me a lot. I really don't understand how people can still use those obsolete "text editors"… :D
+22:49  peth: i had to open one of those today to do some vba idiocy in an access db. :( it feels like being amputated.
+22:55 --- rahult_ is now known as RahulT
+23:04  milkpost: how do I append the contents of a variable at the end of a line from the command-line?
+23:05  homekevin: milkpost: Why from the command-line?
+23:05  peter_w: lots of ways
+23:05  homekevin: :put =varname|jo
+23:05  homekevin: :put =varname|join, maybe?
+23:06  verma: hmm, I split my viewport using :sp .. but for some reason Ctrl+w (j/k) are not working (I stay on the current view) .. is there something that needs to be enabled to get this to work?
+23:06  milkpost: homekevin: part of a command.  I've got a function to add all the number in the line, now I want that number appended.
+23:07  homekevin: For some reason :put doesn't seem to work with =
+23:07  peter_w: it should
+23:08  milkpost: homekevin: does for me
+23:08  homekevin: Oh, I got it. I was doing :put ="blah", but the " was making it a comment.
+23:08  frogonwheels: verma: you are in normal mode not insert mode aren't you?
+23:09  verma: frogonwheels: yes, I am in normal mode.  When I do Ctrl-w j .. It works list just j
+23:10  frogonwheels: verma: type  :map <c-w>
+23:10  verma: frogonwheels: :tabclose<CR>
+23:10  verma: oh
+23:11  verma: damn it
+23:11  frogonwheels: verma:   :verbose map <c-w>     will tell you where from
+23:11  homekevin: milkpost: I think :put =varname|.-1join does the job.
+23:11  verma: frogonwheels: awesome
+23:11  verma: frogonwheels: got it, let me disable it and see if it works
+23:11  milkpost: homekevin: hrm, i'm having a problem cause I have a command I defined with no args, but it won't let me pipe after it
+23:12  verma: frogonwheels: that fixed it :) .. thanks
+23:12  milkpost: homekevin: that works great but not with my command for some reason, any reason It won't let me use pipe after my command?
+23:13  peter_w: milkpost: :command-bar
+23:13  peter_w: ehm
+23:13  homekevin: milkpost: Use -bar with your command
+23:13  peter_w: :he :command-bar even
+23:13  milkpost: homekevin, peter_w  thanks!  New to this stuff
+23:13  homekevin: milkpost: Or, if -bar isn't good with your command, use the :exec "cmd"|stuff trick
+23:14  milkpost: naw, it'll work just fine
+23:15  milkpost: my vim-fu training for the day is over.
+23:16  homekevin: Training never ends, Grasshopper.
+23:17  Sample: Q: I do this in coding a lot so I want to make sure I'm using as few keystrokes as possible. on a line like "funct($var)" I will be inserting and finish the 'r' of the $var and need to add the semicolin after the ), so will hit Esc+A+; , is that the fastest way to do this? I suppose I could also just type ); and then Esc+x. Feels a bit cumbersome to just get around the ) because in a non-vim environment I just arrow right and add the semi-colin. Hm, perhaps 
+23:17  Sample: im new to vim (probably obvious)
+23:18  frogonwheels: Sample: you could press <end>  or <c-o>$
+23:18  Sample: by <c-o> you mean ctrl+o?
+23:18  homekevin: Yes.
+23:19  Sample: k
+23:19  homekevin: I think that does one normal-mode command and returns to insert mode.
+23:19  homekevin: Don't use it myself.
+23:19  Sample: ah cool
+23:19  homekevin: Actually, I usually do what you described, but it does feel a little awkward.
+23:20  jerojasro: Sample: maybe defining a mapping to do that; when adding a semicolon, I usually do as you do
+23:21  jerojasro: or, perhaps a better approach, migrate to a programming language that doesn't ask for semicolons...
+23:21  jerojasro: :P
+23:22  spiiph: What's wrong with just typing the chars in sequence?
+23:22  homekevin: I'm not sure I know of any language without semicolons
+23:22  jerojasro: without mandatory semicolons, python and lua
+23:23  homekevin: Oh, mandatory. That's different.
+23:23  peter_w: does basic have any?
+23:23  jerojasro: spiiph: about <Esc>A;<Esc> ? that it could be cheaper, <Leader>s or something like that
+23:23  spiiph: Uh
+23:24  spiiph: I'm not involved in this
+23:25  homekevin: I thought he meant typing "$var);"
+23:25  homekevin: Presumably because one already has "function()" and is filling in the args.
+23:27  jerojasro: the issue here is to put the end-of-sentence symbol at the end of the line, in a cheap way, regardless of where is the cursor... (I think )
+23:28  jerojasro: and, to me <Esc>A;<Esc> feels somewhat cumbersome, but I haven't ever got around to defining a proper mapping
+23:29  homekevin: A mapping doesn't seem less cumbersome to me, if one still has to go to normal mode first.
+23:29  homekevin: Maybe a bit less, since you don't have to *return* to normal mode after.
+23:29  jerojasro: imap then :) ?
+23:29  homekevin: I guess, I just never use those.
+23:30  jerojasro: I find them useful precisely for those "oh man what a hassle to leave insert mode" situations...
+23:31  Combatjuan: Is there a shortcut to run the last command line mode command faster than ":<UP><CR>"?
+23:32  rson: Combatjuan: depends on the command probably
+23:32  rson: if it was a substitution you can repeat it in normal mode with &
+23:32  Combatjuan: Nah, it's a general question.  The command could be anything.
+23:32  jerojasro: Combatjuan: @:
+23:33  Combatjuan: jerojasro: Ah.  Thanks.
+23:33  feathersanddown: Hi, there is a way to get (to know) wich encoding have a file ?
+23:33  feathersanddown: encoding and file encoding set screen and file encoding, but i just want to know wich one have
+23:33  jerojasro: Combatjuan: and, after doing that, you can use the "last macro" shortcut: @@
+23:34  Combatjuan: feathersanddown: ":set ff" will tell you the line ending format, is that what you want?
+23:34  Combatjuan: feathersanddown: ":set ft" (filetype) will tell you the kind of file (.py, .cpp, etc...)
+23:34  feathersanddown: and if is utf8 ? ansii or whatever
+23:35  Combatjuan: feathersanddown: Looks like ":set encoding" might do it.
+23:35  homekevin: feathersanddown: You can get the encoding Vim is using with :set fenc?
+23:35  jerojasro: feathersanddown: :set fenc?
+23:35  rson: jerojasro: re @:, very nice.
+23:35  homekevin: feathersanddown: And if fenc isn't set, :set encoding?
+23:35  feathersanddown: but it set a value?? it can show it without modifying ?
+23:35  Combatjuan: feathersanddown: If you run set without a value, it displays the current value.
+23:35  homekevin: feathersanddown: But that's only the file's actual encoding if Vim detected it properly.
+23:35  jerojasro: feathersanddown: that's the point of the ? at the end
+23:35  jerojasro: to show the value of such option
+23:36  feathersanddown: aaahh fine
+23:36  homekevin: Though the ? is not necessary for non-boolean options.
+23:36  jerojasro: ahhhh
+23:36  homekevin: It's a good habit though, since you don't want to go around setting boolean options by accident.
+23:36  Combatjuan: homekevin: Good point.
+23:37  feathersanddown: aahh yes, all this information is usefull for me, thank you very much
+23:37  feathersanddown: =)
+--- Log closed Mon Jan 17 23:46:14 2011
+--- Log opened Mon Jan 17 23:46:33 2011
+23:46 --- Users 615 nicks [0 ops, 0 halfops, 0 voices, 615 normal]
+23:47 --- WebDragon is now known as WebDragon|away
+23:47 --- Channel #vim was synced in 75 seconds
+23:49  Geralt: \exit
+23:51  caruso_g: Raimondi
+23:51  passbe: new to vim buffers, i have minibufexplorer nerdtree and a tag list running, everytime i try to close a buffer with ":bd" and switch buffers it splits the window or opens up in the taglist or nerdtree. Is there a way i can lock these buffers or something ?
+23:51  Raimondi: caruso_g
+23:52  caruso_g: Raimondi: sorry, was trying to understand autocompletion key in Linkinus that, weird, is not tab but spacebar… :P
+23:52  Raimondi: :)
+23:54  Raimondi: passbe: :h usr_07
+23:54  passbe: Raimondi: ill have a look
+23:54  passbe: thanks
+23:54  Raimondi: Also, I think it's not mentioned there  :h 'hidden'
+23:54  Raimondi: passbe: ^
+23:54  passbe: ok cools
+--- Log closed Tue Jan 18 00:00:37 2011

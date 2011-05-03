@@ -1,0 +1,221 @@
+--- Log opened Wed Nov 10 08:35:13 2010
+08:35 --- Users 131 nicks [7 ops, 0 halfops, 0 voices, 124 normal]
+08:37 --- Channel #svn was synced in 129 seconds
+--- Log closed Wed Nov 10 08:48:11 2010
+--- Log opened Wed Nov 10 08:48:34 2010
+08:48 --- Users 132 nicks [7 ops, 0 halfops, 0 voices, 125 normal]
+08:50 --- Channel #svn was synced in 131 seconds
+10:37  Whiskey: where do you config where to save the repos?`
+10:47  Hyperi: With what ?
+10:47  Hyperi: mkdir /svnroot
+10:47  Hyperi: svnadmin create /svnroot
+10:48  Hyperi: Or if you want multi-repositories, you do mkdir /svnroot/my_project
+10:48  Hyperi: then svnadmin create /svnroot/my_proejct
+10:48  Hyperi: And you make /svnroot/ as SVNParentPath
+10:49  Hyperi: Whiskey: Is that what you were looking for? :>
+10:50  Whiskey: dunno
+10:50  Whiskey: i just wanne know how it knows where the svn root is
+10:50  Whiskey: and how to set it
+10:52  Hyperi: What knows what ?
+10:52  Hyperi: Apache ?
+10:53  Whiskey: not sure i try see if it works
+11:11 --- Bert_ is now known as Bert
+--- Log closed Wed Nov 10 11:22:11 2010
+--- Log opened Wed Nov 10 11:22:31 2010
+11:22 --- Users 136 nicks [7 ops, 0 halfops, 0 voices, 129 normal]
+11:22 --- Server: [kornbluth.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+11:24 --- Channel #svn was synced in 139 seconds
+11:37  dgtlmoon: does svn copy (im using it to make a new tag) literally copy the files on the filesystem?
+11:37  dgtlmoon: its a very very large project *5gb of code)
+11:42  Whiskey: damn
+11:42  spetrea: can I make a request to the subversion server so that it gives me a diff between 2 specific revisions ?
+11:53 @peterS: spetrea: svn diff --help
+11:54 @peterS: what you want is two URLs with @NNNN suffixes
+11:58  Hyperi: dgtlmoon: I tried that with TortoiseSVN and it failed, dropped some files
+11:58  dgtlmoon: Hyperi, works ok from command line
+11:58  dgtlmoon: so, im thinking, i have a tagged checkout in /var/www/mysite/TheSVNCode, can i just "svn update -rNEW_TAG" on that checked out code?
+11:59  dgtlmoon: like, how do i switch running code (say for a website) to a different tag?
+--- Log closed Wed Nov 10 12:10:11 2010
+--- Log opened Wed Nov 10 12:10:38 2010
+12:10 --- Users 138 nicks [7 ops, 0 halfops, 0 voices, 131 normal]
+12:11  dgtlmoon: peterS, literally with the carrot?
+12:11  dgtlmoon: cool, that makes sense
+12:12 --- Channel #svn was synced in 136 seconds
+12:12 @peterS: (well, 'caret' not 'carrot') - yes, ^/ is an abbreviation for the URL corresponding to the root of the current repository
+12:12  dgtlmoon: so i do like, svn checkout https://svn.server.org/myproject/tags/MYTAG ?
+12:13  dgtlmoon: and then svn switch.. ?
+12:13  dgtlmoon: mv MYTAG httpdocs
+12:13  dgtlmoon: cd httpdocs
+12:13 @peterS: well
+12:13  dgtlmoon: svn switch ^/tags/newtag
+12:14  dgtlmoon: peterS, hmm im not sure if i am making sense
+12:14 @peterS: first off, if you know the tag you want before you start, just check that out to begin with
+12:14  dgtlmoon: yes but basically the problem is, i have some running code i want to update to the latest tag
+12:14 @peterS: second, no need to 'mv MYTAG httpdocs', you can just add 'httpdocs' to the end of your svn checkout command
+12:14  dgtlmoon: for example a website with a heap of PHP
+12:14  dgtlmoon: aahuh
+12:14  dgtlmoon: ok
+12:15 @peterS: but to switch between tags, yes, 'svn switch ^/tags/foobar' is short for 'svn switch https://svn.server.org/myproject/tags/foobar'
+12:15 @peterS: assuming https://svn.server.org/myproject is the root of the repository
+12:15  dgtlmoon: yes
+12:16  dgtlmoon: peterS, could i svn switch -rHEAD ?
+12:17 @peterS: dgtlmoon: tags and revisions, in svn, are two completely different concepts
+12:17  dgtlmoon: peterS, does svn copy literally copy the files?
+12:17 @peterS: so yes you can specify -rHEAD in a switch, but that doesn't have anything to do with which branch or tag you're switching to - just means you're getting the newest piece of whatever branch you pick
+12:18  dgtlmoon: ok, well im thinking of just managing what code the site is running with tags
+12:18  dgtlmoon: as its just a heap of PHP and images
+12:18  dgtlmoon: i can tell the developers to commit a new tag of the code when they are happy and tested and then i will just svn switch the production code on the webserver
+12:19  dgtlmoon: what do you think of my scheme?
+12:19  IcePic: switching to a tag to get to a known state is a fine idea. If you dont ever commit to the tag, it will never matter which rev of the repo there is, the tag will stay the same regardless.
+12:19  IcePic: dgtlmoon: so yes, that is a fine idea.
+12:19  dgtlmoon: yes the plan is just commit to the tag once (to create the tag)
+12:20  dgtlmoon: and every /tag/new_tag must have all of the code 'svn copy' into it right?
+12:22  IcePic: right.
+12:29  IcePic: do mind that tags and branches in svn are very cheap, like softlinks in file systems, so its fast and easy to create lots of tags for all points in history you want to mark
+13:27  Skaag: Hello there the nice people of #svn :-)
+13:30  IcePic: can't be me, I'm a whiney old stiff svn guy. =)
+13:31  Renter: you're not stiff, you're platonically challenged
+13:32  IcePic: you're not stiff <- thats what she said!
+13:38  ghufran: hi. i need some help with recovering a file. i deleted it accidentally and now cant recover it. svn st says its deleted. but i havent committed it. svn up doesnot appear to work
+13:40  ghufran: nevermind. fixed it.
+13:43  Renter: IcePic: yes, yes she did
+13:44  Whiskey: hmm
+13:44  Whiskey: when a svn is commited
+13:44  Whiskey: or no
+13:44  Whiskey: can you export an svn to ftp?
+13:45  Renter: svnmirror
+13:45  Renter: again
+13:46  Whiskey: svn mirror?
+13:48  Whiskey: btw
+13:48  Whiskey: i have in my a dosent matter
+13:48  Whiskey: i have like this
+13:50  Whiskey: C:\Program Files\WinRar\rar.exe" a -r -ep1 "C:\Program Files (x86)\Apache Software Foundation\www\project\project-svn-%date%.zip" "C:\Program Files (x86)\Project\"
+13:50  Whiskey: in my hook/post-commit
+13:50  Whiskey: are it anyway to get it to zip like this
+13:50  Whiskey: C:\Program Files\WinRar\rar.exe" a -r -ep1 "C:\Program Files (x86)\Apache Software Foundation\www\project\project-svn-%rev%.zip" "C:\Program Files (x86)\Project\"
+13:51  Whiskey: to get it to zip all revisions
+13:52  Whiskey: but have no clue how to get revision number in to the post-commit
+14:17  Renter: er, don't you get it as parameter?
+14:18  Renter: set rev=%2
+14:21  Whiskey: yeh
+14:22  Whiskey: i found that out :)
+14:22  Whiskey: tested that yesterday but of some reason i dident got it to work
+14:22  doxick: i have just installed subversion and for some reason i can access it through the web address but when i use tortoisesvn to do a full checkout i get an access forbidden. anybody knows how to fix that ?
+--- Log closed Wed Nov 10 14:28:14 2010
+--- Log opened Wed Nov 10 14:28:36 2010
+14:28 --- Users 139 nicks [7 ops, 0 halfops, 0 voices, 132 normal]
+14:29  IcePic: for some reason i can access it  through the web address
+14:29  IcePic: sounds weird
+14:29  IcePic: if you didnt set up web access and you still can access it that way, it sure smells of mighty magic
+14:29  doxick: well, http://blabla/~svn/ in my browser works, checking it out using tortoise svn fails
+14:30 --- Channel #svn was synced in 148 seconds
+14:35  sbs: hi
+14:36  sbs: I have mistakenly commited a change in a branch, inseatd of the trunk. Is there an "easy way" to get a patch of this commit to apply it where it should have been in the first place?
+14:53  Whiskey: hmm
+14:53  Whiskey: is it possible to setup commit rules?
+14:53  Whiskey: like if i will every commit to be like
+14:53  Whiskey: Fixed: $massage ($id) can i set it to just approval that one?
+14:54  sbs: that's what hooks are for. Yo ucan set a pre-commit hook to check the message and reject if it is not properly formatted
+14:55  Whiskey: can you give me an exampel
+14:55  Whiskey: or where i can read about it
+14:55  sbs: google for svn empty message commit
+14:55  sbs: there are plenty of samples for that
+14:55  sbs: you'll have to adapt the rule to check your message format
+14:56  sbs: the scripting language will depend on your server's platform
+14:56  Whiskey: looks complicated
+14:57  TomyLobo: hi
+14:57  TomyLobo: which windows command line client do you recommend?
+14:57  TomyLobo: something without background tasks etc
+15:00  Whiskey: the exampel dosent work
+15:03  sbs: the principle is simple you use svnlook to grab the commit log message then "parse" that message an see if it fit your rule
+15:03  sbs: the exit code of your script tells svn to commit or rollback the transaction
+15:08  Whiskey: yeh but do like
+15:08  Whiskey: Fixed: $massage (number)
+15:08  Whiskey: seeems relly complicated to do
+15:08  Whiskey: i don´t understand a shit of the exampels :(
+15:42  doxick: when using an svn client i get "svn: access to '/~svn/repository/!svn/vcc/default' forbidden" while i can access the repository through the web, anybody has an idea of what could be going wrong ?
+15:42  doxick: (this is when i do a checkout or an import)
+16:10  doxick: when using an svn client i get "svn: access to '/~svn/repository/!svn/vcc/default' forbidden" while i can access the repository through the web, anybody has an idea of what could be going wrong ?
+17:07  abstrakt: ok so I'm reading svn help cp
+17:07  abstrakt: and it says
+17:07  abstrakt: usage: copy SRC[@REV]... DST
+17:08  abstrakt: if I used, for example svn copy file:///repo@1329 would that copy everything from revision 0 through revision 1329?
+17:08  abstrakt: or what happens there?
+17:08  abstrakt: it copies that branch, as it is in that state?
+17:13  IcePic: abstrakt: it notes that the destination has the same ancestry as the source, but when you change it later, it will store "this is like repo@1329 with these four lines added to file X and remove file Y"
+17:14 --- sno_ is now known as sno
+17:15  BBonifield: Ok admittedly, this is probably a server config issue, not svn, but i'm still stumped.  i have a variety of different clients, all updating from the same source repo.  i try to run "sudo -u apache -H svn list https://domain.com/repos/myrepo".  One client will auth just fine, while the other gives me the "Error validating server certificate" error.  the thing is, though, i can hit 'p' to accept
+17:15  BBonifield: the certificantly permanently, but yet, it's never remembered.
+17:16  abstrakt: IcePic: hmm, I'm sorry but that doesn't quite make sense to me, I don't follow, what's what?
+17:16  abstrakt: IcePic: oh wait, ok I think I get what you're saying now
+17:17  IcePic: abstrakt: so yes, a svn copy will "freeze" the state as of repo@1329, though you could develop on that branch also
+17:18  abstrakt: IcePic: ok, just checking that I don't need to provide something like REV@23:1497 or whatever
+17:18 --- ChanServ sets modes [#svn +o kfogel]
+17:18  abstrakt: IcePic: I guess it makes sense though, it'll just freeze the state of that revision, so obviously that revision will have all the changes made prior to it, so there's no need to explicitly include previous revision numbers
+17:19  IcePic: abstrakt: but also, the copy will keep the ancestry so you can follow the shared history from either point
+17:19  abstrakt: IcePic: yup, ok got it thanks
+17:22  BBonifield: Bottom line, it seems like SVN is either looking in the wrong place for previous cert auths or it isn't storing them.  I'm relatively certain it's because of the '-H' flag i'm sending with sudo, but that's necessary since apache isn't a true user with it's own svn config
+--- Log closed Wed Nov 10 19:35:40 2010
+--- Log opened Wed Nov 10 19:56:14 2010
+19:56 --- Users 141 nicks [9 ops, 0 halfops, 0 voices, 132 normal]
+19:56  Whiskey: i use
+19:56  Whiskey: http://codepad.org/QJk9N28N
+19:56  Whiskey: but it dosent work
+19:56 @stsp: you could also svn merge ^/trunk@MAGIC_REV ^/branch but reintegrate figures out MAGIC_REV for you
+19:56  Whiskey: and its taken from an exampel
+19:57  urbanmonk: stsp: I see ... I think I understand but I'll take a look at the link you posted
+19:57  Whiskey: don´t understand a shit :/
+19:58 --- fpk^off is now known as fpk
+19:58 --- Channel #svn was synced in 163 seconds
+19:59 @stsp: urbanmonk, also see this post: http://svn.haxx.se/users/archive-2010-09/0547.shtml
+19:59 @stsp: the ascii graph isn't coming out right there though
+19:59 @stsp: needs a proportional font
+20:00  urbanmonk: stsp: thanks
+20:15 --- ChanServ sets modes [#svn +o stsp]
+--- Log closed Wed Nov 10 20:21:56 2010
+--- Log opened Wed Nov 10 20:22:22 2010
+20:22 --- Users 141 nicks [9 ops, 0 halfops, 0 voices, 132 normal]
+20:24 --- Channel #svn was synced in 145 seconds
+20:44 --- ChanServ sets modes [#svn +o stsp]
+21:00 --- khmarbaise_ is now known as khmarbaise
+21:00  webPragmatist: with the apache svn module can you specify a revision like http://85500@svn.magentocommerce.com/source/branches/1.4/
+21:00  webPragmatist: or something
+21:03  larrys: webPragmatist: see http://svnbook.red-bean.com/nightly/en/svn.serverconfig.httpd.html#svn.serverconfig.httpd.extra.browsing
+21:03  webPragmatist: larrys: ah thanks!
+21:03  webPragmatist: http://svnbook.red-bean.com/nightly/en/svn.serverconfig.httpd.html#svn.serverconfig.httpd.extra.browsing
+21:03  webPragmatist: er
+21:03  BBonifield: Ok admittedly, this is probably a server config issue, not svn, but i'm still stumped.  i have a variety of different clients, all updating from the same source repo.  i try to run "sudo -u apache -H svn list https://domain.com/repos/myrepo".  One client will auth just fine, while the other gives me the "Error validating server certificate" error.  the thing is, though, i can hit 'p' to accept
+21:03  BBonifield: the certificantly permanently, but yet, it's never remembered.
+21:03  larrys: BBonifield: I suggest you send an email to the users list.
+21:12  svnnoob: hi
+21:12  svnnoob: do I have to set eol:style property on the svn server?  Or can I set it on my local checkout and all files checked out into the directory will be that eol:style?
+21:13  larrys: you don't set svn:eol-style on the directory, you set it on the files. And you should commit that property change back to the repo.
+21:14  svnnoob: aaah ok
+21:14  svnnoob: well what if i want to set it on all *.php files inside the directory
+21:14  larrys: see http://svnbook.red-bean.com/nightly/en/svn.advanced.props.html#svn.advanced.props.auto
+21:15  svnnoob: svn propset eol:style native -r /dir/?
+21:15  larrys: but yes, you would need to set it on each file, and then if you have auto-props setup on the client(s), then you will get it for free with new files.
+--- Log closed Wed Nov 10 21:16:52 2010
+--- Log opened Wed Nov 10 21:22:16 2010
+21:22 --- Users 147 nicks [10 ops, 0 halfops, 0 voices, 137 normal]
+21:24 --- Channel #svn was synced in 142 seconds
+21:26  larrys: atpa8a: have you read http://svnbook.red-bean.com/nightly/en/svn.serverconfig.httpd.html#svn.serverconfig.httpd.authn ?
+21:27  larrys: in paticular, http://svnbook.red-bean.com/nightly/en/svn.serverconfig.httpd.html#svn.serverconfig.httpd.authz
+21:29  atpa8a: yeah
+21:29  atpa8a: i thought it'd try to authorize me anyway
+21:30  atpa8a: i've only Require valid-user for now
+21:30  atpa8a: trying to setup authz now
+22:07  atpa8a: hmm
+22:08  atpa8a: ok... got it working but...
+22:08  atpa8a: i'm using SVNParentPath and now i always get Forbidden when i try to access that URI
+22:08  atpa8a: but if i specify the repository it's all good
+22:08  atpa8a: any clues?
+22:16  toonacid: I'm getting this error in my Apache web servers default error log. "svn: Write error: Broken pipe". I have no idea why it's there, as my default error log just logs all uncaught VHosts errors (e.g. going to the server with a numeric IP address instead of the domain name), and I don't see how SVN has anything to do with this. Any ideas of why this is appearing in my default error log?
+22:56  atpa8a: hmm
+22:56  atpa8a: does conf/config in the repo work with apache?
+--- Log closed Wed Nov 10 23:22:47 2010
+--- Log opened Wed Nov 10 23:23:15 2010
+23:23 --- Users 137 nicks [8 ops, 0 halfops, 0 voices, 129 normal]
+23:25 --- Channel #svn was synced in 141 seconds
+23:33 --- fpk is now known as fpk^off
+--- Log closed Thu Nov 11 00:00:39 2010

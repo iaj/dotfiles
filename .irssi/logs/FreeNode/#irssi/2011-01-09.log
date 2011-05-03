@@ -1,0 +1,307 @@
+--- Log opened Sun Jan 09 17:48:12 2011
+17:48 --- Users 403 nicks [1 ops, 0 halfops, 392 voices, 10 normal]
+17:48 --- ChanServ sets modes [#irssi +v iaj]
+17:48 +xand: though esc-X doesn't work quite the same as alt-X
+17:48 +share: i was
+17:48 * Bazerka actually takes a look at the code
+17:49 +shabble: compared to _set_time, which behaves how you'd expect
+17:49 --- Channel #irssi was synced in 98 seconds
+17:49 --- ChanServ sets modes [#irssi +v share_]
+17:50 +shabble: ie: 1m30s is valid, etc.
+17:51 +Bazerka: sure
+17:52 +Bazerka: but since when are datasizes ever described using that format? :)
+17:52 +share_: xand: i hold ctrl and left nothing happens
+17:52 +xand: mouse button?
+17:52 +Bazerka: if something is 1.5MB, you don't say 1M500
+17:52 +share_: oh lol
+17:52 +share_: :) now it works
+17:53 +shabble: but you can't say 1.5MB either, iirc :)
+17:53 +Bazerka: sure, but I'm simply rebutting your comparison to _set_time and your example above :)
+17:53 +shabble: I just came across it when tr ying to document how it worked
+17:53 +share_: xand: alt q or o is disabled?
+17:54 +shabble: and was surprised at how user-unfriendly it was compared with time :)
+17:54 +share_: esc + q works
+17:54 +xand: what?
+17:54 +share_: xand: in xterm
+17:54 +share_: alt+q doesnt function
+17:56 +xand: WFM
+17:57 +share: ?
+17:58 +share: anyway im happy with gnome terminal
+17:58 +share: :P
+17:58 +Myrtti: terminator ftw
+17:59 +Bazerka: hmm
+17:59 +Bazerka: actually, this has exposed a different bug I'd forgotten about
+18:00 +share: Bazerka: can you update nicklist.pl in http://scripts.irssi.org/
+18:00 +Nei: in xterm, you want ctrl+left click & check "... sends escape" to make irssi happy, which expects esc
+18:00 +Bazerka: reutilising setting names within different types
+18:00 +share:  there is a new version that supports ~ & modes
+18:00 +share: bye coekie
+18:01 +share: by
+18:01 +Bazerka: share: you are aware that nicklist.pl is written by the main developer of irssi and that he's more than capable of updating it himself?
+18:01 +share: hm
+18:01 +share: maybe he forgot gonna pm
+18:01 +Bazerka: we don't arbitrarily update scripts on the archive without being asked to by the script's author
+18:02 +Nei: just avoid scripts.irssi website and try to locate authors websites if you want the latest versions
+18:02 +share: k
+18:03 +Bazerka: and more to the point
+18:03 +Bazerka: it's 0.4.6 on s.i.o *AND* the author's site
+18:03 +share: sio?
+18:03 +Bazerka: what's in the author's git is NOT the release version
+18:03 +Bazerka: it's a development version
+18:04 +Bazerka: you're talking about 0.4.6+ and that's the git version
+18:04 +share: hm it works :)
+18:04 +Bazerka: sure, but it's not the release version
+18:04 +Bazerka: and hence, won't be on s.i.o under any circumstances
+18:05 +Bazerka: and given that it's the git development version, nothing requires updating
+18:07 --- ChanServ sets modes [#irssi +v Quex01]
+18:12 +Bazerka: shabble: hmm, something isn't quite working right (surprise, surprise)
+18:12 +Bazerka: ./irc/dcc/dcc-autoget.c:        settings_add_size("dcc", "dcc_autoget_max_size", "0k");
+18:12 +Bazerka: /set dcc_autoget_max_size 100shekles
+18:12 +Bazerka: |09/01 17:11:16| [dcc]
+18:12 +Bazerka: |09/01 17:11:16| dcc_autoget_max_size = 100shekles
+18:13 +shabble: it's stored internally as a string and parsed each time, I think?
+18:13 +Bazerka: so you should be able to set non-sensical values given that
+18:14 +Bazerka: my point is, the behaviour isn't consistent
+18:15 +shabble: yeah, you do get 'invalid size' for some values
+18:15 +shabble: is it worth me filing as a bug?
+18:16 +shabble: I've just been fighting with gdb to try and figure out that osx /exec no output thing.
+18:16 +shabble: and I still haven't a clue
+18:16 +Bazerka: hmm
+18:17 +Bazerka: I've now repeated your test from above but with a different setting name, and it works how you expected
+18:17 * Bazerka boggles
+18:18 +Bazerka: /script exec Irssi::settings_add_size("foo", "testval", "0"); Irssi::settings_set_size("testval", "5000"); print Irssi::settings_get_str("testval"); prints 5000
+18:18 --- ChanServ sets modes [#irssi +v Axius]
+18:18 +Bazerka: oh, you were using unquoted values
+18:19 * Bazerka retries without the quotes
+18:19 +Bazerka: that works the same
+18:20 +Bazerka: ah
+18:20 +share: Nei: yes thanks for the tip :P 4 bitlbee scripts outdated
+18:20 +share: etc
+18:20 +Bazerka: doh, typo'd the final method
+18:20 +Bazerka: should be get_size
+18:21 +Bazerka: heh, more coffee required
+18:22 +Bazerka: they aren't really outdated
+18:22 +Bazerka: the author has two sets of scripts with the same name, depending on some external version iirc
+18:22 +Bazerka: ah yes, depending on the bitlbee version
+18:23 +Bazerka: so I dunno how he expects us to handle that given the script names are the same
+18:23 --- ChanServ sets modes [#irssi +v Mjiig]
+18:25 +share: ^
+18:25 +Bazerka: I don't use bitlbee, so I need to ask, is bitlbee < 0.3 even still relevant these days?
+18:26 +nilicule: 0.3? wow, talk about seriously ancient code
+18:27 +share: Stable: 3.0.1
+18:27 +share: 2010-11-24
+18:27 +Bazerka: er, *3.0
+18:27 +Bazerka: clearly a typo
+18:27 +share: lol but im using BitlBee 1.2.8-1
+18:28 +Bazerka: share: well, the updated scripts are for 3.0+
+18:30 +Bazerka: so the versions on s.i.o (with the excepting of blist script are all up to date with the author's versions for pre 3.0 bitlbee
+18:30 +Bazerka: *exception
+18:30 +share: yes
+18:30 +share: restoring scripts from trash!
+18:30 +share: :p
+18:30 +Bazerka: heh
+18:31 --- ChanServ sets modes [#irssi +v CEnTR4L]
+18:31 +nilicule: oh if s.i.o would only let you sort on last updated *sigh*
+18:32 +shabble: how would that help? Not much use there being a brand new script to do foo when you need to do bar :)
+18:32 +share: lol
+18:32 +share: dudes explain me that "story" about foobar
+18:33 +Bazerka: nilicule: if only it would let you do lots of things :)
+18:33 +share: ppl keep saying foo and bar whats the meaning
+18:33 +vague`: share, google it.
+18:33 +share: http://en.wikipedia.org/wiki/Foobar
+18:33 +shabble: http://en.wikipedia.org/wiki/Metasyntactic_variable :P
+18:34 +share: that's too geek for me
+18:40 +Soliton: nilicule: /scriptassist new 5
+18:48 --- ChanServ sets modes [#irssi +v Death4Life]
+18:59 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+19:02 --- ChanServ sets modes [#irssi +v Qvist_]
+19:05 --- ChanServ sets modes [#irssi +v loadedwith_]
+19:05 +share: is there a script to search text in irssi
+19:05 +share: currently i use lastlog thing
+19:06 +yitz_: lastlog works swell
+19:06 +yitz_: You could turn on logging and grep log files, too
+19:06 +share: hm
+19:07 +Bazerka: there's sb_search.pl too (which comes bundled with newer irssi versions)
+19:08 +yitz_: It's not on scripts.irssi.org?
+19:08 +Bazerka: none of the official irssi scripts are
+19:08 +Bazerka: because they come *with* irssi
+19:08 +yitz_: Oh...
+19:08 * yitz_ rebuilds irssi
+19:08 +share: hm
+19:09 +yitz_: git pull? Fail. bzr pull? Fail. hg? Not installed. /me checks www.irssi.org
+19:10 +yitz_: Ooh. svn :D
+19:11 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+19:12 +rudi_s: yitz_: There's also a git repo.
+19:12 +rudi_s: git://git.irssi.org/irssi
+19:13 +share: SETHOST Unknown command
+19:13 +share: sethost?!
+19:13 +Koffa: o,O
+19:13 +Koffa: where did that come from o,O
+19:13 +share: i have that command lol
+19:13 +yitz_: Cool. sb_search scrolls to the match, hrm? Interesting
+19:13 +share: maybe a old script
+19:14 +share: not
+19:14 +Koffa: nope
+19:14 +Koffa: wtf
+19:14 +share: Koffa: do you have /sethost?
+19:14 +Koffa: yeah
+19:14 +share: lol
+19:14 +Koffa: I do and I don't
+19:14 +Koffa: nice
+19:14 +share: Bazerka: what is /sethost :PP:
+19:15 --- ChanServ sets modes [#irssi +v delhage]
+19:16 --- ChanServ sets modes [#irssi +v joneal]
+19:16 +delhage: can you get irssi to load previous channel logs on startup, so that you maintain history between sessions (like xchat does)?
+19:16 +Koffa: dunno if this is at irssi.org yet but ... http://explodingferret.com/linux/irssi/logresume.pl
+19:16 +Koffa: ^delhage
+19:17 +delhage: Koffa: thanks, I'll try it
+19:18 +Koffa: delhage: np
+19:18 +Koffa: it doesn't do themes, but otherwise quite nice
+19:18 +share: Koffa: /sethost mistery
+19:18 +share: :D:DD
+19:20 --- ChanServ sets modes [#irssi +v loadedwith_]
+19:21 +delhage: Koffa: beutiful, thanks!
+19:21 +delhage: beautiful*
+19:21 +Koffa: thank whoever wrote it :)
+19:21 +delhage: :)
+19:22 +delhage: ferret: thanks for http://explodingferret.com/linux/irssi/logresume.pl
+19:24 +share: ping attacks
+19:25 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+19:25 --- ChanServ sets modes [#irssi +v CrazyEddy]
+19:25 +share: channel_max_who_sync -1
+19:25 +share: disabled right
+19:27 +share: (it is)
+19:30 +share:  im gonna take a nap
+19:32 --- ChanServ sets modes [#irssi +v hammockh_]
+19:36 --- ChanServ sets modes [#irssi +v preller]
+19:36 --- ChanServ sets modes [#irssi +v ahihi]
+19:40 --- ChanServ sets modes [#irssi +v j0z]
+19:48 +share: ei
+19:49 +share: sb_search is great
+19:51 --- ChanServ sets modes [#irssi +v kody]
+19:59 --- ChanServ sets modes [#irssi +v hammockhero]
+20:03 --- ChanServ sets modes [#irssi +v loadedwith_]
+20:08 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+20:08 --- ChanServ sets modes [#irssi +v gnomefreak]
+20:09 --- ChanServ sets modes [#irssi +v openess]
+20:11 --- ChanServ sets modes [#irssi +v samferry]
+20:13 --- ChanServ sets modes [#irssi +v WonTu]
+20:14 --- ChanServ sets modes [#irssi +v Dice-Man]
+20:15 --- samferry is now known as sferry
+20:22 --- ChanServ sets modes [#irssi +v ApHeX321]
+20:32 --- ChanServ sets modes [#irssi +v cloq]
+20:36 --- ChanServ sets modes [#irssi +v CEnTR4L]
+20:39 --- xindz is now known as xindz-off
+20:44 --- ChanServ sets modes [#irssi +v joneal]
+20:50 --- xindz-off is now known as xindz
+20:55 --- ChanServ sets modes [#irssi +v ski]
+20:56 +ski: hm, i forgot which command to search ("grep") though the backlog of a window for a specific string (or pattern)
+20:56 +Bazerka:  /help lastlog
+20:56 +ski: ah, right, ty
+20:56 +Bazerka: np
+20:56 --- ChanServ sets modes [#irssi +v gnomefreak]
+20:57 +ski: (i looked at `scrollback',`backlog',`search',`find', but didn't find it)
+20:57 +Bazerka: there's also a script with new irssi versions called sb_search.pl that provides /scrollback search
+20:57 +Bazerka: *newer
+20:57 +share: ski: it's found in /usr/share/irssi/sb_search.pl
+20:58 +Bazerka: share: no, it's found wherever the package puts it
+20:58 +share: oh
+20:58 +Bazerka: and irssi automatically searches the correct path if the package was built correctly
+20:58 +Bazerka: so you can just /run sb_search.pl
+20:58 +share: you could add it to irssi scripts page because many ppl dont know about it
+20:58 +Bazerka: for the last time
+20:58 +share: i just discovered it today
+20:58 +share: ! Lol
+20:59 +Bazerka: it comes *WITH* irssi itself
+20:59 +share: i have an idea
+20:59 +share: put a line on the site saying that
+20:59 +share: " some scripts come with irssi" :p
+21:00 +Bazerka: most users completely ignore the documentation and inbuilt help anyways
+21:01 +Bazerka: or so it seems ;)
+21:01 --- ChanServ sets modes [#irssi +v Sp4rKy]
+21:01 +share: Bazerka: one question
+21:01 +share: the lag_check_time option is only to make "Lag:" visible
+21:01 +share: in act bar right
+21:02 +share: or lag_min_show
+21:03 +share: why would i want those options if i have lag_max_before_disconnect = -1
+21:03 +Bazerka: lag_check_time is the period of lag that must have passed before that lag warning is shown
+21:03 +Bazerka: iirc
+21:04 * Bazerka looks
+21:04 +Bazerka: ah no, it's the period of active lag checks
+21:04 +share: to ping server?
+21:04 --- ChanServ sets modes [#irssi +v craiggles]
+21:06 +Bazerka: yes
+21:06 +share: but only if i want to know if i am lagged right
+21:06 +share: it doesnt matter if i ping it or not i get lagged anyway
+21:06 +Bazerka: is there a question in there somewhere?
+21:07 +share: no
+21:07 +share: am i right? is question
+21:07 +share: :p
+21:08 +Bazerka: lag_min_show is used to dictate when the lag status bar item is visible
+21:08 +share: ye
+21:08 +Bazerka: if lag goes above that (and you have the lag item in your status bar and it is not disabled), the lag item will be shown
+21:09 --- ChanServ sets modes [#irssi +v Dice-Man]
+21:16 +share: time to watch football
+21:16 +share: later
+21:21 --- ChanServ sets modes [#irssi +v xorrbit]
+21:21 --- ChanServ sets modes [#irssi +v {Nathan}]
+21:22 +xorrbit: hey does anyone know is there a way to disable the indentation of messages in line with nicks?
+21:22 --- ChanServ sets modes [#irssi +v loadedwithwyrms]
+21:22 +xorrbit: I'm in a small-width setup and there's a ton of wasted space where message text could be
+21:23 +Koffa: I'd like to have "sane-rewrap"
+21:27 +xorrbit: If I could even just disable the indenting that would be nice
+21:28 +mauke: this is probably a format thing
+21:29 +Babar: yes it
+21:29 +Babar: argh
+21:30 +Babar: can't find it anymore, but iirc, there is a setting for that
+21:31 +mauke: you could edit your theme and remove all %|
+21:31 --- ChanServ sets modes [#irssi +v gnomefreak]
+21:31 +xorrbit: hmm a bit hackish but I guess if I must
+21:34 --- ChanServ sets modes [#irssi +v ahihi]
+21:40 +shabble: /set indent or yeah, hunt the %|'s
+21:41 +xorrbit: /set indent doesn't do anything :/
+21:41 +shabble: then you're stuck with some theme-a-jigging
+21:42 +xorrbit: yeah, shitty
+21:45 +share: GOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL
+21:45 +share: sick :)
+--- Log closed Sun Jan 09 22:02:02 2011
+--- Log opened Sun Jan 09 22:02:26 2011
+22:02 --- Users 409 nicks [1 ops, 0 halfops, 398 voices, 10 normal]
+22:02 --- ChanServ sets modes [#irssi +v iaj]
+22:03 --- Channel #irssi was synced in 98 seconds
+22:06 --- ChanServ sets modes [#irssi +v ahihi]
+22:09 --- xindz is now known as xindz-off
+22:12 --- ChanServ sets modes [#irssi +v CEnTR4L]
+--- Log opened Sun Jan 09 22:34:11 2011
+22:34 --- Users 404 nicks [1 ops, 0 halfops, 393 voices, 10 normal]
+22:34 --- ChanServ sets modes [#irssi +v iaj]
+22:35 --- Channel #irssi was synced in 97 seconds
+22:45 --- ChanServ sets modes [#irssi +v vaxerdec]
+22:46 +vaxerdec: hello, how does one turn off display of join/leave messages when running with use_status_window/no and reuse_unused_windows/true ?
+22:47 +yitz_: /ignore * JOINS QUITS PARTS
+22:49 +vaxerdec: yitz_: ah now that syntax was accepted, thanks.  it seems quote parsing has changed from the time some faqs were written.
+22:50 +shabble: vaxerdec: /help <cmd> is usually up-to-date :)
+22:50 +vaxerdec: yitz_: a lot of examples that come up in a web search have quotes around stuff, which seem to be no longer valid syntax.
+22:51 +vaxerdec: shabble: ah that's even more helpful.  duh.
+22:53 +vaxerdec: just trying irssi out.  this thing is awesome.  i had been using epic.  looks like it's pretty much arbitrarily configurable.
+22:54 +vaxerdec: thanks for your help.
+22:55 --- ChanServ sets modes [#irssi +v ahihi]
+23:00 +shabble: arbitrary is a big place.  It fills quite a chunk of it though :)
+23:02 --- ChanServ sets modes [#irssi +v surgeon_]
+23:03 --- ChanServ sets modes [#irssi +v nightfrog]
+23:04 +shabble: mauke: mind if I add your irssi scripts dir to my docs project as a source of things? (link from #perl)
+23:06 +mauke: no, but the link may go down randomly
+23:07 +shabble: yeah, I figured it was a locally hosted thingie from the dyndns.
+23:08 +shabble: I doubt there's ever going to be enough traffic for you to notice though :)
+23:13 --- ChanServ sets modes [#irssi +v janhouse]
+23:25 +share: great game
+23:34 --- ChanServ sets modes [#irssi +v tris]
+23:41 --- loadedwithwyrms is now known as loadedwith|weigh
+23:44 --- ChanServ sets modes [#irssi +v skonek]
+23:47 --- ChanServ sets modes [#irssi +v tris]
+23:49 --- ChanServ sets modes [#irssi +v pete__]
+23:51 --- ChanServ sets modes [#irssi +v alip]
+23:52 --- ChanServ sets modes [#irssi +v mirko]
+23:52 --- ChanServ sets modes [#irssi +v pete__]
+23:56 --- ChanServ sets modes [#irssi +v ycas]
+--- Log closed Mon Jan 10 00:00:50 2011

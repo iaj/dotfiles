@@ -1,0 +1,531 @@
+--- Log opened Tue Oct 12 06:14:54 2010
+06:14 --- Users 521 nicks [0 ops, 0 halfops, 0 voices, 521 normal]
+06:16 --- Channel #bash was synced in 84 seconds
+06:28  pav5088: How would I run a command on the first file found by "find <pattern> -type f"  ?
+06:31  yitz_: With a -quit
+06:33  pav5088: I also just remembered "head"
+06:34  yitz_: Eww. Use -quit
+06:34  yitz_: And -exec
+--- Log closed Tue Oct 12 08:47:14 2010
+--- Log opened Tue Oct 12 08:47:37 2010
+08:47 --- Users 524 nicks [0 ops, 0 halfops, 0 voices, 524 normal]
+--- Log closed Tue Oct 12 08:50:43 2010
+--- Log opened Tue Oct 12 08:51:03 2010
+08:51 --- Users 522 nicks [0 ops, 0 halfops, 0 voices, 522 normal]
+08:52 --- Channel #bash was synced in 80 seconds
+08:55  dropdrive: geirha: Thank you.
+08:57 --- streuner__ is now known as streuner
+09:58  xelister: what is the easiest method to delete all files in directory /foo/, non-recursivly, and not trying to delete directories (do not get the warning/error msg)?
+10:01  geirha: for f in /foo/*; do [[ -f $f ]] && rm "$f"; done
+10:01  kwaa: Sup, bash.
+10:01  kwaa: With which function do I randomly print a string from an array?
+10:01  pgas: find /foo/*  -type d -prune  -o -exec rm {} +
+10:02  geirha: !faq random > kwaa
+10:02  greybot: kwaa: http://mywiki.wooledge.org/BashFAQ/026 -- How can I randomize (shuffle) the order of lines in a file?  (Or select a random line from a file, or select a random file from a directory.)
+10:02  xelister: thanks geirha
+10:02  geirha: n=${#array[@]}; printf '%s\n' "${array[RANDOM%n]}"
+10:03  kwaa: perfect
+10:03  kwaa: -bash: RANDOM%n: division by 0 (error token is "n")
+10:03  kwaa: n=${#array["x", "y", "z"]}; printf '%s\n' "${array[RANDOM%n]}"
+10:04  Knirch: what the
+10:04  Knirch: you can't just go and make up your own syntax
+10:04  koala_man: array=(a b c);  n=${#array[@]}; printf '%s\n' "${array[RANDOM%n]}"
+10:04  kwaa: Knirch: I make up whatever syntax I want.
+10:05  kwaa: So, what do I do if I want a quoted sentense?
+10:05  Knirch: echo "Quoted Sentence"
+10:06  geirha: # array=( "A short sentence" "Some other stuff" ) n=${#array[@]}; printf '%s\n' "${array[RANDOM%n]}"
+10:06  xelister: geirha: will it work for many files, like thousands?
+10:06  evalbot: geirha: Some other stuff
+10:06  kwaa: Awesome, thank you.
+10:06  geirha: xelister: Yes
+10:07  geirha: xelister: Both the for-loop and the find will work for large amounts
+10:10  republic1n_devil: ok
+10:11  republic1n_devil: to what extent can I keep variables in ram in bash
+10:11  republic1n_devil: and keep say a list of servers in memory
+10:11  republic1n_devil: instead of in a file
+10:11  koala_man: to the extent the os doesn't swap them out
+10:13  joost_op: morning, trying to write a KDE autostart script: http://pastebin.com/1uSsB2RG
+10:14  joost_op: for some reason picocom closes instantly after running the script
+10:14  joost_op: anybody know what I'm doing wrongish?
+10:14  taylanub: !caps
+10:14  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+10:15  joost_op: let me correct that
+10:15  taylanub: but sorry, i don't think i can help otherwise :P
+10:16  geirha: That's a whole lot of bad practice squeezed into a tiny script
+10:16  geirha: Put a wait at the end
+10:17  geirha: You already have the pid btw, so parsing ps to find the same process is really silly
+10:17  geirha: if kill -0 "$mypid"; then echo "It's running"; else echo crap; fi
+10:18  joost_op: ok
+10:18  geirha: And lastly, don't put more than one argument into a variable
+10:19 --- republic1n_devil is now known as capitalist_demig
+10:19  geirha: Oh and quote all epansions/substitutions
+10:19  geirha: *expansions
+10:19 --- capitalist_demig is now known as capitalist_witty
+10:20  taylanub: foo=$bar  doesn't need quotation though
+10:20  blackpenguin: geirha: uhmm.. this would break the script even more. especially with $ARGS, as it would pass 3 args a one, no?
+10:20  joost_op: http://pastebin.com/wSF8vhHL
+10:20  joost_op: so this would be a bit cleaner
+10:21  geirha: blackpenguin: Well, I told him not to do that first
+10:22  geirha: args=(--b 115200 /dev/ttyUSB0); picocom "${args[@]}" > file & pid=$!
+10:22  geirha: wait "$pid"; kdialog --msgbox "picocom died with exit status $? after $SECONDS seconds"
+10:23  taylanub: you needn't use my_... for all arg names but that's rather trivial
+10:23  geirha: The main point is, don't put more than one argument into a variable. Use an array instead.
+10:24  geirha: Or just type the whole command without any variables. They seem pretty pointless for that tiny script.
+10:24  joost_op: thx
+10:25  blackpenguin: however that's just a style thing. actually the answer to his question is just about "wait"
+10:28  joost_op: crazy, but it dies instantly, my command from terminal: picocom --b 115200 /dev/ttyUSB0 > /home/jruis/NIR/NIR.txt
+10:28  rical: What is best practice for tabs in shell scripts?
+10:28  rical: spaces or tabs? how many chars?
+10:28  taylanub: rical: entirely subjective
+10:29  rical: so I will use tabs 4 spaces long, thats what I like best..
+10:29  geirha: I generally use four spaces and I hate tabs.
+10:29  taylanub: i'm like geirha
+10:29  rical: really? why?
+10:29  taylanub: i also always put 'then', 'do', etc. on a line of their own... most people do '; then'.
+10:30  geirha: The indentation will become screwed if you view it in an editor with different sized tab... unless you are very very careful of where you use tabs and where you use spaces.
+10:32  rical: intresting..
+10:34  pgas: n
+10:35  geirha: o
+10:35  rical: pgas: what do you think, spaces or real tabs?
+10:42 --- Mission-Critical is now known as MissionCritical
+10:42  lhunath: tabs are idiotic.
+10:42  lhunath: what, are you trying to save bytes on your disk?
+10:42 --- Weust`afk is now known as Weust`
+10:43  geirha: If your script is using up more than an inode, switch to a different language.
+10:45  lhunath: tabs will fuck with your diffs, they will fuck with you while editing code, they will fuck your code alignment in different editors; and for all that, they give you nothing good.
+10:48  e-future: lhunath: you know stuff but don't you have manners?
+10:49  lhunath: a handful.
+10:51  schweizer: how do i check for "not equal" in bash script? if [ $bla -neq "foo" ] ?
+10:52  geirha: [[ $bla != foo ]]
+10:52  schweizer: why the double [[ ?
+10:52  geirha: ![[
+10:52  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+10:52  lhunath: schweizer: don't forget you need "quotes" if you don't use [[.
+10:53  lhunath: schweizer: and -eq compares numbers, not strings, while = compares strings, not numbers.
+10:53  schweizer: ok thx guys you are the best
+10:53  lhunath: if you *are* comparing numbers, however, you should use (( $bla != 5 ))
+10:53  lhunath: or no $, even
+10:54  schweizer: and equals would be == or -eq ?
+10:54  lhunath: as I just said; that depends on whether you want string or numeric comparison.
+10:55  lhunath: in [[, == means string comparison and -eq means numeric.
+10:55  schweizer: string
+10:55  schweizer: ok
+10:55  lhunath: in ((, == means numeric, string comparison is impossible.
+10:55  schweizer: thx
+10:55  geirha: And in [[, == and = are the same operator
+10:55  lhunath: and you should probably never use -eq, but (( == instead.
+11:00  DrkShadow: ugh, help? I can't get xxd to convert from hex to binary..
+11:00  DrkShadow: xxd -r seems to ignore everything thinking it's junk, xxd -rp should work, but still no output..
+11:01  trash: bash doesn't care, xxd is external.
+11:01  DrkShadow: yeah, well I don't know where else to get command-line help.
+11:02  koala_man: DrkShadow: xxd converts its own hex dumps back to binary. what are you feeding it?
+11:03  xelister: files  a/*.jpg   user has rwx access to dir a/,  but only r access to files *.jpg.  How the user can remove the files?
+11:03  DrkShadow: ooh. xxd -r -p - out -- doesn't work. xxd -r -plain - out -- does.
+11:03  DrkShadow: (feeding a string of hex digits)
+11:03  geirha: xelister: It's the directories' permissions that determine whether you can create delete files.
+11:04  geirha: The files' permissions only apply to the files' content
+11:04  xelister: no wait hm
+11:04  geirha: s,create delete,create/delete,
+11:05 * DrkShadow cringes
+11:05  DrkShadow: this app.. it serializes a java class.. and stuffs it into a database.
+11:05  xelister: wtf
+11:05  DrkShadow: which is stored as plain-text SQL.
+11:05  DrkShadow: Why, oh why, does the average GPL project suck SO MUCH?
+11:07  koala_man: 90% of everything is crap
+11:07  koala_man: including gpl projects
+11:07 * DrkShadow sighs
+11:07  xelister: actually.  User owns top/. About all sub-dirs/files there, user can r/rX them, but can not W them and is not owner.  How can the user chmod a+rwX all the files there?  One could write a script that would re-create the top2/ by reading the top/ files (he can read all) and then kill files in old top/* (he should since he owns top/) and then rename top2->top. But other way?
+11:08  DrkShadow: this database.. the "links" table consists of one row. Of the 25000 links I added to the GUI app, it has one row. Two columns. One has value, "links", the other has 15MB of hex.
+11:10  xelister: god linux file permissions appear to suck donkeys cock sometimes
+11:10  xelister: the advanced use of it, that is
+11:10  DrkShadow: uh.. what do you want to do?
+11:10  xelister: chmod all files that are not mine but are in my directory
+11:10  DrkShadow: find will help..
+11:11  xelister: chmod all files that are not mine but are in my directory (I can read all this files, and I own the top dir)
+11:11  xelister: DrkShadow: I can't chmod the files since I don't own them
+11:11  DrkShadow: You're right. Hmm. You can recreate them.. hmm. Thought if you owned the _directory_ you could.
+11:11  koala_man: cp -R dir foo; rm -rf dir; mv foo dir
+11:12  DrkShadow: can you take ownership if you own the directory? would that be acceptable?
+11:13  xelister: DrkShadow: no, you can not  chown file that is owned by someone else (unless root) it seems... ?
+11:14 --- Carmageddon2 is now known as Carmageddon
+11:14  xelister: yes.  I can not   chown myself dir/  even if the dir is chmod 777 but it has other owner
+11:15  xelister: yeah koala_man is right. Im fucking stupid for not figuring this out :o   Why I didnt think of that
+11:16  xelister: koala_man: ok, however, how can I rm -rf the old dir?  it doesnt want to delete it
+11:16  koala_man: xelister: so there's a dir you don't own in there?
+11:16  xelister: like, it refuses to delete: old/foo/bar/baz.jpg  where  bar and baz have other owner (as unpacked by tar)...
+11:17  koala_man: then you can't delete it
+11:17  xelister: but wtf,  why  the tar run as myself  can create files with owner=someone_else,  and I can not chmod to someone ????
+11:17  koala_man: you extracted it as root or with sudo or something
+11:17  geirha: It can't. You must have run it as root
+11:17  xelister: so (as user) I can create files owned by me,  as well as files owned by some1else - but I can not change ownership of already existing file, then??
+11:17  koala_man: no
+11:18  xelister: but yes
+11:18  xelister: no wait
+11:18  xelister: meh my mistake.  That files where created not by me running tar,  but by apache server running as other user.  never mind
+11:18  xelister: so how to annihiliate such files that are owned by other user, but are in MY DIRECTORY
+11:19  geirha: Write a php script that removes them
+11:21  geirha: I'm guessing they were created by some php gallery contraption
+11:25 --- rainy_day is now known as whatarainy_day
+11:27 --- whatarainy_day is now known as whatashui
+11:28  xelister: geirha: yeah
+11:29  xelister: geirha: that sucks cocks that linux doesnt remove them
+11:29  xelister: one could although MOVE this files, like to some ~/trash/  and write root cronjob to kill such files, but wtf that is stupid
+11:29  xelister: why I can't kill files that are in my dir
+11:30  koala_man: you can. but you can't delete files that are in dirs you don't own or have write access to
+11:31  koala_man: even if you own the parent dir of that
+11:31  xelister: koala_man: yeah but I want to remove them from the tree, not to put some bad content into them
+11:33  koala_man: are you suggesting that the os should reserve those filenames in that dir so that you can't recreate it with bad contents later?
+11:33  geirha: Change the app's umask and put setgid on the dir. Then you can get write access via group permissions
+11:33  xelister: I can anyway remove them from the tree by move to other place
+11:35  xelister: and I can anyway recreate such path
+11:36  xelister: mv /dir/users     ~/hole  ;   mkdir -p /dir/users/rights/sell_home.yes
+11:37  trash: && instead of ; would be smart.
+11:39  xelister: so I dont see reason of prohibiting user from just deleting some things under his directory,  and only allowing him to "kill" (by moving elsewhere) the entire tree
+11:39  xelister: * to kill all
+11:40  xelister: perhaps there should be such file mode. or chfacl/chattr, to say that owner of top/ is the master of all files below it (fully rights to delete for example)
+11:40  geirha: Yes, you can say that with setfacl
+11:40  xelister: geirha: how?
+11:41  xelister: user will be creating the top/.  How to do it, so that later he can rm -rf top/ even if top contains subdirs+files owned (700) by other user (like www-data user)
+11:42  geirha: man setfacl
+11:42  geirha: acl must be enabled on the fs of course
+11:43  xelister: are you sure ACL can make rights more allowable, not only restrict them on top of restrictions from basic chown?
+11:45  geirha: I've only briefly tried acls, but I'm fairly certain you can make sure group permissions get w
+11:47  xelister: Im not in the group
+11:47  xelister: but are the ACLs of top/  inherited when creating subdirs and files in top?
+11:47  geirha: man setfacl
+12:30  ghostknife: Is there a way to monitor the commands entered via bash in a more verbose fashion, for example time, user, command, etc. ? this is for audit purposes.
+12:31  ghostknife: We are using sudo for logging root commands, but sometimes some admins do "sudo -s" if they need to navigate certain directories, and we loose this verbose logging
+12:33  koala_man: check HISTTIMEFORMAT
+12:33  trash: What about communication?
+12:37  ghostknife: I was thinking of TIMEFORMAT for having the time, though it would be nice if I could also log a certain environment variable with it, specifically, SUDO_UID
+12:40  geirha: Maybe  PROMPT_COMMAND='echo "$(date) $SUDO_UID $BASH_COMMAND" >> somefile'
+12:47  grandemahatma: I'm using a key-pair for connecting via ssh, and it's nice that from my client I can use file completion on the server. I recently changed ssh port though (so now I have to connect using ssh -p 1000 myServer) and completion doesn't work anymore. How to bring it back?
+12:47 --- hittt is now known as Guest80328
+12:50  pgas: completion has nothing to do with the port number
+12:52  koala_man: he's probably talking about the ssh completion from bash-completion
+12:53  pgas: aaah
+12:53  pgas: and bash-completion connects to the server to provide distant file completion?
+12:54  grandemahatma: sorry I explain it better
+12:54  grandemahatma: from my client, I was able to run "scp myServer:/myDirectory"
+12:55  grandemahatma: and myDirectory could be tab-completed
+12:55  grandemahatma: now it cannot.
+12:55  grandemahatma: is it clear?
+12:56  pgas: the easiest way is probably to set the port in .ssh/config so that port setting is transparent to you and probably to bash-completion
+12:57  grandemahatma: you mean on my client?
+12:58  pgas: on the local side yes
+12:59  grandemahatma: I'll try, thanks
+12:59  pgas: Host server <newline> Port 1000 # or something like that
+13:00  grandemahatma: great
+13:00  pgas: this way you don't have to give the -P or -p (<rant> it really pisses me that ssh and scp don't use the same option for this</rant>)
+13:00  grandemahatma: it does work, thanks a lot
+13:00  grandemahatma: indeed :)
+13:01  grandemahatma: thanks again, bb
+13:22  kwaa: how do I escape a "/' in a string?
+13:22  pgas: / doesn't need to be escaped
+13:22  kwaa: " "quote" "
+13:23  pgas:  "\"bar"
+13:23  kwaa: \"quote\"?
+13:23  kwaa: Ah
+13:24  sternocera: I want to write to a file using an application, and have input redirected to "netcat 192.168.1.11 1234". How can I do this?
+13:24  pgas: you cannot put a ' inside '' though. you have to close the ' put a 'quoted with\ and reopen the ': echo 'foo'\''bar'
+13:24  pgas: sternocera: tee
+13:25  kwaa: pgas: I see. I'm doing it in an array.. do i "x".'"' or something?
+13:25  kwaa: Like in php.
+13:26  pgas: yes, except you don't put a .
+13:26  geirha: # echo 'foo'"bar" is the same as "foobar"
+13:26  sternocera: pgas: I don't think tee will do that...I need to write to an actual file, and have the input to the file sent to netcat
+13:26  evalbot: geirha: foobar is the same as foobar
+13:27  kwaa: '" ... who don'"'t."'" - Unknown'
+13:27  kwaa: Looks alittle clusterd.. but it works.
+13:27  kwaa: pgas: thank you.
+13:28  pgas: sternocera: you don't want: command | tee file | nc ?
+13:28  geirha: kwaa: You can also use $''
+13:28  sternocera: No
+13:29  sternocera: I want to write to a file
+13:29  geirha: kwaa: echo $'foo\'bar'
+13:29  sternocera: and from there
+13:29  geirha: kwaa: $'' is just like ''  except \ escapes will be replaced
+13:29  sternocera: I must write to the file using something like fopen() in an application, you see
+13:30  pgas: sternocera: it would be a lot nicer if you wrote to stdout rather than to a file...anyway tail -f file | netcat
+13:31  kwaa: geirha: neat, thanks :)
+13:31  sternocera: pgas: Probably, but this is for writing to a block device on another machine...it generally makes sense to write to a file, except for this testing
+13:32  kwaa: bash > ruby?
+13:32  kwaa: I know the response I will get, but how is Bash in comparison to Ruby on the web?
+13:33  pgas: sternocera: then you just need to send the file with netcat? netcat ... < file?
+13:33  geirha: on the web?
+13:33  pgas: kwaa: different.
+13:34  kwaa: geirha: for a serverside language I mean
+13:35  geirha: kwaa: Ruby is usable for that, bash is not.
+13:35  kwaa: Ah, okey.
+13:36  pgas: bash is not really a multi purpose language
+13:36  kwaa: I see
+13:36  sternocera: pgas: I need to send the file, but I need to continually send it....as I write to my local file, I should write to the remote device node
+13:36  sternocera: It's actually a serial customer display node from a retail terminal
+13:37  Mohan: sternocera: rsyslog is that an option ?
+13:38  pgas: well...I would consider writing something a bit more robust than using a shell hack
+13:39  pgas: (tail -f should do what you want....modulo the buffering problems)
+13:40  sternocera: pgas: It sort of works....the first few characters go missing
+13:41  sternocera: and there are buffering problems
+13:41  pgas: sternocera: do you really need this file? can you cheat your application?
+13:41  pgas: for instance doing: command >(nc ....)
+13:42  pgas: or  using a fifo?
+13:42  sternocera: I probably can, but it's a hassle
+13:42  sternocera: I would have imagined that shell hacks were the way to go
+13:43  pgas: well writing and reading a file at the same time is rarely the way to go ;)
+13:54  sternocera: time to write it in python, methinks
+14:07 --- e-DIO-t is now known as t-EDI-o
+14:08  sternocera: Why can't I just write a python script that pipes stdin to netcat?
+14:10  pgas: why do you feel you cannot?
+14:11  sternocera: I don't
+14:11  sternocera: I think it should work
+14:12 --- jzacsh__ is now known as jzacsh
+14:38  flamingo: How can I grep a value from the top of a file and store it as a variable?
+14:38  twkm: command substitution.
+14:39  flamingo: ?
+14:40  drizztbsd: flamingo: sed?
+14:41  ferret: !faq n'th
+14:41  greybot: http://mywiki.wooledge.org/BashFAQ/011 -- How can I print the n'th line of a file?
+14:41  ferret: !faq 2
+14:41  greybot: http://mywiki.wooledge.org/BashFAQ/002 -- How can I store the return value/output of a command in a variable?
+14:41  flamingo: I could use head -1 as well, but how do I make sure that I get a value
+14:41  taylanub: what kind of value?
+14:42  ferret: use head -n 1 file | get-value-from-line
+14:42  ferret: obviously
+14:42  taylanub: must it be a number? any nonempty string?
+14:42  ferret: If you don't have the imaginary magical program that gets a "value" from unspecified data you may have to install it
+14:42  taylanub: does the first line always have only the value, or extra text that you must strip off?
+14:42  taylanub: in any case, sed can do it. and to put it in a variable use command substitution
+14:42  taylanub: !cs
+14:42  greybot: Command Substitution: The $(foo bar) causes the command 'foo' to be executed with the argument 'bar' and $(..) will be replaced by the *output*. See http://mywiki.wooledge.org/BashFAQ/002 and http://mywiki.wooledge.org/CommandSubstitution
+14:43  flamingo: taylanub: The first line does always have the value, the file contains 8 lines with IP numbers.
+14:43  flamingo: taylanub: I want to make sure I get a IP number or exit 1
+14:44  drizztbsd: flamingo: sed regex
+14:45  edogawaconan: the awk command seems to long
+14:45  edogawaconan: shouldn't '| awk "NR==$lineno"' sufficient?
+14:45  taylanub: foo=$(head -n1 file | grep -E '([0-9]{1,3}.){3}[0-9]{1,3}' || exit 1)    should work.  the regex is optimized for space :P
+14:45  edogawaconan: s/ to / too /
+14:46  loomsen: '([0-9]{1,3}\.?){4}'
+14:46  taylanub: by the way put the whole regex between ^ and $
+14:46  taylanub: and i forgot to escape the dot
+14:47  loomsen: :)
+14:47  taylanub: though loomsen's regex will match e.g. 1111  without dots at all
+14:47  flamingo: foo=$(head -n1 file | grep -E '([0-9]{1,3}\.?){4}' || exit 1)
+14:47  loomsen: taylanub: true
+14:48  taylanub: don't we want it to definitely have dots?
+14:48  loomsen: taylanub: yes, we should combine out regexes :D
+14:48  taylanub: foo=$(head -n1 file | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$' || exit 1)    then
+14:49  twkm: sheesh.
+14:51  mar77i: I must have been bored... http://img3.imagebanana.com/img/pqp7ojk2/mandelbrot_c64.jpg
+14:53  koala_man: do it in graphical mode
+14:54  loomsen: koala_man: was that for me? i'll try
+14:54  koala_man: no, mar77i
+14:54  loomsen: oh ^^
+14:55  mar77i: yeah I wanted to make a hires program. Although I'm pretty scared what time concerns. The screenshot is 255 iter, which was slow in warp mode :D
+14:55  koala_man: hah
+14:56  mar77i: ...but it would be pretty logical in hires to have at least 64 iter
+14:58  mar77i: umm, okay, 32 look fine.
+14:59  flamingo: taylanub: the script doesn't seem to exit when there are no more lines available in the file.
+15:00  taylanub: flamingo: how do you go on to the next line?
+15:00  flamingo: taylanub: I echo foo into another file and erase it with sed from the file I took it from
+15:02  flamingo: taylanub: the script starts to echo white spaces into the new file when no more values are left
+15:02  flamingo: it doesn't exit
+15:02  winkey: flamingo sed does not modify a file you have to redirect seds output to another file them mv or cp it to the original
+15:03  loomsen: flamingo: might help if you pastebinned your script
+15:03  loomsen: s/nn/n
+15:03  flamingo: winkey: yes it does, with -i
+15:04  flamingo: http://pastebin.ca/1960079
+15:05  taylanub: -i is a GNU extension
+15:05  pgas: flamingo: what are you trying to do in the first place?
+15:06  taylanub: sed doesn't do extended RE
+15:06  flamingo: taylanub: but if I cat the file I see the value is actually gone?
+15:06  taylanub: oh, sorry
+15:06  taylanub: i was stupid
+15:06  flamingo: so it does remove the line.
+15:07  pgas: it seems like  you are trying to process a file in a very inefficient way
+15:09  pgas: you want to remove everything after the first lines that contains an ip?
+15:09  flamingo: pgas: No, I am trying to take a value from one file and echo it to another. The script should exit if the file doesn't contain any values in it.
+15:10  taylanub: what you pastebinned is not really a loop. what do you use to loop it?
+15:11  flamingo: taylanub: Why would I need to loop it? The script is run manually, if an available value doesn't exist in the file, exit.
+15:12  taylanub: it will move one IP address, if it is the first file, every time you run it
+15:12  taylanub: if the first line is not a valid IPv4 address, it will do nothing
+15:12  taylanub: is that not what it does?
+15:12  pgas: flamingo: awk '!/value/{exit}{print}' file > newfile
+15:12  flamingo: yes it does that. But when the available file is empty it doesn't exit the script and then it starts to echo white spaces in to the used file
+15:13  taylanub: that's weird. let me test it myself
+15:13  flamingo: foo=$(head -n1 values/available | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$' || exit 0)
+15:13  flamingo: it's not exitting when values/available is empty
+15:16  taylanub: you're right
+15:16  taylanub: erm, i think $(... exit) exits the $() subshell...
+15:16  latenite: evalbot, echo hello
+15:16  pgas: sed -n -e '/^\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}$/!q' -e p file
+15:17  taylanub: # echo $(exit)
+15:17  evalbot: taylanub: no output
+15:17  kojiro: !ip
+15:17  taylanub: well, not the best way to see what i mean  :P  do that in an interactive shell, it won't exit
+15:17  kojiro: oh surely we have a factoid on that
+15:18  kojiro: oh, we did :/
+15:18  kojiro: !meta ip
+15:18  greybot: \amethyst 1241282442 forget
+15:18  flamingo: taylanub: so where should I place the exit?
+15:18  taylanub: flamingo: remove the exit, do a test "$foo" || exit
+15:19  taylanub: http://pastebin.ca/1960092
+15:19  kojiro: !learn ip Regular expressions to match ip addresses (among many others) learn IP address regex: http://www.regular-expressions.info/examples.html
+15:19  greybot: OK, kojiro
+15:22  taylanub: heh, we of course didn't take into consideration the possibility of a bogus IP like 832.27.384.28
+15:22  StaRetji: Hi there people :) Can wget --spider option be used to check if file is newer? I've made bash script which now need to become a bit smarter, it has to check if remote file is newer, if it is then something, if it's not - exit.
+15:26  taylanub: the same question was asked not long ago -- it would need the server telling you the last modification date of the file (HTTP headers??), or e.g. an md5sum.
+15:27  taylanub: yup, http://en.wikipedia.org/wiki/List_of_HTTP_header_fields  search in page for 'Last_Modified'
+15:28  taylanub: dunno if wget can automate the process for you.  might want to ask in #wget
+15:28  taylanub: i correct myself it's "Last-Modified"
+15:28  apropos: I think there was an environment variable to get bash to store history from multiple bash instances, but I can't remember it.
+15:29  taylanub: man bash?
+15:29  koala_man: histappend
+15:30  flamingo: taylanub: thanks
+15:30  apropos: Thanks koala_man
+15:30  apropos: Interesting, it's already on for me.
+15:31  apropos: Ohh, bash doesn't write the history file until it exits.
+15:31  taylanub: that's right
+15:31  pgas: there is a faq entry or 2 about that in the faq in the topic
+15:31  poisonbit: I'm working in a "framework like" script, based on "bash libs" that i would like people be able to extend, append, etc....
+15:31  poisonbit: Request for comments...  Is 'set -e' as line 2 of the framework initialization a god or a bad idea ?
+15:32  apropos: bash sounds like the wrong language to choose.
+15:33  poisonbit: frameworks are conventions to help development, I think that somethings can be done to help development in bash
+15:34  pgas: !faq losing
+15:34  greybot: http://mywiki.wooledge.org/BashFAQ/088 -- How can I avoid losing any history lines?
+15:34  twkm: bad idea.
+15:35  taylanub: my http://78.176.188.45/scripts/common_stuff.sh will rock your socks off.  /ad
+15:35  apropos: twkm: what's a bad idea?
+15:35  taylanub: bash framework i guess
+15:36  poisonbit: the framework user can set +e at any point
+15:36  twkm: were there lots of questions recently that asked for an opinion?
+15:37  pgas: poisonbit: thus the framework should not rely on set -e ..so why enable it?
+15:39  poisonbit: my main reason was to reduce the initalization code
+15:39  poisonbit: error checkings etc...
+15:39  apropos: What's the "framework" for?
+15:40  poisonbit: eh eh god question
+15:40  poisonbit: it generates code, generates CLI apps, daemon apps, init scripts....
+15:40  poisonbit: also works on some convention on comments to generate doc in multiple formats
+15:41  poisonbit: but there is no a "main" "for"
+15:41  poisonbit: maybe to "accelerate development"
+15:41  poisonbit: or to add policies and best practices to common tasks
+15:41  poisonbit: configurable policies
+15:42  apropos: Then it's a library, not a framework.
+15:43  apropos: A "framework" molly-coddles you and makes it difficult to do something that the framework writer didn't think of. If it hasn't got a specific purpose, then it won't be useful for anything!
+15:43  poisonbit: it is intended as a file to be sourced  in your script at the begining, yes
+15:44  poisonbit: libs can have multiple purposes... I'm working on the purposes i need currently
+15:45  poisonbit: clim is the file to be sourced, then you can make:  use 'Clim::Doc' to_html to_txt      or:  use 'Other::Lib' other_method ....
+15:45  poisonbit: i.e. i've a DBI::SQLite to start other namespace outside the framework core   :)
+15:48  suigeneris: hey. does http://pastebin.com/tG3pTiAi look right, especially the parameters
+15:48  suigeneris: ?
+15:49  apropos: suigeneris: #mplayer
+15:49  loomsen: suigeneris: a=$1 also
+15:49  Knirch: suigeneris: no, a=$1
+15:51  suigeneris: okay loomsen and Knirch thanks
+15:51  suigeneris: apropos excuse me?,
+15:52  apropos: oh
+15:52  apropos: suigeneris: use quotes around variables: "$a" not $a
+15:52  apropos: (when expanding them into a command)
+15:52  apropos: a=$1 without quotes is fine
+15:52  twkm: (usually)
+15:52  suigeneris: apropos I need to expand it to the 1st parameter, not a command
+15:52  apropos: twkm: when isn't it?
+15:54 --- h4x0r is now known as Guest99123
+15:54  twkm: no quotes on an expansion when you want that word split.  quotes on an assignment when it isn't really a bash assignment, e.g., ''env a=$1 ...''.
+15:55  zxd: what does alnum mean in: grep '^[[:alnum:]][[:alnum:]\._-]*$'
+15:55  twkm: usually you don't want the expansion word split, and do want a=$1 to be considered a single word.
+15:55  twkm: zxd: alphanumeric.
+15:55  twkm: zxd: ''man bash''.
+15:55  twkm: err, ''man grep'', see also section.
+16:00  zxd: groovey
+16:00  zplinux: how can I remove a single line by a number in bash?
+16:01  trash: An editor might be useful.
+16:01  trash: !ed > zplinux
+16:01  greybot: zplinux: ed is a command-based file editor. See http://bash-hackers.org/wiki/doku.php?id=howto:edit-ed - http://sdf.lonestar.org/index.cgi?tutorials/ed - http://wolfram.schneider.org/bsd/7thEdManVol2/edtut/edtut.pdf
+16:01  taylanub: sed Nd file   where N is a number
+16:01  trash: If he has a stream to edit, yes.
+16:02  zplinux: thanks taylanub
+16:02  suigeneris: /usr/local/bin/convertsingleavi: line 2: a: command not found <--- I get this when I use like a=$1
+16:02  apropos: You can use sed -i to edit the file in-place.
+16:02  trash: !sed-i > apropos
+16:02  greybot: apropos: A common request is how to write to the same file as the one you read. "sed -i" is a potential solution, but keep in mind the -i flag to sed is nonstandard and not portable. If in doubt, use a temp file. See !faq 21 and ask me about ed.
+16:02  taylanub: i wish 'sponge' was a coreutil :/
+16:02  trash: suigeneris: What is line 2?
+16:02  suigeneris: trash a=$1
+16:02  trash: !cr > you might want to check this, suigeneris
+16:02  greybot: you might want to check this, suigeneris: Carriage Return (ASCII 13). Often written as ^M or \r. CRs are found just before newlines in text files generated by DOS/Windows apps. You can see them with "cat -e". See http://mywiki.wooledge.org/BashFAQ/052 to get rid of them.
+16:06  suigeneris: trash could that be caused by a semicolon?
+16:06  trash: suigeneris: Show a minimal not working example.
+16:07  suigeneris: trash http://pastebin.com/jHmN6VBt
+16:07  kbk1: Care to share thoughts on CCK3 (Multigroup)?  I need the functionality but I could use a Node Reference -> Second Content Type workaround
+16:07  nacitar: suigeneris: no spaces.
+16:07  trash: suigeneris: Yo you actually like when you said to me that you have 'a=$1' in your code.
+16:07  trash: s/yo/So/
+16:07  trash: s/like/lied/
+16:08  suigeneris: trash I was typing from memory, but I failed
+16:08  kbk1: I've got two concerns.  1) Upgrade path, 2) compatibility with other modules (e.g., content profile)
+16:08  trash: suigeneris: I hope you got what you did wrong now.
+16:09  trash: kbk1: Wrong channel?
+16:09  kbk1: totally
+16:09  kbk1: sorry.  ha ha
+16:11  suigeneris: trash now I did a=$1 instead of a = $1;
+16:12  trash: Good.
+16:15  supos: Basic question: I have a bunch of files in a directory. Some of these I need to use as an input to a certain command. I have the names of these in a text file. How do i do this cleverly, so I don't need to manually look up the names in the file and do command name1 && command name2, etc.
+16:17  taylanub: while read file; do command "$file"; done < filelist
+16:18  supos: taylanub: thanks
+16:19  taylanub: assumes one file per line in the filelist
+16:19  supos: taylanub: good assumption :)
+16:21  taylanub: also, read -r if filenames might include '\'  (they really, really shouldn't)
+16:23 --- MuzerAway is now known as muzer
+16:28  StaRetji: folks, thx for replying, I was afk
+16:28  StaRetji: I have a timestamp option wget -N, but it seems to be only working on direct download
+16:29  StaRetji: anyway, I will try on wget channel, thx for all the answers
+16:46  StaRetji: can I at least make script what to do on echo or something?
+16:51 --- muzer is now known as MuzerAway
+17:01  Republicn: Did you know? Barrack Obama is using Kenyan Sorcery (AKA Negromancy) to bankrupt America's future, paving the way for a new Islamic\Socialist New World Order. Message me now to learn how you can protect yourself, your children and your country, with one of my powerful 14 karat gold Anti-Witchcraft Amulets! Just seven easy payments of $19.99, order now and get a free American Flag candle!
+17:02 * erUSUL rotfl
+17:04  stockhol1: who banned republican? this was hilarious!
+17:04  stockhol1: get him back here!
+17:07  erUSUL: stockhol1: was freenode staff afaics ...
+17:08  pragma_: It was a bot.
+17:08  pragma_: Of course, the bot can be interacted with by some staff members, I'm sure.
+17:09  pragma_: In any case, has anyone ever spotted the elusive butternut sasquatch?
+--- Log closed Tue Oct 12 21:16:56 2010
+--- Log opened Tue Oct 12 21:17:08 2010
+21:17 --- Users 586 nicks [0 ops, 0 halfops, 0 voices, 586 normal]
+21:17  Varazir: 100 was talking about PE
+21:17  greycat: among other things, yes
+21:18 --- Channel #bash was synced in 76 seconds
+21:22  TheBonsai: pgas: btw, found the same for the c style for loopö
+21:23  TheBonsai: pgas: and the select command
+21:24  pgas: a must if you play golf :)
+21:27  TheBonsai: :)
+21:30  TheBonsai: the comments in parse.y are interesting
+21:30  TheBonsai:  /* Boy, this is unclean.
+21:30  TheBonsai: :)
+21:31  flowbee: having trouble reading syntax for pavuk (-request $req) where $req is defined as: URL:["]$url["] [METHOD:["]{GET|POST}["]] [ENCODING:["]{u|m}["]] [FIELD:["]variable=value["]] [COOKIE:["][variable=value;[...]]variable=value[;]["]] [FILE:["]variable=filename["]] [LNAME:["]local_filename["]]    ; i just want to send a cookie.  "-req COOKIE:var1=foo;var2=bar;" doesnt work
+21:31  greycat: NABQ
+21:31  TheBonsai: PQ?
+21:31  greycat: whateverthefuck pavuk is
+21:33  talirk81: if i have  a  large file and i want awk to  out put something like   abc:5\r\ndef:2\r\n and so on  how could i get awk to dynamically count all occurqances of each value in $2
+21:34  greycat: !using
+21:34  greybot: "How can I do X using Y?" NEVER ask a question of that form. Y may not be the best way to do X. All you should ask is, "How do I do X?"
+21:34  greycat: sort yourfile | uniq -c
+21:37  talirk81: the issue was i wanted to  group on  field 2 not field 1 which is why i though id need an awk
+21:37  Somelauw: echo http://google.nl
+21:37  greycat: awk '{print $2}' yourfile | sort | uniq -c
+21:37  greycat: if you want to do it in pure-awk, then ask #awk
+21:38  Somelauw: Sorry, I meant cat http://google.com
+21:38  greycat: Why are you telling us this?
+21:39  Somelauw: Is there a way to accomplish that? (That it prints the source of a website)
+21:39  greycat: try curl instead of cat
+21:40 --- Guest80328 is now known as hittt
+21:41  TheBonsai:  * Pushing and popping strings.
+21:41  TheBonsai: hm
+21:41  TheBonsai: kind of safer sex
+21:43  Melior: I'm trying to catch CTR+C and exit. Weird thing is my other part of the script isn't executed.. How come? http://pastebin.com/adbga22N I'm unsure about while true; do read backup; done and back() { .. }
+21:44  greycat: trap 'exit 1' INT
+21:44  Melior: sorry?
+21:44  twkm: you need to trap the signal.  ''help trap''
+21:45  TheBonsai: also interesting (parse.y):   /* We allow a `do' after a for ((...)) without an intervening list_terminator */
+21:45  greycat: that's how you "catch CTR+C and exit".
+--- Log closed Tue Oct 12 21:50:19 2010

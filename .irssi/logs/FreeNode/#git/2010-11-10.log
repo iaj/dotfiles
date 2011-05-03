@@ -1,0 +1,841 @@
+--- Log opened Wed Nov 10 08:35:14 2010
+08:35 --- Users 675 nicks [0 ops, 0 halfops, 0 voices, 675 normal]
+08:35 --- lamont` is now known as lamont
+08:37 --- Channel #git was synced in 139 seconds
+08:41  ihme-TTilus: how do i find out if a repo is at specific tag or not (or what tags are pointing to the commit the working tree is checked out to)
+08:42  ihme-TTilus: with cli tools
+08:42  ihme-TTilus: i can see it when browsing with gitk
+08:43  cimenta: git fetch remote does nothing although there are new commits, any idea how I can get them?
+08:45  jim: cimenta, I'm guessing you're not saying your whole situation, possibly not what branch you're trying to get, possibly not the exact commandline you're using, and definitely not any message you may be getting back
+08:45  cimenta: git fetch git@mydomain.com:gitolite-admin.git gives me no message back
+08:47  didi: I have four commits ahead of origin/master. I want to produce a format-patch, but just one, that contains these 4 commits. Is it possible or it doesn't make sense?
+08:48 --- ihme-TTilus is now known as TTilus
+08:48  jim: git diff commit1..commit4?
+08:48  cbreak_work: didi: just cat them together?
+08:48  frogonwheels: didi:  if you want to make them one patch, then rebase them into one patch first
+--- Log closed Wed Nov 10 08:48:11 2010
+--- Log opened Wed Nov 10 08:48:35 2010
+08:48 --- Users 675 nicks [0 ops, 0 halfops, 0 voices, 675 normal]
+08:48  frogonwheels: didi: when they aplpy the patches at the other end, do you want it to be 1 commit or 4 ?
+08:49  cbreak_work: doesn't it support whole mailboxes full of patches?
+08:49  cbreak_work: not that I ever used patches...
+08:49  frogonwheels: cbreak_work: ahh yes, of course!  it supports mbox format
+08:49  frogonwheels: iirc
+08:49  didi: cbreak_work: I want them too be e-mails.
+08:49  didi: Or one e-mail, actually.
+08:50  cimenta: jim: did I provide everything needed?
+08:50 --- Channel #git was synced in 141 seconds
+08:51  didi: frogonwheels: Hum. I don't know about he number of commits. I guess I don't care. What I don't want to do is bother them with four different e-mails that combined make one single feature.
+08:51  frogonwheels: didi: well why don't you rebase -i the 4 commits into one 'feature' commit  with a proper explanation, and then send that?
+08:52  didi: frogonwheels: Because I don't know how? :) I'll take a look at it. Thank you. :D
+08:52  frogonwheels: rebase -i origin/master   and follow the instructions :)
+08:53  jim: cimenta, does fetch just get the branch on the remote whose name is also that of the local branch?
+08:53  frogonwheels: didi: it's quite a valid way of working -  commit in a fine grain, then when you're all ready rebase it into larger chunks
+08:53 --- Adri2000_ is now known as Adri2000
+08:57  didi: frogonwheels: I see. Do you mean squashing them?
+08:57  banisterfiend: didi; hi
+08:57  frogonwheels: didi: exactly
+08:57  didi: banisterfiend: hi
+08:58  didi: frogonwheels: Nice.
+08:58  frogonwheels: didi (btw you don't edit the descs in the file that comes up with the list of commits, it will give you a normal 'commit' file to modify the commit)
+08:59  banisterfiend: didi: the pretenders is playing on the television
+09:00  didi: frogonwheels: I see. The second file presents to me the previous commit messages.
+09:01  frogonwheels: didi: yep - so munge them into something meaningful  (with a nice concise subject of course)
+09:01  didi: frogonwheels: Not an easy thing to do, if you ask me.
+09:03  cimenta: jim: not sure what you're asking... I did clone the other day and now I want to get the latest gitolite conf update it and push back. I guess there is only one branch (master)
+09:03  cimenta: jim: I am totally new to git ...
+09:04  sitaram: cimenta: git fetch; git status
+09:04  sitaram: paste that
+09:05  cimenta: is that good enough? "Your branch is behind 'origin/master' by 7 commits, and can be fast-forwarded."
+09:06  jim: cimenta: new? oh ok, what's your background and what do you want to use gut for?
+09:07 --- VadtecWork is now known as Guest59630
+09:08  sitaram: cimenta: youre doing it again -- asking for handholding on absolute basics...  I told your twice already.  You need to spend some quality time with a good git tutorial or progit or something.
+09:08  freimatz: like a book :-)
+09:08  pantsman:  what do you want to use gut for? <-- digesting his food probably
+09:09  banisterfiend: didi: any idea if this would create a race condition? https://gist.github.com/670530
+09:09  cimenta: jim: basically no background. I will manage my own projects using git but development is done by somebody else. I have git&gitolite up and running, still strugling to use git as you can see
+09:10  sitaram: banisterfiend: it won't dont' worry.  No git race possible there :-)
+09:10  sitaram: banisterfiend: in case it is not obvious -- I am saying that does not seem git related at all :)
+09:11  banisterfiend: sitaram: but you are a ruby programmer
+09:11  sitaram: banisterfiend: oh is that ruby?  I guessed but wasn't sure
+09:11  banisterfiend: sitaram: yes
+09:11  sitaram: banisterfiend: and who told you I'm a ruby programmer?  I've never written one in all my life!
+09:12  banisterfiend: sitaram: oh, i was just told by a friend that 'ask sitaram on #git any ruby question, he's an expert'
+09:12  sitaram: and even if I were, isn't that better on #ruby or something
+09:12  banisterfiend: sitaram: what languages do you use then?
+09:13  sitaram: banisterfiend: I can't figure out if someone made a genuine mistake, or someone pulled your leg, or you're pulling mine.  I wouldn't accept that statement even about perl, and I'd still say 'ask on #perl"
+09:16 --- qDot_ is now known as qDot|Away
+09:18  cimenta: I got it. "git pull repo branch" worked. Can I pull and merge all branches at once? I thought it was by default
+09:20  cimenta: somebody uses trigger after each commit to synchronize local repo that needs redmine to display repo via web interface?
+09:22  [exa]: cimenta: you can put git-push to post-commit hook
+09:22  sitaram: i cimenta
+09:22  sitaram: u
+09:22  sitaram: oops
+09:22  sitaram: sorry guys
+09:23  sitaram: (wrong window + bad tab completion!)
+09:23  cimenta: the hook will be executed under git user?
+09:24  cbreak_work: hooks are executed under the user that runs the git command
+09:43  zoran119: i just had a merge conflit and solved it by calling git mergetool... how do i continue the merge... (i'm after someting like git rebase --continue i guess)?
+09:45  pantsman: zoran119, git add on the files you merged
+09:46  pantsman: then git commit to create the merge commit, I guess
+09:49  bjornbjorn: hmm, I created a local branch which I've made changes on .. committed etc. but when I try to push I get an error message telling me it was rejected (due to changes) .. but those are changes on the master - I thought the whole point of branching was that I had my own branch I could work on .. so what do I do? pull and merge with master before I push?
+09:50  bjornbjorn: og merge it and then pull?
+09:50  doener: bjornbjorn: the error message likely also tells you that pushing master is what was rejected, not your branch
+09:50  zoran119: pantsman: yeah... just a plain 'git commit' did it all... LOVE git
+09:50  doener: bjornbjorn: "git push" just pushes all branch heads that exist remotely and locally
+09:50  bjornbjorn: doener: correct
+09:51  doener: bjornbjorn: if you want to push just your branch, use something like "git push <repo> <your_branch>"
+09:51  bjornbjorn: doener: I see now that master -> master was rejected ..
+09:51  bjornbjorn: doener: my branch is a local branch .. and I'm pretty much finished with my work in it so I should probably merge it with master and then pull/push master, right?
+09:52  doener: bjornbjorn: right. First update your local master branch head (using e.g. pull), then merge your topic branch to it, then push it out
+09:53  doener: bjornbjorn: (gives a cleaner history than: merge, try to push, fail, pull, push. As you avoid the extraneous merge commit from pull)
+09:55  bjornbjorn: doener: hmm, git pull errors with 'you didn't tell em which branch to merge with' .. should I switch to master, then pull, switch back to my local branch, then merge, then push?
+09:59  doener: bjornbjorn: no
+09:59  doener: bjornbjorn: you want to update master, so checkout master, then pull. Then merge your topic branch, then push
+09:59  doener: bjornbjorn: you don't want to merge master to your topic branch, but the other way around
+10:00  bjornbjorn: doener: right .. makes sense
+10:05  bjornbjorn: doener: thanks for your help! :-) just needed to fix a couple of conflicts and now my branch is part of master, yay!
+10:07  freimatz: Deletion of directory 'src/program/00_Allgemein/System/Datenpflege' failed. Should I try again? (y/n)? <- why?
+10:07  freimatz: after "git checkout master"
+10:31  hiptobecubic^: If i clone something with --depth 1 and then do `git pull`, does it download the rest of the history or does it only pull in changes AFTER the clone?
+10:33  _rane: you could try rather easily
+10:33  Adri2000: I'm trying to write a pre-commit hook that would ask the user his username and email, and set them as user.name and user.email
+10:34  tasslehoff: For svn we have a daemon that accesses the repo, so that individual user don't have direct access to the folder. Is it possible to do it the same way for git?
+10:34  Adri2000: but, is it possible to get user input from a git hook? and is it possible to set user.name and user.email in a pre-commit hook? if at least one of the answers is "no", what would you suggest instead? :)
+10:36 --- cillybabe is now known as cilly
+10:55  saimon_: Hi all... I'm pretty sure this isn't possible but I'd like to add my ~/.gitconfig to github (along with other dotfiles) but it contains my github token which I obviously don't want to publish. Can I split up .gitconfig? Is there another location git will read a .gitconfig from?
+10:55  frogonwheels: saimon_:  there are a few levels of gitconfig
+10:55  frogonwheels: saimon_: and you can add your own iirc
+10:56  saimon_: frogonwheels: if that's so that's great...
+10:56  frogonwheels: oh no that's excludes, my bad :(
+10:56  saimon_: frogonwheels: what are the default locations?
+10:57  frogonwheels: saimon_: man git-config
+10:57  saimon_: frogonwheels: I'm looking at it...
+10:58  frogonwheels: saimon_: /FILES
+10:58  saimon_: ah /etc/gitconfig
+10:58  saimon_: that'll do
+10:58  saimon_: thanks
+10:58  linoj: hiya, i have a branch foo and it want it to become master, i dont care about the old master. How do it do that?
+10:59  saimon_: frogonwheels: there's also a GIT_CONFIG env variable
+11:00  frogonwheels: saimon_:  doesn't really help as it's _instead_ of .gitconfig
+11:00  saimon_: frogonwheels: ah yes :(
+11:01  saimon_: I'll use system wide..that'll do me
+11:01  benishor: linoj: I think you could drop the master branch then use git branch -m oldbranch master
+11:01  benishor: check "git help branch"
+11:03  linoj: would git rebase master do it?
+11:04  banisterfiend: linoj: i dont know, i find git too complicated
+11:04  banisterfiend: where can i find a basic overview of git
+11:04  banisterfiend: for complete epsilon semi-morons?
+11:06  frogonwheels: banisterfiend: there are many linked to from git-scm.com
+11:07  saimon_: frogonwheels: :( I stuck the token bit in /usr/local/etc/gitconfig but git isn't picking it up
+11:08  frogonwheels: saimon_: did you try setting it with git config ??  you sure you're looking in the right spot?
+11:08  dr_lepper: banisterfiend, tried gitmagic?
+11:08  saimon_: frogonwheels: no I just added the file ass it was multiline but i'll try setting with gitconfig
+11:08  ptl: hi
+11:08  ptl: I want to migrate from subversion to git
+11:08  dr_lepper: linoj, you need to run git-reset
+11:08  banisterfiend: dr_lepper: what's that? link
+11:09  dr_lepper: banisterfiend, http://crypto.stanford.edu/~blynn/gitmagic/
+11:09  banisterfiend: dr_lepper: thanks
+11:09  dr_lepper: linoj, switch to master, run `git reset --hard <yourbranchname>`
+11:09  ptl: and I am doing this: git svn clone --stdlayout --authors-file=/dados/gitroot/authors.txt svn+patolassh://patola.org/dados/svnroot -- but it always creates an empty git repository. :(
+11:09  ptl: I have git-svn installed, of course
+11:09  ptl: can anyone help me?
+11:14  linoj: dr_lepper: for some reason, reading about reset, it scares me to use it
+11:14  Tom_B: Good localtime()
+11:15  Tom_B: Any Git Guru's lurking?
+11:16  dr_lepper: Tom_B, don't ask to ask, just ask
+11:16  dr_lepper: linoj, reset only affects the branch you are currently on; if you don't care about the future of your master branch, it's safe to use it
+--- Log closed Wed Nov 10 11:22:11 2010
+--- Log opened Wed Nov 10 11:22:32 2010
+11:22 --- Users 707 nicks [0 ops, 0 halfops, 0 voices, 707 normal]
+11:22  Tom_B: I'm just Mr.Average. Having moved from CVS to SVN, and now onto Git. I have 3 git locations: repos, live and dev. I need to make repos bare?
+11:23  curtana: Tom_B, the repos that you push to/pull from are generally bare
+11:24  frogonwheels: bremner: if it was here :(
+11:24  Tom_B: Super. [Because I'm so used to SVN I guess] I have committed changes in dev and live (don't ask!) that I need to merge into dev (via repos). Can I safely make repos bare now?
+11:24  bremner: https://git.wiki.kernel.org/index.php/GitFaq#Why_won.27t_I_see_changes_in_the_remote_repo_after_.22git_push.22.3F
+11:24 --- Channel #git was synced in 149 seconds
+11:28  Yotson: hi all. a question about a step in this tutorial. http://www.howtoforge.com/how-to-install-a-public-git-repository-on-a-debian-server   The step " mkdir project.git "
+11:28  Yotson: anyone got a tip on what to do?
+11:28  Yotson: hmm. the error is "permission denied"
+11:29 --- masonkramer_ is now known as masonkramer
+11:29  bremner: Yotson: that is not a git question, that is a debian question. The answer is that you don't have permission to create a directory in your current working directory
+11:33  ptl: ... no help on my conversion from svn to giut?
+11:33  Yotson: thanks for the reply bremner. i realize that it isn't a git specific question. I merely hoped that someone could point me to a solution.
+11:33  ptl: *git
+11:33  Yotson: np. off to debian.
+11:34  bremner: Yotson: I meantioned it because it made me think you might not be ready to administer a public server just yet...
+11:34  Yotson: all i can say is that you are right. the public will be me alone.
+11:37  Tom_B: I'm going to go for the 2nd option here: https://git.wiki.kernel.org/index.php/GitFaq#How_do_I_make_existing_non-bare_repository_bare.3F
+11:57  siyb__: hi, i merged a branch of a friend into my own branch and i had commits in there that i wanted to squash later on. is it advisable to sqash the commits now, even if there are not in a row any more?
+--- Log closed Wed Nov 10 12:10:11 2010
+--- Log opened Wed Nov 10 12:10:39 2010
+12:10 --- Users 709 nicks [0 ops, 0 halfops, 0 voices, 709 normal]
+12:10  boehmer: when using an editor like eclipse each line gets intended as the former one (in general) and i leave empty lines just as they are
+12:10  divVerent: personally... I'd like to avoid creating empty lines with tabs
+12:10  divVerent: but no idea how to best avoid it
+12:11  divVerent: always have to delete them manually, this is annoying
+12:11  divVerent: using vim, BTW
+12:11  divVerent: happens all the time when editing, no idea why
+12:12  divVerent: ah, found out when vim creates the empty lines with whitespace
+12:12  divVerent: when making a new line, typing something, deleting it, pressing enter and typing again
+12:12  divVerent: this creates a line with indented nothing
+12:12  cimenta: can I have more than one hook with the same name but different extention?
+12:12  divVerent: basically, I want either vim to not create this WS, or have git ignore it
+12:12 --- Channel #git was synced in 139 seconds
+12:12  divVerent: as it's annoying in git to have such lines
+12:13  boehmer: wereHamster, can you name some coding guideline which demands that? would help me to apply that rule in our team
+12:13  wereHamster: cimenta: yes. But git will only execute the hook with the name it expects (it'll ignore pre-commit.foo for example)
+12:14  cimenta: wereHamster: hm. there is already post-receive.mirrorpush so should I edit his one or create post-receive ?
+12:14  Tom_B: Bremner,Yotson: Thank you for your help.
+12:14  wereHamster: cimenta: you can edit post-receive.mirrorpush, but git wont' execute it.
+12:14  wereHamster: it expects 'post-receive'
+12:15  wereHamster: and nothing else
+12:15  Tom_B: frogonwheels: gotcha, thanks
+12:15  cimenta: wereHamster: ok, cool thank you. Let me try if it works
+12:18  xc0ffee: Hi Guys.. I want to create a branch based off one of the earlier revisions.. for example, if my revision tree looks like this A->B->C->D->HEAD, I want to branch out from revision B.. Any trick to do this?
+12:20  charon: xc0ffee: simply figure out the sha1 of B and use 'git branch new_name sha_of_B', or similarly with checkout -b, or use gitk's context menu on B, or ...
+12:21  charon: if your history _actually_ has only these five commits, you can also 'git checkout -b new_name HEAD~3' since B would be the 3rd ancestor of HEAD
+12:21  xc0ffee: charon: Thanks.. it worked..
+12:24  path[l]: Ive got 3 commits on my machine that havent been pushed. How can I undo the last commit but keep the changes
+12:32  guardian: hi
+12:32 * paradigm waves
+12:33  guardian: what's the best way to get "git diff" launches gnu diff but something like "git vdiff" launches p4merge? what's the way to go? configure something into git or just use a bash alias?
+12:33  ptor: path[l]: You wish keep the last commit away somewhere, then reset master to one down (so that there are 2 commits, not 3 commits to push), is that right?
+12:33  guardian: currently i configured "git diff" to launch p4merge but it sometimes unpractical as on my mac i have to quit p4merge everytime i launch git diff
+12:33  shruggar: gaurdian: define a git alias?
+12:34  shruggar: guardian, make a git-vdiff file and put it in your PATH, if it's more complicated than a git alias requires?
+12:55  path[l]: ptor yeah thats right
+12:56  path[l]: ptor:  actually I would rather "undo" the commit back to uncommitted changes
+12:58  ptor: path[l]: git reset --mixed <sha-of-previous-commit>  <--- that'll give you the last commit as uncommited changes. Mind, you need a Git new enough to support reset --mixed
+12:59  ptor: If not, then there's the simple method of 'git show > patch'; git reset --hard <sha-of-previous-commit'. Changes will be in 'patch'.
+13:01  ptor: path[l]: For these things (that I do rarely) I use a little test-repo with some easily identifiable commits, and then I fool around with the commands to verify or search for the behaviour I want.
+13:01  doener: err, if your git doesn't support --mixed, that would be ... uhm...
+13:02 * ptor has no idea which version included that, i.e. if it's old or new
+13:02  doener: got added in v0.99.5~4^2~5
+13:02  ptor: hehe, safe bet it's there then :-)
+13:03  doener: and --mixed is the default, and the "previous" commit is HEAD^, so just "git reset HEAD^" will do
+13:06 * ptor nods
+13:07  ptor: For some reason I very rarely need to use plain 'git reset', I don't end up in those situations. It's more often reset --hard and that kind of stuff.
+13:08  _rane: I use it sometimes
+13:08  _rane: when I accidentally stage something I wasn't supposed to
+13:08  ptor: path[l]: So, see doener's reply:  A simple git reset HEAD^ will do in this case.
+13:09  guardian: shruggar: what i want is "git diff foo.c" keeps me in the console but "git difftool foo.c" launches a visual diff program; looks like my git isn't configure properly for that
+13:09  ptor: _rane: Right, I do that sometimes, on individual files (but then I don't think, I simply follow the advice output of 'git status' on how to unstage :-)
+13:10  _rane: I always use git status -s, so I get no advice ;)
+13:10  _rane: know my way around git well enough
+13:12  ptor: _rane: I have an alias set to git status --untracked=no because I always have a lot of rubbish around. Then I only need to see the full output when I really want to add something new. And I use -s when I want to script-process the output :-)
+13:29  path[l]: thanks
+13:40 --- hiptobecubic^ is now known as hiptobecubic
+13:46 --- SvenDowideit_ is now known as SvenDowideit
+13:47  mookney_: hi, i'm new to git and have been asked create a repo on one of our servers. so i browse to the directory (which contains a few files) i want to make a repo (cd /home/git/repo1) and run 'git init'. On my local machine I then run 'git clone git@rservername:/home/git/repo1' and i get "warning: You appear to have cloned an empty repository." - I'd expect it to copy the files on the server in the rope directory or am I missing something?
+13:48  mookney_: *rope directory
+13:48  reto_: mookney_: have you done a tutorial about git or so?
+13:48  mookney_: *repo directory
+13:48  mookney_: yeah
+13:48  reto_: you hae to add and commit the files, not?
+13:48  mookney_: reading http://gitref.org/
+13:49  reto_: git init does nothing but creating an empty repo
+13:49  reto_: unlike i.e. svn import
+13:49  mookney_: reto: and if the ARE files in the directory you run 'git init' in?
+13:50  mookney_: reto: i must have mis understood the tutorial then - see http://gitref.org/creating/
+13:51 --- Putr is now known as Putr|Away
+13:51  mookney_: reto: i just reread
+13:52  mookney_: reto: ugh - thanks though
+13:59  avar: if I do : "git checkout -b foo" and forget to do "git checkout -b foo -t origin/master" instead, what was the thing to add the tracking info after the branch had been created?
+13:59 * avar always just edits .git/config
+14:00  albel727: avar: git branch --set-upstream, iirc. or something.
+14:02  albel727: avar: alse there is quite useful "git push --set-upstream", which sets up tracking for all succesfully pushed branches.
+14:18 --- sebastor1ma is now known as sebastorama
+14:21  cimenta: I cannot make the post-receive hook work :-(
+14:21  cimenta: I created a question on SO http://stackoverflow.com/questions/4144853/from-command-line-ok-but-the-hook-git
+14:21  cimenta: off to bed, thank you
+--- Log closed Wed Nov 10 14:28:14 2010
+--- Log opened Wed Nov 10 14:28:37 2010
+14:28 --- Users 712 nicks [0 ops, 0 halfops, 0 voices, 712 normal]
+14:28  avar: I've taken to always working on named local branches for even trivial stuff
+14:31 --- Channel #git was synced in 158 seconds
+14:37 --- Putr|Away is now known as Putr
+14:45  Aleric: Erm, how do I abort a git rebase?
+14:45  patrikf: git rebase --abort
+14:45  Aleric: Thanks :*)
+14:46  jzacsh: anyone here use gitoline?
+14:47  jzacsh: gitolite*
+14:47  wereHamster: jzacsh: what if I do.. ?
+14:47  Anti-X: yeah what if he does!?
+14:47  shruggar: well, the author is in here, so he probably does ;)
+14:47  jzacsh: sorry: i'm following the install instructions and getting: cp: cannot stat `/tmp/share/gitolite/conf/example.gitolite.rc': No such file or directory
+14:47  jzacsh: The default settings in the rc file (/home/repo/.gitolite.rc) are fine for most
+14:47  jzacsh: lol
+14:48  jzacsh: specifically, i'm following the "root method directly on server" instruction
+14:49  jzacsh: i see mention in "important notes" but it doesn't say it has to be installed first, in order to install gitolite and put it up and running.
+14:49  jzacsh: looks like, from the error i got, that the install script expected to atleast  find a default rc file
+14:51  Aleric: Hmm, this rebase failure is annoying, as it is not necessary.  I created a branch a month ago, merging it with several other branches over time (so it's a real mess ;).  However, all of that was just local, so now I want to rewrite the history and just rebase the branch on top of the most recent of the other branches. However, if I attempt that I get horrible collisions (that I already solved in the past, too) :/.
+14:53  Aleric: Since I want to squash all commits, and told rebase so, I think this is a bug :p... Since everything is squashed, it should just take the diff between the tip of the branch now and what I want to rebase it on :p.  I just need the rebase to get a correct commit message.
+14:53  sitaram: jzacsh: if you run all the commands given, it works fine.  There are no assumptions or hidden instructions.  Paste me the commands you used and what you got as output
+14:56  jzacsh: sitaram: http://dpaste.de/eigk/
+14:56  jzacsh: sitaram: sorry, that inclused some bashcompletions' offerings to me (eg.: line 4)
+14:58  jzacsh: sitaram: repasting, that was a messy paste
+14:58  sitaram: jzacsh: dont use "./gl-setup".  Just "gl-setup" (line 33)
+14:58  jzacsh: sitaram: aaah
+14:59  jzacsh: http://dpaste.de/qSgc/ is the repaste, anyway
+14:59  jzacsh: sitaram: so should i C-c out of it now?
+14:59  sitaram: jzacsh: actually, I'm not sure how even that would have caused this error, but try it anyway
+14:59  jzacsh: or too late?
+15:00 --- Guest59630 is now known as VadtecWork
+15:00  sitaram: jzacsh: never too late to follow http://github.com/sitaramc/gitolite/blob/pu/doc/1-INSTALL.mkd#_cleaning_out_a_botched_install :-)
+15:00  jzacsh: sitaram: aaah, sweet.
+15:00  jzacsh: i'll try again right after this cleanup
+15:01  sitaram: jzacsh: but I'm curious about this; I can't see how that /tmp based path is in there.  Try it without the ./ and let me know, and if it still doesn't work I'll try and simulate it.  If you don't mind chatting on a pm (query) that might be even better
+15:01  jzacsh: sitaram: so, aside from trying without specifying path... should i atleast cp example.conf to .conf (or w/e the name is) ?
+15:01  sitaram: no; it does all that by itself
+15:01  jzacsh: sitaram: i can pm
+15:01  sitaram: I meant what I said -- there are no hidden steps you should have done etc :)
+15:01  sitaram: but... after about 20 min; I have to have dinner
+15:02 * sitaram is hungry
+15:02 * jzacsh understands
+15:02  Teo`: hello
+15:03  Teo`: I'm using git-svn and a dcommit failed on my 3rd commit because of a failed hook. Now all my later commits have disappeared and my changes all ended up in the working dir
+15:03  Teo`: is there a way to undo the failed git svn dcommit?
+15:03  Teo`: and restore my commits pretty please
+15:13  mmc: Teo`: I'd try w/  git reflog (to recover those lost commits)
+15:14  mmc: that is, find them (the hash), and the check them out (on a reference/branch)
+15:14  Teo`: mmc: is there a way to just grab the commit messages from reflog? recovering all the commits would be a pain because I did a lot of rebasing before dcommitting
+15:14  Teo`: I mean squashing
+15:14 --- jzacsh is now known as jzacsh_
+15:14  SethRobertson1: There should be a ref representing all of the work you did
+15:15  SethRobertson1: all commits, their messages, etc
+15:16  Teo`: SethRobertson1: I'm so sorry, I'm a bit of a beginner with git. this is what git reflog gives me, could you please tell me which one are you referring to? http://pastebin.com/AdggYrKM
+15:17  SethRobertson1: There is no way for me to tell.  Perhaps one of those looks like the first line of you last commit message.  Another option is to stick those commit IDs (or HEAD... abbreviations) into `git log` or `gitk` and take a look at what they look like
+15:18  Teo`: SethRobertson1: ok, thank you :)
+15:18  Teo`: mmc:  SethRobertson1: thank you both
+15:18  Teo`: woohoo great, there are my commit msgs
+15:18  Teo`: :D
+15:21  roborino: continue to get error: cannot open .git/FETCH_HEAD: Permission denied all permissions are set correctly...what else could I be missing?
+15:22  SethRobertson1: ownership?
+15:22  roborino: the user is in the group
+15:23  roborino: all files have been set with chgrp -R webdev directory
+15:23  roborino: user is in webdev
+15:23  SethRobertson1: Type `id` and `ls -ld .git/FETCH_HEAD .git` and report back
+15:23  Borbus: Is it possible that diffs could eventually get "lost", for example if everyone currently has a history that goes back only to say version 10, what if somebody then came along with version 1 and tried to pull?
+15:24  roborino: correct group for both files
+15:24  SethRobertson1: I was more asking to see the output
+15:24  roborino: is there a bin to post the output?
+15:25  SethRobertson1: Borbus: as long as the older history is connected, it will not get lost
+15:25  SethRobertson1: pastebin or any of the other ones
+15:25  roborino: http://bin.cakephp.org/view/102754734
+15:26  charon: roborino: the + means xattrs. check if those are to blame
+15:26  SethRobertson1: also the `id` output.  Either here or in a bin
+15:27  roborino: http://bin.cakephp.org/pastes/edit/63422
+15:28  SethRobertson1: e.g. lsattr .git .git/FETCH_HEAD
+15:29  roborino: http://bin.cakephp.org/view/102754734
+15:29  charon: iirc that's getfattr, but then who knows
+15:29  SethRobertson1: + is *any* other.  So you have to search to see which one is being used
+15:30  charon: i see
+15:30  roborino: not sure I understand
+15:30  SethRobertson1: I'm not sure how to get the xattr stats though.  Perhaps I just don't have the right package loaded
+15:32  charon: getfattr .git/FETCH_HEAD
+15:32  charon: or maybe also: getfacl .git/FETCH_HEAD
+15:32  charon: still confused :)
+15:33  roborino: http://bin.cakephp.org/view/102754734
+15:33  SethRobertson1: That shows the problem
+15:33  SethRobertson1: group doesn't have write
+15:33  roborino: showing I guess that group doesn't have w
+15:33  roborino: hrmm...how to fix that?
+15:34  SethRobertson1: setfacl looks likely
+15:35  charon: i wonder why it lets acl and stat data disagree though
+15:35  roborino: setfacl -m group:webdev:rwx .git .git/FETCH_HEAD
+15:36  roborino: that look right?
+15:36  SethRobertson1: You probably want -R on .git
+15:37  roborino: so leave it out?
+15:38  SethRobertson1: From the man page description: `setfacl -R -m g::rwx .git` shoud work
+15:38  charon: the following is in man 5 acl, and explains that the group bits are those in the mask entry: http://pastebin.com/s7BHFxNT
+15:38  SethRobertson1: Or `setfacl -R -m g::rwX .git` would be better
+15:38  charon: it does not say why this should make any sense, however.
+15:39  Freeaqingme: I deleted some branches using git branch -dr <name>. Now how do I get those deletions to origin?
+15:40  SethRobertson1: I believe `git push origin :unwantedbranchname`
+15:41  SethRobertson1: may be forbidden by remote repo
+15:42  Freeaqingme: SethRobertson1, tnx, but I keep getting: error: src refspec :modulename does not match any.
+15:43  SethRobertson1: Can you put the exact command and output in a pastebin?
+15:43  curtana: newer git has git push --delete origin branchname
+15:43  SethRobertson1: Nice shortcut, though the older should still work
+15:44  Freeaqingme: nice one curtana that works
+15:44  curtana: yes it is just syntactic shgar for the ormer
+15:44  curtana: *sugar
+15:47  charon: SethRobertson1: reading posix.1e b23.3.6, it appears that this was chosen because 'chmod go-rwx', by mapping g-rwx to the mask, is guaranteed to revoke access from everyone but the owner
+15:47  charon: if it were mapped to the main group:: entry, then group:other: would still be in effect
+15:47  ranza: is there a way to take the changes ive made since last commit and put them in a new branch and reset the changes made to the master branch?
+15:48  charon: SethRobertson1: this page has links to posix.1e and others, if you care: http://www.lucq.org/openbsd/posix1e.html
+15:49 * charon stops caring in the interest of getting work done
+15:49  ranza: charon, work is overrated :)
+15:52  SethRobertson1: ranza: Yes.  You have NOT committed or pushed, right?
+15:52  SethRobertson1: ranza: `git checkout -b newbranch; git add -A .; git commit -m "New stuff"`
+15:52  SethRobertson1: If you have not committed, you changes will float to a new branch which you create
+15:53  ranza: SethRobertson1, i think what im looking for is checkout -b branchname
+15:53  ranza: ah
+15:53  ranza: im slow :) thank you sir
+15:53  SethRobertson1: the old branch does not need to be reset since you did not comit
+15:56 --- Feh_ is now known as Feh
+15:58  ivan-kanis: How do you restrict access to the master branch ? (I am using smart http backend)
+15:58  Symbi0nt: question to the blue: Has someone successfully get nbgit/netbeans running with public/private key access and git on windows?
+15:59  Symbi0nt: Looking for a tutorial or solution to this
+16:13 --- bittwist_ is now known as bittwist
+16:24  joooo: hello
+16:25  joooo: if i have 2 features, and for each one i create a branch, both based on "master"
+16:25  joooo: and i want to test with both features enabled from time to time, how should i do?
+16:26  joooo: (preferably often)
+16:27  wereHamster: joooo: checkout master^0; merge both features and test
+16:28  joooo: wereHamster: won't it pollute master with the other branches?
+16:35 --- shennyg_ is now known as shennyg
+16:37 --- NfNitLoo` is now known as NfNitLoop
+16:37  jpitts: I ran git svn rebase and thought I had resolved the merge issues it ran into ( by editing the offending file and git add'ing it ), but git rebase --continue tells me You must edit all merge conflicts and then
+16:37  jpitts: mark them as resolved using git add
+16:38  jpitts: what am i missing here?
+16:39  yrlnry: jpitts:  if the result of conflict resolution is that there are no changes at all, you need git rebase --skip instead of --continue.
+16:39  yrlnry: Oh, maybe that's not it.  Do you happen to have rerere enabled?
+16:39  jpitts: yrlnry: I had to edit a file to resolve a merge conflist.
+16:40  jpitts: rerere?
+16:40  jpitts: not having heard of it, i would guess not.
+16:40  jpitts: would that be in my config?
+16:40  yrlnry: yes.
+16:41  yrlnry: jpitts:  does 'git status' report any conflicts?
+16:42  jpitts: git status shows what I understand to be a clean set of changes to be committed
+16:42  yrlnry: can you paste the output of git-status at http://pastebin.ca/ ?
+16:43  jpitts: http://pastebin.ca/1987302
+16:44  yrlnry: Sorry, I don't know.
+16:48  jpitts: thank you for looking.
+16:48  jpitts: any advice where I might turn next?
+16:52  fr0sty: jpitts: that is the entire output of 'git status' ? what does 'git diff' return?
+16:53  jpitts: it returns immediately with no differences.
+16:53  jpitts: --staged shows roughly what i would expect also
+16:54  fr0sty: and 'git rebase --continue' doesn't work?
+16:54  fr0sty: try it again, if you would.
+16:54  jpitts: i will...
+16:55  jpitts: and it behaves differently on the second execution. is that expected?
+16:55  fr0sty: did it work?
+16:55  fr0sty: or just fail differently?
+16:55  jpitts: it continued and encountered another file i need to manually merge
+16:56  jpitts: which I'll tenatively call "working" :D
+16:56  fr0sty: jpitts: that counts.
+16:57  fr0sty: the index was not completely up to date it seems. 'git diff' fixed that.
+16:57  fr0sty: what version of git? 'git --version'
+16:57  jpitts: that is surprising to me
+16:57  jpitts: '
+16:57  jpitts: 1.7.1
+16:58  jpitts: On OSX 10.6.4 managed by macports, if thats interesting.
+16:59  fr0sty: I forget the details, but if you touch, but don't modify files you will change their timestamp and a command like 'git describe --dirty' will report your tree as 'dirty' even though 'git diff' will show no changes.
+16:59  Tom_B: Is it possible to pull(?) updated into a bare repos to handle merges?
+17:00  fr0sty: basically git takes a short-cut and since it can't prove that everything is up to date, it assumes it isn't.
+17:00  fr0sty: 'git diff can be a somewhat expensive operation if you have a massive repository so it is not run automatically.
+17:00  fr0sty: Tom_B: you cannot merge in a bare repository.
+17:00  jpitts: fr0sty: but I _edited_ the file. deleted lines and such.
+17:00  fr0sty: that is probably not the file that was causing an issue.
+17:01  jpitts: ok. fair enough.
+17:01  jpitts: thank you for your help!
+17:01  fr0sty: no problem.
+17:02  Tom_B: bleurgh
+17:02  fr0sty: Tom_B: how could you merge there? how would you resolve conflicts?
+17:02  fr0sty: you can reset --hard to move branches around, though...
+17:03  Tom_B: No, no. I do see. This is my first day using git, just getting used to it.
+17:03  Tom_B: And I'm hampered by people doing things the wrong way.
+17:04  Tom_B: I have comitted and pushed dev changes, and committed live changes that won't push [obviously(!)]
+17:05  cbreak_work: pull or pull --rebase before push if the push fails due to non-fast-forward
+17:05  cbreak_work: pull is short for fetch && merge
+17:05  Tom_B: I can't put the pushed changes live, as they haven't been signed off.
+17:05  cbreak_work: then just push to a different branch
+17:06  cbreak_work: or force push (which kills everything that was there)
+17:06  cbreak_work: that's why you usually have a dev branch and a release branch :)
+17:06  Tom_B: There is only default/master/trunk branch, whatever git comes with when nobody has actively made any branches.
+17:06  cbreak_work: master's the default
+17:06  cbreak_work: just make mroe
+17:07  Tom_B: ok
+17:07  cbreak_work: git push remotename localbranchname:remotebranchname
+17:07  cbreak_work: you can also rename your local branch to release, for example
+17:07  cbreak_work: and then just git push remotename release
+17:08  Tom_B: The important thing is that live is, er, live and I can't mess that up :)
+17:09  Tom_B: I want the live changes pushed into the dev changes...
+17:09  Tom_B: git push origin master:release ?
+17:10  Tom_B: From the live machine?
+17:10  cbreak_work: that will push the local master branch into origin's release branch
+17:10  cbreak_work: it probably creates a new release branch since you don't have one there
+17:10  cbreak_work: you can then pull the release branch from your dev machine
+17:10  cbreak_work: (which merges live changes into the dev machine's local branch)
+17:11  Tom_B: I also need to change the branch 'flag' on the live box?
+17:11  cbreak_work: flag?
+17:11  cbreak_work: never heard of.
+17:11  Tom_B: Or can I just leave that as it is, handle all the merging on dev and push it back as master?
+17:12  Tom_B: *waves flag*
+17:12  cbreak_work: you can NOT push to a branch with files, just to bare repositories
+17:12  Tom_B: Yes.
+17:12  cbreak_work: but if it's fast forward, it should work with bares
+17:12  Tom_B: LIVE: push origin master:release
+17:12  Tom_B: erm
+17:13  cbreak_work: then on some other machine: git pull origin release (that merges the stuff)
+17:13  Tom_B: My issue is which branch is currently active.
+17:13  Tom_B: Aha
+17:13  cbreak_work: git branch will show
+17:13  cbreak_work: get the git bash helper stuff installed
+17:14  cbreak_work: ah well, work end :)
+17:14  cbreak_work: good luck
+17:14  Tom_B: Breaks horribly (installing manual)
+17:14  Tom_B: Thanks cbreak
+17:24  lepine: Is there a recommended way to keep track of rebased branches and those that have been pushed up?
+17:25  offby1: what does "keep track of" mean?
+17:25  deoxxa: how is it that i can have a repository that's a direct copy of another repository at another point in time, then get merge errors when i try to add the original repository as a remote and merge it?
+17:26  deoxxa: given that there have been precisely 0 changes to the local repository
+17:26  lepine: I guess the question is does git branch --no-merge list branches that have been rebased?
+17:26  lepine: eventhough the history doesn't list references to each commit?
+17:27  SethRobertson1: deoxxa: If the other repo has had its history rebased for sure
+17:27  offby1: lepine: beats me.  Why not create such a branch, and then run "git branch --no-merge", and see?
+17:27  deoxxa: hm, i'll look into it
+17:27  SethRobertson1: lepine: I am sure that `git branch --no-merge` will be entirely ignorant of rebases
+17:27  deoxxa: i think github's fork queue does horrible things to repositories
+17:27  SethRobertson1: I could be wrong, but I am sure
+17:28  lepine: SethRobertson1: I know, it makes alot of sense for git not to track that.
+17:28  lepine: offby1: quite right, I could and should. But i'm at work, and already have to justify why i'm even using git-svn ;)
+17:28  offby1: yow
+17:28  offby1: the experiment shouldn't take more than two minutes
+17:29  lepine: eh, by chatting, I've already waster more time than if I had tried, i know
+17:31  offby1: yep
+17:34 --- SethRobertson1 is now known as SethRobertson
+17:36 --- qDot|Away is now known as qDot_
+17:39  irc2samus: guys if I have some modification on my working tree or staged how can I see the file from the last commit? other than staging the changes
+17:40  SethRobertson: git show HEAD:filename
+17:40  SethRobertson: Hopefully you have quick eyes
+17:41  irc2samus: ahh perfect! I tried git show HEAD -- filename, didn't knew about that notation :)
+17:41  irc2samus: thanks!
+17:42  sl0ppy: i need to make a change to one of the commits that i pushed to master, what's the best way of going about doing that
+17:43  slonopotamus: sl0ppy: just make one more commit that fixes things.
+17:44  sl0ppy: slonopotamus: yeah i could do it that way i guess, but isnt there a way to pull back the commit, make the change, and recommit?
+17:45  slonopotamus: sl0ppy: someone might have already pulled your changes from shared repo. you can't modify what he has
+17:45  yared: how do I undo after doing a 'git add .'
+17:45  sl0ppy: slonopotamus: oh i see
+17:45  yared: I havent commited the changes yet
+17:45  PerlJam: yared: "git status" tells you
+17:45  sl0ppy: thanks
+17:46  slonopotamus: sl0ppy: so no reason messing with commit correction
+17:46  SethRobertson: sl0ppy: It is technically possible to do, but since it involves notifying everyone else of the problem and giving them special instructions, it is rarely worth it.
+17:47  slonopotamus: sl0ppy: well, if you really want that, you can git rebase and force push. however things will break for everyone else when they try to pull
+17:47  ptor: well, they'll have to pull --rebase, and may end up having to resolve merge conflicts.
+17:48  SethRobertson: Unless it has been tagged by someone, and unless...
+17:49  FYLGood: yared: I'm not totally sure, but you might want to look into git reset with the --soft option...  (Just an idea of where to look, but I'm not making any guarantees :)
+17:50  MrPunkin: how do you fix an error when trying to just switch to a branch and it says "Untracked working tree file '...' would be overwritten my merge" and doesn't switch branches?
+--- Log closed Wed Nov 10 19:35:40 2010
+--- Log opened Wed Nov 10 19:56:20 2010
+19:56 --- Users 732 nicks [0 ops, 0 halfops, 0 voices, 732 normal]
+19:59 --- Channel #git was synced in 199 seconds
+20:02  thehcdreamer: Hi. I was using gitosis but I changed my computer and I no longer have access to the gitosis-admin repo. I tried to add my new ssh key with no luck, so I figured out that maybe reinstalling would be a good idea. The question is: I've downloaded the git repos that I already had, now how do I checkout each of them? Is this possible at all?
+20:03  SethRobertson: gitosis is deprecated by the sane.  Please try gitolite
+20:03  cbreak: just clone the repositories
+20:03  thehcdreamer: SethRobertson: I will, thanks.
+20:03  cbreak: checking out a repository makes no sense
+20:04  spb: that said, it is quite possible to recover from losing access, provided you have access to the account it's running under on the server
+20:04  thehcdreamer: cbreak: that makes send ;)
+20:04  thehcdreamer: ok, my problem is solved. Thanks all
+20:06 * davidfetter_vmw wonders what an hcdream might be
+20:09  mmc: doener: and btw, using "rerere" my conflicts are solved (by repetition) automaticaly. that's why I want to run the commit w/o editor intervention. Would be even better if "merge" did not fail (since rerere solved all)
+--- Log closed Wed Nov 10 20:21:56 2010
+--- Log opened Wed Nov 10 20:22:24 2010
+20:22 --- Users 740 nicks [0 ops, 0 halfops, 0 voices, 740 normal]
+20:24 --- Channel #git was synced in 155 seconds
+20:25 --- unixtippse_ is now known as unixtippse
+20:27  zerium1: I'm using gitolite for access control and trying to find out a difinitive answer on creating a new repo. Is it as simple as cloning the admin repo and doing:
+20:28  zerium1: git remote add hostname git@hostname:reponame.git
+20:28  zerium1: git push hostname master
+20:35  kbond: hello, I have a repo with just a master branch, i would like to create a 1.0 branch from master and have a blank master to start on the 2.0 version, whats the best practice/way for doing this?
+20:36  fr0sty: 'blank' master?
+20:37 --- andrewwatts_ is now known as andrewwatts
+20:38  zerium1: anyone here using gitolite?
+20:38  kbond: well a new master will be a clean slate, not based on 1.0 branch
+20:41  fr0sty: you mean no files?
+20:42  fr0sty: zerium1: try it and see.
+20:42  kbond: well i will be adding files, but it is in now way based on the 1.0 branch
+20:42  fr0sty: what do you want it based on?
+20:42  kbond: nothing, i will be adding all new files
+20:43  kbond: i basically want to have a 1.0 branch and a 2.0 branch, i currently just have a master branch (1.0)
+20:44 --- nevyn^_ is now known as nevyn^
+20:48  helo: kbond: if 2.0 isn't based on 1.0 at all, there is no use in having them as part of the same git repo
+20:48  fr0sty: kbond just start a new repository
+20:49  fr0sty: or man git-checkout and look at --orphan.
+20:50  kbond: all the time i see repos that have say a docs branch, that isn't based on the master branch
+20:51 --- rayners is now known as rayners_afk
+20:51  kbond: i am being anal about creating a new repo as well because i don't want to increase my github subscription
+20:52  fr0sty: kbond: having 'master' and 'docs' being separate makes sense... 'having 1.0 and 2.0 with no common history makes less...
+20:52  kbond: i see
+20:52  KeeperOfTheSoul: nice, what version was --orphan added?
+20:52  fr0sty: if you want to abuse your github account and have separate projects in one repo checkout --orphan is the way to go...
+20:53  fr0sty: KeeperOfTheSoul: 1.7.1, probably...
+20:54  kbond: so with git you should only create a branch for the purposes of merging back into the master?
+20:54  kbond: when a new component is added?
+20:54  kbond: i am just trying to figure out best practices
+20:55  fr0sty: make branches whenever lines of development diverge.
+20:56  kbond: i see
+20:56  kbond: with the intention of converging back at some point?
+20:56  helo: which could be temporary for a particular feature that will be merged back in
+20:57  IslandUsurper: kbond, not necessarily, but branches that never diverge usually have some common history, which is why they are in the same repo
+20:57  kbond: so having version 1.0 and version 2.0 branches in the same repo is not proper because they will never converge
+20:57  fr0sty: or purely experimental
+20:57  IslandUsurper: never converge*
+20:57  fr0sty: full of debug output to test some feature...
+20:58  fr0sty: kbond: usually 2.0 is based on 1.0
+20:58  helo: kbond: not exactly... version 1.0 and 2.0 branches in the same repo doesn't make sense if they don't share history
+20:58  kbond: right, 2.0 is so different that sharing the same history doesn't make sense
+20:58  kbond: *history/codebase
+20:59  fr0sty: if product-2.0 doesn't descend from product-1.0 why not call it newproduct-1.0 instead?
+20:59  fr0sty: kbond: if 2.0 is a total rewrite, just pick a point, branch, change all the files, and go forward.
+21:00 --- khmarbaise_ is now known as khmarbaise
+21:00  fr0sty: if you really want disparate histories us --orphan.
+21:00  kbond: ok, 2.0 is the same product but just totally rewritten, have to keep support for 1.0 for a while though
+21:01  sagelywizard: How do you update the commit which a submodule is pointed at?
+21:02  kbond: i really appreciate the help guys, thanks
+21:04  KeeperOfTheSoul: kbond: I'd normally create a 1.0 branch from master, then delete all the files from master
+21:04  KeeperOfTheSoul: well, 1.x branch
+21:12  trigen: not a huge issue, but was wondering if it is possible to discard history of older versions for specific binary files in a respository?
+21:13  FauxFaux: Not without rewriting, which makes anyone else working on the repo angry.
+21:13  c00kiemon5ter: hi all
+21:14  trigen: okay, luckily i'm the only one using the repository
+21:14  c00kiemon5ter: can I clone a remote repo up untill the HEAD^ ?
+21:14  c00kiemon5ter: or just clone HEAD^
+21:15  c00kiemon5ter: that is do that ^ directly, not cloning the repo and then going back to HEAD^
+21:15  FauxFaux: c00kiemon5ter: Why not clone the whole thing and reset --hard or whatever to HEAD^?
+21:15  SethRobertson: sagelywizard: in the subproject, set the revision to what you want.  In the superproject, git add subproject.  Note that you MAY find gitslave more useful to you than submodules, depending on your use case for subprojects.
+21:15  FauxFaux: Meh. :p
+21:15  trigen: i have found a usable google result thanks to your used keyword 'rewriting', thanks :)
+21:15  c00kiemon5ter: :P because I found a repo, whose last commit broke the tree, and I want to get the one before the last
+--- Log closed Wed Nov 10 21:16:52 2010
+--- Log opened Wed Nov 10 21:22:17 2010
+21:22 --- Users 748 nicks [0 ops, 0 halfops, 0 voices, 748 normal]
+21:22  FauxFaux: Uh, fetch, not clone.
+21:22 * c00kiemon5ter reading git help fetch
+21:24 --- Channel #git was synced in 152 seconds
+21:28  trigen: FauxFaux: thanks checking it out
+21:30 --- alexisabril_ is now known as alexisabril
+21:34 --- rayners_afk is now known as rayners
+21:35  pioto: given some file that's now outside of a repo, is it possible to figure out the most recent revision which contained that file (based upon the blob sha you'd get from git hash-object)
+21:35  pioto: ?
+21:36  pioto: (in other words, some rough equivalent to the utility you can get from the $Id$ keyword in cvs/svn)
+21:36  cbreak: hmm... I have not seen anything like that
+21:37  cbreak: but I'd say a good way to implement it is to hash the thing
+21:37  cbreak: and then go through the history and look for a tree that uses it
+21:37  pioto: more or less... find all the trees that contain that blob, then find the latest revision that refers to that tree
+21:37  pioto: yeah
+21:37  sagelywizard: SethRobertson: Thanks!
+21:37  pioto: i'm wondering if there's some foo i can do with some crazy refspec to git-log or something to do that for me
+21:38  SethRobertson: pioto: smudge is the fundamental way to get this going
+21:39  SethRobertson: man gitattributes and search for $Id$
+21:39  pioto: well, that relys upon whomever checked out that file having a hook set up to do that in the first place
+21:40  SethRobertson: That is just how git rolls.  You could in theory rewrite the commit when you push it upstream, but that is probably more work than you would want to even thing about
+21:41  pioto: yeah, and that makes merges potentially messier
+21:41  SethRobertson: seriously messier
+21:42  SethRobertson: Another approach is to have `make release` and `make install` do the substitution as part of the tarball creation process (release) and compilation/installation process (install)
+21:42  pioto: i figure that smudge is going to be part of the evential workflow so that people who are already trained to look for cvs keywords will be able to still do that, more or less.
+21:43  pioto: yes, but that relies upon people actually using a build system to install everything, which isn't necessarily true.
+21:43  SethRobertson: Some people you just can't help
+21:43  pioto: yes, but i still need to be able to work w/ them
+21:43  pioto: since they're not in my department
+21:51 --- _Unode is now known as Unode
+21:51  cbreak: if you can't trust them with using a build system, can you trust them with using certain smudge/hook things?
+21:57  pioto: cbreak: if i jam it in their GIT_TEMPLATE_DIR, maybe.
+21:57  cbreak: hmm...
+21:58  cbreak: don't know if you can put a .git/config file into the template
+21:58  pioto: you can put hooks in, isn't that all i need?
+21:59  albel727: pioto: a question. how does the file gets out of version control?
+21:59  pioto: oh, no, smudge isn't an actual hook.
+21:59  pioto: currently, someone has a cvs checkout, and copies that file in place, either on the local filesystem, or using some deploy script.
+21:59  cbreak: lack of barbed wire fences
+21:59  albel727: pioto:  does it do so in some kind of deployment process?
+22:00  albel727: hmm
+22:00  albel727: and when did the cvs got in the picture?
+22:00  pioto: albel727: you presume a certain level of sophistication or consistency in the deploy process. i'm hoping to make things "just work" for people
+22:00  pioto: since forever
+22:00  pioto: the hope is to change that
+22:00  cbreak: when it became wall art from neanderthals.
+22:00  pioto: but that requires solving various problems
+22:01  pioto: because while cvs is terrible in a lot of ways, it does work
+22:01  albel727: pioto: I mean, there's a git and there is cvs. how does the file moves from git to cvs, and how do you thing a git hook will help you in your problem?
+22:01  cbreak: it never worked well for me :)
+22:01  pioto: and therefore the motivation for most people to change is very low
+22:02  Aristata: Hello, I have been developing on the master branch for a while not realizing it. I have not made any commits, just put a lot of work in. How can I check out a new branch and not lose everything I just did?
+22:02  pioto: albel727: this is in a theoretical future when i've done a cvs2svn run or something and done away w/ cvs altogether.
+22:02  [exa]: pioto: setup some nice frontend for them, with stats, graphs etc. that makes motivation
+22:02  albel727: pioto: oh
+22:02  cbreak: Aristata: git checkout -b newbranch
+22:02  Aristata: I won't lose my work?
+22:02  cbreak: no
+22:02  [exa]: no
+22:02  Aristata: Amazing thanks
+22:02  pioto: the issue is mostly that non-developers have no motivation to change to git, since it wins them nothing other than having to change how they do stuff
+22:03  cbreak: it wins flexibility, speed, stability, resilience
+22:03  albel727: pioto: so you actually are solving the problem, how will I deploy my files when using git (aka replacement for cvs's $id$)?
+22:03  pioto: cbreak: none of which they need.
+22:03  cbreak: power, ease of use
+22:03  pioto: all they need is cvs up
+22:03  pioto: and cvs co
+22:03  cbreak: so make them two shell scripts they can use
+22:04  cbreak: and remove their "developer" title
+22:05  albel727: pioto: if yes, then, you should look at combination of "git archive" and export-subst gitattribute. see here http://progit.org/book/ch7-2.html  a section on "Exporting your repository". export-subst doesn't require setting up hooks. it needs nothing, besides committed .gitattributes file, actually.
+22:06  albel727: pioto: export-subst allows filling specified files with specified (and quite extensive) set of data on commit, files, dates, authors, etc.
+22:07 --- jzacsh_ is now known as jzacsh
+22:08  albel727: (full list of available options is available in man git-log, section "PRETTY FORMATS") http://www.kernel.org/pub/software/scm/git/docs/git-log.html
+22:10  pioto: albel727: hrm, i'll see if one of those will fit in with our use case. thanks.
+22:14  NET||abuse: hi folks, i've got an svn checkout that I am working on some modifications to a largish feature set, but i want to move it between home and my office.
+22:14 * albel727 doesn't understand, why on earth, export-subst attribute functionality is limited only to git archive. it would make perfect sense in git checkout too, just like any other clean/smudge filter =/
+22:14  NET||abuse: is git a good way to just pull changes from work to my hom machine (i have a work vpn.)
+22:15  NET||abuse: can i do that without messing up svn?
+22:15  NET||abuse: or ahve it co-operate in a sensible way?
+22:16  SethRobertson: Git certainly supports that functionality
+22:16  NET||abuse: would i have to checkout svn first?
+22:16  albel727: NET||abuse: well, if you have vpn to your work machine and back, then you can just use rsync. git is clearly an overkill there. and no, git doesn't have any magic, that will help interoperating with svn in that case.
+22:16  chuck: In my repo, I made a commit that had a mistake, so I did "git revert HEAD". Is there any way I can just revert both of those commits and get the changes back in my working tree so that they're unstaged as they were before I made the mistake?
+22:16  SethRobertson: NET||abuse: No,  You just check out your svn repo with git-svn onto a USB drive or something
+22:16  cbreak: albel727: non-reversibility
+22:16  NET||abuse: albel727, unfortunately my home machine is shared and i can't really go install linux on it, windows 7
+22:17 --- q0rban is now known as q0rban|run
+22:17  SethRobertson: chuck: have you pushed?
+22:17  albel727: cbreak: ?
+22:17  cbreak: if you filter on git checkout, it changes the file
+22:17  cbreak: you would have to undo the changes on commit
+22:18  cbreak: is everything this filter does reversible?
+22:18  chuck: SethRobertson, nope
+22:18  cbreak: like for example, if you rename the file?
+22:18  cbreak: I doubt it.
+22:18  chuck: SethRobertson, and I can force push, i'm the only contributor
+22:18  chuck: it's just a heroku git repository
+22:19  cbreak: chuck: git reset HEAD~2 will nuke away the last two changes
+22:19  cbreak: it should leave the current index state untouched
+22:19  SethRobertson: chuck: so `git reset HEAD` should not have really done anything.  If you only made one commit, then `git reset --hard HEAD^` might work, but it is best if you use `gitk --date-order` to examine your commits and make sure the one you want to get rid of is the last
+22:19  henryC: I'm trying to migrate my websites and git repos to a new server.  I used "git clone" of my hubs to get the code to my new server.  I tried to create a new hub with "bit init --bare", then from my working directory, git committed everything, but then when I try to "git remote add hub ...me@newserver:/home/github/my_new_hub.git I get "fatal: Not a git repository".
+22:19  albel727: cbreak: by your logic, clean/smudge filters can't exist at all. but they do. and there is builtin $id$ filter, that basically does the same, as export-subst.
+22:19  cbreak: (so it will be as if you had added all the changes of the last two commits for commit)
+22:19  sitaktif: When I want to clone a local repository with user www-data, there are files that are 600 with owner sitaktif, what is the right thing to do ? Do a sudo and then chown -R www-data ?
+22:19  chuck: cbreak, but I don't want to nuke them entirely, I want to move the changes in the commits back into the working tree
+22:19  chuck: so that they're unstaged
+22:19  cbreak: albel727: no, clean/smudge filters have to be made so they are reversible
+22:20  chuck: or is that what it will do?
+22:20  cbreak: read the man page if you don't get what I wrote above
+22:20  cbreak: the changes will be staged
+22:20  SethRobertson: henryC: You might want to do a `--bare --mirror` clone in this instance
+22:20  albel727: cbreak: and builtin id clean/smudge filter is reversible. and there is no reason for format filter to be reversible too.
+22:20  albel727: *to be irreversible
+22:20  chuck: cbreak, they weren't
+22:21  chuck: the commits are gone but that changes weren't staged
+22:21  dunpeal: Hi. I have a situation where a Python script clones (using os.popen, if that matters) a Git repo, and for some reason .git/config of the newly cloneed repo doesn't contain a [remote 'origin'] section. Any idea why?
+22:21  SethRobertson: henryC: if you ssh me@newserver 'cd /home/github/my_new_hub.git; git status; what happens?
+22:21  cbreak: what did you type?
+22:21  chuck: git reset HEAD~2
+22:21  chuck: I made a backup before I ran that though
+22:21  cbreak: that should leave the commit staged.
+22:21  chuck: the second commit was reverting the first one, could that have done it?
+22:21  henryC: SethRobertson: says "fatal: This operation must be run in a work tree."
+22:21  cbreak: well, you can always get the commits back with git reset HEAD@{1}
+22:22  cbreak: but... wonder what didn't work for you
+22:22  SethRobertson: henryC: good point.  How about 'git log -n 1'
+22:22  henryC: SethRobertson: says "fatal: bad default revision 'HEAD'"
+22:22  SethRobertson: chuck: did you examine with gitk to see how many commits you want to throw away
+22:22  cbreak: chuck: try --soft :)
+22:23  chuck: SethRobertson, yeah, I can see in both gitk and "git log" that I want to just get rid of the last two but keep the changes in staging
+22:23  SethRobertson: henryC: well, that is peculiar.  What was the clone command?
+22:23  chuck: --soft doesn't seem to be doing it
+22:24  SethRobertson: chuck: find the SHA of the last commits you want to throw away.  `git reset --hard SHA` then `git reset --soft HEAD^^`
+22:24  henryC: SethRobertson:  I went to my new server, where I wanted the new working (live site) copy, and did git clone ssh://my_linux_user@my_old_server:/home/my_linux_user/github/mysite_hub.git .
+22:25  chuck: SethRobertson, what is "SHA"?
+22:25  henryC: SethRobertson:  Then, on my new server, I created /home/my_linux_user/github/my_site_hub.git, cd'd into it, and did "git init --bare".
+22:25  SethRobertson: henryC: what directory were you in when you ran that command?
+22:25  chuck: the sha of the earliest commit to throw away or what
+22:25  Escherial: hello...is it appropriate to use github to merge changes from a source project into my branch?
+22:25  henryC: SethRobertson: I did the clone from /home/my_linux_user/www/live
+22:25  Escherial: the fork queue is complaining that most changes won't apply cleanly when i'm almost certain that they will
+22:25  SethRobertson: henreyC: wait, why are you doing a `git init` at all?
+22:26  SethRobertson: henryC: Don't you just want to clone on the new server?
+22:27  henryC: SethRobertson:  I only did "git init --bare" from /home/my_linux_user/mysite_hub.git.  Yes I wanted to clone on the new server.  I've already killed the old server now.  It's history.  I haven't lost any code yet.  I just want to create a new hub.
+22:28  SethRobertson: henryC: I think you should on the new server `mkdir /home/my_linux_user/github; git clone --bare --mirror ssh://my_linux_user@my_old_server:/home/my_linux_user/github/mysite_hub.git` and then on the new server in the working directory `git clone /home/my_linux_user/github/mysite_hub.git .`
+22:29  henryC: SethRobertson:  That sounds reasonable but my old server is completely gone now.  Inaccessible.  So I guess I just need to create this new hub before I actually lose code.
+22:29  sitaktif: When I want to clone a local repository (owned by user sitaktif) with user www-data, there are files that are 600 and I cannot perform the clone. What is the right thing to do ? Do a sudo and then chown -R www-data ? (seems a bit overkill...)
+22:30  patrikf: sitaktif: make them 644?
+22:31  matjas: Is it possible to use git submodules to say like, this file right here == that file from that other repo?
+22:31  henryC: SethRobertson:  For the couple years I've been using Git, I've been following the conventions in the "Getting Started" section here: http://joemaller.com/990/a-web-focused-git-workflow/
+22:31  pioto: matjas: submodules probably don't do what you wish they did...
+22:31  matjas: AFAIK you can only reference entire git repos through git submodules, not single files, but then again I’m a git noob.
+22:31  pioto: they're pinned to a specific revision of the remote repo; they won't track it
+22:32  pioto: and, yeah, you can't have a partial checkout
+22:32  sitaktif: patrikf: I am talking about git object files ; if I alter the repository I guess the new ones will be 400 still (sorry btw, they were 400 not 600)
+22:32  matjas: pioto: oh, d'oh :/ i didn't even know the first part
+22:32  sitaktif: actually 300
+22:32  sitaktif: (I'm a moron.)
+22:32  SethRobertson: henryC: Then in my instructions replace the URL to the old server with whatever URL you believe the new server is at. Obviously it is critical at this stage not to delete anything and move the directories away to "foo.old" instead
+22:32  matjas: pioto: so there's no way to keep track of remote repo revisions of a specific file?
+22:32  pioto: yeah. i'm really disappointed in how submodules work, because i think it really dimishes their utility
+22:33  matjas: pioto: that makes two of us then :)
+22:33  pioto: the closest you can do is
+22:33  pioto: have some /vendor/otherrepo/, and then in your repo have a symlink to that other file
+22:33  SethRobertson: matjas/pioto: consider gitslave as an alternative to git-submodules
+22:33  SethRobertson: gitslave (http://gitslave.sf.net) is useful when you control and develop on the subprojects at more of less the same time as the superproject, and furthermore when you typically want to tag, branch, push, pull, etc all repositories at the same time.
+22:33  pioto: hrm. first i've heard of that
+22:33  SethRobertson: Oh I talk about it all of the time her
+22:33  pioto: i was going to try out repo (android's tool) and mr
+22:33  SethRobertson: git-submodule is better when you do not control the subprojects or wish to fix the subproject at a specific revision even as the subproject changes 
+22:33  pioto: yes
+22:33  SethRobertson: git-subtree is better when you prefer to have a single-repository "unified" git history and only need to pull changes in from external sources--not contribute your own changes back
+22:34  SethRobertson: repo is in theory similar to gitslave, but not as well documented that I have found
+22:35  SethRobertson: gitslave is specific to git, while mr seems to support blended operations.  I imagine that limits its abilities with pure git and of course allows everything else
+22:35  matjas: gitslave sounds interesting
+22:35  matjas: thanks SethRobertson, I'll check it out
+22:38  _bacon: I got this git the other day to post to svn from my git repo. anyone know if there is an easier way? https://gist.github.com/671572
+22:40  pioto: SethRobertson: seems like things like gitweb won't work very well with gitslave, though?
+22:40  SethRobertson: pioto: gitweb works fine, but what you will not have is a unified history.  You need to use git-subtree to get that.
+22:41  SethRobertson: OF course, git-subtree has its own problems
+22:41  SethRobertson: You would have multiple repos and gitweb would serve the history of each repo seperately
+22:41  henryC: Seth Robertson:  OK, now I have a working "working directory" and a working hub, both on my new server.  What should I do to get another working copy on my local linux?  use git clone?  or git init followed by adding remote hub and git pull?
+22:42  henryC: Seth Robertson:  I mean my new server has working directory and hub.  I just need a local copy to edit.
+22:42  SethRobertson: henryC: `git clone` is by far the easiest way of doing that.  That is why it was written
+22:45  henryC: SethRobertson:  So strange.  I do git clone my_linux_user@my_new_server:/home/github/mysite_hub.git, and I get the message "Initialized empty Git repository in /home/my_linux_user/www/live/mysite/mysite_hub/.git, then fatal:'/home/github/home_hub.git' does not appear to be a git repository.
+22:46  SethRobertson: When you go to that directory what do you see?
+22:46  henryC: SethRobertson:  I think somewhere I am getting confused between what is the repo and what is the directory containing the repo.
+22:47  SethRobertson: henryC: Wait, you had two paths
+22:47  SethRobertson: You do NOT want to talk about the /.git directory when talking to git, in general
+22:48  SethRobertson: A bare repo (which is what you should be cloning from) should have the files config and the directory hooks in it.  The config file should say something about bare=true
+22:49  henryC: Seth Robertson:  ok yes, on my new server, I have that, and it's at /home/my_linux_user/github/mysite_hub.git (contains branches, config, etc).
+22:50  SethRobertson: When you cd there and run `git branch` what does it say?
+22:51  henryC: SethRobertson: it says "* master".  Now, I think I've succeded in cloning a local copy to work from, but I don't understand why it ended up with the name "mysite_hub"...
+22:51  SethRobertson: git likes to create the directory when you clone
+22:52  henryC: SethRobertson:  Can I just rename my local copy from mysite_hub to mysite?
+22:52  SethRobertson: Unless you give it another name it will use the name at the end of the source URL (stripping .git)
+22:52  SethRobertson: sure
+22:52  henryC: SethRobertson:  OK... phew!  Thanks for bearing with me.  I don't know why I still get so confused with this.  I guess I just don't use it often enough.
+22:53  SethRobertson: Reading the ProGit book might be good
+22:53  henryC: SethRobertson: Thx, I'll look into it.
+23:01  kbond: sorry for the newb question but when you clone a repo off of github do the branches come with it?
+23:01  kbond: when i do git branch i just see master
+23:01  mlq: git branch -a
+23:02  kbond: is there a way to totally clone everything (all branches/tags) - say if i wanted to move the repo to a different remote?
+23:03  kbond: mlq: i see now, -a lists the remotes and local
+23:07  karstensrage: im trying to use git format-patch, but it keeps putting the top level directory in rather than just 'src/main/resources/foo.xml' it has "module/src/main/resources/foo.xml"
+23:08  SethRobertson: karstensrage: Does it matter?
+23:09  SethRobertson: Presumably git-apply works with the patch, and patch(1) works with -p1
+23:10  karstensrage: ah
+23:10  karstensrage: yes
+23:10  bug1: Hi all, Many years ago i committed lots of other people patches to a projects revision system, its now on git and show me as author to all of them. I would like to correct them to show the rightful author. Looking for some advise on how to do it (git newb)
+23:11  SethRobertson: bug1: Probably not worth it, but `git-filter-tree` is the way to do it
+23:11  bug1: googling "git reassign author" says i should use git filter-branch and says something about rewritting all of history, is that what i want to do ?
+23:11  fr0sty: bug1: you have to rewrite it all if you want to do that.
+23:11  fr0sty: do you have the information?
+23:11  bug1: SethRobertson, im considering re-assigning some copyrights for enforcment reasons, so i want ot be clear about what is and isnt mine
+23:12  SethRobertson: You would essentially create a mapping table to figure out for each revision who the right author was and let filter-tree work.  NOT not newbees.  NOT for any project which has previously been publicly available
+23:12  SethRobertson: Since you are going to be rewriting history so any existing clones would be invalidated
+23:13  bug1: ?I dont think i understand the implications of "Rewriting it all", does it mean its going to mess everything up for other people ?
+23:14  bug1: hmm, ok
+23:15  SethRobertson: bug1: You could use `git-notes` to clarify things, or just commit a file into the repo which clarifies things.  Note that git-notes may not be as useful as you want.
+23:16  bug1: SethRobertson, i did about 1000 commits, maybe a half to a third where really my work
+--- Log closed Wed Nov 10 23:22:47 2010
+--- Log opened Wed Nov 10 23:23:16 2010
+23:23 --- Users 728 nicks [0 ops, 0 halfops, 0 voices, 728 normal]
+23:25 --- Channel #git was synced in 151 seconds
+23:32 --- q0rban|run is now known as q0rban
+23:34  fr0sty: bug1: if it is important to have a public audit trail you can filter-branch to correct the authorship and merge the two branches together again you will have duplicate, parallel history for a while, but one will have correct authorship.
+23:40 --- q0rban is now known as q0rban|afk
+23:56  bug1: fr0sty: that might be good enough, i iwll look int oit
+23:57  fr0sty: you can also just do it privately, or push it to someplace 'obscure' refs/audit/correct_authors. so it is available, but only ifyou want it.
+23:58 --- Putr is now known as Putr|Away
+23:58  bug1: thanks fr0sty
+23:59  fr0sty: np
+--- Log closed Thu Nov 11 00:00:39 2010

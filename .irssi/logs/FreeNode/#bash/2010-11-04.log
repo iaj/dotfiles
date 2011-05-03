@@ -1,0 +1,470 @@
+--- Log opened Thu Nov 04 08:21:56 2010
+08:21 --- Users 494 nicks [0 ops, 0 halfops, 0 voices, 494 normal]
+08:23 --- Channel #bash was synced in 95 seconds
+08:32  prince_jammys: asfjio: $? is the exit status of the last foreground command
+08:33  prince_jammys: !$?
+08:33  greybot: The special parameter ? (you use $? to expand it) contains the exit status of the previous command, an integer from 0 to 255 inclusive. In general, an exit status of 0 implies success (or "true") and non-zero implies failure ("false").
+08:33  prince_jammys: but this won't work if you put the command in the background
+08:34  prince_jammys: or rather, it'll just be 0
+09:32  suw: hello
+09:33  suw: how can I use grep with negation ? - I wan to list all folders that does not have owner that starts with "vu2"  :  ls -alh |awk {'print $3" "$8'}|grep  "^vu2"
+09:35  suw: got it
+09:35  suw: grep -v
+09:35  suw: inverse mathc
+09:35  suw: bye
+09:44 --- bamaboy is now known as xt3mp0r
+09:46  [eXception]: hi
+09:47  [eXception]: tail -f /var/log/apache2/* is really cool for many logs.... but how can I exclude some pattern from * ?
+09:52  pgas: !extglob > [eXception]
+09:52  greybot: [eXception]: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+09:54  [eXception]: cool thx
+09:55  neurodamage: http://pastie.org/1271732
+09:55  neurodamage: that's my current PS1 I was wondering if anyone could help me identify any issues or syntax errorrs in my PS1
+10:00  lhunath: neurodamage: do yourself a favor.  don't hardcode terminal sequences.
+10:00  lhunath: red=$(tput setaf 1); ...; PS1="\[$red\] \u \$ "
+10:01  lhunath: come back when you fix that and I may consider actually trying to read it.
+10:01  lhunath: !faq colors
+10:01  greybot: http://mywiki.wooledge.org/BashFAQ/037 -- How can I print text in various colors?
+10:02  neurodamage: lhunath: I agree, that's ollldd....and just kept getting copied around for like 10 years lol
+10:03  neurodamage: lhunath: kewl and it has all the terminal codes in there
+10:04  lhunath: they're actually all in man terminfo
+10:18  asfjio: prince_jammys: thank you again!
+10:21  mkay: is it possible to invoke bash with ~/.my_own_bashrc (not default one) when login via ssh?
+10:22  mkay: i'm trying ssh@host bash --rcfile ..., but that doesn't work as expected
+10:23  [eXception]: <pgas>: I get -sh: syntax error near unexpected token `('
+10:25  [eXception]: it was ~$ tail -f /var/log/apache2/*_(a1|a2).log
+10:25  pgas: [eXception]: 1) you need bash 2) you need to run shopt -s extglob
+10:25  [eXception]: earlier I did  shopt -s extglob
+10:25  [eXception]: ok how do I switch to bash?
+10:25  pgas: and _(a1|a2) is not a valid syntax
+10:26  [eXception]: what would be the valid syntax for that?
+10:26  pgas: what do you want to match?
+10:26  pgas: to run bash you type "bash" is this in a script?
+10:26  [eXception]: all log files with a1 and a2 in the name
+10:26  pgas: no need for extglob then: *a[12].log
+10:27  [eXception]: and longer phrases?
+10:27  [eXception]: like all with "debug" and "error" in the name
+10:27  [eXception]: *(debug|error).log ??
+10:28 --- Uqbar_ is now known as Uqbar
+10:29  geirha: mkay: When you run ssh without a command, it will allocate a pty and invoke a login shell. When you run ssh with a command, it will not allocate a pty ...
+10:36  mkay: geirha: that's exactly my problem
+10:36  [eXception]: ok I forgot the +
+10:44  geirha: mkay: See if maybe there's a way to force the pty allocation ...
+10:48  ecksit: Hey guys
+10:48  ecksit: How would go about writing a bash script to automated restart MySQL if it crashes?
+10:48  trash: ecksit: Use nagios.
+10:49  ecksit: nagios?
+10:49  trash: It's hard to read, isn't it. Let me capizalize it.
+10:49  trash: NAGIOS
+10:49  trash: capitalize*
+10:51  trash: And you should fix your mysqld problem, it's not meant to crash.
+10:53  lhunath: shudder.  nagios.
+10:53  ecksit: I know it isn't meant to crash however I have a spastic working on it sometimes and he causes issues.
+10:54  ecksit: I.e. Running a select * for 450,000 rows
+10:54  ecksit: However, I need to have this as a fail over.
+10:54  ecksit: So what is this nagios?
+10:55  trash: It's infrastracture software meant to monitor your hosts and services and may be configured to restarted a service if in critical state.
+10:55  ecksit: Ah, a simple bash script will do. I only have one that crashes
+10:56  trash: *shrug* well.
+10:56  lhunath: mysql shoudn't crash no matter what query you tell it to run.
+10:57  ecksit: Well lhunath, that along with the normal queries kills it.
+10:57  lhunath: at any rate; a cheap solution for that is something like: until mysqld; do echo "mysqld failed with exit code $?; respawning..."; sleep 1; done
+10:57  lhunath: ecksit: once you have that lame fix in place; go figure out what the real problem is.
+10:57  lhunath: and no, it isn't "I have a spastic working on it"
+10:58  trash: while :; mysqld --foregroundmode; done
+10:58  trash: while :; do    even.
+10:58  ecksit: lhunath, Spastics requesting 450,000 rows with the normal procedures will do it.
+10:58  lhunath: well; that's a very agressive loop.
+10:58  lhunath: not only does it not shut down when you do a clean shutdown of mysql but it also makes it nearly uninterruptable.
+10:59  lhunath: ecksit: if mysql can't handle a simple query; what the fuck are you doing using it?
+11:00  ecksit: MySQL can handle it on the normal basis - just not when this spaz requests all the table at once.
+11:00  lhunath: dataset size is irrelevant.
+11:00  lhunath: it can be slow.  it shouldn't crash.
+11:01  lhunath: maybe the spaz that maintains the database server should fix his setup or hardware.
+11:19  ksmith: hey guys
+11:19  ksmith: in my .profile there's a line that reads: eval gdircolors ~/.dir_colors
+11:20  ksmith: but it's printing this every time I launch a new terminal instead of leaving it inside the profile.
+11:20  ksmith: what am I doing wrong?
+11:21  geirha: Firstly, it should be in .bashrc, and secondly, you want to eval the output of the command, not the command itself.
+11:21  geirha: err wait, no.
+11:21  geirha: .profile is correct, sorry.
+11:22  geirha: anyway,   eval $(gdircolors ~/.dir_colors)
+11:22  ksmith: I'll try that one :)
+11:22  ksmith: nice!
+11:22  ksmith: I was sure it had to be an easy fix
+11:31  Moombasa: Alright, any bash boys awake that have a moment to get me on the right track? I'm failing miserably at mapping something out ;p
+11:31  erUSUL: !ask
+11:31  greybot: You need not ask permission to ask a question. Just ask and be patient. http://mywiki.wooledge.org/NetEtiquette
+11:31  Moombasa: ;p
+11:33  Moombasa: I have 15 directories that have configuration files that are the same 3 configuration files but they're up to 5 levels deep and can be in multiple locations. I need to grep out three specific lines from each of them and store that information in a text file on the same line for each configuration, while retaining the path it was located in in the text file on the same line as well.
+11:34  Moombasa: I'm terrible at bash scripting ;p so I'm looking for an idea that's more than a for loop, which would obviously cause problems.
+11:34 * Moombasa be's complicated.
+11:34  unop: grep works fine
+11:34  Moombasa: So yeh, I'm fishing for ideas if anyone wants to throw me a bone or in a decent direction ;)
+11:37  erUSUL: Moombasa: unop is right what is wrong with just "grep -R -f file_with_3_lines_you_search_for dir/ > textfile.out" ?
+11:38  Moombasa: I need both the files and the pwd of them, when they can be randomly through out the directories.
+11:38  unop: grep -H "pattern" dir/**/*cfg > file.out
+11:40  Moombasa: Still leaves me with trying to figure out how to add find & grep to the same line of the file out, since I need the relative pwd of each file on the line as well.
+11:40  Moombasa: Which is what really has me in the pickle.
+11:41  geirha: find /the/root/dir -name "*.cfg" -print -exec grep 'pattern' {} \; > resultfile
+11:41  Moombasa: mm
+11:42  Moombasa: overthinking things is ftw.
+11:45 * erUSUL still does not know what is wrong wih the path as written by grep
+12:08  Moombasa: Alright
+12:09  Moombasa: now we're getting somewhere. I probably should've gone to sleep after I finished the other half and before I beat my head into the wall with the simpler end lol
+12:09  Moombasa: Only problem is, the output isn't printing to the same line, it's on multiple lines still.
+12:10  Moombasa: find ./ -type f -name "testconfig.php" -print -exec egrep "DB_NAME|DB_USER|DB_PASSWORD|DB_HOST" {} \; | cut -d"'" -f4
+12:10  Moombasa: Anyone care to give me an idea to clean it up on the same line? :p
+12:12  neure: hello
+12:13  neure: how do i print linenumbers for lines that are modified by a patch?
+12:13  pgas: Moombasa: each result from egrep is on one line, you want all the results concatenated on one line?
+12:13  Moombasa: Yes, I want it to print pwd name user pass host on one line in the output file
+12:16  pgas: | sed -e N -e 's/\n/ /' #might do what you want
+12:29  xy: if you comment a line with # can you uncomment it behind the #?
+12:29  bonsaikitten: no
+12:29  xy: are there other ways to vomment lines in bash?
+12:29  xy: s/vomment/comment
+12:30  trash: xy: No. Only workarounds.
+12:30  trash: (That use a side effect)
+12:49  jar__: hi
+12:49  jar__: is it posible to write an shell script por mac os
+12:49  jar__: for customizing wireless network connections like
+12:49  jar__: /etc/network/interfaces file in Debian
+12:50  jar__: im running Mac OS 10.6
+12:50  jar__: and i would like to automatize tcp/ip settings of my wireless connection
+12:50  jar__: by using a shell script
+12:50  jar__: any help is appreciated
+12:51  trash: That's rather a OSX question than a bash question.
+13:00  xyster: hello, this is a question regarding running a bash script.
+13:01  xyster: I wrote it and it works, however when i use shell_exec(./myScript arg1 arg2); in PHP to call it, it fails. The script unrars a file and rename/moves it. It works via command line, but via PHP it says "No Files to Extract"
+13:01  xyster: any ideas? or wrong chan?
+13:02  ferret: wrong channel
+13:02  xyster: thankyou ferret, where do i go?
+13:02  ferret: #php
+13:02  xyster: thankyou
+13:05 --- MuzerAway is now known as Muzer
+13:05 --- lynucs is now known as jham
+13:44  shai__: Hi :) I'm trying to use grep and can't get it working quite as I want (see: http://pastebin.com/0GxrWAcB ) ; can someone help me out?
+13:46  koala_man: shai__: echo "$x"
+13:48  trash: !nopaste > shai__
+13:48  greybot: shai__: Please don't waste our time by making us go to a pastebin just for a five-line snippet. Paste it in the channel. If you have a larger script that's showing problems, trim it down to the bare minimum size that still shows the problem. You'll probably fix it yourself once you do that.
+13:50  shai__: koala_man: thanks :) Why does echo $x and echo "$x" differ?
+13:50  shai__: trash: ok
+13:50  pgas: !words > shai__
+13:50  greybot: shai__: Some words about words: http://wiki.bash-hackers.org/syntax/words and http://wooledge.org/mywiki/WordSplitting
+13:50  trash: !wordsplitting > shai__
+13:50  greybot: shai__: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+13:53  shai__: Thanks ;)
+13:57  b0ot: pgas, you're here!!
+13:58  b0ot: I'm convinced you are one of 3 people in the world that understands how socat works
+13:58  b0ot: and I haven't met the other 2 yet
+14:16  madsj: hi; is there some easy way to check if a tarball (or zipfile) contains a folder?
+14:17  lhunath: ask tar or zip
+14:18  madsj: lhunath: ? the channels?
+14:19  irc2samus: he means to pass arguments to the 'tar' or 'zip' commands that show you a list of the contents
+14:21  irc2samus: *unzip
+14:21  loomsen: tar -tvf
+14:21  lhunath: madsj: you ask tar or zip by running them with arguments that make them give you the information you need.  channels, man pages or documentation may help you figure out how.
+14:23  lhunath: if one says just the name of a command as a noun; one generally refers to the command.  not the channel.
+14:35  madsj: irc2samus: oh, ok :-)
+14:35  madsj: thanks
+14:36  Justin-Bieber: if [[ -f /var/spool/cron/root && \! ( $(grep -q 'yum -y upgrade' /var/spool/cron/root); $? == 0 ) ]]; then echo ok; fi
+14:36  Justin-Bieber: what's the right solution?
+14:36  Justin-Bieber: i'm tired of bash
+14:36  trash: Looks wrong.
+14:37  trash: The proper version would look like:
+14:37  Justin-Bieber: if [[ -f /var/spool/cron/root && \! (grep -q 'yum -y upgrade' /var/spool/cron/root) ]]; then echo ok; fi
+14:37  trash: if grep -q 'yum -y upgrade' /var/spool/cron/root/; then echo ok; fi
+14:37  Justin-Bieber: doesn't work either
+14:37  trash: Justin-Bieber: NO
+14:37  trash: if grep -q 'yum -y upgrade' /var/spool/cron/root/; then echo ok; fi
+14:37  trash: Just that.
+14:37  trash: (without the trailing / of course)
+14:38  Justin-Bieber: nope, I want to do the reverse
+14:38  Justin-Bieber: if exists and not matched
+14:38  trash: if  ! grep -q 'yum -y upgrade' /var/spool/cron/root 2>/dev/null; then echo ok; fi
+14:38  Justin-Bieber: what if file doesn't exist?
+14:38  trash: Then nothing happens.
+14:39  Justin-Bieber: tell me how && proeprly in [[]]
+14:39  trash: if [[ -f file ]] || grep -q ...; then ...; fi
+14:39  trash: or is it && ! ..
+14:39  Justin-Bieber: but can I do that inside [[]] ??
+14:39  trash: Justin-Bieber: You just don't need to.
+14:39  Justin-Bieber: will [[ 1==1 && 1==1 ]]  work?
+14:39  trash: *sigh*
+14:40  trash: Someone else have fun with out.
+14:40  trash: s/out/you/
+14:43  Justin-Bieber: [[ 1==1 && $( echo 0 ) ]] && echo ok
+14:43  Justin-Bieber: should not print ok
+14:44  Justin-Bieber: what's the section of manual responsible for explaining the behaviour?
+14:44  l1x: i don't get you, why should not print that ok?
+14:46 --- Weust`afk is now known as Weust`
+14:46  Justin-Bieber: I don't want it to print okay
+14:46  Justin-Bieber:     Command substitution allows the output of a command to replace the command name.  There are two forms:
+14:46  pgas:       string
+14:46  pgas:        -n string
+14:46  pgas:               True if the length of string is non-zero.
+14:46  Justin-Bieber: e command substitution with the standard output of the command, with any trailing newlines deleted.
+14:46  koala_man: !pitfalls > Justin-Bieber
+14:46  greybot: Justin-Bieber: http://mywiki.wooledge.org/BashPitfalls
+14:46  koala_man: short answer [[ 1 == 1 ]]
+14:47  koala_man: pitfall 10
+14:48  Justin-Bieber: [[ 1==1 && $( echo 0 ) == 0 ]] && echo ok
+14:48  Justin-Bieber: [[ 1==1 && $( echo 1 ) == 0 ]] && echo ok
+14:48  Justin-Bieber: works as expected.
+14:48  trash: HEY LET'S ALL MAKE UP SOME RANDOM SYNTAX
+14:48  Justin-Bieber: next topic is exit value.
+14:50  Justin-Bieber: [[ 1==1 && [ sh -c 'exit 234' ] == 234 ]] && echo ok
+14:50  Justin-Bieber: what's the proper way of writing this?
+14:50  pgas: what do you thing that does? [ sh -c 'exit 234' ]
+14:51  pgas: if is testing the exit values
+14:51  pgas: not [ or [[
+14:51  Justin-Bieber: i've tried with $() too
+14:51  pgas: I don't doubt that you try random things
+14:52  pgas: sh -c 'exit 234'; [[ 1 == 1 && $? == 234 ]] && echo ok
+14:52  Justin-Bieber: is it possible to execute a command in-line, inside [[ ]] ?
+14:52  Justin-Bieber: and check for it status somehow?
+14:53  Justin-Bieber: I'm trying to learn.
+14:53  pgas: not really
+14:53  Justin-Bieber: so no way?  okay...
+14:53  pgas: no sane way.
+14:53  pgas: or maybe no way at all, not sure.
+14:55  Justin-Bieber: trash,   if  ! grep -q 'yum -y upgrade' /var/spool/cron/root 2>/dev/null; then echo ok; fi   is wrong. IF no file exists, it still prints OK
+14:55  pgas: if [[ 1 = 1 ]];then sh -c 'exit 234'; if [[ $? = 234 ]]; then ...
+14:55  Justin-Bieber: I got it, thanks
+14:56  trash: Justin-Bieber: if [[ -f file ]] && ! grep -q ...; then ...; fi
+14:57  Justin-Bieber: doesn't work
+14:57  Justin-Bieber: or wait
+14:57  Justin-Bieber: okay, worked
+14:59  Justin-Bieber: thank you
+15:11  vu1kan: what's the output of a zenity entry dialog if you click the cancel button? I'm trying to write a bash script that will use a zenity dialog to pass a url to firefox, it does this fine, but if i hit cancel, it launches firefox @ my homepage, I'd rather it just exited... http://pastebin.com/xEKthkZE
+15:17  lhunath: look at the exit code?
+15:17 --- drizztbsd_ is now known as drizztbsd
+15:19  vu1kan: i'm not exactly sure how to do that
+15:20  lhunath: !conditionals > vu1kan
+15:20  greybot: vu1kan: Conditional Structures: http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+15:21  lhunath: oh dear.
+15:21  lhunath: seems you don't know the very basics of bash.
+15:21  lhunath: please stop writing bash until you've read the guide before you hurt yourself.
+15:22  vu1kan: i'm trying to teach myself...only way to learn is to do
+15:22  lhunath: true
+15:22  lhunath: the guide lets you do.  by means of many examples.
+15:22 --- jzacsh is now known as jzacsh_
+15:22  lhunath: don't just do on your own or based off of internet information.  you will fail badly and not even know it.
+15:23  vu1kan: well, in this particular case, all i'm wanting is a launcher on my gnome panel that allows me to input a url for firefox to goto...and i'd like the script to exit if i hit cancel
+15:24  lhunath: your pastebin has these mistakes: if runs a command.  you did not give it one.  false is nothing special; just a string. you don't use `` to execute a command.  in fact; you should NEVER use `` in a bash script.
+15:24  Damnshock: lhunath: why shouldn't you?
+15:24  lhunath: vu1kan: url=$(zenity ..) && [[ $url ]] && firefox "$url"
+15:25  lhunath: Damnshock: because `` sucks.  use $() instead.  and don't forget your quotes!
+15:25  lhunath: `` sucks to nest, `` sucks to read, `` is inconsistent with expansion syntax, and `` ARE NOT QUOTES.  they STILL need to be quoted.
+15:25  vu1kan: well, i've removed the if loop..didn't seem to make a differance
+15:26  Damnshock: lhunath: you are just giving me your opinion
+15:26  lhunath: vu1kan: I gave you the whole script.  now, start reading the guide.
+15:26  Damnshock: not a real fact
+15:26  vu1kan: what's the point of bracketing the $url?
+15:26  lhunath: bracketing?
+15:26  vu1kan: [[ $url ]]
+15:26  lhunath: [[ is a command.
+15:27  bassliner: [[ is a shell-builtin.
+15:27  bassliner: keyword tbe.
+15:27  lhunath: it's a program (built in bash) that tests whether $url is empty.  if not, it exits with a 0 exit code indicating success.
+15:28  bassliner: tho it's interesting that [ resides in /usr/bin/ while [[ is a bash builtin keyword.
+15:28  lhunath: Damnshock: `` sucks to nest because you need several backslashes for each new level making the whole insanely non-transparent.
+15:28  bassliner: encapsulating multiple `` inside each other will make your scripts extremely unreadable, yes.
+15:28  lhunath: Damnshock: `` sucks to read because they aren't quotes even if they look like it.  additionally; when nested this problem compounds.
+15:29  vu1kan: i've been using http://www.gnu.org/software/bash/manual/bashref.html for info, that recommended using grave marks to enclose terminal input
+15:29  lhunath: Damnshock: `` is inconsistent with expansion syntax because expansion is ALWAYS dollar-something.  $var, $(command), $((arithmetics)), $'escape-sequence'
+15:30  lhunath: Damnshock: `` is not quotes because it does not prevent word splitting or disable bash syntax within.  hence they still need quotes to stop that.
+15:30  lhunath: Damnshock: does that make you happy?
+15:30  CarlFK: how do you test if a function has been defined?  (without erroring, which aborts under set -e) current plan:  type deactivate >/dev/null 2>&1      if [ $? -eq 0 ]      then          deactivate
+15:31  lhunath: ![$?
+15:31  greybot: Don't do this: mycommand; if [ $? -eq 0 ] -- You're running the [ command and checking its exit code to test whether "mycommand"'s exit code is 0. That's a pointless operation, test mycommand directly: if mycommand
+15:31  CarlFK: I am guessing the type foo can be inside the [
+15:31  CarlFK: right.
+15:31  lhunath: No.
+15:31  lhunath: ![
+15:31  greybot: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+15:31  lhunath: [ is a program that tests a string or a file.  it doesn't run commands.  that's "if"
+15:32  asfjio: hello, can i make a core dumpwhen a bash script is running? i mean i tried this ./myscript & and then kill -SIGQUIT myscript_PID this didn't even stop the script. at the same time if i do ./myscript and then CTRL+\ it says which row is executed now. actually myscript is doing sleep 60. my iea is if i had variables set to dump them.
+15:32  CarlFK: lhunath: um... i lost ya
+15:32  lhunath: re-read what I/greybot said or tell me what's unclear about what we said
+15:32  lhunath: so I can clarify.
+15:33  CarlFK: lhunath: i understand both, they are what I expected.  I don't see how the 2nd one (about [ ) applies to my problem
+15:34  lhunath: it applies to: CarlFK | I am guessing the type foo can be inside the [
+15:34  lhunath: if [ type foo ] would be wrong.
+15:34  CarlFK: ah, loose the type.
+15:34  lhunath: if type foo
+15:34 * CarlFK is enlightened 
+15:35  lhunath: if [ foo ] would test whether the string "foo" is longer than 0 characters.
+15:35  lhunath: I don't think that's the type of thing you're wonering about.
+15:37  lhunath: you may prefer if declare -F foo 2>/dev/null, or if [[ $(type -t foo) = function]
+15:37  lhunath: you may prefer if declare -F foo 2>/dev/null, or if [[ $(type -t foo) = function ]]
+15:37  lhunath: I would probably pick the former.
+15:38  CarlFK: http://dpaste.de/V4jX/  that look right
+15:38  CarlFK: ?
+15:39  CarlFK: seems so simple now.  I think the suggestion we needed the extra stuff broke my brain
+15:49  Zathraz: Hi. Why does this not work:
+15:49  Zathraz: grep -n '^[[:space:]][\[]print[/]][/$].*' -A10 /etc/samba/smb.conf |less
+15:50  pgas: you tell us
+15:50  Zathraz: regex fails. But no idea why.
+15:50  pgas: ] must be the first char in a range of char
+15:50  pgas: what is [/]] supposed to do?
+15:51  Zathraz: ah. should have been \
+15:51  pgas: no
+15:51  Zathraz: escaping
+15:51  pgas: you can't escape with \ you just need: []]
+15:51  pgas: for [ you just need [[]
+15:51  Zathraz: same result though
+15:52  hemanth: !smart
+15:52  greybot: http://www.catb.org/~esr/faqs/smart-questions.html
+15:52  geirha: ^[[:space:]]\[print\][/$].*
+15:53  pgas: # grep -n '^[[:space:]][[]print[]][/$].*' /dev/null
+15:53  evalbot: pgas: no output
+15:53  pgas: no regexp error
+15:53  CarlFK: Zathraz: I like to have these discussions with the data being piped in: carl@dc10:~$ echo "abc 123" | grep "c.*1"
+15:53  CarlFK: abc 123
+15:53  geirha: I bet you want a * after the [[:space:]] too
+15:54  Zathraz: true. had that in a previous version/test but omitted it now
+15:54  geirha: [[ "abc 123" = *c*1* ]]
+15:55  Zathraz: grep -n '^[[:space:]]*\[print\][/$].*' -A10 /etc/samba/smb.conf |less ---> still no output
+15:56  Zathraz: (trying to get the next then lines of the samba share config of a share called [print$]
+15:56  Zathraz: *ten lines
+15:57  hemanth: bash aphorism factoid is? :)
+16:00  hemanth: !ba1
+16:00  hemanth: there were these bash aphorism right? :(
+16:01  kojiro: !b1
+16:01  greybot: bashphorism 1: the questioner's first description of the problem/question will be misleading.
+16:01  telemachus: I apologize that this question is somewhat vague, but can anyone see a reason why redefining cd along these lines would break TAB-completion for cd? http://pastie.org/1272335
+16:01  geirha: Zathraz: awk '/^[[:blank:]]*\[/{p=0} /^[[:blank:]]*\[print$\]/{p=1} p'
+16:01  telemachus: is bashphorism the X Y problem under another name?
+16:02  CarlFK: anything wrong with:  if [[ $(type -t deactivate) -eq function ]]; then ...
+16:03  Zathraz: geirha, thanks again. But.... Still no output...
+16:03  CarlFK: I only 1/2 understand the type docs.
+16:03  Bronze: telemachus: in a way, but cuter.
+16:03 --- b0ot is now known as wwwwwwwwwwwwwwww
+16:03  telemachus: Bronze: Fair enough
+16:04  telemachus: Bronze: At first, I thought that was an answer to my cd question, which made me confused...
+16:04  CarlFK: Zathraz: maybe your smb file is empty...  I might be able to help if I saw some input
+16:04 * Bronze calls the long boring repititious nick police on wwwwwwwwwwwwwwww
+16:05  wwwwwwwwwwwwwwww: Bronze, do you know how to use socat?
+16:05  Bronze: nope.  only 17 people in the world do.
+16:05  Bronze: ;-)
+16:05  cousteau`work: I've tried the "${file%.*}" syntax with several shells and it works on all of them. Is this syntax POSIX?
+16:06  Zathraz: part of my smb.conf is : http://pastebin.com/LNcJp7P1
+16:06  Bronze: cousteau`work: does it work in "sh" (original bourne shell) ?
+16:06  Zathraz: so I want the info in the share called [print$]
+16:06  Zathraz: to be more precise: it's path. With the idea to omit results with commented out lines such as #path=
+16:07  cousteau`work: Bronze: don't have it here, I've tested it on bash, dash and busybox
+16:07  Zathraz: therefor I wanted to start out with getting the next 10 lines after [print$]
+16:07  geirha: # printf '[print$]\nsome option\n[new section]\n' | awk '/^[[:blank:]]*\[/{p=0} /^[[:blank:]]*\[print\$\]/{p=1} p'
+16:07  evalbot: geirha: [print$]
+16:07  evalbot: geirha: some option
+16:07  Zathraz: and grep further on that part of text
+16:07  geirha: Zathraz: Forgot to escape the $
+16:07  telemachus: Let me ask my question another way. Does anyone know a better way to reproduce zsh's chpwd() than something like this: function cd () { builtin cd "$@" && myfunction; }
+16:08  Bronze: cousteau`work: ihmm, well if its in "sh" as well, then it's pretty much not distinguishable from a posix compliant shell function.
+16:08  erUSUL: cousteau`work: http://www.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_06_02
+16:08  cousteau`work: I'll use bash instead of sh, just in case...
+16:08  telemachus: (Note that there are already problems there about the setting of $?
+16:09 --- Weust` is now known as Weust`afk
+16:10  Zathraz: geirha, thanks! Result is in http://pastebin.com/jdBsz2cU
+16:10  cousteau`work: erUSUL: ok, so it's standard sh
+16:11  Zathraz: so I have way to much lines, but it is a start. And an eyeopener too as it turns out the share is defined twice....
+16:12  Zathraz: turns out this works too:  '^[[:space:]]*\[print\$\]'
+16:12  Zathraz: as a grep that is
+16:20  geirha: Zathraz: /^[;[:blank:]]*\[/{p=0} ...  maybe
+16:21  geirha: awk '/^[;[:blank:]]*\[/{p=0} /^[[:blank:]]*\[print\$\]/{p=1} p && !/^#/'
+16:22  wwwwwwwwwwwwwwww: Does anyone know of an easy way to make a virtual COM port in Windows that is able to connect to a physical COM port in ubuntu via the network?
+16:23  geirha: !nabq
+16:23  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+16:27 --- lynucs is now known as jham
+16:41  f00bar80: anybody may tell me what's wrong in the following http://pastebin.com/JxNtPPFx ?
+16:42  geirha: f00bar80: Yes, you're mangling a list of files into a string.
+16:42  geirha: you are also missing a closing "-quote
+16:43  f00bar80: geirha, what do you mean by "mangling a list of files into a string"
+16:44  geirha: find */ -type f -iname "*.php" -exec grep -F creator /dev/null {} + > cities.txt
+16:44  geirha: f00bar80: When you put a list of files into a string, bash no longer knows where each file begins and ends
+16:45  geirha:  | >  is also wrong
+16:45  hemanth: kojiro, thanks noticed bashphorism now :)
+16:45  kojiro: !b56
+16:46  geirha: !find > f00bar80
+16:46  greybot: f00bar80: http://mywiki.wooledge.org/UsingFind
+16:49  f00bar80: geirha, thx
+16:59  Bronze: f00bar80: you don't really need the grep -F option to accomplish your goal.
+17:02  Bronze: f00bar80: also if we are allowed to assume that any file ending in .php is one of your php files, then we can do this:
+17:03  Bronze: ls  -d -1 -R **/*txt | grep -o "Creator.*$" >> cities.txt
+17:04  Bronze: woops - Creator should be creator  (No initial upper case char )
+17:04  geirha: Bronze: That'll grep a filelist. I think he wants to grep the files' content
+17:05  geirha: Bronze: You're also close to tripping the !ls trigger
+17:05  Bronze: geirha: ayup,    grep -o "Creator.*$" < $( ls  -d -1 -R **/*txt )  >> cities.txt
+17:05  Bronze: here.
+17:05  Bronze: errg! dang typos
+17:05  Bronze: "There"
+17:05  Bronze: :-)
+17:07  geirha: That might work if there's only one file and that file doesn't contain any special characters.
+17:08  Bronze: geirha: I dont allow white space terrorists on my file systems except in two specific locations.  User's media files and user's work documents. :-)
+17:09  geirha: whitespace isn't the only problem
+17:11  Bronze: Thats OK, I treat ALL terrorists the same. You put non printables in your filenames and you get what you deserve.  No one is going to go through  nearly 40 years of UNIX scripts and rewrite them to be "whistespace safe"  :-)  While its clear people need to be aware of the issue, as I am, but the danger is way overblown.
+17:12  geirha: []*? aren't non-printables
+17:12  kojiro: Bronze: You appear to be an "overuses the word terrorist" terrorist.
+17:13  geirha: Anyway, ls is pointless in that example.
+17:13  Bronze: kojiro: and you're clearly a ""overuses the word terrorist, terrorist" terrorista! :-D
+17:13  geirha: grep -o 'creator.*$' **/*txt
+17:13  Bronze: geirha: ah! very nice.
+17:13  kojiro: Bronze: you got me
+17:13  Bronze: geirha: I think that one is thewinner.
+17:13  geirha: Bronze: Not really, because it will fail if there are too many files.
+17:14  geirha: !faq too long
+17:14  greybot: http://mywiki.wooledge.org/BashFAQ/095 -- I'm getting "Argument list too long".  How can I process a large list in chunks?
+17:14  Bronze: geirha: yes, thats another issue one must be aware of, but.. that issue will identify itself when you try it.
+17:14  geirha: Also, you need bash4 and globstar enabled of course
+17:16  Bronze: geirha: or a tiny recursive descent loop, like the ones I used to use in my src-configuration managment tools (built on top of sccs) in 1985.
+17:19  geirha: ... or just use find
+17:20  Bronze: ah, here it is; the fragment, roughly, is:   for f in * ; do if [ -d $f ] ; then $0 $f ;  else do some operation $f ; fi; done
+17:21  Bronze: That client was a MILSPEC telecomm equipment maker.  VERY structured development rules. :-) (but excellent on-site coffee....   :-)
+17:22  Bronze: we found the recursive rescent better becouase it allowed us to read the local rules fo each dir more easily.  by calling the process anew as weentered each dir we had a nice neat scope of locality, self contained and self managing.
+17:23  Bronze: whoa - looks like my typing is taking the no whitespaces thing too far... :-)
+17:29  tazz: in bash when i try to do calculations for example "05 - 01" the answer i get is 4, i need the answer as 04... how do i do that ?
+17:29  Bronze: tazz: use printf
+17:30  Bronze: tazz:  math in bash does not format the output for you, so do the math and then format the result.
+17:31  tazz: you mean to say i should store the answer in a variable eg :- i and then use printf to print "0i" ?
+17:31  Bronze: taxx, do you know printf ?
+17:31  Bronze: err
+17:31  tazz: no
+17:31  tazz: not really
+17:31  Bronze: tazz: ^^^^^^^^^^ (2 up )
+17:31  tazz: but i can man
+17:32  tazz: i am checking out http://wiki.bash-hackers.org/commands/builtin/printf
+17:32  Bronze: tazz: printf "%02d" $yourvalue
+17:32  Bronze: (I think)
+17:32  Bronze: tazz: also "help printf" may give you enough to go on
+17:33  Bronze: hmm, or not.  itsvery short
+17:33  tazz: thanks, i'll check it out.
+17:33  Bronze: errg - dont. its way to short.
+17:34  Bronze:  same for the printf entry in the bash man page.
+17:37 --- taylanub0 is now known as taylanub
+17:37  Bronze: tazz: man 3 printf has a the detailed info, but is specifying it for use from "C".   IIRC you can use the info and examples from that man page, replace  the parens with spaces and drop and trailing ; to use it in bash
+17:39  tazz: Bronze, printf "%02d" `expr 05 - 02` works just fine for me. :)
+17:39  taylanub: !`
+17:39  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+17:39  taylanub: !expr
+17:39  greybot: 'expr' is a program used in ancient shell code to do math. In Posix shells like bash, use $(( expression )). In bash and ksh93, you can also use '(( expression ))' or 'let expression' if you don't need to use the result in an expansion.
+17:40  tazz: hahaha ok
+17:40 * tazz is an old school student :p
+17:40  kojiro: "oldschool student", or "old student (at school)"
+17:41  tazz: kojiro, results may vary if you mangle the words in a statement :)
+17:42  Bronze: ain't eng-lish a wunnerful language?
+17:43  Bronze: full of vagueness and loose construction, damning all engineers to hell on earth. :-D
+17:44 * Bronze thinks when she becomes emperor she'll mandate Esperanto as the only valid language.... [ yeah, right... ] 
+17:46  kojiro: Bronze: why not? The Chinese are trying to do it with Mandarin.
+17:49  Bronze: kojiro: well, sure, being the common trade languages gives your country some advantages. but Mandarin is much harder to learn the either english or esperanto.. and spelling in Mandarin is truly a nightmare... - its a non-phonetic language.
+17:50  tazz: Bronze, devanagari might fit your bill.
+17:50  kojiro: Mandarin is not harder to learn than English
+17:51  kojiro: It's probably harder to learn than Esperanto
+17:51  Damnshock: kojiro: that's debatable
+17:52  kojiro: As conservatives continue to prove, everything is debatable if you're willing to debate about anything.
+17:52  Bronze: Mandarin and Cantonese ( the two most widely used languages in China) use exactly the same character set, but are pronounced totally differently, despite having all the same spellings.  The character set ( the glyphs) has no phonetic component. so you must memorize the spelling AND the pronunciation of each word.each
+17:53  Damnshock: it's been long proven that learning Mandarin is extremely difficult
+17:53  Damnshock: much more than english
+17:54  tuxdev: I don't know as much about Mandarin, but Japanese is really not that hard..
+--- Log closed Fri Nov 05 12:52:00 2010

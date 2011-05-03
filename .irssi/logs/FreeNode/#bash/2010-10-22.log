@@ -1,0 +1,1342 @@
+--- Log opened Fri Oct 22 00:00:00 2010
+--- Day changed Fri Oct 22 2010
+00:00  Edong23: totally not a bash question, but maybe someone can point me the right direction...   has anyone had experience setting up a SIEVE system?  email filtering using SIEVE?
+00:00  lhunath: if you really cared to put this in a function; you *could* use PROMPT_COMMAND.
+00:01  RainCT: Nah, I've just put the color codes in PS1 (around the function call) and it looks good enough. Thanks lhunath :)
+00:01  lhunath: don't hardcode color codes.
+00:02  lhunath: !faq color
+00:02  greybot: http://mywiki.wooledge.org/BashFAQ/037 -- How can I print text in various colors?
+00:13  poisonbit: ouch, I was about some years hardcofing colors
+00:14  poisonbit: hardcoding
+00:15 --- bonsaikitten is now known as AmazingPudding
+00:27  Noble: I've installed a package called bash-completion, how do I enable it in bashrc?
+00:28  Edong23: ITS A VIRUS!
+00:28  koala_man: Noble: source /etc/bash_completion
+00:28  lhunath: it is, actually, it will bug out your completion attempts at unexpected moments; most commonly when you really need to get something done quickly.
+00:29  evelyette_: hi
+00:29  evelyette_: how would I sent all env variables to children ... I'm starting a child from current bash with another bash call ... (bash my_script.sh) ?
+00:30  nDuff: evelyette_, if they truely are environment variables, the children will be inheriting them by default.
+00:30  lhunath: evelyette_: env vars are inherited.  you don't need to do anything.  it's the way UNIX works.
+00:30  lhunath: !env
+00:30  greybot: There are two kinds of variables: Environment Variables (''env'') and Bash Parameters (''set''). Every process has the former; and they are inherited by its children. Bash creates a parameter for each env var it has, and with ''export'' you can "link" other bash parameters to env vars of the same name.
+00:31  twkm: Noble: ignoring the documentation is a keen first step.
+00:31  nDuff: !.sh > evelyette_ (as an aside)
+00:31  greybot: evelyette_ (as an aside): Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+00:33  Edong23: lol
+00:34 --- mretnuh is now known as hunterm
+00:35  republican_devil: configuration management is me job
+00:35  republican_devil: wow
+00:35  republican_devil: bash faq reccomending not using sed awk n shit
+00:35  republican_devil: use builtings in bash
+00:35  republican_devil: woa!
+00:35  republican_devil: what about unix tools philopshy
+00:35  bassliner: o.O
+00:36  taylanub: republican_devil: love it or leave it.   (i left it, i use dash)
+00:36 * nDuff finds taylanub's comment somehow fitting
+00:39  evelyette_: ok here's the problem
+00:40  evelyette_: this is the global file: http://paste.pocoo.org/show/278632/
+00:40  evelyette_: and this is another file: http://paste.pocoo.org/show/278633/
+00:40  republican_devil: dash?
+00:40  evelyette_: and I just did: source global
+00:40  republican_devil: wtf is dash?
+00:40  evelyette_: dash ?
+00:41  evelyette_: the problem is when I run the second script, which it says: test: line 6: element_in_array: command not found
+00:41  nDuff: republican_devil, a popular /bin/sh implementation
+00:41  republican_devil: oh not ksh in disguise?
+00:41  evelyette_: but I can run it from the terminal: element_in_array ...
+00:41  evelyette_: what's happening here?
+00:41  republican_devil: or pdksh
+00:42  twkm: taylanub: i find it hilarious, after all even dash goes beyond posix, and posix goes *way* beyond bourne, which ...
+00:42  lhunath: evelyette_: your code doesn't even source anything.  give real code.
+00:42  evelyette_: lhunath, yes I'm sourcing from command line
+00:42  evelyette_: that's what I want
+00:42  lhunath: evelyette_: functions aren't inherited ..
+00:43  lhunath: evelyette_: consider what greybot said about the environment.
+00:43  evelyette_: is there any way to make functions inherited too ?
+00:43  twkm: yes.
+00:43  evelyette_: how
+00:43  lhunath: that would be stupid.
+00:43  twkm: most people -- not the morons -- but them in a file to be sourced.
+00:44  evelyette_: I just want them inherited from one and only one file
+00:44  twkm: kooks consider reading ''help export''.
+00:45  lhunath: evelyette_: still stupid.
+00:45  lhunath: if your script needs global's functions, tell it to source global.
+00:45  evelyette_: here's the thing ... I have one global bash script ... and there are functions there I want them available in all other scripts (bash scripts)
+00:45  evelyette_: but I don't want to source it in every file
+00:46  lhunath: letting your script use functions relying on the fact that they are run from a shell that happened to source in those functions and export them; is mad.
+00:46  evelyette_: and it's not mad for variables to be inherited ?
+00:47  twkm: i find that scripts work better for that purpose.
+00:47  lhunath: yes, you do.  using functions from scripts without saying where they're defined is stupid.  then again, perhaps I'm mad and you're a genious.
+00:47  twkm: easier to organize and update.
+00:48  republican_devil: can I egrep somehow such that 1 thing is -v and rest are picked?
+00:48  lhunath: evelyette_: variables aren't.  only env vars are; and they're used for a different purpose
+00:48  republican_devil: without do two greps?
+00:48  evelyette_: ok than...another question: how can I have access from python to bash environment variables ?
+00:48  twkm: republican_devil: parser fail.
+00:48  twkm: evelyette_: join #python and find out.
+00:48  twkm: remove the word bash when you ask.
+00:48  republican_devil: egrep 'boobs|horses'|grep -v white
+00:49  republican_devil: can i do something in egrpe to get rid of grep -v after?
+00:49  lhunath: make a smarter pattern.
+00:49  evelyette_: regardless of being stupid, how can I still make functions inherit
+00:49  lhunath: or don't use grep.
+00:50  lhunath: evelyette_: assuming then that you're a genious; consider reading twkm's pointers again.  you should find the information you need from them.
+00:53  republican_devil: I have to find 300 files, each of which has some crap and then a listing of hostnames , which i think i can extract by grep "\." since the hostnames have a .
+00:53  republican_devil: a find prunes down the 300 files to about 200 ones I really need
+00:53  republican_devil: I want to extract the server hostnames
+00:54  republican_devil: into 1 big file
+00:54  republican_devil: then run an ssh hostname "some comna dto check load"
+00:54  republican_devil: to see which of 200 are working too hard
+00:54  republican_devil: then cron the load check to see when each is working hardest
+00:54  republican_devil: during day
+00:54  republican_devil: then rearrange crappy java aps on 200 to balance out load
+00:54  republican_devil: WHEW
+00:55  nDuff: ...doesn't sound like the best tool to suit the job, frankly
+00:56  nDuff: last time I had a large datacenter using SSH for running remote checks and management, the amount of overhead from the checks came to the point where it itself was real and substantial overhead
+00:56  nDuff: we ended up moving to using Ganglia -- UDP broadcast for status info; much lighter-weight.
+00:57  twkm: sounds risky.
+00:57  twkm: republican_devil: perhaps you want glark.
+00:57  nDuff: depends on the environment
+00:58  nDuff: even putting an HMAC in for authentication, UDP-based notification is still dramatically cheaper than SSH-based polling
+00:58  nDuff: oh, "risky" meaning the work of rebalancing as opposed to the use of UDP?
+01:00 * nDuff agrees -- is risky. Cheaper/safer to do the adjustments from the load balancer side rather than trying to distribute them, if possible.
+01:01  pragma_: sounds risky.
+01:01  pragma_: let's just drop it and get frisky.
+--- Log closed Fri Oct 22 01:08:11 2010
+--- Log opened Fri Oct 22 01:08:31 2010
+01:08 --- Users 508 nicks [0 ops, 0 halfops, 0 voices, 508 normal]
+01:09 --- Channel #bash was synced in 95 seconds
+01:18  x0rus: hi -> question: how to move all files except subdirs from one dir to another dir via mv command? thx
+01:18  sente: a better test: sign up for a dreamhost account and see how long it takes you to gain access to where you should't, etc
+01:18  tsolox: depth=${2:-1}, i need to subtract 1 to $1 if it's supplied. How do i elegantly achieve this?
+01:18  sente: omani: i'm only half joking, dreamhost is miserable
+01:19  tsolox: i meant $2
+01:19  x0rus: @sente: what's better than dreamhost then?
+01:20  sente: x0rus: it depends what you need, slicehost treats me well
+01:20  tsolox: depth=${2:-1}, i need to subtract 1 to $2 if it's supplied. If not, depth=1.  How do i elegantly achieve this?
+01:20  sente: dreamhost is just shitty in every way i've determined
+01:20  sente: except their unlimited disk space
+01:22  falconindy: tsolox: ${2:+$(( $2 - 1 ))}
+01:23  falconindy: tsolox: or at least that takes care of the 'if assigned' part... use another named variable initialized to 1 and use that assignment
+01:23  sente: omani: if you come across that website i'd be interested in seeing it
+01:24  omani: sente, I knew it once, but I forgot unfortenatly
+01:24  omani: I will inform u
+01:25  sente: what was the website layout such that it let you test your skills?
+01:27  omani: sente, the first mission was e.g. finding out which password is needed for login. at the very beginning u had just to look in the source code of the website to see a comment with the password string
+01:27  c00kiemon5ter: hi all, regarding sed I have some multiline output, from which I only need the first 8 lines, and want to extract two elements. first is on the 1st line, 2d is on the last(8th) line.
+01:27  c00kiemon5ter: I use 'N;' to do that, to bring the output to one line, but I need 8 N; in a row (N;N;N;N;..)
+01:27  c00kiemon5ter: is there some other way for this ?
+01:27  omani: and the more missions u solved, the harder it got
+01:28  c00kiemon5ter: I tried specifying a range for N like 1,8N; but that didnt work :/
+01:29  tsolox: falconindy: its not working..
+01:29  sente: ahhh, you might enjoy: http://www.pythonchallenge.com/
+01:29  falconindy: tsolox: that's so helpful. i dont know what 'it' is, but im not sure i want to know.
+01:30  galerien: Hi! How can I launch a shell script using a shell script (my script check if the file exist and if so, launch the script in the variable) ??
+01:31  sente: launches the script in the variable?
+01:31  galerien: errr, no. The variable is the name of the script
+01:32  sente: foo=$(some-script args)
+01:32  galerien: ok, i'll try that, thanks sente
+01:32  sente: just $var
+01:32  sente: # var=uptime; $var
+01:32  galerien: aw, "foo"... though that it was a command
+01:32  evalbot: sente: bash: uptime: command not found
+01:33  Noble: How can I bind more of the functions listed in bind -P to keys in bash?
+01:33  Noble: for vi mode
+01:33  sente: my foo example was an showing how to capture the output of the subprocess 'some-script arg'
+01:34  galerien: sente, yes yes, it's just that i'm French, it's late and we use "toto" instead of "foo" here ^^
+01:37  c00kiemon5ter: anyone on sed N; ?
+01:39  sente: galerien: no worries :)
+01:42  go|dfish: c00kiemon5ter: probably easier to use awk. awk 'NR == 1 { extract } NR == 8 { extract; exit }'
+01:44  galerien: sente, sorry to bother you again, but I get a not found each time I try to launch my script, any idea ?
+01:44  sente: probably because of the parameters you're passing to it
+01:45  sente: can you show me the code?
+01:45  galerien: !paste
+01:45  greybot: Please don't waste our time by making us go to a pastebin just for a five-line snippet. Paste it in the channel. If you have a larger script that's showing problems, trim it down to the bare minimum size that still shows the problem. You'll probably fix it yourself once you do that.
+01:45  galerien: echo "\n   Please enter the script name, press the space key and enter the log file name\n"
+01:45  galerien: read -p 'Enter the name of the program : ' program
+01:45  galerien:   run=$("$HOME/Documents/L3\ Informatique/Projets/System/scripts/$program")
+01:45  galerien:   $run
+01:47  sente: galerien: the $(...) is used to capture the output subshells
+01:47  sente: galerien: run="$HOME/Documents/L3\ Informatique/Projets/System/scripts/$program"; "$run"
+01:47  sente: try that
+01:48  sente: also you might might want to remove the \ after in "L3
+01:48  sente: "L3\ " because the expression is already being quoted (so spaces aren't a problem
+01:48  galerien: ok
+01:50  geirha: galerien: read -p 'Enter program name and logfile: ' program logfile
+01:52  galerien: echo "\n   Please enter the script name, press the space key and enter the log file name\n"
+01:52  galerien: read -p 'Enter the name of the program : ' program
+01:52  galerien: read -p 'Enter the name of the log : ' log
+01:52  galerien:   run="$HOME/Documents/L3 Informatique/Projets/System/scripts/$program $log";
+01:52  galerien:   "$run"
+01:52  galerien: geirha, it looks like that actually
+01:52  geirha: ~/"Documents/L3 Informatique/Projects/System/scripts/$program" "$log"
+01:52  geirha: Don't put more than one argument in a variable
+01:54 --- muzer is now known as MuzerAway
+01:55  galerien_: geirha, sorry, my ubuntu freeze from time to time, and thanks, that's exactly the answer I would have been expecting if you had let me ask my question ^^
+02:01 --- galerien_ is now known as galerien
+02:01  Cycron: whats the difference between bash and sh?
+02:02  abstrakt: ok I just went looking on the bashfaq wiki for this
+02:02  abstrakt: but didn't fine quite what I wanted
+02:02  abstrakt: I've looked at...
+02:03  abstrakt: http://mywiki.wooledge.org/BashPitfalls#for_i_in_.24.28ls_.2A.mp3.29
+02:03  abstrakt: and http://mywiki.wooledge.org/BashFAQ#BashFAQ.2BAC8-001.How_can_I_read_a_file_.28data_stream.2C_variable.29_line-by-line_.28and.2BAC8-or_field-by-field.29.3F
+02:03  abstrakt: but I can't remember where to find the while read syntax
+02:03  abstrakt: which is what I think I want
+02:03  abstrakt: anyway, my filenames don't have spaces in them
+02:03  abstrakt: so what would be wrong with using
+02:04  abstrakt: for FILE in `find .......`
+02:04 * nDuff shudders
+02:05  nDuff: abstrakt, you need to trust that IFS is only splitting on spaces -- if your script could be run by someone with a different IFS, you might end up being split on something else. More importantly, though...
+02:05  abstrakt: this just just for me myself and I
+02:05  abstrakt: it's never going to go out into production use
+02:05  nDuff: abstrakt, doing it the Right Way is more efficient -- it's able to actually start operating on the things it finds as it finds them, rather than needing to collect all the results, store them in memory, string-split the output in memory, and operate on the result
+02:05  abstrakt: I'll probably delete it after I'm done, it's just like a single command line
+02:05  abstrakt: I would use find -print0 | xargs
+02:05  abstrakt: like I usually do
+02:06  nDuff: abstrakt, doing it the Right Way gets you in good habits, which matters later when you _do_ write production code
+02:06  abstrakt: but I need the filename to come first and the arguments later
+02:06  nDuff: abstract3d, what's the point of -print0 | xargs -0 when you just did string splitting first?!
+02:06  nDuff: oh,
+02:06  nDuff: right.
+02:06  abstrakt: yeah
+02:06  abstrakt: right
+02:06  abstrakt: so, anyway, as I was saying
+02:06  nDuff: ...and anyhow, what's wrong with the best-practices way of find ... -exec {} ';' ?
+02:06  abstrakt: eh, I dunno lemme look it up
+02:07  nDuff: !find > abstrakt
+02:07  greybot: abstrakt: http://mywiki.wooledge.org/UsingFind
+02:08  galerien: I get a "Permission denied" when I try to launch my program within my script, do you know what can cause this ?
+02:09  galerien: (just to try it, I logged in as root)
+02:09  galerien: (and chmod 777 *) ^^
+02:10  abstrakt: Unfortunately, with the POSIX-style + feature, the {} must appear at the end of the command. This does not work:
+02:10  abstrakt: find . -type f -exec cp {} ../bar +          # Generates an error.
+02:10  abstrakt: what's with the + sign
+02:10  abstrakt: btw
+02:10  abstrakt: nDuff, so if that doesn't work, then I think you missed the point... ?
+02:12  nDuff: abstract3d, that's why I told you to use ';' instead of +
+02:12  nDuff: s/abstract3d/abstrakt/
+02:12  abstrakt: ah, well you didn't really explicitly mention +
+02:13  nDuff: abstrakt, right, but I did say ';'
+02:13  abstrakt: not the same thing :) sorry
+02:13  abstrakt: anyway, I've used exec once or twice, but I didn't get what you were after, sorry
+02:13  abstrakt: anyway... so if I use ; then {} does not need to come at the end correct?
+02:16  galerien: anyone can help me with my "permission denied" ?
+02:16  abstrakt: nDuff, from the manual page "Both of these constructions might need to be escaped (with a `\') or quoted to protect them from expansion  by  the  shell." so is that why you quoted the semicolon?
+02:16  galerien: i've got "rwxrwxrwx" on all files
+02:17  abstrakt: nDuff, and it should work equally well to use find -exec cp {} foo \;
+02:17  abstrakt: right?
+02:17  nDuff: abstrakt, if "cp" is what you're trying to run, then look at the -t argument
+02:18  nDuff: abstract3d, ...you certainly can put the files-to-be-copied at the end of the command line, and the destination before them :)
+02:18  nDuff: abstrakt, correct, that's why I quoted the semicolon.
+02:18  abstrakt: ok
+02:20  nDuff: galerien, there are too many different reasons that could happen; you could be unable to access the file due to permissions on its parent directory, you could have a shebang line indicating an invalid interpreter, you could have an extra security layer in your OS interfering, etc etc etc.
+02:20  nDuff: galerien, ...and please try to get out of the habit of using 777 when debugging; making things world-writable doesn't help with bugs regarding +rx permissions, but _does_ open you up to security vulnerabilities.
+02:21  abstrakt: find sorted -name \*.JPG -print0 | xargs -0 cp -t resized
+02:21  abstrakt: ftw
+02:21  abstrakt: thanks nDuff
+02:21  nDuff: abstract3d, you don't need xargs if you use -exec {} +
+02:22  nDuff: abstrakt, find sorted -iname '*.jpg' -exec cp -t resized '{}' +
+02:22  nDuff: abstrakt, ...one less process in the mix.
+02:22  galerien: nDuff, ok about the 777, but it's just a normal directory (that I created) and i'm root... I mean, I never had any "permission denied" as a root user on my own computer
+02:22  abstrakt: nDuff, erm... why use + as opposed to ; ?
+02:23  abstrakt: and why are the quotes required around the {}
+02:23  abstrakt: is that to take care of cases with spaces?
+02:23  nDuff: abstrakt, because the + acts like xargs, and the quotes around {} aren't actually required for bash, but might be for other shells.
+02:23  nDuff: abstrakt, no -- the quotes are stripped before they go to find, so they really are irrelevant
+02:23  abstrakt: ok, but I still don't get it
+02:23  abstrakt: i thought -exec worked like xargs
+02:24  abstrakt: I mean, in my mind it's use the "xargs version" or the "exec version"
+02:24  abstrakt: how is ; not like using xargs?
+02:24  geirha: # touch file1 file2; find . -type f -exec echo {} \;
+02:24  evalbot: geirha: ./file2
+02:24  evalbot: geirha: ./file1
+02:24  geirha: # touch file1 file2; find . -type f -exec echo {} +
+02:24  evalbot: geirha: ./file2 ./file1
+02:24  abstrakt: hmm
+02:25  abstrakt: ok then
+02:25  ferret: # touch file1 file2; find . -type f -print0 | xargs -0 echo
+02:25  abstrakt: well I see that the + doesn't need escaping, first of all
+02:25  evalbot: ferret: no output within the time limit
+02:25  ferret: whatever
+02:25  geirha: Yes, because + is not special to the shell
+02:25  geirha: ; is
+02:25  abstrakt: so there's an extra newline
+02:26  abstrakt: or there will be newlines, I see that
+02:26  abstrakt: why is that? like what's the difference? why would I need or want to have newlines included?
+02:26  ferret: no
+02:26  ferret: It's nothing to do with newlines
+02:26  geirha: That find, it finds two files; file1 and file2.
+02:26  nDuff: abstrakt, when does echo print newlines?
+02:26  ferret: In one case echo is being run once per file
+02:26  abstrakt: um, I'm just talking about what I see
+02:26  geirha: With -exec echo {} \;  it runs echo file1  then echo file2
+02:26  ferret: In the other case echo is being run once
+02:26  abstrakt: you did it I'm looking at it
+02:26  abstrakt: on my screen, in my IRC client, there is a newline in the first example and there's not in the second
+02:27  abstrakt: LF, CR, CRLF
+02:27  nDuff: abstrakt, yes, and if you think about _why_ that is you'll figure out the difference
+02:27  nDuff: abstrakt, they're calling echo two different ways
+02:27  geirha: With -exec echo {} + it runs  echo file1 file2
+02:27  abstrakt: nDuff, um... yes I don't know why that is
+02:27  abstrakt: and I'd like to think about it
+02:27  abstrakt: but I don't know, so that's why I'm asking
+02:27  abstrakt: geirha, ahh
+02:28  abstrakt: got it
+02:28  abstrakt: so then theoretically + is faster right?
+02:28  abstrakt: nDuff, geirha... ?
+02:29  abstrakt: because it's one call instead of many, so you'd save the overhead of the application startup time, which with echo is probably negligible
+02:29  abstrakt: but still
+02:29  nDuff: yup.
+02:29  abstrakt: ok cool
+02:30  abstrakt: ok, now... next item of business... automatically sort into folders by JPG resolution... some are 3000x4000 and some are 4000x3000 pixels
+02:30  abstrakt: I've got imagemagick installed
+02:30  abstrakt: I suppose this is the part where I should actually break out vim and start writing a script
+02:30  abstrakt: don't suppose there's a way to do that just with an xargs/exec call... ?
+02:30  nDuff: if you exec a shell instance, sure :P
+02:31  nDuff: the UsingFind wiki page (which I already linked you to) describes that
+02:32  abstrakt: nDuff, just looked at the imagemagick command line tools list, don't see anything that just says that it reports data, e.g. resolution
+02:32  abstrakt: nDuff, any idea what I should use for finding resolution?
+02:33  abstrakt: all I'd actually need would be one dimension even, because based on that one, I know whether it's landscape or portrait because all the resolutions are the same
+02:33  nDuff: abstrakt, identify
+02:33  abstrakt: just different orientations
+02:33  abstrakt: ahh, great thanks
+02:33  nDuff: abstract3d, ...in particular, see -format
+02:42  abstrakt: nDuff, is there such a thing as ternary in bash?
+02:43  yitz_: Nope
+02:43  yitz_: test && var=a || var=b
+02:45  humpty: arithmetic evaluation has ternary
+02:46  galerien: ok, I managed to get passed it, thanks for your help guys
+02:46  abstrakt: nDuff, ok so I have this much
+02:47  abstrakt: if [ `identify -format "%w" mypic.jpg` = 4000 ]; then echo "Wide"; else echo "Tall"; fi
+02:47  abstrakt: and that works as far as I can tell
+02:47  nDuff: !(( > abstrakt
+02:47  greybot: abstrakt: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+02:47  abstrakt: now how would I use that with -exec
+02:47  nDuff: !` > abstrakt
+02:47  greybot: abstrakt: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+02:47  nDuff: !find > abstrakt
+02:47  greybot: abstrakt: http://mywiki.wooledge.org/UsingFind
+02:47  abstrakt: and or, what did I fuck up
+02:47  abstrakt: :P
+02:48  abstrakt: nDuff, geirha so then like this... ? if [ $(identify -format "%w" mypic.jpg) = 4000 ]; then echo "Wide"; else echo "Tall"; fi
+02:49  abstrakt: JohnDoe_, yes? why are you messaging me?
+02:49  nDuff: ![ > abstract3d
+02:49  greybot: abstract3d: [ is NOT part of the `if' syntax. It's a normal, ordinary COMMAND. The `if' just checks its exit status. See `help test', http://mywiki.wooledge.org/BashGuide/TestsAndConditionals , and http://partmaps.org/era/unix/award-example-backticks.html
+02:49  nDuff: erm,
+02:49  nDuff: ![[ > abstrakt
+02:49  greybot: abstrakt: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+02:50  abstrakt: nDuff, I know that [ is not part of if syntax
+02:50  pragma_: !quotes > abstrakt
+02:50  greybot: abstrakt: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+02:50  nDuff: see that last sentence in particular; (( is preferred for numeric comparisons, [[ for textual ones, [ ] only in cases where you need compatibility with non-bash shells
+02:50  pragma_: !|| > abstrakt
+02:50  greybot: abstrakt: foo || bar runs bar when foo fails: [[ -d $foo ]] || { echo 'ohNoes!' >&2; exit 1; }
+02:50  abstrakt: pragma_, um, exactly where do I need to use more quotes?
+02:50  nDuff: abstrakt, the place where you call $() and _assume_ that it'll return one and only one token
+02:51  pragma_: !$() > abstrakt
+02:51  greybot: abstrakt: Command Substitution: "$(foo bar)" causes the command 'foo' to be executed with the argument 'bar' and "$(..)" will be replaced by the *output*. See http://mywiki.wooledge.org/BashFAQ/002 and http://mywiki.wooledge.org/CommandSubstitution
+02:51  abstrakt: pragma_, yes I'm aware of what $() does
+02:51  nDuff: abstract3d, ...granted, it _should_ always do that, but let's say you're running against a file that isn't an image; it may return an empty string to stdout
+02:52  nDuff: JohnDoe_, don't privmsg people without prior in-channel permission.
+02:52  abstrakt: nDuff, you ask as if I even knew that $() returns tokens, which I did not
+02:52  abstrakt: what does that mean, to return more than one token
+02:52  abstrakt: I thought that $() was replaced with the command output
+02:52  nDuff: abstrakt, soo -- strings get split into individual tokens
+02:52  nDuff: abstract3d, correct, it returns the output, which is a string
+02:52  abstrakt: yup
+02:52  abstrakt: which will not have spaces
+02:52  nDuff: abstract3d, but it may also be empty!
+02:52  abstrakt: hmm, ok fair enough
+02:53  nDuff: abstract3d, ...and _assuming_ that it doesn't have spaces is _assuming_ that the program you're calling works the way you expect
+02:53  abstrakt: sure is
+02:53  nDuff: abstrakt, ...and I don't need to repeat that little trite thing my father always said to be whenever I said the word "assume" in his presence, do I? :P
+02:53  abstrakt: I'm aware of the saying
+02:54  abstrakt: maybe I just have too much faith in "the system" maaaaan
+02:54  nDuff: so -- let's say you call [ $(foo) ] and foo returns "1 -gt 2"
+02:54  abstrakt: damn the man maaaaan!
+02:54  abstrakt: ;)
+02:54  abstrakt: yeah I get it
+02:54  abstrakt: I understand the token thing now
+02:54  abstrakt: it just as far as I can tell will never return more than one token
+02:54  pragma_: !token > abstrakt
+02:54  abstrakt: that it might be empty is a valid point though
+02:55  abstrakt: so now I arrive at
+02:55  pragma_: the enter key
+02:55  abstrakt: if [[ "$(identify -format "%w" mypic.jpg)" = "4000" ]]; then echo "Wide"; else echo "Tall"; fi
+02:55 * nDuff wanders homeward
+02:55  pragma_: homeward bound
+02:56  abstrakt: is this still retarded and wrong?
+02:56  pragma_: wrongness is relative
+02:56  pragma_: what's wrong for someone else may be right for you
+02:56  abstrakt: ok
+02:56  abstrakt: let me ask again
+02:56  krzee: i would use a case
+02:56  abstrakt: how wrong is that?
+02:56  nDuff: abstrakt, it's not so bad. So -- now see the UsingFind page
+02:56  pragma_: i would use a cake
+02:56  abstrakt: krzee, hmm, might be a good option
+02:57  abstrakt: krzee, how would the case equivalent look?
+02:57  krzee: but that doesnt make what you did wrong
+02:57  abstrakt: and does it matter in this instance if I use = or -eq ?
+02:57  pragma_: !-eq > abstrakt
+02:58  abstrakt: and also, basically, so just to get this straight, the difference between (( and [[ is that (( is better suited for numerical comparisons
+02:58  abstrakt: and [[ is better suited for string comparisons
+02:58  abstrakt: also, now if I expand this to be something like
+02:59  abstrakt: if [[ "$(identify -format "%w" $FILE)" = "4000" ]]; then mv $FILE landscape; else mv $FILE portrait; fi
+02:59  abstrakt: what is the ideal way to include this in a loop? can I use {} more than once with -exec ?
+02:59  abstrakt: what about with -xargs ?
+02:59  abstrakt: derp
+03:00  abstrakt: with xargs -0
+03:00  abstrakt: krzee, pragma_ ?
+03:07  abstrakt: for FILE in *.JPG; do if [[ "$(identify -format "%w" $FILE)" = "4000" ]]; then mv $FILE landscape; else mv $FILE portrait; fi; done
+03:07  abstrakt: works for me
+03:08  yitz_: !capvar > abstrakt
+03:08  greybot: abstrakt: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+03:09  abstrakt: for img_file in *.JPG; do if [[ "$(identify -format "%w" $img_file)" = "4000" ]]; then mv $img_file landscape; else mv $img_file portrait; fi; done
+03:09  yitz_: abstrakt: You need more quotes...
+03:09  abstrakt: yitz_, around what
+03:10  yitz_: All variables
+03:10  yitz_: eg in the mv commands
+03:10  abstrakt: I happen to know my data set
+03:10  abstrakt: and I happen to know there are no spaces
+03:10 * yitz_ shrugs. Good practices all the same
+03:11  abstrakt: ok, well so then what about the fact that the bash guide says basically not to ever use for i in ....
+03:11  yitz_: [[ is string and (( is numeric. 4000 can be either.
+03:11  yitz_: Which guide? Where?
+03:12 --- JmZ is now known as JmZ_
+03:12  abstrakt: http://mywiki.wooledge.org/BashPitfalls#for_i_in_.24.28ls_.2A.mp3.29
+03:12  abstrakt: yitz_, that one ^
+03:13  yitz_: It says don't try word-splitting the output of a command
+03:13  yitz_: for i in $(ls *.JPG)  -> bad
+03:13  yitz_: for i in *.JPG  -> globbing -> good
+03:13  abstrakt: so why is *.JPG any better
+03:14  yitz_: It doesn't parse the output of a command that wasn't set up for parsing. There is no wordsplitting involved.
+03:14  abstrakt: what if I want to use a find command and give the results to a loop
+03:14  abstrakt: like what if my files aren't just all in the same folder
+03:14  abstrakt: so *.JPG doesn't cut it
+03:14  yitz_: globstar or print0
+03:15  abstrakt: yitz_, for works with print0
+03:15  abstrakt: ?
+03:15  yitz_: Or ... drop the loop
+03:15  yitz_: Why would you use a loop when find does the looping?
+03:15  abstrakt: yitz_, to run more than one command
+03:15  yitz_: But find feeds the -exec one file at a time
+03:15  abstrakt: ...
+03:15  yitz_: So the -exec has nothing to loop over
+03:16  abstrakt: yitz_, to run more than one command
+03:16  yitz_: find /path -exec bash -c 'cmda "$1" ; cmdb "$1"' _ {} \;
+03:16  yitz_: That runs two commands on each item found.
+03:16  yitz_: (Or two -exec's...)
+03:16  abstrakt: ahh
+03:17  abstrakt: hmm, what's up with $1 and also using {}
+03:17  yitz_: Prevents nasty word splitting. The {} deals with passing the argument to the -exec'd bash properly
+03:17  yitz_: And bash processes arguments via $1 $2 ...
+03:20  abstrakt: find . -iname "*.jpg" -exec if [[ "$(identify -format "%w" "$1")" = "4000" ]]; then mv "$1"; else mv "$1"; fi\;
+03:20  abstrakt: anything wrong with that?
+03:20  yitz_: if isn't an executable
+03:20  yitz_: !find > abstrakt
+03:20  greybot: abstrakt: http://mywiki.wooledge.org/UsingFind
+03:20 --- go|dfish is now known as GO|DFISH
+03:22  abstrakt: yitz_, ok, well so then how would I do it instead?
+03:22  abstrakt: yitz_, I have to write a bash script with the if statement? and then pass {} to that bash script?
+03:23  abstrakt: # touch hello.jpg world.jpg; find . -iname "*.jpg" -exec if [[ "$1" = "hello.jpg" ]]; then echo "Hello!"; else echo "World!"; fi\;
+03:23  evalbot: abstrakt: bash: syntax error near unexpected token `then'
+03:23  yitz_: abstrakt: See that link ^^ near before section 6
+03:23  yitz_: Meh. Read section 5
+03:24  karsten-nr: Looking for a recipe to create a pidfile in /var/run for an SSH tunnel process, to monitor via monit.
+03:27  yitz_: !pm > karsten-nr
+03:27  greybot: karsten-nr: http://mywiki.wooledge.org/ProcessManagement
+03:29  abstrakt: # touch hello.jpg world.jpg; find . -name "*.jpg" -exec bash -c 'if [[ "$1" = "./hello.jpg" ]]; then echo "$1 Hello!"; else echo "$1 World!"; fi' _ {} \;
+03:29  evalbot: abstrakt: ./world.jpg World!
+03:29  evalbot: abstrakt: ./hello.jpg Hello!
+03:30  abstrakt: aight, cool, looks good
+03:30  abstrakt: I'm gonna use it
+03:30  abstrakt: you got a problem wid dat!?
+03:31  yitz_: lol
+03:31  yitz_: Not at all
+03:32  karsten-nr: yitz_: Tx.  Thought bang had something to do with it.
+03:32  yitz_: Though technically you can drop the quotes inside the [[
+03:32  abstrakt: um, I thought that the bash guide just told me otherwise
+03:32  abstrakt: but ok
+03:33  karsten-nr: yitz_: You can drop the quotes, but if $1 is unevaluated, the test gets quirky
+03:33  yitz_: Inside [ you need quotes
+03:33  abstrakt: I'm gonna stick with quotes
+03:33  yitz_: The [[ is special, though. It's not a command. It's very very different than test or [
+03:33  karsten-nr: abstrakt: safer.
+03:33  yitz_: bash parses it differently
+03:33  yitz_: karsten-nr: No...
+03:34  yitz_: ![[
+03:34  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+03:42 --- emma is now known as emmaldp
+03:42 --- emmaldp is now known as emma
+04:15  abstrakt: !paste
+04:15  greybot: Please don't waste our time by making us go to a pastebin just for a five-line snippet. Paste it in the channel. If you have a larger script that's showing problems, trim it down to the bare minimum size that still shows the problem. You'll probably fix it yourself once you do that.
+04:15  abstrakt: is there a recommended channel pastebin
+04:16  yitz_: Nope
+04:28  abstrakt: is there a standard utility that will return the max of two numbers?
+04:32  yitz_: (( a > b ? a : b ))
+04:34  abstrakt: cool
+04:34  abstrakt: is there such a thing as typecasting?
+04:34  yitz_: bash doesn't do types...
+04:36  abstrakt: # img_height=3;img_width=4;max=$(if (( $img_height > $img_width)); then echo $img_height; else echo $img_width; fi); min=$(if (( $img_height < $img_width)); then echo $img_height; else echo $img_width; fi); ratio=$min/$max; echo $ratio
+04:36  evalbot: abstrakt: no output within the time limit
+04:36  abstrakt: ok well
+04:36  abstrakt: on my machine I literally get "3/4" (minus the quotes)
+04:36  abstrakt: not 0.75 as I would like
+04:36  abstrakt: what am I doing wrong?
+04:36  yitz_: !float
+04:36  greybot: for floating point numbers see !faq 22
+04:36  yitz_: !faq 22
+04:36  greybot: http://mywiki.wooledge.org/BashFAQ/022 -- How can I calculate with floating point numbers instead of just integers?
+04:51  latenite: Hi folks, I want my scriptuser to make *multiple* selections. For example for creatin volume groups in lvm. With that I can ONLY choose one http://pastie.org/1239812
+04:51  latenite: I want my user to enter "1,2,5" and then work with his selections. How can this be done? thanks
+04:55  yitz_: read -a
+04:56  latenite: yitz_, can you explain some more please :)
+04:56  yitz_: See: help read
+04:56  yitz_: Note the -a and -d sections
+04:57  latenite: yitz_, this way my values would have to be in an array?
+04:58  yitz_: Sure
+04:58  yitz_: How else do you want to store a valiable number of options?
+04:59  latenite: yure, ok but I dont know where to put "read -a" in my select clause.
+05:00  yitz_: Oh. Using select? I don't think it's set up for multi-entries at once
+05:00  latenite: yitz_, http://pastie.org/1239829 is not woring
+05:00  yitz_: You loop through it
+05:02  latenite: yitz_, well I get my values from that find in my pastie. Can you tell me how to get this loop?
+--- Log closed Fri Oct 22 05:07:23 2010
+--- Log opened Fri Oct 22 05:07:45 2010
+05:07 --- Users 493 nicks [0 ops, 0 halfops, 0 voices, 493 normal]
+05:08  latenite: yitz_, what part of it?
+05:09  yitz_: All
+05:09 --- Channel #bash was synced in 92 seconds
+05:09  latenite: ok I will, still I d like to know how to do this, now
+05:23  Linex: cp * means including all dot files and recursive directory, right ? I want to copy a whole disk mounted on my dvd drive.
+05:24  yitz_: Linex: Use rsync probably
+05:24  Linex: cp * won't work ?
+05:24  yitz_: Or see man cp at least. You'd need -r at the very leat and dotglob
+05:26  Linex: ok yitz thanks. I will use rsync then
+05:35  mahipal: what is "-z" checks in   if [ ! -z filename ]
+05:36  yitz_: See help test
+05:36 --- cloq is now known as cloq[afkdass]
+05:36 --- cloq[afkdass] is now known as cloq[afk]
+05:46  winkey: !return
+05:46  greybot: Every Unix process returns an exit status code to its parent. This is an unsigned 8-bit value, a number from 0 to 255 inclusive. Your script returns the exit status from the last command it executed, unless you specifically call "exit" with a value. Functions also return values, using "return".
+06:03  mahipal: !stickbit
+06:08  TheBonsai: Y0
+06:17  orange80a: i googled but couldn't figure this out... how do i split a string, such as "red:blue:green:gray" to be printed out into lines?
+06:20  orange80a: anybody?
+06:25 --- nadir is now known as Guest67576
+06:28  yitz_: orange80a: What are you trying to do?
+06:28  orange80a: print $PATH onto mutliple lines so i can read it
+06:29  sn18: orange80a: what do you mean by read it?
+06:29  orange80a: the current path is one long string delmited by colons
+06:30  orange80a: i want essentially remove the colons and print each token on a new line
+06:30  orange80a: as in, $ echo $PATH | <something that replaces ':' with '\n'
+06:31  danst_: echo $PATH | sed -e "s/:/\n/g"
+06:31  danst_: like that?
+06:31  sn18: !ifs > orange80a
+06:31  greybot: orange80a: Internal Field Separator (or Input Field Separator), used to break things into words. See http://mywiki.wooledge.org/IFS and http://mywiki.wooledge.org/BashFAQ/001 and http://bash-hackers.org/wiki/doku.php/syntax/words
+06:32  orange80a: thanks guys
+06:32  danst_: !
+06:39  yitz_: danst_: tr :)
+06:39  yitz_: tr : '\n' <<<"$PATH"
+06:44  Cyber_Beast: I'm using for loop and as in variable "i" I have absolute path of a file... How do I get only filename out of it? eg... I have /home/CyberBeast/Scripts/filename.sh ... how do I get filename.sh directly out of it?
+06:44  yitz_: !basename > Cyber_Beast
+06:44  greybot: Cyber_Beast: basename(1) can strip the directory and extension from a path. (a/b/c.d -> c.d or c). Or you can use a parameter expansion: "${path##*/}" or "${path%.*}"
+06:45 --- Guest67576 is now known as n1adir
+06:46  Cyber_Beast: greybot: super! Thanks.
+06:46  Iceland_jack: is it possible to manipulate the escape characters in the bash prompt?
+06:47  yitz_: Yes
+06:47  Iceland_jack: I want to change the colour of my pwd in ps1 so I want to subtract \W from \w
+06:47  yitz_: Edit the PS1 variable, then
+06:48  Iceland_jack: I have... but \w and \W are expanded when the prompt is used
+06:49  Iceland_jack: I could do something like ${PWD##*/} but that makes ~ into /home/user and doesn't account for directory names that include slashes
+06:50 --- MTecknology is now known as AFWEG43y6t23yt2t
+06:50 --- AFWEG43y6t23yt2t is now known as MTecknology
+06:51  Iceland_jack: yitz_: you said there was a way to do that, how would I for example remove a substring from \w?
+06:51  yitz_: You could run arbitrary code in, say, the PROMPT_COMMAND and output anything you want
+06:52 --- whaley_ is now known as whaley
+06:53  Iceland_jack: yitz_: I did ask about the escapt characters though, if I try removing \W from \w in the PROMPT_COMMAND it would try to remove "W" from "w"
+06:53  yitz_: But you could operate on $PWD and printf whatever you want and skip the PS1
+06:53  Iceland_jack: I explained why I'd rather not do that
+06:54  Iceland_jack: the exact information I want is in those two escape characters, surely there must be a way of manipulating them like you said
+06:57  sn18: !wayttd > Iceland_jack
+06:57  greybot: Iceland_jack: What Are You Trying To Do?
+06:57  Iceland_jack: I want to highlight my pwd
+06:58  Iceland_jack: in my PS{1,2}
+06:59 --- kaja is now known as wippo
+06:59 --- wippo is now known as kaja
+07:00  abhinavjauhri: Hey, I have a binary which takes input a file and generates an output file. So I want write a script which runs through all the files in a directory and makes them run on the binary
+07:01  abhinavjauhri: something like ls * | binary -i $1 -o output$1.o
+07:02  sn18: !ls > abhinavjauhri
+07:02  greybot: abhinavjauhri: Don't try to parse ls output. http://mywiki.wooledge.org/ParsingLs
+07:03  abhinavjauhri: greybot: How else can I do it? I need to read each file for a directory and make it run on the binary
+07:04  abhinavjauhri: greybot: input files are like : i1, i2, i3, i4 and I want the output to be like : o1, o2, o3 respectively
+07:05  jordanm: abhinavjauhri: did you read the link?
+07:05  jordanm: abhinavjauhri: greybot is a bot
+07:06  abhinavjauhri: jordanm: Ya I got it
+07:32  sparrW: I'd like to get the current cpu iowait% (as appears in top) and conditionally run a command if it's over a certain amount. is there a way to capture that info?
+07:35  Edong23: i think /proc/stat would help
+07:35  Edong23: instead of trying to parse top
+07:35  sparrW: thanks
+07:36  Edong23: it gives all cpu informtion... so you will have to mush it up abit
+07:42  sparrW: I'd like to send the output of a command via email. {echo `command` | sendmail -v user@domain} leaves all the newlines out of the output. is there a better way?
+07:54  sente: sendmail -v user@domain <command, perhaps?
+07:57  lhunath: sparrW: echo `..` is utterly pointless and broken.
+07:57  lhunath: sparrW: ''echo `..`'' is exactly the same thing, (only broken), as JUST ''..''
+07:57  lhunath: also, never use ``, always use the $() variant.  in this case, don't use it altogether.
+07:58  lhunath: !wordsplitting > sparrW
+07:58  greybot: sparrW: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+07:58  lhunath: sente: < is called "file redirection".  command is not a file.
+07:58  sente: ah, right
+07:58  lhunath: he wants command | sendmail ..
+07:59  sente: echo `cmd` or better echo $(cmd) has the use of removing newlines for whenever it's necessary, but yeah, silly
+07:59  yitz_: cmd | tr -d '\n'
+07:59  sente: i did read it was a command but my answer was on autopilot
+08:00  lhunath: wordsplitting is never a desired feature.
+08:00  sparrW: thanks
+08:00  lhunath: it also expands any words in command's output to a bunch of filenames if they happen to look like globs that happen to match files on your filesystem.
+08:01  sente: yitz_: yep
+08:01  Cyber_Beast: cp -i "$i" "$path3"	echo "Copied to \"$path3\" successfully." ... I want to detect whether user entered y or n for copying files... how can I give condition in here?
+08:01  lhunath: Cyber_Beast: ask cp.
+08:02  lhunath: Cyber_Beast: maybe it sets an exit code that you can use.
+08:02  lhunath: if not; don't let cp ask; ask it yourself.
+08:02  sparrW: can cron jobs have multiple commands separated by semicolons?
+08:02  sparrW: * * * * * username something;something;something;if something;then something;fi;something
+08:02  lhunath: and escaping quotes is silly and ugly.  printf 'Copied to "%s" successfully.' "$path3"
+08:03 --- s|re is now known as k-_
+08:03  Cyber_Beast: lhunath: No, cp doesn't set exit code.. I think I'm gonna have to ask by myself...
+08:03  lhunath: sparrW: man cron will tell you they execute the code you put there from a shell.  so yes.
+08:03  lhunath: Cyber_Beast: 'read' then.
+08:04 --- k-_ is now known as k|-
+08:04  lhunath: Cyber_Beast: and cp actually DOES set a different exit code if you answer no.
+08:05  lhunath: # touch a b; cp -i a b <<< n; echo $?
+08:05  evalbot: lhunath: cp: overwrite `b'? 0
+08:05  lhunath: .. or at least, my cp does.
+08:05  Cyber_Beast: lhunath: what? There is nothing written about exit code in "man cp"..
+08:06  lhunath: $ cp -i work/foo work/bar; echo $?
+08:06  lhunath: overwrite work/bar? (y/n [n]) n
+08:06  lhunath: not overwritten
+08:06  lhunath: 1
+08:06  lhunath: anyhow; ask it yourself.
+08:09  Cyber_Beast: lhunath: My cp returns 0 everytime.. thanks a ton.
+--- Log closed Fri Oct 22 08:48:45 2010
+--- Log opened Fri Oct 22 10:55:20 2010
+10:55 --- Users 500 nicks [0 ops, 0 halfops, 0 voices, 500 normal]
+--- Log closed Fri Oct 22 10:55:26 2010
+--- Log opened Fri Oct 22 10:55:33 2010
+10:55 --- Users 500 nicks [0 ops, 0 halfops, 0 voices, 500 normal]
+10:56  qdb: pgas, you do not know how to remove that message also?
+10:56  qdb: pgas, you do not know how to {remove that message also}?
+10:56 --- Channel #bash was synced in 85 seconds
+10:57  pgas: qdb: what are you doing exactly now?
+10:57  qdb: i have written in crontab your command. but e-mail still comes
+10:58  twkm: the parent shell detects and reports it, not the command you run.
+10:59  qdb: twkm, then what i can do?
+10:59  pgas: though it seems strange to see this from a crontab...are you starting the command from another crontab or what?
+10:59  qdb:  /etc/crontab
+10:59  twkm: games and bouncers are all crap like this, so i would guess it is one of those things.
+10:59  qdb: only 1 crontab
+10:59  qdb: is used
+11:00  qdb: twkm, about my command? it fixes a farkice bug
+11:00  qdb: it restarts it
+11:00  qdb: because it starts to use much processor
+11:01  pgas:  well but I don't see why { killall darkice;darkice ;} >/dev/null 2>/dev/null #would print something
+11:01  twkm: sounds like a game.
+11:01  qdb: darkice sends line-in signal to streaming server
+11:01  qdb: in mp3 format
+11:02  qdb: this time email has not come!
+11:02  qdb: it runs every half of hou
+11:03  qdb: thank you
+11:03  qdb: also i would better script, that checks darkice processor usage
+11:04  xok: hello all...
+11:05  xok: I'm trying to get pipe as an argument to my script...
+11:05  xok: something like this: ./script -options | grep something
+11:05  xok: and to catch it in the $* variable...
+11:05  geirha: If you want to pass a literal |, escape it, either with \ or quotes
+11:05  qdb: is it possible to make that in one line in crontab? i think i need to use ps, grep, if, fi
+11:06  xok: can it be possible?..
+11:06  twkm: xok: that is't how pipes work.
+11:06  geirha: !ps > qdb
+11:06  greybot: qdb: Don't use ps(1) in scripts -- see http://mywiki.wooledge.org/ProcessManagement instead.
+11:06  twkm: heh, isn't.
+11:06  xok: twkm: sorry?..
+11:06  twkm: consider reading ''man bash'' for a description of what a pipe does.
+11:07  xok: twkm: I do know what  pipe does...
+11:07  twkm: it would appear not.
+11:07  xok: twkm: I just want to catch pipes as arguments..
+11:07  twkm: sigh.
+11:07  twkm: fine, see geirha's response.
+11:08  geirha: # echo \| "|" '|'
+11:08  evalbot: geirha: | | |
+11:09  geirha: I bet the next question will be why the pipe doesn't work when $* is executed
+11:13  xok: geirha: you miss.. :-D
+11:13  xok: geirha: here's the next question: I want to catch all the pipes and pass them to some variable ($* for example)...
+11:14  xok: is this possible?...
+11:14  abstract3d: nDuff: :$
+11:15  twkm: /me chortles
+11:15  xok: in my script I've got: echo $* and when I execute it like this: ./script -some-options | grep me_here
+11:15  xok: to show the output like this: -some-options | grep me_here
+11:16  twkm: so, did you quote the | yet?
+11:16  geirha: ./script -some-options \| grep me_here
+11:16  twkm: your example of running it does not.
+11:16  xok: no, I want to use them without quoting...
+11:17  twkm: too bad.
+11:18  geirha: Then you can't use a shell to execute your script
+11:25  xok: ok, thanks...
+11:33 --- orion1 is now known as [USA][XP][8913]
+11:42  xev: how to find file in bash in /
+11:43 --- Mohan__ is now known as Mohan
+11:44  trash: xev: What?
+11:47 --- niko is now known as NIKO
+11:48  xev: trash, I want to list *init* in my / .. how to do that?
+11:48  pgas: find / -name '*init*'
+11:48  pgas: !find > xev
+11:48  greybot: xev: http://mywiki.wooledge.org/UsingFind
+11:49  trash: I have no idea what you want.
+11:49  xev: I want to find a file
+11:49  xev: like
+11:50  xev: dir c:\ *yawn* /s/a
+11:59  karthee: xev: find -name 'filename'
+12:01  trash: Then what pgas said.
+12:01  trash: karthee: $ find -name 'filename'
+12:01  trash: find: illegal option -- n
+12:01  trash: find: illegal option -- a
+12:01  trash: find: illegal option -- m
+12:01  trash: find: illegal option -- e
+12:01  trash: find: filename: No such file or directory
+12:01  xev: thanks :)
+12:02  karthee: are you using windows ?
+12:03  pgas: posix/bsd find requires a pathname
+12:04  nae: how can i build up a string in a variable inside a while read loop, then acccess it afterwards?  output stuff | while read avariable; do make=$(do something with avariable); done now how can I get $make ?
+12:04  trash: !faq disappear > noesc
+12:04  greybot: noesc: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+12:04  trash: err nae.
+12:05  nae: trash: thanks
+12:09  nae: right, switched it to a: for abariable in $(output stuff); do
+12:11  realubot: I want to use grep to grep for a particular pattern together with regular expression. I think grep -e "parttern" let me grep for exactly pattern, but how do I achieve something like this: grep -e ".*\ pattern [A-Z]*"
+12:12  realubot: I want to grep for one pattern, say a smiley :) and therefore use grep -e ":)" but I also want to grep for a regular expression at the same time? Is this possible?
+12:14  realubot: Like this: grep ".*;).*" where ;) will be treated as a text string and .* as regular expressions.
+12:14  trash: nae: Uhm, if you want line iteration, then this will fail.
+12:15  trash: realubot: Escape the special characters.
+12:22  audio: First off I am a very occasional, not a confident, scripter hoping to find some general advice. I've looked through http://mywiki.wooledge.org/BashFAQ but had no success.
+12:22  audio: I am trying to write a short script which creates a symlink for each directory in ~/.gvfs.
+12:23  audio: The directories are automatically generated by the OS but the construction of their names (spaces etc) cannot be predicted.  They are connections (mounts?) to network shares.
+12:23  audio: I only want the script to run once at boot-up.  I envisage it something like - Wait until directories appear in ~/.gvfs - Create a list of the directories - Feed the list to a for loop - The loop creates a symlink for each entry in list to ~/Desktop.
+12:23  audio: Is anyone able to point to some relevant examples or snipets please.
+12:27  nullogic: audio: you pretty much just said what you wanted to do in plain english, so now script it
+12:28  nullogic: you can cron it to @reboot or put it in your boot rc.local, or however you need it.
+12:29  audio: nullogic: I'm quite willing to but script so infrequently I was hoping someone might be able to get me started by pointing to some useful snippets somewhere.
+12:30  nullogic: audio: what type of snippit ater you looking for? that was a very broad area you just covered
+12:30  nae: trash: it's working okay, i think because there's no whitespace in my output lines
+12:32  audio: nullogic: mainly how to construct the list and feed it to the loop taking account of spaces etc
+12:35  nae: that was pretty exciting. I just made a really dodgy script that checks through /proc/*/environ for DBUS_SESSION_BUS_ADDRESSes, then gets the uid from proc/*/status then gets the username, su's to the username and runs notify-send with a message and all this is run from udev so I can spam libnotify when a particular usb device is added
+12:37  nullogic: audio: something like this: for file in `ls /path/to/dir/with/files`; do
+12:37 --- MuzerAway is now known as muzer
+12:38  nullogic: audio: to see if a dir exists: if [ -d /path/to/dir ]; then
+12:38  nullogic: that should be enough to figure it out
+12:40  audio: nullogic: that looks much more straightforward than I expected.  It will help get me started and potentially save a lot of time.  Many thanks.
+12:40  nullogic: audio: http://mywiki.wooledge.org/BashPitfalls#pf1
+13:00  takamichi: I've got a script which uses the PID of the last started background process and it works perfect when I run it. However, its supposed to be executed by Zabbix monitoring and when it does, the PID is always one number higher... Any ideas why? - http://pastebin.com/gxYPgKhF
+13:02  Knirch: takamichi: $! changes after each command
+13:02  Knirch: takamichi: so the sudo kill $! would try to kill "echo 0" which has already finished
+13:02  Knirch: !pe > takamichi
+13:02  greybot: takamichi: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+13:02  Knirch: sorry
+13:02  Knirch: wrong one
+13:02  Knirch: !pm > takamichi
+13:02  greybot: takamichi: http://mywiki.wooledge.org/ProcessManagement
+13:02  Knirch: is a good read
+13:02  xok: I want to delete some entries from history, am I able to use range?..
+13:03  xok: e.g. 900-1000 for example?..
+13:03  takamichi: @Knirch - Thank you, I will read that right away
+13:03  danst_: lines?
+13:03  Knirch: takamichi: and ignore my comments, I'm totally off base, $! does not change after each command
+13:03  xok: danst_: yes, to delete some lines from the history command..
+13:04  Knirch: takamichi: I had a sudden and painful brainfart. but the ProcessManagement is a very good read though :)
+13:04  takamichi: Knirch - he he, Thank you
+13:06  Knirch: takamichi: and it seems you're trying to implement a timeout command, there are commands and bash implementation available
+13:06  xok: anyone please?..
+13:06  realubot: trash: Ok, T thought I did try to escape the charaters without success, but I may have done it in the wrong way then.
+13:06  realubot: trash: I'll try to escape the characters once again.
+13:11  danst_: is it possible to rewrite last line of output?
+13:12  pgas: not sure to understand what you want exactly
+13:15  takamichi: @Knirch - know of any references to these timeout commands?
+13:40  Mohan: danst_: if you know the pattern, pipe the output to sed and you can rewrite it. sed '$ s/find/replace/g'
+14:04 --- jaminja_ is now known as jaminja
+14:18  dagni: hello guys
+14:19  dagni: i wonder, if there is already some linux tool or something, that will check whether the variable i have is valid IP address or not ? i would like to save myself some extra coding
+14:23  D3f0: good morning
+14:24  dagni: moin
+14:24  D3f0: how do I get the full input key representation, for example ^[[A when you type the upper arrow key...
+14:24  lhunath: dagni: pass it to ping.
+14:24  lhunath: shrug.  all depends on why you care.
+14:25  dagni: ping: unknown host 213.232.134.256
+14:25  lhunath: D3f0: cat -v
+14:25  dagni: lhunath: can it give "unknown host" for some valid ip address under some circumstances?
+14:25  dagni: just want to be sure
+14:25  D3f0: lhunath, great, thanks!
+14:25  lhunath: dagni: what about "all depends on why you care" don't you understand?
+14:26  lhunath: do you just care whether the number you've been given conforms to IPv4 dot-notation?
+14:27  lhunath: and why do you even care?
+14:28  dagni: yes just if it's valid IPv4 dot-notation
+14:28  dagni: not greateer than 255 in each field, not less than 0 in each field
+14:30  takamichi: When I run a script from the shell it returns the correct PID for a new background process using $!, however when the script is run by another process, $! returns the correct PID + 1 - Why + 1 Any ideas?
+14:30  takamichi: And Ive jsut finished reading http://mywiki.wooledge.org/ProcessManagement
+14:31  lhunath: dagni: since you seem adamant to check this even though you refuse to explain why; or don't even know why; IFS=. read -a fields <<< "$ip", iterate the fields and do a (( )) check or something.
+14:31  lhunath: or, you know, don't bother with any of this sillyness.
+14:31  dagni: lhunath: sorry, i'm going to grab ip from variable and block it on iptables
+14:31  dagni: but before i do that i want to make sure the ip is valid ip not some number
+14:31  dagni: like 23434234
+14:32  lhunath: that's not an answer to "why", that's a "what for"
+14:32  lhunath: why do you want to make sure it's valid?
+14:32  lhunath: do you not trust your own config files?
+14:32  lhunath: or whatever the heck fills in your variable
+14:33  lhunath: takamichi: no, it returns a random PID which, in your system setup happens to look like PID+1, usually.
+14:34  lhunath: takamichi: $! outputs the PID of the last command the current script backgrounded.
+14:34  lhunath: what PID do you want?
+14:34  lhunath: the PID of the process executed by the last command you executed?
+14:34  takamichi: Yes I want the PID of the last command that was backgrounded.
+14:35  lhunath: $! is it.
+14:35  takamichi: The script works fine when I run it from the shell, but when our Zabbix monitoring server runs it, it picks up the wrong pid, always + 1
+14:35  lhunath: notice that I said the last command THE CURRENT SCRIPT backgrounded.  I don't write extra words because I enjoy the feeling in my fingers as they touch the keyboard.
+14:36  lhunath: if you're running a command asynchronously that is in turn backgrounding a process, then $! will give you the wrong PID
+14:36  takamichi: @lhunath - he he, thanks, let me try figure that out
+14:36  lhunath: perhaps you're doing that; perhaps something more complex
+14:36  lhunath: I can't tell from here.  set -x may help you determine what is happening.
+14:37  dagni: lhunath: i will use the IFS stuff you suggested :p
+14:38  takamichi: Im using set -x, we are using a Zabbix montioring server which can run scripts to monitor services etc. If I run the script as the zabbix user it works fine, but when zabbix executes the script, I see in the logs that the PID it is checking - kill -0 $mypid, is the wrong pid, its always the correct pid (as I determine from ps -ef) plus one.
+14:39  takamichi: @lhunath - Does that tell you anything?
+14:39  lhunath: lots, none of it particularly useful.
+14:40  lhunath: as I have no idea what mypid is, what script is running the kill -0, what script is starting the process, etc.
+14:40  takamichi: @lhunath - ok, thanks, I guess I need to put this into a forum thread
+14:42  dagni: i don't trust my variables ;)
+14:44  dagni: where is manual for read
+14:45  dagni: i do man read and it give me C function ;p
+14:45  xok: dagni: man bash then type /read and hit n while you get there...
+14:46  GO|DFISH: dagni: 'help read'
+14:46  dagni: thanks
+14:46  xok: you're welcome... :-)
+14:55  digitteknohippie: http://crunchbanglinux.org/pastebin/797 question in the comments at end of pastebin entry.  simple "if" question.
+14:56  GO|DFISH: digitteknohippie: if [ "$(ps ...)" = ]
+14:57  digitteknohippie: ..?   just add a "$"   ... doesnt work....
+14:57  GO|DFISH: $ and ( and )
+14:57  digitteknohippie: oh, lol, oops.
+14:58  digitteknohippie: WOOHOO!   thnx GO|DFISH
+14:58 * digitteknohippie goes off to do a happy dance.
+14:58  geirha: if pgrep tilda >/dev/null; then ...
+14:59  digitteknohippie: ah, cool.  thnx geirha.
+15:00  geirha: You possibly want -u "$USER" too
+15:00  digitteknohippie: it does the job as i have it, so i'll stick with.    gonna add in these alternative methods to comments for future reference.
+15:07  latenite: Hi folks, I'd like to make a script where the user can male *multiple* selections seperated by comma from a list. This list is *is not* static. so kind of like this: http://pastie.org/1240627 But with that I cant make more than one selection -> http://pastie.org/1240625
+15:13  Bushmills: # sel="1,2,5" IFS=, sels=($sel); echo ${#sels[@]}
+15:13  evalbot: Bushmills: 3
+15:13  Bushmills: # sel="1,2,5,6,4" IFS=, sels=($sel); echo ${#sels[@]}
+15:13  evalbot: Bushmills: 5
+15:13  skered: {n..m} is a bashism?
+15:13  Bushmills: yes
+15:14  Bushmills: though zsh knows that too
+15:15  tmr: zsh does only numeric ranges.
+15:15 * skered is really needs it in ksh or sh
+15:16  latenite: Bushmills, how would my find results be put init the "sel" variable?
+15:16  Bushmills: latenite, just any way you allow the user to enter his choices
+15:18  Bushmills: when using read, you don't need to convert from string in var to array, as read respects IFS and array variables
+15:19  Bushmills: i.e.      IFS=,  read -a sels      should do already
+15:19  latenite: Bushmills, yould you show me with my little fnd exaple? I am lost here....
+15:20  Bushmills: result is an array with items consisting of user choices
+15:21  CalimeroTeknik: can I echo a variable without parsing it ?
+15:22  latenite: Bushmills, How would I present to choices a user can make?
+15:22  Bushmills: i
+15:22  Bushmills: i'd output his choices on a device he can look at
+15:22  geirha: skered: ksh93 has it afaik
+15:23  geirha: k# echo ${.sh.version} {a..h}
+15:23  shbot: geirha: Version M 1993-12-28 s+ a b c d e f g h
+15:25  latenite: Bushmills, on a device??? In the end I want the user to type in numbers seperated by comma. I realy don t get the way you solve my problem. This is not working http://pastie.org/1240671
+15:26  geirha: IFS=, read -r -p "Type in the numbers separated with commas: " -a sels
+15:26  Bushmills: second line replaces first line, in case you use read for input.
+15:27  Bushmills: first line showed the use when input wasn't prompted for, but sat in a variable named sel, regardless how it got there
+15:28  Bushmills: i.e. difference is between "have it already" vs. "still have to prompt for user input"
+15:28  geirha: I'd use read in either case
+15:28  geirha: IFS=, read -r -a sels <<< "$inputstring"
+15:28  latenite: Bushmills, http://pastie.org/1240677 But how would I get the choices into the array in the first lace?
+15:29  geirha: latenite: IFS=, read -r -p "Type in the numbers separated with commas: " -a sels
+15:29  Bushmills: not you. user enters them. script puts the choices there
+15:31  latenite: Bushmills, what I want is "find" to find special files. Present the found files to the user. and let the user select some of them to work with them.
+15:31  latenite: like this "PARTITIONS=`find /dev/ -type b | cat | grep ^/dev/[sh].*[0-9]$`"
+15:31  Bushmills: i fail to see the problem you have with the offered solution
+15:32 * Bushmills marvels at the innovative use of cat
+15:33  geirha: partitions=( /dev/[sh]*[0-9] )
+15:33  geirha: useless use of find|cat|grep :P
+15:33  geirha: Well, apart from the -type b
+15:33  geirha: You'll have to loop over with a -b test
+15:34 --- jzacsh is now known as jzacsh_
+15:34  latenite: geirha, cool :) I did not know thta this works. How is this done? How does bash know that I want to list all in /dev/....
+15:35  Bushmills: # echo *
+15:35  evalbot: Bushmills: *
+15:35  geirha: # echo /dev/*
+15:35  evalbot: geirha: /dev/console /dev/fd /dev/null
+15:35 --- jzacsh__ is now known as jzacsh
+15:35  latenite: Bushmills, well I dont know how to put the resluts from "partitions=( /dev/[sh]*[0-9] )" out. So the user can selct them
+15:36  Bushmills: loop through items, print lop index and item
+15:36  Bushmills: lop
+15:36  Bushmills: loop
+15:38  geirha: select device in /dev/[sh]d*[0-9]; do [[ $device ]] && break; done; echo "You chose $device"
+15:41  Bushmills: # foo=(a b c); for ((i=1; i<=${#foo[@]}; i++)); do echo "$i: ${foo[i-1]}"; done
+15:41  evalbot: Bushmills: 1: a
+15:41  evalbot: Bushmills: 2: b
+15:41  evalbot: Bushmills: 3: c
+15:41  latenite: http://pastie.org/1240703 I try that to but some is wrong with my loop.
+15:42 --- taylanub is now known as TAYLANUB
+15:42  geirha: latenite: You are missing   do
+15:42  geirha: for name in words; do commands; done
+15:43  latenite: geirha, ahh ok now the loop works , thanks.
+15:43  geirha: !varcaps
+15:43  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+15:44  latenite: geirha, ohh ok :)
+15:48  Bushmills: there's also programs like  dialog, whiptail and the like, allowing you to select displayed choices by toggling a mark, for use in and with scripts
+15:51  latenite: Bushmills, thanks :) but i need that to be CLI
+15:52  geirha: dialog and whiptail use curses
+15:52  latenite: Bushmills, an I realy try to learn  of of that so soory hat it take my a while to get it down. This http://pastie.org/1240717 is whereI am at now.
+15:53  geirha: latenite: for i in "${!partitions[@]}"; do echo "$i.) ${partitions[i]}"; done
+15:54  Bushmills: sure about that?
+15:54  Bushmills: i ain't a counter in this case
+15:55  latenite: geirha, *cry* why ohh why :) Oh well I ll use urs...but I am happy I got my own loop working though :)
+15:55  Bushmills: ehm, nm. missed the "!"
+15:58  geirha: tmp=(); for i in "${!partitions[@]}"; do tmp+=( "$i" "${partitions[i]}" ); done; printf '%2d.) %-14s %2d.) %-14s %2d.) %-14s\n' "${tmp[@]}"
+16:00 --- muzer is now known as MuzerAway
+16:01  latenite: Bushmills, geirha this http://pastie.org/1240733 should work, but does nit. where Am I going off track here?
+16:01 --- MuzerAway is now known as muzer
+16:01  geirha: ${partition} is equivalent to ${partitions[0]}
+16:02  geirha: Lose line 13
+16:02  winkey: is there a way to remove trailing slashes with bash PE or am i stuck with sed "s:/*$::g" ?
+16:03  geirha: Change line 14 to   read -r -p "Your selection (separate with commas): " -a selection
+16:03  latenite: geirha, http://pastie.org/1240740 still will not let me selct anything
+16:03  geirha: err:  IFS=, read -r -p "Your selection (separate with commas): " -a selection
+16:04  Bushmills: # a=5; echo $a; ((a++)); echo $a
+16:04  evalbot: Bushmills: 5
+16:04  evalbot: Bushmills: 6
+16:04  likewhoa: # var=var/;echo ${var/\/}
+16:04  evalbot: likewhoa: var
+16:04  geirha: latenite: Also, stop omitting quotes. They are VERY important!
+16:06  latenite: geirha, yould you corret the line with the "read" command? http://pastie.org/1240747
+16:11 --- TAYLANUB is now known as taylanub
+16:12  geirha: latenite: http://pastie.org/1240756
+16:12  geirha: Only changed lines 13 and down
+16:13  geirha: Please consider reading the guide, it covers getting input from the user, and using arrays.
+16:13  stefano: hi, what happens if bash is executing a script on disk, but the script file gets changed by an external source during script execution?
+16:14  pgas: bad things
+16:14  xok: are we able to delete multiple lines in history?...
+16:14  geirha: Depends on wheter it gets replaced or overwritten probably.
+16:14  xok: for example to delete all lines starting from 900 and ending on 950?..
+16:14  latenite: geirha, I got some time to read now...could you link me to the guide? Man and and thanks to both of you...now I can move on with my actual script :)
+16:15 * geirha points at /topic
+16:15  latenite: geirha, http://mywiki.wooledge.org/BashGuide ?
+16:15  latenite: this one?
+16:15  geirha: Aye
+16:16  latenite: cool :) I ll be off reading...thanks again.
+16:16  pgas: xok: I guess you could history -w, edit the history file and history -c history -r
+16:16  xok: pgas: thanks, will try that... :-)
+16:17  pgas: though I don't really know why you would want something like that..
+16:17  pgas: maybe check HISTIGNORE too
+16:17  qdb: hello
+16:18  stefano: can you give me any pointers for bash behaviour in this case ? ( runnin script changed on disk )
+16:18  pgas: stefano: the bash source, it's not documented and not meant to be done so it might even change from one bash version to another one. ie just don't do that
+16:19  stefano: ok pgas, thanks
+16:20  qdb: how can i get darkice cpu usage %s ?
+16:21  lhunath: not from bash.
+16:21  qdb: here are results in google...
+16:21  lhunath: whatever the heck darkice is supposed to be; ask them.
+16:21  qdb: )
+16:22  cthuluh: qdb: something like     ps -o pcpu -p $(pgrep darkice)
+16:22  qdb: i have reported bug to darkice...
+16:22  qdb: thank you
+16:23  cthuluh: qdb: this should fail if you have multiple darkice processes, though
+16:23  qdb: it works
+16:23  qdb: only 1
+16:24  pgas: stefano: if you need to update the script, replace the file by another one. eg rm script <- the script will continue to run without problem from the old file mv newscript script <- no conflict to problem
+16:26  dagni: how do i check if var is integer ?
+16:26  geirha: !faq valid > dagni
+16:26  greybot: dagni: http://mywiki.wooledge.org/BashFAQ/054 -- How can I tell whether a variable contains a valid number?
+16:27  qdb: i want only number of %s of cpu usage, to use in shell script in if-then
+16:28  qdb: so i somehow should get second row and remove % sign?
+16:28  qdb: cthuluh
+16:28  lhunath: % of cpu usage for in an if condition? hahaha.
+16:29  qdb: ) what is ... laughty(?)?
+16:29  dagni: geirha: thanks, can i check 4 vars if they're integers without using four 'if' loops ?
+16:30  qdb: lhunath,  a buggy process once begins to use much cpu, i want restart it
+16:30  lhunath: oh dear, this gets more hilarious by the minute.
+16:30  qdb: )
+16:30  qdb: why
+16:32  geirha: dagni: if [[ $var1$var2$var3$var4 = *[!0-9]* ]]; then echo "At least one of the vars contain a non-digit"; fi
+16:32  dagni: great ! thanks ;)
+16:32  qdb: i check it with crontab every 30 minutes, if it beginned to use much cpu, restart it
+16:32  geirha: That doesn't catch if any of the vars are empty though...
+16:32  dagni: geirha: that's ok, have that part with checking for empty vars ready
+16:33  lhunath: qdb: do me a favor; never apply for a job where you actually manage other people's machines.
+16:34  qdb: )
+16:34  qdb: lhunath, that is too strong, explain what's wrong
+16:34  lhunath: there is *nothing* OK about grepping ps for a process' "cpu usage percentage" and based on that guessing whether the program is "bugged" and "fixing" that by restarting the process.
+16:35  lhunath: ok, you're not grepping.
+16:36 --- muzer is now known as MuzerAway
+16:36 --- Myctodera is now known as Japyx
+16:36  qdb: if there is method to directly get cpu usage of a process then ok of course
+16:36  lhunath: how about you fix the process or its configuration so it doesn't "bug out".
+16:37  qdb: ok, i ll try
+16:37  lhunath: CPU usage is WORTHLESS.  what makes you think CPU usage or a percent of it is going to tell you ANYthing useful?
+16:37  lhunath: at any point in time anything can use any amount of cpu.  and that's perfectly fine.
+16:40  qdb: lhunath, i know behavior of that process
+16:40  qdb: it creates mp3 from line-in and sends to server
+16:40  qdb: usually it uses 12%
+16:40 * lhunath stops wasting his time.
+16:41  cthuluh: did you look for bugreports concerning this problem, qdb ? please do so
+16:41  qdb: i have reported bug, no reply
+16:41  qdb: wait, i ll show
+16:41  lhunath: we don't care about your bug.
+16:41  lhunath: use a different program.
+16:41  lhunath: or fix it in its source.
+16:42 --- MuzerAway is now known as muzer
+16:42  qdb: no, here are replies!
+16:42  qdb: http://code.google.com/p/darkice/issues/detail?id=34
+16:43  randy2009: Hi, if i start a command with ssh user@server ~/kaboem.sh on another server in my bash script, how can i make it that my bash script waits till the kaboem.sh is finished?
+16:43  tux0: qdb: `man bash', search for $? and `man ps'
+16:44  lhunath: randy2009: exactly the way you wrote it.
+16:44  cusco: j curl
+16:44  cusco: oops
+16:44  qdb: tux0, how to search in man?
+16:44  tux0: qdb: /
+16:44  tux0: qdb: / (search forward), ? (search backward)
+16:45  qdb: ah ok
+16:45  cthuluh: randy2009: you should quote '~/kaboem.sh', also...
+16:45  cthuluh: !.sh > kahen
+16:45  tux0: qdb: so to search for $? in man bash you would type /\$?
+16:45  greybot: kahen: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+16:45  cthuluh: err, randy2009 ^
+16:46  qdb: tux0, does nothing
+16:46  lhunath: randy2009: ah yes, the ~ will expand locally before ssh executes to your local homedir.  then the remote will look for kaboem.sh in a remote directory that is the same as your local homedir.
+16:46  kahen: eh thanks for the advice :)
+16:46  qdb: man ps i have looked
+16:47  tux0: qdb: man bash and type /\?
+16:48 --- muzer is now known as MuzerAway
+16:48  qdb: ok
+16:49  randy2009: Ok thnx
+16:49  randy2009: the ~ was an example:)
+16:49  tux0: qdb: also read about ! which is directly below ?
+16:49  randy2009: and what command make's it not waiting?
+16:49  qdb: "Expands to the exit status of the most recently  executed  foreground pipeline." i do not undesrtand enough )
+16:51  qdb: how does what expand? )
+16:52  GO|DFISH: # false; echo $?; true; echo $?
+16:52  evalbot: GO|DFISH: 1
+16:52  evalbot: GO|DFISH: 0
+16:52  qdb: mm
+16:55  GO|DFISH: qdb: perhaps a better way to put it would be. it "holds" the exit status of the most recently executed "command"
+16:57  qdb: tux0, you have said that to get number from ps -o pcpu -p $(pgrep darkice)   ?
+17:06  tux0: qdb: sure you can also launch darkice and retrieve its PID with $!
+17:06  qdb: mm but i do not kill when it is recently runned
+17:06  tux0: qdb: might want to use ps --no-headers -o pcpu -p $(pgrep darkice)
+17:15 --- MuzerAway is now known as muzer
+17:15  qdb: thank you it works, though may be has new lines
+17:16  blackcat73: Hi, what's the best way to do something like | / - \  progress status?
+17:16  blackcat73: on the console
+17:18  TheBonsai: !faq progress
+17:18  greybot: http://mywiki.wooledge.org/BashFAQ/044 -- How do I create a progress bar?  How do I see a progress indicator when copying/moving files?
+17:18  TheBonsai: hm
+17:18  TheBonsai: !faq spinner
+17:18  greybot: http://mywiki.wooledge.org/BashFAQ/034 -- Can I do a spinner in Bash?
+17:18  TheBonsai: yep.
+17:19  blackcat73: thx
+17:20  Pablerkas: hi. I need help. I exported my google contacts to a single vcf file, but I need a vcf file for each contact.
+17:21  Pablerkas: so i need a command or script or something that reads the first file and splits it in several vcf files every time it finds a BEGIN:VCARD -- END:VCARD
+17:21  Pablerkas: would someone help me for charity? i have no contacts on my phone right now...
+17:22  Pablerkas: pleasseee
+17:22  randy2009: how can i start a number of commands with ssh on a server simultain and wait all of them to finish in bash?
+17:23  randy2009: so start backup of multiple servers and wait till all backups are finished then continue
+17:23  karthee: randy2009: put all the commands in a file on the remote machine and do ssh remotemachine  sh /path/to/file.sh
+17:24  unop: ssh you@host 'command1 & command2 & command3'
+17:24  unop: !.sh
+17:24  greybot: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+17:24  randy2009: :)
+17:26  Pablerkas: nobody knows what command would be helpful for me?
+17:27  Shubuntu: hey guys don't hate me but can i ask questions regarding window batch here too?
+17:27  Shubuntu: i'm trying to create a sequence of files from 1 to 100
+17:27  ferret: Pablerkas: awk; try asking in #awk
+17:28  ferret: You can make a script in awk that opens a new output file every time the line is BEGIN:VCARD
+17:28  Pablerkas: thanks ferret
+17:28  randy2009: this is the situation, i have say 10 servers, where some folders/apps need to backup. I want to create a script which i can run and that all the 10 servers are being backuped simultane (every backup lasts about 1 hour, and i can't wait 10 hours). After the backups i want to continue my script
+17:29  Shubuntu: i'm using this snippet, but it's not working for /l %%i IN (1,1,100) do set filename=%basename%%%i%extension%, echo.%filename%
+17:29  Shubuntu: what i get is that all file names are 100
+17:29  ferret: randy2009: you can't really do that in bash
+17:29  Shubuntu: if i do echo the %%i though i get all the numbers, so there's no problem with my for loop
+17:30  Pablerkas: ferret: look! it's already done.. hehe, i knew it!
+17:30  Pablerkas: http://www.phwinfo.com/forum/comp-unix-shell/249300-v-card-split-script.html
+17:30  randy2009: :(
+17:30  ferret: Pablerkas: all of those are rubbish
+17:31  Pablerkas: really? mmm ... ok, i'll search a bit more
+17:33  ferret: Pablerkas: awk 'BEGIN{ filename=1 } /^BEGIN:VCARD$/{ filename++ } { print >filename ".vcf" }' blah.vcf
+17:33  ferret: there, I did it for you
+17:33  randy2009: ferret: And if i don't have to wait? (so only start all the backups without waiting till 1 is finished)
+17:34  ferret: Pablerkas: It names each file numerically.  If you want them to have sensible names based on the contact name or number or whatever, let me know
+17:35  Pablerkas: no, i don't. I just want them to send them to my phone. Thanks!!
+17:35  ferret: randy2009: I lied a bit, you can kinda do this in bash
+17:36  randy2009: how?:)
+17:36  ferret: randy2009: for server in hostname1 hostname2 ....; do initiate-backup "$server" & done; wait; echo "they have all finished
+17:36  ferret: Now all you have to do is create a function or script called initiate-backup that does the backup for one single machine
+17:37  null: Question:  When I am in an interactive ssh session and do an 'ls -ltr,' the resulting output is formatted with colors.  If I run the same command non-interactively through 'ssh host ls -ltr' I do not get colors.  How can I have colors when I run non-interactive commands?
+17:37  randy2009: alias ls
+17:38  ferret: null: those colours are set up in a shell initialisation file, which is not being run in this situation
+17:38  ferret: !dotfiles > null
+17:38  Pablerkas: mmm ferret, i just executed your line in the shell and i got a '1.vcf' file with all the information, kinda copy&rename of the file
+17:38  greybot: null: http://mywiki.wooledge.org/DotFiles or - for a technical explanation - the INVOCATION section of man bash.
+17:39  randy2009: ferret, thnx, i'll copy you're text and look into it tomorrow
+17:39  ferret: Pablerkas: In that case, you do not have any lines that are EXACTLY BEGIN:VCARD
+17:39  ferret: Pablerkas: maybe there are spaces in front or something?
+17:39  null: hmm okay
+17:40  ferret: Pablerkas: also maybe you have "carriage returns" ( ^M or \r ) at the end of the lines, use ''cat -v blah.vcf'' to check for that
+17:40  Pablerkas: ferret: it is: BEGIN:VCARD[newline]VERSION3.0[newline]etc[newline]END:VCARD
+17:42  Pablerkas: BEGIN:VCARD^M
+17:42  ferret: yeah, so, you need to change the script a bit
+17:42  ferret: /^BEGIN:VCARD\r$/
+17:42  ferret: /^BEGIN:VCARD\r$/
+17:42  Pablerkas: ok
+17:43  Pablerkas: yep, now it works like a charm. You are the man!
+17:44  Pablerkas: hehe, thank you veeery much. You saved my evening
+17:48  rgr: using sed -i which would be the most efficient way to comment out any non empty line with "-- " ?
+17:50  geirha: Maybe /./s/^-- /
+17:50  geirha: err, /./s/^/-- /
+17:50  TheBonsai: get a better sql editor :)
+17:50  rgr: isnt . any character?
+17:50  geirha: Yes, it would match any non-empty lines.
+17:51  rgr: oh my spec was wong any non empty non commented line ;) so any line starting without "-- "
+17:51  TheBonsai: i guess he's after some match like ^[[:space:]]*$
+17:51  TheBonsai: ah
+17:52  geirha: /^--/!s/^./-- &/
+17:52  geirha: /^--/!s/^./-- &/
+17:52  rgr: that just goes as a parameter to sed  -i?
+17:52  rgr: thanks
+17:52  geirha: No, that's the sed script
+17:53  geirha: -i takes a mandatory or optional backup suffix, depending on whether you have BSD or GNU sed
+17:53  rgr: sed -i '/^--/!s/^./-- &/' file
+17:53  rgr: worked fine thanks
+17:54  geirha: That means you have GNU sed, and it will only work with GNU sed.
+18:17 --- vezeena is now known as genjix
+18:26  karthee: how do i add few lines at the end of a file ?
+18:27  lhunath: use the >> operator.
+18:27  karthee: huh .. I m an idiot ..
+18:30  karthee: can i do it with find ?
+18:31  karthee: find a list of files and append few lines at the end of those files
+18:32  lhunath: it's a file redirection operator.  it works on any command
+18:32  karthee: find -exec printf  "new\nstring\ngoing\nto\nadd" >> {}  \;
+18:32  karthee: it creates a file {} ..
+18:32 --- Weust`afk is now known as Weust`
+18:32  karthee: and adds there
+18:33  lhunath: >> is bash code, not find code.
+18:33  lhunath: {} is find code, not bash code.  do not confuse them.
+18:34  karthee: okay ..
+18:34  karthee: so how would I add  the lines at the end using find code ?
+18:35  lhunath: find can't write to files.
+18:36  geirha: You have find execute a shell to do the redirection for you
+18:36  geirha: !find
+18:36  greybot: http://mywiki.wooledge.org/UsingFind
+18:37  geirha: Don't embed the {} inside the script though, pass it as an argument to the shell.
+18:38 --- Weust` is now known as Weust`afk
+18:39  karthee: geirha: Sorry can you tell me how do i do that please ?
+18:40  lhunath: he did.  with a useful and informative link.
+18:43  karthee: geirha: can you tell how do i pass it as an arguement to the shell ?
+18:45  geirha: # bash -c 'echo "First argument is: $1"' "Script name" "Argument 1"
+18:45  evalbot: geirha: First argument is: Argument 1
+18:46  rickest: karthee: you want something like: find . -type f -exec bash -c 'printf "new text\n" >> $1' _ {} \;
+18:46  karthee: rcikest: wow .. thanks .
+18:47  geirha: Don't forget quotes
+18:49  rickest: karthee: now you can search that UsingFind link for "_ {}" to understand what's going on there
+18:49  geirha: ... that one will break on filenames containing whitespace and other characters special to the shell.
+18:51  rickest: karthee: which means use:  >> "$1"' instead of an unquoted $1
+18:56  kanja: I've confused myself - can someone explain to me why leaving the shbang off my python script caused an X11 problem?
+18:57  sn18: kanja: this is #bash
+18:57  twkm: see the command execution section of the bash manual.
+18:57  geirha: The kernel won't know what interpreter the script needs to be run with.
+18:58  kanja: right - won't it default to the shell I'm currently in - bash?
+18:58  ferret: It often defaults to sh
+18:58  kanja: ah, I'd be in the wrong channel then :)
+18:58  ferret: #sh redirects to here also
+18:59  geirha: And since the first line is probably an import line, it runs the imagemagick command by that name.
+18:59  alkisg: How can I use & (fork in the background) in a single line? e.g.
+18:59  alkisg: bash -c 'sleep 30 & ;  whoami'
+18:59  pgas: remove the ;
+18:59  twkm: don't use a ; too.
+19:00 * alkisg feels silly, the only thing I didn't try :D Thanks guys
+19:00  kanja: geriha:  That must be it. Thanks for satisfying my curiosity
+19:07  alkisg: Yeah! Found the two magic lines to share a screen over the network:
+19:07  alkisg: remote pc: xterm -e socat tcp-listen:5500,keepalive=1 stdio,raw,echo=0
+19:07  alkisg: local pc: socat SYSTEM:"sleep 1 && exec screen -x",pty,stderr tcp:server:5500 & exec xterm -e screen -l
+19:10  twkm: i find sharing them w/o socat infinitely easier.
+19:10  twkm: as an side, that's more a #screen thing than #bash.
+19:10  greycat: I just use ssh and then screen -x
+19:11  greycat: I'm not l33t.
+19:11  alkisg: ssh requires that the remote person has sshd installed and gives you an ssh account/password
+19:11  greycat: I think I'm about to plonk someone.
+19:11  alkisg: It isn't handy for quick remote support
+19:12  twkm: neither is installing and teaching them to type the socat stuff correctly.
+19:12  alkisg: twkm: agreed, I was just missing the & part that I asked before
+19:12  twkm: ahh.
+19:18  dborba: anyone know a good way of automatically (and temporarily) add the first source or bin directory found along the path of pwd (searching backwards) to $PATH
+19:18  dborba: the idea is that when I'm working on something within /this/long/path/in/my/system - i'd have access to the first bin and source directory found going backwards from .../system
+19:19  dborba: so kind of a dynamic $PATH that would search ../bin then ../../bin down to /
+19:21  greycat: You could literally put ../bin:../../bin:../../../bin:etc. into your $PATH
+19:21  tharkun: greycat: thx, you just made my life easier
+19:22  jkyle: I have a command that has a multiline return string. I want to iteratively print it out, but not concatenated. basically overwriting the same space. I tried print "\r${output}", but that didn't fly
+19:22  greycat: tr '\n' '\r'
+19:22  jkyle: k
+19:22  greycat: also you misspelled printf
+19:23  dborba: greycat, right - but i'd like all depths covered & i dont want to have ../../../../../../../../../../../../../../../bin in my $path just in case
+19:24  jkyle: I was just using print :P
+19:24  greycat: printf '\r%s' "$string"
+19:24  jkyle: I'm reading the man on tr to figure out how to integrate the search replace
+19:25  pgas: I would just print the last line, almost the same effect and not time wasted
+19:25  hobodave: hey guys
+19:28  dborba: greycat, someone on ##linux suggested writing a script to recurse backwards looking @ \.\.*/bin and execute the first found - that sound's reasonable but not as elegant as being able to simply have the directories path'ed by default. another thing i thought of was aliasing cd so that when i change directory it does the search & updates a variable $CURR_PATH & have $CURR_PATH in the $PATH
+19:29  greycat: You are insane.  Have fun.
+19:29  dborba: greycat, haha - why is that? just trying to make my life convenient
+19:29  greycat: How on EARTH is this "convenient"??
+19:30  greycat: Christ, I can't even imagine.
+19:30  dborba: that's rather short sighted
+19:30  greycat: Are you on one of those weirdo legacy Unix systems that uses /opt like a mad motherfucker and doesn't have a proper $PATH set up for some unknown reason?
+19:30  dborba: no
+19:31  dborba: i have several project directories
+19:31  dborba: which have data directories with deep paths
+19:31  dborba: usually along with the data directories in the project there is a bin/ and source/
+19:31  dborba: when i'm working on the data
+19:32  dborba: i'd like to be able to access the stuff in /bin and /source without having to use ../../.. etc
+19:32  dborba: and i'd like to have that work for all the projects
+19:32  dborba: without having to set a retarded $PATH
+19:32  greycat: make install
+19:33  dborba: how do you mean?
+19:33  greycat: sudo make install
+19:33  dborba: that's not gonna do anything
+19:34  dborba: there is no makefile
+19:34  greycat: Then you know what you should be working on instead of hacking up your shell.
+19:35  dborba: you're being real short-sighted & kinda rude... there are likely naming conflicts between the projects, a lot of the code is not mine & shared across several people, etc
+19:36  skered: How portable is -maxdepth with find?
+19:36  greycat: It's not.
+19:36  greycat: dborba: Then fine, hack up your cd and enjoy.
+19:36  dborba: greycat, not the most elegant solution - clearly i was trying to find something more reasonable - thanks for your help anyways
+19:37  greycat: THERE IS NO OTHER ANSWER
+19:37  greycat: Christ.
+19:37  greycat: Every time I try to HELP someone I just get bitched at because I won't hand them their magical pink unicorn lollipop magic wand.
+19:39  poisonbit: maybe they need  #bash-magic
+19:39  greycat: Is ##pinkunicornlollipop too long?
+19:40  poisonbit: anyway, such explanations are good for all the channel readers, not only the one searching for "help"
+19:40  poisonbit: :)
+19:42  poisonbit: alias paparazzi='for i in {1..3}; do tput flash; sleep 1; done'
+19:43  greycat: !learn want And I want a pink unicorn lollipop magic wand!
+19:43  greybot: OK, greycat
+19:49  poisonbit: is there any recommendable book about bash?  at a side of the topic wikis
+19:49  greycat: not that I've ever heard of
+19:50  poisonbit: the Perl community use to produce free ebooks, that is sometimes good for some people. Anyway wiki format is fine for me
+19:51  geirha: !pdfguide
+19:51  greybot: PDF version of the BashGuide: http://stuff.lhunath.com/BashGuide.pdf
+19:52  greycat: 2 Last-Modified: Mon, 03 May 2010 14:52:26 GMT
+19:52  lhunath: yeah, yeah.  /me gets to it.
+19:52  poisonbit: perfect! i need something in pdf to read at bus
+19:52  poisonbit: needed
+19:53  lhunath: !forget pdfguide
+19:53  greybot: OK, lhunath
+19:54  karthee: can i delete last 5 lines in a file ..
+19:54  cylence: Does anyone in here happen to know what file contains the first portion of $PATH on Cent OS?
+19:54  greycat: !ed > karthee
+19:54  greybot: karthee: ed is a command-based file editor. See http://bash-hackers.org/wiki/doku.php?id=howto:edit-ed - http://sdf.lonestar.org/index.cgi?tutorials/ed - http://wolfram.schneider.org/bsd/7thEdManVol2/edtut/edtut.pdf
+19:54  lhunath: !learn pdfguide PDF version of the BashGuide: http://stuff.lhunath.com/BashGuide.pdf or print http://mywiki.wooledge.org/FullBashGuide (to paper or PDF) for the latest version.
+19:54  greybot: OK, lhunath
+19:54  greycat: cylence: Probably not.  Maybe there is a CentOS channel.
+19:55  cylence: and apparently there's a #centos channel, heh
+19:55  cylence: greycat: we're on the same page, I'm just still in need or more coffee it seems ;)
+19:55  cylence: thanks
+19:55  geirha: lhunath: That's the lazy fix :P
+19:55 --- NIKO is now known as niko
+19:56  cylence: yes, the stuff before what I am able to control through bash_profile
+19:56  greycat: cylence: it's not in /etc/profile, then?
+19:56  cylence: lame, sorry
+19:56  cylence: wrong channel haha
+19:57  cylence: hah, thanks greycat. that might be it!
+19:57  greycat: !dotfiles > cylence
+19:57  greybot: cylence: http://mywiki.wooledge.org/DotFiles or - for a technical explanation - the INVOCATION section of man bash.
+19:57  geirha: Could also be in /etc/environment or ~/.pam_environment if that pam module is used.
+19:58  lhunath: geirha: aye.  but updated the link too now :-P
+20:00  geirha: :)
+20:03  cylence: thanks again, geirha
+20:04  karthee: hi .. i have a big list of files on which i want to remove the last 5 lines ..
+20:05  julius____: hi
+20:06  julius____: if something is started like this:  nice -n +20 sh somescript.sh        will processes that start from that script inherit the nicevalue?  ive tried it with a program but the childs do not use the changed level
+20:12  Synthead: you know how, in some command-line applications, it can take over the whole terminal and do its thing, but when you close it, you get back to your terminal like before it started?  For example, htop does this.  Is there any way I can do this in bash scripting?
+20:12  greycat: There's some terminal sequence you can put to begin/end that mode.
+20:13  poisonbit: julius____, I use to put into the script    renice +19 "$$" >/dev/null  (as well as ionice if needed)
+20:13  greycat: I don't recall its tput name off hand.
+20:13  poisonbit: Synthead, yes, it's in the bash-hackers wiki a example
+20:14  geirha: karthee: printf '%s\n' '$-4,$d' w | ed -s file
+20:14  geirha: That works on the ed on my system. Not sure if the $-4 syntax is portable though.
+20:14  greycat: I usually care about how to make less *stop* doing that.  And the way to do that is export LESS=-X
+20:14  poisonbit: Synthead, http://wiki.bash-hackers.org/scripting/terminalcodes#misc_codes
+20:15  sn18: smcup/rmcup
+20:15 --- niko is now known as NIKO
+20:16  greycat: also, export MORE='-W notite' on HP-UX if you're using more(1) for some reason
+20:16  Synthead: poisonbit: niiiiiiiiiice!!
+20:16  Synthead: poisonbit: bookmarked, thank you!
+20:16  poisonbit: was playing ome days ago with the same example :)
+20:16  poisonbit: some
+--- Log closed Fri Oct 22 23:11:39 2010
+--- Log opened Fri Oct 22 23:12:02 2010
+23:12 --- Users 542 nicks [0 ops, 0 halfops, 0 voices, 542 normal]
+23:12  RenatoSilva: Barnerd: actually -pw doesn't work in puttygen either :(
+23:13 --- Channel #bash was synced in 91 seconds
+23:13  Barnerd: Then you're stuck with expect, empty, perl-Expect, Pexpect
+23:13  RenatoSilva: or just type pwd twice
+23:14  RenatoSilva: If there was at least a way to "press enter"...
+23:14  RenatoSilva: I could use -P for changing password while exporting
+23:15  RenatoSilva: then when it asks to type new pwd and retype, the script would "press enter" twice and generate a non-passphrase open-ssh key
+23:20  Barnerd: RenatoSilva: echo '${pwd}\n' | puttygen ?????
+23:22  mcantor: Is there a way to make find search UPWARD in the hierarchy, instead of down?
+23:22  RenatoSilva: it works with puttygen (except for later priting puttygen's pwd prompt) but not with ssh-add
+23:22  mcantor: I want to know if there is a file of a particular name in ANY parent directory of pwd.
+23:23  helo: mcantor: only parents of parents, or children of parents too?
+23:23 --- jabular_ is now known as jabular
+23:24  mcantor: helo: Only parent of parents
+23:25  mcantor: Basically I want to see if a directory is under git version control--but I don't want to rely on having a git binary available
+23:25  mcantor: (otherwise i'd just check the exit status of git status)
+23:26  nDuff: mcantor, no need for find for that -- you can just use a loop with dirname (or an appropriate PE expressions)
+23:27  mcantor: nDuff: I'm having trouble visualizing that... hmm... oh, maybe like while $(dirname .) ~= '/' or something?
+23:27  helo: yeah a looped pe would be nice
+23:27 --- hunterm is now known as HUNTERM
+23:27  RenatoSilva: Barnerd: this does work! http://pastie.org/1241719
+23:28  mcantor: 'pe'?  perl expression?
+23:28  nDuff: !pe > mcantor
+23:28  greybot: mcantor: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+23:28  RenatoSilva: Barnerd: I echo the $pwd for puttygen while passing -P, for some reason it's not asking new password
+23:29  mcantor: A *looped* parameter expansion??
+23:29  helo: currdir=${PWD}; while [[ "$currdir" != "" ]]; do if stat $currdir/.git; then exit 0; else currdir=${currdir%/*}; fi; done; exit -1
+23:29  helo: sloppy, but fun :)
+23:29  RenatoSilva: Barnerd: only problem now  is hide the questions, they appear in output
+23:29  mcantor: Ahhh.  That makes sense.
+23:30  mcantor: helo: Isn't it "better" to do [[ -z "$currdir" ]] ?
+23:30  RenatoSilva: how to redirect output of a command to nowhere? > /dev/null and &> /dev/null are not working...
+23:30  mcantor: errr, or was it -e...
+23:30  republican_devil: how so I get while read -r x to remove leading whitespace again?
+23:30  mcantor: or -n
+23:30  helo: mcantor: i hate having to remember all of those flags... but yeah, that's probably considered better form
+23:31  GO|DFISH: republican_devil: while IFS= read -r x
+23:31  RenatoSilva: s/&>/2>
+23:31  republican_devil: I tried that and no go
+23:32  GO|DFISH: # while IFS= read -r x; do echo "$x"; done < <(echo '         moo')
+23:32  evalbot: GO|DFISH:          moo
+23:32  GO|DFISH: RenatoSilva: what is the command?
+23:33  RenatoSilva: GO|DFISH: echo $pwd | puttygen -P -O private-openssh $1 -o $file
+23:33  mcantor: Is there a comparison you can use in [[ ]] that's just "command exits with status of 0"?
+23:33  republican_devil: that not workin for me
+23:33  republican_devil: hmm
+23:33  RenatoSilva: GO|DFISH: after running, it shows the pwd promts (current, new, retype new)
+23:34  RenatoSilva: GO|DFISH: I want to hide these prompts since they're useless with the echo $pwd and -P hack
+23:34  GO|DFISH: hm ok
+23:34 --- HUNTERM is now known as hunterm
+23:34  RenatoSilva: GO|DFISH: this is not doing the trick though: echo $pwd | puttygen -P -O private-openssh $1 -o $file > /dev/null
+23:35  mcantor: Oh, nevermind.  I just realized that in that case, you can just do && or what-have-you like usual
+23:38  GO|DFISH: RenatoSilva: ah ok. well it's probably sending output directly to your tty or something then
+23:42  RenatoSilva: GO|DFISH: thanks anyway, I ended up with this final version: http://pastie.org/1241719
+23:43 --- caemir_ is now known as caemir
+23:58 --- NIKO is now known as niko
+--- Log closed Sat Oct 23 00:00:38 2010

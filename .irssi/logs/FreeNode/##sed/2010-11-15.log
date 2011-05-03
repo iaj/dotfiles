@@ -1,0 +1,154 @@
+--- Log opened Mon Nov 15 00:00:10 2010
+--- Log closed Mon Nov 15 00:09:23 2010
+--- Log opened Mon Nov 15 00:09:50 2010
+00:09 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+00:11 --- Channel ##sed was synced in 102 seconds
+00:21  StFS: Hi. I don't get this... I'm trying to compress whitespaces in a file with 's/[ \t]+/ /g' but it isn't working!? Is this some newbie pitfall that I'm unaware of?
+00:32  geirha: That's a extended regular expression. sed uses basic regular expressions
+00:33  Riviera: StFS: maybe 's/[[:blank:]]\{2,\}/ /g'
+00:34  StFS: Riviera: that works... thanks!
+00:35  StFS: Riviera: but what is the deal with the other thing... I just tried 's/[[:space:]]+/ /g' and that doesn't work either... however, 's/[[:space:]]*/ /g' puts a single space in between each character _and_ compresses multiple whitespaces to one
+00:36  Riviera: StFS: as geirha said: + is a feature that sed does not support.
+00:36  StFS: ahh... didn't notice his reply
+00:36  Riviera: :)
+00:36  jwillia3: StFS, * matches ANY number of spaces, including zero.
+00:36  geirha: StFS: http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_03
+00:37  StFS: jwillia3: yeah... I knew that so I was expecting this... just didn't know that '+' wasn't supported
+00:37  geirha: Also, some implementations may treat \t as a tab, others may treat it as \ and t
+00:38  StFS: geirha: thanks
+00:48  paissad: guys, i would like to insert "Disallow: /" and a newline after each pattern of "^User-Agent:" in the file robots.txt
+00:48  paissad: 1st of all,  i did this -> sed -i".bak" "aDisallow: /" robots.txt
+00:49  paissad: that inserts "Disallow: /" every 2 lines ^^
+00:52  paissad: sed -i".bak" "/^User-Agent:/aDisallow: /" robots.txt
+00:56  paissad: but i don't know how to insert the newline directly after "Disallow: /"
+00:56  paissad: sed -i".bak" -e "/^User-Agent:/aDisallow: /" -e /^Disallow:/a robots.txt
+00:56  paissad: but that does not work
+01:13  paissad: hmm, i'm progressing ^^, here is what i did
+01:13  paissad: sed  -e "/^User-Agent:/aDisallow: /\n" robots.txt
+01:13  paissad: but i don't understand the reason why it does not match all patterns
+01:14  paissad: help please
+01:14  paissad: here is the output http://dpaste.com/275291/
+01:14  paissad: thanks in advance
+01:15  paissad: at line 319, there isn't changes anylonger
+01:19  Riviera: paissad: Please explain what you want to do
+01:19  paissad: Riviera, i want to insert "Disallow: /" and a newline after each pattern "^User-Agent:"
+01:20  paissad: Riviera, the matter is that from line 319 to the end of the text, there are no changes ^^
+01:20  Riviera: paissad: on the next lines, the lines following each "User-Agent:" line, right?
+01:20  paissad: yes,
+01:21  Riviera: sed '/^User-Agent:/a\
+01:21  Riviera: Disallow: /'
+01:21  Riviera: err.
+01:21  Riviera: Disallow: '
+01:21  Riviera: :)
+01:21  Riviera: Ah, NO :D
+01:21  Riviera: the first was correct, hell :)
+01:21  paissad: :)
+01:21  Riviera: sed '/^User-Agent:/a\
+01:21  Riviera: Disallow: /'
+01:21  Riviera: If you want to have a newline after the Disallow: /, then it's like this:
+01:22  Riviera: sed '/^User-Agent:/a\
+01:22  Riviera: Disallow: /\
+01:22  Riviera: '
+01:22  paissad: ok, and what's wrong with this ? -> sed  -e "/^User-Agent:/aDisallow: /\n" robots.txt
+01:23  Riviera: I don't know, using the a command like that is GNU-specific and I have no clue how that is supposed to work, especially in combination with "\n"
+01:24  Riviera: If you use sed from bash, ksh or zsh, you can write my version of the command in a single line like that:
+01:24  Riviera: oh, hehe :)
+01:24  Riviera: it's quite obvious why your command does not work from line 319.
+01:24  Riviera: You search for
+01:24  Riviera: User-Agent
+01:25  Riviera: your file contains (from line 319)
+01:25  Riviera: User-agent
+01:25  Riviera: :)
+01:25  Riviera: The agent's a looks different ;)
+01:25  Riviera: So:
+01:26  Riviera: sed $'/^User-[Aa]gent:/a\\\nDisallow: \\\n'
+01:30  paissad: oh sorry, i did not see the a instead of A , indeed, it's obvious !!
+01:30  paissad: at line 319
+01:30  Riviera: :)
+01:30  paissad: so my command worked !
+01:31  paissad: yours too of course
+01:31  Riviera: yes, yours was correct :)
+01:34  paissad: sed -i".bak" -e "s/User-agent/User-Agent/" -e "/^User-Agent:/aDisallow: /\n" robots.txt
+01:35  paissad: done, thanks
+01:38  Riviera: :)
+--- Log closed Mon Nov 15 04:11:18 2010
+--- Log opened Mon Nov 15 04:11:40 2010
+04:11 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+04:13 --- Channel ##sed was synced in 99 seconds
+--- Log closed Mon Nov 15 06:58:47 2010
+--- Log opened Mon Nov 15 08:19:48 2010
+08:19 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+08:21 --- Channel ##sed was synced in 97 seconds
+--- Log closed Mon Nov 15 09:07:12 2010
+--- Log opened Mon Nov 15 09:12:22 2010
+09:12 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+09:13 --- Channel ##sed was synced in 99 seconds
+--- Log closed Mon Nov 15 10:27:45 2010
+--- Log opened Mon Nov 15 10:34:17 2010
+10:34 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+10:35 --- Channel ##sed was synced in 94 seconds
+--- Log closed Mon Nov 15 11:07:41 2010
+--- Log opened Mon Nov 15 11:08:27 2010
+11:08 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+11:10 --- Channel ##sed was synced in 106 seconds
+--- Log opened Mon Nov 15 12:43:08 2010
+12:43 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+12:44 --- Channel ##sed was synced in 95 seconds
+--- Log closed Mon Nov 15 13:56:52 2010
+--- Log opened Mon Nov 15 13:57:01 2010
+13:57 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+13:58 --- Channel ##sed was synced in 105 seconds
+--- Log closed Mon Nov 15 16:31:38 2010
+--- Log opened Mon Nov 15 17:03:53 2010
+17:03 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+17:05 --- Channel ##sed was synced in 93 seconds
+--- Log closed Mon Nov 15 17:13:40 2010
+--- Log opened Mon Nov 15 17:14:03 2010
+17:14 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+17:15 --- Channel ##sed was synced in 106 seconds
+--- Log closed Mon Nov 15 18:13:42 2010
+--- Log opened Mon Nov 15 18:14:11 2010
+18:14 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+18:15 --- Channel ##sed was synced in 106 seconds
+--- Log closed Mon Nov 15 20:13:40 2010
+--- Log opened Mon Nov 15 20:14:03 2010
+20:14 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+20:15 --- Channel ##sed was synced in 105 seconds
+21:33  omes: how do i make a regex in sed where it return everything before a certain combination of characters?
+21:34  The-Compiler: sed 's/chars.*//'
+21:34  omes: Lots of text here Start text: this is the beginning, and this is the end! end here! more text
+21:34  omes: i want it to return everything from "Start text:" to "end here!"
+21:34  The-Compiler: 4# echo 'one two three four five six seven' | sed 's/four.*//'
+21:34  shbot: The-Compiler: one two three
+21:35  omes: this may be repated multiple times throughout the whole text
+21:35  The-Compiler: hmm, then it's getting tricky.
+21:35  omes: i want it to return each one using global
+21:35  omes: yes, i couldn't do ^ based on multiple chars :(
+21:35  The-Compiler: how exactly would the real input look like?
+21:35  omes: [^] i mean
+21:36  omes: you're just gonna start yelling at me.. :P
+21:36  omes: It's html
+21:36  The-Compiler: actually I parsed HTMLs with sed as well
+21:36  The-Compiler: but there are really ways which are way more simple.
+21:36  omes: i want it to parse everything between <p> and </p> i have the regex for that, just need it to return everything between them
+21:37  omes: basically i want to know how i can use [^<char here>] with multiple chars in a sequence
+21:37  taylanub: which is impossible, from what i know
+21:37  omes: where <char here> are the chars you don't want it to match
+21:38  omes: taylanub: yeah, i don't know the regex syntax of sed too well :(
+21:38  omes: it's doable in perl and php though
+21:38  omes: so i just wanted to try my luck here :)
+21:38  taylanub: it's Basic Regular Expressions, omes. but implementations support more than that
+21:39  taylanub: e.g. using \|, \?, \+ are nonstandard
+21:39  taylanub: you might have a "man 7 regex" manpage
+21:39  omes: yeah, i'm using ? for it in php
+22:24 --- y3llow_ is now known as y3llow
+22:25 --- cuba33ci_ is now known as cuba33ci
+--- Log closed Mon Nov 15 22:57:23 2010
+--- Log opened Mon Nov 15 23:02:46 2010
+23:02 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+23:04 --- Channel ##sed was synced in 108 seconds
+--- Log closed Mon Nov 15 23:27:57 2010
+--- Log opened Mon Nov 15 23:33:24 2010
+23:33 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+23:34 --- Channel ##sed was synced in 104 seconds
+--- Log closed Tue Nov 16 00:00:30 2010

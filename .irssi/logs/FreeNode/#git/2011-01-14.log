@@ -1,0 +1,295 @@
+--- Log opened Fri Jan 14 19:30:45 2011
+19:30 --- Users 653 nicks [0 ops, 0 halfops, 7 voices, 646 normal]
+19:30 --- Channel #git was synced in 1 seconds
+19:31  timepilot: just seemed like ssh + cp functionality would be avail
+19:31  fr0sty: bww, I only count 30 repos
+19:32  fr0sty: s/bww/btw/
+19:32  timepilot: 82
+19:32  timepilot: not sure what u r looking at
+19:33  fr0sty: ah, only the first page...
+19:34  timepilot: not a big deal.  just wanted to organize a bit before i start uploading my own code.  ill write a script or something.  thx all
+19:35  eean: is there a way to only list annotated tags?
+19:39  fr0sty: not directly...
+19:40  drizt: hi. How i can create patch (by command 'git diff') for renamed files? I renamed files with 'git mv' but 'git diff' return nothing.
+19:40  eean: fr0sty: how about unannotated tags? :D trying to diagnose tag issues with a converted repo
+19:41  drizt: or what I should do if I want get patch for renamed files?
+19:41  cbreak: drizt: renaming a file does not change it's contents
+19:42  fr0sty: eean: you have to look at each tag.
+19:44  fr0sty: git tag | git cat-file --batch |grep "^tag " will list annotated ones
+19:45  drizt: cbreak: i need patch which I can apply for my sources and get sources with renamed files. Such patch must remove all content from source file and write the same content to other file.
+19:46  cbreak: then why not use git format-patch?
+19:49  drizt: cbreak: show me example.
+19:49  cbreak: git format-patch HEAD~1
+19:51  drizt: cbreak: hm. ... if i want create patch from last commit and tree sources, what i should do?
+19:51  cbreak: tree sources?
+19:51  cbreak: commit them
+19:52 --- ChanServ sets modes [#git +v ArseneRe1]
+19:52 +ArseneRe1: Is there a way to limit grep log to the subject line?
+19:53  cbreak: maybe with a regexp
+19:53  patrikf: ArseneRe1: not that i know of, but maybe just use "git log --format=oneline | grep foo"
+19:53  cbreak: that matches the empty line below the subject
+19:54  drizt: cbreak: exelent!
+19:54  drizt: cbreak: big thank you!
+19:54 +ArseneRe1: Oops, yeah I meant git log --grep.
+19:54 +ArseneRe1: I'll look into that. Thanks patrikf.
+19:54  cbreak: np
+19:54  cbreak: ArseneRe1: it takes a regular expresson as argument
+19:55 +ArseneRe1: cbreak: Right, but I don't know how to match only the first line with regex.
+19:55 +ArseneRe1: I know how to match the beginning
+19:55  cbreak: the first line is probably the only line that is followed by a blank line
+19:56 +ArseneRe1: Hm...not in multi-paragraph commit messages.
+19:56 +ArseneRe1: Or when you have tags like Signed-off-by.
+19:57  FilipeMaia: After merging an experimental branch with the master branch is there a way to make the experiemental branch disapear from the git branch command? I'm asking because after a couple experimental branches git branch would get pretty crowded.
+19:59 --- Silex is now known as silex
+19:59  patrikf: FilipeMaia: sure, you can delete branches any time you want with git branch
+19:59  FilipeMaia: patrikf: and deleting does not delete the history right?
+19:59  cbreak: it deletes the branch
+19:59  cbreak: the branch is just a tiny text file that points to some history graph
+20:00  cbreak: if you've merged the history graph somewhere else, it won't die just because you kill the label
+20:00  patrikf: when you merge branch experimental into master, all commits from experimental are in master as well
+20:00  cbreak: if it WOULD die, git branch -d will moan
+20:00  FilipeMaia: cbreak: ok, thanks
+20:01  FilipeMaia: It works great! Thanks for the help
+20:03  FilipeMaia: cbreak: is there a way to delete branches in a public repository like github?
+20:03  cbreak: push an empty ref into them
+20:03  cbreak: git push remotename :destbranchname
+20:03  patrikf: newer git versions have push --delete
+20:04  patrikf: (though of course that's more to type...)
+20:04  scelis: cbreak: git push --delete origin BRANCH is nicer for the avg user
+20:04  cbreak: but the true notation is truer
+20:04  FilipeMaia: :)
+20:04  jast: the true notation is to speak the pack protocol yourself!
+20:05  cbreak: oh, you have no idea...
+20:05  FilipeMaia: Thanks i'll give it a try, even though i'll probably use the blasphemous --delete notation
+20:05  cbreak: the first time I wanted to install git, I had to clone git.git with netcat
+20:05  cbreak: that was a major pain...
+20:06  patrikf: cbreak: i do think the tarball was invented by then. ;-)
+20:06  pt3asw: hi again. what if i clone a remote git repository, add a spurious file to the cloned repo, and do either checkout or reset? it seems the spurious file likes to remain there, but i'd like to delete it.
+20:06  jast: FilipeMaia: scandalous! the wrath of the gits will visit upon you!
+20:06  cbreak: what does spurious mean?
+20:06  cbreak: did you want to write furious?
+20:06  FilipeMaia: jast: I will lay awake at night in fear, no doubt!
+20:06  jast: curious?
+20:06  pt3asw: cbreak, a useless test file
+20:07  cbreak: git checkout doesn't delete stuff
+20:07  patrikf: pt3asw: if you want to match the HEAD's state with your working tree, checkout -f and clean -fd should do the trick
+20:07  cbreak: (unless it's tracked)
+20:07  jast: ludic..urious?
+20:07  cbreak: git reset the same
+20:07  cbreak: use git clean
+20:07  cbreak: (read man page).
+20:07  scelis: pt3asw: just 'rm' it. or use 'git clean'
+20:07  patrikf: actually, that will match the working tree with the index
+20:07  jast: note that git clean eradicates all untracked files
+20:08  jast: what about "just delete the file" :)
+20:10  pt3asw: the fact is that in reality i don't know which files have been added because i run tools such as autoreconf
+20:11  pt3asw: this is why i can't remove files manually
+20:11  cbreak: pt3asw: git status
+20:11  cbreak: or if you want a parsable list, use git ls-files
+20:12  patrikf: pt3asw: what are you trying to do? automated builds?
+20:12  patrikf: or are you developing in that repository? then gitignore / git clean are probably what you want
+20:13  pt3asw: i'm just downloading from git repos instead of getting tarballs because i'd like to stay more update
+20:14  pt3asw: i don't want to upload nothing upstream for now
+20:14  jast: if you have no valuable uncommitted files in the repository, git clean will definitely unclutter things :)
+20:16  pt3asw: i git'added a file, then git'cleaned, but the file is still there
+20:17  pt3asw: really, the only way i know for the moment to get reliable source code is to clone the repo every time. this is a big waste of network resources
+20:17  cbreak: pt3asw: if you add it, then it's not untracked
+20:17  cbreak: don't add stuff you don't want!
+20:17  cbreak: git clean won't delete tracked files
+20:18  jast: git reset --hard to undo any changes you've staged using git add
+20:18  jast: and unstaged changes in untracked files
+20:18  jast: neither of which should be a big deal if you aren't actually looking to change the files in the repository
+20:18  jast: erk
+20:18  jast: *and unstaged changes in tracked files
+20:19  pt3asw: git reset + git clean seems to work
+20:20  pt3asw: anyway git seems to be difficult to learn for someone that has never used such tools. maybe i should start with cvs or svn. what do you think?
+20:21  jast: then you'll have to unlearn quite a few things about those when you switch to git later on
+20:21  jast: cvs/svn and git are different types of version control systems
+20:22  Cromulent: french is quite hard for someone who has never spoken a language before, maybe I should start with german?
+20:23  jast: I recommend reading a decent book to get into git
+20:23  jast: !book @
+20:23  jast: 'Pro Git' is a complete book about git that is available online for free: http://progit.org/book/ [automatic message]
+20:23  jast: (there's a print version, too)
+20:24  bremner: pt3asw: starting with CVS would be like making PL/1 your first programming language.
+20:24  pt3asw: ok. i'll start directly with git then
+20:30  sec^nd: I have a server and I want users to be able to share code, what is the best way to do this ? I also dont want the users to have ssh login or anything else
+20:30  sec^nd: also what is git-daemon ?
+20:30  sec^nd: is there a way to setup anon clones to be enabled ?
+20:30  jast: git-daemon is for anonymous cloning
+20:31  sec^nd: how does it work ?
+20:31  ayust: man git-daemon
+20:31  jast: the 'git-daemon' manpage can be found at http://www.kernel.org/pub/software/scm/git/docs/git-daemon.html [automatic message]
+20:31  jast: it has a manpage ;)
+20:31  sec^nd: man git-daemon ;D
+20:31  jast: the 'git-daemon' manpage can be found at http://www.kernel.org/pub/software/scm/git/docs/git-daemon.html [automatic message]
+20:44  kenneth: hey y'all. so i've got a git (pre-receive) hook that checks incoming pushes for code validity
+20:45  kenneth: and i want it to check incoming blobs only. i'm doing `git ls-tree -r new_sha1`
+20:46  kenneth: this seems to list everything, including files that haven't been changed by the incoming commits. is there a  comparable command that'll give be the blobs for modified files only?
+20:48  charon: diff-tree
+20:49  ayust: diff-tree will give you ":oldmode newmode old_object_sha new_object_sha [A/M/D] path/to/file"
+20:50  charon: kenneth: but you should probably parse through something like 'git log --no-notes --raw --abbrev=40 --format=%H old..new' so as not to forget any blobs in the commits *between* old and new
+20:51  charon: hrm, maybe --no-notes is redundant. it sucks a bit that rev-list does not take --raw and i can't think of a plumbing command that does
+20:52  mdunham918: how do i utilize gitolite with my php based project management system?
+20:53  ayust: charon: git rev-list --pretty=raw ?
+20:54  sleepyowl: quick question, how do I few file line changes? kinda like a diff, before committing them
+20:54  ayust: git diff ?
+20:54  Mpenz: what does force push do?
+20:54  ayust: or if you already did git add, then do "git diff --staged"
+20:54  sleepyowl: lol, thanks
+20:54  sleepyowl: duh!
+20:55  ayust: Mpenz: forces the ref to be updated remotely even if it's not a fast-forward from the current ref
+20:55  ayust: i.e. if you had a structure where one person has commits A -> B
+20:55  ayust: and another has A -> C
+20:55  ayust: and the first one tries to push to the second
+20:56  ayust: the push won't happen because C is not an ancestor of B
+20:56  charon: ayust: --raw is like "give me the diff-tree for each commit"
+20:56  Mpenz: so a force push can cause problems ... ?
+20:56  ayust: yes
+20:57  ayust: force push is saying that you want to overwrite what's on the remote
+20:57  scelis: mdunham918: what exactly are you trying to do?
+20:57  mdunham918: well im wanting to build a php project management system with private repos like github for internal useage
+20:58 --- ricky_ is now known as ricky
+20:58  mdunham918: i think gitolite is want i need
+20:58  mdunham918: but how do i interacte with it
+20:58  mdunham918: im googling the shit out this
+20:58  mdunham918: reading the progit section again to see if there is anything in there that would be easily managed via php
+20:58  bremner: mdunham918: you interact with gitolite via ssh
+20:58  ayust: charon: "git log --oneline --raw" does fairly well
+20:59  mdunham918: but php and gitolite on the same server so couldn't i just access it via the command line
+20:59  scelis: mdunham918: gitolite does git access control via SSH
+20:59  ayust: maybe add --full-index for the full shas to make it like diff-tree
+20:59  mdunham918: just curious if anyone has seen anything similar with php managing git repos
+20:59  scelis: mdunham918: if you want something else (like access control locally) gitlite wont really help you
+20:59  bremner: mdunham918: maybe gitorious is closer to what you want
+21:00  bremner: mdunham918: why the php constraint?
+21:00  mdunham918: why not?
+21:00  mdunham918: php will just be creating repos
+21:00  ayust: because most of the existing tools don't use PHP
+21:00  mdunham918: like github
+21:00  ayust: and so if you dont limit yourself to PHP you could just use an existing tool
+21:00  ayust: like gitorious
+21:00  scelis: mdunham918: github doesn't use PHP
+21:00  mdunham918: im just refering to its basic nature
+21:00  mdunham918: of simply creating repos and viewing commits
+21:00  bremner: mdunham918: if you want some fancy web interface, look at gitorious. gitolite is not that.
+21:01  mdunham918: im going to use php to speak to gitolite over commandline i don't want a big fancy tool
+21:01  mdunham918: ah nevermind
+21:01  scelis: mdunham918: why not use PHP to access git by making system calls?
+21:01  bremner: mdunham918:  gitolite has no commandline interface
+21:01  scelis: mdunham918: if you want something simple, that's it. gitolite doesn't do what you want
+21:01  Mpenz: thanks
+21:01  mdunham918: thats what i need
+21:02  mdunham918: i only wanted gitolite for the access control
+21:02  mdunham918: just not sure how to add sshkeys to gitolite from php
+21:02  scelis: mdunham918: gitolite is SSH access control. you need something else or you need to roll your own
+21:02  mdunham918: i guess i'd tell php to ssh to its localhost and then communicate with gitolite
+21:02  mdunham918: ?
+21:02  scelis: mdunham918: you could have your PHP code checkout the gitolite-admin repo, add the ssh key, commit, and push
+21:02  mdunham918: ssh is just a protocal to gain secure access to command line of the od
+21:02  mdunham918: os
+21:03  mdunham918: hmmm
+21:04  yhager: I cloned a git repo (that was created by pushing a git svn clone into bare), but when I try to git svn dcommit from the clone I get "Unable to determine upstream SVN information from HEAD history."
+21:04  scelis: mdunham918: unless there is a PHP library out there I am unaware of, you are going to need to do all this by replicating command-line commands
+21:04  yhager: do I need to update-ref in some way?
+21:04  charon: yhager: that, and afaik you cannot dcommit from bare repos
+21:04  charon: (because it does a rebase)
+21:04  yhager: charon: I'm trying to dcommit from a clone of that bare
+21:05  mdunham918: hmmm i'm still digging on google i actually want to build the entire system myself which is fine im just looking for more infomation on managing a gitolite install
+21:05  scelis: do clones of git-svn repos pull in all the svn information?
+21:05  yhager: scelis: nope, I ran 'git svn init' after cloning, but apparently something is still missing
+21:06  scelis: mdunham918: I would recommend asking basic gitolite questions. leave PHP out of it as you will likely just need to execute the terminal commands and edit the files yourself in PHP
+21:07  charon: yhager: yes, then you need to 'git svn init' with all the original args and then use update-ref to put the refs into place again
+21:07  yhager: charon: Can you explain that update-ref part?
+21:08  charon: you need to restore the refs as they were created by the original git svn clone
+21:08  charon: either you push and fetch them (with explicit fetchspecs) or you do things like git update-ref refs/remotes/git-svn some_sha1
+21:08  divVerent: sitaram: I just tried out gitolite with HTTP pushing
+21:08  divVerent: works fine, great work... but took a while to figure out
+21:08  divVerent: especially, how to make apache do the auth properly
+21:09  divVerent: and how to set it up so the www-data user is not the one to log in to :P
+21:09  divVerent: to do that, I ended up doing a simple shell script that execs a suidperl script (that checks the user ID) that runs gl-auth-command...
+21:10  divVerent: not REALLY nice
+21:10  divVerent: and not safe if untrusted users can set up PHP scripts
+21:10  yhager: charon: so how do I determine some_sha1?
+21:10  divVerent: if only suexec were less paranoidly brain-dead... why can't I simply have the script owned by root, be in a path only root can control, and specify user/group to run it as in the apache config...
+21:13  divVerent: the current way, i have to make sure $REMOTE_USER cannot be a fully privileged gitolite user to limit possible damage
+21:15  yhager: charon: the only file I have under refs/remotes is refs/remotes/origin/HEAD..
+21:20  offby1: Can anyone explain why "git pull" might yield the error message "fatal: <<SHA1>> not something we can merge"?  Google isn't helping.  (And my message didn't, of course, include the literal string <<SHA1>>; it instead included an actual SHA1)
+21:21  uau: offby1: what kind of object is that SHA1?
+21:21  offby1: a commit
+21:21  offby1`: all I can add is: the guy was using a rather old Cygwin version of git (1.6.something), and he hadn't done a "git pull" in a while
+21:21  cirwin: is there a way i can make git log --graph mix the commits from each merged branch "fairly" so I see one from each in turn instead of all of one, and then all of the other?
+21:23 --- ChanServ sets modes [#git +v cajoel]
+21:23 +cajoel: good day.
+21:23  roger_padactor: little curious about how a git workflow would work for two web devs.  we have a local dev server and a remote one.  I made a master on the dev server which updates to the remote .  and i can see the changes on both.  But i want another dev to help out.  they would make their own repo on their part of the dev server  but would It be necessary for them to have their own working version separate from mine?  did any of that make sense.
+21:23  offby1: got disconnected
+21:23  offby1: if anyone said anything to me in the last 60 seconds, could you repeat it?  tx
+21:23  scelis: cirwin: did you read the man page of log right around --graph?
+21:24  scelis: cirwin: it says right there how to change the ordering :)
+21:24  cirwin: it offers date-order
+21:24  cirwin: or topo-order
+21:24  cirwin: date-order helps a bit
+21:25 +cajoel: I'm looking to combine two repos and merge their histories.  I've tried the subtree merge method, but I'm not able to maintain 'git log' or  'git log —follow' information for the merged code..  Any advice on how to accomplish this?
+21:25  cirwin: roger_padactor: you have a central repo on the dev server
+21:25  cirwin: and each has a working copy
+21:25 --- whaley is now known as al--
+21:26  cirwin: (using git clone)
+21:26  malesca: cajoel: Do you mean you want them to keep their hashes? That's not possible.
+21:26  uau: offby1: i think that message is mainly meant to be shown if the value does not specify a commit
+21:27 --- al-- is now known as whaley
+21:27 +cajoel: malesca: they are completely isolated directories — I would like to combine the histories..
+21:28 +cajoel: apenwarr's git-subtree seems to imply it can bring over the other repo's history, but I'm finding that not to be the case.
+21:28  uau: cajoel: what kind of layout do you want? if you want to keep the files in their current positions then you could just merge; but you want to move some files to a subdirectory?
+21:29  offby1: uau: the impression I got is that it's for refs that are misspelled, etc.
+21:29 +cajoel: uau: I've attempted this strategy..
+21:29 +cajoel: http://www.kernel.org/pub/software/scm/git/docs/howto/using-merge-subtree.html
+21:30  roger_padactor: cirwin:  right, but to see the changes i goto dev.mydomain.com and for others to see they're chnages would they have their own site or would they merge to the central?
+21:30  uau: cajoel: well subtree merge sucks; what is it you actually want to do?
+21:31 +cajoel: uau: I need to bring over code from a different repo in to my current repo and preserve the history
+21:31  uau: cajoel: what about the part i asked above?
+21:31  uau: "bring over" how? changing paths or not?
+21:34  cirwin: roger_padactor: usually you only have one remote git server, but you can set up two if you want
+21:35 +cajoel: uau: I don't know how to bring it over..  (I'm avoiding the word "merge" because it has other meanings in git)
+21:35 +cajoel: I would like to combine two git repos in to one and maintain their independent histories.
+21:36  uau: cajoel: you keep repeating that, but you still haven't answered the part about the layout
+21:36 +cajoel: ideally by "inserting" one repo as a sub directory of an existing repo
+21:36  uau: ok
+21:36  uau: there the main problem is not the merging
+21:36  uau: but git's very bad support for any kind of renaming/moving
+21:37 +cajoel: I've looked at git-stitch-repo, and it seems to work, but then I end up generating a new third repo, that I'll have to ask people to re-clone off of.
+21:37  wereHamster: how so?
+21:37  uau: if you want to keep the history compatible with old repos then there's no really good solution i think
+21:37 +cajoel: I would prefer to 'insert' repo A in to repo B.
+21:38 +cajoel: FWIW: stitch-repo works (with the caveat that I have a new third repo generated in the end)
+21:38  uau: if you're willing to modify the history of repo A, then you could use filter-branch to change its existing history to appear as if it had always happened inside a subdirectory
+21:38  uau: and then merge that to repo B
+21:38  uau: that would keep the history of the resulting repo compatible with that of B, but not that of A
+21:38  wereHamster: why not do a subtree merge right away?
+21:39  uau: wereHamster: what would a subtree merge help? that's not really useful at all here for what i see
+21:39 +cajoel: I've tried subtree merges, but they don't preserve history
+21:39  wereHamster: it does
+21:39 +cajoel: it shows up in 'git log' for the whole repo, but I lose per file history
+21:39 +cajoel: git log source.c   only shows the merge log, not the prior history
+21:40  uau: wereHamster: IIRC subtree is mainly for merging NEW development into a repository where you already have an embedded copy of the code from another repository, but at a different path
+21:41  uau: and subtree  doesn't really help at all to make git understand moves in repository history; the _only_ thing it helps with is creating the directory state to commit as the merge result
+21:41  foom: oh neat, git stitch-repo looks cool! Why didn't anyone tell me about that when I was asking how to do a similar thing the other day? Thanks for mentioning it!
+21:43 +cajoel: foom: git stitch repo is pretty cool
+21:43  wereHamster: you didn't ask :)
+21:47 +cajoel: it seems to me like a pretty common (more in corporate environments) exercise to merge two isolated repositories in to one..
+21:47 +cajoel: so I was surprised that it's not trivial to combine histories..
+21:48  uau: cajoel: well combining histories works with a simple merge
+21:49  uau: cajoel: the part that breaks history handling is moving the files to another directory, _that_ is the part that git does not handle well
+21:50  uau: some VCSes have accurate tracking and handling of file moves/renames, git does not
+21:51  DrNick: and those VCSes generally do something stupid when you combine renames with merges
+21:52  DrNick: of course, VCSes generally do something stupid with merges
+21:53  foom: cajoel: isn't that exactly what git stitch-repo does? How is that not trivial?
+21:53 +cajoel: stich takes two and makes a third
+21:53  foom: git can follow renames, git log --follow source.c
+21:53 +cajoel: this means I need everyone to push up changes and have a flag day
+21:53 +cajoel: I think
+21:53  foom: any time you edit history, everyone needs to rebase their changes
+21:54  uau: cajoel: what about what i described above with rewriting the repo changing paths?
+21:54 +cajoel: I'd prefer not to need everyone to re-clone
+21:54  foom: they don't need to push them up; they can just rebase them on the new repo
+21:54 +cajoel: hrm
+21:54 +cajoel: I'll give that a try
+--- Log closed Fri Jan 14 23:44:11 2011

@@ -1,0 +1,261 @@
+--- Log opened Thu Jan 13 00:00:06 2011
+--- Day changed Thu Jan 13 2011
+00:00  cthuluh: right
+00:00  vkues: rxMokka: sed, before starting a new cycle (before reading a new line) by default prints the current buffer.
+00:00  vkues: rxMokka: -n tells sed not to do this.
+00:00  rxMokka: aaaah, so I need to use a d deletion instead of -n
+00:01  vkues: rxMokka: That depends, there are many possible ways of controlling the flow, like using /addresses/, { grouping } or :labels and branches.
+00:02  rxMokka: I've looked at address/grouping, but haven't been able to sufficiently grasp it to implement
+00:02  vkues: rxMokka: What do you want the script that you currently are struggling with to do?
+00:04  rxMokka: well, my problem with chaining statements together, was because I had a complex substitution regexp, that I was wanting to break into multiple -e statements for readability/simplicity
+00:04  rxMokka: however its probably more efficient as a single statement
+00:05  cthuluh: I'm sure there's no difference
+00:06  vkues: rxMokka: I was hoping it's not too complicated or too complex to try to illustrate the several strategies with your actual use case.
+00:07  rxMokka: I'm looking at the sedfaq in the /topic now, and section 4.21 is very well illustrated and commented
+00:07  rxMokka: I believe I'll try to implement this as a replacement for a seperate "grep" that I'm currently using
+00:08  rxMokka: I should have a more specific inquiry once I get into that :)
+00:08  vkues: :)
+00:09  rxMokka: I'm working on a script to process distro package names from the form of pkgtools-tukaani-1.2.5-i586-1vl60.tlz
+00:09  rxMokka: I had a bunch of cut/rev/cut type work going on, condensing it down to less process forking now... with the help of sed!
+00:09  vkues: .tlz?! :) Amiga? :)
+00:09  rxMokka: vkues: slack
+00:09  cthuluh: 4# sed -n -e 's/o/a/2' -e 't end' -e n -e ': end' -e 's/f/b/p' <<< foo
+00:09  shbot: cthuluh: boa
+00:09  cthuluh: 4# sed -n -e 's/o/a/2' -e 't end' -e n -e ': end' -e 's/f/b/p' <<< bar
+00:09  vkues: cthuluh: Oh. :)
+00:09  shbot: cthuluh: no output
+00:10  cthuluh: (complicated example)
+00:10  vkues: Sadly, t is a bit tricky.
+00:11  cthuluh: rxMokka: if the first replace fails, then branch to the label 'end', else execute n (which ends the current cycle)
+00:11  vkues: Many implementations of sed require the flag whether a substitution occured to be reset.
+00:12  cthuluh: aye, tricky
+00:12  vkues: With a dummy operation like: -e tdummy -e :dummy
+00:16  rxMokka: is it good practice to escape space characters, or am I just cluttering up my display? like "PACKAGE NAME" vs "PACKAGE\ NAME"
+00:17  cthuluh: 4# echo "foo\ bar"
+00:17  shbot: cthuluh: foo\ bar
+00:17  cthuluh: obviously, you shouldn't escape them if you already use quotes
+00:52  rxMokka: hmm, I've been using double quotes, and escaping the space with success
+00:52  rxMokka: but I'll drop the escapes since its not necessary
+00:52  rxMokka: no wait
+00:52  rxMokka: I used double-quotes and escaped space... in grep's regexp, not in sed
+00:54  cthuluh: you don't need to escape spaces if you use double or single quotes
+00:54  cthuluh: with either sed or grep
+00:57  rxMokka: alrighty, I'll clean them both up then :)
+--- Log closed Thu Jan 13 01:28:20 2011
+--- Log opened Thu Jan 13 01:33:42 2011
+01:33 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+01:33  shbot: geirha: xman-1.0.3-i486-1
+01:34  rxMokka: geirha: thats just one line of many coming in that need other filtering done as well
+01:34  rxMokka: would it be better to toss in a -E, or escape my parenthesis?
+01:35  rxMokka: oops, not -E
+01:35 --- Channel ##sed was synced in 105 seconds
+01:35  rxMokka: looks like sed uses -r for extended regex
+01:35  geirha: Even more the reason to use the shell rather than spawning seds for every single string.
+01:35  geirha: -r and -E are non-standard
+01:36  rxMokka: geirha: only spawing one instance of sed, with several instructions within it
+01:41  SmartViking: cthuluh: Thanks, i think sed and regular exressions is something i will need to learn over time, it just blows me away right now. Obviously, it is very useful to know. :)
+01:42  rxMokka: SmartViking: I found that when using other languages such as php, python, etc.... if I substitute some of their inbuilt string processing functions, for simple regexp, it really helps me in learning the regexps
+01:42  rxMokka: I'd be comeletely lost at the sed stuff I'm currently working on(ok, I'm pretty closs to lost anyway), if I hadn't put some practice in regexps in php
+01:43  rxMokka: part of a php course I was in last year, wenti into introductory regexps
+01:44  SmartViking: rxMokka: Nice, i know some very basic python i think it is fun using it. It'd might be a good idea to blend those two things together. :)
+01:44  vkues: In the old days, people learnt regular expressions when dealing with automata theory, not with php :)
+01:50  cthuluh: I learned regular expressions "on the heap", as we say here in France ;)
+01:50  vkues: That is, in prison? :)
+01:51  cthuluh: nope, as in "sur le tas" :P
+01:55  rxMokka: hmmm, I think I need a better way to do this
+01:55  rxMokka: s/(\w*)(-.*-.*-.*$)/\1/
+01:55  rxMokka: I'm trying to cut off the last through groups of -stuff-stuff2-stuff3 only
+01:56  rxMokka: but it seems to be matching any -stuffX closser to the front as well
+01:56  rxMokka: I'm guessing thats because my . is matching on - characters
+02:00  rxMokka: would this be the trick I'm after? (-[^-]*-[^-]*-[^-]*$)
+02:01  rxMokka: dash, anything not dash until the next dash, again, again and only at the end of the line
+02:01  rxMokka: my mind screaming character class, but it doesn't look right
+02:02  rxMokka: it does seem to work better, output seems to be as expected
+02:03  rxMokka: but the regex just doesn't look right like that
+02:39  go|dfish: rxMokka: looks ok..
+02:48  rxMokka: go|dfish: thanks for the reassurance, I'll quit worrying about it then
+03:26  rxMokka: any suggestion how to combile these two sed calls into one? I was getting lines with $LOG_DIR still on them with the second set of sed commands as part of the first
+03:26  rxMokka: http://pastebin.com/mL9GfNcS
+03:26  rxMokka: I mean, when I only called sed once, with all of the commands to it, I was getting lines with $LOG_DIR
+03:32  rxMokka: without the goto, here's my failing example with them as a single sed command
+03:32  rxMokka: http://pastebin.com/ieJbBXue
+03:33 --- kurohige is now known as grrrrrr
+03:33  rxMokka: looks like every other line is getting through without the line5,6,7 substitutions being executed
+03:34  vkues: We experience several problems here.
+03:34  vkues: The whole channel is asleep.
+03:34  vkues: And I am too tired to really be helpful.
+03:34  vkues: (and admittedly also too lazy)
+03:34  vkues: some random ideas:
+03:34  vkues: 1) it's better to use tr for removing newline characters than sed, because sed has to read the whole input into memory for that
+03:35  rxMokka: vkues: I figured tr is better, but I'm trying to limit forking/pipes where it is reasonable
+03:36  vkues: 2) commands that you want to execute on any line don't need addresses like /.*/, just use the commands themselves, like N instead of /.*/N [note, however, that some implementations of sed have problems with the N command when processing the last line of input, often something like $!N is better)
+03:36  rxMokka: possibly this is a place where its not reasonable?
+03:36  vkues: rxMokka: it's never reasonable
+03:36  rxMokka: its never reasonable to eliminate forking?
+03:36  vkues: rxMokka: not when writing shells scripts, no
+03:36  vkues: rxMokka: i mean,
+03:37  vkues: rxMokka: sure, it would in some cases make scripts run faster
+03:37  vkues: rxMokka: but well, if you care about that, don't program in a shell.
+03:38  vkues: rxMokka: also, IMHO, the original unix philosophy of combining many tools via pipes is something that I personally like way more than using the later introduced -dozens -of -options
+03:38  vkues: rxMokka: and if only performance is the reason to abandon the original philosophy, then i think this is a weak reason.
+03:38  vkues: rxMokka: but, sorry, i talk too much, feel free to ignore that :)
+03:39  vkues: rxMokka: (but also: *observe* where this particular idea led you:
+03:39  vkues: rxMokka: by thinking "ah, yes, removing forks and pipes is a good thing" you almost forgot about the issue about sucking arbitrary amounts of input into memory)
+03:40  vkues: :)
+03:41  rxMokka:  hmmm yes, good point
+03:41  rxMokka: many of the boxes that will be running this, will be fairly memory limited
+03:42  vkues: of course, all my talking is only a strategy of evading the duty to provide a sed script that combines both of course into one
+03:42  rxMokka: well, all your talking also got me thinking that I really don't even want to strip newlines
+03:42  vkues: hehe
+03:42  rxMokka: it will be much more difficult to compare two comma-delimited lists
+03:42  vkues: (also note that sed cannot remove the trailing newline)
+03:42  rxMokka: than it will two line-delimited lists
+04:18  Yohko: anybody here know how to make sed not move onto the next line after the first match?
+04:19  vkues: Yohko: what exactly do you mean?
+04:20  Yohko: i mean i have lines that match the pattern in multiple places, but sed just finds the first one, then moves onto the next like
+04:20  Yohko: i'd like to make sed not move line by line
+04:21  vkues: That it will anyway do
+04:21  vkues: you cannot prevent that,
+04:21  Yohko: aw :(
+04:21  vkues: can you give an example?
+04:21  vkues: an example input line
+04:21  Yohko: ok
+04:21  vkues: and what sed should do with it
+04:21  vkues: but does not? :)
+04:22  Yohko: my line is something like "Code_Geass_Creditless_ED1_[720p,BluRay,x264]_-_gg-THORA.mkv"
+04:22  vkues: ok
+04:22  Yohko: so type sed 's/\,/\\\,/' <file
+04:22  Yohko: >outfile
+04:22  Yohko: and it comes out
+04:22  Yohko: Code_Geass_Creditless_ED1_[720p\,BluRay,x264]_-_gg-THORA.mkv
+04:22  Yohko: but i want it to be Code_Geass_Creditless_ED1_[720p\,BluRay\,x264]_-_gg-THORA.mkv
+04:24  vkues: okay
+04:24  Yohko: i'm thinking of just having sed make the first character a different one first then work backwards lol
+04:24  vkues: Yohko: I am a bit tired, so maybe I miss something obvious,
+04:24  vkues: Yohko: but, do you know about the g flag of the s command?
+04:24  vkues: 4# sed 's/a/b/' <<< aaa
+04:24  shbot: vkues: baa
+04:24  Yohko: i'm a sed beginner, so this is the first i've heard
+04:24  vkues: 4# sed 's/a/b/g' <<< aaa
+04:24  shbot: vkues: bbb
+04:25  Yohko: so, pass it the g flag?
+04:25  vkues: yes
+04:25  vkues: Also,
+04:25  vkues: should \, match "," or "\,"?
+04:26  Yohko: \, should match ","
+04:26  vkues: then use ",", because "," matches "," :)
+04:26  vkues: 4# sed 's/,/\\&/g' <<< 'one, two, three'
+04:26  shbot: vkues: one\, two\, three
+04:26  Yohko: oh ok :)
+04:26  Yohko: i didn't know , doesnt need an escape
+04:27  vkues: yes, be careful with these
+04:27  Yohko: thank you! :)
+04:27  vkues: only very few characters needs backslash-escaping
+04:27  vkues: and sometimes it does harm
+04:27  vkues: characters that normally would just match themselves
+04:27  vkues: suddenly, with a backslash, become special
+04:27  vkues: like (
+04:27  vkues: "(" matches "("
+04:27  vkues: but
+04:28  vkues: "\(" starts a match group
+04:31 --- luptenschteiner is now known as probonono
+05:39 --- luptenschteiner is now known as probonono
+06:07  e36freak: so [^fo] is anything that isn't "f" or "o", any way to do the equivalent of [^(foo)] ?
+06:07  e36freak: as in, not that exact substring
+06:08  rxMokka: since foo isn't a character class, I don't think you'll be able to use ^, checkout the ! modifier
+06:08  e36freak: mk
+06:08  e36freak: rather, i want "not digit.digit" (the . being literal)
+06:11  e36freak: and how would i go about using \( \) and \1 with ! ?
+06:12  rxMokka: someone more knowledgable needs to chime in :)
+06:23  e36freak: busy channel, huh?
+06:23  rxMokka: I think there's a bunch of europeans in here, that aren't awake
+06:24  e36freak: that could do it
+--- Log closed Thu Jan 13 09:25:48 2011
+--- Log opened Thu Jan 13 09:31:31 2011
+09:31 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+09:33 --- Channel ##sed was synced in 109 seconds
+12:18  nd__: Hey... Is there a way to tell sed that it should not insert a newline at EOF during the replacements?
+12:23 --- Guest63308 is now known as Mohan
+12:23  waldner: it doesn't
+12:24  nd__: waldner: I'd say it does, but that might be my fault of course. Using sed -i '' 's/getUrl/getURL/g' {}\; in an -exec of find, git tells me all EOFs are changed.
+12:25  waldner: well, are you working with dodgy files?
+12:25  nd__: Ah, I see there's a difference between gsed and bsd-sed
+12:25  waldner: ie, without the trailing newline?
+12:26  nd__: Yes, the files are all without the newline (coding guidelines, not my fault)
+12:26  nd__: and I need to preserve it that way
+12:26  nd__: but gsed does it
+12:26  waldner: those files are not valid text files
+12:26  waldner: and what would be the reason of this, uh, guideline?
+12:28  nd__: I can't tell. It's been there before I was working on this project
+12:29  waldner: I can't think of a valid reason to work with broken files, except perhaps having tools that would break with valid files
+12:29  waldner: in which case, they should be replaced or upgraded anyway
+12:30  nd__: Well, I think the explanation for you then would be that it's an PHP-based CMS ;)
+12:30  waldner: ah
+12:30  waldner: maybe it's that php madness when including files etc.
+12:30  waldner: headers already sent or so
+12:30  waldner: I remember that had something to do with newlines
+12:31  nd__: No, the files do work fine with or without the newline as far as I know (at least nowadays)
+12:31  nd__: but maybe it's a historic thing
+12:31  waldner: yes, that was some time ago when I saw it, hopefully they've fixed it since
+12:34  nd__: thanks anyway
+14:04  Maleko: meh
+14:05  Maleko: could anyone show me how to print out all instances of id value in this string
+14:05  Maleko: echo 'id=item_foo moo id=item_bar'
+14:10  waldner: that's not the easiest thing to do with sed
+14:10  Maleko: how so
+14:11  waldner: because sed is not very good at these things
+14:11  waldner: it can be done though
+14:13  waldner: 4# sed 's/id=\([^ ]*\)/\x1\1\x2/g;s/^[^\x2]*\x2//;s/\x1[^\x1]*$//;s/\x1[^\x2]*\x2/\n/g' <<< 'id=item_foo moo id=item_bar'
+14:13  shbot: waldner:  moo
+14:13  waldner: wrong
+14:13  waldner: 4# sed 's/id=\([^ ]*\)/\x1\1\x2/g;s/^[^\x1]*\x1//;s/\x2[^\x2]*$//;s/\x2[^\x1]*\x1/\n/g' <<< 'id=item_foo moo id=item_bar'
+14:13  shbot: waldner: item_foo
+14:13  shbot: waldner: item_bar
+14:13  waldner: that's it
+14:13  Maleko: yes, that's it :]
+14:16  Maleko: you said sed isnt very good at doing thse sort of things, what would you want to suggest instead?
+14:16  waldner: perl is probably the easiest
+14:16  waldner: then also awk
+14:17  waldner: 4# perl -pe 's/id=(\S*)/$1\n/g' <<< 'id=item_foo moo id=item_bar'
+14:17  shbot: waldner: bash4: perl: command not found
+14:17  waldner: argh
+14:17  waldner: was wrong anyway
+14:19  waldner: 4# gawk -v RS='id=[^ ]+' 'RT{print substr(RT,3)}' <<< 'id=item_foo moo id=item_bar'
+14:19  shbot: waldner: =item_foo
+14:19  shbot: waldner: =item_bar
+14:19  waldner: 4# gawk -v RS='id=[^ ]+' 'RT{print substr(RT,4)}' <<< 'id=item_foo moo id=item_bar'
+14:19  shbot: waldner: item_foo
+14:19  shbot: waldner: item_bar
+14:19  waldner: the perl one would be like perl -pe 's/id=(\S*)/$1\n/g' <<< 'id=item_foo moo id=item_bar'
+14:19  waldner: nope that's still the wrong one
+14:20  waldner: perl -ne 'print map {"$_\n" } /id=(\S*)/g' <<< 'id=item_foo moo id=item_bar'
+14:20  waldner: but yes, the point is that with sed you need a lot of extra work to do something like that
+14:27  Maleko: and which of them you think works faster
+14:27  Maleko: perl/sed/awk
+14:27  waldner: if the input is small, it doesn't really matter
+14:28  waldner: (ie, about 10/20MB or so)
+14:28  waldner: if it's bigger, you just have to benchmark
+14:28  Maleko: um imagine im going to run it through 30k of records :]
+14:28  waldner: I think perl and awk surely are faster than sed
+14:30  waldner: in my test here on a 60K lines file, perl is the fastest, then awk, then sed
+14:31  waldner: but we;re still talking 0.1, 0.3 and 0.8 secs
+14:36  Maleko: ah okay. i guess i'll just give that perl cmmand a go
+14:36  Maleko: thanks a lot :)
+14:37  waldner: np
+17:21 --- kurohige is now known as grrrrrr
+17:21 --- grrrrrr is now known as barbanegra
+19:08  Synthead: can I match newlines in sed?  I am changing file names with regex and I want to replace "&", " ", and newlines with "_"
+19:09  cthuluh: Synthead: you'd better use tr
+19:10  Synthead: cthuluh: okay, thank you :)
+19:10  cthuluh: 4# echo '&_' | tr '& \n' '___'
+19:10  shbot: cthuluh: ___
+19:11  Synthead: cthuluh: yeah!  that's great stuff, I appreciate it!
+19:23  waldner: if you have newlines in filenames, you deserve pain :)
+19:24  e36freak: it happens
+19:27  dwxreaper: what does /t match?
+19:28  waldner: slash and t
+19:28  waldner: *followed by
+19:33  e36freak: dwxreaper: you wean \t ?
+19:34  dwxreaper: yea
+19:35  e36freak: tab
+--- Log closed Fri Jan 14 08:48:30 2011

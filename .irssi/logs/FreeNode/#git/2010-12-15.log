@@ -1,0 +1,924 @@
+--- Log opened Wed Dec 15 00:00:31 2010
+--- Log closed Wed Dec 15 00:02:36 2010
+--- Log opened Wed Dec 15 00:07:59 2010
+00:07 --- Users 724 nicks [0 ops, 0 halfops, 12 voices, 712 normal]
+00:09 --- Channel #git was synced in 121 seconds
+00:13 --- yaotti is now known as yaotti_aw
+00:17  AAA_awright: Would it be possible to hack up Git to store only the commits and trees in the repository, and get the blobs from a distributed hash table?
+00:17  johnw: interesting idea
+00:18  JordiGH: I believe the bfiles extension in hg more or less does this.
+00:18  johnw: this would make it very easy to implement "on-demand fetch"
+00:19  johnw: but you'd lose all the advantages of downloading a whole pack
+00:19  johnw: i.e., if you get blobs when-referred-to from a distributed store, very rarely would you get to take good advantage of delta compression
+00:20  johnw: instead, your .git/objects would populate over time, and then every client would have to do their own packing at various intervals.  For the case of really large repositories, for which this approach sounds like an advantage, it's actually a detriment in some use cases...
+00:21  devinus: anybody know how to cherry pick a specific commit of a remote branch to a local branch?
+00:21  johnw: just name the commit id
+00:22  johnw: it doesn't matter which branch it's on
+00:23  devinus: i have a remote i call upstream
+00:23  devinus: how does it know to use that?
+00:23  johnw: you do this: git checkout <local branch name> ; git cherry-pick <commit id>
+00:23  johnw: cherry-pick has nothing to do with branches
+00:23  johnw: it just uses the commit id
+00:23  devinus: hrm
+00:25 +HrznDefeated: Is anyone a git-svn expert?
+00:25  johnw: i've used it a fair bit
+00:25  johnw: i'm not quite ready to write a book on it, though ;)
+00:26 +HrznDefeated: So initial svn conversion-- if you do not specify a directory structure (branches/tags/trunk).  Does this cause git-svn to just flatten everything (ie shove it into master)?
+00:27  kevlarman: HrznDefeated: yes
+00:27  wereHamster: HrznDefeated: --stdlayout
+00:27  johnw: or, -s
+00:30 +HrznDefeated: Ok so -s specifies standard layout... but what I'm not straight on yet is how git-svn is figuring out how branches come about.  In SVN you do a "branch" command which I assume is stored in the DB and the path is irrelevant (maybe).  So is git-svn assuming that everything in branches (or wherever you tell it) is a branch, rather than looking at the svn history?
+00:32 --- ivey is now known as ivey_off
+00:32  johnw: my understanding is that it looks at the pathnames
+00:32  johnw: so yes, things under branches/ are branches
+00:33  sitaram_: ll sita
+00:33  sitaram_: oops sorry
+00:34 +HrznDefeated: So in my particular case, we unfortunately have an SVN layout that has several projects under the trunk.  Eg /trunk/Project1, /trunk/Project2.  So then in the branches directory we will have branches of the various projects Eg /branches/Project1-BranchA /branches/Project1-BranchB, etc
+00:38  ew0: HrznDefeated, I think you can check them out separatedly and add -T options to each
+00:39  ew0: HrznDefeated, so in the end you'll have multiple git repositories working well with your single SVN rep
+00:41 +HrznDefeated: Ok.  So I should expect to manually specify the mapping for each?
+00:41  ew0: yes, with -T -t and -b
+00:42  ew0: you'll have extra branches and tags
+00:42  ew0: because it seems your branches/ is shared
+00:43  ew0: but if you change your layout so your branches go to /branches/Project1/branch1 /branches/Project1/branch2 /branches/Project1/branch3
+00:43 +HrznDefeated: ew0: So for example I would have svn clone ... -T /trunk/Project1 -b /branches/Project1-BranchA ? or would I have -b /branches with a bunch of ignores?
+00:43  ew0: it can work much better
+00:43  ew0: the second option
+00:44 +HrznDefeated: ew0: If I make the change at the svn head does it successfully track the changes back through the svn rename (or delete/add)?
+00:44  ew0: I don't think so
+00:44  ew0: but you can use the layout for new branches
+00:44 +HrznDefeated: I see.  Well hopefully we can retire the SVN repo shortly
+00:45  ew0: you can use svn to develop on old branches
+00:45  ew0: and git for new ones
+00:45  ew0: eventually you'll only have git
+00:52 +HrznDefeated: ew0: Are you saying you would use SVN to develop on old branches instead of bringing those branches into git?
+00:57  ew0: yeah
+00:57  ew0: HrznDefeated, I'm lazy
+00:57  ew0: HrznDefeated, And I'm proud of it =D
+00:58 +HrznDefeated: :)
+00:58 +HrznDefeated: So what do you do if you need to merge an old branch into the trunk (in git)?
+00:59  ew0: I'm not sure
+01:00  ew0: is it too bad for the old branches continue in svn ?
+01:00  ew0: as they get merged to the trunk their revision history will be added to the git rep
+01:01 +HrznDefeated: Not quite sure what that would look like yet.  Kinda weird to merge to an old version though, right?
+01:02  ew0: no, no
+01:02  ew0: you keep commiting your changes
+01:02  ew0: to the svn
+01:02 +HrznDefeated: ic
+01:03  ew0: and pulling after a branch is merged
+01:03  ew0: it is quite simple
+01:03  ew0: the only problem is that someone must be in charge of doing it
+01:04  ew0: losing a bit of git magic
+01:06 +HrznDefeated: ew0: Ok so stepping back to the option of bringing all the branches into the git repo.
+01:07  ew0: I'm not sure it will work
+01:07  ew0: as well
+01:07  ew0: you'll really need the .gitignore
+01:07  ew0: but once you have the reps
+01:08  ew0: you can dump the svn server
+01:08  ew0: uhm, actually it'll probably work very well
+01:08 +HrznDefeated: ew0:  My command to suck in Project1 would look something like --> git svn clone http://... -T "/trunk/Project1" -b "/branches" and that would pull in Project1-Branch1, Project1-Branch2, etc.  But how to make it NOT pull in Project2-Branch1, etc?
+01:09  ew0: uhm
+01:09 +HrznDefeated: ew0: So I would specify -b "/branches" but then in the .gitignore I would have "/branches/Project2-Branch1" and all the other branches that are not Project1 related?
+01:09  ew0: look at the git help svn manual
+01:09  ew0: the third example of the section
+01:09  ew0: BASIC EXAMPLES
+01:10  ew0: after the git init, create a .gitignore
+01:10  ew0: containing something like
+01:11  ew0:  /branches/Project2*
+01:11  ew0: for the project 1
+01:11  ew0: and for the project 2
+01:11  ew0: uhm
+01:11  ew0: no
+01:11  ew0: it won't work
+01:12 +HrznDefeated: Hmm.. why do you say?
+01:12  ew0: gitignore is for files
+01:12  ew0: and git won't create files for branches as svn does
+01:13  ptronico: Anyone can recommend me an application like Trac for GIT?
+01:13  ew0: http://stackoverflow.com/questions/108567/subversion-moving-directories-with-history
+01:14 +HrznDefeated: Ok so another option that was mentioned to me previously, was import each of the branches into a separate git repo, and then later join them to the main repo as branches.
+01:14  ew0: HrznDefeated,  it seems changing the layout will keep history in svn
+01:15 +HrznDefeated: ew0: So you are proposing moving the branches in svn before the git-svn clone?
+01:20  ew0: I'm testing it right now
+01:20  ew0: to see how it works
+01:21 +HrznDefeated: Cool.  Let me know how you get on
+01:22 --- Unknown[NF] is now known as Unknown[OFF]
+01:27 +HrznDefeated: ew0: From the git svn man page it seems that --ignore-paths does do directories (as opposed to just files).  If I am understanding correctly.
+01:31  ew0: uhm
+01:32 --- ivey_off is now known as ivey
+01:32  ew0: I'll test it
+01:32 +HrznDefeated: Although renaming things in SVN would defiinitely be easier
+01:34 --- tty1 is now known as Danniel
+01:34 --- Danniel is now known as tty1
+01:35  bawigga: is there a faster way to add modifed files to stage without having to specify them all?
+01:36  cbreak: bawigga: man git-add
+01:36  jast: bawigga: the 'git-add' manpage can be found at http://git.or.cz/man/git-add [automatic message]
+01:36  cbreak: many :)
+01:38  ew0: HrznDefeated, ingnore paths did not worked for me
+01:38  d1zzy: hmm, how to set a file to the index contents?
+01:38  ew0: but I found out a very simple way of doing things
+01:38  d1zzy: (the contents are onloy in the index, not in HEAD nor in work dir)
+01:39  ew0: getting updates from all the branchs
+01:39  ew0: branches
+01:39  ew0: an them deleting the extra branches
+01:39  ew0: with git branch -D
+01:39  cbreak: d1zzy: git checkout -- file
+01:39  ew0: it was by far the easiest way of doing it
+01:39  d1zzy: cbreak: wouldn't that checkout from HEAD?
+01:39  cbreak: why?
+01:39  ew0: well
+01:39  ew0: 10:33 pm here
+01:40  Rogi: after commiting into local branch, how can I undo the commit?
+01:40  ew0: good night folks
+01:40  d1zzy: cbreak: ah no, you're right
+01:40  cbreak: Rogi: git reset HEAD@{1}
+01:40  cbreak: or better HEAD^
+01:41  Rogi: fatal: ambiguous argument 'HEAD@^': unknown revision or path not in the working tree.
+01:41  Rogi: oops
+01:41  Rogi: works thanks
+01:41  cbreak: don't randomly combine stuff :)
+01:41 --- yaotti_aw is now known as yaotti
+01:42  bawigga: jast, cbreak: thanks, so git add -f. A little confused, will that force adding of my ignored files? Or will it add my files and ignore the ignored files
+01:42  bawigga: im trying to run git add *
+01:42  cbreak: ignored files can only be added with -f
+01:42  bawigga: but it throws an error because im ignoring some files that blob returns
+01:43  cbreak: no need to specify . with -A
+01:43  cbreak: either or
+01:43 --- AAA_awright_ is now known as AAA_awright
+01:44  bawigga: sweet, thanks cbreak
+01:44  bawigga: git add .
+01:44  bawigga: that's what i needed
+01:44  wolfrage: what is the most complete GIT GUI tool aviable?
+01:45  wolfrage: *available
+01:45  bawigga: wolfrage: win/mac ?
+01:45 +HrznDefeated: ew0: Thanks for the help on that
+01:46  wolfrage: bawigga: Ubuntu Linux
+01:46 +HrznDefeated: ew0: Sounds like I could pull the whole messy repo.  And then create a clone for each project.  Then prune all the wrong branches, etc from each individual clone.
+01:46  devians[w]: wolfrage: git tower is the closest and its still super limiting. the cli is pretty easy to learn
+01:47  bawigga: devians[w]: isnt that a mac app?
+01:47  bawigga: wolfrage: have you checked out giggle?
+01:47  bawigga: wolfrage: http://live.gnome.org/giggle
+01:48  wolfrage: bawigga: I will try giggle, is it better than git cola?
+01:56 +HrznDefeated: When migrating from SVN to Git (import once, close SVN repo).  Is it necessary to have all pending merges completed?
+01:56  rvsjoen: does git do anything similar to svn's auto props ?
+01:57  rvsjoen: for inserting information about modification time, author, id, revision etc into the files themselves
+01:57  M4d3L: hi. is it possible on git to add automatically a block comment at start of each php file on the repository with version id like svn?
+01:57  frogonwheels: rvsjoen: generally in git it is frowned upon, however...
+--- Log closed Wed Dec 15 02:02:13 2010
+--- Log opened Wed Dec 15 02:07:37 2010
+02:07 --- Users 702 nicks [0 ops, 0 halfops, 12 voices, 690 normal]
+02:09 --- Channel #git was synced in 118 seconds
+02:10  amerinese: What would be the problem if git created individual DAG for each file in a repo and then generated a global DAG from that?
+02:16 --- ivey is now known as ivey_off
+02:21  M4d3L: I create my repository on my server with Virtual min. but now I dont know how to connect to it from Aptana Studio
+02:24 --- yaotti is now known as yaotti_aw
+02:33 --- yaotti_aw is now known as yaotti
+02:42 --- theoros_ is now known as theoros
+02:54  M4d3L: anyone can help me setup my git repository?
+02:54  M4d3L: I got this error with TortoiseGit Password: fatal: Out of memory, realloc failed Initialized empty Git repository in C:/Users/<home>/Documents/Aptana Studio 3 Workspace/JNotifyMe/.git/
+02:54  M4d3L: git.exe clone  --progress -v  "http://<user>@dev.webonaute.ca/git/JNotifyMe.git" "C:\Users\mdelisle\Documents\Aptana Studio 3 Workspace\JNotifyMe"
+02:55  cmyers: I have a remote (bare) repo that (using smart HTTPS) I can clone, but I can't add a remote and fetch.  When I log into the box and do "git log -1 HEAD" I see "fatal: bad default revision 'HEAD'".
+02:56  cmyers: is that normal?
+02:57  d1zzy: cmyers: depends on where HEAD points to
+02:57  d1zzy: cmyers: you can have bare repositories with invalid HEAD that work fine for most things
+02:57  d1zzy: cmyers: maybe you want to just do git log <branch>
+02:58  d1zzy: normally when HEAD is not properly set the reverse happens: git clone errors (since by default it's trying to set HEAD as the defualt branch) but fetch works fine
+02:59  cmyers: d1zzy: which branch though?  the whole repo can clone, but when I do `git remote add foo url....` and `git fetch foo` it just hangs.
+02:59  cmyers: d1zzy: yeh, I thought it was weird to be in that direction also
+03:01  M4d3L: I am on windows. how I got my putty key from linux server?
+03:03 --- AAA_awright_ is now known as AAA_awright
+03:04  aFlag: my patch tree currently looks like this: 1 -> 2 -> 3 -> 4 -> 5 -> 6. I want to merge commits 1, 2, 4, 5 and 6 into a single commit. What commands should I use for that?
+03:04  kevlarman: aFlag: rebase -i
+03:07  cmyers: so has anyone seen an instance where the local git client hangs when you add a new ref, then fetch it, but clones of the same URL work fine?
+03:07 --- ries_ is now known as ries
+03:07  yhager: Hi. I am testing git & bzr for a huge project, which currently uses svn. I tried to import from svn to bzr, but bzr loads each file into memory, which causes it to crash on large files (600MB). Does git have this limitation (or similar) as well?
+03:08  aFlag: hm, rebase doesn't seem to be quite what I want. I have only one branch, rebase seems to be needed for merging two different branches, unless I'm missing something here
+03:08  yhager: bzr issue is here: https://bugs.launchpad.net/bzr/+bug/109114
+03:09 --- ivey_off is now known as ivey
+03:09  kevlarman: aFlag: rebase -i does exactly what you're asking for
+03:09  M4d3L: I got alway this error : Password: fatal: Out of memory, realloc failed
+03:09  kevlarman: (you'll want to give it the parent of commit 1 as its argument)
+03:10 --- ChanServ sets modes [#git +v dylan_]
+03:10 +dylan_: hello
+03:10  kevlarman: yhager: if you have 600mb files in git, you'll likely have other issues even if you manage to import it
+03:11  kevlarman: i don't know off the top of my head if it will crash or not though
+03:11 +dylan_: does anyone know how to modify the base path for git@server:path/to/file?
+03:11 +dylan_: i'm being sent into my home dir instead of into ~/repositories
+03:12  kevlarman: dylan_: gito{sis,lite} i'm assuming?
+03:12 +dylan_: oh wow, i cant believe i forgot to say
+03:12 +dylan_: but yes
+03:12 +dylan_: gitosis
+03:13 --- ivey is now known as ivey_off
+03:13  kevlarman: dylan_: ssh chooses the less restricted key by default
+03:14  kevlarman: in this case, that is incorrect behavior
+03:14 +dylan_: the less restricted directory?
+03:14 +dylan_: i'm not sure what you mean by key
+03:14  kevlarman: ssh key
+03:14  SethRobertson:  
+03:14 +dylan_: what does the ssh key have to do with the problem?
+03:15 +dylan_: i'm able to transfer alright
+03:15 +dylan_: i just have to do (for example) git clone git@50.16.219.8:repositories/gitosis-admin.git
+03:15  kevlarman: dylan_: because gitosis adds the repositories to the path
+03:16 +dylan_: oh i see
+03:16 +dylan_: i guess the problem then is that it did not do that
+03:16  kevlarman: and for that, you need to use the key that has command= on it
+03:16 +dylan_: i see
+03:16  kevlarman: and like i said, ssh chooses the less restricted key by default
+03:17 +dylan_: i checked my keydir, and none have command=
+03:17 +dylan_: thank you for your help already btw
+03:19  kevlarman: your keydir?
+03:19  kevlarman: this will be in authorized_keys
+03:19  kevlarman: gitosis adds it
+03:19  kevlarman: basically, you can't let ssh find a key that will allow you to log into that account
+03:20 +dylan_: ahhhhh
+03:20 +dylan_: i see now
+03:20 +dylan_: that makes perfect sense now
+03:20 +dylan_: thats the problem
+03:20  kevlarman: which i already said 5 times
+03:20  yhager: kevlarman: yes. unfortunately those guys committed full .iso files into the repository. I cannot change history (well, not in SVN nor real life. not everything is git ;)
+03:21  kevlarman: but you refused to believe me
+03:21  kevlarman: yhager: you can however change history in git :P
+03:21  yhager: kevlarman: exactly :)
+03:22 +dylan_: sorry, it wasn't clear to me. your help meant a lot though, thank you
+03:22  yhager: I can also use '--ignore-paths' in git-svn, but we will need the full history eventually (or just dump it alltogether and start clean, but this is not what I am aiming for)
+03:23  yhager: How can I create a branch in a bare repo? just push to it?
+03:24  kevlarman: yup
+03:25  yhager: git push remote-bare local-branch:remote-branch ?
+03:26  kevlarman: well normally local branches will have the same name on the remote
+03:26  kevlarman: but yeah
+03:29  aFlag: hm, I'm almost there with git rebase, I think, but skiping a commit seems hard
+03:30  yhager: kevlarman: yes, I meant that too, just wanted to make it clear..
+03:31  yhager: kevlarman: I will know in an hour if git can import those 600MB files from svn...
+03:34 --- fedesilva_ is now known as fedesilva
+03:34  kevlarman: yhager: you might want to get it to start on the revision with that file
+03:35  kevlarman: i'm nearly sure that if it succeeds on the first instance of it, it won't crash on the remaining ones
+03:35  yhager: kevlarman: oh, yeah.. I forgot this is possible!
+03:35  kevlarman: and then you can restart from the beginning
+03:35  yhager: After all, I only care about revisions from last 6-12 months
+03:36  homa_rano: MadCoder: it seems 'git diff-index --quiet HEAD' does exactly what I want and is way shorter
+03:36  aFlag: ah, I got it! :)
+03:36  homa_rano: MadCoder: am I missing anything?
+03:36  aFlag: rebase -i is a very good command :)
+03:37  kevlarman: yhager: it's still nice to have everything
+03:38  yhager: kevlarman: Yes. I am running the full import now. If that fails, I'll start cutting revisions out
+03:50  _nil: git log -n1 release will return the commit log with a release tag
+03:51  _nil: is there a way i can have the same behavior but check for a tag OR a branch?
+03:55 --- kmap_ is now known as kmap
+04:01  wereHamster: _nil: git log -n1 refs/tags/release
+04:01  wereHamster: and naming a branch and tag the same leads only to confusion.. so don't do that
+04:03 --- adamholt is now known as adamholt_away
+04:03 --- adamholt_away is now known as adamholt
+04:08  yhager: If I run git svn clone of the same SVN repo from two different locations - can those two location share commits? In other words, will git svn clone generate the same hash ids for the same SVN commits?
+04:13  yhager: kevlarman: git DOES read the file into memory, but it is doing it just once (so it used 630MB RAM). As opposed to bzr, which reached >2GB RAM (and forces me to use 64bit machine for it)
+04:13  yhager: Most of the time, git uses a modest sub 100MB RAM, while bzr uses 500MB as a baseline...
+04:28  offby1: 100MB is "modest"?
+04:30  _nil: wereHamster: yay thanks.
+04:31  _nil: wereHamster: ?
+04:31  _nil: i can't seem to find the branch
+04:31 --- ries_ is now known as ries
+04:34  trobrock: What would cause an exit code of 128 on a git clone?
+04:35 --- rohanpm_ is now known as rohanpm
+04:36  rohanpm: trobrock: many things, do you have some more data?
+04:36  trobrock: It is failing in one of my chef recipes, but works fine when entering it myself, was curious if it was a limited number of things that could cause it or not
+04:37 --- ries_ is now known as ries
+04:42  yhager: offby1: for importing a huge svn repo, and when bzr uses 5 times this number, yes, it is rather modest..
+04:44  _nil: i know this is stupid but i can't seem to figure out a way to use "git log -n1" to get all local and remote instances of either branches or tags named release
+04:44  _nil: phew
+04:44  _nil: mouthful
+04:56  offby1: _nil: not sure what you're asking.  If _I_ want to know the names of refs, I don't use "git log"; instead I do "ls .git/refs" or perhaps "git for-each-ref"
+04:56 --- yaotti is now known as yaotti_aw
+04:56  offby1: or "git branch -a ; git tag"
+04:59 --- mmattice is now known as etx
+04:59 --- etx is now known as mmattice
+05:03 --- yaotti_aw is now known as yaotti
+05:10 --- lilylnx is now known as thichlinux
+05:20  kevlarman: yhager: git svn clone invoked with the same arguments will generate the same sha1 sums
+05:20  cmyers: yhager: IF you use an authors file.
+05:20  cmyers: (which you should)
+05:22  offby1: kevlarman: are you sure?
+05:22  kevlarman: offby1: pretty sure i've tested it at some point
+05:22  offby1: kevlarman: certainly I expect the blobs and trees to have the same sums.  But the commits seems to vary unpredictably
+05:22 --- yaotti is now known as yaotti_aw
+05:22  offby1: I've tested it too :-|
+05:22  cmyers: offby1: I am sure it does if you use the same arguments and an identical (or superset) authors file
+05:22  cmyers: but if not, the uuid of the svn server, I dunno where that comes from.
+05:23  cmyers: at my job we rely upon this behavior and it hasn't bitten us yet.
+05:23  offby1: cmyers: svn servers simply have UUIDs.  They're created when you run "svn create" or whatever the command is.
+05:23  cmyers: so upgrading the server, performing a backup and restore, or who knows what else, might change it.
+05:24  cmyers: but it doesn't change *often*
+05:24  cmyers: that is good to know
+05:24  offby1: cmyers: I confess we regularly edit log messages, which of course changes the SHA1 of the associated commits
+05:24  cmyers: the other reason to use an authors file is so the usernames don't look like ASS
+05:24  cmyers: so you can have a centralized git "mirror" of svn which has nice commit metadata and the sha1s don't change.
+05:25  cmyers: it would be a swell feature to add to git-svn to tell it "re-read this rev" and have it check the message, and if it has changed, create a new commit object and rebase the other stuff onto it and fix everything.
+05:26  cmyers: also, i want a pony.
+05:26  kevlarman: cmyers: you can sorta force that i think
+05:26  cmyers: I've seen it done manually
+05:26  kevlarman: just make git-svn think it's a few revs behind
+05:26  cmyers: it's a real pain in the ass
+05:26  cmyers: yeh, if hte changed thing isn't too old you can do it that way, for sure
+05:27  kevlarman: it's not too common for old commits to change is it?
+05:27  kevlarman: most of the commit editing i've seen was of the "oshit" variety
+05:27  cmyers: one could imagine plenty of situations.  Legal reasons, for example
+05:28  cmyers: expunge this from our code base - or "remove this hardcoded pw some asshat checked in 3 years ago and we only just discovered"
+05:29  kevlarman: "i confess we regularly edit log messages" tends to imply some more boring screwups
+05:30  offby1: no, it's how we indicate that a commit needs review, or has been reviewed.
+05:31  cmyers: ah, the joys of using source control as a relational database.  Been there =/
+05:32 * offby1 stares blankly
+05:39 --- yaotti_aw is now known as yaotti
+--- Log closed Wed Dec 15 06:02:27 2010
+--- Log opened Wed Dec 15 06:07:53 2010
+06:07 --- Users 667 nicks [0 ops, 0 halfops, 11 voices, 656 normal]
+06:09 --- Channel #git was synced in 118 seconds
+06:15 --- Hunner_ is now known as Hunner
+06:30 --- ivey is now known as ivey_off
+06:31 --- ivey_off is now known as ivey
+06:34 --- yaotti is now known as yaotti_aw
+06:40 --- yaotti_aw is now known as yaotti
+06:50  jluxenberg: is there any trick to getting git-apply to work?  I tried to use it, and I get some warnings but it appears to apply successfully.  however, none of the files in the patch are changed
+06:50  jluxenberg: here's the warnings I get: http://pastebin.com/nm5YXcBf
+06:51  frogonwheels: jluxenberg: whitespace _errors_  so therefore it  failed the whole patch
+06:52  frogonwheels: jluxenberg: .. there are options to not break on whitespae error
+06:52  jluxenberg: frogonwheels: ah, okay I'll look in to that.  it said "warning" and gave a 0 exit status so I figured things were a-ok
+06:52  jluxenberg: frogonwheels: it it normal for git(1) to return 0 when there were errors?
+06:52  frogonwheels: ah. sure.. yeah then it should have applied. sorry
+06:53  frogonwheels: missed the echo $?
+06:53  frogonwheels: jluxenberg: and  git status  doesn't show anything modified?
+06:53 --- ChanServ sets modes [#git +v Nicolas_Raoul]
+06:53  jluxenberg: "no changes added to commit"
+06:53 +Nicolas_Raoul: I want to write "applied patch X by Y, thanks!" as a commit message, but the "!" character confuses bash. How can I escape it?
+06:53  jluxenberg: from git status
+06:54  frogonwheels: Nicolas_Raoul: \!  should do it?
+06:54  frogonwheels: Nicolas_Raoul: or possibly use '  ' quotes
+06:54  jluxenberg: yeah, single quotes work, \! gives \!
+06:55  frogonwheels: jluxenberg: did you try  git patch --reject  ?
+06:57  jluxenberg: frogonwheels: just tried, same output and no "*.rej" files were generated
+06:57 +Nicolas_Raoul: frogonwheels, jluxenberg, I just tried \! and the backslash appears in the commit message. Not the end of the world, I will use "applied patch X by Y, thanks'!'" next time
+06:57  jluxenberg: Nicolas_Raoul: yeah, that's what I said :)
+06:58  jluxenberg: Nicolas_Raoul: also, you'd want 'applied patch X by Y, thanks!'
+07:00  jluxenberg: is there any way to increase the verbosity of git-apply's output?
+07:00 +Nicolas_Raoul: jluxenberg, ah OK, understood
+07:01  frogonwheels: jluxenberg: presumably this patch hasn't already been applied?
+07:01  jluxenberg: frogonwheels: yeah, it definitely has not because it adds files, and those files do not exist after running git-apply
+07:03  frogonwheels: jluxenberg:  try --stat to see if that shows those files?
+07:03  jluxenberg: jared@jared-laptop:~/code/beagleboard/oe/angstrom-setup-scripts/build/tmp-angstrom_2008_1/work/beagleboard-angstrom-linux-gnueabi/linux-omap-psp-2.6.32-r91+gitr5fc29e7b2a76a64a739f857858ef0b98294aa155/git$ git apply --stat -p1 tmp.gitdiff
+07:03  jluxenberg:  0 files changed, 0 insertions(+), 0 deletions(-)
+07:03  jluxenberg: er, crap, sorry to spam
+07:03  frogonwheels: jluxenberg: possibly the wrong format.. sure it's not an  'am' format ?
+07:04  jluxenberg: frogonwheels: how can I tell?
+07:05  frogonwheels: jluxenberg: how did you construct the tmp.gitdiff in the first place?
+07:05  jluxenberg: grabbed it from here:http://www.galilsoft.com/mt9p031-dm355-evm.patch
+07:05  frogonwheels: jluxenberg: try  git am <file>
+07:06  jluxenberg: previous rebase directory /home/jared/code/beagleboard/oe/angstrom-setup-scripts/.git/rebase-apply still exists but mbox given
+07:06  jluxenberg: this directory might not be a git checkout, would that matter?
+07:06  frogonwheels: jluxenberg: you in the middle of a rebase that you care about?
+07:06  inkedmn: I've got a git repo on my local machine that I push to a private github remote and I'd like to be able to deploy it to a server
+07:06  inkedmn: I found this document via google: http://blog.tonyscelfo.com/2010/09/using-git-to-deploy-website.html
+07:07  jluxenberg: frogonwheels: not as far as I know, this directory isn't even a git repo
+07:07  inkedmn: my problem is that his example doesn't deal with an existing repository, but rather when starting from scratch
+07:07  jluxenberg: frogonwheels: er, actually I may be wrong about that, it is a git repo
+07:07  inkedmn: is there a (reasonably newb-friendly) document that describes how to do what I'm trying to do?
+07:07  inkedmn: the link above is the closest I've been able to find
+07:08  frogonwheels: jluxenberg:  you probably don't need the .git/rebase-apply then..
+--- Log closed Wed Dec 15 11:04:11 2010
+--- Log opened Wed Dec 15 11:09:33 2010
+11:09 --- Users 697 nicks [0 ops, 0 halfops, 11 voices, 686 normal]
+11:09 --- Server: [lindbohm.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+11:11 --- Channel #git was synced in 119 seconds
+11:13 --- jcspray_ is now known as jcspray
+11:18  sandGorgon: hi.. i had a couple of merge conflicts on a git pull. I rm-ed the conflicted file and wanted to get the copy from the repository. But it is not allowing me to checkout. How do I indicate that it should just discard my changes and accept the repository copy ?
+11:19  doener: sandGorgon: There's no single "repository copy". You can use checkout with either --theirs or --ours to get the version from the respective side of the merge
+11:20  sandGorgon: doener, thanks! that worked
+11:25  jeeger: Hm, after a while of git svn clone, I get "Connection reset by peer". Does that mean that their svn server is configured strangely? BUt why does the regular svn checkout work?
+11:28  leo2007: The default abbrev commit length is not configurable, is it?
+11:28  leo2007: using 1.7.3 here.
+11:31 --- ianmcorvidae|alt is now known as ianmcorvidae
+11:39 --- jcspray_ is now known as jcspray
+11:57  silv3r_m00n: is it possible to see differences between remote and local repo without fetching ?
+12:02  patrikf: silv3r_m00n: not easily, but you can e.g. do a git log on the remote side
+12:02  bluenovember: silv3r_m00n, may I ask why you would not want to fetch?
+12:03  bluenovember: big commits+slow connection?
+12:03  silv3r_m00n: no ,no , its all on LAN
+12:04  silv3r_m00n: I was just wondering
+12:04  silv3r_m00n: by the way , when I do a git fetch , it does not change the working files , then where are the changes stored ?
+12:07  albel727: silv3r_m00n: in .git/ subdirectory.
+12:08  silv3r_m00n: I mean , in terms of tags , branches , commits etc
+12:08  albel727: the answer is still the same =)
+12:08  albel727: more specifically
+12:09  albel727: commits and annotated tags go to .git/objects
+12:09  albel727: branches and lightweight tags go to .git/refs
+12:11  albel727: well, to be more precise, branches go into refs/remotes/<remotename>/ subdir, and can be listed by "git branch -r" as e.g "origin/master".
+12:11  albel727: and tags are not fetched by regular fetch. it has to be "git fetch --tags" iirc
+12:12  albel727: well, maybe I'm wrong on that last one.
+12:13  hipe: albel727: i think when u push you have to --tags
+12:13  albel727: thinking once more, I seem to recall the following rule: tags are fetched, only if the commits, that they refer to, are fetched (kinda reachability criterion). --tags option allows to fetch all tags.
+12:14  hipe: mm
+12:14  hipe: anyway, me: i just finished my topic branch with like 20 commits in it and now i want to merge back into my master.  when i do that, are all the individual commit messages from the topic branch effectively 'lost' from the perspective of the master branch?
+12:14  albel727: (fetch and push are different in this respect yeah)
+12:14  albel727: as for your question
+12:15  hipe: ;)
+12:16  hipe: the thing was, with my topic branch, it's gonna be my first pull request to a personally signifiant opensource project, so i was careful to explain exactly what i was doing in the commit message and make lots of small commits
+12:16  hipe: but i have realized that those small messages will all get 'flattened' into one big commit that's like "Merged branch into master"
+12:16  albel727: not exactly
+12:16  albel727: the messages in question will be where they are.
+12:16  albel727: merge doesnt turn a bunch of commits into a single commit
+12:17  albel727: merge creates a completely new commit with two parents, that joins two history lines together.
+12:17  albel727: so nothing will be lost, and can be viewed anytime.
+12:17  albel727: the only reasonable question is
+12:18  hipe: ok, hm  so , sorry to complicate this, but 1) i forked it 2) i created a topic branch on my workstation , 3) i'm merging my topic branch back to my master 4) i'm gonna make a pull request to the main project's master
+12:18  albel727: whether git log will show your messages by default
+12:18  hipe: oic
+12:18  hipe: but even when my changes get back into the master line of the main project , my little messages will carry along with it?
+12:19  albel727: they will
+12:19  albel727: commits don't get squashed by merge
+12:19  albel727: they don't disappear
+12:20  albel727: merge has a special --squash option, if you want that, but by default it's off
+12:20  hipe: i guess i remember linus' talk about git at google whatever, and his networks of trust thing.  so i guess, is it that every line of code in the linux kernel can show you the last author and the commit message that went with that? (hypothetically of course)
+12:20  hipe: ok but i think i've belabored the point and now i get it so i'm gonna go ahead and merge my topic into my master and push to github and make a pull request ;) thx albel727!
+12:20  albel727: every single commit, it's author, it's committer (yeah that's a separate concept), commit date, patch date (yeah, just like with author and committer) and commit message.
+12:21  albel727: you're welcome =)
+12:21  albel727: s/it's/its/
+12:21  albel727: - in several places =/
+12:22  hipe: albel727: i think the reason i got all obsessed with it is because here, this last commit, i am the author of it, but i don't see my name anywehre, https://github.com/nathansobo/treetop/commits/master
+12:23  hipe: o wait, there it is, when you follow the commit
+12:23  hipe: ok that's cool git's great
+12:24  albel727: yeah it is =)
+12:28  albel727: you probably got confused by differing author of merge commit. merge commit is just like any other commit, i.e it has its own author. the man who decided to merge two branches and run "git merge" holds the responsibility, and so he is the one, who gets mentioned there.
+12:30  albel727: in any case merge commits can merge several lines of development, each consisting of many commits, each having its own author. there is no way to reasonably derive a "canonical author" for a merge commit, besides the "who made the merge" criterion.
+12:41  nfrs: hi
+--- Log closed Wed Dec 15 12:46:51 2010
+--- Log opened Wed Dec 15 13:24:20 2010
+13:24 --- Users 698 nicks [0 ops, 0 halfops, 11 voices, 687 normal]
+13:25  dmilith: hi, I have question about tmp_pack_* files
+13:25  dmilith: 1. why they're touched with owner +rw only?
+13:25  dmilith: 2. When they're created?
+13:26  bremner: dubey: and you double checked the filename of the key matched the identifier in the config file?
+13:26 --- Channel #git was synced in 120 seconds
+13:26  dmilith: I know that I can clean them with git prune
+13:27  dubey: bremner: Yes, i can see the keys added to authorized_key files
+13:27  dubey: bremner : but when i tried to pull, still it is asking for password
+13:28  bremner: dubey: what happens if you run ssh git@your.server.com    for the client in question?
+13:29 --- jeeger` is now known as jeeger
+13:29  leadgy: hi
+13:29  leadgy: anyone using git and IntelliJ?
+13:29  cbreak: dubey: so... you try to use public key authentication?
+13:29  dubey: bremner: remote: 		***** WARNING *****
+13:29  dubey: remote:         the following users have no pubkeys:
+13:30  dubey: cbreak: yes
+13:30  cbreak: is the key you added in the git user's .ssh/authorized_keys file?
+13:30  dubey: Bremner: ssh_exchange_identification: Connection closed by remote host
+13:30  dubey: yes
+13:30  leadgy: I want to do a clone but I have a custom server port - is there any way to configure it?
+13:30  dubey: cbreak: permission is rw-r-r git:git
+13:31  cbreak: it should be not readable by anyone but the owner
+13:31  cbreak: the whole .ssh dir
+13:32  bremner: leadgy: running on what platform?
+13:33  cbreak: leadgy: you can encode it in the url
+13:33 --- wm3|away is now known as workmad3
+13:34  dubey: cbreak: same issue after changing permission
+13:34  cbreak: dubey: will you answer my question or not? :)
+13:35  dubey: cbreak: yes
+13:36  leadgy: cbreak: I've tried but it doesn't accept <url>:<port> format
+13:37  leadgy: I've installed IntelliJ 10
+13:37  leadgy: they say they have better git integration
+13:37  leadgy: we shall see :)
+13:37  cbreak: leadgy: intellij is irelevant
+13:37  cbreak: git supports url:port format
+13:37  cbreak: see man git-clone
+13:37  jast: the 'git-clone' manpage can be found at http://git.or.cz/man/git-clone [automatic message]
+13:39  leadgy: cbreak: they have this "clone repository UI" where I have these fields:
+13:39  leadgy: Git Repository URL
+13:39  leadgy: Origin Name
+13:39  leadgy: Parent Dir
+13:39  leadgy: Dir Name
+13:39  cbreak: so?
+13:39  cbreak: just put the url into the url field...
+13:39  dubey: cbreak: I don't added it manually, but git did it. I means added keys to authorized_keys file
+13:40  leadgy: I've tried to type in Git Rep  URL the ssh://git@<server>:<port>
+13:40  cbreak: dubey: gitolite has done it probably, so if it's inside that file, that's great
+13:40  leadgy: I'll try
+13:40  cbreak: does your client use the key? (did you ssh-add it?)
+13:40  leadgy: it says: ssh: connect to host  port 22:
+13:40  leadgy: and the port is not 22
+13:40  cbreak: well, of course, use the complete url...
+13:41  dubey: cbreak: Yes, i can see all keys of users in authorized_keys files
+13:41  leadgy: cbreak: what do you mean?
+13:41  cbreak: leadgy: man git-clone
+13:41  jast: leadgy: the 'git-clone' manpage can be found at http://git.or.cz/man/git-clone [automatic message]
+13:41  cbreak: read it
+13:42  cbreak: ssh://[user@]host.xz[:port]/path/to/repo.git/
+13:42  leadgy: cbreak: :) it's the third time I read it :P - I guess I was tired last night - I'll give it another go
+13:42  cbreak: one of the many examples
+13:42  leadgy: :)
+13:42  cbreak: you forgot the path
+13:42  resmo: Hi
+13:43  leadgy: cbreak: yes, I thought the other fields were for the last part of the path and the git url was only for the URL
+13:43  cbreak: the whole thing is the url
+13:43  resmo: I've got 2 commits (not public) I want do throw away, so a git checkout the last commit and rebase right?
+13:44  cbreak: git checkout the branch
+13:44  resmo: s/last commit/last commit I want to keep
+13:44  jeeger: resmo: reset --hard ^^HEAD?
+13:44  resmo: jeeger, ok thx
+13:44  jeeger: waitaminute
+13:44  resmo: ok :)
+13:44  cbreak: make sure you're on a branch before you do it.
+13:44  jeeger: resmo: I think that's right, but I don't know
+13:44  workmad3: resmo: you won't need to rebase
+13:44 --- adamholt is now known as adamholt_away
+13:44 --- adamholt_away is now known as adamholt
+13:45  workmad3: not with a reset anyway
+13:45  cbreak: it's only right if those two commits he wants to be gone are the last two
+13:45  workmad3: yeah
+13:45  cbreak: and it's HEAD^^
+13:45  resmo: they are the last 2
+13:46  resmo: throw away the last 2 commits on branch master (not yet public commits)
+13:47  dubey: any clue ?
+13:47  cbreak: dubey: does your client use the key? (did you ssh-add it?)
+13:48  resmo: git checkout master; git reset --hard HEAD^^ did the job
+13:48  resmo: thx
+13:49  leadgy: cbreak: to use the git protocol(not ssh), must I do extra configs to gitolite?
+13:49  cbreak: no
+13:49  leadgy: perfect!
+13:49  cbreak: because gitolite does not work via git protocol
+13:49  jeeger: hehe
+13:50  cbreak: it only works via ssh (I have heard some got crazy smart http stuff working...)
+13:50  dubey: cbreak: does ssh-add require
+13:50  cbreak: it's done on the client to make your client use the key
+13:50  leadgy: cbreak: hmm
+13:50  leadgy: that's a bummer!
+13:50  cbreak: leadgy: no, it's kind of to be expected
+13:51  cbreak: considering that gitolite builds on ssh features
+13:51  albel727: cbreak: wait a sec
+13:51  cbreak: and git:// does not support pushing
+13:51  albel727: cbreak: https://github.com/sitaramc/gitolite/blob/pu/doc/2-admin.mkd#_specifying_gitweb_and_daemon_access
+13:51  leadgy: cbreak: aah..yes - that makes sense
+13:51  cbreak: (without enabling it, in which case it's insecure)
+13:51  cbreak: albel727: yeah, but that has nothing to do with gitolite
+13:52  cbreak: they get direct repo access afaik
+13:52  leadgy: cbreak: ok, so do the IDEs(maybe you don't use IntelliJ, but maybe Eclipse) work via ssh or git protocol?
+13:53  cbreak: I don't use either
+13:53  cbreak: I use git.
+13:53  cbreak: git uses ssh
+13:53  leadgy: ok
+13:53  cbreak: among other things :)
+13:54  albel727: cbreak: well, yeah, the actual setup of git daemon has to be done seaparately. but at least gitolite nicely allows to specify access rights from config.
+13:54  leadgy: well, then I'll keep googling for this issue
+13:54  leadgy: thanks for the tips :)
+13:54  cbreak: albel727: but it doesn't check those access rights
+13:55  cbreak: using git:// gives full, unhindered anonymous access to all repositories that are exposed
+13:55  cbreak: (read only)
+13:55  cbreak: with anonymous I mean unauthenticated
+13:56  albel727: cbreak: it does "create the file git-daemon-export-ok in the repository", which defines access. yeah, daemon account is worse than mob one, in this regard.
+14:05  speakman: is there any way to stash stuff in index only?
+14:06  speakman: (to split all current changes into a few smaller stashes)
+14:06  cbreak: speakman: just commit them to some temp branch
+14:27  c3l: I have a repository with submodules, it all works fine in the repo where I initially added the submodules (I did < git submodule add externalrepo.git path/to/submodule/in/repo > and it gets cloned and all is well, however when I clone my repo with the submodules, the submodule folders are completely empty, how do I fix this?
+14:28  storrgie: is there a way to do automatic versioning with git?
+14:29  gergap: hi
+14:30  albel727: c3l: there are several ways. the simplest one, is to do cloning with --recursive option.
+14:30  albel727: c3l: post-factum, it can be amended with git submodule update --init --recursive, iirc.
+14:31  gergap: I want to install a server side hook which does email validation against a small list of known addresses (people often forget to run git config). Does anyone have an example hook for that?
+14:36  albel727: gergap: well, I can only say, that for what you want, you'll need to use either "post-receive" or "update" hook. git installation provides a sample of update hook, at least, which denies receipt of unnannotated tags. I guess it should be relatively easy to modify that.
+14:36  rvsjoen: do gitosis and gitolite do pretty much the same thing ? if I just want a 'public' but personal repository for my stuff, which one do people recommend ?
+14:37  albel727: rvsjoen: yeah, the same thing. but gitosis is dead for years. go with gitolite.
+14:37  rvsjoen: ah, great, thanks
+14:37  albel727: yw
+14:38  c3l: albel727: ooh, that worked. thanks!
+14:38  albel727: you're welcome, too =)
+14:40  gergap: albel727: yes, I've seen that. But the problem is I don't know how to get the commiter email addresses. AFAIK I must iterate over all commits of the current push and validate all email addresses. An example would be helpful.
+14:42  gergap: albel727: one idea is to use git-show and grep, but I'm not sure if this is the best way to do it.
+14:42  albel727: gergap: man git log --pretty option
+14:42  jast: gergap: the 'git' manpage can be found at http://git.or.cz/man/git [automatic message]
+14:42  albel727: gergap: it allows to print arbitrary info about commits
+14:43  albel727: something like, "git log --pretty=%ce <oldrev>..<newrev>"
+14:43  albel727: gergap: ^
+14:44  gergap: albel727: thx
+14:44  albel727: gergap: this will give you emails of all newly added commits, one per line you can check them against your list, and deny update on mismatch
+14:44  albel727: gergap: yw
+14:45  gergap: albel727: that's exactly what I need :-)
+14:51  hipe: aright thanks again albel727! cheers
+15:01  Gunni: how do i take a submodule and make it a part of the repository it's in?
+15:01  Gunni: because i modified it a lot and the original structure does not work for me
+15:02  Gunni: removing it from .gitmodules didnt work
+15:02  albel727: Gunni: sure it wouldn't. rather, it's not the only step, that you need to take
+15:02  Gunni: can you tell me the other steps?
+15:02  albel727: Gunni: sure
+15:03  albel727: Gunni: well, next thing you need to do is "git rm --cached path/to/sumbodule; git add path/to/submodule"
+15:04  albel727: Gunni: and then you need to edit .git/config
+15:04  Gunni: will that delete the folder itself or just from the git cache?
+15:04  albel727: Gunni: and remove all the submodule section
+15:04  albel727: Gunni: it's tricky to explain, what this does, but yeah, in your terms, it will delete only from cache.
+15:05  albel727: ...meaning it shouldn't even touch the actual directory and files in it.
+15:06  albel727: it will only tell to git, that submodule gets removed, and a regular directory and files in it get added.
+15:06 --- yaotti_aw is now known as yaotti
+15:06  Gunni: it seems to be working
+15:06  albel727: cleaned up git config?
+15:06  Gunni: this module wasn't there
+15:06  Gunni: only in gitmodules
+15:06  albel727: hmm, strange.
+15:07  albel727: probably you never did submodule init, or submodule sync in this clone...
+15:07  Gunni: this repo is kohana, it has a bunch of submodules but this one i added later
+15:07  albel727: well, if it works.
+15:07  Gunni: yes i did a init and update first when i started
+15:08  albel727: well, git submodule add should have added a section to .git/config. well, if it is not there, then it is not there, and that's good. =)
+15:08  Gunni: cool
+15:08  albel727: oh
+15:08  albel727: and don't forget to make a commit, ofc
+15:08  albel727: =)
+15:09  Gunni: yep it worked, and is now in my repo on github
+15:09  albel727: the one with changes to .gitmodules and path/to/submodule magic.
+15:09  albel727: oh
+15:09  albel727: ok =)
+15:09  leadgy: I've added a file via git add, git commit, git push - how do I remove this file from git altogether?
+15:09  Gunni: "10 changed files with 304 additions and 33 deletions"
+15:10  leadgy: I don't want to ignore it via .gitignore - I want to make git "forget about it"
+15:10  albel727: leadgy: git rm?
+15:11  leadgy: albel727: thanks
+15:11  albel727: yw
+15:12  albel727: Gunni: oh, and btw. you might have wanted to remove path/to/submodule/.git/ subfolder, before git adding =/
+15:13  albel727: sorry, I forgot about it =(
+15:13  Gunni: that folder didn't get committed
+15:13  albel727: phew
+15:13  Gunni: must be a built in ignore
+15:13  albel727: =)
+15:13  albel727: maybe =)
+15:14  leadgy: albel727: git rm deleted my file physically
+15:14  leadgy: I only wanted to remove it from the server's repo
+15:14  albel727: leadgy: oh, you wanted to keep it only in your clone
+15:14  albel727: ?
+15:14  leadgy: yes
+15:14  albel727: oh
+15:14  leadgy: :P
+15:14  albel727: then restore it with "git checkout HEAD -- <file>"
+15:15  leadgy: :)
+15:15  albel727: or rather
+15:15  leadgy: it wasn't that important file, but how do I remove it from the server's repo?
+15:15  albel727: git checkout HEAD^1 -- <file>, if you have already committed
+15:15  Gunni: leadgy did you commit a password?
+15:16  leadgy: Gunni: why you ask that?
+15:16  Gunni: because it sounds like that ^^
+15:16  Gunni: http://help.github.com/removing-sensitive-data/
+15:16  leadgy: aah..no, it was a IDE config file
+15:16  leadgy: and I want to remove it from server but keep it on my client
+15:17  leadgy: albel727: I'll try
+15:17  albel727: ok. "git checkout HEAD~1 -- <file>" - if you're on windows
+15:18  leadgy: albel727: ok, now it's restored
+15:19  leadgy: how do I remove it from server / git
+15:19  leadgy: ?
+15:19  albel727: leadgy: so, did you already commit or not?
+15:19  leadgy: before that file was removed it was commited and pushed to server
+15:19  albel727: leadgy: if not, then "git rm --cached <file>", commit, and that's it.
+15:20  albel727: leadgy: I meant, did you commit after "git rm"?
+15:21  leadgy: albel727: I'm not sure - I'm using the IDE
+15:21  leadgy: but I think so
+15:23  albel727: leadgy: ok
+15:24  leadgy: albel727: how do I make git not to ask for the ssh key passphrase each time I do "git push"?
+15:24  albel727: leadgy: windows, linux?
+15:24  leadgy: windows
+15:24  rvsjoen: use an authentication agent
+15:24  rvsjoen: pageant
+15:24  leadgy: pageant is on windows?
+15:24  rvsjoen: comes with putty
+15:25  albel727: leadgy: what ide do you use to commit to git?
+15:25  leadgy: aha
+15:25  leadgy: albel727: IntelliJ
+15:25  albel727: hmm
+15:25  albel727: and it also does pushes to server?
+15:25  albel727: or you do them manually?
+15:26  albel727: ...from command line, or something
+15:26  albel727: ?
+15:26  leadgy: albel727: also pushes to server
+15:27  leadgy: but it doesn't have the remove file thing without physically removing the file so for that I must do manually using git console
+15:29  albel727: leadgy: hmm, unfortunately, as far as I can see, Idea 8.X doesn't allow saving ssh passphrases. Idea 9.0.3 should allow it.
+15:30  leadgy: yes, in IntelliJ I have it saved and it doesn't ask again
+15:31  leadgy: but in "portable git"/git console it asks each time - when I run commands manually by command line
+15:31  albel727: leadgy: oh
+15:31  albel727: leadgy: well, you can push with Idea only
+15:31  albel727: leadgy: but if you want to do it from console
+15:31  albel727: then it depends on what ssh agent you use to connect
+15:32  albel727: you use msysgit, I presume?
+15:32 --- ivey_off is now known as ivey
+15:32  albel727: if yes, then it's a question, whether you chose to use Putty, during install, or not.
+15:32  leadgy: http://code.google.com/p/msysgit/downloads/list?can=3
+15:32  leadgy: I use PortableGit
+15:33  leadgy: should I use msysgit?
+15:33  albel727: hmm
+15:33  leadgy: is it better?
+15:33  albel727: never even heard of that one before
+15:33  albel727: well, according to polls, most of the people use msysgit on windows.
+15:33  albel727: =)
+15:34  leadgy: I wanted to not install anything outside git's dir so I used PortableGit
+15:34  albel727: well
+15:34  leadgy: I'll give a try to msysgit later
+15:34  odin_: would it be possible to see the commit-id for  >>>> # Your branch is ahead of 'origin/ant-refactor' by 2 commits.
+15:34  albel727: leadgy: I'm just not sure, what ssh agent does portablegit use.
+15:34  leadgy: I don't think it uses any
+15:34  albel727: if it's putty, then google on using pageant
+15:34  odin_: git diff origin/ant-refactor HEAD  # seems to give me 1 commit only but it says 2
+15:35  leadgy: I mean, it doesn't use any app to store the keys in keychain
+15:35  albel727: leadgy: ah
+15:35  leadgy: and for ssh agent I think it uses ssh.exe (from putty..perhaps)
+15:35  leadgy: not sure though
+15:35  albel727: so, it's not a passphrase (that one is for public key authorization), it's a password
+15:36  albel727: then you're on your own, unfortunately =/
+15:36  leadgy: btw, about removing that file from server/git repo - should I do another "git rm <file>"?
+15:36  leadgy: or .. how do I remove it only from the server and not also from client repo
+15:36  albel727: leadgy: what for?
+15:37  workmad3: leadgy: surely you just want it removed from the repo, but the copy left in the working directory
+15:37  albel727: leadgy: if you dig git rm --cached, git commit, and git push, then you're done
+15:37  workmad3: leadgy: which is ^^ that command
+15:37  leadgy: it's a IDE settings file - it shouldn't be in git repo
+15:37  albel727: s/dig/did/
+15:37  leadgy: aha
+15:37  leadgy: I'll try again
+15:38  leadgy: it says: pathspec '<file>' did not match any files
+15:38  albel727: leadgy: and gitignoring it is also a generally good idea, so nobody will accidentally add it again.
+15:38  leadgy: when I do git rm --cached
+15:38  albel727: leadgy: git status says...?
+15:39  leadgy: git rm --cached <file> says that
+15:39  leadgy: this is what it gives now
+15:39  leadgy: does this mean it is already removed?
+15:39  workmad3: leadgy: yes
+15:39  albel727: leadgy: no, I'm asking to run "git status", and see what it says.
+15:39  albel727: leadgy: but most likely, yeah, it is already removed from repo.
+15:40  leadgy: nothing to commit
+15:40  leadgy: for status
+15:40  albel727: leadgy: then you're done
+15:40  leadgy: hmm..but IntelliJ still sees the file under git's control
+15:40  albel727: leadgy: it needs refreshing, most likely =)
+15:41  leadgy: ok, I'll reopen
+15:42 --- chrischambers_ is now known as chrischambers
+15:52  CiaranG: Anyone know if it's possible to anchor the end of a commit message in the 'regular expression' used with /: in a revision specifier. (Or to match the entire message, not just part, would do the trick)
+15:52  CiaranG: For example, if I had "pig" and "pigs" as two different commit messages, it seems to be impossible to identify the "pig" one, since /:pig will match "pigs"
+15:53  FauxFaux: Are you sure $ doesn't work and you're not losing at shell escaping?
+15:55  CiaranG: It didn't seem to work, but maybe. Let me try again
+15:56  CiaranG: Nope, it's not lost in the shell escaping, I get back: bad revision '/:pig$' if I try that
+15:56  CiaranG: I found another solution that does work though, pig[^.]
+15:57  CiaranG: So I guess I've answered my own question. But there is still an open question of why $ doesn't work - I would have expected it to
+15:57  ew0: HrznDefeated, did it worked?
+15:59  leadgy: albel727: I want to commit with an author set but it says: fatal: No existing author found with 'Dan Leahu'
+15:59  leadgy: any way to fix this?
+16:00  albel727: leadgy: hmm, commit with an author set? from idea?
+16:00  leadgy: yes
+16:01  albel727: leadgy: looks like there should be something about it in project configuration, or something. it's not git problem, it's idea git plugin question, most likely.
+16:01  leadgy: aha
+16:01  leadgy: thanks  - I'll google
+16:02  CiaranG: Hmm, the [^.] thing seems to work in 1.7.3 and not in 1.7.1 though
+16:04  albel727: leadgy: oh wait
+16:04  albel727: leadgy: it's kinda git problem, actually
+16:05  albel727: leadgy: try specifying the author fully. like that:  A U Thor <author@example.com>
+16:06 --- fedesilva_ is now known as fedesilva
+16:08  doxtor: Hi, how do get git log to list just paths I affected today?
+16:11  albel727: doxtor: man git log --since
+16:11  jast: doxtor: the 'git' manpage can be found at http://git.or.cz/man/git [automatic message]
+16:12  albel727: doxtor: e.g  git log --since="1 day ago" --name-status
+16:13  leadgy: albel727: hmm
+16:13  leadgy: but why does it need this format?
+16:13  leadgy: can't I use only my name?
+16:13  doxtor: albel727: thanks, although I would like it more condensed, without headers and repeating files
+16:14  vano_: I have a source tree in modules that I would like to keep separate gits for each, however I want to be able to manage the git globally so that I don't have to go into each module directory and manage the changes. I don't know if this makes sense. I am looking into submodules, but is there any other solution ( such as having another root git in the root source dir)?
+16:20  ribasushi: what's the conventional way to ask "which hash is my HEAD?"
+16:20  albel727: ribasushi: git rev-parse HEAD?
+16:21  ribasushi: nothing like a flag to status or anything?
+16:21 * ribasushi is looking for dummy-proof ways
+16:21  albel727: vano_: you may want to look into gitslave - an alternative to git submodules. I never used it myself though, just seen it advised here often.
+16:22  bremner: ribasushi: I don't know what you want, but e.g.  git log -n1 --oneline
+16:22  ivan-kanis: how do I copy a file from one branch to another?
+16:22  bremner: git show branch:file  > file
+16:22  bremner: for example
+16:22  albel727: ribasushi: git rev-parse is the most dummy proof way to do it. if HEAD exists, then git rev-parse will give you the hash.
+16:22  bremner: ivan-kanis: or, git checkout branch:file
+16:23  ribasushi: aye
+16:24  vano_: albel727: thanks, not sure I want to use something separate from git itself though...
+16:26  ivan-kanis: c:\1-src>git checkout master:CMakeLists.txt
+16:26  ivan-kanis: fatal: reference is not a tree: master:CMakeLists.txt
+16:26  ivan-kanis: bremner: if i do 1) i lose all history
+16:27  bremner: ivan-kanis: yes.
+16:27  bremner: ivan-kanis: history is about whole trees, not files, to I don't know what can be done really.
+16:29  ivan-kanis: well screw history, i'll copy the lot
+16:29  albel727: you probably wanted "git checkout master -- <file>", not "master:file"
+16:31  bremner: err, probably
+16:31 --- yaotti is now known as yaotti_aw
+16:31  bremner: but my syntax makes more sense :)
+16:33  albel727: bremner: haha. well, it doesn't, if you want to checkout multiple files. "git checkout master -- file1 file2 file3" - nice. "git checkout master:file1 master:file2 master:file3" - ugly =)
+16:37  ivan-kanis: well i tried it but the history is lost again
+16:37  ivan-kanis: no worries i'll just toss history
+16:39  cbreak: ivan-kanis: git does not lose history :)
+16:39  ivan-kanis: cbreak: well you know what i mean ;)
+16:40  cbreak: no
+16:40  cbreak: don't know what you mean
+16:40  cbreak: it's really, really hard to lose history with git, unless you throw it away deliberately
+16:40  cbreak: or some kind of bug occurs
+16:41 --- yaotti_aw is now known as yaotti
+16:41  ivan-kanis: cbreak: i have bunch of files in a branch master that i need to copy to a branch say foo
+16:42  cbreak: then merge master?
+16:42  ivan-kanis: cbreak: no merge involved
+16:43 --- yaotti is now known as yaotti_aw
+16:43  cbreak: do you know what history in git is?
+16:43  ivan-kanis: cbreak: yes
+16:43  cbreak: in git, history is a chain of commits
+16:43  cbreak: and a merge is a commit with two ancestor commits
+16:44  cbreak: so if you want to get something from master, with history from master, then you have to merge
+16:44  cbreak: otherwise, you won't get the commits in master as ancestor
+16:44  cbreak: of course, you can filter'branch master so that you only get the commits you care about
+16:44  cbreak: and merge that
+16:44  cbreak: or do some rebase magic
+16:44  ivan-kanis: hah, i don't want to merge everything from master
+16:45  albel727: ivan-kanis: so what kind of history is lost, when you do the checkout?
+16:45  ivan-kanis: albel727: it just look like a new file after doing a commit
+16:45  cbreak: it is a new file.
+16:46  ivan-kanis: cbreak: but if I filter the branch master all the sha1 will be changed...
+16:46  cbreak: yes
+16:46  ivan-kanis: cbreak: how would i apply that to the branch foo ?
+16:46  albel727: ivan-kanis: and you want it otherwise? you want to basically, do a merge, so changes will combine, but do it on a subset of files?
+16:46  cbreak: with a merge.
+16:47  ivan-kanis: cbreak: but the merge won't work if the sha1 are different...
+16:47  cbreak: you should read up on the git basics if you think that :)
+16:47  ivan-kanis: albel727: yes that describes what I am trying to do
+16:47  cbreak: the concept is fairly simple:
+16:47  cbreak: you filter-branch master to create a new branch, tinymaster, that only contains the stuff you want to merge
+16:48  cbreak: then you merge that branch
+16:48  cbreak: of course, that's an evil hack
+16:48  pom_: How do I correctly put a remote branch in my local repository?
+16:48  cbreak: but if you want to do something stupid, you have to do some trickery :)
+16:48  cbreak: pom_: with git remote add
+16:48  albel727: ivan-kanis: hmm. I'm not sure if it will work, but try "git checkout --merge master -- <file>"
+16:49  cbreak: checkout --merge is for something else albel727
+16:49  cbreak: it's for branch switching with local conflicting changes
+16:49  albel727: cbreak: yeah, I suspected so
+16:49  albel727: cbreak: but I wanted to try, just in case =)
+16:50  cbreak: don't think he can do it without forging new fake history
+16:50  albel727: cbreak: well, I think, he can.
+16:50  albel727: cbreak: either that, or I don't understand what he wants.
+16:51  cbreak: he wants to get files from an other branch, including the commits that modify them, but the commits should not modify anything but them
+16:51  ivan-kanis: cbreak: are you saying filter branch will keep the sha1?
+16:51  cbreak: the last thing requires creating new commits
+16:51  cbreak: no, I don't say stupid things
+16:51  andre_pl: how do I set my working tree to match the last commit (ie. destroy uncommit changes)
+16:52  albel727: cbreak: oh, if so, then indeed, it needs a filter-branch.
+16:52  ivan-kanis: cbreak: well i am ready to try, but i think the merge will be confused...
+16:52  cbreak: ivan-kanis: you should understand what a merge is first :)
+16:53  cbreak: merge does not care about shas
+16:53  ivan-kanis: cbreak: a merge is commit with two parents sha1
+16:53  albel727: andre_pl: try "git reset --hard "
+16:53  cbreak: it creates a new commit with two or more parents
+16:53  cbreak: you can merge more or less any commits
+16:53  albel727: andre_pl: or even "git reset --hard HEAD", if your index is already dirty.
+16:53  andre_pl: albel727: that did it, thanks :)
+16:54  albel727: yw =)
+16:54  andre_pl: albel727: i was stuck between revert and reset, and wasn't sure on which options i needed for either one :P
+16:55  pom_: I have a branch remotely that I want locally. Previously I have craeated a new branch, checked that out and got the update with git pull origin [that branch name]. But that tries to merge it with the branch I branched of from. How can I create this new branch cleanly?
+16:56  andre_pl: pom: git branch -b branchname origin/branchname
+16:56  andre_pl: hmm
+16:57  andre_pl: maybe checkout not branch
+16:57  andre_pl: sorry
+16:58  pom_: andre_pl: No worries! Thanks!
+17:26 --- Max is now known as Guest45614
+17:30  endpoint_david: is there a tool to take some arbitrary content and compare against a list of revs in order to find which one has the most similarity?  I'm thinking of a use case where some code has been modified from a specific unknown version, but you want to find the "best" match to determine what is the most likely base for the modified content.  I'm defining best by having the least number of changed lines, probably ignoring whitespace.
+17:30  endpoint_david: it strikes me this is essentially the copy detection algorithm
+17:31  endpoint_david: don't know if that's exposed in any userside script, but I'm not aware of it if so
+17:31  cbreak: endpoint_david: just ask who ever did that.
+17:32  endpoint_david: cbreak: while practical, I'm thinking this could be a useful tool in and of itself
+17:32  endpoint_david: :-)
+17:34 --- thiago_home is now known as thiago
+17:40  Cope: I wonder if I am doing something wrong - following the examples in man gitignore I have added metadata.json to my .gitignore, but path/to/metadata.json is till shown in git status
+17:40  jast: the 'gitignore' manpage can be found at http://git.or.cz/man/gitignore [automatic message]
+17:40  Cope: likewise, I added \#*#
+17:41  Cope: but I still see emacs files of the form path/to/somewhere/#blah.rb#
+17:41  Cope: any ideaS?
+17:42  fr0sty: #*.*# ?
+17:42  fr0sty: Cope: also, is 'metadata.json already tracked by git?
+17:42  _nil: i know this is stupid but i can't seem to figure out a way to use "git log -n1" to get all local and remote instances of either branches or tags named release
+17:43  _nil: all i really want is for git to return something if there is either a branch or a tag named release
+17:43  fr0sty: for what purpose?
+17:44  fr0sty: and why git log -n1
+17:44  Cope: fr0sty: aha - good question... i think not
+17:44  fr0sty: ?
+17:44  endpoint_david: _nil: `git show release` will do it
+17:44  _nil: i'm automating checkout of a release tag or branch for goinstall on googles go language
+17:44  Cope: fr0sty: no... git says new file
+17:44  _nil: endpoint_david: not if it's a branch
+17:45  _nil: git log -n1 release works great for tags
+17:45  _nil: i'm really just stuck on branch
+17:45  _nil: but i want one command to check for both
+17:45  _nil: because then i can just do git checkout
+17:45  _nil: if it exists
+17:46  endpoint_david: _nil: you must mean a remote branch, then.  have you tried `git show-ref <ref>`?
+17:46  fr0sty: Cope: 'new file' ?
+17:46  _nil: endpoint_david: it is a remote
+17:46  fr0sty: that means you already added it to the index.
+17:46  endpoint_david: I think show-ref will show remote refs, too
+17:46  fr0sty: don't do that.
+17:47  fr0sty: Cope: 'git reset HEAD path/to/metadata.json
+17:47  _nil: endpoint_david: show-ref is what i want
+17:47  _nil: you're the man.
+17:47  digitalfiz: testing
+17:48  yhager: are git-svn hashes supposed to be deterministic? I ran 'git svn fetch' on two different locations and it generated different hashes..
+17:48 --- DrBeer_ is now known as brntbeer
+17:49  Polysics: hello
+17:50  Polysics: probably a stupid question: how do i tell git to commit a long list of deleted files? that is, those files need to not be there any more, they were removed
+17:50  Polysics: only there's about fifty of them
+17:51  fr0sty: Polysics: git add -u if you don't have other changes you don't want to add.
+17:52  Polysics: i am not that advanced - i usually just want git to get my current state
+17:52  Polysics: thanks
+17:53  Cope: fr0sty: so, if a file is already staged, because it appeared before the .gitignore was created, it must be manually unstaged? and then subsequently will be ignored?
+--- Log closed Fri Dec 17 18:23:32 2010

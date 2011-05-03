@@ -1,0 +1,1 @@
+/Users/iaj/.irssi/scripts/act.pl

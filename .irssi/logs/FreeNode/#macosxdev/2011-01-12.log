@@ -1,0 +1,169 @@
+--- Log opened Wed Jan 12 00:03:35 2011
+00:03 --- Users 46 nicks [1 ops, 0 halfops, 0 voices, 45 normal]
+00:05 --- Channel #macosxdev was synced in 97 seconds
+00:25  tgunr: At http://developer.apple.com/library/mac/#documentation/DeveloperTools/gdb/gdb/gdb_18.html they talk about gdbserver, but there seems to be no such beast avaiable! Wondering why gdbserver has never been port to OSX?
+00:38  jacksson_: hi. How to intruct xcode to rename pList from MyProjectName-Info.plist to Info.plist, when xcode builds the project?
+--- Log closed Wed Jan 12 00:58:15 2011
+--- Log opened Wed Jan 12 01:03:41 2011
+01:03 --- Users 46 nicks [1 ops, 0 halfops, 0 voices, 45 normal]
+01:05 --- Channel #macosxdev was synced in 99 seconds
+01:09  tgunr: Easiest is to just specify the name of your plist in a config build setting for Info.plist=MyInfo.plist
+01:09  tgunr: jacksson_:
+01:51  jacksson_: thanks tgunr
+02:09  b6: did something bad happen to pthreads around 10.6.1?
+02:27 --- Psy|_ is now known as psy
+02:27 --- psy is now known as Psy
+--- Log closed Wed Jan 12 02:58:20 2011
+--- Log opened Wed Jan 12 03:03:47 2011
+03:03 --- Users 49 nicks [1 ops, 0 halfops, 0 voices, 48 normal]
+03:05 --- Channel #macosxdev was synced in 100 seconds
+03:12  Axman6: b6: what do you mean?
+03:19  b6: Axman6: i'm working on a biggish program with threads. the code's been working on most major platforms for about 10 years. in 10.6.1, i see crazy thread unreliability, like locking up on pthread_cond_signal.
+03:20  b6: can't reproduce the problem on any other platform. on mac, everything before 10.6.1 was ok.
+03:20  Axman6: it's possible something has changed, but has been fixed in later versions of OS X. why are you using such an old version?
+03:20  b6: Axman6: just to figure out this bug.
+03:20  Axman6: hmm
+03:22  b6: i've been valgrinding and scan-build making, etc., for two weeks, trying to find some insidious bug.
+03:22  Axman6: it's worth filing a bug report with Apple
+03:22  b6: worried they'll just pat me on the head and say i need to get a pthreads book.
+03:23  Axman6: you're morelikely to not get a reply at all, and eventually have the bug fixed
+03:23  Axman6: i'm thinking that the addition of the grand central dispatch stuff could be an issue here
+03:23  b6: yeah, we were thinking that too.
+03:24  Axman6: what's the app?
+03:24  b6: credit card processing middleware translation server.
+03:24  Axman6: ah, fair enough
+03:24  Axman6: well, seems the easiest solution is use 10.5 for now :\
+03:25  b6: yeah, it only matters if it's our bug.
+03:26  b6: i could quit looking so hard if it was common knowledge in os x land that 10.6.1 had big thread problems.
+03:37 --- dust--- is now known as dust--
+03:39  Axman6: google isn't turning up much :\
+03:39  b6: thanks for trying.
+--- Log closed Wed Jan 12 06:59:25 2011
+--- Log opened Wed Jan 12 06:59:48 2011
+06:59 --- Users 45 nicks [1 ops, 0 halfops, 0 voices, 44 normal]
+07:01 --- Channel #macosxdev was synced in 96 seconds
+--- Log closed Wed Jan 12 08:10:12 2011
+--- Log opened Wed Jan 12 08:10:21 2011
+08:10 --- Users 46 nicks [1 ops, 0 halfops, 0 voices, 45 normal]
+08:11 --- Channel #macosxdev was synced in 100 seconds
+08:27 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+12:17  ffsa: hey
+12:18  ffsa: i am writing a c++ application tool with xcode
+12:18  ffsa:  first time on mac
+12:18  ffsa:  and xcode doesn't underline with red my syntax errors
+12:18  ffsa: and i can't find out how to configure xcode to do this
+12:22  Bynbo7: i'm not sure Xcode does do that, at least not without analysing the code first
+12:23  Bynbo7: not sure if the analysis work on C++ yet
+12:23  ffsa: okey, thank you
+12:50 --- StrAbZ is now known as StrAbZ|away
+13:28  johnlocke: I'm trying to subclass NSTableView and specifically the method numberOfRowsInTableView: But when I'm in that method and call [super numberOfRowsInTableView:tableView]; I get the warning "NSControl may not respond to -numberOfRowsInTableView"
+13:28  johnlocke: that just doesnt make sense
+13:28  johnlocke: why is super NSControl? Shouldn't it be NSTableView?
+13:36 --- StrAbZ|away is now known as StrAbZ
+15:18  johnlocke: I have a pointer to a SEL. How do I call that pointer?
+15:26  cnfer: johnlocke: with a stern but gentle voice
+15:48 @Beelsebob: johnlocke: performSelector:
+15:49 @Beelsebob: (possibly withObject:/onMainThread:/...)
+15:49  johnlocke: Beelsebob: yes, I managed to figure it out :)
+15:54  Psy: johnlocke: why do you subclass NSTableView anyway ?!
+15:55  johnlocke: Psy: I'm creating a SIMBL plugin for a thirdparty app, and I would like to know what it says in their NSTableView's
+15:55  Psy: I doubt they subclass it
+15:55  johnlocke: so I thought I'd just override the creation of the table, and then call the original method
+15:56  Psy: what kind of information do you actually want ?
+15:56  johnlocke: why would that make a difference?
+15:57  Psy: if they don't subclass you can do your stuff somewhere else
+15:57  Psy: somewhere that actually works :)
+15:57  johnlocke: the app creates a tableview with a few colums. I just want to get the contents of those columns, compare the data with some string, and if a row matches - select that row
+15:58  Psy: johnlocke: use the delegate of the table instead of subclassing the table view
+15:59  johnlocke: the thing is that I don't know where the delegate is
+15:59  johnlocke: reverse engineering is not my strong side.
+16:01  Psy: I can see that
+16:01  Psy: johnlocke: download OCMock
+16:02  Psy: and override allocWithZone: of NSTableView to return an mocked object of the table view that is being allocated
+16:03  Psy: you can then "override" the setDelegate: method to see what delegate is set on the table
+16:03  Psy: and that's the class you have to subclass
+16:03  Psy: because [super numberOfRowsInTableView:tableView]; on a table view subclass will not work
+16:04  johnlocke: interesting. I will take a look and come back later :) Thank you for the pointers
+16:06  Psy: johnlocke: -numberOfRowsInTableView: is a dataSource method so it's called on the dataSource, usually the dataSource is the same as the delegate, if they are stupid it might not be the case though
+16:12  b6: anyone know of something happening to pthreads on 10.6.1 that would make them unreliable?
+16:24 --- Psy| is now known as Psy
+16:55  hz_: hi guys, i would like to make cmake-gui to access an environment variable
+16:56  hz_: how can i set this var onto snowleopard env?
+16:56  tobylane: cmake has a channel
+16:56  hz_: cmake-gui or another app
+16:56  hz_: not important if cmake-gui
+19:21 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+19:24 --- ChanServ sets modes [#macosxdev +o Beelsebob]
+21:36 --- Zorg1 is now known as Zorg
+22:26 --- Dynetrekk_ is now known as Dynetrekk
+22:33  Dynetrekk: how can I printf() a NSString ?
+22:36  Zorg: use NSLog
+22:36  Zorg: otherwise convert the NSString to a c string..
+22:36  Zorg: and print it as so
+22:38  Dynetrekk: Zorg: NSLog is a function?
+22:38  Zorg: Dynetrekk: yes
+22:39  Zorg: NSLog(@"my NSString: %@", myString);
+22:39  Dynetrekk: great. % is string concatenation?
+22:39  Dynetrekk: sorry, I misread. works like printf, right?
+22:40  Zorg: it works like printf yeah, %@ is used for NSString's
+22:40  Zorg: NSLog also prepends a date printed and stuff too, I think
+22:40  Zorg: also it appends a \n
+22:40  Dynetrekk: how do you make constants in objc btw? C-style 'const NSString whatever = "hello"' in a .h file?
+22:40  Zorg: yeah...sure
+22:41  Dynetrekk: right, that is true. works for now, for simple debugging and learning objc
+22:41  Dynetrekk: ok, thanks
+22:41  Zorg: same way as in C.
+22:41  Zorg: oh
+22:41  Psy: Dynetrekk: NSString *const whatever = @"whatever";
+22:41  Zorg: @"hello" is for NSString literals
+22:41  lambdabot: Unknown command, try @list
+22:41  Psy: and in the header: extern NSString *const whatever;
+22:41  Psy: Dynetrekk: ^^^^
+22:42  Dynetrekk: Psy: do I need to put it both in the .h and .m file?
+22:42  Dynetrekk: sounds unnecessary?
+22:42  Psy: ...
+22:42  Psy: just like you do in C, you have to put in both places
+22:42  Psy: NSString *const whatever = @"whatever"; <-- implementation
+22:42  Psy: extern NSString *const whatever; <-- header
+22:43  Psy: or else you'll get linking error
+22:43  Dynetrekk: hum, really. perhaps I have it from C++ that I only need it once. is that the sensible way of defining a constant in a class?
+22:44  Dynetrekk: I guess in java it would be "private static final String someString;"
+22:44  Psy: the "in a class" should NOT be in this sentence, it doesn't make any sense
+22:44  Psy: Dynetrekk: what are you really trying to accomplish
+22:44  Psy: ?
+22:44  Dynetrekk: Psy: right. I may be Java brain damaged
+22:44  Psy: that's unfortunate
+22:44  Dynetrekk: Psy:  the java thing. a private static final string constant
+22:44  Dynetrekk: I know, I'm trying to revert, but it ain't easy goin'
+22:44  Psy: I mean: what fooooooor ?
+22:44  Dynetrekk: saving a string constant for use in a class
+22:45  Psy: try to do 1:1 match between languages that don't work the same is not good
+22:45  Psy: static NSString *const MyStringConstant = @"some stuff";
+22:46  Psy: in the .m
+22:46  Psy: that will restrict it to the file
+22:46  Dynetrekk: good enough I suppose
+22:46  Psy: and I do say the file not the class
+22:46  Dynetrekk: I don't try to map 1:1, but I figured all languages - almost - have the concept of a constant
+22:46  Psy: unless you put it inside a function then that restrict it to the function
+22:46  Dynetrekk: right, makes sense, "standard" scoping rules
+22:46  Psy: yes but all languages don't use it for the same purpose
+22:47  Dynetrekk: this is true. and some don't have them. like python.
+22:47  Dynetrekk: what does static mean?
+22:48  Psy: restricted to the compilation unit
+22:48  Psy: @implementation+@end or @protocol+@end or @interface+@end aren't compilation units
+22:48  lambdabot: Unknown command, try @list
+22:49  Dynetrekk: compilation units are usually files?
+22:49  Psy: a compilation unit is either a file including all the files (usually headers) it #import or #include
+22:49  Psy: and also function blocks or compound statements
+22:52  Dynetrekk: ok, thanks. so nothing like static in java, but that's fine I suppose
+22:53  Dynetrekk: the java classes are documented nicely here: http://download.oracle.com/javase/6/docs/api/  does something similar-ish exist for objc and NS(whatever) etc objects?
+22:57  ingonyama: Dynetrekk try Cocoa Browser Air: http://numata.designed.jp/en/programming/cocoa-browser-air.html
+22:57  Dynetrekk: there is no official apple equivalent?
+23:14  Dynetrekk: but, by the way, looks nice :-)
+23:30  Psy: Dynetrekk: Apple docs
+23:31  Psy: Dynetrekk: and I don't find java docs nice at all
+23:31  Dynetrekk: ok, I'll have a look. are those installed locally with xcode?
+23:31  Dynetrekk: Psy: well, it's browsable and searchable, I was looking for something similar for objc. I guess that was  all.
+23:32  Psy: Help --> Developer Documentation
+23:45  Dynetrekk: Psy: thanks a bunch! good night, I'm too tired to continue in a productive fashion :P
+--- Log closed Thu Jan 13 00:00:11 2011

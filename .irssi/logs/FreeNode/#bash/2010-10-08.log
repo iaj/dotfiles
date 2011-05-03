@@ -1,0 +1,477 @@
+--- Log opened Fri Oct 08 02:19:36 2010
+--- Log closed Fri Oct 08 02:24:40 2010
+--- Log opened Fri Oct 08 02:24:49 2010
+02:24 --- Users 523 nicks [0 ops, 0 halfops, 0 voices, 523 normal]
+02:24  lightsabarr: so how cna i simmulate as if I had cd-ed into that dir manuallY?
+02:25 --- Channel #bash was synced in 71 seconds
+02:26  nDuff: lightsabarr, if the script doesn't work with the command you gave above, it's likely for a different reason -- like there not being a tty for commands run in that way.
+02:26  nDuff: lightsabarr, ...from the perspective of what the current working directory is, there's no difference.
+02:26  lightsabarr: say what?
+02:27  lightsabarr: if I go on box
+02:27  lightsabarr: cd to dir
+02:27  lightsabarr: run command
+02:27  lightsabarr: works fine
+02:27  lightsabarr: just rahter do ssh me@otherbox "stuff"
+02:27  lightsabarr: bugger
+02:27 --- rduplain_ is now known as rduplain
+02:28  nDuff: lightsabarr, as I said, though, ssh you@otherbox "stuff" behaves differently than running "stuff" in an interactive terminal
+02:29  nDuff: lightsabarr, for instance, ssh doesn't set up a pseudoterminal by default when it's given an explicit command to run
+02:30  nDuff: lightsabarr, ...you might try the -t argument.
+02:32  lightsabarr: -t eh?
+02:32  lightsabarr: let me man that
+02:32  nDuff: lightsabarr, ...argument to ssh, that is, not bash
+02:36  lightsabarr: aye
+--- Log closed Fri Oct 08 09:52:28 2010
+--- Log opened Fri Oct 08 09:52:50 2010
+09:52 --- Users 527 nicks [0 ops, 0 halfops, 0 voices, 527 normal]
+09:53 --- Channel #bash was synced in 70 seconds
+10:00  geirha: q99125: You can resize the FS to fit the partition afterwards
+10:06  q99125: taylanub: I spent so much time reading on tar and would like to keep it as simple as possible. Are you saying that tar will not make a copy of the partition? I know dd could be used but it appears that I would have to use additional steps I am unfamiliar with to accomplish the same results.
+10:07  taylanub: tar with --one-file-system will do the same actually
+10:07  taylanub: if sda6 is on / and sda7 on /home, do a tar for each
+10:08  taylanub: what distro by the way?
+10:08  q99125: geirha: I'm trying to avoid resizing the partition afterwards as it suggests backing up first, which would mean a second time.
+10:10  q99125: taylanub: Ubuntu 9.04, but if successful I need to do the same with my daughters computer, Ubuntu 7.04.
+10:11  sda1986: hi all! what i have to search online for read something about include a script inside another? like a a library in a C\python program
+10:13  sn18: !source > sda1986
+10:13  greybot: sda1986: ''source <script>'' or ''. <script>'' reads and executes the commands from <script> into the current shell, only one script per invocation the rest is passed as arguments to it
+10:22  taylanub: sda1986: reading through "man dash" or BSD's "man sh" is an awesome start in general IMO. and the BashFAQ aka Greg's Wiki rocks
+10:26  wt: pgas: thanks earlier
+10:34  Morten_: Hi, is it possible to make a varible which starts at 00000 and goes like 00001 00002 etc?
+10:36  mar77i: # a=00000; echo -n $a; a=$(printf '%05d' $(( a + 1 ))); echo "  "$a
+10:36  evalbot: mar77i: 00000  00001
+11:03 --- h4x0r` is now known as DeathByIPv6
+11:09  dyek_: Hi! Why is it that when I have an echo statement in ~/.bashrc file, scp to the computer will stop working? What is the reason?
+11:12  ferret: !dotfiles
+11:12  greybot: http://mywiki.wooledge.org/DotFiles or - for a technical explanation - the INVOCATION section of man bash.
+11:13  taylanub: what's scp?
+11:13  ferret: Hmm, it isn't explained there
+11:13  ferret: dyek_: It's because scp is a lot lower-tech than you think
+11:14  ferret: It's little more than ssh, running a single command, passing a file through STDIN, then exiting
+11:14  ferret: Put this at the top of your .bashrc:
+11:14  ferret: [[ $- != *i* ]] && return
+11:14  ferret: it prevents the file being run in non-interactive shells
+11:14  taylanub: oh ok, secure copy
+11:16  cousteau: I'm looking for an equivalent for HyperTerminal. Would   exec </dev/ttyS0 >/dev/ttyS0   work?
+11:16  cousteau: (there's also gtkterm, but that's "cheating")
+11:18  lundtor: i need to extract something from the output of pwd and then concatenate that ouput onto another string
+11:18  cousteau: lundtor: "$(pwd)/blahblahblah"
+11:18  cousteau: or just use $PWD
+11:19  ferret: cousteau: does ''screen /dev/ttyS0'' work?
+11:20  lundtor: cousteau: pwd gives me /home/IXONOS/lundtor/work/ixogit/platform/system/vold.git, and im only interested in /platform/system/vold.git
+11:20  cousteau: ferret: ok, I'll try that (I'm not at the linux computer atm).   cat /dev/ttyS0   worked, but only as output
+11:20  taylanub: $PWD _can_ be wrong, but only if someone's stupid enough to do PWD=foo
+11:21  cousteau: taylanub: I thought changing $PWD was an alternative to cd
+11:21  ferret: lundtor: echo "/platform/system/vold.git"
+11:21  ferret: That command gives you only that bit
+11:22  ferret: I can't give you a command that is less specific without more information
+11:22  cousteau: taylanub: wow, just checked... it isn't
+11:22  taylanub: cousteau: nope. it might show up on your prompt but compare it to $(pwd), and also do a "cd ." (yeah funny :P)
+11:22  ferret: Are you interested in everything from the first letter ''p'' onwards, for example?
+11:22  dyek_: ferret: Thanks for explanation, but when I scp a remote file to a local PC, the remote PC's .bashrc's echo statement is causing problem. Why is that so? Wouldn't the remote sshd concatenate the echo output and the requested file and send it over the network?
+11:23  lundtor: problem is that i need to run it recursively.
+11:23  taylanub: lundtor: tell us what you _exactly_ want to do
+11:23  ferret: dyek_: it's hard to say, it depends on the scp implementation you are using
+11:23 * cousteau goes to a computer with linux and checks
+11:24  ferret: dyek_: But basically it is safe to say that SCP depends on controlling the STDOUT of the ssh session and any unexpected noise in STDOUT will cause problems
+11:24  cousteau: ...too lazy, I'll just google the manpage
+11:25  erUSUL: cousteau: minicom or cu
+11:27  cousteau: erUSUL: thanks... although I was actually looking for the simplest option
+11:27  cousteau: s/simplest/geekest/, actually
+11:28  lundtor: taylanub, cousteau: Sorry for the lack on info. i have elaborated it here: http://pastebin.com/L6H6fvUQ
+11:29  cousteau: lundtor: I'd use sed
+11:29  taylanub: lundtor: use sed
+11:29  taylanub: foo | sed 's,/home/IXONOS/lundtor/work/ixogit,,' | bar
+11:30  cousteau: command | sed 's:^/home/IXONOS/lundtor/work/ixogit/::'
+11:31 * cousteau proposes a "Find the best alternative to '/' for regular expressions" contest
+11:32  lundtor: taylanub, cousteau: thanks
+11:34  disposable: i have a lot of filenames i need to change using string manipulation magic. i.e. http://pastebin.com/wZxSd73m can somebody please show me how to do the first one in a way that i can adjust and reuse for the other types?
+11:35  lhunath: there is nothing special about / for regular expressions.
+11:35  lhunath: the / has nothing to do with regular expressions; but everything with sed command syntax.
+11:36  taylanub: lhunath: it's tradition i guess. doesn't ed use them?
+11:36  lhunath: sure, as do my URLs.
+11:37  lundtor: taylanub, cousteau: another small thing on the issue. /home/IXONOS/lundtor/work/ixogit/ can be fetched with echo $PWD, so how to combine it?
+11:37  lhunath: they are commonly used as a delimitor.
+11:37  silasdavis: how do I call a bash script from another, such that the called script may access variables defined in the first?
+11:37  lhunath: silasdavis: help source
+11:37  silasdavis: lhunath: thanks
+11:37  lhunath: silasdavis: if by 'access' you mean 'modify'
+11:38  silasdavis: i mean read, really
+11:38  cousteau: lundtor:   directory=$PWD
+11:38  lhunath: if not, export what you want to pass and invoke the other script like an ordinary command.
+11:38  lundtor: | sed 's:^$PWD::' does not work
+11:38  lhunath: or turn it into a function; no need for exporting then
+11:38  silasdavis: I'd also like the called script to have access to the $<n> arguments of the first
+11:39  lundtor: $ does does not escape sed, since it thinks its a string to be matched
+11:39  lhunath: can't be done.  but you can pass them.
+11:39  silasdavis: lhunath: if I export it will it hang around in the environment after both scripts have ended?
+11:39  cousteau: lundtor: you could use   sed "s:^$PWD::"   (with double quotes)
+11:39  lhunath: source ./otherscript "$@"
+11:39  silasdavis: what is $@?
+11:39  silasdavis: like "$*"?
+11:39  cousteau: silasdavis: not exactly
+11:39  lhunath: only "$*" sucks.
+11:39  silasdavis: interesting, why?
+11:39  lhunath: "$@" is the same as "$1" "$2" "$3" ...
+11:40  lhunath: "$*" is the same as "$1 $2 $3 ..."
+11:40  silasdavis: ah, very good
+11:40  lhunath: you never want the latter.
+11:40  cousteau: command foo bar "b a z" -> "$@" expands to 'foo' 'bar' 'b a z'
+11:40  silasdavis: yes
+11:40  lhunath: you can export only to one command, and not have it "hang around in the environment" beyond that.
+11:41  lhunath: var="coffee"; var=$var command
+11:41  lhunath: (notice: no semicolon between the second assignment and command)
+11:41  cousteau: (personally, I don't understand the need for quotes on it,   $@   should be enough)
+11:41  ferret: hysterical raisins
+11:41  silasdavis: what would 'export var; command' do?
+11:41  lhunath: no, $@ is always wrong.
+11:42  lhunath: command foo bar "b a z" -> $@ expands to 'foo' 'bar' 'b' 'a' 'z'
+11:42  cousteau: like, what's "foo $@ bar" supposed to do then?
+11:42 * cousteau checks
+11:42  lhunath: gluing strings to it is not very useful
+11:42  lhunath: "foo foo" "bar" "b a z bar"
+11:42  lundtor: cousteau Thanks again
+11:43  cousteau: IMO, $@should do what "$@" does, and "$@" should do what "$*" does, it's more logical
+11:43  lhunath: I've only ever found it useful for things like "./$@", where it doesn't matter if only the first expanded element has ./ prefixed.
+11:43  cousteau: gotta go
+11:43  lhunath: not at all.  unquoted expansions should NOT behave like quoted expansions.
+11:44  pgas: cousteau: but then how would you do what $@ does?
+11:44  lhunath: and unquoted expansions should be avoided at all costs.
+11:44  cousteau: pgas: $*, I think
+11:44  cousteau: gotta go, cu later
+11:44  silasdavis: what's the best idiom for "let var = x, unless var is set"
+11:45  ferret: cousteau needs to invent time travel, in that case
+11:45  lhunath: var=${var:-x}
+11:45  silasdavis: god you're handy lhunath, what is :-?
+11:45  silasdavis: god you're handy lhunath, what is :- ?
+11:46  lhunath: !pe
+11:46  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+11:46  lhunath: that URL is also handy.
+11:46  pgas: silasdavis: do you know what let does in your example?
+11:47  lundtor: cousteau: now i need to append the output to the ssh url.  sed "s:^$PWD::" | git remote add testremote ssh://somwhere
+11:47  silasdavis: pgas: well, yes, because it was my pseudocode, but not in bash no..
+11:48  hipe: disposable: http://pastebin.com/MEWgduzj
+11:48  lhunath: !math > silasdavis
+11:48  greybot: silasdavis: Add 7 to a variable: let a+=7; ((a+=7)); a=$((a+7)); See http://mywiki.wooledge.org/ArithmeticExpression
+11:48  hipe: disposable: sorry i know this is bash channel but i couldn't resist making a ruby one off.  has little typos
+11:51  disposable: hipe: you should resist the urge next time
+11:52  silasdavis: pgas, lhunath: thanks for the info
+11:52  disposable: hipe: unfortunately, there is a specific reason why i can't use perl/ruby/python
+11:53  hipe: disposable: haha curious why?
+11:55  disposable: hipe: i need to rename the files on 300+ servers and the only thing i'm sure about is that they all have working bash.
+11:55  hipe: disposable: wow! what a project 300 servers!?? ok good luck sed is for this n'esc pas? or awk? do you have that? no prob not
+11:56  hipe: having to do anything on 300 servers sounds like a hassle not matter what you're doing
+11:57  napster: how can I return the pid of a process?
+11:57  napster: named x
+11:57  napster: ?
+11:57  napster: ps -A | grep <process> | $1         Will this work?
+11:58  pgas: pgrep x
+11:58  napster: pgas: Thank you
+11:59  hipe: napster: that's better but there's this ps aux | grep someprog | awk '{ ; print $2 ; }'
+11:59  napster: hipe: Hmm wow, thats a good idea
+11:59  napster: :-)
+12:00  pgas: ps -
+12:00  disposable: hipe: not really. i use "puppet".
+12:00  pgas: ps can print only the name and grep someprog often returns to many pids
+12:01  pgas: *too many
+12:06  mjrosenb: is there a way of getting a variable to expand to one word if it is set and nothing if it is unset / empty?
+12:07  lhunath: ${moo:+word}
+12:07  lhunath: quoted.
+12:07  lhunath: !pe > mjrosenb
+12:07  greybot: mjrosenb: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+12:12  mjrosenb: wow, i had just read about :+ in the man page yesterday, and it didn't click that i could use it like that.
+12:13  mjrosenb: lhunath: thank you very much.
+12:14  UT2K3: hi guys! How its possible to create dynamic variables? I've got a variable X="foo" so i would create like "$$X='123'" a variable $foo which contains "123"
+12:15  erUSUL: !faq indirect
+12:15  greybot: http://mywiki.wooledge.org/BashFAQ/006 -- How can I use variable variables (indirect variables, pointers, references) or associative arrays?
+12:15  UT2K3: thank you :)
+12:25 * taylanub says "eval" and runs away
+12:26  mjrosenb: erUSUL: at least that is acknowledging that it is a hack
+12:34  lhunath: UT2K3: learn what associative arrays are.
+12:54  UT2K3: lhunath: i know what associative arrays are. I was just wondering how something like that working :)
+13:02  lundtor: inside a bash script i run a recursive command. How to loop the output?
+13:04  Acedip: shouldn't putting date string in a crontab command to execute a shell script work.
+13:04  Acedip: i mean a cronjob, "filename" >> "logfilename`date '+%d-%m-%y'`.log 2>&1
+13:04  Acedip: is not working, but its working without the date string
+13:05  cthuluh: !faq cron
+13:05  greybot: http://mywiki.wooledge.org/BashFAQ/043 -- Why does my crontab job fail?  0 0 * * * some command > /var/log/mylog.`date +%Y%m%d`
+13:06  cthuluh: perhaps for this reason
+13:07 * Acedip trying
+13:12  Gokhlayeh: Hi, is using [ "$var" ] instead of [ -n "$var" ] and [ ! "$var" ] instead [ -z "$var" ] a correct syntax ? It works on my shell (busybox sh) but I want to know if there's issue with this (portability/pitfall)
+13:16  pgas: [ "$var" ] might fail in particular cases on very old shells
+13:16  pgas: (and perhaps ! "$var")
+13:16  pgas: otherwise you should be ok
+13:17  Gokhlayeh: thanks for your help pgas
+13:22  Acedip: cthuluh: dint work
+13:22  cthuluh: !doesntwork
+13:22  greybot: Saying something "doesn't work" helps nobody. Explain what you *want* to do, what you are *doing* and how it is *failing*. Being abstract or vague doesn't help. Copy/paste the commands that fail and the errors they produce.
+13:23  Acedip: cthuluh: adding backslash to the cronjob dint make it run either
+13:23  Acedip: :D
+13:24 --- katoen is now known as cmdr_w_t_riker
+13:24  cthuluh: fine
+13:26  Acedip: cthuluh: fine what. i need to make it work. :/
+13:27  twkm: i suggest writing a script, which you invoke from cron.
+13:28 --- cmdr_w_t_riker is now known as Cmdr_W_T_Riker
+13:29  lng: hi! how do I grab error from last command?
+13:30  lhunath: what? the output of the command's stderr?
+13:30  lng: I need to do this: if command failed, then email error message
+13:30  lng: yes
+13:31  lng: I can reditrect it to stdout
+13:31  erUSUL: !ifgrep
+13:31  greybot: if grep -q word "$file"; then blah blah; fi DO NOT use [[ or [ or ` or $() or any other crap. "if" expects a command. "grep" is a command. "[" is too. You don't need both, just the grep works because grep returns true (0) if a match is found, but not otherwise.
+13:31  lhunath: lng: redirect stderr to stdout
+13:31  lng: this is how I did it
+13:31  lng: lhunath: well
+13:32  lng: just test it with if and redirect...
+13:32  lng: tnx
+13:32  lhunath: if?  none of this involves an if
+13:32  mgedmin: lng, capture the output, then check $?
+13:33  lng: yep
+13:33  lng: thanks
+13:33  lhunath: just don't use $?
+13:33  lng: one mmt
+13:33  cthuluh: Acedip: read the factoid I triggered and your answer. do you think you gave us enough details? did you give us the error message?
+13:34  EvilCoder: tensorpudding
+13:34  EvilCoder: Hello everyone
+13:34  EvilCoder: I want certain ubuntu 10.04, ssh users to execute a special command at the time of loggin into shell, any help ? For example I want few ssh users to execute uname -r ater soon they log into ssh shell, thanks
+13:34  lng: $ if ! command; then; HOW DO I OUPUT ERROR HERE?
+13:35  cthuluh: echo error >&2; fi
+13:35  cthuluh: !conditionals > lng
+13:35  greybot: lng: Conditional Structures: http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+13:35 * mgedmin would do it like this: OUTPUT=`command 2>&1`; [ $? -ne 0 ] && echo "$error" 1>&2
+13:36 * mgedmin eagerly awaits corrections from professionals
+13:36  lng: cthuluh: is error special variable?
+13:36  cthuluh: lng: no
+13:36  mgedmin: ideally command itself would have a switch to be quiet unless there's an error
+13:36 * mgedmin notices his statement is incorrect: should've been echo "$OUTPUT"
+13:36  cthuluh: !faq output > mgedmin
+13:36  greybot: mgedmin: http://mywiki.wooledge.org/BashFAQ/002 -- How can I store the return value/output of a command in a variable?
+13:37  cthuluh: !varcaps > mgedmin
+13:37  greybot: mgedmin: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+13:37  cthuluh: !` > mgedmin
+13:37  greybot: mgedmin: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+13:38  cthuluh: had enough? :)
+13:38 * mgedmin scribbles down notes hurriedly
+13:38  mgedmin: thanks
+13:39  cthuluh: you could also write it    if output=$(foo); then echo success; else echo error; fi
+13:40  mgedmin: is there a difference between output=$(foo) and output="$(foo)"?
+13:41  cthuluh: no, there's no wordsplitting on variable assignement
+13:41  cthuluh: of course you need quotes if you want to do     output="$(foo) bar"
+13:44  lng: cthuluh: didn't know that -
+13:44  lng:  if output=$(command); then
+13:44  lng: cheers
+13:48  Acedip: cthuluh: where do you see cron error messages?
+13:49  cthuluh: in your main syslog file, usually
+13:49  cthuluh: or in your mailbox too
+13:49  EvilCoder: how a group of ssh users OR certain ssh users be added so that they execute one command automatically as soon as they loginto the shell ? any idea
+13:52  cthuluh: EvilCoder: see sshrc in sshd(8). and remember there's an #openssh channel
+13:53  EvilCoder: ohkay thanks
+13:55  twkm: EvilCoder: also, #openssh
+14:06 --- cookiemo15ter is now known as cookiemon5ter
+14:37 --- jzacsh is now known as jzacsh_
+14:37 --- jzacsh__ is now known as jzacsh
+15:07  grawity: How do I collapse "/home/grawity/some/path" to "~/some/path" (when $HOME == "/home/grawity") ?
+15:08  grawity: Well, any path, not just that one in example
+15:08  lhunath: shortening for displaying to the user?
+15:08  grawity: Yes.
+15:08  lhunath: because if you give that to a COMMAND, it will try to go into the '~' directory in the current directory.
+15:08  grawity: It's just for display.
+15:09  lhunath: use a PE and replace $HOME by ~
+15:09  skered: "${var/$HOME/~}" ?
+15:09  lhunath: # file=~/moo; echo "$file"; echo "${file/$HOME/\~}"
+15:09  evalbot: lhunath: /root/moo
+15:09  evalbot: lhunath: \~/moo
+15:09  lhunath: uck.
+15:09  grawity: What if I have "/arch/home/grawity/somepath"?
+15:09  lhunath: ~ doesn't expand there, obviously
+15:10  grawity: Oh, right
+15:10  grawity: Can ${//} match only at the start of string?
+15:10  lhunath: anywhere.
+15:10  lhunath: # file=~/moo; echo "$file"; echo "${file/#$HOME/~}"
+15:10  evalbot: lhunath: /root/moo
+15:10  evalbot: lhunath: ~/moo
+15:10  grawity: sigh
+15:10  lhunath: this one only matches at the star.
+15:10  kel39: not exactly sure where to ask this, but will try here first. I have this script, http://pastebin.com/XwCf52P5 which produces that error
+15:10  lhunath: t
+15:10  grawity: I'll rephrase.
+15:10  grawity: Can I tell ${//} to match only at the start of string?
+15:11  pgas: yes
+15:11  lhunath: yeah, see my second example.  in effect, you prefer the pattern with #
+15:11  grawity: Aha. Thanks.
+15:11  lhunath: kel39: quotes.
+15:12  kel39: on *show1* ?
+15:12  lhunath: !quotewhen > kel39
+15:12  greybot: kel39: "Double quote" *EVERY* argument that contains whitespace or expansions ("$foo", "$(foo)", "`foo`"). 'Single Quotes' prevent expansions from happening at all. Also quote *, [, ], ? etc. if you don't want bash to expand them into filenames.
+15:12  lhunath: kel39: you don't want bash to replace *show1* by all the filenames that matches it before running the find command.  so to disable pathname expansion, you quote the glob.
+15:13  kel39: glob?
+15:13  kel39: the whole lot/
+15:13  lhunath: the glob.
+15:13  lhunath: *show1* is a glob.
+15:13  grawity: If I want to update the terminal's title... Better to use PROMPT_COMMAND or PS1?
+15:14  kel39: lhunath - i figured that, but when I run it with double quote ( " ) it returns find: NO MATCH
+15:15  lhunath: what's with the -E?
+15:15  lhunath: anyhow, give us the command you're running, the output you're getting, and the output you expect.
+15:16  lhunath: (and the reason as to why you expect that output)
+15:16  lhunath: grawity: either
+15:17  kel39: what -E ?
+15:17  kel39: ohh right
+15:17  lhunath: find /my/dir -name *show1* -E cp {} /mnt/main/data/tv/Show1 \;
+15:17  kel39: thats meant to be -exec
+15:17  kel39: i was testing -E
+15:17  lhunath: indeed.
+15:17  kel39: im on bsd
+15:17  kel39: but assume find is the same on all OS's, right?
+15:17  kel39: it has no -exec in the man
+15:17  lhunath: the parts defined by posix.
+15:18  lhunath: if you're lucky.
+15:18  pgas: kel39: what bsd?
+15:18  kel39: freebsd
+15:18  pgas: then you just need to look harder in your manpage
+15:19  kel39: usage: find [-H | -L | -P] [-EXdsx] [-f file] [file ...] [expression]
+15:19  kel39: unless im missing something?
+15:19  pgas: that there is more than the SYNOPSIS in a man page?
+15:19  lhunath: $ uname -rs; man find | grep -- -exec
+15:20  lhunath: FreeBSD 8.1-RELEASE
+15:20  lhunath:      find / -type f -exec echo {} \;
+15:20  pgas: -exec is part of  [expression]
+15:20  kel39: ok
+15:30  Edong23: q99125: how did it go?
+15:37  q99125: Edong23: Waiting until I can take the system down, but have notes ready to apply. Hopefully all will go well, and thanks for all the help.
+15:37  Edong23: yeah, it isn't really hard... there are MANY ways to do it
+15:37  tsolox: UNAME=$(/usr/bin/uname -n | /usr/bin/tr [:upper:] [:lower:]) <---- this one runs ok manually, but fails in cron..
+15:37  Edong23: cp -rax will copy it exactly but exclude proc and sysfs
+15:37  Edong23: i haven't head of the option for tar that somone told you, but that is bad ass
+15:38  twkm: tsolox: invoke a script from cron.
+15:39  twkm: as an aside, quote your classes.
+15:39  tsolox: twkm: those are the contents of myscript.sh invoked in cron
+15:39  pgas: how does it fail?
+15:39  twkm: then probably due to the second thing.
+15:40  tsolox: contains an invalid character class.
+15:41  avinashhm: hi, i have written a simple shell script to do while loop .. but giving an error .. Shell script and error @ http://pastebin.com/g7sM3NiS.. can someone help pls
+15:42  malorie: what was the command to show where a binary is? (I don't mean `whereis' here.)
+15:42  koala_man: avinashhm: bash is more whitespace sensitive than you're used to. [ is a regular command, so [1 -lt 20] doesn't work better than ls*.jpg
+15:43  koala_man: malorie: 'type'
+15:44  malorie: koala_man: hm. the output is `vim is hashed (/usr/bin/vim)'. I remember a tool that outputs just `/usr/bin/vim', though
+15:44  avinashhm: koala_man, put space after '[' and before ']' ... it works like a charm .. tks :-)
+15:44  twkm: malorie: ''help type''
+15:45  malorie: twkm: thanks.
+15:46  malorie: I could swear the tool was invoked without command line switches. whatever...
+15:46  twkm: there are zillions of tools.  type is builtin.
+15:52  malorie: indeed
+15:55  avinashhm: hi, how can i see my cpuload ... i wan't to use this cmd in shell script
+15:58  Circuitsoft: avinashhm: There are several ways to get it, depending on how you're going to use it. What is it for?
+16:00  avinashhm: i am using it in a embedded system .. wan't to run testcases and log cpuload throughout testcase ..
+16:00  Circuitsoft: malorie - Are you thinking of "which"?
+16:00  avinashhm: tried to use top .. but it doens't exit after it prints load :-(
+16:01  Circuitsoft: How long do the test cases run? vmstat will show you instantaneous load, /proc/loadavg might be preferable.
+16:02  avinashhm: Circuitsoft, vmstat isn't there ... [ using busybox ] .. let me dig on /proc/laodavg
+16:03  Edong23: do what you want, but i would look at /proc/loadavg
+16:03  Edong23: ;)
+16:03  ehcah: Hello. I'm having trouble getting a script to run correctly that will use WINE to open a small windows app. I can successfully run it from terminal. http://pastebin.ubuntu.com/508806/
+16:04  avinashhm: Edong23, :-) .. I would also be happy if i can exit automatically from top in a shellscript ... tried q in nextline didn't work :-(
+16:04  trash: Why would it need root access?
+16:04  ehcah: I should clarify that I can manually type in the command from terminal to open the app. Not the script.
+16:04  trash: ehcah: Do you know what PATH does?
+16:05  trash: !varcaps
+16:05  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+16:05  trash: that's why this convention exists.
+16:05  trash: PATH is such internal shell variable.
+16:05  ehcah: trash: I assumed it focussed the file search, but I'm probably going to get schooled!  :)
+16:06  trash: ehcah: but sudo and wine probably does not exist in '/home/jason/.wine/drive_c/Program Files/
+16:06  trash: ', does it?
+16:06  ehcah: you're most likely correct.
+16:06  trash: You are fine if you just remove the line, besides I still don't see the need of sudo.
+16:07  ehcah: Do I indicate path's for the commands as well as the files?
+16:07  ehcah: ok.
+16:07  trash: ehcah: Usually you don't.
+16:07  trash: If you have some special paths, you'd do PATH=$PATH:/my/special/path - or PATH behind that.
+16:08  ehcah: trash: wine: cannot find '/home/jason/.wine/drive_c/Program'
+16:09  Circuitsoft: avinashhm - "top -n 1"
+16:09  trash: ehcah: Quote the path.
+16:09  ehcah: trash: wine /home/jason/.wine/drive_c/Program Files/D9-Viewer.exe
+16:09  ehcah: So add " in front and " at the end?
+16:10  ehcah: Man. Thank you.
+16:10  ehcah: The worst part is my original attempt had the quotations.
+16:20  ehcah: trash: One last question? I'm trying to use a launcher to run this file script. I've made it executable using "chmod 777 q-see.sh". I added "/etc/init.d/./q-see.sh" as the launcher path?
+16:20  trash: Why would it be in /etc/init.d?
+16:20 --- streuner__ is now known as streuner
+16:20  trash: You also don't need ./ in the path of you are using an absolute path.
+16:20  ehcah: That is where the tutorial told me to put it.
+16:20  trash: Bad one.
+16:20  trash: !guide > ehcah
+16:20  greybot: ehcah: http://mywiki.wooledge.org/BashGuide
+16:26  avinashhm: Circuitsoft, works like a charm .. thanks a lot.
+16:27  comp_: is it possible to redirect stdout and stderr into stdin? it would have guessed this would work "cmd 1>&0 2>&1" but it doesn't
+16:28  pgas: just 2>&1
+16:28  pgas: err stdin?
+16:29  Circuitsoft: comp_ - Do you want to pipe the output of a command into itself?
+16:29  comp_: yes (as oddly as this may sound)
+16:30  twkm: sounds like an idiotic program.
+16:30  Circuitsoft: mknod tempf p; my_cmd 2>&1 > tempf < tempf
+16:30  twkm: you get to use a named pipe, and prayer.
+16:30  Circuitsoft: I think I can see the use case - You want to use netcat as an echo server...
+16:31  twkm: there is some chance you just want cmd|cmd.
+16:31  Circuitsoft: twkm - Seemed to me he only wants one instance.
+16:33  behappy1: how to convert a string to ascii ?
+16:33  behappy1: ascii syntax
+16:33  twkm: but we covered that already.  so the alternative he might have meant, a program whose output can be transformed a second time by the same program, seemed worth mentioning.
+16:33  twkm: behappy1: uh.  isn't it already that way?
+16:33  comp_: I'm trying to capture the threaddump printed by the jvm on stdout after sigquit into the java app running on that jvm without using files/fifo
+16:34  twkm: behappy1: but wag: ''man od''
+16:34  erUSUL: behappy1: iconv ?
+16:34  twkm: comp_: so after the program quits it should reads its own output, somehow without any connection.  uh-huh.
+16:34  Circuitsoft: comp_ You want a java app to capture its own thread dump before dieing?
+16:35  comp_: sigquit doesn't kill the jvm, it just logs the thread dump
+16:35  Circuitsoft: comp_ Do you expect the program to run for a little while after sigquit to deal with this input?
+16:35  behappy1: erUSUL, I have a string with invalid characters I would like to convert it to ascii format to know which characters are not valid
+16:35  twkm: sigquit doesn't cause it to quit.  fuck, i knew i hated java, but now i really hate it.
+16:36  erUSUL: behappy1: invalid characters in what context. what complains about them?
+16:36  twkm: behappy1: ''man od''
+16:36  Circuitsoft: twkm - I've never actually used SIGQUIT for anything before - only SIGINT and SIGTERM.
+16:37  twkm: Circuitsoft: those i expect the app to trap, though it should still terminate soon.  ditto with sigquit, though i expect a corpse to inspect (so a dump of info sounds fine, but not terminating so it can read that dump is pure suckage).
+16:38  twkm: of course, as i say, i hate java, so perhaps i just don't have the right mindset.
+16:38  krisfremen: screw java, it's a sacrilege
+16:39  VeXocide: good day, what's the easiest way to create a for loop iterating over "A" to "M"?
+16:39  Circuitsoft: I'm not too fond of Java either, though I suppose it's possible he wrote his java app to explicitly trap SIGQUIT?
+16:40  erUSUL: VeXocide: for i in {A..M}; do ...; done
+16:40  VeXocide: ah, I had {"A".."M"}, close
+16:40  twkm: Circuitsoft: i'd say the same of any app that fails to quit when i tell it to.  but yes, that sounds like what was done, and is certainly allowed.
+16:40  VeXocide: thanks erUSUL
+16:41  ehcah: trash: I can consistently run that script from terminal now. Thank you. From launcher however, using command: xterm -e "q-see.sh && read" I get an error. I've tried with "read" and without.
+16:41  comp_: I suppose I should check the code, the limitation seems artificial (maybe to avoid loops?)
+16:44  taylanub: ehcah: teh command for xterm -e is not a shell command, try: xterm -e sh -c 'q-see.sh && read _'
+16:45  taylanub: the*
+16:45  lhunath: does -e take multiple arguments?
+16:45  ehcah: Still getting the same error. Another tutorial suggested: sh /etc/init.d/q-see.sh & . But I don't even get an error from that. It too works from terminal.
+16:46  Combatjuan: Is there a somewhat standard for utility that syntax highlights text from stdout.  Something like  "$ cat my_script.sql | synhighlight sql"
+16:48  erUSUL: Combatjuan: use an editor with syntac highlight
+16:48  taylanub: lhunath: i tested with urxvt. don't have xterm installed but should be the same
+16:49  Combatjuan: erUSUL: Of course I have syntax highlighting in my editor.  I'd like to have it in bash output.
+16:49  ehcah: taylanub: weird. I ran your script from terminal and it works. It first pops up a small terminal window entitled "sh" with errors in it, but the app then opens.
+16:49  ehcah: taylanub: from the launcher, I just get the error window and no app opening?
+16:50  taylanub: what's this app you mention?
+16:50  ehcah: It's a small app to view my security camera's.
+16:51  ehcah: I'm trying to prove to a friend of mine that I can run everything I do in Win7 on Ubuntu.
+16:52  gnubien: ehcah: xawtv might do it
+16:52  ehcah: Q-See only supports IE or IE Tabs for HTML viewing. This app is created by Q-See to run locally in Windows. I can run it using wine, from terminal. I'm just trying to create a shortcut.
+16:52  ehcah: gnubien: xawtv? Is that an app?
+16:52  gnubien: yea
+16:52  ehcah: just a sec. Ill let you knwo.
+16:53  ehcah: bad typing.
+16:53  Combatjuan: Looks like there is a program called source-highlight that does what I want.
+16:53  taylanub: why not use 'native' applications to view your cams?
+16:54  tsolox: in .bashrc, 32 is green..etc, but what's the value for gray?
+16:54  ehcah: DUDE!!! You just scared the crap out of me! I start "xawtv" and all of a sudden this ugly guy pops up on my screen!  --me
+16:55  taylanub: lol
+16:55  jsquared: tsolox: Light gray is 0;37. Dark gray is "bold black", which is 1;30.
+16:55  tsolox: thanks..will try this.
+16:56  jsquared: However, your terminal is free to map the ANSI colors to whatever actual colors you have it configured for.
+16:56  jsquared: That is, the actual pixels-on-your-screen color doesn't have to be gray. It could be blue, or green, or hot pink, or anything else.
+16:57  tsolox: jsquared: 0;37 is white
+16:58  jsquared: tsolox: That's the way your terminal is mapping it, then.
+16:58  jsquared: There isn't really a "gray" color code in ANSI.
+16:58  jsquared: tsolox: http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+16:58 --- Laynef_ is now known as Laynef
+16:59  jsquared: tsolox: "x;(30+y)" is the color code from that table, where x = 0 for normal and 1 for bright.
+--- Log closed Sat Oct 09 11:57:30 2010

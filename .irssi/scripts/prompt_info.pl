@@ -1,0 +1,1 @@
+/Users/iaj/git/irssi-scripts/prompt_info/prompt_info.pl

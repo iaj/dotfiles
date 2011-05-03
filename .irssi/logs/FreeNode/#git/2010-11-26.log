@@ -1,0 +1,620 @@
+--- Log opened Fri Nov 26 00:00:49 2010
+00:11  charon: PointMan, frogonwheels: main difference is, ssh://user@host/path takes path absolute, user@host:path takes path relative to ~user
+00:12  banisterfiend: what does it mean 'you are in a dettached head state' ?
+00:12  wereHamster: banisterfiend: faq detached
+00:12  jast: banisterfiend: You are on a detached HEAD and might lose commits.: please see https://git.wiki.kernel.org/index.php/GitFaq#detached [automatic message]
+00:15  frogonwheels: thanks charon
+00:37  banisterfiend: how come when i cloned a remote git repo i dont get a local copy of all the branches on the remote repo?
+00:38  cbreak: because it's not designed to do it
+00:38  bremner: banisterfiend: git branch -r
+00:38  cbreak: you get remote tracking branches for all
+00:38  cbreak: and HEAD will get checked out into a local branch
+00:38  cbreak: you can do that with the rest with git checkout -t
+00:39  banisterfiend: cbreak: what does -t mean?
+00:39  cbreak: read man page
+00:39  banisterfiend: bremner: and branch -r ?
+00:39  bremner: banisterfiend: *cough* man git-branch
+00:39  jast: banisterfiend: the 'git-branch' manpage can be found at http://git.or.cz/man/git-branch [automatic message]
+00:39  cbreak: for details
+00:43  banisterfiend: cbreak: so if i have a remote branch called origin/blah/blah/refinements
+00:43  banisterfiend: cbreak: and i do: git checkout -t refinements
+00:43  cbreak: no
+00:43  cbreak: full name
+00:43  banisterfiend: it'll create a local branch that tracks the remote refinements branch?
+00:43  banisterfiend: hmm
+00:43  banisterfiend: but it'll create a local copy?
+00:43  cbreak: "copy"
+00:43  wereHamster: yes
+00:44  banisterfiend: is it requivalent to checking out the remote branch (without using -t) and when in that branch going: git checkout -b refinements ?
+00:44  cbreak: no
+00:44  wereHamster: no. git checkout -t will set up the tracking info
+00:44  banisterfiend: what's the difference between the two?
+00:44  banisterfiend: oh ok
+00:44  banisterfiend: but aside from tracking, it's the same?
+00:45  cbreak: is the man page unclear?
+00:45  wereHamster: yes
+00:45  banisterfiend: cbreak: i personally find the man pages a bit too brief and confusing for my slow mind
+00:45  banisterfiend: wereHamster: thanks
+00:45  wereHamster: banisterfiend: progit.org/book
+00:45  frogonwheels: banisterfiend: in fact you don't even need the -t in later gits.. iif you have  origin/mybranch  and you git checkout mybranch   then the first time it will auto-magically do the setting up of the tracking branch
+00:45  banisterfiend: wereHamster: iirc the book doesnt talk about that?
+00:45  wereHamster: talk about what? Creating branches?
+00:46  banisterfiend: about -t
+00:46  wereHamster: banisterfiend: http://progit.org/book/ch3-5.html -> tracking branches
+00:46  banisterfiend: ah thanks
+00:46  banisterfiend: sorry
+01:29  banisterfiend: how do i apply a patch with git?
+01:30  offby1: banisterfiend: try "git am -3 whatever.patch"
+01:30  offby1: sometimes omitting the "-3" helps
+01:30  offby1: if neither of those works, you could try "git apply'
+01:30  offby1: and if all else fails, the "patch" program should work too.
+01:31  banisterfiend: offby1: the patch is a .diff, right?
+01:37  offby1: that's a conventional filename extension, yes
+01:40  banisterfiend: offby1: so .diff and .patch are the same kind of file?
+01:40  offby1: yeah.
+01:40  offby1: fundamentally they're all (more or less) copying the output format of the "diff" command.
+01:41  offby1: With which I recommend you play.
+01:41  offby1: Create a tiny file, copy it, make a little edit to one copy, run "diff f1 f2" to compare them.
+02:38  Planet8: I have been working in a clone and created a new branch. When I try to pull the new branch into the repo from which I originally cloned I get "Already up-to-date" etc., but the branch isn't pulled. How is this supposed to be done?
+02:42  rohanpm: Planet8: what commands did you run, what did you expect to happen, and what actually happened?
+02:43  Planet8: I ran "git pull SOURCE BRANCHNAME" and I exspected the branch to be pulled into the repo.
+02:43  Planet8: The new branch doesn't exist in the old repo from which the new was made.
+02:44  rohanpm: you ran `git pull' from within which repo?
+02:45  Planet8: Also if I am working in a repo in a branch called RB1, and I clone this repo, the master branch doesn't get cloned, why is that? I cannot do checkout master in the new clone.
+02:45  Planet8: from within the original repo
+02:47  Planet8: Why doesn't a "git clone" get all the branches with it?
+02:47  rohanpm: Planet8: the branch is probably there under the `remotename' namespace, e.g. origin/RB1
+02:47  rohanpm: try `git branch -r'
+02:47  Planet8: rohanpm, yes, then I can see it, but what does that mean?
+02:49  rohanpm: Planet8: well, it means for example that you can create a local branch tracking the remote branch by `git checkout -b RB1 origin/RB1'
+02:54  Planet8: rohanpm, if I try that I get "fatal: A branch name x already exists"
+02:54  rohanpm: ...
+02:55  rohanpm: Planet8: and `git checkout x' fails ?
+02:56  rohanpm: if you already have the RB1 branch, you don't need to do it for that, but you can do e.g. "git checkout -b master origin/master"
+02:57  Planet8: rohanpm, okay.. I need to look into that. Thanks.
+02:57  Planet8: Why isn't all branches cloned but only the active branch?
+02:58  Planet8: I am using NFS between two lan machines if that matters
+02:58  ssbr: does git diff not work on windows?
+02:58  rohanpm: Planet8: I don't know, but that is the way it's intended and documented to work
+02:59  ssbr: git status says a file has been modified, but all git diff says about that file is "WARNING: terminal is not fully functional - (press RETURN)"
+02:59  Planet8: this doesn't make sense to me at all.. if I clone a repo ofcourse I need EVERYTHING and not just the active branch
+03:00  rohanpm: Planet8: you do get everything
+03:00  Planet8: rohanpm, but git branch doesn't display the branches as it does on the original repo, why is that?
+03:00  rohanpm: Planet8: because they're considered "remote" branches and shown if you run `git branch -r'
+03:03  Planet8: rohanpm, okay I can see this is confusing to many (new at git coming from mercurial), thanks for your time a patients.
+03:09  ssbr: uh. So I try to run git diff under cygwin to see what I've changed, and it prints out entire files twice, once with - and again with +. I know I haven't changed them at all. What is going on?
+03:09  SethRobertson: Try `git diff -b`
+03:10  ssbr: Wait, why is git insisting I changed the whitespace?
+03:11  ssbr: Oh. Oh! line-endings.
+03:11  ssbr: That's terrible
+03:11  SethRobertson: Yes.  See man gitattributes for hints as to settings for man git-config
+03:11  jast: the 'gitattributes' manpage can be found at http://git.or.cz/man/gitattributes [automatic message]
+03:11  SethRobertson: First match only jast?  Sigh.  man git-config
+03:11  jast: the 'git-config' manpage can be found at http://git.or.cz/man/git-config [automatic message]
+03:11  ssbr: SethRobertson: what setting should I be looking at?
+03:12  SethRobertson: search for eol and crlf  There should be several settings
+03:12  ssbr: The current setting is to commit only LFs
+03:13  frogonwheels: ssbr: .. and what about checkout?
+03:13  ssbr: checkout only CRLF
+03:13  ssbr: but some of my files already have LFs because I used an editor that's weird.
+03:13  frogonwheels: ssbr: which settings are you using then?
+03:13  ssbr: I'm using the default settings of the git installer
+03:13  ssbr: hmm
+03:13  frogonwheels: ssbr: ok.
+03:14  frogonwheels: ssbr:  if you vim the file, what does  :set fileformat?      give you?
+03:14  ssbr: I wonder how bad an idea it would be to try to patch git diff to ignore line-endings if they aren't committed unchanged?
+03:14  ssbr: frogonwheels: what file?
+03:14  ssbr: Also, I don't have vim.
+03:16  frogonwheels: ssbr: you using cygwin? you can always install it :)   if msysgit?  you have vim then
+03:16  ssbr: frogonwheels: I'm lazy and no matter what that command does, I'm sure there's another way.
+03:17  ssbr: I also still don't know which file I should be looking at. the files described by gitattributes don't exist.
+03:19  ssbr: Oh, I see.
+03:19  ssbr: It's a proglem with how git behaves in the cygwin environment.
+03:19  ssbr: It thinks it's in unix or something and decides I've overwritten LFs with CLRFs
+03:20  frogonwheels: ssbr: which git are you using?
+03:20  ssbr: frogonwheels: Windows git
+03:20  frogonwheels: ssbr: you mean msysgit?
+03:20  ssbr: I think that's the msysgit one. The official one, whatever it is.
+03:20  ssbr: frogonwheels: Is that the official windows git?
+03:20  frogonwheels: ssbr: ok - if you're in cygwin, why aren't you using cygwin git?
+03:20  frogonwheels: ssbr: sure, msysgit is good for windows apps (that's what I use)
+03:20  ssbr: frogonwheels: because the git installer said using it from cygwin would be fine, IIRC
+03:21  frogonwheels: oh.. ok
+03:21  ssbr: it had different settings for how it would override the PATH. I chose the one that said I would only get to use unix utilities from its included bash shell or cygwin
+03:22  ssbr: Anyway, git diff has stopped returning no results in the windows shell, so I don't need cygwin for this anymore.
+03:22  ssbr: But while I'm here, how do I suppress "warning: LF will be replaced by CRLF in <file>." ?
+03:23  ssbr: just replace all the newlines?
+03:23  ssbr: (it'd be nice if there's a global setting, because some of my editors are configured for less-cool VCSes that record line-endings, and thus only output LFs)
+03:28  bremner: there is a global setting, but I never use windows, so I forget it. Something about lineendings?
+03:31  Anvah1: Hey all
+03:31  Anvah1: I wonder if this is possible with git - I'd like to get a list of files last updated by a specific user.
+03:31  ssbr: So I edited my environment variables, and now windows can't find git.
+03:32  ssbr: Oh, I see.
+03:32  ssbr: Lilypond added itself to the path when I installed it. And removed everything else.
+03:32 * ssbr sighs
+03:33  Anvah1: Anyone?
+03:34 --- ChanServ sets modes [#git +v ArseneRe1]
+03:34 +ArseneRe1: Anvah1: Try git log --author=<specific-user> --name-only -1
+03:35  Anvah1: ArseneRe1:  That seems to give me the commit when the author did something.
+03:35  Anvah1: Hmm..maybe I need to parse that to see if that's the last commit.
+03:36 +ArseneRe1: Anvah1: Hm, try specifying the path at the end of the command I gave you if you're thinking about specific files.
+03:40 --- chrischambers_ is now known as chrischambers
+03:56  hal: if anyone knows about github, I'd appreciate it if you wouldn't mind looking at my question in #github
+05:14 --- pheaver_ is now known as pheaver
+--- Log closed Fri Nov 26 09:16:33 2010
+--- Log opened Fri Nov 26 09:16:56 2010
+09:16 --- Users 672 nicks [0 ops, 0 halfops, 8 voices, 664 normal]
+09:18 --- Channel #git was synced in 127 seconds
+09:21  tasslehoff: When I do git-svn clone --ignore-paths, it ignores the content, but I still have empty commit messages for the commits there were in the ignored folders. Can this be avoided?
+09:34  willvarfar: I have an app and a lib; these are in different repos, and it would be possible for the compiled lib to be put into the repo; is it possible to use git to pull that compiled lib into my app's link folder etc?  Basically, does git have a concept of modules or does everything always have to be in one big repo?
+09:48  tasslehoff: if my branch novdemo is ahead of origin/novdemo by one commit, shouldn't 'git push origin novdemo' do something? It just says that everything is up-to-date.
+09:54  tasslehoff: even 'git push --all' says everything is up to date
+09:55  frogonwheels: tasslehoff: you sure one's ahead of the other?
+09:56  tasslehoff: frogonwheels: yeah. status says so.
+09:57  cbreak_work: tasslehoff: status doesn't compare with remote
+09:57  cbreak_work: but with local tracking
+09:57  cbreak_work: do git remote update
+09:59  tasslehoff: cbreak_work: still ahead
+09:59  cbreak_work: do a git log on the branch that it says is ahead
+09:59  cbreak_work: and on the remote tracking branch for it
+09:59 --- Putr|Away is now known as Putr
+09:59  cbreak_work: and it's upstream
+10:02  tasslehoff: hm. I seemed to have fudged up a push here. I started with "git branch novdemo origin/2010-11-demo". Then I have done something that created "remotes/origin/novdemo"
+10:03  tasslehoff: "git branch -v -v" still says novdemo track origin/2010-11-demo
+10:03  frogonwheels: tasslehoff:  git push origin novdemo  would have created it.
+10:04  frogonwheels: tasslehoff:  even ifyou use -t  to indicate tracking, it's primary use seems to be for pull
+10:04  tasslehoff: frogonwheels: I most likely have done that. How do I fix this?
+10:05  frogonwheels: tasslehoff: you probably want to get rid of  novdemo upstream?
+10:05  tasslehoff: frogonwheels: yep.
+10:06  frogonwheels: tasslehoff:  you push empty to it..    git push  origin   :refs/heads/novademo      iirc
+10:06  frogonwheels: look at man git-push
+10:06  jast: the 'git-push' manpage can be found at http://git.or.cz/man/git-push [automatic message]
+10:06  frogonwheels: (nothing before the :  means   push nothing to the thing on the rhs - ie to delete it)
+10:07  tasslehoff: frogonwheels: that worked. thanks
+10:07  frogonwheels: tasslehoff: I'd be using gitk --all   to visualise what you've done
+10:07  tasslehoff: now, where did I go wrong...
+10:08  frogonwheels: .. probably by creating a tracking branch that doesn't match the upstream name :(
+10:08  tasslehoff: frogonwheels: ah. so that's a should/must do?
+10:09  frogonwheels: tasslehoff: well, it seems there are still some places where git likes to have them matching :|
+10:10  tasslehoff: frogonwheels: yeah. using the same name worked much better. thanks :)
+10:10  frogonwheels: tasslehoff: I'm sure there's a way you can make different names work - but for now..
+10:12  frogonwheels: tasslehoff: :) Sometimes knowing what you don't know is as important as knowing what you do know ;)
+10:14  tasslehoff: frogonwheels: :)
+10:22  cbreak_work: git doesn't need same names at all
+10:22  cbreak_work: but be aware: the default behaviour for git push remotename is to push all matching named branches
+10:24  frogonwheels: cbreak_work: yeah, big caveat there :( not sure I really like the way that was done.. but *shrug*
+10:24  cbreak_work: then... change it
+10:25  frogonwheels: cbreak_work: was just contemplating a new command :)
+10:25  cbreak_work: frogonwheels: man git-config, search for push.default
+10:25  jast: frogonwheels: the 'git-config' manpage can be found at http://git.or.cz/man/git-config [automatic message]
+10:25  cbreak_work: set it to tracking or what ever
+10:25  frogonwheels: cbreak_work: Yeah - I know - for now I'm content to work within the rules.
+10:26  frogonwheels: cbreak_work: I also have to consider my cli-challenged team-mates
+10:27  cbreak_work: replace them? :/
+10:29  [exa]: :D
+10:31  frogonwheels: cbreak_work: working on it :)
+10:32  frogonwheels: cbreak_work: unfortunately it's Delphi - so  it's gonna be fun finding a quality dev
+10:33  cbreak_work: ... what a ... weird choice of language.
+10:34  tasslehoff: I have to consider my windows-challenged teammates.. I have added the public key of one to gitolite, but when I try to clone the repo on his machine in msysgit it wants a password.
+10:35  gzy: hi, how can i squash a merge onto the initial commit? (i have 3 commits in my history, i want to have 1)
+10:36  cbreak_work: tasslehoff: maybe it doesn't find his private key on the client
+10:36  cbreak_work: gzy: how about doing a git reset firstcommit
+10:36  cbreak_work: then git commit -a --amend
+10:38  tasslehoff: cbreak_work: maybe.
+10:39  gzy: hmmm... i broke something, i was trying reset HEAD~2 (and it sead ambigous), and then i wanted to point to initial commit by hash.. but accidentaly typed:
+10:39  gzy: reset HEAD initial_commit_hash
+10:40  tasslehoff: the key-pair was generated on his desktop, and I moved it to his laptop and renamed it (just for testing). shouldn't fudge something up by doing that?
+10:40  cbreak_work: gzy: that should just fail
+10:40  gzy: after that looked at git-log seemed like nothing happened, but now after reset first_commit my working tree is clean (the idea was that it would be dirty and i could ammend)
+10:40  cbreak_work: tasslehoff: it won't use the key just by existing
+10:41  cbreak_work: you have to put it into the right spot
+10:41  cbreak_work: also, it has to have the right format
+10:41  cbreak_work: .ssh/id_rsa and .ssh/id_rsa.pub for rsa key
+10:41  cbreak_work: similar for dsa
+10:41  cbreak_work: of course, both in ~/
+10:41  tasslehoff: cbreak_work: I put it in $HOME/.ssh/, and the naming is valid
+10:42  gzy: well i have what i wanted, but i'm not sure what happened, oh well...
+10:42  cbreak_work: gzy: after git reset firstcommit, the changes are added
+10:42  cbreak_work: git status should show them in green
+10:42  tasslehoff: anyway, I'll try it in my own windows VM and figure it out there :)
+10:42  cbreak_work: so after a git commit -a --amend it should be squashed into the first commit
+10:42  cbreak_work: tasslehoff: they're using tortoisegit?
+10:43  gzy: (yeah i know i use reset+ammend all the time, i don't know what happened now, but i seem to be where i wanted to be)
+10:45  tasslehoff: cbreak_work: no, msysgit
+10:45  cbreak_work: then that location should be correct
+10:46  cbreak_work: maybe you can see something in the server's ssh log
+10:58  tasslehoff: cbreak_work: hm. the log just says "failed password for gitolite", so it doesn't seem to get any public key to work with
+11:01  cbreak_work: you can connect yourself?
+11:01  cbreak_work: gitolite is an unusual name, I thought people would use git as username usually :)
+11:02  tasslehoff: cbreak_work: yeah, but I installed from the ubuntu repos, and that automatically created a user called gitolite :)
+11:02  cbreak_work: how inconvenient
+11:03  tasslehoff: cbreak_work: works fine for me and my linux-colleague.
+11:03  cbreak_work: fun. blame windows.
+11:05  tasslehoff: yep
+11:11  JeffJohnson: howdy
+11:12  tasslehoff: hm. it doesn't try to offer my keys at all.
+11:21  tasslehoff: cbreak_work: uhm. I had to name the keys id_rsa like you said, otherwise the openssh in windows didn't try the key
+11:37  cbreak_work: tasslehoff: indeed :)
+11:41  banisterfiend: how do i go back a commit?
+11:41  banisterfiend: undo my last commit?
+11:41  wereHamster: undo how? Completely remove from history?
+11:43  banisterfiend: no
+11:43  banisterfiend: just set HEAD to the previous commit
+11:43  wereHamster: git reset HEAD^
+11:45  banisterfiend: thanks
+11:45  banisterfiend: and how would i completely remove from history (out of interest) ?
+11:48  pietia: is it possible to specyfy public key during git clone ?
+12:19  banisterfiend: hey
+12:19  banisterfiend: isnt it weird as hell that
+12:19  banisterfiend: git reset HEAD -- blah
+12:19  banisterfiend: unstages files
+12:19  banisterfiend: yet
+12:19  banisterfiend: git reset HEAD^
+12:19  banisterfiend: moves back the repo one commit?
+12:19  esc: git reset HEAD, sets index and current branch to the value of HEAD
+12:19  zomg: banisterfiend: yes, git doesn't make much sense
+12:19  esc: git reset HEAD^, sets index and current branch to the value of HEAD^
+12:19  zomg: you just get used to it not making any sense
+12:19  zomg: =)
+12:19 +Ferris: banisterfiend: ^ means parent, ^^ means grandparent.
+12:19  doener: banisterfiend: "git reset <commit>" moves the active branch head to <commit> (not the whole repo)
+12:19  esc: banisterfiend: but yeah, from a UI perspective it is somewhat odd
+12:19  zomg: reset should probably be called git goto (since it goes to a commit)
+12:19  banisterfiend: esc: but what do you mean it sets index to the value of HEAD, like the index is going to be empty right/
+12:19  doener: banisterfiend: while "git reset <commit> -- <paths>" just resets the index entry
+12:19  esc: i find reset is one of the more tricky commands to master
+12:19  engla: zomg: reset is also destructive, so goto is misleading
+12:19  zomg: goto doesn't imply it isn't
+12:19  zomg: reset on the other hand implies nothing at all except that it resets something
+12:20  esc: banisterfiend: i always imagine the index to contain initially what the working-tree contains
+12:20  doener: banisterfiend: no, the index is a path => object map. If it's empty, that means you deleted all entries (i.e. what you get from "git rm *")
+12:20  zomg: all the reset and checkout and whatever stuff in git probably makes sense if you think of the low level operations git does
+12:20  banisterfiend: i thought the index is the 'staging area' right?
+12:20  zomg: but it doesn't make much sense from ta user's perspective to use such terminology
+12:20  banisterfiend: so if you're moving it back to a previous commit...there's nothing staged right?
+12:20  zomg: at least from a learning perspective it makes things kind of difficult at first
+12:21  doener: banisterfiend: that's what some people call it...
+12:22  esc: banisterfiend: depends on how you use reset, (soft, mixed, or hard)
+12:22  engla: zomg: git checkout is goto.. you put yourself in a different perspective on the project, you just "move" there. reset actually operates on the current branch or staging area.. it's something mutating the project, an active thing
+12:23  doener: banisterfiend: with --soft, the index is left untouched, so it will likely differ from HEAD after that reset, so you'll see "staged" changes
+12:23  zomg: engla: perhaps it's not perfect, but git's commands are hardly very intuitive either =)
+12:24  banisterfiend: this is confusing as hell
+12:24  zomg: banisterfiend: just think of the staging area as sort of pre-commit =)
+12:24  zomg: well, it's really just something you'll get used to
+12:25  doener: banisterfiend: you have HEAD, which (indirectly) points to a commit, which is a snapshot of a certain state. The index is yet another snapshot. If it differs from the snapshot in HEAD, you have staged changes. If it differs from your working tree, you have unstaged changes.
+12:25  banisterfiend: so when i reset a repo to a previous head what happens to the head im currently on?
+12:25  doener: banisterfiend: you cannot reset a repo
+12:25  banisterfiend: a branch
+12:26  doener: well, the active branch head is what you reset. So afterwards it will reference the commit you reset it to. In the described case, that will be the commit the "previous head" (whatever that may be) references
+12:27  banisterfiend: ya
+12:27  banisterfiend: but what happens to the head i was on before the reset
+12:27  engla: banisterfiend: if nothing else (tags, branches) references the old head, it's basically tossed.
+12:27  doener: banisterfiend: hu? It's still the same head, it just got changed
+12:28  banisterfiend: i mean the commit
+12:28  doener: banisterfiend: a branch head is a ref, referencing some commit
+12:28  doener: banisterfiend: nothing, commits are immutable. It might eventually get garbage collected, that's all
+12:28  banisterfiend: so it seems git is really just a bunch of commits
+12:28  banisterfiend: and the commits have pointers back to their parent
+12:28  banisterfiend: and branches and shit or whatever just point at different commits
+12:29  banisterfiend: crazy
+12:29  banisterfiend: so 'commits' are like the currency
+12:29  banisterfiend: and everything else is just messing round with pointers to diff. commits
+12:29  banisterfiend: right?
+12:29  doener: yeah, the history is made of commits. Branch heads, tags etc. are just for humans and to manage garbage collection
+12:30  esc: banisterfiend: exactomundo! :)
+12:30  esc: just a DAG with pointers and commands to modify the graph structure
+12:30  banisterfiend: is this the new idea in git?
+12:31  banisterfiend: or do other version control systems work in this way too?
+12:31  engla: banisterfiend: yes, and this is the brilliant thing with git
+12:31  banisterfiend: it's pretty subtle
+12:31  doener: IIRC it was at least inspired by arch
+12:39  banisterfiend: what is HEAD@{2}
+12:39  banisterfiend: ?
+12:40  wereHamster: banisterfiend: man git-rev-parse
+12:40  jast: banisterfiend: the 'git-rev-parse' manpage can be found at http://git.or.cz/man/git-rev-parse [automatic message]
+12:43  Sajaki: wh is --no--ff not the default for merge?
+12:43  wereHamster: why should it?
+12:44  Sajaki: so i can see which commits implement a feature
+12:46  wereHamster: you should know that you are not the only one using git.
+12:49  jel: Are suggestions on how to provide simple SFTP access for designers who don't "get" git?
+12:49  banisterfiend: what is tbhe reflog?
+12:49  wereHamster: banisterfiend: did you read its man page?
+12:50  wereHamster: jel: teach them git
+12:50 --- ChanServ sets modes [#git +v FabianB__]
+12:50 +FabianB__: fast forward is a great feature, no reason to abandon it, there are other ways to see which commits implement a feature (branches aren't for features only)
+12:51  jel: wereHamster, I've pushed them about as far as they'll go for a while, without their heads exploding :)
+12:51  banisterfiend: wereHamster: i did but i found it confusing
+12:52  wereHamster: banisterfiend: it would be use ful to know what exactly you fould confusing
+12:52  wereHamster: jel: did you have them read a book? Or work thorugh a tutorial?
+12:52  banisterfiend: what is the rellationship between reflog and log
+12:52  wereHamster: none
+12:55  jel: wereHamster, the designers pay me, not the other way around ;)
+12:55  workmad3: jel: if you're really just looking for a simple solution, why not use SCP instead? if they have git+ssh access, then they have SSH and therefore can SCP to the server
+13:00  jel: workmad3, that's the idea.  Question is how to integrate that with git.
+13:00  workmad3: you don't... if you're using git, you don't need to use scp
+13:01  banisterfiend: wereHamster: well there seems quite a strong relationship from my reading, git log, shows the commits relevant to a particular branch, but git reflog shows all commits made in the repo, is that right?
+13:01  wereHamster: yes
+13:01  banisterfiend: thx
+13:01  banisterfiend: but one thing
+13:02  banisterfiend: git log keeps its memory when you clone the repo from somewhere else
+13:02  jel: *sigh*, I guess I'm just wishing for proper transactions and commit logs, but yeah, only teaching them to use git and properly commit stuff will get me there.
+13:02  banisterfiend: but git reflog is started afresh when you clone a repo right?
+13:02  wereHamster: yes
+13:02  workmad3: jel: :)
+13:02  engla: the reflog is local to the repository and it is pruned.
+13:02  banisterfiend: pruned?
+13:03  engla: I mean, it expires after a certain time, and git gc will clean it up
+13:10 --- nevyn^_ is now known as nevyn^
+13:14  tasslehoff: is it possible to emulate svn revision number in git? i.e. figure out what # a commit is in the repository?of commit
+13:14  tasslehoff: oops
+13:15  engla: tasslehoff: yes, but it has no universality for any distributed vcs like git. Use git describe  to name commits.
+13:16  tasslehoff: engla: I know. I use git-describe now, but that counts only along the branch I run if from?
+13:17  tasslehoff: s/if/it/
+13:17  engla: tasslehoff: git describe only names 1 commit
+13:18  tasslehoff: so I may get the same number in master and a branch, and must look at the sha to differentiate them
+13:19  engla: well that's true
+13:24  tasslehoff: I'm looking at how to manage if our git repo in time gets too huge, and git filter-branch seems to be the way to clean up. Should I use that to get rid of the empty commits I have after doing "git-svn clone --ignore-paths=foo"?
+13:28  charon: tasslehoff: for cleaning up one-shot imports, yes. "cleaning up" large active history in git itself is a huge hassle for everyone working with the repo though, so i would think at least three times about whether you really need to do it
+13:29  tasslehoff: charon: yeah. I'm just trying to figure out how to "cut the crap" some years from now if we need to
+13:31  engla: if you're just removing empty commits then it's not worth it at all
+13:31  engla: zero space reduction and all commit ids change
+13:35  babusri: I modified file a.txt with change-1, commited it, modified it again with change-2 and commited it. Now, if I want only change-2 what is simplest way to do it?
+13:36  flavius: Suppose I want to create a web interface for gitolite (for adding projects, managinc accesses, creating forks). Is there any better way than creating ssh requests? Since the web interface and gitolite are on the same machine, it would be nice not having to spawn new processes (like git or ssh), but modify it directly ...
+13:36  tasslehoff: engla: I'm taking us from svn to git, so perhaps it would be nice to run it as part of the conversion process to start with a good looking repo.
+13:36  flavius: I mean modifying gitolite-admin.git directly
+13:37  charon: tasslehoff: if you really run into issues with "too big" history a few years down the road, just make a clean cut at a well defined point and then use replacements (or grafts) to "go back" if needed
+13:40 --- Putr is now known as Putr|Away
+13:45  cbreak_work: that'd be history rewriting
+13:46  charon: sure, but it's less effort in rewriting for the same net pain in usage
+13:46  charon: if your history is big enough to suffer from its size, running filter-branch over it will not be feasible
+14:04 --- Unknown[OFF] is now known as Unknown[NF]
+14:08 --- Putr|Away is now known as Putr
+14:10  tasslehoff: rewriting of history will be fine if we ever reach that point, I suspect.
+14:13 --- martinciu_ is now known as martinciu
+14:15  flavius: Does anyone have an idea for my problem? A hint or something...
+14:16 --- ChanServ sets modes [#git +v gitNewbie]
+14:17 +gitNewbie: Hi guys, how can I find the difference between my local repository and a remote one (e.g. github)
+14:17  charon: flavius: you can push to it locally if you have the correct permissions
+14:17  charon: flavius: in theory you could also directly write to it and run the update hook yourself, but pushing will be safer.
+14:18  curtana: gitNewbie, you can do something like: gitk master...origin/master
+14:18 +gitNewbie: is there anything I can do with git diff ?
+14:18  curtana: sure
+14:20  curtana: 'git diff master origin/master' will show you the diff between your master branch and upstream's
+14:20 +gitNewbie: cool thanks a lot
+14:21  flavius: charon: on the official page it says it could work for repositories/ repositories (that is, the managed repositories themselves) but this kind of stuff should not be done for gitolite-admin, because of hooks bla bla. it makes me wonder how much the author has thought about integration before designing gitolite ...
+14:27  charon: flavius: eh? this has very little to do with the design of gitolite apart from using a git repo. as i said, you *could* directly write objects to the bare repo, update refs, and then run the hooks yourself. but you'd just be reimplementing some subset of git-{commit,push}, so it's far easier to use an external repo with a worktree, and run 'git push /path/to/gitolite-admin.git master' which takes care of everything for you
+14:27  charon: (nobody said push has to go over ssh)
+14:30  MrJones: hi
+14:30  MrJones: how can I go back to an older version without actually reverting the newer commits?
+14:30  MrJones: I just want to temporarily go back to an older state I had
+14:30  cbreak_work: MrJones: git checkout oldhash
+14:30  cbreak_work: don't try to commit anything until you're back
+14:31  teukka: charon: you have to set some environment variables for the gitolite hooks to work
+14:32  charon: teukka: hrm, ok, didn't know that
+14:32  charon: flavius: ^
+14:33  MrJones: cbreak_work: cool :) how can I get back to the latest state? just git checkout branch?
+14:33  cbreak_work: yes
+14:37  flavius: charon: thanks
+14:52 --- kornbluth.freenode.net sets modes [#git +vv cjk__ fbenoit]
+15:12  Rickardo1: can someone tell me what I´m doing wrong here?
+15:12  Rickardo1: http://d.pr/Vu4b
+15:12  charon: most likely you're not reading the long help message in full
+15:13  Rickardo1: charon: Maybe I´m stupid but I can´t get it
+15:13  charon: Rickardo1: you are pushing to the branch checked out in the (non-bare) repository at the remote end
+15:14  charon: git could do one of several things, as the help message indicates, but as they all proved to be confusing for beginners, we changed it to refuse by default and tell the user about the options
+15:14  charon: so your options are
+15:14  Rickardo1: charon: non-bare?
+15:15  charon: non-bare = having a worktree attached to it
+15:15  charon: faq non-bare
+15:15  jast: Pushing to non-bare repositories is discouraged: please see https://git.wiki.kernel.org/index.php/GitFaq#non-bare [automatic message]
+15:18  Rickardo1: charon: is there any tutorial with a real world scenario?
+15:25  curtana: i have extracted an archive of some software and modified it. i now want to put this in git, but committing my modifications separately from the contents of the original archive. i created a new repository and committed the unpackaged files from the archive to it; now i've gone into my working copy and added the remote, fetched, and made a new head, 'master' that points at the commit pointed to by origin/master
+15:26  curtana: git now shows the files from origin as being deleted, and all the files in the working directory are untracked. do i need to delete the index or something to get it to realise what i've done?
+15:26  charon: Rickardo1: depends what you want to do. the usual answer is just, use a bare repository (git init --bare) to push to/fetch from
+15:26  Rickardo1: charon: I think I get it now :)
+15:31  gribouille: hi
+15:32  gribouille: I have added to the index some changes made to a file with git add -i. how can I tell git to commit only the staged changes ?
+15:33  crab: git commit
+15:33  gribouille: crab, but I staged changes to other files too, and I don't want to commit these changes
+15:34  JKL_: cant you just reset files that you dont want to commit?
+15:35  gribouille: JKL_, I could, but I then would have to stage the changes again
+15:35  JKL_: can you make a commit now and then split it?
+15:36  gribouille: JKL_, I would rather avoid
+15:37  crab: you can't pick and choose which parts of the index to commit.
+15:37  JKL_: you can pick file
+15:37  FauxFaux: git add -p
+15:37  JKL_: git commit file
+15:37  JKL_: it commits only that file
+15:39  JKL_: but the file have to be tracked already
+15:39  gribouille: JKL_, I don't want to commit all thr changes
+15:39  JKL_: gribouille: but you already used git add -p ?
+15:39  JKL_: ah
+15:39  gribouille: JKL_, no
+15:40  JKL_: im not sure can you pick patches
+15:41  gribouille: why isn't is possible to commit part of the index ?
+15:41  gribouille: s/is/it
+15:41  FauxFaux: That's not what commit means.
+15:41  gribouille: there could be an option
+15:41  FauxFaux: You mean, why isn't it possible to remove some of the index from the index?  It is.  git rm --cached.
+15:41  JKL_: i think it would be easy to just commit everythink you have now patched and then split the commit
+15:42  JKL_: y
+15:43  gribouille: ok, thanks
+15:44  parasti: it won't make any difference, you will still have to add to index and remove from it
+15:44  parasti: or, not remove, but reset
+15:45  gribouille: what's the difference between "git reset HEAD <file>" and "git rm --cached <file>" ?
+15:46  parasti: one sets an index entry, the other removes it
+15:47  gribouille: parasti, but concretely, does it make a difference ?
+15:47  parasti: gribouille: didn't I just answer that...
+15:48  JKL_: parasti: can you use verbose mode :) i dont see the difference neither
+15:48  parasti: gribouille: when you remove X you have nothing, when you set X to something, you have X but set to something
+15:50  JKL_: what is difference between resetting index and removing paths from index?
+15:50  parasti: whatever :P
+15:51  gribouille: parasti, does using one or the other comand change the result of a a subsequent git command ?
+15:51 --- jelmer_ is now known as jelmer
+15:53  parasti: gribouille: git checkout <file>, for instance
+15:53  parasti: gribouille: with your reset example, you will get contents of <file> at HEAD
+15:53  parasti: gribouille: with your remove example, you will get an error
+15:54  parasti: gribouille: as git checkout <file> checks out from index
+15:54  gribouille: parasti, ok
+16:00 --- Tricia is now known as Guest53263
+16:04  LiamH: How do I get the description file added and committed?
+16:04  sgronblo: My understanding of git rm --cached has always been that it "unadds" a file from your git repository without removing it from the working directory.
+16:04  JKL_: parasti: so the git rm --cached sets file to untracked stage and adds the deletion to index and lets the working tree alone?
+16:21 --- ChanServ sets modes [#git +v ivan_l1]
+16:21 +ivan_l1: hi all, is there any  other way to reset the working tree besides checkout or reset? git status tells me that I have 3 files that are "Changed but not updated:" and shows them as modified. but I cannot do a checkout and revert them to an unmodified state.
+16:21  broonie: Why can you not do a checkout or revert them to unmodified state?
+16:21  L0cky: hello
+16:22 +ivan_l1: i run git checkout ., it runs and nothing happens
+16:22  wereHamster: ivan_l1: checkout -- <path>
+16:22 +ivan_l1: doesn't work
+16:22  wereHamster: ivan_l1: windows?
+16:22  PuffTheMagic: can someone tell me how to add a remote that to a working dir based on a repo that is already cloned in another dir
+16:22 +ivan_l1: i'll post from the terminal to a pastebin, one sec
+16:22  PuffTheMagic: i dont want to have to reclone it
+16:22 +ivan_l1: mac
+16:22  L0cky: what's the editor that comes with windows git?
+16:22  _ikke_: vim?
+16:22  wereHamster: ivan_l1: linux kernel repo?
+16:23 +ivan_l1: no, my personal repo
+16:23  wereHamster: PuffTheMagic: git remote add
+16:23  wereHamster: ivan_l1: what does 'git diff' show?
+16:23  PuffTheMagic: wereHamster: i know how to add a remote normally, shoudlnt there be some extra syntax to add it from another dir
+16:24  PuffTheMagic: on my local machine
+16:24  wereHamster: PuffTheMagic: git remote add <name of the remote> <path to the repo>
+16:24  jast: nope. no extra syntax. :)
+16:24 +ivan_l1: https://gist.github.com/716839
+16:25 +ivan_l1: checkout the pastebin - the damn thing just does not work =(
+16:25  wereHamster: ivan_l1: what about 'git diff' ?
+16:25 +ivan_l1: i've been using git for a couple of months for now, and never had any problems before
+16:25 +ivan_l1: shows the diff
+16:25 +ivan_l1: shows some changes in the file
+16:26 +ivan_l1: files
+16:26  wereHamster: ivan_l1: 'git reset --hard' ?
+16:26 +ivan_l1: nope
+16:26 +ivan_l1: tried that also =)
+16:26  PuffTheMagic: thanks
+16:26  jast: ivan_l1: what kinds of changes?
+16:26  PuffTheMagic: wereHamster: so after i add the remote i do a git fetch <remote>?
+16:26 +ivan_l1: edits in the file
+16:26 --- Guest53263 is now known as Tricia
+16:26  wereHamster: ivan_l1: git diff | git apply -R
+16:27  jast: ivan_l1: do things work better after a "git update-index --refresh"?
+16:27 +ivan_l1: not line endings if you are asking
+16:27 +ivan_l1: nope, git status still shows 3 modified files
+16:28  jast: yes, but does git reset --hard work better now?
+16:29 +ivan_l1: nope, reset --hard didn't do anything
+16:29  henk: hi, how do i get a diff between an unstaged file in my working directory and what's in HEAD?
+16:29 +ivan_l1: i googled A LOT before getting here to irc
+16:29  wereHamster: henk: git diff HEAD
+16:30 +ivan_l1: and nothing was helping at all
+16:30  henk: hm ouch
+16:30  jast: ivan_l1: if you just want a quick fix, do the hacky thing wereHamster suggested
+16:30 +ivan_l1: i did that
+16:30 +ivan_l1: but i missed git update-index --refresh
+16:30 +ivan_l1: i'll try that
+16:30  henk: wereHamster: thank you. i still didn't really understand how diff works in git :-/
+16:30  wereHamster: ivan_l1: what if you change the file (like, delete all contents). Does the output of 'git diff' change then?
+16:30  wereHamster: henk: man git-diff
+16:30  jast: henk: the 'git-diff' manpage can be found at http://git.or.cz/man/git-diff [automatic message]
+16:31  jast: actually I think reset --hard runs update-index --refresh anyway, but I mentioned it just to be sure
+16:31  henk: wereHamster: hehe, that's not the problem, i guess i read it 3-4 times already... probably something in the concept of git i yet have to grasp. or i have to read it again...
+16:31 +ivan_l1: ok, 1) it update-index --refresh just tells me that the 3 files "needs update"
+16:31 +ivan_l1: 2) i tried to delete the filed
+16:32 +ivan_l1: they then get marked as deleted
+16:32 +ivan_l1: and when i do git checkout . after
+16:32 +ivan_l1: i get right back to the modified state for all of the files that i have just deleted
+16:32 +ivan_l1: i don't get it all
+16:32  wereHamster: ivan_l1: how about 'git checkout HEAD -- .' ?
+16:33  wereHamster: ivan_l1: another idea. Do you have two files in the repo which differ only by capitalization?
+16:33  wereHamster: like, foo and Foo ?
+16:33 +ivan_l1: one sec, i'll check
+16:33 +ivan_l1: git checkout HEAD -- . didn't work by the way
+16:36 +ivan_l1: no, i do not have files like that, but I did find something else strange
+16:36  etnt: is it possible to clone just a part of a repo?
+16:36 +ivan_l1: git status shows the filename as: PATH/TO/FILE.TXT
+16:36  wereHamster: you mean in caps?
+16:37 +ivan_l1: but the file itself is PATH/TO/FILE.txt
+16:37  wereHamster: etnt: no
+16:37 +ivan_l1: yup
+16:37  wereHamster: ivan_l1: did you recently rename the file from TXT to txt
+16:37  dr_lepper: again windows crap?
+16:37 +ivan_l1: as far as i remember, now
+16:37  wereHamster: no, macosx case insensitive filesystem
+16:37  wereHamster: ivan_l1: git rm --cached PATH/TO/FILE.TXT && git add PATH/TO/FILE.txt
+16:38  dr_lepper: macos has case insensitive fs?
+16:38 +ivan_l1: yeah, i really was disappointed when i find out that mac isn't case sensitive
+16:38 +ivan_l1: member:dr_lepper: yup
+16:38  wereHamster: ivan_l1: you know you can change that, right?
+16:38 * wereHamster is runing hfs+ case sensitive, journaled
+16:39 +ivan_l1: member:identifier:werehamster : there are a lot of problems because of this as far as i know
+16:39  wereHamster: none
+16:39 +ivan_l1: really?
+16:39  wereHamster: there were, a long time ago
+16:39 +ivan_l1: oh yeah
+16:39  PuffTheMagic: wereHamster: i add the local remote like you said and i dont seem to see any of the branches from that repo after doing git fetch
+16:39 +ivan_l1: next reinstall - i'm going case sensitive for sure
+16:39  wereHamster: PuffTheMagic: git remote update
+16:40  PuffTheMagic: ahh
+16:40  PuffTheMagic: dont thin i've ever needed to use that command before
+16:43 +ivan_l1: member:identifier:werehamster : oh yeah, it worked!
+16:43  wereHamster: btw, I'm wereHamster, not member:identifier:werehamster
+16:44  PuffTheMagic: wereHamster: still dont see any of the branches on the remote
+16:44  wereHamster: PuffTheMagic: git branch -r
+16:44 +ivan_l1: its this client, colloquy. it adds the thing for some reason
+16:44  PuffTheMagic: wereHamster: ya i know that one, all i see is the master
+16:44  wereHamster: PuffTheMagic: does the remote have any brnahes?
+16:44  PuffTheMagic: yes lots
+16:44 +ivan_l1: wereHamster: anyway, its really strange that this happened. because i got this thing when cloning the remote repository
+16:45  PuffTheMagic: wereHamster: is this other local dir still acting like the remote, so i need to update that one too?
+16:45  wereHamster: PuffTheMagic: are any branches listed in 'git ls-remote <path to the other local repo>' >
+16:45  wereHamster: ?
+16:47  PuffTheMagic: ya they show up
+16:47  PuffTheMagic: but thats cause i just updated the other dir
+16:47  KU0N: hello
+16:47 +ivan_l1: wereHamster: anyways, thanks a lot
+16:47  PuffTheMagic: i thought i would be able to get rid of this other dir after i did this
+16:47  wereHamster: PuffTheMagic: why do you have that other dir anyway?
+16:48  PuffTheMagic: ../
+16:48  PuffTheMagic: ../<other>
+16:48  KU0N: I have some trouble with submodules. I'm not sure I understand them. I understand them as a repository inside a repository. For example, I have an myapp repository and within my framwork folder I have an utils repository which is a separate repository
+16:48  KU0N: is that correct?
+16:49  wereHamster: yes
+16:49  KU0N: Now, when I do  git submodule update, then I go do git status inside my submodule directory, I have the following message: # Not currently on any branch.
+16:49  KU0N: and I don't understand why
+16:49  wereHamster: correct
+16:49  wereHamster: because submodules are on detached head
+16:49  cbreak_work: because submodules are bound by their parent to a specific hash
+16:50  cbreak_work: (commit hash)
+16:50  KU0N: ok, and what should I do to update to the latest version?
+16:50  cbreak_work: just check out a branch, then pull
+16:51  cbreak_work: or fetch and then check that out
+16:51  cbreak_work: just don't forget to commit the parent with the new child hash if you want to do that
+16:51  KU0N: should I check out the branch from within the submodule directory?
+16:51  Sajaki: help if i create a new branch locally how do i send it to remote?
+16:51  wereHamster: KU0N: yes
+16:51  wereHamster: Sajaki: you push it to the remote
+16:52  Sajaki: git push : fatal: No destination configured to push to.
+16:52 +ivan_l1: hope everyone has a good weekend, bye!
+16:52  wereHamster: Sajaki: you need to tell push where to push to
+16:52  cbreak_work: Sajaki: git push remotename srcbranchname:dstbranchname
+16:52  cbreak_work: read the man page...
+16:53  KU0N: ok, now I'm on master branch in my submodule, and I have #       modified:   utils (new commits)  in my parent repo
+16:53  KU0N: should I simply commit the parent repo?
+16:54  cbreak_work: do a git status and read it
+16:54  cbreak_work: try to understand
+16:54  cbreak_work: it will tell you what will be commited and what not
+16:55  KU0N: ok. In fact I just missunderstood the git submodule update command
+16:55  cbreak_work: update means "update to what ever is correct"
+16:55  KU0N: I didn't realise it was bound to a specific commit hash
+16:56  KU0N: yea I thought it would pull the last version
+16:56  cbreak_work: that surprised me too. but it's very neat :)
+16:56  cbreak_work: no weird compilation compatibility complications because of incompatible submodules
+16:56  KU0N: yea
+16:56  KU0N: that's a good approach
+16:57  KU0N: I come from mercurial, but I was frustrated of the lack of such feature
+16:57  KU0N: git has a learning curve, but it fills many gap mercurial had.
+16:57  KU0N: anyway, thanks for clariying this
+16:58  cbreak_work: welcome :)
+17:08 --- sh1m is now known as sh1mmer
+17:17  jaalto: During rebase, what should I do when git says "both added: FILE"?
+--- Log closed Sat Nov 27 00:05:28 2010

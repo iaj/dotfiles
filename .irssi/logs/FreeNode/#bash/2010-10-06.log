@@ -1,0 +1,77 @@
+--- Log opened Wed Oct 06 15:13:53 2010
+15:13 --- Users 554 nicks [0 ops, 0 halfops, 0 voices, 554 normal]
+15:15 --- Channel #bash was synced in 74 seconds
+15:29  winkey: is there a way to emulate read -e -i on an older bash?
+15:31  geirha: No
+15:32  pgas: winkey: one lame workaround is to fill history and to tell the user to press <up> to edit the default value
+15:33  geirha: I'd just put the default value in -p, and use that if nothing's input
+15:35  winkey: how about dialog --inputbox     <text> <height> <width> [<init>]
+15:35  geirha: read -re -p "Dir to delete [/usr]: " dir
+15:36  geirha: Sure, but dialog is not bash, and may not be available
+15:36  winkey: lets se if it can be installed on the target system
+15:40  stockholm: i want to pipe a long list into xargs and i want it to do process it in batches of 10 (xargs -n 10) and sleep a few seconds before or after each line.
+15:40  stockholm: how can i do that?
+15:41  trash: stockholm: Use while read.
+15:41  lhunath: stockholm: doing use xargs.
+15:42  lhunath: stockholm: don't*
+15:42  stockholm: i figured that...
+15:42  stockholm: how would that look?
+15:42  pgas: stockholm: sleep after each line? any way see the processmanagement page
+15:42  stockholm: pgas: hu?
+15:42  pgas: !pm
+15:42  greybot: http://mywiki.wooledge.org/ProcessManagement
+15:42  stockholm: seep 5
+15:42  stockholm: sleep even
+15:42  geirha: !faq batch
+15:42  greybot: http://mywiki.wooledge.org/BashFAQ/065 -- Is there a "PAUSE" command in bash like there is in MSDOS batch scripts?  To prompt the user to press any key to continue?
+15:42  geirha: d'oh
+15:43  geirha: !faq chunk
+15:43  greybot: http://mywiki.wooledge.org/BashFAQ/095 -- I'm getting "Argument list too long".  How can I process a large list in chunks?
+15:43  pgas: you said you want to process in batches of 10, so I wonder what "each line" means
+15:43  stockholm: i would overload the system if i did the commands as fast as they came
+15:44  stockholm: therefor i want to sleep a little in between
+15:44 --- jzacsh is now known as jzacsh__
+15:44  lhunath: while read line; do do_something_with "$line" & (( ++l % 10 == 0 )) && wait; done
+15:44 --- jzacsh_ is now known as jzacsh
+15:44 --- jzacsh__ is now known as jzacsh_
+15:48  pgas: stockholm: I understood the sleep part.... anyway ...
+15:56 --- netsan is now known as Guest736
+16:21  kle77: Does anybody know how to "embed" whitespace escaping for a directory in a bash variable?
+16:21  kle77: To expand a little: `APP_HOME=/usr/local/application\ name` works fine in that it will return "/usr/local/application name", but what I would like to do is return the whitespace escaped value, e.g. "/usr/local/application\ name".
+16:21  kle77: I've tried `APP_HOME=/usr/local/application\\ name`, but to no avail.
+16:21  kle77: Thanks
+16:21  pgas: usually you want to use "$APP_HOME" with quotes
+16:21  trash: !varcaps > kle77
+16:22  greybot: kle77: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+16:22  trash: var="foo bar"
+16:22  pgas: kle77: because the applications don't see the escape, the escape is for the shell that removes it
+16:22  kle77: trash: apologies, Im jumping from various different languages here, where uppercase denotes constant :-)
+16:22 --- JmZ_ is now known as JmZ
+16:22  kle77: The quoting solution would work, but its slightly inconvenient
+16:23  kle77: This is just for a shell environment, not scripting
+16:23  kle77: basically what I'm doing is `cd $app_home`
+16:23  kle77: for convenience
+16:23  kle77: would prefer not to delve into using CDPATHs and all that
+16:24  pgas: well it might be slightly inconvenient, but your solution will not work
+16:24  kle77: any idea why I can't put an escape character in there?
+16:25  pgas: because the escape char stops to be special when you put it in a variable
+16:25  pgas: only the literal quotes count for the shell
+16:25  kle77: okey doke, thanks
+16:26  kle77: I may just create a symlink to the dir elsewhere on the FS
+16:26 --- terrorpup is now known as terrorwork
+16:43 --- MuzerAway is now known as muzer
+16:52  a_ok: How do a save the first two elements in PIPESTATUS array without overriding it?
+16:52  njckname: I'm trying to write a very basic shell script, this is it: http://pastie.org/private/lww2eehpwmxfi21uszja  When I execute it it gives me the following error: "line 6: syntax error: unexpected end of file"
+16:52  whatever2ei29i: Hey folks. So, I have this script, and I was working on two servers, via two terminals. I could have scp'd the script, but I was lazy, and copy pasted 3 lines, using a terminal on fedora. One of the lines was simply a 'sleep 10'
+16:53  whatever2ei29i: however, despite looking fine in copy paste, I get an error
+16:53  whatever2ei29i: sleep: invalid option -- '10'
+16:54  whatever2ei29i: How. Is. That. Possible? sleep 10 works. copy pasted... it apparently causes a... whitespace issue? I can't see it. I copy-pasted this emacs-> emacs from two term tabs
+16:54  whatever2ei29i: is this a known issue? HOW, in 2010, can a terminal... copy and paste... not work?
+16:54  whatever2ei29i: ctrl-shift-c, ctrl-shift-v, seemed ok... things looked fine, but that error. how what when where and why?
+16:55  whatever2ei29i: I just don't even
+16:56  whatever2ei29i: touch dopey; touch sneezy; emacs dopey sneezy; chmod a+x dopey sneezy; ./dopey; ./sneezy
+16:56  whatever2ei29i: can someone test that on their machine and put a sleep 10 echo lol in one and then copy paste using the ctrl-shift method, .... I am ... it
+16:57  whatever2ei29i: I do not condone molesting dwarves. Just. You know. Since this is IRC.
+17:00  theos: pgas, hey! :) just came to tell you the script is working now. thanks
+17:11  ToxicFrog: whatever2ei29i: od the file and see exactly what you have there?
+--- Log closed Wed Oct 06 23:32:35 2010

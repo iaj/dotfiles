@@ -1,0 +1,201 @@
+--- Log opened Tue Jan 11 00:00:53 2011
+--- Log opened Tue Jan 11 00:51:26 2011
+00:51 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+00:51 --- Server: [niven.freenode.net] [freenode-info] channel trolls and no channel staff around to help? please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+--- Log closed Tue Jan 11 00:51:50 2011
+--- Log closed Tue Jan 11 01:03:13 2011
+--- Log opened Tue Jan 11 01:08:38 2011
+01:08 --- Users 88 nicks [0 ops, 0 halfops, 0 voices, 88 normal]
+01:10 --- Channel ##sed was synced in 109 seconds
+02:08 --- galaxywatcher_ is now known as galaxywatcher
+04:13  Lantizia: I know I can do this with echo meow >> file... but is there a sed way to put stuff at the bottom of a file?
+04:14  Lantizia: ah $!
+04:16  go|dfish: hmmmm
+04:34 --- stepnem_ is now known as stepnem
+04:35 --- cuba33ci_ is now known as cuba33ci
+--- Log closed Tue Jan 11 08:15:55 2011
+--- Log opened Tue Jan 11 08:16:04 2011
+08:16 --- Users 86 nicks [0 ops, 0 halfops, 0 voices, 86 normal]
+08:17 --- Channel ##sed was synced in 108 seconds
+11:19  eneon: hi
+11:19  eneon: "user logged in. ID=123.-0-12.2.2.32-0-blablabl."
+11:20  eneon: how could I get string only to first occurence of "-0-" chars?
+11:20  eneon: sed s/"\(^User has logged in.*\)-0-.*"/"\1"/
+11:21  eneon: this is too greedy :/
+11:21  eneon: and take ip address too ;/
+11:21  waldner: sed 's/-0-.///'
+11:22  waldner: one / too much
+11:22  waldner: sed 's/-0-.*//'
+11:23  eneon: waldner: but i have some various string before
+11:23  eneon: user logged, failed log etc.
+11:23  eneon: sed 's/User logged.*-0-.*//' is too greedy
+11:24  geirha: Maybe you want something like sed -n '/^user logged in./s/-0-.*//p'
+11:24  waldner: did you even try it?
+11:24  waldner: ah, that
+11:24  waldner: yes, in that case yes
+11:25  eneon: geirha: null
+11:26  eneon: sed s/"^User has logged.*-0-"/"T,"/ | sed s/"^Query failed.-0-"/"Q,"/
+11:26  eneon: i would like something like that
+11:27  waldner: why don't you paste some real input and expected output?
+11:27  eneon: but i dont know how could I restrict greedy
+11:27  eneon: here
+11:27  eneon: Input 1:
+11:27  eneon: User has logged in. ID=1309518 GID=12 FLAGS=0.-0-10.38.4.80-0-approvalua
+11:27  eneon: Input 2:
+11:27  eneon: Query failed. ID=1309d4518 GID=112 FLAGS=4.-0-10.44.4.80-0-abc
+11:28  eneon: Expected result 1:
+11:28  eneon: Logged,10.38.4.80,approvalua
+11:28  eneon: Expected result 2:
+11:28  eneon: QFailed,10.44.4.80,abc
+11:29  waldner: that's not quite what you said originally
+11:29  eneon: thats what I try to reach
+11:29  waldner: and do you have other possible input lines?
+11:30  eneon: yes
+11:30  waldner: and those should be ignored?
+11:30  eneon: but generaly i would like parse first message to -0- chars
+11:30  eneon: later ip address
+11:30  eneon: and account after -0-
+11:30  eneon: so i have sed s/"^User has logged.*-0-"/"T,"/ but it is too greedy
+11:31  waldner: you didn't answer my question
+11:31  eneon: yes
+11:31  waldner: ok
+11:32  waldner: 4# sed 's/.*-0-\(.*\)-0-\(.*\)/Logged,\1,\2/' <<< 'User has logged in. ID=1309518 GID=12 FLAGS=0.-0-10.38.4.80-0-approvalua'
+11:32  shbot: waldner: Logged,10.38.4.80,approvalua
+11:33  geirha: eneon: sed -n '/^User logged in./s/-0-.*//p'
+11:33  geirha: err
+11:33  geirha: eneon: sed -n '/^User has logged in./s/-0-.*//p'
+11:34  waldner: 4# printf 'User has logged in. ID=1309518 GID=12 FLAGS=0.-0-10.38.4.80-0-approvalua\nQuery failed. ID=1309d4518 GID=112 FLAGS=4.-0-10.44.4.80-0-abc' | sed '/^User has logged/{s/.*-0-\(.*\)-0-\(.*\)/Logged,\1,\2/;b;};/^Query failed/{s/.*-0-\(.*\)-0-\(.*\)/Qfailed,\1,\2/;b;};d'
+11:34  shbot: waldner: Logged,10.38.4.80,approvalua
+11:34  shbot: waldner: Qfailed,10.44.4.80,abc
+11:34  waldner: that should get you started
+11:34  waldner: it can be simplified too, depending on your real data
+11:36  eneon: hm interesting
+11:40  eneon: working great
+11:40  eneon: waldner: thanks
+11:40  waldner: np
+13:03  xy: anyone here?
+13:03  xy: hello. I want sed to replace all newlines with a +
+13:09  cthuluh: 4# printf '%s\n' foo bar baz | sed ': loop; $!{ N; b loop; }; s/\n/+/g'
+13:09  shbot: cthuluh: foo+bar+baz
+13:47  ramok: 4# printf '%s\n' foo bar baz | sed -n 'H;$!b;g;s/\n/+/g'
+13:47  shbot: ramok: no output
+13:47  ramok: 4# printf '%s\n' foo bar baz | sed -n 'H;$!b;g;s/\n/+/gp'
+13:47  shbot: ramok: +foo+bar+baz
+13:47  ramok: 4# printf '%s\n' foo bar baz | sed -n 'H;$!b;g;s/\n/+/g;p'
+13:47  shbot: ramok: +foo+bar+baz
+13:48  ramok: 4# printf '%s\n' foo bar baz | sed -n 'H;$!b;g;s/.//;s/\n/+/gp'
+13:48  shbot: ramok: foo+bar+baz
+14:13  tktiddle: Hi how do can i print out the first two values from a line of CSVs?
+14:15  cthuluh: 4#  sed -n 's/^\([^,]*,[^,]*\).*/\1/p' <<< 'foo,bar,baz,qux'
+14:15  shbot: cthuluh: foo,bar
+14:16  cthuluh: though if the CSV format if more complex, you'd better use awk or Perl
+14:20  tktiddle: thanks cthuluh
+14:27  ramok: 4# awk -F, '{print $1,$2}' <<< 'foo,bar,baz,qux'
+14:27  shbot: ramok: foo bar
+15:42  VJTachyon: how would i remove all leading zeros from values on a line without removing zero values (i.e, ' 0003' to ' 3', but not ' 0000' to ' ')
+15:43  VJTachyon: i did a s/ 0*/ /g
+15:43  VJTachyon: also is it possible to do any math with sed?
+15:44  geirha: 's/0*\([0-9]\)/\1/'
+15:44  bot779work: something like s/0*\([[:digit:]]\)/\1 but that won't replace your 0s with spaces.
+15:45  geirha: ah, right.
+15:45  geirha: 4# echo ' 0000 0001 0040 2000' | sed 's/ 0*\([0-9]\)/ \1/g'
+15:45  shbot: geirha:  0 1 40 2000
+15:46  VJTachyon: hmm
+15:46  VJTachyon: :)
+15:46  VJTachyon: how about converting hex to dec, should i use awk for that or something?
+15:46  geirha: 4# var="0000"; echo "$(( 10#$var ))"
+15:46  shbot: geirha: 0
+15:46  geirha: 4# var="0300"; echo "$(( 10#$var ))"
+15:46  shbot: geirha: 300
+15:47  VJTachyon: oh there is hex in these values btw
+15:47  geirha: 4# var="0f30"; echo "$(( 16#$var ))"
+15:47  shbot: geirha: 3888
+15:47  VJTachyon: 0002 0002 ffffe9c4
+15:47  VJTachyon: wait, these are all hex values
+15:47  VJTachyon: and i need to convert them to dec, and remove leading zeros
+15:48  VJTachyon: geirha: whats script is that?
+15:50  geirha: It's bash
+15:50  VJTachyon: ah
+15:51  geirha: 4# echo "ibase=16; FFFFE9C4" | bc
+15:51  shbot: geirha: 4294961604
+15:52  VJTachyon: hmm how would you structure this implementation then? input file with string processing needed, but have to convert all number values to dec?
+15:54  VJTachyon: also, the lines in this file end with \r\r\n, I need to end with \r\n
+15:54  geirha: I'd just do it with bash, read the file line by line, output modified lines to a new file, then move the new file over the old one.
+15:54  VJTachyon: ah
+15:55  geirha: Should be possible with awk too. You can ask #awk about that.
+15:56  VJTachyon: i havent done line processing with bash before
+15:57  geirha: Well, see the Guide in /topic #bash  and FAQ 1 has examples on reading a file line by line.
+15:58  VJTachyon: heh .. so it does
+15:59  geirha: FAQ 100 explains how to do string manipulations
+16:03  VJTachyon: hmmm
+16:03  VJTachyon: it already doesn't like it
+16:04  VJTachyon: ./process.sh: line 4: syntax error near unexpected token `done'
+16:04  VJTachyon: '/process.sh: line 4: `done < "$file"
+16:04  VJTachyon: http://mywiki.wooledge.org/BashFAQ/001
+16:06  geirha: The first one?
+16:06  VJTachyon: yeah
+16:06  VJTachyon: im sure im doing something stupid
+16:06  VJTachyon: how do you execute this then from the command line?
+16:06  geirha: Did you assign file an actual filename? e.g.  file=mytestfile.txt
+16:07  VJTachyon: why would this be the first FAQ if they don't cover how to do everything to make the solution?
+16:07  geirha: while read -r line; do echo "< $line >"; done < testfile.txt
+16:07  VJTachyon: how can I feed the file in via the command line?
+16:07  geirha: VJTachyon: That part is covered in the Guide. The FAQ assumes you've read the Guide.
+16:08  VJTachyon: ah
+16:08  geirha: 4# echo "One line in this testfile" > testfile.txt; while read -r line; do echo "< $line >"; done < testfile.txt
+16:08  shbot: geirha: < One line in this testfile >
+16:21  VJTachyon: geirha: oh it was the damn tabs .. agh
+16:22  geirha: tabs?
+16:23  VJTachyon: i was inserting tabs in the script and it was screwing it up
+16:23  VJTachyon: but now im getting a no such file or directory
+16:23  VJTachyon: when i copy your code
+16:24  VJTachyon: oh hmm
+16:25  VJTachyon: nevermind
+16:25  VJTachyon: is there any way to structure this so that I can have code on other lines without it executing?
+16:26  VJTachyon: as it is structured on the FAQ
+16:26  geirha: huh?
+16:26  VJTachyon: well the faq lists all it's commands out with keeping it on the same line and using semicolons
+16:26  geirha: Put it in a file, make the first line of the file read:  #!/bin/bash
+16:27  VJTachyon: i did
+16:27  VJTachyon: its not executing unless it's all on the same line
+16:28  geirha: Make sure it doesn't have any ^M at the end of the lines.    cat -e script   will show them if there are any.
+16:28  VJTachyon: yeah i just realized that
+16:28  VJTachyon: argh
+16:29  VJTachyon: damn cygwin
+16:29  VJTachyon: windows
+16:29  VJTachyon: blargh
+16:29  VJTachyon: perfect
+16:29  VJTachyon: thanks
+17:59  Mike1_: hi!
+17:59  Mike1_: Is there any good sed tutorial on the internet?
+17:59 --- Mike1_ is now known as Mike1
+18:00  waldner: see the channel topic
+18:15  VJTachyon: how would i make a bash script for executing an awk script with the output from a sed script
+18:15  VJTachyon: #!/bin/bash
+18:15  VJTachyon: awk -f process.awk sed -f process.sed $1
+18:15  waldner: awk | sed
+18:16  VJTachyon: oh right
+18:16  VJTachyon: hmm
+18:16  VJTachyon: hmm something isn't completing
+18:16  Mike1: waldner: thanks
+18:17  waldner: np
+18:17  VJTachyon: waldner: my terminal hangs on that ..
+18:17  waldner: what's the EXACT command you're typing?
+18:17  VJTachyon: awk -f process.awk | sed -f process.sed $1
+18:17  waldner: you have to give an arg to awk, of course
+18:17  waldner: or give it stdin
+18:17  VJTachyon: right ..
+18:18  waldner: awk -f bla.awk FILE | sed ...
+18:18  VJTachyon: yeah i want the awk to process the output of the sed
+18:18  VJTachyon: without passing through a file
+18:18  VJTachyon: so stdin?
+18:18  waldner: no, then it's the other way round
+18:18  waldner: sed | awk
+18:19  VJTachyon: oh perfect
+18:19  VJTachyon: thanks
+19:31 --- mohan is now known as Guest63308
+--- Log closed Tue Jan 11 23:41:44 2011
+--- Log opened Tue Jan 11 23:42:08 2011
+23:42 --- Users 87 nicks [0 ops, 0 halfops, 0 voices, 87 normal]
+23:43 --- Channel ##sed was synced in 109 seconds
+--- Log closed Tue Jan 11 23:58:11 2011

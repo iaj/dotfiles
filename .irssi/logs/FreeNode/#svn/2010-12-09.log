@@ -1,0 +1,117 @@
+--- Log opened Thu Dec 09 00:00:18 2010
+00:00  joel: well I have no idea wtf you're asking for Drakfyre all I saw was "dirty hack. hack hack. dirty hack."
+00:00 @jeremyw: haha
+00:00  joel: svn/web has a dynamic address. check.
+00:00  joel: what are you trying to do?
+00:01 @jeremyw: It seems that he has a shared host on some hosting site and has to work with changing DNS entries for his IP address.
+00:01 @jeremyw: Just a guess.
+00:01 @jeremyw: Not sure why IP addresses or even DNS entries would change unless I told them to.
+00:01  joel: ah, he's hosting svn? and his web hosting doesn't update often enough?
+00:02 @jeremyw: Drakfyre: Have a cron or some other automatable thing on your clients that identify the real DNS/IP and update the local hosts file.
+00:02 @jeremyw: It's a hack, just like the problem being solved.
+00:02  joel: what he said is what I was going to say, if that's the problem
+00:03  joel: "dirty hack. hack hack. dirty hack." + more hack = ball of twine, please find both ends.
+00:04  Drakfyre: I'll give that a shot, thank you JeremyW.  And Joel, yes, I understand that it's a dirty, dirty hack, but it's cheap and I am broke.
+00:04  joel: Drakfyre: why don't you move svn to the webhost?
+00:05  joel: Drakfyre: are you working on something that could be hosted at googlecode? sourceforge? millions of other free hosted svn sites?
+00:08  Drakfyre: Maybe; most of the free hosted SVN sites I've checked out so far either have # of user account limitations for the free tier or require the project to be publicly hosted.
+00:10  Drakfyre: And with regards to moving SVN to the webserver... that's a really good idea if I can figure out how (It's a shared hosting service).  I'll look into that too.  Sorry to bother you guys with such a hackjob, I was honestly afraid to ask the question in the first place; thank you for being civil.
+00:12  waldi: Drakfyre: use DNS
+00:16  joel: waldi: ?
+00:16  joel: waldi: he is?
+00:17  joel: although arguably you could change the dns servers on the web host to those provided by your dyndns service
+00:17  joel: although if you did that on my machine I would break your legs :)
+00:28  Drakfyre: Calling what I have a "dyndns service" is really more than it deserves
+00:31  Drakfyre: The main thing I was trying to do is basically keep better control over my data; the PROPER way to do this by far would be to pay extra for a static IP, but as I said, I am not really in a position to pay anymore than I already am.
+00:39 @peterS: as for why free svn hosting services tend to require the project to be public, there's not a lot of business model in hosting svn for free if the general public isn't invited to look in and click through.  for some reason the 'show banner ad during "svn update"' patch isn't very popular
+00:40  Drakfyre: Oh, I understand that, I am not complaining that they aren't free, I am just stating that public access in this case is undesirable.
+00:41 @peterS: how many clients need to be able to get to this repository?
+00:41 @peterS: is it just you in your apartment, or is it a business with 30 sites?
+00:42 @peterS: (trying to get a feel for how feasible a client-side hack is)
+00:42  Drakfyre: 3 for the moment, will be ~10 by the end of next year.  Small company if I dare to call it that.
+00:43 @peterS: if you don't mind being on a nonstandard port (http://svn.mycompany.com:8080/repos/...), I would probably just use old-fashioned NAT.  by which I mean, plain old TCP port forwarding.
+00:43 @peterS: but if you want to use port 80 and share it with a real web server, that's not so feasible
+00:44 @peterS: this does mean traffic has to go to your hosted site and _then_ round trip to your real server, for every packet
+00:45 @peterS: alternate solution (actually _this_ is probably what I'd do): use real dyndns instead of hacky http-only dyndns.  I've used zoneedit.com for years and it's very rarely (not never) given me trouble
+00:46  joel: I'd recommend investing in a $25 a month vps service.
+00:47 @peterS: and for the cost-conscious, yes, zoneedit is free for the first few domains
+00:48 @peterS: ...wow, it's been almost 7 years I've been using them.  time flies.
+00:52  Drakfyre: Thank you for all the suggestions, I really appreciate it.
+01:25 --- ChanServ sets modes [#svn +o blairzajac]
+01:44  iaj: when im in the root of a svn repo - how can I get rid of all changes I made and just revert the whole thing to the most up2date version as it is online?
+01:49 @jeremyw: svn revert -R .
+01:55  iaj: thanks :-) will that get rid of newly added files as well?
+02:28 @peterS: why don't you try it and see?
+02:28 @peterS: 'svn status' is pretty good at giving you feedback
+04:07 --- ChanServ sets modes [#svn +o DannyB]
+05:28 --- ChanServ sets modes [#svn +o stylesen]
+05:57 --- ChanServ sets modes [#svn +o dannas]
+06:36  enferex: I want to do development on my own SVN server.  I am working on a project I only have read access too, and I want to be able to update my repository from the read-only server frequently.  Should I just do merges or can I "clone" their repository and just do svn updates that only affect my local server?
+07:39 --- Smedles_ is now known as Smedles
+08:27 --- ChanServ sets modes [#svn +o danielsh]
+09:21  alesan: hi! is there a way to check when a specific line of a file was last changed?
+09:33  IcePic: svn blame / annotate
+09:33  alesan: thanks
+10:41  ericlee: hi, I changed wrong in my local repo, and I wanna sync with the newest master repo, how do I do by using git-svn?
+10:45  wawrek: When I try to add a new directory, I get this error with svn:
+10:45  wawrek: svn: warning: /dir_name/ is already under version control
+10:45  wawrek: The thing is that such a directory already existed, but I want to replace it with new content. How do I force svn to add the new directory?
+10:49  IcePic: wawrek: if you do like in a filesystem? rename it to dir_name.old and then svn-create a new dir there?
+11:14  wawrek: IcePic: thanks, but in some cases the amount of to rename directories is way to big. there are many libraries. I will create a new svn.
+11:21  IcePic: its not unthinkable that "svn rename" would take URLs, which means it would be completely serverside
+11:43  AnAnt: Hello, someone made a 8GB commit by mistake, which we want to remove (to save diskspace on server). what would happen if I delete the commit file from db/revs/ ?
+11:43  AnAnt: namely the file I want to remove is db/revs/254
+11:49  IcePic: then the repo would break
+11:49  IcePic: !a AnAnt obliterate
+11:49  wayita: AnAnt: basically the answer is ... "no". svn will never forget about stuff. but under some conditions you can force the amnesia. see this FAQ: http://subversion.apache.org/faq.html#removal , and also http://subversion.tigris.org/issues/show_bug.cgi?id=516
+11:50  AnAnt: IcePic: how about svnadmin rmtxns 254 ?
+11:54 @danielsh: it's a revision, not a txn
+11:54  vijayaguru: AnAnt: The commit is already done, right? Then there is no use in removing transactions. Because the transaction has already been promoted to revision
+11:54 @danielsh: so no
+11:54  AnAnt: oh
+11:54 @danielsh: AnAnt: svnadmin dump -r 0:253 | svnadmin load
+11:54 @danielsh: or the svnsync equivalent
+11:58  AnAnt: danielsh: can I run that twice? ie: svnadmin dump -r 0:253 | svnadmin load ; svnadmin dump -r 255:260 | svnadmin load ?
+11:58 @danielsh: only if none if r255:r260 depend on r254
+11:58 @danielsh: s/if/of/
+11:58  AnAnt: ok
+12:41  AnAnt: thanks
+12:41  AnAnt: svndumpfilter was useful
+12:41 --- ChanServ sets modes [#svn +o stylesen]
+12:42 @danielsh: :)
+15:10 --- ChanServ sets modes [#svn +o danielsh]
+15:31  Aicasn: i'm getting a mixture of  "malformed network data" and "decompression of svndiff data failed" when I use the checkout command from any box other than the svn server
+15:31  Aicasn: server is fbsd6, svn version is 1.6.13 from ports
+15:31  Aicasn: server *OS
+15:32  Aicasn: eg.  svn co svn://svnmachine/repo checkout_dir   works fine from that one machine, but from anywhere else in the network will give one of the two errors above
+15:33  Aicasn: i have verified the integrety of the ram and drives in the server. my guess is that I have a bad build of svn but I'm not sure where the build could have broken.  any thoughts?
+15:47  Aicasn: what's the most active time for this channel?  i don't want to keep reposting my issue if no one will be awake for a while
+15:48  IcePic: Aicasn: bad builds from ports could also be an issue for the fbsd subversion port maintainer
+15:48  IcePic: worth pursuing, imh
+15:48  IcePic: imho
+15:58  jwineinger: hey guys, is there a way to "fork" a repository and keep history?  I've got a client who is reusing an existing project as the basis for a new one, so I basically need to copy the repo as is to start a new one
+16:01  IcePic: svnadmin dump ?
+16:07  jwineinger: anything that will work remotely with repo URLs?  I just tried that and hotcopy and both complained that i needed to give a path
+16:09  IcePic: svnsync could talk over repo URLs
+16:12  jwineinger: ok,thanks
+16:26 --- ChanServ sets modes [#svn +o kfogel]
+16:47  infid: can you squash commits in svn
+16:47  larrys: what do you mean by squash?
+16:56  infid: combine in a branch into one
+16:56  infid: like you can do in git
+16:57  larrys: No, you can't do that in svn.
+17:05  infid: when i merge my branch to trunk, will my commit messages be seen in the main commit log, or only for the branch?
+17:07  larrys: The merge will be a single commit you will see on trunk.
+17:07  Aicasn: eg.  Revsion 23493:  merged from branch XYZ
+17:08  infid: k
+17:08  Aicasn: so, no, you don't get the full commit log for the branch. only what you enter as the commit message for the merge
+17:09  infid: cause i like to use stupid commit messages when i'm in my branch and dont want them to be seen :p
+17:17  Renter: so?
+17:17  Renter: edit them
+17:18  infid: how
+17:19  Renter: but also, if someone checks log and doesn't use --stop-on-copy and has read access to your branch (I think) he can see the full history there, too
+17:19  Renter: depends on what you're merging ofc
+17:20  Aicasn: the best thing to do would be to _not_ put commit log messages into a repo that you don't want others to see. if you're saying that the branch message don't matter then why worry about them?
+17:20  Aicasn: *messages
+17:20  Renter: infid: http://tinyurl.com/23gznfu
+--- Log closed Thu Dec 09 17:21:49 2010

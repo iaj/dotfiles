@@ -1,0 +1,134 @@
+--- Log opened Wed Oct 13 08:40:14 2010
+08:40 --- Users 7 nicks [2 ops, 0 halfops, 0 voices, 5 normal]
+08:41 --- Channel #irssi_vim was synced in 90 seconds
+13:30 @shabble: iaj: hi, I found a few bugs in teh uberprompt/hist search, if you want to try again
+13:31  iaj: shabble: ahh.. cool
+13:31  iaj: thanks, I will give it a shot
+13:31 @shabble: (bear in mind that I have no idea if it'll work side by side with vim mode, probably not)
+13:31  iaj: hmm, you aren't using vim mode?
+13:32  iaj: 13:31:58  Use of uninitialized value in string eq at /Users/iaj/.irssi/scripts/uberprompt.pl line 289.
+13:33  iaj: http://pastebin.com/82RLxGM5
+13:33  iaj: comes from rl_history_search
+13:35 @shabble: fixed
+13:35  virssi-bot: irssi-scripts: master Tom Feist * 8edb0c6 (1 files in 1 dirs): fixed undef bug in uberprompt - http://bit.ly/bA4cvw
+13:35 @shabble: you'll need both new uberprompt & new rl_history_search
+13:36  iaj: hmm Im using both of m... the ones from master branch
+13:37  virssi-bot: irssi-scripts: master Tom Feist * 3eb58a8 (1 files in 1 dirs): removed a defined-or which needs perl 5.10 - http://bit.ly/cRIOqL
+13:37  iaj: Hmm.. still got the problem when I /script load uberprompt
+13:37 @shabble: I guess you're using perl 5.8 or so?
+13:38  iaj: 5.8.9
+13:38  iaj: why, do I need something more recent?
+13:38 @shabble: nah, I just fixed the thing that needed it
+13:38 @shabble: should be ok now
+13:38  iaj: 13:38:46  Use of uninitialized value in string eq at /Users/iaj/.irssi/scripts/uberprompt.pl line 289.i
+13:39  iaj: and line 266 same story
+13:40 @shabble: the only way I can see that happening is if you're using an older version of rl_history
+13:41 @shabble: can you find hte code (for rl_hist) and search for a line that contains 'signal_emit'?
+13:41 @shabble: should be around line 136
+13:48  iaj: I can't even load rl_history_search
+13:48 @shabble: why not?
+13:48  iaj: oh
+13:48  iaj: maybe now
+13:49  iaj: Oh both loaded..
+13:49  iaj: same problem...
+13:49  iaj: sec I'll do the search
+13:49  iaj: wth... trying to open it and my vim crashes :\
+13:49 @shabble: ?!
+13:51  iaj: line 129 it is
+13:51  iaj: the signal_emit
+13:51  iaj: and 134
+13:51  iaj: ls
+13:51  iaj: ops.
+13:52  iaj: the use of uninitialized value appears as soon as I load uberprompt and go to : mode
+13:52 @shabble: oh, right
+13:52 @shabble: vim_mode isn't using uberprompt yet
+13:52 @shabble: that'll be why
+13:53  iaj: ohhh.. ok..  I thought it was specifially for vim_mode
+13:53 @shabble: well, it sort of is
+13:53 @shabble: but I haven't updated vim_mode to use it yet :)
+13:56  virssi-bot: irssi-scripts: master Tom Feist * fb9f56c (1 files in 1 dirs): Merge remote branch 'origin/dev'
+13:56  virssi-bot: irssi-scripts: master Tom Feist * ee9ce3d (1 files in 1 dirs): switched vim_mode to using uberprompt
+13:56  virssi-bot: irssi-scripts: master commits 3eb58a8...ee9ce3d - http://bit.ly/b2xeCb
+13:56 @shabble: have now
+14:00  iaj: sweet.
+14:00  iaj: lemme try
+14:00  iaj: (tbh I don't really know what uberprompt is doing SO FAR)
+14:02  iaj: still the same problem
+14:06  iaj: :-(
+14:12  iaj: what exactly is uberprompt for? just for rl_history_search, shabble ?
+14:17 @shabble: iaj: it's a general purpose utility script for doing stuff with your prompt that you wouldn't normally be able to do
+14:17 @shabble: so far history_search, scrolled_reminder and vim_mode use it
+14:18  iaj: shabble: Ahh.. alright... I still get that odd message line 289, 266 uninitizialed value of string eq
+14:18 @shabble: ok
+14:18 @shabble: when looking at those signal_emit lines, is there an argument like 'UP_INNER' there?
+14:18 @shabble: that's about teh only thing I can think that would cause those things ot be undef
+14:18  iaj: where should I look... rl_history_search?
+14:18 @shabble: yeah
+14:19  iaj: even if I don't load up rl_history_search
+14:19  iaj: I get those errors by uberprompt.pl
+14:19 @shabble: you running vim_mode?
+14:19  iaj: k
+14:19  iaj: yeah
+14:19 @shabble: oh, crap
+14:19 @shabble: I think I know why
+14:19  iaj: Oh.. sec.. Im not getting them ATM
+14:19 @shabble: do/did you have prompt_info loaded?
+14:19  iaj: with only uberprompt
+14:19  iaj: yeah.
+14:19  iaj: Shouldn't I/
+14:19 @shabble: you need to make sure that's not loading
+14:20 @shabble: and then restart irssi :/
+14:20  iaj: weee...
+14:20  iaj: ok... sec
+14:20  iaj: i won't need it anymore right?
+14:20 @shabble: nope
+14:20 @shabble: uberprompt is a complete replacement
+14:20  iaj: kk
+14:20  iaj: sec
+14:21  iaj: so I won't need to change my statusbars in config file, correct?
+14:22 @shabble: correct
+14:24  iaj: sec ill restart
+--- Log closed Wed Oct 13 14:25:04 2010
+--- Log opened Wed Oct 13 14:25:37 2010
+14:25 --- Users 7 nicks [2 ops, 0 halfops, 0 voices, 5 normal]
+14:26  iaj: so uberprompt.pl is loaded now.
+14:27 --- Channel #irssi_vim was synced in 95 seconds
+14:27 @shabble: ok
+14:28  iaj: what did you set your prompt to?
+14:29 @shabble: the default is '[$*$uber] ' iirc
+14:29 @shabble: you can change it with /set uberprompt_format
+14:33  iaj: hmm I don't see the prompt :D
+14:33  iaj: Oh
+14:34  iaj: Seems to be working onw
+14:34  iaj: now...
+14:34  iaj: However the rl_history_search does nothing
+14:35  iaj: got ^R bound to command history_search_start  so hitting CTRL-R should invoke something - shouldn't it?
+14:35 @shabble: yes
+14:35 @shabble: try typing stuff after C-r?
+14:35  estragib: maybe a problem with ctrl-r register insert from vim_mode?
+14:36  iaj: I need to wait a bit after C-r
+14:36  iaj: that's why.
+14:36  iaj: hmm I don't see the prompt :D
+14:36  iaj: Ah... ok.. works :-)
+14:36 @shabble: yeah, like I say, it's not currently designed to work concurrently with vim_mode
+14:36 @shabble: it's a totally different script I wrote a while ago
+14:36  iaj: how do I cancel the search and edit the history thing?
+14:37 @shabble: C-g
+14:37  iaj: C-g aborts everything no?
+14:37  iaj: I want to have the line here to edit some stuff of it.
+14:37 @shabble: C-e
+14:38 @shabble: or tab should also work
+14:39  iaj: thanks shabble - working like a charm now
+14:39 @shabble: np
+14:40  iaj: just that delay after hitting <C-R> is a bit 'to get used to
+14:40 @shabble: eventually it'll end up in vim_mode with /?n etc
+14:40 @shabble: I'm not sure why there should be a delay
+14:40 @shabble: oh, it's hte imap thing from vim_mode
+14:40  iaj: no clue - got nothing else bound... ahh.. yeah
+14:40 @shabble: yeah, you'll have to live with that for anow
+14:40  iaj: your right :)
+--- Log closed Wed Oct 13 21:58:57 2010
+--- Log opened Wed Oct 13 21:59:19 2010
+21:59 --- Users 7 nicks [2 ops, 0 halfops, 0 voices, 5 normal]
+22:00 --- Channel #irssi_vim was synced in 87 seconds
+--- Log closed Thu Oct 14 00:00:06 2010

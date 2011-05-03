@@ -1,0 +1,201 @@
+--- Log opened Fri Nov 05 12:52:00 2010
+--- Log closed Fri Nov 05 12:57:01 2010
+--- Log opened Fri Nov 05 12:57:23 2010
+12:57 --- Users 514 nicks [0 ops, 0 halfops, 0 voices, 514 normal]
+12:58 --- Channel #bash was synced in 97 seconds
+12:59  mattish: Hello, how would i go about going through a log file and for each time X is found on a line increment a variable ?
+12:59  mattish: cant figure out the best way to do it, at the moment im going back through the file for each X but that obviously takes quite a long time
+13:00  geirha: grep -c 'pattern' file
+13:00  koala_man: is the goal of this to count the number of lines containing X?
+13:00  mattish: correct koala_man
+13:00  koala_man: see geirha's then
+13:00  mattish: i actually want to seach for X Y Z not just one term
+13:00  mattish: but there will only be one of either on each line
+13:01  geirha: grep -c -e 'X' -e 'Y' -e 'Z' file
+13:01  koala_man: !b1
+13:01  greybot: bashphorism 1: the questioner's first description of the problem/question will be misleading.
+13:01  geirha: Or do you want separate counts?
+13:01  mattish: separate counts for X Y Z
+13:01  koala_man: use awk
+13:01  geirha: awk '/X/{x++} /Y/{y++} /Z/{z++} END {print x, y, z}'
+13:03  mattish: that bashphorism is very true
+13:04  geirha: read x y z < <(awk '/X/{x++} /Y/{y++} /Z/{z++} END {print x, y, z}' file); echo "$x occurances of X, $y occurances of Y, $z occurances of Z"
+13:06  geirha: Or using just bash: while IFS= read -r line; do [[ $line = *X* ]] && ((x++)); [[ $line = *Y* ]] && ((y++)); [[ $line = *Z* ]] && ((z++)); done < file; echo "$x occurances of X, ..."
+13:07  mattish: Thankyou, just looking through seeing how this works :)
+--- Log closed Fri Nov 05 17:58:22 2010
+--- Log opened Fri Nov 05 21:16:07 2010
+21:16 --- Users 525 nicks [0 ops, 0 halfops, 0 voices, 525 normal]
+21:17 --- Channel #bash was synced in 99 seconds
+--- Log closed Fri Nov 05 21:28:20 2010
+--- Log opened Fri Nov 05 21:29:00 2010
+21:29 --- Users 527 nicks [0 ops, 0 halfops, 0 voices, 527 normal]
+21:30 --- Channel #bash was synced in 100 seconds
+21:57  Matuku: Can anyone explain to me why this isn't working? Keeps throwing up "unexpected symbol": if [ ! -f $i-* -o $i -ne 404 ]
+21:58  pgas: -f can test only one file
+21:58  Matuku: Does something need quotes? Or brackets?
+21:58  lhunath: quote your stuff.
+21:58  pgas: the $variable needs quotes but the * won't work
+21:58  lhunath: and pass only one argument to -f
+21:58  pgas: !faq empty
+21:58  greybot: http://mywiki.wooledge.org/BashFAQ/004 -- How can I check whether a directory is empty or not?  How do I check for any *.mpg files?
+21:58  lhunath: eg. if you want to do tests on multiple files, use a loop.
+21:59  lhunath: one file at a time.  if you want to do something else; explain yourself.
+21:59  Matuku: This isn't empty directory checking; it's checking for a very specific file. It's looking for any file starting with a specific number or if it's 404, skipping it
+22:02  lhunath: where does i come from?
+22:02  Matuku: This is all in a for loop: for i in {1..850}
+22:02  lhunath: what do you want to do when a file 840-* exists?
+22:03  Matuku: Well, if it doesn't exist it downloads the corresponding comic (it's a script to download XKCD) and saves it as 840-(comicname).jpg
+22:04  Matuku: But not for 404 (because that one's a joke 404 page)
+22:04  lhunath: for i in {1..850}; do (( i == 404 )) && continue; comic=("$i"-*.jpg); [[ -e "$comic" ]] || wget ...; done
+22:05  lhunath: you would've done well reading the FAQ pgas linked you.
+22:05  toolbear: hello. is there any way to modify the output of the builtin time command so that, e.g., it _just_ prints the real time?
+22:05  lhunath: no
+22:05  lhunath: actually yes
+22:05  Matuku: So no way to do it just with a logical OR in the if loop? A nested if works but just seems nasty.
+22:06  lhunath: TIMEFORMAT; but I don't know to what extent
+22:06  lhunath: there is no nested if.
+22:07  lhunath: and you're testing for two completely unrelated things; it makes sense to separate them.
+22:07  Matuku: Just an if within an if, I mean.
+22:08  lhunath: http://pastie.org/1275852
+22:08  lhunath: there is no if within an if
+22:08  geirha: # TIMEFORMAT=%1R; time sleep 1
+22:08  evalbot: geirha: 1.0
+22:08  lhunath: that pastie put the code on multiple lines for readability.
+22:09  Matuku: "if [ ! -f $i-* ]; then if [ $i -ne 404 ]; ...; fi; fi" seems to work?
+22:11  geirha: For your simple test case, maybe. But it's wrong.
+22:13  geirha: The glob will be expanded to filenames before the [ command is run.
+22:13  geirha: If there's exactly one, that'll be fine, but if there are more than one, [ will complain about syntax.
+22:16  lhunath: Matuku: stop leaving expansions unquoted and stop using [[ in bash.
+22:16  Tramp: [[??
+22:17  lhunath: yeah, I meant [
+22:17  lhunath: and I told you -f takes ONE ARGUMENT.  give it ONE.
+22:17  lhunath: you are giving it "all the files in the directory that begin with $i-
+22:18  lhunath: that is not ONE.  that may be NONE, ONE, FIVE or any other number of arguments.
+22:18  lhunath: in any case other than one it will blow up.
+22:25  Matuku: There will be only one file with that name in that directory; either one or none. But the pastie you sent is nicer anyway.
+22:25  Matuku: The () causes it to evaluate the globbing?
+22:26  lhunath: it makes an array
+22:26  lhunath: with each file in an element.
+22:27  lhunath: then "$comic" expands to the first element in the array or an empty argument if there are none.
+22:27  lhunath: your [ will fail when there are none.
+22:27  lhunath: well; that's not true but only because of a buggy side-effect
+22:28  lhunath: !args
+22:28  greybot: Understanding Arguments and Word Splitting: http://mywiki.wooledge.org/Arguments
+22:28  Matuku: Is there one on arrays too?
+22:28  Matuku: !arrays
+22:28  greybot: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+22:32  Matuku: Does it just default to the first element even though we haven't declared it as such? (i.e. haven't used ${comic[1]}     ?)
+22:33  lhunath: yeah "$comic" is identical to "${comic[0]}"
+22:34  lhunath: (note: arrays are 0 based)
+22:34  lhunath: it's because "$foo" expands the STRING in 'foo'
+22:34  lhunath: if foo contains an array of strings, only the first one gets expanded
+22:34  Matuku: And $comic{@} expands to all of them? How is that different from $comic[*] ?
+22:35 --- jzacsh_ is now known as jzacsh
+22:35  lhunath: that is "${comic[@]}"
+22:35  lhunath: and "${comic[*]}"
+22:35  lhunath: the {} are not optional.
+22:35  Matuku: Sorry, ${comic[@]}, yes (and ${comic[*]})
+22:35  lhunath: (and neither are the quotes!)
+22:35  lhunath: !$*
+22:35  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+22:36  Matuku: Cool, thanks :)
+22:36  lhunath: note the bash sheet you were linked explains this too
+22:53  JayPee: Quick bash scripting question: I'm running something like "blah | grep ^q", and it seems to be working as expected
+22:54  JayPee: however, someone pointed out that ^ is an arithmetic operator, and "needs to be quoted"
+22:54  JayPee: but it seems to work; is this because it's not technically a "shell expansion," within a let statement, and -i isn't on?
+22:59  lhunath: ^ is not a syntactical character in that context.
+23:02  JayPee: lhunath: that's what I thought; it's just a command argument, right?
+23:03  lhunath: part of one, yeah
+23:03  JayPee: yah
+23:10  pcard: # date -d 1288994637
+23:10  evalbot: pcard: date: invalid date `1288994637'
+23:10  pcard: ????
+23:11  pcard: I could of sworn that used to work, but can't for the life of me remember
+23:11  geirha: # date -d @1288994637
+23:11  evalbot: geirha: Fri Nov  5 22:03:57 UTC 2010
+23:11  geirha: GNU-specific
+23:11  pcard: uugh I knew I missing something incredibly retardedly stupidld obvious liek that
+23:11  pcard: geirha: thanks
+23:12  pcard: geirha: I thought that was rather portable actually, if not, how is it done udner bsd (I have both version actually)
+23:12  geirha: Only GNU date has -d I think.
+23:13  geirha: pcard: Short answer is, you don't. You choose a more suitable language
+23:13  lhunath: date stuff in bash is hell.  thread lightly; avoid at all cost
+23:13  pcard: well theres Perl, but what if a more suitable language like Perl isn't available
+23:13  lhunath: unless you can depend on non-standard utilities
+23:13  lhunath: !adu
+23:13  greybot: adu(1) - a date utility - source code at http://twkm.freeshell.org/adu.tar.Z
+23:14  pcard: cool
+23:14  pcard: thanks
+23:14  geirha: pcard: Also, depends on what you need it for.
+23:15  geirha: You are more likely to find perl than bash on a UNIX or UNIX-like system actually ...
+23:20  fahmad: hello
+23:22  fahmad: can some one help me with this little script i want to add ip increment but its creating issues
+23:22  fahmad: http://paste.ubuntu.com/526622/
+--- Log closed Fri Nov 05 23:27:58 2010
+--- Log opened Fri Nov 05 23:28:20 2010
+23:28 --- Users 511 nicks [0 ops, 0 halfops, 0 voices, 511 normal]
+23:28  fahmad: i did bash new.sh
+23:28  fahmad: but i get 0  in ips
+23:28  fahmad: :(
+23:28  nemo: 'sok
+23:28  nemo: one sec
+23:28  nemo: this is covered in their FAQ - just looking for the relevant section
+23:28  nemo: you have a few options
+23:29  fahmad: ?
+23:29 --- Channel #bash was synced in 97 seconds
+23:30  nemo: fahmad: http://mywiki.wooledge.org/BashFAQ/024\
+23:30  nemo: oops
+23:30  nemo: http://mywiki.wooledge.org/BashFAQ/024
+23:30  nemo: fahmad: I found that just by reading through the list from the topic btw ;)
+23:31  fahmad: ok
+23:31  fahmad: lemme check brot
+23:32  nemo: looks like I'm personally running into:
+23:32  Tramp: that's not his problem
+23:32  nemo: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=458098
+23:32  nemo: Tramp: oh?
+23:32  nemo: fahmad: welp. ignore me then...
+23:32  Tramp: his problem is doing stuff like $((foo$bar))
+23:32  nemo: ah. TBH I hadn't read it too carefully. I saw a loop and variable setting and jumped to conclusions
+23:33  fahmad: Tramp: humm
+23:33  Tramp: fahmad: and, first of all, decide if you want to write sh or bash
+23:33  fahmad: Tramp: well how can i increment in sh
+23:33  fahmad: bash is easy for increment i think ...
+23:33  fahmad: (( COUNT++ )) case :)
+23:34  Tramp: with arithmetic expansion (i.e. the $(())-stuff)
+23:34  Tramp: sh has aritmetic expansion, but no arithmetic evaluation (the (())-stuff)
+23:34  fahmad: humm
+23:34  fahmad: so i will need to use bash :)
+23:34  fahmad: then
+23:35  Tramp: !math > fahmad
+23:35  greybot: fahmad: Add 7 to a variable: let a+=7; ((a+=7)); a=$((a+7)); See http://mywiki.wooledge.org/ArithmeticExpression
+23:36  fahmad: Tramp: but what about $foo$bar thing
+23:36  Tramp: the one in the middle is bash only, let an arith. expansion are sh (though not sure if sh supports +=)
+23:36  Tramp: s/let an/let and/
+23:37  Tramp: fahmad: that's fine, just not the way you do it
+23:37  fahmad: humm
+23:37  Tramp: # foo=1.; bar=2; echo "$foo$bar"
+23:37  fahmad: ok lemme modify
+23:37  evalbot: Tramp: 1.2
+23:38  fahmad: yup
+23:39  fahmad: done
+23:42  fahmad: new.sh: 19: COUNT_PRIVAT++: not found
+23:42  fahmad: get this error
+23:43  tuxdev: pretty sure you're missing an E and not doing that in an arithmetic context
+23:44  fahmad: E ?
+23:46  sprung: How would I grep from the list of filenames the actual contents of the files outputted by using find?
+23:47  tuxdev: -exec
+23:48  fahmad: tuxdev: what do you mean by E
+23:49  fahmad: # c=1; c = $c + 1; echo $c
+23:49  evalbot: fahmad: bash: c: command not found
+23:49  evalbot: fahmad: 1
+23:52  joeytwiddle: sprung: you can use find ... | xargs -0 grep ...
+23:52  joeytwiddle: or something close to that
+23:53  Tramp: ... if you happen to be on a GNU system
+23:53  Tramp: but even then it would be pointless
+23:53  Tramp: the proper way, as tuxdev noted, is to use -exec ... +
+23:56  sprung: joeytwiddle, ok. yeah i keep seeing that xargs command show up but need to practice using it
+23:59  Tramp: sprung: there is rarely a use for xargs (and none I can think of in conjunction with find). Most examples you see are wrong or broken or both
+23:59  Tramp: !xargs
+23:59  greybot: xargs(1) is dangerous (broken) when processing filenames that are not NUL-terminated. If you're working with filenames, use find's -exec {} + instead (yes, it does multiple-filenames-per-invocation, too).
+23:59  sprung: ok
+--- Log closed Sat Nov 06 00:00:46 2010

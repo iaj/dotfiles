@@ -1,0 +1,103 @@
+--- Log opened Thu Jan 20 08:34:25 2011
+--- Log closed Thu Jan 20 08:37:26 2011
+--- Log opened Thu Jan 20 08:37:45 2011
+08:37 --- Users 161 nicks [0 ops, 0 halfops, 0 voices, 161 normal]
+08:38 --- Channel #zsh was synced in 75 seconds
+08:50 --- wuehlmau1 is now known as wuehlmaus
+08:56 --- dive is now known as Guest47496
+08:56 --- Guest47496 is now known as dive
+09:37  haxley: hi everyone
+09:38  haxley: I got some problems with the completion
+09:38  haxley: theres some alias inst="sudo aptitude install"
+09:39  haxley: now completion works for sudo aptitude install<TAB>
+09:39  haxley: but not for inst<TAB>
+09:39  haxley: setopt MULTIOS SHARE_HISTORY autocd extendedglob COMPLETE_ALIASES glob bareglobqual nullglob rcexpandparam extendedglob
+09:39  haxley: thus aliases should be completed.
+09:40  ft: man zshoptions | less -p'COMP.*ALIAS'
+09:42  haxley: thx
+09:42  haxley: thats kind of fucking stupid
+09:42  haxley: -_-
+09:42  haxley: sry should have done that too
+10:34  iaj: is there a wise guide on how to create a .zsh configuration that can be run on multiple machines? 
+10:37  mkae: iaj: I use my zshrc on multiple mashines. I use zkb for the different keyboard-settings and include a .zsh-$(hostname) for host specific settings
+10:39  iaj: mkae: so only .zshrc + a zsh-host only those 2 files?
+10:39  iaj: mkae: are you able to post your .rc?
+10:40  mkae: yes, just 2 files. the .zshrc is everywhere the same... Host specific things (named directories, aliases...) are in the .zsh-hostname file.
+10:40  mkae: i post it... one minute...
+10:41  iaj: looking forward to it mkae :)
+10:46  mkae: iaj: i only posted the head of the file: http://pastebin.com/BX3Tmu35 But it contains all you need. 
+10:47  mkae: the "recognise keys"-section deals with different keycodes on different mashines.
+10:48  mkae: hope that helps...
+10:49  iaj: yay, mkae 1000x!!
+10:49  iaj: export HOME=${HOME:-/home/mkae}  besides that one... or are you only using $HOME on your main machine
+10:51  mkae: this means that HOME is set to /home/mkae if it is not already set. But AFAIK HOME is set by the zsh to your real homedirectory by default
+10:51  mkae: I have different usernames on the mashines and HOME is always set correct
+10:53  iaj: Ahh okay, good :)
+13:11 --- mren|off is now known as mren
+--- Log closed Thu Jan 20 14:12:25 2011
+--- Log opened Thu Jan 20 14:17:34 2011
+14:17 --- Users 164 nicks [0 ops, 0 halfops, 0 voices, 164 normal]
+14:18 --- Channel #zsh was synced in 76 seconds
+--- Log opened Thu Jan 20 14:41:21 2011
+14:41 --- Users 165 nicks [0 ops, 0 halfops, 0 voices, 165 normal]
+14:42 --- Channel #zsh was synced in 97 seconds
+16:11  FabTG: hi everyone, i have tried a tar cjvf test.tar.bz2 $(echo $(find . -name "*test*"))
+16:11  FabTG: but if there is a file with space in its name
+16:12  FabTG: this raise an error
+16:13  FabTG: is there a way to add somme "" to perform the action i'd like?
+16:13  thrig: usually one switches to find -print0
+16:14  Patplu: FabTG: use tar cjvf test.tar.bz2 **/*test*
+16:14  Patplu: instead of find
+16:15  FabTG: Patplu: well in fact the exact find command i didn't write uses the -mtime option
+16:17  FabTG: so **/*test* is not enough
+16:17  Patplu: tar cjvf test.tar.bz2 ${(f)"$(find . -name '*test*')"} 
+16:17  Patplu: and you can add your find options
+16:18  thrig: and hope there are never enough files to break things
+16:21  blueyed: FabTG: you can use something along **/*test*(m-5) to list only the files changed in the last 5 days, too.
+16:36  FabTG: blueyed: zsh is wonderful ;)
+16:37  FabTG: blueyed: blueyed in wich part of the help files did you find that?
+16:38  FabTG: Patplu: what is (f) ?
+16:42  Patplu: FabTG: f flag converts the output of find to an array
+16:43  FabTG: is this a feature from zsh or from the command find?
+16:43  Patplu: it's a zshism
+16:45  ft: But just line by line. if a filename contained a newline character, that wouldn't work. I known that's unlikely. I'm just saying.
+16:46  Patplu: you're right
+16:46  thrig: ... and, again, if there are slightly too many files found. *KABOOM*
+--- Log opened Thu Jan 20 17:07:18 2011
+17:07 --- Users 162 nicks [0 ops, 0 halfops, 0 voices, 162 normal]
+17:08 --- Channel #zsh was synced in 80 seconds
+17:51  blueyed: Mikachu: that's what I told him.
+17:51  blueyed: FabTG: you can see it here: man zshexpn|less -p "Glob Qualifiers"
+17:52 --- ae is now known as Guest89725
+17:54  blueyed: this is a good reference card: www.bash2zsh.com/zsh_refcard/refcard.pdf
+18:00  Mikachu: blueyed: sorry, didn't read everything
+18:29  yacoob: Hmm.
+18:29  yacoob: How do I make a while read ... loop reading from a process substitute?
+18:30  yacoob: while read p ...; done <( other; list ) doesn't seem to be working
+18:30  thrig: (other; list) | while ...
+18:31  yacoob: yeah, that's what I gathered - is there a way to use <(...) here?
+18:31  thrig: I fail to see why you would need that
+18:32  yacoob: too lazy to move large chunks of command line around :)
+18:33  ft: you're almost right. while read line; do print -- --$line--; done < <(echo Hello World;)
+18:34  yacoob: ah
+18:34  ft: <(...) is something you can read from. but you need to tell the shell to read from it.
+18:34  yacoob: yeah - when I did 'echo <(...)' it turned obvious
+--- Log closed Thu Jan 20 19:27:59 2011
+--- Log opened Thu Jan 20 19:28:54 2011
+19:28 --- Users 165 nicks [0 ops, 0 halfops, 0 voices, 165 normal]
+19:30 --- Channel #zsh was synced in 95 seconds
+--- Log closed Thu Jan 20 19:55:25 2011
+--- Log opened Thu Jan 20 19:55:49 2011
+19:55 --- Users 164 nicks [0 ops, 0 halfops, 0 voices, 164 normal]
+19:55 --- Server: [pratchett.freenode.net] [freenode-info] channel trolls and no channel staff around to help? please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+19:56 --- Channel #zsh was synced in 76 seconds
+19:58  FabTG: i'm looking for a way to print the x days ago date
+--- Log opened Thu Jan 20 20:01:23 2011
+20:01 --- Users 165 nicks [0 ops, 0 halfops, 0 voices, 165 normal]
+20:02 --- Channel #zsh was synced in 77 seconds
+20:04  thrig: FabTG: complain to the maintainer of the date comand (or supply documentation patches?)
+--- Log closed Thu Jan 20 21:55:02 2011
+--- Log opened Thu Jan 20 21:55:27 2011
+21:55 --- Users 167 nicks [0 ops, 0 halfops, 0 voices, 167 normal]
+21:56 --- Channel #zsh was synced in 80 seconds
+--- Log closed Thu Jan 20 23:14:16 2011

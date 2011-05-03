@@ -1,0 +1,102 @@
+--- Log opened Mon Jan 10 00:00:21 2011
+--- Day changed Mon Jan 10 2011
+00:00  jason22: the idea is the word to put a table
+00:00  waldner: did you even try it?
+00:01  jason22: now i try but it does not work
+00:02  jason22: any idea how to make it this?
+00:03  waldner: strange, it works for me
+00:03  pr3d4t0r: jason22: Splitting the string into component characters looks fine.
+00:03  waldner: 4# a=tea; awk -v vart="$a" 'BEGIN{n=split(vart, a, ""); for (i=1;i<=n;i++) print a[i]}' 
+00:03  shbot: waldner: t
+00:03  shbot: waldner: e
+00:03  shbot: waldner: a
+00:03  waldner: doh
+00:04  waldner: of course, since we don't know what you really want to do, it may very well be "not working" for you, but that's not a big help
+00:08  jason22: thanks walder it works now
+00:08  jason22: i would try to see my wrong
+00:23  jason22: can you tell me how to read specific position of table in bash?
+00:37  steve___: jason22: The array is in awk...
+00:38  steve___: 4# a=tea; awk -v vart="$a" 'BEGIN{n=split(vart, a, ""); print a[2]}'
+00:38  shbot: steve___: e
+00:45  jason22: ok steve thanjs
+00:46  cthuluh: 4# var=tea; for ((i = 0; i < ${#var}; i++)) { echo "$i ${var:i:1}"; } # an "other way" with bash
+00:46  shbot: cthuluh: 0 t
+00:46  shbot: cthuluh: 1 e
+00:46  shbot: cthuluh: 2 a
+00:48  pr3d4t0r: Good night, peeps.
+00:48  pr3d4t0r: Z z .
+00:55  jason22: thanks cthuluh
+01:47  ecksun: Im trying to split a string on a word
+01:47  ecksun: into an array, but I cannot figure out how to put stdin in split() :)
+01:49  igli: eh? you mean $0 (= current record) ?
+01:49  ecksun: perhaps :)
+01:49  ecksun: perhaps a better question is where I could read about that, and other basic stuff
+01:49  ecksun: guessing in /topic
+01:49  igli: yeah
+01:49  igli: start with the tutorial :)
+01:50  steve___: Can you show sample data and desired output?
+01:50  ecksun: sure
+01:50  ecksun: http://services.tvrage.com/feeds/search.php?show=doctor%20who
+01:50  ecksun: i would like to parse each show separatly with bash
+01:51  ecksun: and yes, I know its a bad idea to parse XML data like that
+01:54  steve___: yeah...  if you want to muck around then something like this might get you started:
+01:55  steve___: lynx -dump "http://services.tvrage.com/feeds/search.php?show=doctor who" | awk -F'(<|>|</)' '{print $2}'
+01:55  ecksun: does | have some special meaning?
+01:55  steve___: to add more fields $2,$3 etc
+01:55  steve___: or
+01:56  ecksun: i see
+01:57  steve___: -F sets the field separator.  < or > or </
+01:57  ecksun: yes
+01:58  ecksun: so simply looping through all $\d and adding newlines after would work
+01:59  ecksun: hmm, Im confused, BEGIN and END patterns are obvious
+02:00  ecksun: but stuff inside {} without a pattern should be executed once per line
+02:00  ecksun: or in this case per <|>|</
+02:00  ecksun: right?
+02:00  ecksun: but in that case, what does $2 represent?
+02:01  ecksun: and, when I try the code $2 is only one value, so my assumption must be incorrect
+02:02  cthuluh: RS separates records. the default value for RS is a newline. here, you're setting FS, so no, actions without conditions will be executed for each *line*
+02:03  cthuluh: here you're asking awk to split $0 (the whole line) into fields ($1, $2, etc)
+02:03  ecksun: oh, there is both FS and RS
+02:03  ecksun: that explains it
+02:18  ecksun: oh, forgot to say thx :D
+02:25  jason22: any idea how to check if one variable is character else if variable is number or special character appear message is not character
+02:26  jason22: i think i should use command test
+02:27  nycjv321: question I run the following command "awk -F, '{ print $1; print $2; print $3 }' list" , this prints the output of three columns, my question is why are the second and third fields of the output containing an extra space?
+02:28  nycjv321: why do they contain* which isn't found in the first field?
+02:35  cthuluh: jason22: something like: if (match(string, /[^[:digit:]]/)) { print string,"doesn't contain only digits" }
+02:35  cthuluh: nycjv321: I guess it depends on your data
+02:35  cthuluh: nycjv321: is the format like:  "foo, bar, baz"?
+02:36  cthuluh: http://awk.freeshell.org/AwkTips#toc6  <= this one might be interesting
+02:41  nycjv321: cthuluh: ahhhh! that makes sense
+02:41  nycjv321: cthuluh: yea thanks!, I didn't even think of that
+02:43  nycjv321: cthuluh: im reading Sed and Awk 2nd Revision and trying to teach myself how to use this great programs!
+02:43  cthuluh: fine, I heard it was a good book :)
+06:48  alex87: is it fairly straightforward to take a few variables from ffmpeg's output and do some maths on them?
+06:54  gnomon: alex87, generally, yes, depending on the complexity of the maths and the ease with which the values can be extracted from ffmpeg's output.
+06:54  alex87: gnomon, i'm very new to awk, so my issue is extracting the variables across multiple lines. i can do the regex, and the maths is very basic
+06:57  gnomon: alex87, the easiest way to extract values across multiple lines is the program pattern where you use a regex to find the value, then assign it to a value, and defer all your math processing until the END block.
+06:57  gnomon: Does that explanation make sense?
+06:58  alex87: gnomon, yep! thanks, i'll give it atry
+--- Log closed Mon Jan 10 08:42:48 2011
+--- Log opened Mon Jan 10 11:13:24 2011
+11:13 --- Users 81 nicks [0 ops, 0 halfops, 0 voices, 81 normal]
+11:15 --- Channel #awk was synced in 104 seconds
+--- Log closed Mon Jan 10 12:48:20 2011
+--- Log opened Mon Jan 10 13:29:42 2011
+13:29 --- Users 82 nicks [0 ops, 0 halfops, 0 voices, 82 normal]
+13:31 --- Channel #awk was synced in 123 seconds
+--- Log closed Mon Jan 10 17:47:21 2011
+--- Log opened Mon Jan 10 17:53:31 2011
+17:53 --- Users 86 nicks [0 ops, 0 halfops, 0 voices, 86 normal]
+17:55 --- Channel #awk was synced in 105 seconds
+--- Log closed Mon Jan 10 20:52:54 2011
+--- Log opened Mon Jan 10 20:53:17 2011
+20:53 --- Users 85 nicks [0 ops, 0 halfops, 0 voices, 85 normal]
+20:54 --- Channel #awk was synced in 106 seconds
+--- Log closed Mon Jan 10 21:19:29 2011
+--- Log opened Mon Jan 10 21:24:51 2011
+21:24 --- Users 85 nicks [0 ops, 0 halfops, 0 voices, 85 normal]
+21:26 --- Channel #awk was synced in 105 seconds
+21:59 --- cuba33ci_ is now known as cuba33ci
+21:59 --- y3llow_ is now known as y3llow
+--- Log closed Tue Jan 11 00:00:53 2011

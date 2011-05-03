@@ -1,0 +1,921 @@
+--- Log opened Sun Dec 05 00:00:32 2010
+00:05  dekhaus: Hi.  Is it possible to put a link in the section of an accordian in addition to the existing link (aka the one within the 'h3' tab) ?  If so - how ?  Thx
+00:06  Rufus: wow, I'm so not good at this heh /me looks at devinrolsen and RTPMatt
+00:08  RTPMatt: problems?
+00:08  mathi: hi
+00:08  mathi: how do I remove all $('span.receiverWrapper') elements except the first one ?
+00:08  RTPMatt: dekhaus: AFAIK, there is not good way to do it
+00:08  Rufus: RTPMatt I'm not sure what I must do to be honest. /me n00bish about jquery and such ;/ Would a link help maybe?
+00:09  dekhaus: ok. any 2nd opinions ?
+00:09  mathi: anyone ?
+00:09  ronx: hey guys, i have a question about using jquery with SharePoint (2007). i've searched everywhere but can't seem to find a good explanation of the difference between _spBodyOnLoadFunctionNames and $(document).ready
+00:09  RTPMatt: mathi: $('span.receiverWrapper').shift.remove();
+00:10  ronx: seems like they are both designed to do the same thing (execute when DOM is loaded/ready)
+00:10  RTPMatt: Rufus: yes,m if you can give a link  thaqt is good
+00:10  Rufus: RTPMatt sending via /notice
+00:11  RTPMatt: ronx: there is a pretty big difference between when the DOM is ready and when the DOM is loaded
+00:11  mathi: RTPMatt, $("span.receiverWrapper").shift is undefined
+00:11  RTPMatt: shift()
+00:12  RTPMatt: sorry, it is a function
+00:12  mathi: RTPMatt, $("span.receiverWrapper").shift is not a function
+00:12  ronx: RTPMatt, any insight into the difference between those two events?
+00:12  Rufus: poor RTPMatt ;) Must be nickname
+00:13  RTPMatt: mathi: you are right, i am bad
+00:13  mathi: RTPMatt, it's not me, it's firebug :-)
+00:14  RTPMatt: try $(..).slice(1).remove()
+00:14  ronx: i'm wondering if they're interchangeable... _spBodyOnLoadFunctionNames is a sharepoint function that adds functions to the body's onload event... whereas the jquery document.ready is jquery's way to do the same thing
+00:15  devinrolsen: mathi $('span.receiverWrapper').not(':eq(0)').remove()?
+00:15  mathi: $('span.receiverWrapper').slice(1).remove();
+00:16  mathi: RTPMatt, devinrolsen ^
+00:16  danheberden: $(me).find('bills').remove();
+00:16  devinrolsen: lol
+00:16  mathi: ahahah ))
+00:16  danheberden: .animate()
+00:16  ronx: RTP here too btw ;)
+00:16  RTPMatt: ronx: the 2 you are lookin at, i am not sure, i dont know anythin about _spBodyOnLoadFunctionNames
+00:16  ultrarapid: RTPMatt: i found the problem, now i just don't know how to fix it with my modal, the problem is that the div that fills with an image sometimes get the wrong height and width, i guess it gets the value from the div width and height before the image is loaded and therefor the modal is off
+00:18  RTPMatt: Rufus: i dont see the search call in there?
+00:18  ronx: RTPMatt: k, nps, gonna debug a little and see if i can tell if there's a diff...
+00:18  ronx: just wondering if anyone in here was doing jquery dev in sharepoint
+00:19  Rufus: RTPMatt $( "#query" ).autocomplete({ source: "js/suggest.php", 	minLength: 1 });  it's what's doing the search
+00:19  RTPMatt: ronx: maybe try them both at the same time and see which is triggered first?
+00:20  RTPMatt: yeah, add: $('#query').click(function(){$( "#query" ).autocomplete('search')}); inder that
+00:20  ronx: RTPMatt: yeah, that's what i'm doing... i threw in some alerts... first test showed _spBodyOnLoadFunctionNames triggered first
+00:21  ronx: but wondering if that's because it was listed first in the script block
+00:21  ronx: e.g. if both are adding to the same body onload event
+00:21  ronx: so i'm changing the order and see if it makes a diff
+00:21  RTPMatt: ronx: .ready does NOT add to the body onload, it should in general fire long before that
+00:21  ronx: problem is this damn sharepoint farm test environment doesn't have enough resources... taking forever to update the scripts
+00:21  RTPMatt: so neither does the other one i guess
+00:22  RTPMatt: the other might be better for your use
+00:22  Rufus: Thank you RTPMatt. Worked like a charm.
+00:22  RTPMatt: i dunno
+00:22  RTPMatt: awesome
+00:22  ronx: yeah sorry didn't mean body onload... meant just whichever onload they were using.. jmaybe it's the same
+00:23  RTPMatt: if it fires before .ready, and it works for your need, it might be the way to go
+00:23  Rufus: uhm, actually... That disabled the option to click one of the items in the autosugest list RTPMatt
+00:24  ronx: if it fires before .ready, i'd be skeptical to use it since i'm using jquery to manipulate the dom...
+00:24  ronx: even if it appears to work fine for me, what if i have some js files cached and it doesn't always work for other users, heh
+00:25  RTPMatt: yeah, that would be my concern...so i guess it just depends on if it works...with .reay at least you know it wirks
+00:27  ronx: yeah, but double edged sword... what if .ready doesn't take into consideration if all sharepoint pages are finished loading... which i doubt, but it'd still be nice to find a good explanation of the exact difference between the two methods
+00:28  RTPMatt: Rufus: can you take out the line so i can check it out with out it again?
+00:28  Rufus: Sure, sec RTPMatt
+00:29  Rufus: Done
+00:29  RTPMatt: Rufus: foir me i get the same error with or without that iline
+00:30  Rufus: Hmm... smth was changed then. Give me a few minutes RTPMatt
+00:30  Rufus: <-- not the only one playing with it it seems
+00:31  danheberden: twss
+00:31  trave: Is anyone familiar with a way to stylize a .buttonset() to work vertically?
+00:31 --- dub54_ is now known as dub54
+00:32  trave: say ive just got 16x16 icons, and want them stacked ontop of eachother, and have the corners of the first use top left and right, instead of left top and bottom, visavi the last one too?
+00:32  Rufus: Ok all fixed now. Thank you RTPMatt
+00:32  RTPMatt: sure thing
+00:32  Rufus: Your line was good
+00:36  ultrarapid: i have a modal which loads images, the modal is centered by calculating window/document size and popup-size. but sometimes when the server is slow the size of the popup is calculated without the image which puts the modal way of the center, any one know any sollution. code: http://jsfiddle.net/SXjBm/
+00:38  RTPMatt: ultrarapid: you could add a .load() to the image that positions it correctly
+00:40  ronx: interesting... when i moved the _spBodyOnLoadFunctionNames underneath the document.ready block, this time document.ready fired immediately before _spBodyOnLoadFunctionNames.. but i got the 2nd alert on top of the 1st (instead of the first alert blocking until dismissing it)
+00:40  ronx: so it seems like i can probably use either one
+00:41  ultrarapid: rtpmatt can i do that when i get the image by an ajaxcall. i mean i get a html-part from ajax which is <img src=".....">
+00:45  RTPMatt: ultrarapid: well, doing a .load() on an image can be a bit trickey, you can add one, you can do something like have the ajax return you <img _src="..."> then add that to the dom, attach the .load() event, the change the _src attr to just src to be REALLY sure that it will fire
+00:47  RTPMatt: actually writing that out gave me a better idea
+00:47  mathi: gtg, thanks for the help
+00:47  RTPMatt: just make it a live/delegate event for the .load() on your image
+00:48  RTPMatt: then it should work just fine
+00:51  ultrarapid: hmm haven't done that before, ill check it out and ask you if i don't get it :p
+00:51  RTPMatt: ok
+00:53  RTPMatt: actually, i just tested it, i don't think load will work with live
+00:54  jmorris: im looking for a tooltip for jquery like this: http://www.nickstakenburg.com/projects/prototip2/
+00:54  RTPMatt: ..it sounds like it should though
+00:54  jmorris: any recommendations ?
+00:55  ultrarapid: RTPMatt do you know if it works with delegate? or is live() needed also?
+00:56  RTPMatt: they work the same way, so if one does not work, i dont think the other will.  let me test real quick
+00:56  flying_fortress: jmorris, like this? http://bassistance.de/jquery-plugins/jquery-plugin-tooltip/
+00:57  jmorris: flying_fortress: im going to have a form in it
+00:57  jmorris: seems like that one disapears
+00:58 --- Unknown[NF] is now known as Unknown[OFF]
+00:59  RTPMatt: yeah, the delegate and live both do not do it for me...that is unfortunate
+01:00 --- kdrsx is now known as kuadrosx
+01:01  ultrarapid: in your previous sollution, why would i want to remove the src from img?
+01:03 --- Unknown[OFF] is now known as Unknown[NF]
+01:03  RTPMatt: well, you need to make sure that you attach your load handler before the image is loaded, so if you add the ser attribute after attaching the load handler, you will be sure that it is attached before the image is loaded
+01:05  ultrarapid: ok then i understand
+01:06  jsilver: guys what library do i use if i want to pop a lightbox of an HTML pages i.e. an IFRAME thansk
+01:07  flying_fortress: you want to open a lightbox like inlay popup containing a secondary website?
+01:07  RTPMatt: jsilver: jquery UI dialogs and thickbox are both good choices
+01:07  gnycl: hey
+01:07  RTPMatt: hi
+01:08  gnycl: Hi all, have a quick question on using a bunch of new shiny JS tools out here
+01:08  flying_fortress: http://fancybox.net/ and http://colorpowered.com/colorbox/ come to mind in this case
+01:08  gnycl: has anyone had any luck using CoffeeScript with Jquery with zencoding technique?
+01:08  gnycl: does it all parse correctly
+01:09  jsilver: ty flying_fortress RTPMatt :)
+01:09  gnycl: ie no probs converting coffeescript to javascript?
+01:09  gnycl: forget i even mentioned zencoding
+01:10  gnycl: wow
+01:10  gnycl: thanks a ton flying_fortress
+01:11  flying_fortress: what for?
+01:11  gnycl: links provided
+01:11  gnycl: very useful hopefully
+01:11  RTPMatt: yw
+01:11  flying_fortress: they were for jsilver but okay
+01:11  flying_fortress: xD
+01:12  jsilver: gnycl: try js2cs
+01:12  jsilver: hehe
+01:12  jsilver: doesnt work on jquery tho
+01:12  jsilver: just javascript lite
+01:12  jsilver: no support for $,
+01:12  jsilver: you could add it
+01:12  gnycl: jsilver: thx
+01:12  jsilver: ;) bp
+01:12  jsilver: np
+01:13  jsilver: thanks all
+01:13  jsilver: ill keep trying
+01:24  ultrarapid: RTPMatt: thanks alot for the help, it worked very well
+01:28  RTPMatt: sure thing
+01:31  Joikus_: hey guys, I have a function umm
+01:31 --- Unknown[NF] is now known as Unknown[OFF]
+01:31  Joikus_: GetAppointmentDetails: function(appointmentID) { $.ajax(..{onSuccess:function(msg) { return msg.d; } ...
+01:31  Joikus_: this doesn't work does it? because of context
+--- Log closed Sun Dec 05 12:03:07 2010
+--- Log opened Sun Dec 05 12:03:16 2010
+12:03 --- Users 628 nicks [2 ops, 0 halfops, 0 voices, 626 normal]
+12:03  SugaSlide: <li class="lobby_panel" id="lobbyid:2"> change to something like <li class="lobby_panel" data-id="2">
+12:03  SugaSlide: then your click would be
+12:04 --- Unknown[OFF] is now known as Unknown[NF]
+12:04  SugaSlide: $(".lobby_panel").click(function(){ var id = $(this).data("id")
+12:04  SugaSlide: and you can sue the id thing
+12:04  SugaSlide: use
+12:05  SugaSlide: or just  <li class="lobby_panel" data-panel="lobby_tooltip:2">
+12:05 --- Channel #jquery was synced in 131 seconds
+12:05  SugaSlide: then $(".lobby_panel").click(function(){ $("#"+$(this).data("panel")).toggle()
+12:06  SugaSlide: i still think you can get away with the whole ID thing if you wrap all the elements in a block
+12:07  SugaSlide: <div class="wrap"> < lobby_panel ></ loby_panel> < lobby_data > </ lobby_data> </div>
+12:08  JKarsrud1: why not use data-attributes to store the tooltip data, and just have one tooltip that positions itslelf relative the to the triggering element, with the text of the data attribute?
+12:10  JKarsrud1: I have no idea what the usecase is, as I just joined, but that would be my suggestion :)
+12:11  SugaSlide: JKarsrud1 http://jsfiddle.net/yg4eg/
+12:11  SugaSlide: lol
+12:12  JKarsrud1: amagad
+12:13  SugaSlide: i had the same reaction
+12:13  SugaSlide: the html is a bit.. messy.. but looks sweet
+12:13  JKarsrud1: Ahh, lulz
+12:13  JKarsrud1: It wasn't a tooltip at all :o
+12:13  SugaSlide: nopes
+12:14  SugaSlide: more a "panel"
+12:14 --- Unknown[NF] is now known as Unknown[OFF]
+12:14  JKarsrud1: Yeah
+12:15  SugaSlide: i think i need to re write this whole thing :(
+12:15  SugaSlide: now none of my triggers seem to be working
+12:15  SugaSlide: bleh
+12:15  JKarsrud1: Was put off by the class name
+12:15  JKarsrud1: It works here?
+12:15  SugaSlide: na not that thing
+12:15  JKarsrud1: Aha
+12:15  SugaSlide: thats some other users Q
+12:15 --- frigginAsleep is now known as frigginSnowedIn
+12:15  JKarsrud1: Lol, too early for me :P
+12:16  SugaSlide: hehe
+12:16 --- frigginSnowedIn is now known as frigginCarebear
+12:16  Back2Basics: Nightbox... that's incredible.
+12:17 --- frigginCarebear is now known as frigginSnowedIn
+12:17  Nightbox: sorry i was away
+12:17  JKarsrud1: frigginSnowedIn: Where you at in all that snow?
+12:17  Nightbox: now im back and reading what sugaslide said
+12:17  Nightbox: Back2Basics: what is amazing ?:D
+12:18  Nightbox: i mean incredible
+12:18  frigginSnowedIn: JKarsrud baraque de fraiture
+12:19  JKarsrud1: frigginSnowedIn: Ahh, okay. Total chaos it seems :)
+12:19  Back2Basics: the whole thing... that's not flash.  just looking at the screenshot and seeing the code to make this.
+12:19  frigginSnowedIn: JKarsrud: the ppl who had to leave early got out, so it's all good
+12:20  frigginSnowedIn: some of us might stay an extra day and pray it's better tomorrow, but I doubt it
+12:21  JKarsrud1: frigginSnowedIn: Good good :) It's like that here in Norway too, only we're used to it ;)
+12:21  Nightbox: SugaSlide: $(".lobby_panel").click(function(){ $("#"+$(this).data("panel")).toggle(); }); [ <li class=​"lobby_panel" data-panel=​"lobby_tooltip:​1">​…​</li>​ ,  <li class=​"lobby_panel" data-panel=​"lobby_tooltip:​2">​…​</li>​ ]
+12:22  Nightbox: when i click, it doesnt work :D
+12:22  frigginSnowedIn: JKarsrud: yeh, google describes this as "light snow", but ppl here have reached a consensus, we're calling it a "freakin blizzard"
+12:22  JKarsrud1: hahaha :D
+12:22  ravenzz: hello
+12:22  SugaSlide: im not totaly sure of the :1 etc
+12:22  frigginSnowedIn: same
+12:22  SugaSlide: try changing it to -1?
+12:22  Nightbox: k
+12:23  frigginSnowedIn: also # = id
+12:23  Nightbox: do i change something in the js ?
+12:23  frigginSnowedIn: ur using classes
+12:23  JKarsrud1: frigginSnowedIn: He is actually looking for an ID
+12:23  SugaSlide: no change to js
+12:23  frigginSnowedIn: oh, I figured the LIs were the example markup, ma b
+12:23  SugaSlide: <li class=?"lobby_panel" data-panel=?"lobby_tooltip:-1">?
+12:24  Nightbox: ah
+12:24  Nightbox: i used - instead of :
+12:24  Nightbox: ok
+12:24  SugaSlide: <li class=?"lobby_panel" data-panel=?"lobby_tooltip-1">?
+12:24  SugaSlide: ye
+12:24  Nightbox:  data-panel="lobby_tooltip:-'.$this->id.'">
+12:24  Nightbox: good ?
+12:25  Superman_: ..
+12:26  Nightbox: <li class="lobby_panel" data-panel="lobby_tooltip:-'.$this->id.'">
+12:26  Nightbox: is this right ? SugaSlide
+12:27  SugaSlide: no
+12:27  SugaSlide: <li class="lobby_panel" data-panel="lobby_tooltip-1">
+12:27  Nightbox: k
+12:28  SugaSlide: <li class="lobby_panel" data-panel="lobby_tooltip-2">
+12:28  SugaSlide: etc
+12:28  Nightbox: its php so its auto :P
+12:29  JKarsrud1: Nightbox: You need to skip the whole : thing, just use - as a separator before the php
+12:29  Nightbox: SugaSlide: $(".lobby_panel").click(function(){ $("#"+$(this).data("panel")).toggle(); }); [ <li class=​"lobby_panel" data-panel=​"lobby_tooltip-1">​…​</li>​ ,  <li class=​"lobby_panel" data-panel=​"lobby_tooltip-2">​…​</li>​ ](chrome)
+12:29  Nightbox: ive done that
+12:29  JKarsrud1: Okay, just checking :)
+12:29  Nightbox: just htat when i press it doesnt toggle
+12:29  JKarsrud1: Then the ID isn't right
+12:30  frigginSnowedIn: what is the ID on the tooltip?
+12:30  JKarsrud1: try storing it in a variable, and then find it
+12:30  pecanha: Hello, I'm trying to reset a select to the default selected option  clicking on a radio button. How can I change the select to the default?
+12:30  JKarsrud1: like var panelID = '#' + $(this).data("panel"); $(panelID).toggle();
+12:30  Nightbox: i mentioned that im completly new to jquery :D i would know how to store it as var in php
+12:30  Nightbox: but in jquery :D
+12:30  Nightbox: i dont
+12:31  JKarsrud1: look at my example
+12:31  JKarsrud1: var = variable
+12:31  Nightbox: i know
+12:31  JKarsrud1: then what's the problem :)
+12:31  JKarsrud1: ?
+12:31  Nightbox: i wrote that before you wrote ;D
+12:31  Nightbox: i mean i was writing
+12:32  Nightbox: $(".lobby_panel").click(function(){ var panelID = '#' + $(this).data("panel"); $(panelID).toggle(); });
+12:32  Nightbox: ?
+12:32  JKarsrud1: Yup
+12:33  frigginSnowedIn: http://jsbin.com/uqedo4/2/edit is this ur intention?
+12:34  Nightbox: yeah
+12:35  frigginSnowedIn: or like this? http://jsbin.com/uqedo4/3/edit
+12:35  frigginSnowedIn: gotta escape ":"
+12:36  frigginSnowedIn: should use id="foo:hover" tbh, to make it even more confusing for the parser
+12:36  JKarsrud1: Ahaha :D
+12:37  Nightbox: im sorry but i cant modify your example to fit mine
+12:37  Nightbox: cna you help ?
+12:37  frigginSnowedIn: should use id="foo:hover" tbh, to make it even more confusing for the parser
+12:37  frigginSnowedIn: ups
+12:38  frigginSnowedIn: im sorry but i cant guess ur markup
+12:38  frigginSnowedIn: can you help ?
+12:38  JKarsrud1: http://jsfiddle.net/yg4eg/
+12:38  JKarsrud1: That's it
+12:39  Nightbox: ive modiufied it
+12:39  Nightbox: w8 a sec :D
+12:40  Nightbox: http://jsfiddle.net/yg4eg/2/
+12:40  Nightbox: frigginSnowedIn: ^
+12:41  lithi: Uh what the hell
+12:41  lithi: @font-face { font-family: "TF2"; src: url("fonts/tf2secondary.ttf");
+12:41  lithi: }
+12:41  lithi: is that supported in css2 or is it new in css3?
+12:42  JKarsrud1: ?@font-face
+12:42  bot-t: font-face, jQuery API - Add elements to the set of matched elements. http://api.jquery.com/
+12:42  JKarsrud1: lol
+12:42  JKarsrud1: ?g "@font-face"
+12:42  bot-t: JKarsrud1, No results found for '"'.
+12:42  Nightbox: dunno
+12:42  JKarsrud1: Nightbox: Anyways, your semantics is screwed up imo
+12:42  Nightbox: you mean my css?
+12:43  JKarsrud1: If that's any kind of list, it's a dl
+12:43  JKarsrud1: Nope
+12:43  JKarsrud1: Your markup
+12:43  Nightbox: which one
+12:43  JKarsrud1: Why isn't one panel inside a whole li, if you need to list them?
+12:43  JKarsrud1: all of it
+12:43  JKarsrud1: No, just your panels list
+12:43  Nightbox: hmm, i did not do it
+12:43  Nightbox: my designer did :D
+12:43  JKarsrud1: Okay, he's a moron
+12:43  SugaSlide: lol
+12:43  SugaSlide: play nice :P
+12:44  SugaSlide: i would think somehting like
+12:44  JKarsrud1: But okay, I don't care, it just doesn't make sense :P
+12:44  SugaSlide: <li> panel and details </li>
+12:44  JKarsrud1: SugaSlide: Yeah
+12:44  SugaSlide: could do somehting like...
+12:44  JKarsrud1: Exactly
+12:45  SugaSlide: nvm
+12:45  JKarsrud1: Nightbox: If you modify your markup to not have the details separate from the panel itself, it makes more sense, and would make it easier for you to code as well
+12:46  Nightbox: im just php coder :D
+12:46  JKarsrud1: no matter, now you can own your designer with semantics :P
+12:47  JKarsrud1: I'm making an example now :)
+12:47  frigginSnowedIn: odd, it returns undefine for .data('panel')
+12:47  frigginSnowedIn: and .data() returns an object that doesn't contain panel
+12:48  SugaSlide: .attr("data-panel")
+12:48  SugaSlide: .data("panel")
+12:48  Nightbox: i cant disagree with you but can i have a solution ? :D
+12:48  SugaSlide: should return the same thing
+12:48  SugaSlide: solution: redo the markup
+12:48  Nightbox: i cant personally
+12:49  Nightbox: i'm not the designer :D
+12:50  quizme: if you have x={'a' : 1, 'b' : '2'}, how do you make a string like  "a=1&b=2"  ?
+12:50  JKarsrud1: Nightbox: Why does that matter?
+12:51  Nightbox: because i cant code in HTML :D
+12:51  JKarsrud1: ?serialixe @ quizme
+12:51  bot-t: quizme, RagnaRoll » Blog Archive » SAMSUNG LED TV'S-Future is here - http://futureblog.annaunivonline.com/2009/05/12/samsung-led-tvs-future-is-here/
+12:51  JKarsrud1: ?serialize
+12:51  bot-t: .serialize(): Encode a set of form elements as a string for submission. http://api.jquery.com/serialize/
+12:51  JKarsrud1: sorry
+12:51  quizme: tyu
+12:51  JKarsrud1: should work, though it says form elements
+12:52  frigginSnowedIn: SugaSlide: yeh, attr('data-panel') does seem to work
+12:53  frigginSnowedIn: wtf, is that id even in the page o.O
+12:53  frigginSnowedIn: oh, it has a : instead of -
+12:56  frigginSnowedIn: Nightbox: there! http://jsfiddle.net/yg4eg/5/
+12:56  Nightbox: k
+12:57  frigginSnowedIn: whoever is responsible for that markup deserves to be put up against a wall, putting semicolons in IDs...
+12:57  JKarsrud1: Still need a markup change
+12:57  JKarsrud1: imo
+12:58  frigginSnowedIn: w/e, I'ma go eat me some spaghetti
+12:58  JKarsrud1: Do it!
+12:58  Nightbox: frigginSnowedIn: is there any way
+12:58  Nightbox: to see the html diff ?
+12:58  frigginSnowedIn: the html diff?
+12:58  Nightbox: because i have the html spreded in dif files
+12:58  Nightbox: :D
+12:58  quizme: jkarsrud1 $.serialize(x) doesn't do that
+12:58  frigginSnowedIn: I didn't change the markup
+12:58  Nightbox: ah
+12:58  Nightbox: just the code/
+12:58  Nightbox: k
+12:58  JKarsrud1: quizme: $(x).serialize()
+12:58  frigginSnowedIn: yeh, note the .replace('-', '\\:')
+12:59  quizme: ok
+13:00  Nightbox: frigginSnowedIn: doesnt work :D
+13:00  Nightbox: i press but doesnt toggle
+13:00  JKarsrud1: Works here
+13:00  quizme: jkarsrud1 that doesn't work either..
+13:01  Nightbox: w8
+13:01  Nightbox: it did ;D
+13:01  JKarsrud1: quizme: Could you paste some code somewhere?
+13:02  Nightbox: frigginSnowedIn: <3 e-hug for you
+13:02  quizme: jkarsrud1 $({'a':1}).serialize();
+13:02  quizme: => ""
+13:03  JKarsrud1: ahh, yeah, that wouldn't work of course.
+13:04  temp01: quizme: how did you get {'a': 1, 'b': 2}?
+13:04  temp01: what are you trying to do
+13:05  quizme: temp01 i'm trying to make a get URL
+13:05  JKarsrud1: he's trying to serialize an object to make it look like this: a=1&b=2 etc
+13:05  quizme: from an object
+13:05  temp01: quizme: if you're using $.get, you can just pass the object as data
+13:05  quizme: temp01 oh....
+13:05  quizme: thnx
+13:06  quizme: ^^;
+13:06  temp01: it automatically serializes it internally using docs#param
+13:06  bot-t: jQuery.param(obj): Create a serialized representation of an array or object, suitable for use in a URL query string or Ajax request. http://api.jquery.com/jQuery.param/
+13:06  JKarsrud1: param was what I was thinking of, dammit :P
+13:07  JKarsrud1: oh well, good thing you were here then, tempy ;)
+13:07  quizme: thnx guys
+13:08 --- JKarsrud1 is now known as JKarsrud_
+13:19  McManiaC: hey, what am I doing wrong here? why is req_success undefined? http://npaste.de/rl/
+13:19  temp01: you misspelled
+13:19  temp01: success
+13:19  McManiaC: seriously?
+13:20  McManiaC: omg lol
+13:20  McManiaC: haha
+13:20  McManiaC: thank you
+13:20  McManiaC: now it works
+13:20  McManiaC: great
+13:22  sean`: epic
+13:24  Rails: hi, anyone know about jquery-rails
+13:29  lithi: google does
+--- Log closed Sun Dec 05 13:39:40 2010
+--- Log opened Sun Dec 05 13:39:52 2010
+13:39 --- Users 642 nicks [2 ops, 0 halfops, 0 voices, 640 normal]
+13:40 --- dub54_ is now known as dub54
+13:40  yareckon: my click function is triggering immediately....
+13:41  yareckon: it's nested inside a function triggered by click itself.... but hopefully that doesn't pass the even through, does it?
+13:41 --- Channel #jquery was synced in 135 seconds
+13:41  yareckon: i.e. I have a function that loads content after a click.... at the end of this function, it also sets up a pager to be clickable
+13:42  yareckon: but the pager links are firing right on the load of the content
+13:42  yareckon: I tried .click and .bind('click' and both fire
+13:42  JKarsrud_: yareckon: paste some code? :)
+13:44  yareckon: http://jsfiddle.net/yN2Xq/
+13:45  yareckon: it's pretty naive stuff, and the mediaArray variable holds the result of an ajax call earlier
+13:45  yareckon: just trying to get it working,,, then gonna rework the embed code, so don't worry about that
+13:46  yareckon: those two click functions at the bottom are firing right away, causing it to instantly page through all the videos returned
+13:50  yareckon: I just want bind to click, not trigger it the function .. I assume I am doing something wrong here.  I supposed a *very* remote possibility is that this is a bug in the old version of jquery 1.2.6 shipped with drupal 6
+13:50  linusoleander: Is the images on the page suppose to be loaded when the $(function(){}) callback is triggerd?
+13:51  temp01: no
+13:51  EnginA: $("<img>").load(func).attr("src", URL);
+13:51  EnginA: load fails to be called if some other resource fail ? (facebookconnect)
+13:51  EnginA: ?
+13:51  temp01: use $(window).load() for that
+13:52  EnginA: I need to know when this image is loaded, so that I can paint it on the canvas
+13:52  linusoleander: temp01: Okey, how do I know when all images a loaded?
+13:52  yareckon: linusoleander, is that a question for me?
+13:52  EnginA: in the developer tools of chrome I can see that this particular image is loaded
+13:52  yareckon: ah, ok, no :)
+13:53  linusoleander: $('img').ready(function()) ?
+13:53  yareckon: JKarsrud_   http://jsfiddle.net/yN2Xq/
+13:54  temp01: linusoleander: $(window).load() fires after the whole page including images have loaded
+13:54  linusoleander: Okey, thanks
+13:55  PY1NB: is there a way to select all elements inside #id when user clicks on #id?
+13:56  linusoleander: Is images still being loaded even if they are hidden? temp01
+13:56  temp01: yes
+13:57  linusoleander: Okey, thanks again
+14:00 --- cjmFloating is now known as cjm
+14:08  Aple: I'm making this basic web-app. I'm trying to make it so when you click '#images a', it sets '#output img' src to the same src that was in '#images a' attr src.
+14:08  Aple: Can anyone browse my code and tell me what I'm doing wrong? It looks right to me but isn't doing anything: http://pastie.org/1349236
+14:09  JKarsrud_: Aple: use e.preventDefault(); in the click event
+14:10  Aple: TL;DR - I want to change a different image's src onclick. http://imgur.com/XKrkB.jpg
+14:10  JKarsrud_: $('#images a').click(function(e) { your code; e.preventDefault(); });
+14:10  Aple: k 1 sec
+14:10  JKarsrud_: pass in e to the handler get the event
+14:11  Aple: Yeah, did so, still nothing. Let me upload a working version of this.
+14:11  JKarsrud_: did you see this: $(selector).click(function(event) {});
+14:11  Aple: http://pressedweb.com/example/app_bug/
+14:12  Aple: Yeah, I added the 'e'
+14:12  JKarsrud_: Aha
+14:12  Aple: Basically I want to be able to click that pizza (or chef) and it replace the src of that "Logo Goes Here" image.
+14:13  JKarsrud_: You need to get the src of the image, not the a
+14:13  JKarsrud_: $(this).find('img').attr('src')
+14:13  JKarsrud_: not $(this).attr('src')
+14:13  Aple: Oh, that makes sense :)
+14:13  JKarsrud_: a doesn't have a source attribute :)
+14:14  Aple: Awesome. Thanks JKarsud_ :)
+14:14  JKarsrud_: np
+14:14  Aple: Yeah, I notice that now. Simplest things blow by me.
+14:15  JKarsrud_: We all make simple mistakes :)
+14:15  Aple: What's the deal with adding the 'e' ?
+14:15  Aple: I see a lot of people add function(e), or function(evt), etc...
+14:16  JKarsrud_: then you get the event (in this case "click"), so that you can get info from it
+14:16  JKarsrud_: like e.target, e.currentTarget etc etc, and it enables you to prevent default behaviour with e.preventDefault, stop propagation; e.stopPropagation etc
+14:16  JKarsrud_: If that makes sense? :)0
+14:22  Chris64: hi all
+14:23  Chris64: in which points do $.post() and a normal browser request differ?
+14:24  Chris64: or is there no difference for server-side scripts?
+14:29  JKarsrud_: no difference for the server
+14:29  Back2Basics: I'm using formwizard plugin - if you don't see step 2 or the questions or the nav buttons then where do you usually look for the problem?  (javascript or html code)
+14:29  Chris64: mh, okay, thank you
+14:31  JKarsrud_: Chris64: Just know that it might depend on the type of server. If you use asp.net you might need to use the inputstream if you post stuff with JSON
+14:31  ispirto: hello, when i load an iframe content (which includes ajax to open new pages), it doesn't continue working on IE8, anyone fixed this?
+14:33  gjvc: hi.  i'm attempting to autorefresh data in a table from a json data source.  what's the best way to start?  i'd rather not use any fancy plugin.
+14:34  Iszak: gjvc, you could use websockets to poll for new data?
+14:35  Chris64: JKarsrud: thanks, no i want to understand a jquery script atm ;)
+14:36  Back2Basics: nvm found it...
+14:37  sean`: Chris64, ajax functions send a specific header along with them
+14:37  Chris64: sean`: great, which one?
+14:37  sean`: This enables you to detect them and serve different content
+14:37  sean`: ?g sean koole detect ajax
+14:37  bot-t: sean`, Detecting AJAX calls (PHP example) - Sean Koole - http://blog.seankoole.com/detecting-ajax-calls-php-example
+14:37  Chris64: thanks
+14:37  Chris64: :)
+14:39  Aple: How do I get the value of a text field with jQuery?
+14:40  ispirto: can anyone take a look at this please? http://ispirto.us/feedback/example1/ after clicking the link "Outside Webpage (Iframe)" in IE 8, it loads the page content, but the inner javascript calls don't work in the lightbox
+14:40  Cork[home]: ?.val @ Aple
+14:40  bot-t: Aple, .val(): Get the current value of the first element in the set of matched elements. http://api.jquery.com/val/
+14:40  Aple: Thanks cork
+14:47  Aple: http://pressedweb.com/example/app/index2.php lines 14-17. I'm trying to make it so you can enter text in that textbox, press "Submit" and jQuery change the value of '#output p' to whatever text was in that textbox.
+14:47  Aple: Any suggestions as to what may be wrong?
+--- Log closed Sun Dec 05 15:35:24 2010
+--- Log opened Sun Dec 05 17:19:28 2010
+17:19 --- Users 651 nicks [2 ops, 0 halfops, 0 voices, 649 normal]
+17:20  beeviz: hey guys
+17:20  beeviz: i've got a json object
+17:20  beeviz: and i need the key to a certain value
+17:20  Nightbox: i have a column called online: if user is online then its 1, if offline its 0; the really problem is that how can i track if user is offline (inactivity, closed browser)
+17:20  beeviz: any idea how
+17:20  beeviz: e.g: {0: 'foo', 1: 'bar'}
+17:20  beeviz: getKey('bar') --> 1
+17:21  RTPMatt_: beeviz if it is an object, you access it the normal way to access an object: object.bar
+17:21 --- Channel #jquery was synced in 131 seconds
+17:21  beeviz: yes. but in this case, 'bar' is the value
+17:22  RTPMatt_: oh, sorry, then: object.1
+17:22  beeviz: yes. i know ;)
+17:22  RTPMatt_: oh, you are trying to get it backwards?
+17:22  beeviz: but i only know "bar" and i need the according 1
+17:22  beeviz: exactly
+17:22  RTPMatt_: then use $.each to look over it and pick out the one you need
+17:22  beeviz: i need something like getKeyByValue()
+17:22  RTPMatt_: Nightbox: so, the problem is keeping that column up to date?
+17:23  Nightbox: yeah, how to know if user closed the tab/browser
+17:23  beeviz: yes. that's the way i'm using. i thought there's a more easy way maybe
+17:23  Afuna: beeviz: it won't work exactly like that, since there's no guarantee that the value is unique.
+17:23  Nightbox: and update the column would not be the problem but tracking that would be
+17:23  RTPMatt_: beeviz: i think that is the best way
+17:23  Afuna: so there might be multiple values of "bar"
+17:23  beeviz: i know
+17:24  beeviz: in case of multiple values, the function should return another array/object
+17:24  beeviz: with all keys ;)
+17:24  beeviz: so i think the $.each() way should really be the best
+17:24  beeviz: thanks
+17:27  RTPMatt_: Nightbox: yeah, there is no way I have found to do that that I _really_ like.  I would probably do something like every time the access a new page rest a timestamp to the current time and assume that if the timestamp is more than X number of minutes old, they are offline.  You can also do a synchronous ajax call in the onbeforeunload to update it, which i really don't like.  I don't know. ...
+17:27  RTPMatt_: ...If someone has a better idea, I would like to hear it.
+17:28  Nightbox: thats what i dont want to do
+17:28  Nightbox: i know that is the "classic" method
+17:28  Nightbox: but im thinking with new web scripts to be able to connect to user
+17:28  Nightbox: keep a link
+17:28  Nightbox: and if the link is broken, change online to 0
+17:29  RTPMatt_: Nightbox: i don't think there is a way to do that that would be friendly to most browsers
+17:29  Nightbox: hmm
+17:29  Nightbox: i thnk of doing a constant ping
+17:30  Nightbox: every 30 sec to user
+17:30  Nightbox: and if ping is timeout update status
+17:30  Nightbox: is that possible ?
+17:30  Nightbox: to ping someone ?
+17:30  Nightbox: hmm
+17:30  Nightbox: get his ip and then do ping ?
+17:31  Nightbox: oh, thats not page related :(
+17:31  RTPMatt_: Nightbox: not really, you could have the user touch the server, but no the other way
+17:32  RTPMatt_: Nightbox: you could (I am NOT saying you should) have the page do an ajax request on a URL every 30 seconds and use that to keep it updated
+17:32  Nightbox: yeah
+17:32  Nightbox: that would be USER Ping :D
+17:32  RTPMatt_: basically
+17:41  keres: Hello people, how can you detect the keyup event not inside of a form?
+17:41  keres: $('body').keyup doesn't seem to work at all
+17:41  keres: It doesn't fire
+17:44  RTPMatt_: keres: The keyup event is sent to an element when the user releases a key on the keyboard. It can be attached to any element, but the event is only sent to the element that has the focus. Focusable elements can vary between browsers, but form elements can always get focus so are reasonable candidates for this event type.
+17:44  keres: Ok, so there is no way to do that?
+17:44  RTPMatt_: not as far as I know
+17:45  sean`: document
+17:45  RTPMatt_: that would make sense
+17:45  sean`: that's the top
+17:45  RTPMatt_: i know i have seen it beofre
+17:45  sean`: no way up
+17:45  RTPMatt_: the document is focusable then?
+17:46  RTPMatt_: it must be
+17:46  ralc: how do i animate one div, over on top of another div, without using fixed positions? fixed positions won't work because it breaks when the user scrolls the page
+17:46  RTPMatt_: yeah http://www.jsfiddle.net/73jQ2/
+17:46  keres: sean`, perfect. Thanks!
+17:47  sean`: ralc, position: absolute?
+17:48 --- RTPMatt_ is now known as RTPMatt
+17:48  sean`: ralc, if you give the wrapper position: relative, you can give the divs you want to animate position: absolute
+17:48  sean`: ?g old cheap flash sean koole @ ralc
+17:48  bot-t: ralc, Sean Koole - Just kidding around.. - http://blog.seankoole.com/
+17:48  sean`: err.. stupid bot-t
+17:48  ralc: hehe
+17:48  sean`: ralc, http://blog.seankoole.com/creating-an-old-cheap-flash-animation
+17:50  ralc: ill try it, but i think i need to show a ss to illustrate my problem
+17:50  ralc: i've already tried absolute positions, but the divs move to some wierd positions
+17:50  sean`: show ass?
+17:51  sean`: ralc, did you see my code?
+17:51  ralc: 'a ss' as in a screenshot :)
+17:51 * bot-t slaps sean` around a bit with a large trout
+17:51  logicpath: does any one have an idea why when i drag a select element, and then click on it (opening its options) it flies to the corner of the screen?
+17:51  bot-t: That's for calling me stupid.
+17:51  sean`: ?fu @ bot-t
+17:51  bot-t: bot-t, fuchs you
+17:51  bot-t: :/
+17:52  RTPMatt: logicpath: so it is selectable and draggable?
+17:53  logicpath: oh, ermm.. no i only have draggable on it :)
+17:53  logicpath: is that the problem?
+17:53  RTPMatt: logicpath: have you set the revert option? http://jqueryui.com/demos/draggable/#option-revert
+17:54  RTPMatt: logicpath: no, i was just a bit confused...which is quite easy for me.
+17:54  logicpath: no i don't need to revert to the original location, it's just when i drag the select element, then i start using it like, selecting an option, the minute i click on it, it just flies away
+17:55  sean`: ?details @ logicpath
+17:55  bot-t: logicpath, Please tell us more about your problem. Describe the issue. Paste your code to a pastebin and give us a link to the URL.
+17:56  RTPMatt: ^^
+17:56  sean`: ?premature optimization
+17:56  bot-t: ?optimisation
+17:56  sean`: ?optimisation
+17:56  bot-t: The First Rule of Program Optimization: Don't do it. The Second Rule of Program Optimization (for experts only!): Don't do it yet.
+17:56  logicpath: oh sure, just a second
+17:57  sean`: LOL see ?html entities
+17:57  bot-t: .html(): Get the HTML contents of the first element in the set of matched elements. http://api.jquery.com/html/
+17:57  sean`: ?html entities
+17:57  bot-t: html &amp; titties
+17:58  RTPMatt: i'll take ape-titties for $400
+18:01  flying_fortress: question can I do $('#id,#nextid').whatever(); ?
+18:01  sean`: yeah man
+18:01  sean`: you can also TIAS, flying_fortress
+18:01  flying_fortress: tias?
+18:01  sean`: ?tias @ flying_fortress
+18:01  bot-t: flying_fortress, Try It And See
+18:01  flying_fortress: which i why I am asking
+18:01  flying_fortress: I did and it doesn't work
+18:01  sean`: Sure
+18:02  flying_fortress: no error no nothing in console
+18:02  sean`: ?details @ flying_fortress
+18:02  bot-t: flying_fortress, Please tell us more about your problem. Describe the issue. Paste your code to a pastebin and give us a link to the URL.
+18:02  flying_fortress: yes one moment
+18:02  flying_fortress: need to upload it
+18:03  flying_fortress: http://nikolasgrottendieck.com/RAQ/ -> step by step -> there is one instance a page is attached which should be loaded using ajax into the right hand side area
+18:04  logicpath: here is the pastie http://pastie.org/1349728
+18:04  logicpath: now what happens is, when i add a select element, and i drag it around a little, then i click on it, it flies to the top left corner
+18:05  sean`: ?jsfiddle @ logicpath
+18:05  bot-t: logicpath, jsFiddle (http://jsfiddle.net) is an online IDE for HTML, CSS, and JavaScript. It is the best way to provide test cases of your jQuery bugs (for support and the bug tracker). Make sure to include the jQuery library (on the left side) and any relevant markup or CSS. You can include external dependencies via the Add Resources tab. You can also mock AJAX requests. These tools allow you to replicate your issue and pres
+18:06  flying_fortress: if I now change the JS to do $('#id').whatever(); $('#nextid').whatever(); it works
+18:07  flying_fortress: js file in question is http://nikolasgrottendieck.com/RAQ/public/blueprint/js/front.php
+18:08  flying_fortress: crap
+18:08  flying_fortress: >.<
+18:08  flying_fortress: forgot what I asked
+18:08  flying_fortress: forget*
+18:08  flying_fortress: I noticed my problem
+18:14  ralc: sean`, i think this shows my problem: http://jsfiddle.net/SdPgd/1/ . How would you move the 'Drag Me' box to the X on pageLoad?
+18:15  sean`: ralc, just do #id
+18:15  sean`: not div#id
+18:16 --- remote__ is now known as remote_
+18:16 --- kurund_ is now known as kurund
+18:18  ralc: sean`, okay i did that, but what else?
+18:19 --- lavish_ is now known as lavish
+18:21  vanillaslice: hello i have this line but it wont animate. it simply changes the background straght away - rather than animating..can anyone see a problem?
+18:21  vanillaslice: function() { $(this).stop().animate($(this).css({"background-position": "bottom"}), 'slow'); }
+18:28  burg: anyone could recommend a history plugin with HTML5 pushState support ?
+18:29  trave: vanillaslice, I've only had luck animating the "background-position" property, when you define both the top and left position in the value.. such as:  $nav.css('background-position', $navBtn.position().left +'px 0');
+18:30  RTPMatt: burg: jquery BBQ
+18:30  trave: the value needs to end up being like: "200px 10px"  or whatevs
+18:31  vanillaslice: cheers bur and trave
+18:32  burg: RTPMatt: it seems to be using hash still... and not pushState
+18:32  RTPMatt: yes, you are corrent
+18:32  RTPMatt: my bad...it is good though
+18:49  janno_: Hi, is it possible, that my livesearch in jquery is blocked by an adblocker?
+18:51  ralc: sean`, could you help me with http://jsfiddle.net/SdPgd/2/?
+18:51  sean`: what do you want to do
+18:55  ralc: i need to move the 'Drag Me' div to the target '#X' div on pageload
+18:55  ralc: i though you got my link before, sorry
+18:58  Hory: ralc: when you set the top and left position of the draggable, it's relative to the element that contains it
+18:58  Hory: put the dragger div directly in the same element as the target
+18:58  krz: if i do .clone(); does the element stay in memory until the page is reloaded?
+19:00  ralc: Hory, yeah that would be a solution, but i need it to stay in a temporary location before pageload
+19:00  Hory: put it hidden in the container
+19:00  Hory: and display on load
+19:00  ralc: i'm using it for a grading system, so if a user has already graded an item, the score holder will 'swoop' up into its position
+19:00  krz: anyone?
+19:01  trave: If I have 75% of 200, (150) im struggling with converting 150 back to the original width of 200, its not 125% like my mind first assumed, its more closely to 133.5% ? ... Is there a simple calculation to find that "reverse" percentage?
+19:01  Hory: also you need to set position: relative on the container and position: absolute on the draggable
+19:01  Hory: it's 150/75*100
+19:05  trave: Thanks Hory
+19:07  ralc: Hory, it's not an option for me to put target and draggable in the same div
+19:07  ralc: i have many many targets, but a limited set of draggables, so it wont do
+19:08  Hory: then put the draggable in the element above the target
+19:08  Hory: put it in body if you like
+19:09  ralc: ah, let me try that
+19:11  JuJuBee: Im trying to learn to use $.ajax  and have trouble with http://pastie.org/1349885  How do I get the return data from the php script?  Currently php just echo's "Success".
+19:12  amf: what call do i use to get the modification date of an image file?
+19:14  ralc: seems to work, thanks Hory
+19:14  Hory: JuJuBee: the script looks ok, what's happening?
+19:15  JuJuBee: I get nothing added to my messageDiv ( I expect "Success" as echo'd from php script)
+19:17  robert2: is there anyway to know when .html() has finished populating an element with content? I need to setup a binding on some of the content after it has been inserted
+19:18  JuJuBee: Hory: any suggestions?
+19:19  Hory: only to specify the datatype as html so jquery doesn't have to guess
+19:19  Hory: but that's probably not it
+19:20  JuJuBee: the dataType is the type of the data being sent to server? or received from?
+19:20  Hory: received
+19:20  JuJuBee: let me try
+19:20  JuJuBee: no change
+19:21  Hory: get firebug and double-check that the content of the php is what you expect
+19:23  JuJuBee: Hory: wow, i just tried to php newTest.php in cli and it worked and now works on web....
+19:24  robert2: hrm this is tough.
+19:24  robert2: async nature of JS is cumbersome sometimes :O
+19:25  Hory: robert2:  shouldn't the element population with content be instantaneous?
+19:27  Hory: or are you talking about an entire process like loading the html from somewhere and then populating?
+19:28  robert2: Hory: making a request through AJAX, and then populating the result in an element.
+19:28  robert2: Hory: takes about >= 500ms to populate the element(I'm missing setTimeout)
+19:28  robert2: seems like a hack tho
+19:28  robert2: ajaxComplete is too soon as well :(
+19:29  Hory: it takes 500ms only for the .html() function after the request to load the content is completed?
+19:31  janno_: Hi, is it possible, that my livesearch in jquery is blocked by an adblocker?
+19:32 --- Putr is now known as Putr|Away
+19:32  robert2: Hory: yeah
+19:32  robert2: Hory: roughly.
+19:32  robert2: Hory: I wonder could it take longer on slower machines.
+19:32  robert2: Hory: my solution is flakly.
+19:33  Hory: well as far as I know the population should be instantaneous
+19:33  Hory: it may be the browser that lags while displaying the change
+19:33  robert2: ok
+19:33  robert2: so 500ms is 'safe'?
+19:33 --- Putr|Away is now known as Putr
+19:33  Hory: depends on what you want to do
+19:34  Hory: if you want to work with the content you don't need a delay
+19:34  Hory: the new content is immediately available
+19:34  robert2: I want to setup a binding for the newly loaded content.
+19:34  robert2: here, it isn't :o
+19:34  Rufus: Greetings. I'm using http://designshack.co.uk/tutorials/creating-a-virtual-jquery-keyboard "linked" to an autocomplete script. Is there a way I could change the layout of the keyboard triggered by an onClick event ?
+19:34  robert2: i'll look over my code again.
+19:34  robert2: maybe i'm overlooking something.
+19:39 --- dub54_ is now known as dub54
+19:56  Rufus: 2-nd post: Greetings. I'm using http://designshack.co.uk/tutorials/creating-a-virtual-jquery-keyboard "linked" to an autocomplete script. Is there a way I could change the layout of the keyboard triggered by an onClick event ?
+19:59  amereservant: I'm trying to better understand how sub-functions work, such as in:http://jsfiddle.net/4dkgN/ .... how are the sub-functions used/called in this example?
+20:04  krz: if i do .clone(); does the element stay in memory until the page is reloaded?
+20:12  sherl0ck: im having trouble with binding jquery-ui resize, to a handle i made - this.box.resizable({ handles:{'se':$('#resize')}}); does seem to do it?
+20:29 --- Unknown[OFF] is now known as Unknown[NF]
+20:30  JuJuBee: Is http://pastie.org/1349885  ok or should the second function be inside the .ready( ?
+--- Log closed Sun Dec 05 20:39:27 2010
+--- Log opened Sun Dec 05 20:39:52 2010
+20:39 --- Users 672 nicks [1 ops, 0 halfops, 0 voices, 671 normal]
+--- Log closed Sun Dec 05 20:43:48 2010
+--- Log opened Sun Dec 05 21:00:00 2010
+21:00 --- Users 671 nicks [1 ops, 0 halfops, 0 voices, 670 normal]
+21:02 --- Channel #jquery was synced in 131 seconds
+21:03 --- thyphus_ is now known as thyphus
+21:12  ecurtis: hi, looking for a little help with Paul Irish's Infinite Scroll Plugin
+21:12  ecurtis: I would like to wrap the loaded content into a div
+21:15  jhine: hi. im pretty awful at jquery but was wondering if someone could help. im trying to create a plugin, which probably doesnt work but when i try to initiate it through $(...).randomimg() i get "randomimg is not a function" in firebug o.o http://jsfiddle.net/bzF4V/
+21:15  krz: if i do .clone(); does the element stay in memory until the page is reloaded?
+--- Log closed Sun Dec 05 21:22:59 2010
+--- Log opened Sun Dec 05 21:28:38 2010
+21:28 --- Users 681 nicks [1 ops, 0 halfops, 0 voices, 680 normal]
+21:28  olvap: i want to select the first td from a tr. $('tr').onclick(function() {$('#console').val('?????')});
+21:28  ajpiano: wat
+21:29  _numbers: does jquery have a script load method like RequireJS
+21:30  Jarda: ?.getScript
+21:30  bot-t: jQuery.getScript(url, [success]): Load a JavaScript file from the server using a GET HTTP request, then execute it. http://api.jquery.com/jQuery.getScript/
+21:30  olvap: i have a table. when i click on a tr i want to get the value of the first column
+21:30 --- Channel #jquery was synced in 138 seconds
+21:30  ajpiano: $("tr").click(function() { $(this).find("td").first().text();   })
+21:31  Jarda: ajpiano: children() :)
+21:31  ajpiano: thanks bro
+21:31  ajpiano: there is not a robust script loading system like require built into jquery
+21:32  ajpiano: that is why there is a version of require that wraps jquery
+21:32  ronx: if i have, for example, <td>some unique text</td>, is there a way to select that <td> element by the inner text?
+21:33  ajpiano: ?:contains @ ronx
+21:33  bot-t: ronx, :contains(text): Select all elements that contain the specified text. http://api.jquery.com/contains-selector/
+21:33  ronx: thx
+21:33  glen1: does anyone know how to get the filename or bit after the .com/ in an url
+21:33  glen1: i googled several methods but there not doing the job
+21:34  ajpiano: glen1: do console.dir(window.location);
+21:34  ajpiano: and then look at its properties
+21:34  glen1: thanks
+21:34  ajpiano: one of them should be the parrt of the url you're looking for
+21:35  glen1: ajpiano, great stuff :) works thanks!
+21:35  jackish: hey guys - is there a way to create a callback for appendTo? I'm creating a multiplayer game in js and need to deal with the different dom rendering speeds in browsers
+21:40  djino: Hi, I have a href link pointing to: (http://localhost:3000/recipes/1/rate?type=Up). I would like to do an Ajax request there (Intercept a user click on the href link). I need to pass two values, the id=1 and type=Up. How would I do that in Jquery?
+21:41  djino: I am particurarily confused about extracting those values
+21:43  cohitre: djino: $.get( $("a").attr('href') )
+21:43  cohitre: no need to extract the individual values if the link is already pointing to your resource
+21:44  djino: cohitre: thanks, yeah,  I guess so, I can parse it on the server side
+21:48  vrtigo: ok guys
+21:48  vrtigo: i need to make an ajax indicator that overlays the div related to the ajax event
+21:48  vrtigo: so like
+21:49  vrtigo: think a list of li's, with prev/next links that update with content via ajax
+21:49  vrtigo: when those links are clicked, the div surrounding the ul needs to have appended an ajax loader gif div
+21:50  vrtigo: the problem im having is that ajaxStart needs to be attached to a specific element, but i want it to be global
+21:50  vrtigo: $.ajaxStart isnt allowed
+21:50  vrtigo: hmm.
+21:51  vrtigo: apparently you cant use $.ajaxSetup to define default beforeSend/complete callbacks
+21:52  vrtigo: scratch that - it actually does
+21:52  vrtigo: problem solved
+21:54  wunderkin: ?cc
+21:54  bot-t: CASE CLOASED >: |
+21:54  wunderkin: heh
+21:55  vrtigo: however
+21:55  vrtigo: >_>
+21:55  vrtigo: not sure how to get a reference to the element that started the ajax call with those callbacks
+21:55  vrtigo: $(this) appears to be the ajax event itself
+21:59  cohitre: vrtigo: make a plugin that takes care of all that
+21:59  cohitre: don't use global callbacks
+21:59 --- lvtrii is now known as mheap
+22:06 --- Unknown[NF] is now known as Unknown[OFF]
+22:09  dyer_: Hello, anyone here have any experience w/ jQuery Mobile?  I have having a heck of a time doing just about anything ,  I would like to bind to simple events, such as change, click, ect, but nothing seems to work...
+22:11  Boohemian: hello, would anyone here be willing to take a look at a page on my website and give me concrete ideas on how best to make it look appealing? it is 12 pages long (from a word document) of text, broken up by 15 subheaders...
+22:15  nolkyan: Boohemian: I think you're looking for #html or #css
+22:16  Boohemian: nolkyan: i thought jquery would help display the text in some type of effect (at least collapsable text)
+22:16  nolkyan: Boohemian: oh, then yes.
+22:16  Boohemian: nolkyan: would you mind taking a look?
+22:16  nolkyan: Boohemian: sure.
+22:17  Boohemian: pm?
+22:17  nolkyan: go for it
+22:19  JuJuBee: If I used json_encode() on my return data array from php, how do I access elements of the arry back in my success : function(d){ }?
+--- Log closed Sun Dec 05 22:23:40 2010
+--- Log opened Sun Dec 05 22:29:07 2010
+22:29 --- Users 689 nicks [1 ops, 0 halfops, 0 voices, 688 normal]
+22:31 --- Channel #jquery was synced in 136 seconds
+22:33  chrisshattuck: If I can identify an element on a page, and I want to select the next element after that that has a certain class, what could I do? It's not a sibling, but it does display after the current element in the DOM.
+22:37 --- mi_ is now known as mi
+22:38  djino: chrisshattuck: http://jqapi.com/#p=find     or children method
+22:39  chrisshattuck: djino: I just found a method that worked, getting the index of the current element using .index(). Thanks for the tip, I'll have to check that out.
+22:39  l4rk: index me shimbers the timers be quick and timely
+22:41  dyer_: So no one has any idea on my jquery mobile question?  Is there another chat I should goto for jqm specific questions ?
+22:42  snover: dyer_: this is it
+22:43  l4rk: dyer_: no this is a free open chat your mileage may vary depending on the date and who's in here
+22:46  dyer_: l4rk: ok, thanks for letting me know
+22:47  Bartzy|work: $cotnainer.html('') is the only way to empty an element ?
+22:48  Bartzy|work: I have an element with other elements in it.. I want to empty it entirely... like <div></div>
+22:49  alcuadrado: you can also delete all its children
+22:49  alcuadrado: but I'll take more time I think
+22:49  alcuadrado: oh, and .empty
+22:49  alcuadrado: ?.empty @ Bartzy|work
+22:49  bot-t: Bartzy|work, .empty(): Remove all child nodes of the set of matched elements from the DOM. http://api.jquery.com/empty/
+22:50  sean`: sometimes clients can really piss me off
+22:50  vrtigo: can you use closest to find the closest element that holds another element?
+22:50  Bartzy|work: and empty() and html('') are the same ? :|
+22:50  sean`: vrtigo, yes
+22:50  vrtigo: like: $('.derp').closest('something somethingdeeper');
+22:50  Bartzy|work: I think html('') should be much faster ?
+22:50  sean`: Bartzy, they work differently,k but the effect is the same
+22:50  sean`: vrtigo, if you wnt to go down, use find
+22:50  sean`: ?source html:
+22:50  bot-t: Line#1692 - "html: true," - http://bot-t.com/jquery.js#1692
+22:51  vrtigo: im currently using parent().find()
+22:51  Bartzy|work: sean`: What's better when I only need to empty an element from contents ?
+22:51  vrtigo: but its not working correctly
+22:51  sean`: Bartzy|work, I use empty
+22:51  Bartzy|work: thanks.
+22:51  sean`: it takes care of memory leaks
+22:51  sean`: if you don't have to worry about that, use .html
+22:52  alcuadrado: Bartzy|work, it'll also makes your intention clearer
+22:52  sean`: also, Bartzy|work, .html uses .emptyu
+22:53  sean`: sometikmes
+22:53  Bartzy|work: .emptyu ? or empty ?
+22:53  OhaiBBQ: empty
+22:53  Bartzy|work: thanks
+22:53  Bartzy|work: I'll use empty
+22:54  sean`: OhaiBBQ, I'll emptyu
+22:56  Bartzy|work: Can I somehow tell if jScrollPane actually added a scroll bar or if no scrolling was needed ?
+23:00  OhaiBBQ: :(
+23:00  topping: hi guys, i am just learning jquery, have a page with tabs and a document.ready function that works just fine in the safari console but not when I load the page.  are tabs tricky like that?
+23:00  topping: the ready function logs to console, so i know it's getting called
+23:01  snover: topping: Are you sure you are not confusing “not working” with “I forgot to load the jQuery UI css”? :)
+23:02  topping: haha, thanks but I don't think so!  wouldn't I have problems using it from console if that were the case?
+23:02  snover: I don’t know what that is supposed to mean exactly since you can’t, like…render your site in the Web Developer console
+23:04  ragefuljoe: can someone point me to a reference on how I can wrap an image around a 3d object? I want to be able to manipulate the object…basically I'm skinning the object I guess
+23:04  snover: ragefuljoe: are you sure you are in the right place?
+23:04  topping: snover: i probably don't know what i am talking about, this front end stuff is new to me.  but when I render the page and bring up the web console, I can do a selector with an .addClass and it changes the display elements just peachy
+23:04  ragefuljoe: is that not possible with jquery?
+23:04  owen1: i try to use $.get to access a websevice. both client and service are localy. this is the error i get: MLHttpRequest cannot load http://0.0.0.0:9394/display. Origin http://0.0.0.0:9393 is not allowed by Access-Control-Allow-Origin.
+23:04  ragefuljoe: ive seen some pretty awesome 3d stuff with jquery
+23:05  snover: ?w same-origin policy @ owen1
+23:05  bot-t: owen1, Same origin policy - In computing, the same origin policy is an important security concept for a number of browser-side programming languages, such as JavaScript. http://en.wikipedia.org/wiki/Same_origin_policy
+23:05  snover: ragefuljoe: I think you are confusing fake 3D with an actual webgl environment
+23:05  ragefuljoe: i dont need it to be 'real' 3d
+23:06  topping: in the document head I have         <script type="text/javascript"> $(document).ready(function() { $("input[type=text]").addClass("ui-corner-all"); console.log("got it"); }); </script>
+23:06  snover: ?p @ topping
+23:06  bot-t: topping, Please paste your code at http://jsfiddle.net/ . If that is down then you may use: http://paste.pocoo.org/+js , or http://fixee.org/
+23:07  owen1: how to tell $.get the service is on the same domain?
+23:07  snover: owen1: The wikipedia article tells you everything you need to know
+23:07  owen1: snover: ok. reading it
+23:08  topping: snover: neat!  learning how to use jsfiddle now
+23:08 --- JoelMcCracken_ is now known as JoelMcCracken
+23:10  dunkel2: yo
+23:11  owen1: snover: ok. it looks like my webservice is on different port. how can i make ajax calls to my service? i can't run the client site and the service on the same port.
+23:11  owen1: both running on my dev machine.
+23:15  topping: snover: http://jsfiddle.net/LXgXn/  I don't know if I'm doing it right though
+23:16  topping: that doesn't make sense, it's adding the class correctly there… sec
+23:16  topping: I guess I need to do the tabs too
+23:16  snover: owen1: If you are not planning on supporting IE, you can use CORS; otherwise, you will need to use JSONP or proxy requests on the server-side
+23:16  vrtigo: can you add a click event onto another click event?
+23:17  vrtigo: like, extend the click event...
+23:17  snover: ?xy problem @ vrtigo
+23:17  bot-t: vrtigo, You're trying to do X, and you thought of solution Y. So you're asking about solution Y, without even mentioning X. The problem is, there might be a better solution, but we can't know that unless you describe what X is. http://www.perlmonks.org/index.pl?node_id=542341
+23:17  owen1: snover: i'll google for those terms. thanks!
+23:17  vrtigo: snover: heh
+23:19  vrtigo: i am writing a plugin that shows an ajax loader gif on some specified div, but need it to fire when that ajax event is fired
+23:19  vrtigo: so if we can do that, then sweet
+23:19  snover: eh?
+23:19  vrtigo: sigh
+23:19  snover: define “it”, and “ajax event”
+23:19  vrtigo: explaining things is not my strong point
+23:20  vrtigo: ok, usecase. a link is clicked, which fires an ajax request to get some content, filling a div
+23:20  vrtigo: i want an ajax loader overlaid on the div when that link is clicked, or that ajax request is fired
+23:20  vrtigo: but has to be generic enough to be in a plugin
+23:20  zedde: so anyone know why jquery ui dialog is only workng once? after closing it it doesn't open anymore :F
+23:21  vrtigo: heres what i have currently
+23:21  vrtigo: http://paste.ubuntu.com/540103/
+23:29  dibs: In IE8 I keep getting an "Access Denfied" error on a page with jquery ui-tabs. Any thoughts on what might cause IE to fail here or how to remedy??
+23:33  Hello71: does it really say "Access Denfied" or is that a typo on your part?
+23:35  serio_: he has a point
+23:35  serio_: note to self, scroll down before typing
+23:36  serio_: this picture is beyond funny: http://jsconf.eu/2010/speakers/paul_irish_lasers.png
+23:37 --- seutje is now known as frigginAsleep^
+23:37 --- frigginAsleep^ is now known as frigginAsleep
+23:37  dibs: Hello71: typo
+23:39  dibs: is there a method for stabbing IE users in the face in 1.4.3?
+23:39  wunderkin: .stab()
+23:39  wunderkin: then .kill() then .die()
+23:39  dibs: $('.face') first?
+23:40  wunderkin: you can choose the weapon and where
+23:40 --- nohk_ is now known as nohk
+23:41  Hello71: dibs: $("#face") would be more semantically correct
+23:42  Hello71: assuming they only have one face
+23:42  wunderkin: some people have more than 1
+23:42  lvh: Any common reason why $('button#feedbackButton').click(function (e) would work but the same thing with a class wouldn't? Assuming the class is also applied, obviously.
+23:43  lvh: Does .click work if the selector matches several elements? (I would assume so)
+23:43  b0x: might have to use each?
+23:43  b0x: er
+23:43  lvh: When?
+23:44  b0x: tho no
+23:44  b0x: maybe ur not defining the selector correctly
+23:44  lvh: $('.giveFeedback')
+23:44  lvh: Not a lot to get wrong
+23:44  b0x: hehe true
+23:45  dibs: Hello71: There could be more than one person viewing the page, hence the class
+23:45  crankharder: does jquery have anything that can help with setting anchors in the url and also retrieving them:  ...foo.html#this_thing -- maybe it's not called an anchor :/
+23:46  Embalmed: can someone tell me why this isn't stopping the setInterval?  It just goes on forever   http://pastebin.com/2kpiX9pB
+23:47  cohitre: ?mdc location @ crankharder
+23:47  bot-t: crankharder, window.location - Returns a Location object , which contains information about the URL of the document and provides methods for changing that URL. You can also assign to this property to load another URL. https://developer.mozilla.org/en/window.location
+23:49  topping: Hmm, i see why my script works in jsfiddle and not in safari, when i do a console.log(<selector>) I get an empty array
+23:49  JuJuBee: Is this ok?  $("div#messageDiv").show().fadeOut(1000);
+23:50 --- willd[a]yble is now known as willdayble
+23:51  topping: $(document).ready isn't really ready
+23:51  coldhead: does anyone know how i can redirect screenreaders to porn sites?
+23:51  hobs: lol
+23:51  fbjork_: what's a good way of triggering loading of AJAX content once the page has been loaded? currently i check if the dom id of a div with data elements exists then trigger the ajax call
+23:51  alcuadrado: it seems ok JuJuBee
+23:51  danheberden: JuJuBee: yes - but no need for divbefore the id
+23:51  bot-t: (9 hours 55 mins ago) <snover> tell danheberden You should have access to 70.32.91.239 now
+23:52  danheberden: JuJuBee: e.g. $('#messageDiv')
+23:52 * coldhead np: slint - nosferatu man
+23:52 * wunderkin needs to start a quotes file
+23:53  wunderkin: coldhead can be #1 ;)
+23:53  danheberden: ?tell snover thank you, works perfectly
+23:53  bot-t: danheberden, Okay.
+23:54  peeps[lappy]: is there a command to create html elements, without yet appending them to anything?
+23:54  JuJuBee: danheberden: thanks.  Seems that 1000 is too fast.  Trying to use it to display a message long enough to read then fade out.
+23:54  danheberden: peeps[lappy]: document.createElement - the jquery way? var $div - $('<div id="zomg">what what</div>')
+23:54  danheberden: $div =
+23:55  RomD: peeps[lappy]:var $div = $('<div id="foo" />');
+23:55  danheberden: then manipulate that, append it, whatever
+23:55  peeps[lappy]: ah, that's easy, thanks ;-)
+23:55  danheberden: twss
+23:57  Embalmed: fbjork_:  document.ready?
+23:57  fbjork_: Embalemed: I was thinking more in terms of triggering an ajax call when a certain condition is met
+23:59  fbjork_: like when i'm logged in or a certain element exists
+--- Log closed Mon Dec 06 00:00:07 2010

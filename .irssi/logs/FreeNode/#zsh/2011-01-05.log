@@ -1,0 +1,200 @@
+--- Log opened Wed Jan 05 00:00:39 2011
+01:23  pielgrzym: how to make my prompt change if I use sudo -s (sudo -i)?
+01:25  thrig: don't export PS1 and etc.
+01:26  pielgrzym: thrig: ?
+01:32  pielgrzym: on sudo -i the prompt changes to root's one. on sudo -s it doesn't :/
+01:32  thrig: stop exporting PS1 and etc.
+01:34  pielgrzym: thrig: in user's bashrc or root's?
+03:06  accel: does zsh offer strings bedoes "" and '' ?
+03:06  accel: *besides*
+03:09 --- peth_ is now known as peth
+03:10  accel: better question:
+03:10  accel: is it possible to write a zsh function foo
+03:10  accel: so that: foo a b c d e f g h
+03:10  accel: ends up being: bar a 'b c d e f g h' ?
+03:11  accel: basically, I want foo to be a zsh function that takes the first argument, then quotes the remaining arguments
+03:24  peth: what's the aim?
+03:25  peth: foo() { bar $1; shift; echo "'$@'" } is what comes to mind, but i'm not sure that's what you need
+03:26  accel: let me try
+03:27  accel: it's almost what I want
+03:27  accel: is there a way I can do:
+03:27  accel: foo a b="cde" f="ghi"
+03:27  accel: and have it result in: a 'b="cde" f="ghi"'
+03:28  accel: i.e. I want the rest of the args to not be expanded; for it appear as is
+03:29  accel: peth: ^ the aim is I'm running a command where the args ends up going into a config file for another prog to ead
+03:29  accel: so I'd prefer to capture things like b="cde" rather than things like b=cde
+03:30  accel: by the time the arg recaches a function, has it already be interpreted, or cna the functio nstill get the raw args?
+03:32  peth: the former. you'll have to quote or escape them
+03:32  peth: i think
+03:33  accel: alright thanks; i'll stop googling for "prevent expansion"
+03:34  peth: there's all kinds of possibilities to make that easier. for example there's a quote-region zle widget you can bind.
+03:35  peth: i see it's bound by default on ESC-"
+03:46  accel: hmm
+03:46  accel: time to read up on wiedgets
+03:46  accel: peth: thanks :-)
+04:51 --- webflo1 is now known as webflo
+06:03 --- whitedragon is now known as Guest9177
+--- Log closed Wed Jan 05 06:25:08 2011
+--- Log opened Wed Jan 05 06:25:29 2011
+06:25 --- Users 150 nicks [0 ops, 0 halfops, 0 voices, 150 normal]
+06:26 --- Channel #zsh was synced in 73 seconds
+--- Log closed Wed Jan 05 08:50:20 2011
+--- Log opened Wed Jan 05 08:50:43 2011
+08:50 --- Users 150 nicks [0 ops, 0 halfops, 0 voices, 150 normal]
+08:51 --- Channel #zsh was synced in 69 seconds
+08:54 --- wuehlmau1 is now known as wuehlmaus
+10:29  tantari: Hi All
+10:30  tantari: How I can list most used today commands ?
+11:03  qbi: fc -ln 1|awk '{print $1}' |sort|uniq -c | sort -rn |head -n 10
+11:14  FauxFaux: Mmm, printf "%c" doesn't seem to output characters; anything less gross than printf "\x$(printf "%02x" $((6+1)))" | xxd #
+11:15  FauxFaux: ?
+11:15  Mikachu: what are you trying to _do_?
+11:16  FauxFaux: Character from a mathematical expression.  Or, print a 4-byte big-endian dword as bytes.
+11:19  Mikachu: that sounds like two different things?
+11:20  Mikachu: ${(#):-$((21*2))} is a bit less gross
+11:20  Mikachu: but it only does the former
+11:21  FauxFaux: Mmm, that's doing something strange.. locale (utf-8) related, perhaps?
+11:22  FauxFaux: Yeah, it's outputing utf-8.  Too smart. :)
+11:25  Mikachu: um, what else would it do?
+11:25  Mikachu: you want characters
+11:29  FauxFaux: No, I want bytes.  e.g. 200 from your version comes out as \xc3\x88, as apposed to \xc8.
+11:31  Mikachu: 11:16:08 <FauxFaux> Character from a mathematical expression.
+11:31  Mikachu: it's not easy when you change your mind ;)
+11:32  FauxFaux: I was using the c definition of character, not the human definition. :)
+11:40 --- alip_ is now known as alip
+11:41 --- alip is now known as alip_
+11:41 --- alip_ is now known as alip
+14:36 --- mikl is now known as robert_
+14:36 --- robert_ is now known as Guest94359
+14:38 --- Guest94359 is now known as mikl
+14:52  nicoulaj: Someone knows which font is used here ? http://plixi.com/p/68008778
+14:53  asyd: frontend?
+14:57  nicoulaj: asyd: do you have a link ? Can't find it
+14:58  asyd: I can't understand why you mean by "frontend":
+14:59  nicoulaj: ?
+14:59  nicoulaj: You are the one talking about "frontend" here :)
+15:00  asyd: ahh
+15:00  asyd: oups
+15:00  asyd: too tired
+15:02  asyd: monaco ?
+15:03  nicoulaj: asyd: ha, looks close, thanks
+15:03  fow: I think it's Inconsalata-g http://www.fantascienza.net/leonardo/ar/inconsolatag/two_inconsolata_20090213.png
+15:03  fow: Monaco has a different l
+15:03  asyd: god
+15:04  asyd: how you can see such differences? :p
+15:04  fow: :P
+15:04  fow: Monaco was my second guess though
+15:07  nicoulaj: fove48: 
+15:07  nicoulaj: oups sorry
+15:07  nicoulaj: fow: thanks
+15:08  fow: you're welcome
+15:59  loz: hi all
+16:00  loz: bindkey "^[" doesn't work, so how can I bind something on C-[ ?
+16:03  anon33_: Lots of keys are bound on a precursor "^[", so I'd choose something different.
+16:04  loz: anon33_: can I see current bounds?
+16:04  anon33_: yeah, type 'bindkey'
+16:05  loz: wow, thanks =)
+16:05  anon33_: might want to page it with less if you're using emacs mode, it's quite long
+16:06  loz: hm, and what excactly zsh using when "$ < file" command executed?
+16:06  anon33_: Dude, no idea.
+16:07  loz: I hear about $PAGER variable, but it is not so.
+16:07  ft: $READNULLCMD
+16:08  loz: ft: yeah, thanks)
+16:18  s`: I saw someone making global grep alias as -G, but when I tried it it didn't work. How do I do it right?
+16:23  loz: s`: maybe G without -?
+16:24  loz: s`: alias -g L='|less' 
+16:24  loz: from archlinux wiki
+16:24  s`: I did it like alias -g "-G"="|grep"
+16:25  s`: Or something else, that I think worked.
+16:26  loz: s`: i've got zsh: bad option: -G
+16:26  s`: alias -g "\-G"="|grep".
+16:26  s`: It works without -.
+16:26  s`: But I need G sometimes, so I want -. :/
+16:26  loz: s`: choose another letter)
+16:27  s`: :|
+16:27  s`: I need all letters.
+16:27  loz: s`: hm "G-" works =)
+16:28  loz: not very handy but..
+16:28  s`: It doesn't look like a flag. ;-D If I won't find anything else, I'll use G-, yeah, but I think I'll keep searching.
+16:29  fow: alias -g -- -G='|grep' # works if you really want it
+16:29  s`: Do want!
+16:29  s`: Also, does anyone have a great two-line PS1?
+16:29  loz: oh, -- of cource)
+16:30  asyd: s`: http://asyd.net/stuff/gnome-terminal+screen+zsh.jpg but nice for me ;p
+16:30  s`: Share for the greater good!
+16:30  loz: s`: do you try all defaults? some of them looks nice
+16:31  s`: PS1?
+16:31  loz: autoload -U promptinit; promptinit; prompt -l
+16:31  loz: to show list, prompt <name> to choose
+16:32  s`: AWESOME
+16:32  loz: =)
+16:34  s`: They're too bloated. :/
+16:35  loz: s`: you can change them for you taste of course
+16:36  loz: hm, mkdir <tab> completes only from directories list, can I get complete from both - directories and files?
+16:36  s`: They're shell scripts, right?
+16:38  loz: s`: you can get they code from $PROMPT var
+16:38  s`: Oh, sweet.
+16:38  s`: Cheat sheet. :
+16:38  s`: ]
+16:40  ft: the code of prompinit themes are in precmd and preexec (likely in the corresponding _functions[] arrays these days)
+16:42  loz: ft: about your solution above, so if command have real option -G, alias will overwrite it?
+16:42  fow: loz, why do you want mkdir to complete files?
+16:43  damex: fow: he was asking for me ;)
+16:43  damex: fow: its for making faster sorting of anime and other stuff :)
+16:44  damex: there are just tons of files like "[aaa] sss #X [ddd][zzz].mmm"
+16:44  fow: That doesn't answer the question :P
+16:44  ft: loz: hm?
+16:44  damex: and its will be more useful if i will can autocomplete creating mkdir with that names of the files
+16:46  Mikachu: damex: you can cheat and type kdir <tab>, then home, m, enter ;)
+16:46  loz: ft: yeah, i just tried it
+16:47  damex: Mikachu: maybe :)
+16:47  fow: loz, yes, that's why I don't use global aliases, though if such a case arises you can use \-G to prevent alias expansion
+16:48  fow: damex, I guess you could start a shell and not load compinit. I'm sure there's a more "proper" way
+16:48  asyd: damex: alias makedir=mkdir
+16:48  Mikachu: asyd: that doesn't actually work unless you setopt completealiases, which is usually more annoying
+16:48  damex: fow: without it there are will not be autocomplete for things like portage or so~
+16:49  damex: asyd: i will try it now :)
+16:49  loz: ft: ok, maybe usefull
+16:49  fow: That's not so bad since it's just for one task
+16:49  asyd: Mikachu: well, if he doesn't have this option, makedir will not herit of mkdir completion, right ? :)
+16:49  fow: loz, I think you're confusing ft and fow
+16:49  fow: damex, well, yes. you would go back to using shells that do load compinit after finishing your sorting
+16:50  Mikachu: asyd: the default is for aliases to expand before completion
+16:50  damex: asyd:  your way not working =/
+16:50  asyd: ok
+16:51  s`: alias l="ls"; alias t="ls -t"
+16:51  loz: fow: mm? damex start this =)
+16:51  fow: damex, honestly I would probably just loop through files sort of like zmv instead of doing it all manually
+16:51  damex: +_+
+16:52  loz: fow: oh, i see, sorr, so similar nicks
+16:53  asyd: Mikachu: what about a function?
+16:54  Mikachu: function works
+16:55  Mikachu: the other option is to bind a key to always complete files, and press that key instead of tab to start the completion (you can then cycle with tab)
+16:55  asyd: I see
+16:55  asyd: too bad it's not possible to override mkdir behavior via zstyl;e
+16:55  Mikachu: maybe it is, i don't know how generic _files is
+16:57  Mikachu: i don't think you can
+16:57  damex: "zstyle ':completion:*' completer _files" ?
+16:58  Mikachu: that's a bit of a sledge hammer
+17:02  ft: just create a keybinding that completes nothing but files. and if a completion is too smart, just use that bindind instead of tab.
+17:04  ft: zle -C complete-files complete-word _generic ; zstyle ':completion:complete-files:*' completer _files ; bindkey '^xf' complete-files
+17:04  ft: like that.
+17:05  loz: ft: what does "^xf" mean?
+17:05  cirwin: Ctrl+x, f
+17:05  loz: oh, cool
+17:05  ft: ^x is C-x in emacs notation, follows be f.
+17:06  ft: by even.
+17:06 * cirwin adds ^x^f to make it harder to get wrong
+17:06  cirwin: thanks ft
+17:06  cirwin: I've been wanting to do that too
+17:06  cirwin: :)
+17:34  loz: does anybody know what key "Prior" is?
+17:38  loz: look like it is PgUp
+--- Log closed Wed Jan 05 18:27:29 2011
+--- Log opened Wed Jan 05 18:32:38 2011
+18:32 --- Users 162 nicks [0 ops, 0 halfops, 0 voices, 162 normal]
+18:33 --- Channel #zsh was synced in 70 seconds
+--- Log closed Wed Jan 05 19:29:13 2011
+--- Log opened Wed Jan 05 19:29:22 2011
+19:29 --- Users 160 nicks [0 ops, 0 halfops, 0 voices, 160 normal]
+--- Log closed Wed Jan 05 19:33:06 2011

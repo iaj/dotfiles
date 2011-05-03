@@ -1,0 +1,1199 @@
+--- Log opened Mon Oct 25 00:00:31 2010
+--- Day changed Mon Oct 25 2010
+00:00  arosen: If I have a two dimensional  dictionary how would I check to see if I have something in the first column of it. For example if I had a = {} a[car, mpg] = 10; Now I want to display all the cars that = bmw ?
+00:00 * arosen so car = bmw; mpg=10; (before that line)
+00:01  papna: arosen: That isn't a 2d dictionary, that's a dict with tuples as keys.
+00:01  papna: arosen: You'd have to do a for loop over the whole dict to do that.
+00:02  Aufwind: Let's say I eant to crawl a page and get the page by urllib and store it in the variable html. I seem to have problems with special characters like ä, é  and so on. When I write the content of html to a file these characters are missing...
+00:03  Aufwind: How do I handle such characters?
+00:03  papna: arosen: That datastructure isn't super-suited to what you want to see. Perhaps you want a collections.defaultdict(dict) or a a database.
+00:05  Ademan: I second the database recommendation
+00:06  arosen: papna: do you mean like sql or something?
+00:06  Ademan: arosen: yes, you can probably use the SQLite that CPython ships with
+00:07  arosen: papna: How would I even loop over that dict with tuples as keys if I don't know the second column value?
+00:07  Ademan: arosen: cars.iterkeys()
+00:08  papna: arosen: `for (make, mpg), value in d.iteritems():`
+00:08  bsod1: do you know any pyparsing examples for tags like bbcode?
+00:08  yaomtc: I have the 64-bit distribution of Python for Windows. Will the 32-bit Windows installer for the mx Base Distribution work?
+00:09  htoothrot: arosen, sqlite would be better for this, imo
+00:09  Ademan: papna: from what I saw of his dict, he wants   for key, count in cars.iteritems():   and then unpacks key into car, mpg
+00:11  Ademan: hey cool you can do nested unpacking
+00:11  Ademan: arosen: `for (make, mpg), count in cars.iteritems():` is probably what you want
+00:13  bob2: Aufwind: time to use an html parser like lxml.html or beautifulsoup
+00:13  Aufwind: bob2: I do use lxml.html
+00:13  arosen: Ademan: I think my example for this is incorrect so say  a[firstname, lastname] = age; Now I want to check to see if  a name bob as a first name. How would that be done?
+00:13  bob2: Aufwind: (getting unicode strings from html is hard and fiddly, those libraries automate it)
+00:14  bob2: Aufwind: pastebin your code?
+00:14  Aufwind: bob2: That's a lot. Wait a sec please...
+00:15  Ademan: arosen: similarly I think.    for (first, last), age in people.iteritems(): if first == 'bob': return age
+00:15  Ademan: or whatever you'd do when you found the right person
+00:15  arosen: Ademan: what would last equal though?
+00:15  arosen: Is there a wild character for this?
+00:16  Aufwind: bob2: http://fpaste.org/Fm2V/
+00:17  Ademan: arosen: if you had a dict {('bob', 'saget'): 54, ('john', 'doe'): 92}  the first time through that loop first would be bob, last would be saget, and age would be 54, then we check if first is bob, it is, so we return age
+00:17  damd: Aufwind: you should get accustomed to the python naming conventions :)
+00:18  Aufwind: damd: I think there is much more for me to learn, then only the naming conventions. ^^
+00:19  jasonx: can anyone think of a list comprehension that would give [1, 2, 4, 8, 16.. N] ?
+00:19  arosen: Ademan: Ah isee thanks!
+00:20  Ademan: jasonx: [2*x for x in irange(N/2)] ?
+00:20  kerio: jasonx: [2**i for i in range(...)]
+00:20  kerio: er, yeah, 2*i
+00:20  jasonx: thanks
+00:20  Ademan: kerio: no wait you were right
+00:20  kerio: dammit Ademan making me reconsider myself
+00:20  Ademan: :-p
+00:22  Ademan: I saw evens instead of powers of two for some reason...
+00:22  arosen: Ademan: Last why do we do we need, age ? (I see it doesn't work as I want if I don't but that) but what does that exactly mean by having that there?
+00:22  arosen: s/Last//'
+00:23 * arosen sorry let me re ask that
+00:24  arosen: Why do we need ,age here "for(first, last), age in a.iteritems():", I see that If I don't put age it prints first as ('john', 'doe'), what exactly does having age there mean?
+00:25  Corollax: Can python string format specification appropriately detect significant figures? I'd like to format a float to display up to two decimal places, but only if they are significant.
+00:26  htoothrot: arosen, it's unpacking tuples, in this case, ((first, last), age)
+00:26  htoothrot: so when you only have two indeifiers to unpack into, it assigns the first one to the whole tuple
+00:26  htoothrot: ugh, identifiers rather
+00:26  Cam: Corollax; Make a function for it. signif(arguement)
+00:27  Cam: Or, sigfig as my chemistry teacher liked to say.
+00:27  Corollax: Cam: I was hoping there was something a little bit more elegant.
+00:27  Ademan: arosen: what htoothrot said, I would explore unpacking on your own in an interactive interpreter
+00:27  Cam: Corollax; No, you were hoping for something easier
+00:27  Corollax: Cam: I've already got it implemented. So no, I was not. =P
+00:27 --- ricky is now known as Guest33288
+00:27  Cam: Corollax; then what is wrong with your implementation?
+00:28  Corollax: It's difficult to read. code should be legible for maintainability purposes. Since part of the data is not under our control, it's best to try to avoid tying our implementation to quirks of the data.
+00:28  Corollax: And moreover, reinventing the wheel poorly tends to be a poor choice -- better to find if somebody already did it.
+00:29  Cam: Corollax; I see.. I would still go with writing your own readable function. I, personally, don't know of a library that has that function.
+00:29 --- ricky_ is now known as ricky
+00:29  Corollax: Unusual, but thank you for the response.
+00:29  Cam: Corollax; key word being "personally" :)
+00:30  htoothrot: arosen, also, here's a simple sqlite example, http://codepad.org/bxuY5SeU i'm not sure what you're working on so i don't know if i'd go so far or not
+00:30  arkanes_: the default float display does only display significant digits
+00:30  Corollax: My biggest concern is that personally implementing things tends to create bugs with one-off errors and edge cases. Better to go with a ready-tested library function should it be available
+00:30  arkanes_: although using a definition of "significant" which is probably entirely unlike the one you want
+00:31  htoothrot: but it also dislays more than 2
+00:31  htoothrot: 2 places rather
+00:31  davekong: Is there some way to get pygments to give haskell syntax highlighting?
+00:32  lfaraone: I'm running tests against built python modules as part of an external package build process. If I'm testing pure-python modules, is there anything bad about calling "PYTHONPATH=$(shell ls -d $(CURDIR)/build/lib* | head -n 1) python run_tests.py"? S
+00:33  ultimatebuster: what's the %format for a boolean value?
+00:34  Hakugin: Hey all
+00:34  ultimatebuster: what's the %strformat for a boolean value?
+00:35 --- elake is now known as etank
+00:36  arosen: htoothrot: thanks that is helpful :D
+00:36  CodingDistrict: f
+00:37  ultimatebuster: %f?
+00:37  spinningcompass: ultimatebuster: print '%s' % ('True' if True else 'False') :)
+00:37  ultimatebuster: that's float..
+00:37  ultimatebuster: ..
+00:37  ultimatebuster: find
+00:37  ultimatebuster: fine*
+00:37  ultimatebuster: %s str(boolvalue)
+00:37  ultimatebuster: :P
+00:37  _habnabit: Um.
+00:37  _habnabit: %s calls str().
+00:37  _habnabit: You don't need to do it twice.
+00:43  rubyruy: is it possible to get the filenemae/linenumber of an ast.Node from the 2.5 compiler module?
+00:44  rubyruy: actually just the filename would do
+00:46  rubyruy: oh wait... nvm it's all there durr
+00:53 * mar77i gives rubyruy a rubberduck :)
+00:54  rlb: If you have a dir foo/ with foo/bar.py and foo/stat.py, is there a way to import the global stat module from bar rather than foo.stat?
+00:55  rlb: s/from bar/from bar.py/
+00:55  bob2: in 2.6+, yes
+00:55  bob2: in <=2.5 it's best to not collide with stdlib module names, alas
+00:57  bob2: Aufwind: ah, you didn't do the thing I thought you did
+00:57  bob2: Aufwind: do you get an exception, or do they just silently disappear?
+--- Log closed Mon Oct 25 01:05:01 2010
+--- Log opened Mon Oct 25 01:05:29 2010
+01:05 --- Users 704 nicks [0 ops, 0 halfops, 0 voices, 704 normal]
+01:06 --- nej|BRB is now known as nejucomo
+01:06  bob2: newlines probably work, anyway
+01:06  andrewmac44: well either way, is there any separator characters that can be used to put multiple commands on one line
+01:06  nejucomo: What's the hip new way to package python?  distutils? setuptools? distribute?
+01:06 --- Channel #python was synced in 97 seconds
+01:07  Ademan: nejucomo: don't forget pip
+01:07  Ademan: I think it's between pip and distribute right now
+01:07  nejucomo: Ok.
+01:07 * nejucomo investigates pip.
+01:08  CodingDistrict: ok
+01:09  bob2: pip is an installer
+01:09  _habnabit: andrewmac44, yes, but that's solving the wrong problem.
+01:09  _habnabit: andrewmac44, don't use exec.
+01:10  andrewmac44: why?
+01:10  andrewmac44: same reasons not to use eval() in javascript? its "dangerous" ?
+01:10  _habnabit: 16:05:20 < bob2> 99% of the time wanting to use exec is a sign that you need some other python feature :)
+01:11  _habnabit: Python's metaprogramming capabilities are good enough that exec is basically worthless.
+01:11  andrewmac44: not when you receive a packet with python code in it and you need that executed
+01:11  andrewmac44: seemed to fit that situation perfectly.
+01:11  _habnabit: Yowza.
+01:12  _habnabit: Well, enjoy your system getting compromised.
+01:12  andrewmac44: the risks are obvious, i would never have overlooked that
+01:12  Diverdude: When using pygst to interface to the webcamera, is it then possible to somehow get a reference to the array holding the frames ?
+01:13  _habnabit: Letting someone exec code is basically giving them full access to your system.
+01:13  nejucomo: andrewmac44: You should probably install the downloaded python in a well-known path, then import it, then call a well-known api.
+01:13  nejucomo: (While of course keeping security in mind.)
+01:14  _habnabit: What
+01:14  andrewmac44: yes, but I'm coding a sort of remote console.. so if someone bypasses the security my system is compromised regardless..
+01:14  _habnabit: Welp,
+01:14  _habnabit: Have fun I guess.
+01:14  nejucomo: andrewmac44: Again, I recommend using module imports instead of eval.
+01:15  Articate: I'm thinking of adding an error module in my project
+01:15  Articate: simple 'error in <where>: <msg>' I was thinking, with an exit code
+01:15  andrewmac44: look I've been down this path with every other language I've coded in, I know the risks, but there are select situations when exec() and alike save a lot of time.
+01:16  Articate: I was thinking to keep it simple to pass it as error("something", self) from elsewhere in the code
+01:16  andrewmac44: anyway, newline appears to working, I appreciate the assistance.
+01:16  Articate: how can I derive something useful from the instance passed to the error module?
+01:16  bob2: http://effbot.org/media/downloads/librarybook-core-modules.pdf shows how to use exec, anyway
+01:16  tos9: Articate: er, are you just referring to logging tracebacks...?
+01:17  Articate: not really
+01:17  Articate: because this will be errors raised by my code
+01:17  mohaned: Hey guys, do you know of a good crypto library in Python that runs well on windows, supports at least RSA and AES256 and doesn't require OpenSSL to be installed system wide, like can work with the DLL files in the app directory if it's an OpenSSL wrapper?
+01:17  Articate: I could of course use "raise"
+01:18  _habnabit: mohaned, what are you encrypting?
+01:18  tos9: Articate: Uh, that's still logging.
+01:18  bob2: Articate: raise + logging at the top level might be simpler
+01:18  mohaned: I'm encrypting audio messages for users.
+01:18  _habnabit: mohaned, so why not just use SSL?
+01:19  mohaned: I'm using public key cryptography to ensure the audio messages are only decyrptable to the user they were intended to.
+01:19  jasonx: is it possible to handle more than one exception in a single block?
+01:19  bob2: jasonx: yes
+01:19  mohaned: cause the files need to be stored on the server in encrypted form
+01:19  bob2: jasonx: except (Foo, Bar), e:
+01:19  jasonx: thanks
+01:19  mohaned: and decrypted by the client with its own private key
+01:19  bob2: jasonx: or 'except (Foo, Bar) as e:' in 2.6+
+01:19  _habnabit: Yep, sounds like you want SSL.
+01:20  Articate: is that mandetory or just added in 2.6+, bob2?
+01:20  mohaned: How's SSL gonna work for that since it's not relatime communication.
+01:20  mohaned: realtime
+01:20  _habnabit: Why are you storing them encrypted.
+01:20  bob2: Articate: the second syntax? mandatory in 3.x+, optional in 2.6+ afaik
+01:20  Articate: also, tos9, bob2, what do you mean when you say "logging at top level"?
+01:20  mohaned: It's for a secure audio posting service for twitter.
+01:20  _habnabit: ... yes.
+01:21  mohaned: except it uses private servers
+01:21  Diverdude: When using pygst to interface to the webcamera, is it then possible to somehow get a reference to the array holding the frames ?
+01:21  _habnabit: 16:20:28 < _habnabit> Why are you storing them encrypted.
+01:21  bob2: Articate: create a subclass of Exception called ArticateException, and have your errors inherit from it
+01:21  bob2: Articate: at the top level, have an 'except ArticateException, e:' block that will capture all your exceptions and print the custom message
+01:21  bob2: Articate: that way you get your output for your errors, and normal tracebacks for everything else
+01:21  mohaned: _habnabit: so not even the adminis hosting the server can decrypt the private messages
+01:22  bob2: storing them like this doesn't seem unreasonable
+01:22  _habnabit: mohaned, um. They wouldn't need to decrypt the message to get it in the first place.
+01:22  _habnabit: mohaned, if they have physical access to the machine, they can get the data. Period.
+01:22  bob2: obviously the admins can pwn you, but it raises the bar abit
+01:22  mohaned: well, not quite
+01:22  mohaned: basically here is what is going on
+01:22  _habnabit: What do you mean 'not quite' ?
+01:23  mohaned: We have a twitter client that generates a 1024 bit public and private RSA key for each twitter session.
+01:23  bob2: wtf is a twitter session
+01:23  mohaned: and it submits the public key to our server.
+01:23  mohaned: our custom client supports sending audio messages in tiwtter by URLs
+01:24  mohaned: twitter
+01:24  mohaned: so what our client does is, it looks up the public key for the client it's sending the direct message to
+01:24  mohaned: and then generates an 256 bit AES key for encrypting the actual audio
+01:24  _habnabit: This sounds like waaaay too much effort.
+01:24  mohaned: and then encrypts the AES256 key with the public key
+01:25  mohaned: with the public key of the user it's sending the dm too, that is
+01:25  bob2: ok, so nothing to do with twitter
+01:25  _habnabit: Generate an SSL certificate, submit the public key, check the client cert fingerprint when they connect.
+01:25  mohaned: and stores the resulting file on the server
+01:25  bob2: you just want to be able to send encrypted files to random people.  can you insist users generate a gpg key?
+01:25  _habnabit: Nothing special needed. SSL is just fine.
+01:25  bob2: or do you control the client?
+01:25  mohaned: I can't insist that
+01:26  mohaned: we control the client and it has to be streamlined
+01:26  bob2: then include gpg in the client
+01:26  mohaned: any python bindings available?
+01:26  bob2: dozens
+01:26 * _habnabit waves his arms in the air.
+01:26  mohaned: nice, thanks
+01:26  bob2: http://wiki.python.org/moin/GnuPrivacyGuard
+01:27  _habnabit: You're really making this vastly more complicated than it needs to be, but okay.
+01:27  _habnabit: It's your own time you're wasting.
+01:27  bob2: but it does sound relatively pointless, the admins can easily compromise the user data
+01:27  bob2: assuming they ever see the plaintext
+01:27  Articate: bob2, that's a sexy way of doing it - thanks :)
+01:27  mohaned: all they can do is find the public keys
+01:27  _habnabit: They have *physical access*.
+01:27  mohaned: yeah, to their server
+01:27  bob2: mohaned: where are the files encrypted?
+01:27  mohaned: on the client's hard disk
+01:30  mohaned: thanks guys
+01:30  mohaned: lol
+01:31  mohaned: bbl
+01:31  bob2: I hope you're not architecting your product based on irc conversations
+01:31  _habnabit: hahahah
+01:31  mohaned: I'm gonna attempt architecting it based on gpg
+01:31  mohaned: I'm hoping I can just include a portable version and include it with py2exe
+01:37  Articate: bob2, you wouldn't happen to have an example of subclassing exception?
+01:37  Articate: like, would I have to import my subclassed exception into all places I want to use it?
+01:37  bob2: Articate: class ArticateException(Exception): pass
+01:37  bob2: Articate: yes, exceptions are normal classes
+01:38  naquad: i need something able to maintain plugins (list existing, enable/disable, trigger events, etc...) for script. are there any libraries for that?
+01:38  bob2: Articate: the only exceptions you don't need to import are the builtin ones like KeyError - and you don't need to import them for the same reason you don't need to import dict and list
+01:38  Articate: yeah
+01:39  bob2: naquad: twisted.plugin if you're already using twisted
+01:39  naquad: bob2, i'm not
+01:39  bob2: or are willing to copy it
+01:40  naquad: to be honest all my python expirience is reading tutorial and couple of simple scripts, so i need something dead simple
+01:42  papna: I've written at least two programs which use Twisted only for twisted.python.plugin
+01:43  davetoo: whassat do?
+01:44 * davetoo searches teh friggin' web
+01:44  bob2: let people put python code in a dir called whatever/plugins anywhere in PYTHONPATH, and then find them
+01:44 --- ultimatebuster is now known as PWNNA
+01:44  davetoo: *nod*
+01:44  bob2: all the other bits naquad wants are either easy or fairly app-specific (what does enable/disable mean?)
+01:45  bob2: naquad: do you already have these plugins written and in a module?
+01:48  Aufwind: bob2: Sorry for afk. They silently disappear...
+01:48  bob2: Aufwind: hm
+01:49  Aufwind: bob2: like this: naîve -> nave
+01:50  naquad: bob2, i don't want modules, i don't want PYTHONPATH and other crap. what i want is to have a bunch of classes in some dir that subclass something and this way they become plugins. they have some interface they must follow. the end. as simple as that
+01:50  bob2: er, anyway
+01:50  bob2: no need to be rude
+01:51  bob2: if you're new to python, I'd suggest stressing less and just writing the plugins
+01:51  bob2: put them in a yourpackage.plugins module
+01:51  bob2: do the enabling/disabling and event stuff
+01:51  naquad: bob2, if was rude i appologize, just after ruby & perl i couldn't even imagine such problem can exist
+01:51  bob2: haha
+01:52  naquad: bob2, i.e. in ruby i can define some class which has inherited hook method and it makes my life 100 times easier
+01:52  bob2: I'm not sure what you're claiming is the problem
+01:53  Ademan: object is a builtin not a keyword right? so foo.object is valid?
+01:53  bob2: yes
+01:53  bob2: naquad: twisted.plugin is a complete implementation of dynamically loading python classes from files at runtime
+01:53  bob2: you can read/adapt/copy from that
+01:54  naquad: bob2, can i take some file and put it into my project so there'll be no dependecies except bundled ones?
+01:54  amstan: how can one make a terminal application ala irssi in python, something where i want to input commands one line at a time, but while i'm typing other lines can be outputted
+01:54  bob2: you'd need to make it not use zope.interface
+01:54  Aufwind: Is there a way to str.find(somestring) but ignoring the case of he string?
+01:54  Ademan: amstan: urwid, I'm using it right now actually
+01:55  Ademan: it seems really nice
+01:55  bob2: naquad: but that's a minor part of it, the important bits are scanning sys.path and poking the modules
+01:55  amstan: Ademan: can it be integrated with twisted, to more more accurate, ssh from twisted?
+01:55  bob2: Aufwind: s.lower().find(somestring.lower())
+01:55  bob2: amstan: twisted.insults
+01:56  Aufwind: bob2: Thanks ^^  I thought of that but hoped there would be a more pythonic way ^^
+01:56  Ademan: amstan: http://excess.org/urwid/reference.html#TwistedEventLoop
+01:56  Articate: "TypeError: exceptions must be old-style classes or derived from BaseException, not NoneType"?
+01:56  Articate: I thought I was supposed to inherit from Exception, not BaseException
+01:57  armence: What is the recommended way to connect to a mysql database?
+01:57  armence: I know MySQLdb is not well loved
+01:58  bob2: Articate: you can't raise None
+01:58  bob2: Articate: which is what it things you're doing - pastebinz?
+01:58  bob2: armence: _habnabit wrote oursql to replace it
+01:59  Articate: oh, wait. I forgot to catch it - I suppose that's the problem? :)
+01:59  armence: bob2: thanks
+02:01  Articate: apparently not
+02:01  bob2: Articate: the problem is that you're raising None
+02:01  dang`r`us: heys
+02:01  bob2: pastebinz
+02:02  dang`r`us: can I use slice notation to invert a string? "12345"[-1:0:-1]  is not quite there ...
+02:02  bob2: ::-1
+02:02  dang`r`us: thx
+02:02  dang`r`us: :)
+02:02  Articate: http://fpaste.org/JqoR/
+02:03  bob2: Articate: eh, no need for a custom __init__
+02:03  bob2: Articate: your top level 'except GameException:' will do the printing
+02:04  bob2: but that's the idea - can you pastebin the traceback too?
+02:05  Articate: http://fpaste.org/njDs/
+02:06  bob2: Articate: hah
+02:07  bob2: Articate: class, not def, for GameException
+02:07  Articate: hahaha
+02:08  naquad: bob2, http://martyalchin.com/2008/jan/10/simple-plugin-framework/ - dead simple, but works perfect :)
+02:08  Articate: there we go :)
+02:09  Eevee: ooh, using a metaclass.  I like that
+02:10  Aufwind: I have a 2 dimensional matrix full of ints. I want to convert all ints to strings. I tryed it this way    matrix = [str(n) for m in matrix for n in m] But it doesn't seam to work. ^^ Is it possible to "nest" such list comprehensions?
+02:11  bob2: yes
+02:11  bob2: but do you think it will be more readable than two for loops?
+02:11  kesselhaus: is that right that a multiline match is only possible with re.search but not re.match?
+02:11  Aufwind: I do only need it at one point and it is only a conversion from int to string
+02:12  Eevee: loops would be three very simple lines
+02:12  bob2: for row in whatever: for index, _ in row: row[index] = str(row[index]))
+02:12  Eevee: ^ enumerate(row)
+02:13  Aufwind: Yes I see that. I always do forget the enumeration thing... ^^
+02:13  Aufwind: Thanks
+02:13  bob2: oops, typo
+02:13  bob2: thx
+02:15  Ademan: yay enumerate
+02:15  spasysheep: using python 3.1, -for i in board[int(cupsel)]:- gives *TypeError: 'int' object is not iterable*, but -for i in board[cupsel]:- gives *TypeError: list indices must be integers, not str*.
+02:15  firemanic: hi
+02:16  Aufwind: bob2: What does the "_" mean? Is it a placeholder for "no variable"?
+02:16  bob2: Aufwind: yup
+02:16  Aufwind: bob2 thx
+02:16  firemanic: given timedelta, how can I get total seconds?  timedelta(days=2).seconds returns 0
+02:16  bob2: Aufwind: not enforced by python or anything, just a common name for "I don't care"
+02:16  kesselhaus: hmm, re seems a bit inconsistent .. adding re.M to re.search does not work, while adding it to re.compile does :/
+02:16  Aufwind: bob2 Ah ok ^^
+02:16  bob2: spasysheep: presumably board is a list of lists
+02:16  bob2: spasysheep: er, sorry, a list
+02:17  bob2: of ints
+02:17  DigitalKiwi: _ is gettext, duh!
+02:17  spasysheep: bob2: board is an array of ints
+02:17  bob2: spasysheep: so board[int(cupsel)] is an int, and board[somestring] is a TypeError
+02:18  spasysheep: bob2: yea, I get why it fails when I don't use int(cupsel), but why does it fail when I do use it?
+02:18  td123: is there a function that will return an array containing an array with x,y,r,g,b values from an image?
+02:18  bob2: spasysheep: because iterating over an int is nonsense
+02:18  bob2: spasysheep: and board[int(cupsel)] is an int
+02:18  bob2: td123: yes if you use PIL
+02:19  bob2: DigitalKiwi: too late
+02:19  td123: bob2: do you know the name by any chance?
+02:19  td123: DigitalKiwi: hey :)
+02:19  bob2: nope
+02:19  DigitalKiwi: td123: you broke python!
+02:19  firemanic: does timedelta have a bug?  timedelta(hours=2).seconds returns 7200, timedelta(days=2).seconds returns 0
+02:19  bob2: perhaps you need to loop over getPixel
+02:19  bob2: firemanic: no
+02:20  spasysheep: bob2: i'm confused... I want the for loop to run when 0 < i < board[cupsel]
+02:20  bob2: firemanic: it returns sensible units, not "how many seconds is this"
+02:20  td123: DigitalKiwi: oh no! when?
+02:20  bob2: spasysheep: for item in board:
+02:20  DigitalKiwi: when you -Syu!
+02:20  bob2: spasysheep: or: for item in board[:cupsel]
+02:20  firemanic: bob2 there are 0 seconds in 2 days?
+02:20  td123: DigitalKiwi: oh noez
+02:20  bob2: firemanic: there are 2 days and 0 seconds
+02:20  bob2: firemanic: there are 0 days and 7200 seconds in 2 hours
+02:20  Eevee: firemanic: http://docs.python.org/library/datetime.html#timedelta-objects  'Only days, seconds and microseconds are stored internally.'
+02:20  td123: bob2: that's what I was thinking, but was wondering if there was an existing function :)
+02:20 * spasysheep is suddenly enlightened
+02:20  td123: bob2: thanks
+02:21  spasysheep: bob2: OIC. thanks
+02:21  firemanic: bob2: and you find that shit sensible? it's neither total seconds, or remaining seconds.  it's something in between
+02:21  Articate: how can I print traceback with my error?
+02:21  bob2: spasysheep: if you feel like pastebin'ing your code, there might be some other simplifications possible
+02:22  bob2: firemanic: I didn't express an opinion
+02:22  firemanic: you said it returns sensible units
+02:22  bob2: firemanic: sensible as in largest-avaiable
+02:22  td123: btw, archlinux switched python -> python3 because we will let everyone else follow in our footsteps
+02:23  bob2: arch is insane
+02:23  bob2: Articate: simplest solution is to re-raise after printing (ie a bare 'raise' statement, which re-raises the last exception)
+02:23  td123: bob2: well, python will eventually point to python3 in all distros
+02:23  bob2: Articate: you can use the traceback module to do fancier things
+02:23  bob2: td123: unrelated to the issue at hand
+02:24  td123: bob2: what issue?
+02:24  spasysheep: bob2: http://pastebin.com/PcqqhAVA
+02:24  bob2: td123: all existing code that calls 'python' in the shebang is for python2, and python3 is explicitly incompatible with python2
+02:24  infobob: http://paste.pocoo.org/show/280051/ (repasted for spasysheep)
+02:24  spasysheep: noted.
+02:25  td123: bob2: find . -type f -exec sed -i 's_#!/usr/bin/python_#!/usr/bin/python2_' {} \; :)
+02:25  bob2: helpful
+02:25  bob2: what's the point?
+02:25  DigitalKiwi: is that smiley part of the command? ;D
+02:25  td123: bob2: also, if you use setup.py it automatically inserts it into the shebang
+02:25  td123: bob2: all I'm saying is that we're paving the way for others to follow
+02:26  bob2: it paves the way for nothing
+02:26  td123: why?
+02:26  td123: will python never point to python3?
+02:26  td123: ever?
+02:26  td123: if so, then I agree
+02:26  bob2: not for a long time
+02:26  td123: well then there you go
+02:26  DigitalKiwi: arch, so bleeding edge we're bleeding blood that hasn't even been made yet
+02:27  td123: we will find the errors early on so that debian and others can benefit later when they decide to make the switch
+02:27  bob2: what 'errors' are you talking about?
+02:27  papna: I suspect the shebang line for Python 3 will be /usr/bin/env python3 wellllll into the forseeable future,.
+02:27  bob2: python3 is deliberately and explicitly incompatible with python2
+02:27  halberd: what's the best way to get a padded BINARY string, given an integer?
+02:28  bob2: halberd: probably the struct module
+02:28  td123: papna: that type of shebang will work on all systems
+02:28  halberd: like 5 -> '00101'
+02:28  spasysheep: too many things still use python2, until they have all been replaced / updated pointing python at python3 would break important stuff for people
+02:28  bob2: halberd: bin()
+02:28  halberd: bin doesn't pad
+02:28  DigitalKiwi: td123: yeah but the shebang that works on every other system in imagination doesn't work on arch ;p
+02:28  halberd: I have something a little nuts to do it
+02:28  halberd: ('%(#)0' + str(length) + 'd') % {'#': int(bin(x).split('b')[1])}
+02:29  halberd: surely that's not the best way
+02:30  td123: DigitalKiwi: a simple sed will fix all their issues
+02:30  kesselhaus: .oO( works on all systems ... but not windows ;) )
+02:30  td123: plus archlinux has already rebuilt all of its packages for the python switch
+02:31  DigitalKiwi: but, aur!
+02:31  td123: DigitalKiwi: those are unsupported
+02:31  conley: DigitalKiwi: I didn't have any problems with AUR programs, but they're unsupported anyways
+02:32  Aufwind: How do I avoid this error? http://fpaste.org/fzv7/
+02:32  td123: DigitalKiwi: + aur only began to update since the move was made official
+02:32  Aufwind: Without loosing the strange character i with 2 dots over it?
+02:33  conley: td123: What DE do you use?
+02:33  td123: I don't
+02:33  conley: td123: console only?
+02:33  td123: no
+02:33  td123: I just use xmonad :)
+02:33  armence: So... SQLAlchemy is nice? Bad? Depends?
+02:34  conley: td123: Oh, I like it
+02:34  bob2: armence: sqlalchemy is generally considered to be pretty good
+02:34  conley: Aufwind: All I can tell you is that the double dot symbol is called an umlaut. Other that than, I'm useless :)
+02:35  armence: bob2: And it will take care of concurrency for me won't it?
+02:35  bob2: Aufwind: that's because you're joining a unicode string to a bytestring
+02:35  bob2: Aufwind: u'\t'.join(...) oughta work
+02:36  bob2: Aufwind: (doing the join implicitly decodes the unicode string, and since it hasn't been told what encoding to use, it guesses ascii, which fails if your unicode string contains anything not in ascii)
+02:36  mar77i: when launching my script, I'd like to test if an executable works. how could I accomplish that?
+02:36  bob2: mar77i: try to run it, catch the exception from subprocess
+02:36  bob2: if you insist on not doing that, os.path.*
+02:37  Aufwind: conley it is not an umlaut ^^ ä ö ü are umlaute but not this i with the 2 dots ^^
+02:37  bob2: armence: no
+02:37  bob2: it'll do some stuff for you, but I don't know the details, sorry
+02:37  Aufwind: bob2 But it is not the tabulator that causes the problem, or am i wrong?
+02:38  armence: bob2: That would have been nice... Oh well... :(
+02:40  bob2: Aufwind: it's joining a byte string and a unicode string
+02:40  conley: Aufwind: Oh derp, good catch. It's a trema
+02:40  bob2: it's not a sensible hting to do - u'\t'
+02:40  disappearedng_: General question about redoing an implementation - if I am doing something quite radically different over my project (which is about 2000 lines of code, is starting from scratch better or editing what I have better? Note it's a big reconstruction
+02:41  bob2: do you have tests you trust? :)
+02:41  disappearedng_: bob2: what do you mean
+02:42  disappearedng_: bob2: should I write test cases first?
+02:44  firemanic: I have to implement this option: "-r, --restore restores the previous state stored in the data file" <- where should I write this data file, in what directory?
+02:50  DigitalKiwi: if I had virtualenvs that were made when my system python was 2.6 and want to upgrade that to 2.7, what do i need to do for the virtualenvs? cause don't they have symlinks to 2.6 specific dirs?
+02:51  Aufwind: bob2: I did  u'\t'.join(...)    but I am still getting "UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position 21: ordinal not in range(128)"
+02:52  bob2: Aufwind: hm, can you pastebin the file again, I lost the link
+02:52  bob2: DigitalKiwi: I'd just rebuild it rather than trying to figure it out
+02:52  Aufwind: bob2: sure: http://fpaste.org/fzv7/
+02:52  DigitalKiwi: bob2: oh :(
+02:53  Gjestland: Hi, I'm verry tired and sorry for the stupid question I'm about to ask: How do I print something and then NOT get a line-shift? As in: I have an array: [x_0,x_1,x_2, ...] and want it to be printed as "x_0-x_1-x_2-x_3-....."
+02:53  bob2: Gjestland: sys.stdout.write
+02:53  bob2: Gjestland: or: print foo,
+02:54  bob2: Gjestland: the trailing comma is an elaborate trap that prevents the trailing newline
+02:54  nosklo: Gjestland: print '-'.join(mylist)
+02:55  Gjestland: <3
+02:55  naquad: i've got a module with global variable, how do i set this variable?
+02:55  orbitalcommand: hey i know some python is django all that different
+02:57  bob2: django's a web framework on top of python, so you'll need to learn it, but you're off to a good start :)
+02:57  bob2: naquad: http://www.ibiblio.org/g2swap/byteofpython/read/local-variables.html
+02:57  disappearedng_: I think I have to change 50% of my code, rewrite or start from scratch (almost)
+02:58  bob2: naquad: in a lot (most) cases you want to use an instance attribute, though, so think about which would be clearer/easier to test and read
+02:58  DigitalKiwi: hey you're better off than i was, i didn't know much python when i started django so had to learn them both as i went along >.>
+02:58  bob2: Aufwind: hm?  do you get the same with u'\t'?
+02:59  Aufwind: bob2 You suggested that and i tryed it and i get: http://fpaste.org/HJ5N/
+02:59  naquad: bob2, thank you. i'm still playing with plugins and i want a dynamic base class XD
+03:00  jasonx: given [('foo', 1), ('bar', 2)], is there a function that will return the first tuple where first element is 'bar' ?
+03:00  bob2: Aufwind: that's the whole thing?  it lost all the useful bits :)
+03:00  bob2: jasonx: next(item for item in somelist if item[0] == 'bar')
+03:01  Aufwind: bob2: Yes =)
+03:01  bob2: naquad: I'm suspecting you're getting over fancy :)
+03:01  naquad: bob2, kind of :) just trying is it possible or not
+03:01  naquad: bob2, atm __metaclass__ doesn't trigger :( but it seems to be solvable
+03:04  Aufwind: bob2: The u before '\t'.join(...) didn't seem to help after all...
+03:04  jasonx: bob2 nice trick, so I take it there is no function that would do it directly?  something like find(l, 'bar', key=itemgetter(0))
+03:04  bob2: Aufwind: hard to tell, the traceback is useless
+03:04  bob2: Aufwind: pastebin the current GSCrawler.py?
+03:04  Aufwind: bob2 ok
+03:05  Aufwind: bob2: http://fpaste.org/JDDi/
+03:05  delaney: how do you make a string like '\x001\x9cT\xa9\xb2mG\xad\x90\xff\xd5\xd8-;i\xee' get json encoded literally? r"%s" % the_string doesn't seem to work.  any ideas?
+03:05  Aufwind: bob2: It is in the writeMatrix(...) function
+03:06  DigitalKiwi: jasonx: you can write one!
+03:07  Gjestland: bob2: When using print foo,   I get a space after each symbol, as in: "x_0 - x_1 - x_2 - ..." instead of "x_0-x_1-x_2-x_3...." I know it sounds arbitrary, but it's school related and is auto-corrected by a program needing the correct output. Is there a quickfix for this? :)
+03:08  ts00000: can someone tell me what's wrong with this regex that supposedly works in ruby but not in python?  \b([A-Za-z0-9-]{2,9})+\b -- I want to match multiple groups from an example like XXX-XY blah - State blah
+03:08  nosklo: Gjestland: print '-'.join(mylist)
+03:09  ts00000: re.compile only ends up showing me one of the groups I want to match
+03:09  ts00000: instead of all 4
+03:09  nosklo: ts00000: the regex seems fine.
+03:10  nosklo: ts00000: maybe you're using .search instead of .findall or .finditer
+03:10  nosklo: ts00000: hm, but it should work nonetheless
+03:10  ts00000: I am using search
+03:10  ts00000: like, >>> locreg = re.compile(r'\b([A-Za-z0-9-]{2,9})+\b')
+03:11  ts00000: and then locreg.search('test xx - test xy').groups()
+03:11  nosklo: ts00000: what's on your string? What's the result? What did you expect?
+03:11  nosklo: ts00000: (use a pastebin)
+03:11  Gjestland: nokslo: Thanks, print '-'.join(map(str,vei)) worked, you got me on track :)
+03:11  bob2: Aufwind: that traceback doesn't match the source file
+03:11  abstrakt: does python have typecasting?
+03:11  abstrakt: is there like myIntVar.to_string() or some such?
+03:12  bob2: abstrakt: not really
+03:12  bob2: abstrakt: str(someint)
+03:12  abstrakt: hmm, k
+03:12  bob2: abstrakt: that's not casting
+03:12  abstrakt: k
+03:12  bob2: abstrakt: that's "please return me a new string based on this other object", which python does have :)
+03:13  ts00000: nosklo: http://pastebin.com/RT2XJp0s
+03:13  nosklo: Gjestland: print '-'.join(str(x) for x in mylist)
+03:13  infobob: http://paste.pocoo.org/show/280095/ (repasted for ts00000)
+03:13  Aufwind: bob2 i left some lines out the header with my names and so on. sorry didn't thought about the line numbers...
+03:13  abstrakt: bob2, great that's what I need, thanks
+03:14  Aufwind: bob2: It should match now: http://fpaste.org/MzUp/
+03:14  naquad: can i dynamically construct class?
+03:15  papna: naquad: That's the only way.
+03:15  papna: naquad: What are you doing?
+03:15  naquad: papna, i mean something like: newCls = Class('ClassName')
+03:16  papna: naquad: What are you doing?
+03:16  nosklo: ts00000: I wouldn't expect your result
+03:16  naquad: papna, fooling around :)
+03:16  nosklo: ts00000: does it work that way on ruby?
+03:16  bob2: Aufwind: can you paste the traceback for that?  still doesn't quite line up
+03:16  abstrakt: is there a ternay operator?
+03:16  abstrakt: I don't see one in this list
+03:16  abstrakt: http://www.devshed.com/c/a/Python/Python-Operators/
+03:16  papna: abstrakt: We typically use real if statements.
+03:17  papna: abstrakt: But there is an expression `a if condition else b`.
+03:17  abstrakt: hmm, including the backticks?
+03:17  ts00000: nosklo: dunno, I used rubular to build the regex because I don't know enough about them yet, just to get myself halfway there
+03:17  ts00000: nosklo: I assume if rubular is reporting the 4 matches then it would work that way
+03:17  nosklo: ts00000: the results seem consistent to me
+03:17  papna: abstrakt: No.
+03:18  bob2: forget about backticks.  they do nothing in python.  nothing.
+03:18  antoDeb: i got a problem. i'm making a script to compare 2 databases. I make a select * on a table on database1 and on database2. But the first select is returning some fields of type Pgnumeric as 0 and the real value is 0.833, in the second select is returning perfect. if i change the order is the same problem so is not a database problem
+03:18  naquad: bob2, thanks for help. thats the result: http://pastebin.com/DyJr8567
+03:18  infobob: http://paste.pocoo.org/show/280096/ (repasted for naquad)
+03:18  Aufwind: bob2: The first one was this one http://fpaste.org/fzv7/
+03:18  ts00000: nosklo: you mean on your python it works correctly?
+03:18  antoDeb: plus if i change the first select, putting limit 1 then the result is correct.
+03:19  nosklo: ts00000: no, I mean the results you're getting are what I would expect from the regex
+03:19  bob2: naquad: classmethods are often a code smell in python
+03:19  antoDeb: so if i retrieve all the rows then it change the value of some fields to 0
+03:19  naquad: bob2, alternative to this is implementation of singleton
+03:19  bob2: naquad: lies
+03:19  naquad: bob2, in this case i can't see any other options
+03:20  bob2: hold on
+03:20  papna: "singleton" isn't a good thing.
+03:20  papna: And there's no reason to implement one in a weird way.
+03:20  papna: http://glyf.livejournal.com/70684.html?thread=209948
+03:21  bob2: .pyw files shouldn't be considered plugins, afaict
+03:21  ts00000: nosklo: do you have a suggestion as to how to fix the regex to return multiple groups?
+03:21  naquad: bob2, fixed
+03:22  bob2: naquad: http://paste.pocoo.org/show/280097/
+03:22  bob2: naquad: singletons are for people using languages that can't run code at import time
+03:23  naquad: bob2, your code won't work. see Mount class
+03:23  Aufwind: bob2: Does the traceback match?
+03:24  bob2: Aufwind: that's back to using a string literal instead of a unicode literal
+03:24  antoDeb: anyone worked with postgresql?
+03:25  papna: antoDeb: Ask an actual question.
+03:25  bob2: antoDeb: pastebin your code
+03:25  ts00000: nosklo: I think I figured it out; there is no repeated capture
+03:25  ts00000: nosklo: I just need to use 'findall' and forego groups
+03:27  nosklo: ts00000: I'd do mystring.split() instead
+03:27  Aufwind: bob2: after changing the '\t.join()  to u'\t'.join() I got this: http://fpaste.org/sx26/
+03:28  bob2: Aufwind: I can't help unless you can pastebin the entire file followed by the traceback that matches it
+03:29 --- PWNNA is now known as ultimatebuster
+03:30  antoDeb: bob2 http://pastebin.com/bhpwnbjM
+03:30  Aufwind: bob2: I pasted it again. The Traceback is under the code: http://fpaste.org/SazE/
+03:30  infobob: http://paste.pocoo.org/show/280103/ (repasted for antoDeb)
+03:30  antoDeb: here is my code
+03:30  antoDeb: let me paste the output i'm talking about
+03:31  Aufwind: bob2: Should match now, I checked it :)
+03:32 --- ultimatebuster is now known as Pwnna
+03:33  antoDeb: bob2 here is the output of a row in database1 and on database2 they are the same databases i mean database2 is a copy of database1 http://pastebin.com/AyniCy4V
+03:33  infobob: http://paste.pocoo.org/show/280104/ (repasted for antoDeb)
+03:33  bob2: Aufwind: need to do the same thing with the ' ' literal
+03:33  bob2: Aufwind: ie make it u' ', same with '\n'
+03:34  antoDeb: bob2 the problem is some values are taken like 0 when is 0.8333
+03:34  bob2: antoDeb: 'show create table' on both sides
+03:35  Aufwind: bob2: You mean like this: wFile.write(u'\t'.join([u' '.join(m), y, k, p + u'\n']))
+03:35  bob2: Aufwind: yup!
+03:36  bob2: Aufwind: if you ever try to join a string and a unicode string, it'll do an implcit conversion and fail
+03:36  Aufwind: bob2: Still says: UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position 21: ordinal not in range(128)
+03:36  bob2: or, if you have no non-ascii chars in them, it'll succeed!
+03:36  Aufwind: bob2: Shall I just do it by hand?
+03:36  bob2: Aufwind: pastebin again
+03:37  Aufwind: bob2: http://fpaste.org/AII7/
+03:37  antoDeb: bob2 sorry didn't understand
+03:37  bob2: Aufwind: one of y, k and p are byte strings
+03:37  bob2: Aufwind: print type() of each to see
+03:37  Aufwind: bob2: ok
+03:38  bob2: adios
+03:39  Aufwind: bob2: y <type 'str'> k <type 'str'> p <type 'str'> They all are from type str
+03:40 --- Pwnna is now known as ULTIMATEbuster
+03:41 --- ULTIMATEbuster is now known as ultimatebuster
+03:45  Aufwind: bob2: I solved that by doing p.decode('utf-8'), Thank you for your help =)
+03:47  abstrakt: was this written for a different django version http://south.aeracode.org/docs/tutorial/part1.html ?
+03:47  abstrakt: I'm using 1.2
+03:48  qiyong: does it return after os.system()?
+03:50  abstrakt: unknown command 'schemamigration'
+03:51  abstrakt: whoops wrong chan
+03:51  antoDeb: http://paste.pocoo.org/show/280103/ and this is the output http://paste.pocoo.org/show/280104/
+03:52  antoDeb: i'm trying to compare 2 databases
+03:52  antoDeb: but the problem is that in the first select some data is showing 0 when is actually 0.8333
+03:53  antoDeb: no matter on what database i select first. the databases are exactly the same but in the first select the data isn't showing correct
+03:55  firemanic: how can i check if object is int or long
+03:56  nosklo: firemanic: why?
+03:56  nosklo: firemanic: shouldn't make a difference
+03:57  firemanic: eh, the difference is valid vs invalid input
+03:57  nosklo: firemanic: why would it be invalid?
+03:58  firemanic: because user typed invalid input
+03:58  papna: firemanic: Like what?
+03:58  firemanic: like "asdf" instead of "10"
+03:58  nosklo: firemanic: "asdf" is neither long nor float
+03:58  firemanic: exactly
+03:59  nosklo: firemanic: what will you do with the object if it is a number?
+03:59  firemanic: i will make sweet love to it
+03:59  nosklo: firemanic: and, more importantly, what will you do if it isn't?
+03:59  firemanic: what's with all the questions
+03:59  papna: firemanic: We are trying to understand your problem.
+03:59  nosklo: firemanic: knowing those details is important to give the best solution
+04:00  nosklo: firemanic: usually you don't check types, you just use the variable and everything works automatically
+04:00  mcantor: What is the "right" way to scale the fraction of a variable to "at most" 2 decimal points, or less if the points would just be zeroes?
+04:00  antoDeb: getting this, does someone know about it? ValueError: wrong format or unknown time zone: "BC"
+04:00  firemanic: I am doing ast.literal_eval(sys.argv[1])
+04:00  papna: firemanic: That's foolish.
+04:00  firemanic: why is it foolish?
+04:00  papna: firemanic: Perhaps you want to do int(sys.argv[1])
+04:00  firemanic: no i don't
+04:00  papna: firemanic: Because you haven't a clue what literal_eval will return.
+04:00  firemanic: int('0x10') is invalid
+04:00  nosklo: firemanic: What's parameter 1? What does it mean?
+04:01  firemanic: which is why i want to check if it returned int
+04:02  firemanic: so much questions and zero help
+04:02  firemanic: ..
+04:02  nosklo: firemanic: you're refusing to answer
+04:02  firemanic: what's the answer?
+04:03  nosklo: firemanic: I want to know what you're doing with the number afterwards, and what you'll do if it is not a number
+04:03  firemanic: you asked me a bunch of silly questions, told me to use int, I told you why I don't want to, and then you both shut up
+04:03  nosklo: firemanic: with that info I can answer the best way of check/convert
+04:03  nosklo: firemanic: So I'm waiting for that feedback from you
+04:03  firemanic: I will use the number or report error
+04:03  nosklo: firemanic: oh, then just use int(literal_eval(sys.argv[0]))
+04:03  nosklo: er
+04:03  nosklo: [1]
+04:04  nosklo: firemanic: that will automatically raise error for you if not int
+04:04  antoDeb: ValueError: wrong format or unknown time zone: "BC"
+04:04  nosklo: antoDeb: you passed a wrong format or a unknown time zone to some date function
+04:05  nosklo: antoDeb: that's all information there is on that error
+04:05  firemanic: nosklo: ok that will work. so would check if the returned object is int that you could have answered half an hour ago :P
+04:05  firemanic: checking*
+04:06  antoDeb: nosklo i'm just retrieving some data from the database, in fact i'm checking over 18000 rows everyone of them with the same value formats, but in row 13625 i'm getting that.
+04:06  antoDeb: i'm not using any date format
+04:06  antoDeb: just some fetchall() and print with some srt functions
+04:06  antoDeb: str*
+04:07  nosklo: firemanic: if you provided all the info in the question, I could've answered more quickly. Please help me by asking questions full of information, with example code
+04:07  halberd: how can I compare two lists greater than or less than, using my custom comparator for the elements of the lists?
+04:07  nosklo: antoDeb: well, there's not more information on that question. Perhaps you want to post the full error traceback and example code?
+04:07  firemanic: nosklo: I asked a precise question, one did not need all the other info to answer it
+04:07  halberd: like if I ask whether ['Q','T'] > ['J','K'] where I have defined values for 'Q','T','J', and 'K'
+04:08  nosklo: firemanic: you don't seem to understand how #python works
+04:08  nosklo: firemanic: it's for helping people write better programs, not to answer random questions
+04:08  nosklo: firemanic: for random questions, hire a consultant
+04:08  antoDeb: nosklo thanks for your help. this is the full traceback http://paste.pocoo.org/show/280108/
+04:08  firemanic: i am starting to realize how it does, and it's very frustrating. not everyone asking questions is a clueless idiot who needs guidance on good practices
+04:09  nosklo: firemanic: well, those who aren't can often deal with the problem themselves, if they're not willing/too lazy to ask full questions and answer about context
+04:09  firemanic: you wasted more time (yours and mine) jumping through all those hoops with me than you would have if you just answered my question
+04:10  nosklo: firemanic: yeah, and most of the time was wasted because the question wasn't complete at first, and you refused to answer details after that
+04:10  firemanic: whatever
+04:10  nosklo: halberd: you'd have to make a function to convert those values to the ones you want
+04:10  DigitalKiwi: ^sign of defeat
+04:10  halberd: yes nosklo I have a key function
+04:11  halberd: but how do I lift it to the list context?
+04:11  halberd: other than just writing my own
+04:11  nosklo: halberd: you have a list of lists you want to sort, right?
+04:11  halberd: sorting would work
+04:11  nosklo: halberd: or you want to do just one comparision?
+04:11  halberd: I just need to compare 2 of them
+04:12  firemanic: DigitalKiwi: no, I could have said "you had all the info you needed to answer a precise question", but then we'd just be running in circles. wise man knows when to give up
+04:13  halberd: 2 entire lists, that is
+04:13  halberd: not 2 list elements
+04:13  tos9: firemanic: no, wise man knows when to do type checking
+04:13  halberd: although my key function is for the elements
+04:14  nosklo: halberd: something like this http://bpaste.net/show/10342/
+04:14  nosklo: tos9: which is never
+04:14  nosklo: (except when you do)
+04:15  halberd: oh I guess that would work nosklo thanks
+04:15  halberd: simpler than what I was doing
+04:15  tos9: nosklo: I know that... Just making sure he's figured it out...
+04:19  Pip: Hello guys, under what circumstances do I need python-nose, python-numeric, python-numpy ?
+04:19  nosklo: Pip: nose is for tests, numeric and numpy are for scientific math calculation
+04:20  Pip: tests of what ?
+04:20  nosklo: Pip: you don't need them. You want them because they're easier/faster than not using
+04:20  nosklo: Pip: tests of code
+04:20  Pip: python codes ?
+04:20  nosklo: yes
+04:20  nosklo: as in "unit tests" and "integration tests" etc
+04:24  Pip: nosklo, so I don't need lapack and setuptools either right ?
+04:24 --- stoned is now known as ajavid
+04:26  nosklo: Pip: "to need" is a complex verb
+04:26  nosklo: Pip: you don't "need" anything... only food and oxygen...
+04:26  papna: Water.
+04:26  Pip: :D
+04:27  MarioneTTe-Doll: Sleep helps, as well.
+04:27  Pip: I don't need those math packages on Python
+04:27  DigitalKiwi: sleep is only necessary if you want to stay sane!
+04:27 * Pip hasn't slept for 22 hours
+04:31  jasonx: is it possible to somehow iterate over options returned by OptionsParser.parse_args?  when printing it it's formatted like a dict, but when trying to iterate over it I get: TypeError: iteration over non-sequence
+04:32  nosklo: jasonx: usually options aren't iterated over -- they're hand-picked... what are you doing?
+04:32  jasonx: wanted to check if no options were set with any
+04:35  disappearedng_: When I run my test case, I am getting the following error: http://paste.pocoo.org/show/280111/
+04:39  Nonpython: What is the best web framework?
+04:40  amstan: and another irc noob is gone
+04:40  MarioneTTe-Doll: A quick question concerning conditionals: Their scope is always based on indentation, and there are no cases where braces or parentheticals are used, correct?
+04:41  nosklo: MarioneTTe-Doll: well, kind of
+04:41  MarioneTTe-Doll: Well, sans for, I should say.
+04:41  tkup: hi, I have a list of tuples (type list) and I need to search the list for a value using index(value). It never matches. What's the right way to go about this?
+04:41  Nonpython: Sorry, mIRC crashed/
+04:41  disappearedng_: Nonpython what do you want to do
+04:41  bob2: tkup: do you mean a list of tuple or a list of lists?
+04:41  MarioneTTe-Doll: nosklo, Ah, OK. The site I'm reading only glossed over that part, and my C-based mind is having difficulty grasping that...
+04:42  bob2: tkup: and are you asking how to match a single item of the inner list/tuple, or the whole thing?
+04:42  tkup: bob2, a list of lists
+04:42  tkup: bob2, I need to obtain the sublist in the list
+04:42  Nonpython: Eh, I looked online, loks like Pylons is good.
+04:43  Nonpython: ...looks like...
+04:43  nosklo: MarioneTTe-Doll: it works quite well once you start using ti
+04:43  bob2: tkup: so you want to find a sublist where some element matches some criteria?
+04:43  nosklo: MarioneTTe-Doll: it
+04:43  tkup: bob2, yes. the matching is done against the first item in each sublist
+04:44  tkup: [['string1', 'val1'], ['string2', 'val2']] etc. I need it to give me the index of the sublist that matches 'string1' for example
+04:45  Nonpython: What is pylons good for?
+04:45  bob2: tkup: next((index, x) for x in somelist if x[0] == 'whatever')[0]
+04:45  nosklo: Nonpython: almost any web application
+04:46  Nonpython: when is it not good?
+04:46  nosklo: Nonpython: this questioning works better if you mention what you have in mind, like, what do you want to write?
+04:47  nosklo: Nonpython: figure out what kind of web application you want to write, and this channel will give you suggestions on what to use
+04:47  Nonpython: I am making a all-in-one developer's website, with a bugtracker, git tree viewing, a blog, and forums/mailinglists.
+04:48  Nonpython: I am using a shit keyboard.
+04:48  Nonpython: Slow typing is slow.
+04:49  nosklo: Nonpython: that's great
+04:49  nosklo: is it open source?
+04:50  Nonpython: Yeah, I wish I could use apache license, goddamn GPL. *Shakes fist*
+04:50  nosklo: you're using gpl libraries?
+04:50  Nonpython: Dulwich, for git.
+04:50  nosklo: you could make the tree viewing part a plugin
+04:51  nosklo: add hg and bzr support
+04:52  Nonpython: That is my plan, but because git is the core supported DVCS, and my git library is GPL, it must be GPL, even though the GPL makes no sense for dynamic languages.
+04:52  bob2: sure it does
+04:53  Nonpython: Sorry, the LGPL was what I was thinking of.
+04:54  Nonpython: It is GPL or give us lots of money.
+04:54  bob2: lgpl isn't much less useful
+04:54  jasonx: can OptionParser support only --long-options for some or certain options?
+04:55  bob2: you still get to obscure your changes if you want
+04:55  jasonx: as far as I can see I have to provide both
+04:56  Nonpython: [None, '--long-option] works.
+04:57  jasonx: Nonpython first thing I tried, getting TypeError: invalid arguments
+04:57  Nonpython: ['', '--long-option] should work.
+04:58  jasonx: you're right.. stupid of me not to try that. thanks
+04:58  bob2: ah, I never knew that
+--- Log closed Mon Oct 25 05:05:09 2010
+--- Log opened Mon Oct 25 05:05:30 2010
+05:05 --- Users 684 nicks [0 ops, 0 halfops, 0 voices, 684 normal]
+05:06 --- Channel #python was synced in 95 seconds
+05:08  Nonpython: I'm off to write a git backend for SQLAlchemy.
+05:09  Nonpython: What is the best python flat-file implimintation.
+05:09  papna: flat-file what?
+05:09  bob2: I don't think the thing you're asking about exists
+05:14  nosklo: Nonpython: I guess you mean flat-file db?
+05:17  dash: Nonpython: don't be silly.
+05:22  catorceavo: i have a dictionary where it seems like the value for a key has changed, after putting in a new, unrelated key-value pair. is there any reason why this should happen?
+05:23  dash: catorceavo: hmm, what do you mean?
+05:23  dash: what's the key?
+05:24  catorceavo: both the key and the value are tuples
+05:25  papna: catorceavo: Post some code where this happens.
+05:25  dash: of what?
+05:26  comawhite: will python ever allow more than one __init__?
+05:27  amstan: comawhite: what are you trying to do?
+05:27  papna: comawhite: You can only have one attribute with a given name.
+05:27  papna: comawhite: What are you doing?
+05:27  comawhite: well I have a class that is in C++ and has many constructors, but I want to make the class in pure python, but you can't do that. I know if I used boost::python, I can do that
+05:28  papna: comawhite: classmethods are used for alternate constuctors sometimes.
+05:28  comawhite: same if I did PyQt4
+05:28  papna: comawhite: default arguments are used for a lot of cases where you can give different information in a constructor.
+05:28  comawhite: yeah but those are only executed once right?
+05:28  amstan: comawhite: problem with having multiple constructors in python is that python is not type safe, you can have your arguments be anything
+05:29  papna: comawhite: I don't see the point of that statement.
+05:29  amstan: what you should do is *args on the int
+05:29  papna: amstan: No.
+05:29  amstan: then check the length and types you find in args
+05:29  papna: amstan: That doens't sound like a great idea.
+05:29  comawhite: amstan, that's a headache
+05:30  comawhite: can you have multiple functions with the same name but different parameters?
+05:30  Epona666: can someone help me get an invite to #java
+05:30  comawhite: Python reminds me of C :P
+05:30  comawhite: Epona666, wrong channel
+05:30  comawhite: btw its ##java
+05:31  papna: comawhite: In Python, we have methods do one thing.
+05:31  papna: comawhite: Rather than having them do multiple things.
+05:31  Epona666: ok, thx!
+05:31  comawhite: well I think in C++ since I've used it for a long time (hard to not think in it)
+05:32  dash: comawhite: python's just C with foam padding
+05:32  comawhite: yeah
+05:32  papna: comawhite: Many of overloading's uses don't serve to make better code.
+05:32  comawhite: dash, well you mean more like objective-c
+05:32  Jerub: comawhite: no, we mean like C.
+05:32  comawhite: papna, I think it does tbh
+05:32  Jerub: the object model python uses is different to objective-c's.
+05:33  papna: comawhite: The design of Python is that a method of one name does one thing.
+05:33  papna: This isn't the design of C++
+05:33  comawhite: yeah I know
+05:33  papna: You'll have to deal with that.
+05:33  comawhite: I understand since each language is different
+05:33  mcantor: How do I detect how many decimal places are used to store a floating point number?  Do I have to convert it to a string and see how many characters come after the dot?  That seems... brutish.
+05:33  comawhite: just takes a while to get used to
+05:33  dash: mcantor: decimal places aren't used to store floating point numbers at all.
+05:33  dash: mcantor: what do you want to do?
+05:34  Back2Basics: surprised there aren't more people in #!/bin/python
+05:35  dash: what
+05:35  mcantor: dash: I want to display "2.5" as "2.5", but "3.139985" as "3.14".  I want any string representation with more than two decimal places to be rounded to 2, and anything less to be left as it is.
+05:36  dash: that sounds kinda silly
+05:36  dash: why not have a consistent representation?
+05:37  comawhite: I see a lot of functions in new python code that has @protected def foo(self, ...) what does @ do and where can I read more about it?
+05:37  kosh: @protected is a decorator it is the equiv of foo = protected(foo)
+05:38  mcantor: dash: Just working with some silly business logic.
+05:38  nosklo: comawhite: @ is a decorator.
+05:38  comawhite: ah okay
+05:38  comawhite: can you create custom decorators?
+05:38  dash: mcantor: i'd use round() and str() then
+05:39  mcantor: comawhite: Boy howdy!
+05:39  comawhite: mcantor, ?
+05:39  dash: comawhite: anything you like
+05:39  comawhite: :>
+05:39  dash: Jerub: how many assertions in a test method is too many
+05:39  mcantor: comawhite: That is, "Can you create custom decorators?"  Boy howdy, can you ever!
+05:39  comawhite: oh
+05:39  mcantor: dash: I'm working with floats internally, so round() is not of much use.
+05:39  comawhite: I thought you knew me xP
+05:39  Jerub: dash: that's an interesting question. i think 1 is the perfect number.
+05:39  dash: mcantor: sure it is
+05:40  Jerub: dash: but the longer the test method, the more assertions are appropriate.
+05:40  dash: Jerub: Hm
+05:40  Jerub: especially if it's 4-5 queries about the state of an objcet after an operation
+05:40  Jerub: which is really '1' when you view it semantically.
+05:40  dash: Jerub: ok yes
+05:40  Jerub: i am most upset when i see: a = foo(); assert(a); b = bar(); assert(b);
+05:40  mcantor: dash: Passing a float into round() doesn't change anything for me...?
+05:40  Jerub: because bar() is a second test
+05:41  dash: Jerub: yeah i'm definitely not doing that
+05:41  dash: Jerub: http://bazaar.launchpad.net/~washort/%2Bjunk/perseus/annotate/head:/perseus/test/test_mapping.py#L45
+05:41  dash: mcantor: round takes more than one arg.
+05:41  dash: Jerub: i'm testing a lot of different methods on a single data structure
+05:41  mcantor: dash: round(2.3353, 2) #=> 2.3399999999999999
+05:42  dash: mcantor: that's why i mentioned str
+05:42  dash: >>> str(round(2.3353, 2))
+05:42  dash: '2.34'
+05:42  dash: same number, slightly different choice of representation :)
+05:42  mcantor: Well, I'll be damned!
+05:42  Jerub: dash: okay, that's an interesting one.
+05:43  dash: Jerub: the only other idea i have is make each method its own TestCase
+05:43  mcantor: I see.  round() jimmies the float value so that when it gets str()'d, it comes out to the desired value.
+05:43  kosh: should 2.401 display as 2.4 or 2.40?
+05:43  dash: Jerub: and put each assertion in its own method
+05:43  Jerub: dash: something that's easy to see with a method 1 assertion is what it's asserting.
+05:43  dash: mcantor: it just founds.
+05:43  dash: er rounds
+05:43  mcantor: dash: Right.  Thanks, that's perfect.
+05:43  Jerub: dash: it wouldn't be bad to annotate what you're actually testing
+05:44  dash: Jerub: yeah
+05:44  dash: hm
+05:45  dash: and then in tests like nearlyFullNode i've got tests about external interface and internal implementation in the same method
+05:45  Jerub: not that it's a big deal for a test like this which will basically never fail.
+05:45  dash: Jerub: well, i'm about to rewrite the code it's testing :D
+05:45  Jerub: awesome
+05:45  dash: need to implement "without" first
+05:45  Jerub: in that case, at least saying in the assertion message which method you expect this to have called
+05:46  Jerub: self.assertTrue(k in d2, 'frozendict.__contains__(k) should return True")
+05:47  Jerub: it makes test output immediately useful.
+05:47  dash: sure
+05:47  dash: sounds good.
+05:48  dash: hm, now i have to decide how i feel about all these methods without docstrings
+05:49  dash: i guess that depends on whether i'm going to keep the python implementation or just have a Cython/C one
+05:51  Jerub: dash: i find tests that have good docstrings are often for code that breaks.
+05:51  Jerub: and tests without good docstrings are sometimes deleted when they fail because they're incomprehensible.
+05:51  Jerub: correlation or causation, YOU DECIDE
+05:52  dash: well i meant code-being-tested docstrings
+05:53  Jerub: oh right
+05:56  Tim1357: How do I use two python scripts connected by sys.stdin?
+05:56  dash: Tim1357: carefully
+05:56  nosklo: Tim1357: use stdout on one of them
+05:56  Tim1357: Right now the second script only works when the first one has ended.
+05:56  nosklo: Tim1357: flush
+05:56  Tim1357: nosklo: Is that a command?
+05:57  nosklo: Tim1357: no, it's a method to the file object, sys.stdout.flush()
+05:57  Tim1357: Ah.
+05:57  Tim1357: So import sys
+05:57  nosklo: Tim1357: otherwise you'll face buffering
+05:57  Tim1357: sys.stdout.write('line')
+05:57  nosklo: sys.stdout.write('line\n')
+05:57  Tim1357: sys.stdout.flush()
+05:57  Tim1357: Ah.
+05:58  Tim1357: nosklo: Thanks!
+06:00  dash: oh, dang
+06:00  dash: i haven't figured out how frozendict.__eq__ is going to work
+06:00  DigitalKiwi: if they're the same then they are equal, duh! ;D
+06:01  dash: yeah but in python things can be equal that aren't the same
+06:01  dash: if they're the same __eq__ won't get called :)
+06:02  DigitalKiwi: well that's confusing if things can be equal that aren't equal
+06:02  dash: they can't!
+06:02  dash: whatever gave you that notion.
+06:03  nosklo: dash: you check if the keys are equal and all corresponding values, no?
+06:03  nosklo: kind of like dict
+06:03  dash: yeah
+06:03  DigitalKiwi: that's almost as bad as True == False ;D
+06:03  dash: hm
+06:03  dash: DigitalKiwi: what?
+06:04  DigitalKiwi: >>> True == False
+06:04  DigitalKiwi: True
+06:04  bob2: dash: is it frozen just so it's hashable, or for another reason?
+06:04  dash: bob2: immutable objects make code more readable
+06:04  amstan: maybe there's a speed improvement in accessing it
+06:05  dash: amstan: it'd be hard to improve on python dicts.
+06:05  dash: i'm hoping to get close, though.
+06:05  dash: i'll settle for "not a lot slower"
+06:08  dash: lookup in this is O(log32(n))
+06:08  amstan: nice
+06:08  dash: well, dicts are amortized O(1)
+06:14 --- oracle_ is now known as oracle
+06:15  Tim1357: nosklo: How do I read from stdin as if it were a stream?
+06:15  Tim1357: I have:
+06:15  Tim1357: for line in stdin.readlines():print line
+06:15  Tim1357: And it isn't working untill the previous python script dies.
+06:17  bob2: readlines() reads until EOF
+06:17  bob2: ie does the thing you described
+06:17  bob2: 'for line in stdin' will block less
+06:18  Tim1357: for line in stdin: print line
+06:18  nosklo: yeah.
+06:18  Tim1357: what do I use for the *sending* bit?
+06:18  Tim1357: Still use stdout.write()?
+06:19  nosklo: exactly
+06:19  Tim1357: Hmm.
+06:19  nosklo: don't forget \n and flush
+06:19  nosklo: if you don't want to buffer at all you could use: for line in iter(sys.stdin.readline, ''):
+06:21  Tim1357: I'll just use raw_input(
+06:21  Tim1357: )
+06:23  tos9: Oh boy... I have newfound appreciation for pyparsing...
+06:25  abstrakt: when an app like django-cms or south etc says that it needs to be in the "python path" what exactly does that mean?
+06:25  abstrakt: how do I find out what my current python path is
+06:25  abstrakt: a google for this hasn't turned up what I was hoping for
+06:26  nosklo: abstrakt: means you have to install the application
+06:27  nosklo: abstrakt: those apps that want to be in python path usually come with a setup.py that installs them to python path
+06:28  tos9: abstrakt: as for how to find out what's currently on your path, even though like nosklo said it's not totally relevant to your question (just install the app), but you can import sys; print sys.path
+06:28  abstrakt: nosklo, awesome I think that was the answer I was looking for thanks
+06:29  dash: tos9: what are you doing with pyparsing? :)
+06:30  tos9: dash: Nothing, I'm doing something *without* it. I'm TAing a class with an instructor who knows as much python as the beginner's tut, and he had me squeeze my (rather simple but elegant) binary tree class into an awful math expression parser.
+06:30  catorceavo: so in python, pointers "live" outside of the function that returns them?
+06:30  dash: tos9: Ug
+06:30  abstrakt: is there anything better about easy_install vs pip ?
+06:30  dash: abstrakt: no, never use it
+06:30  tos9: Despite me recommending that we should just teach everyone how to use pyparsing or something similar.
+06:31  dash: catorceavo: in python, there aren't pointers.
+06:31  abstrakt: ok cool
+06:31  catorceavo: i create a list named blah inside a function, then add things to it, then i return blah. then i also put blah inside a dictionary as a value. then the function that is returned to, calls another function with blah, which modifies blah, and the value inside my dictionary changes!
+06:31  dash: catorceavo: it's the same list.
+06:32  tos9: catorceavo: I.e. the lesson is: be careful when passing around mutable data structures.
+06:33  chaos95: Does anyone know of any tools that can parse a C structure definition and produce a corresponding format string for python's struct module?
+06:34  chaos95: :D
+06:34  catorceavo: if i do segsCopy = segs[1:] , and then i modify segsCopy, does segs get modified?
+06:34  dash: chaos95: that'd not be real easy.
+06:34  tos9: catorceavo: try it and find out (but no, slicing gets you a copy)
+06:34  chaos95: dash: yeah I know, but I live in hope
+06:34  magicblaze0071: if I've a object x of class X (Y is a parent of X) and object y, parent of object x. Can I convert x to y using Y(x). I get errors when I try to do this? Seems like there is no def __init(self) defined in Y. Is that a problem?
+06:34  amstan: catorceavo: the [:] gives you a new copy
+06:34  dash: chaos95: it'd only work a tiny percentage of the time
+06:34  dash: chaos95: and it's easy to do by hand
+06:34  dash: i wouldn't bother.
+06:34  catorceavo: ok
+06:35  dash: magicblaze0071: that is the problem, yes.
+06:35  tos9: magicblaze0071: You can't "convert" between classes unless you tell your code how to. How do you expect it to magically convert between your two classes?
+06:36  magicblaze0071: I thought public inheritance was a "is a" relation...so conversion should be easy?
+06:36  magicblaze0071: dash: why is that the problem? What goes wrong if there is no default constructor?
+06:36  catorceavo: but if i do cap = segs[0], then i do cap.append(blah), segs gets modified...
+06:37  catorceavo: argh python
+06:37  tos9: magicblaze0071: That means that subclasses should behave like superclasses, with some customized behavior. In other words, it would be expected that if something expected a Y, it could take an X. Without a need to "convert", so what you're asking is a bit strange anyhow.
+06:37  dash: magicblaze0071: then it doesn't take an argument
+06:37  catorceavo: how do i create a copy of segs[0] ?
+06:37  dash: magicblaze0071: what is the error message you get?
+06:37  dash: catorceavo: why?
+06:37  catorceavo: or make segs immutable inside the function, there's no equivalent to const?
+06:37  dash: catorceavo: right
+06:38  magicblaze0071: My constructor for Y takes another object as input and uses it. Seems like that object is being replaced by x automatically and the member functions complain...
+06:38  catorceavo: because i want to just fetch that value at segs[0] and use it as another list that i can append stuff to, but it's modifying the original segs, thus modifying the value in a dictionary, etc
+06:38  chaos95: catorceavo: cap = segs[0][:]
+06:38  dash: catorceavo: this sounds like a kinda bad design
+06:39  bob2: catorceavo: foo = segs[0] then using foo cannot modify segs
+06:39  chaos95: bob2: segs[0] is a list
+06:39  catorceavo: dash: what part is the bad design? should i not be passing lists of lists around?
+06:39  bob2: oh ok
+06:39  dash: catorceavo: I don't know
+06:39  dash: catorceavo: more context is needed :)
+06:40  armence: Does the constructor make use of the property setters and getters:w
+06:40  dash: armence: What
+06:41  armence: dash: The __init__ method. If I assign to a property. It uses whatever method I've defined to handle that property right?
+06:41  dash: __init__ doesn't have special behaviour, right.
+06:42  armence: Like if I have @property def foo(self): return self._foo @foo.setter def foo(self, val): self._foo=str(val)   Then, def __init__(foo): self.foo=foo  obj.foo will always be a string right?
+06:43  bob2: armence: __init__ is just a method that gets called automatically after an object is constructed
+06:43  bob2: using a setter just to str()ify something sounds like a bad idea
+06:43  dash: armence: sounds likely
+06:43  dash: and yes
+06:43  dash: don't do that
+06:43  armence: dash: Why not?
+06:43  dash: armence: because just set it to a string already.
+06:43  nosklo: armence: the effort is big and there's nothing to gain
+06:44  armence: You mean just pass a string?
+06:44  nosklo: armence: yeah, just pass a string to __init__, and use a string every time you want to set yourobj.foo
+06:46  tos9: Hm, how come the TypeError is raised by object.__new__ on a class with no __init__? Does object.__init__ take any number of args?
+06:46  tos9: Oh, yes it does. Why?
+06:47  bob2: it lets you just use super(ThisClass, self).__init__(*args, ***kwargs) with impunity
+06:47  bob2: but I don't know if that is deliberate or not
+06:48  armence: OK... Well, whether I should do it or not, it doesn't work...
+06:48  bob2: pastebinz
+06:49  armence: http://pastebin.com/YZbi2dwy
+06:49  infobob: http://paste.pocoo.org/show/280155/ (repasted for armence)
+06:49  magicblaze0071: if there are two ways of constructing an object, what is the correct way to do this in python (since I cant override __init__ twice I guess?)
+06:49  armence: Well, if the pastebin people had accepted my patch, it would be better... LP
+06:49  armence: :P
+06:49  armence: pastebinit people I meant
+06:49  tos9: bob2: Ah. So does object.__init__ actually do anything at all then?
+06:50  bob2: armence: inherit from object
+06:50  armence: bob2: what?
+06:50  bob2: armence: then fix the bug ;)
+06:50  bob2: armence: properties require new-style classes
+06:50  DigitalKiwi: class Foo(object):
+06:50  bob2: magicblaze0071: provide an alternate constructor as a classmethod
+06:51  bob2: tos9: I'm not sure, I think it is in C and I've never looked
+06:51  bob2: armence: (new-style == ultimately inherit from object)
+06:51  armence: OK, that makes sens, thanks
+06:52  armence: what else does the new style buy me?
+06:52  armence: Feel free to say nothing or to paste link
+06:52  bob2: magicblaze0071: http://paste.pocoo.org/show/280158/
+06:52  bob2: armence: super() works
+06:53  bob2: armence: and the method resolution order is 'better'
+06:53  bob2: I think that's all
+06:53  armence: bob2: cool
+06:53  bob2: basically all classes in python2 should inherit from object if nothing else
+06:53  bob2: unless you have a good reason
+06:53  bob2: magicblaze0071: that's a silly example, but hopefully gets the idea across
+06:53  magicblaze0071: bob2: so in your example, construction would go like x = Person("name") or x=Person.from_id(123)?
+06:53  bob2: ugh
+06:53  armence: Is there any reason those were not just made the "normal" classes?
+06:54  bob2: magicblaze0071: http://paste.pocoo.org/show/280159/
+06:54  bob2: armence: it is a backwards-incompatible change
+06:54  bob2: magicblaze0071: sorry, the first example was useless.  and yes, exactly like that.
+06:55  varnie: the Pyglet library uses foo(*args) functions acting as callbacks for some interval based timers. i wonder how *args might help me getting some passed input?
+06:55  bob2: magicblaze0071: the advantage of using a class method rather than a function is that 'cls' always refers to the specific class it is called on - so if you have a Student subclass of Person, and call Student.from_id(123), you'll get a Student instance back instead of a Person
+06:55  magicblaze0071: bob2: is there a way to do : x = Person("name") or x = Person(123) -- and generate the output based on type? I guess using typechecking, i could easily do this, right?
+06:55  bob2: armence: py3k makes new-style the default and removes old-style
+06:55  varnie: i.e. how can i send several arguments to such callbacks and get those values?
+06:55  bob2: magicblaze0071: you could, but it is discouraged
+06:56  bob2: varnie: http://docs.python.org/tutorial/controlflow.html#arbitrary-argument-lists is the gist of it
+06:56  armence: bob2: That sounds good...
+06:56  bob2: varnie: oh and http://docs.python.org/tutorial/controlflow.html#keyword-arguments
+06:56  varnie: bob2, i know how to get these values if they were passed as **kwars, but in case of *args...?
+06:56  armence: bob2, I mean, it's not like backward compatibility has been the greatest feature of python
+06:56  bob2: armence: if you say so
+06:57  bob2: varnie: same deal, they just end up in a tuple called args
+06:58  bob2: varnie: http://paste.pocoo.org/show/280160/
+06:59  varnie: bob2, i don't understand how to get some variables values knowing their names only
+06:59  bob2: varnie: perhaps show us some sample code?  I'm not quite sure which bit you're stuck on
+07:00  varnie: i.e. i invoke showme with argument a=100, and in the body of showme i want to refer to this name 'a'
+07:00  bob2: then you need to make showme take an arg called a
+07:00  magicblaze0071: bob2: http://paste.pocoo.org/show/280161/
+07:00  bob2: or you can access it as kwargs['a']
+07:00  varnie: in case def showme(*args) of course
+07:00  varnie: i don't have kwargs , only args
+07:00  bob2: *args doesn't capture named args
+07:01  bob2: if you try to pass it named args, it will fail
+07:01  bob2: (it = a function that only takes *Args)
+07:01  magicblaze0071: bob2: In that example I would also like to delete one of the attributes of Person... (for Student). How should I do that?
+07:02  bob2: magicblaze0071: perhaps http://paste.pocoo.org/show/280162/
+07:02  bob2: magicblaze0071: or perhaps you want a student to have-a person
+07:03  bob2: magicblaze0071: or maybe it's all silly and having Student take a name is fine
+07:03  magicblaze0071: thanks
+07:04  bob2: oh, sorry, didn't read the last comment - you can't really do that
+07:04  bob2: since then you're not a Person anymore
+07:04  bob2: assuming you mean a 'public' attribute
+07:04  bob2: also, one reason type-checking is discouraged is because it's doing pointless work
+07:05  bob2: the caller absolutely knows if they have an id or a name, and can just call the correct function
+07:05  bob2: if you accept both in the one function, you throw that informationa way and then need extra code to figure it out again
+07:05  varnie: bob2, oops, i've been wrong. the pyglet library has very neat "interface" of working with timer callbacks: schedule(func, *args, **kwargs). it looks cool, because it got clear how to pass additional arguments to callbacks. thank you in any case ;)
+07:09  strav: hi! This is somehow a django specific queston but I'm pretty certain this must have been asked before, as it should be limited to django: I wish to dynamically build filtered querysets and for this, I need to set the filter keyword argument using a string. So the question is: how you do that in python? Is there any way to convert a string to a keyword?
+07:10  strav: (should not be limited to django)
+07:11  Brend: strav: func(**{"key": "value"}) perhaps?
+07:11  abstrakt: how can I add something to sys.path
+07:12  DigitalKiwi: strav: i think there is a django app that might do what you want, depending on where you are filtering
+07:12  strav: Brend: looks sexy, sorry but I'm not really acquainted with python. How do you call those **?
+07:12  amstan: abstrakt: sys.path.append("hi")
+07:12  Brend: strav: "kwargs"
+07:12  DigitalKiwi: http://github.com/alex/django-filter
+07:13  strav: Brend: then it must be it. The docs mentionned the filter fn took kwargs and I wasn't certain of what it was.
+07:13  sontek: If I have 2 classes that need to share 2 methods __init__ and render but inherit from different base classes what should I do?
+07:13  sontek: just define global methods and call them?
+07:15  strav: DigitalKiwi: thanks, I'll take a look at this.
+07:19  bob2: sontek: __init__ should usually only set attributes
+07:19  bob2: but putting the common code in a function and calling it from some method seems like a good idea
+07:22  abstrakt: how can I find out why my ./manage.py runserver isn't using the same settings as my virtualenv
+07:27  strav: **kwargs worked just fine. It'll give me some good reading too thanks!
+07:27  strav: cya all
+07:28  tos9: Huh, emacs has an irc client...?
+07:29  tos9: Wow.
+07:29  sontek: bob2: http://paste2.org/p/1053107   thats my code right now
+07:29  sontek: bob2: everything is the same except what they inherit from
+07:30  Brend: tos9: It has several
+07:32  pavanky: can someone help me out with this error
+07:32  pavanky: http://patx.me/paste/1665.html
+07:32  chaos95: tos9: most operating systems have an IRC client these days
+07:33  sontek: pavanky: You either have to have an instance of QDesktopWidget that you are calling that method on or you have to pass it one as your first argument
+07:33  tos9: chaos95: Heh. Was that supposed to be an emacs joke? Har har.
+07:33  chaos95: ;)
+07:33  tos9: chaos95: Shh don't tell anyone, I like vim too.
+07:33  chaos95: to be fair, I'm actually an emacs user
+07:33  tos9: chaos95: Dammit I told you not to tell.
+07:35  tos9: pavanky: No idea, but does screenGeometry say it expects args, because that error seems to suggest that it does
+07:35  pavanky: sontek, trying your suggestion
+07:35  pavanky: tos9, i tried with screen=-1, scren=0, screen=1 doesnt help
+07:36  tos9: pavanky: Yeah, sontek said it first, but it says one of type QDesktopWidget has to come first, even though it's unbound.
+07:37  pavanky: yep, that helped
+07:37  pavanky: thanks
+07:37  braoru: hello
+07:38  sontek: I have the following code: http://paste2.org/p/1053107 and trying to figure out a good way to refactor it since they are the same exact code
+07:38  sontek: can't create a base class since I need each to inherit from the base classes they are already inheriting from
+07:38  bob2: of course you can create a base class
+07:39  Back2Basics: I have a file downloaded via urllib2.   How do i use Image.show() with it?  (do I need an intermediary temp file?)
+07:40  bob2: http://paste.pocoo.org/show/280277/
+07:40  bob2: is that way or the other way around?
+07:41  sontek: I didn't know python had multiple inheritance
+07:41  sontek: thanks
+07:41  bob2: hm or maybe that won't work
+07:43  tos9: It won't I don't think, since they're different superclasses, and you're gonna get object with super in Whatever.
+07:43  sontek: yeah
+07:44  magicblaze0071: bob2: http://paste.pocoo.org/show/280278/
+07:44  sontek: I could pass the super on __init__ of Whatever and call super on that?
+07:44  tos9: sontek: Factor out everything else besides the super call, and then do the super in each's init is probably the easiest way
+07:46  bob2: magicblaze0071: I'm not really sure what you're trying to do or what the constraints are
+07:46  tos9: magicblaze0071: but it definitely sounds like whatever they are you're complicating them
+07:46  magicblaze0071: my Person class is constructed with a lot of parameters...when I want to instantiate a student, the only thing I've access to is the person object...not all the parameters with which a person is built.
+07:47  bob2: cls(person.name, person.id, person.whataver, ...)?
+07:48  magicblaze0071: bob2: Person in my case is loaded from a file, and the file deleted?
+07:48  bob2: so much stuff we don't know about
+07:49  tos9: magicblaze0071: so? all that info isn't being stored on your person instance? where's it going then?
+07:50  magicblaze0071: http://paste.pocoo.org/show/280279/
+07:51  tos9: magicblaze0071: yeah... and? you're reading all the attrs from the file and then storing them on your person instance? or are you passing around data and not using it at all ?
+07:52  magicblaze0071: http://paste.pocoo.org/show/280280/
+07:52  magicblaze0071: tos9: they are attributes of person.
+07:53  sontek: tos9: yeah, I'm trying to figure out the best way to factor it all out and still be able to do the inheritance
+07:53  magicblaze0071: how do i copy everything in person to student (line 24) and add an extra field?
+07:53  tos9: magicblaze0071: then you can make a constructor for student that takes (person.attr1, person.attr2, person.attr3...) + whatever extra fields you want
+07:54  magicblaze0071: tos9: there are 100 fileds in person!
+07:58  tos9: magicblaze0071: well, in that case this is dirty as hell, but I'm tired, so if bob2 has a better solution he'll set you straight. You could do in your alt constructor for attr in [(a, getattr(person, a) for a in person.__dict__ if not a.startswith("__")]: setattr(self, *attr) or whatever. Don't tell anyone though, that's *seriously* bad.
+07:58  bob2: I can't think of what the sensible solution is either
+07:59  magicblaze0071: thanks
+08:00  tos9: magicblaze0071: Sure, I feel really dirty now though. The more sensible thing would probably be to keep a top level list of all the field names when you read through the file once through, and then just iterate over that...
+08:01  magicblaze0071: tos9: I'll call it a night...I think my design is messed up...will think on it tomorrow.
+08:01  tos9: magicblaze0071: sounds likely. night :)
+08:08  nick125: Hm. Is threading.Timer consider as evil as the rest of the threading API?
+08:10  kerio: probably
+08:10  ssbr: nick125: well, yeah.
+08:10  ssbr: It's exactly like threading.Thread pretty much.
+08:11  nick125: Well, here's what I'm trying to do: I have some code where I need to do X every 100ms and Y every 500ms.
+08:11  kerio: nick125: twisted
+08:12  nick125: kerio: I was trying to stay within the standard library. :(
+08:12  kerio: twisted is as close as standard as it gets
+08:12  ivazquez|laptop: What's wrong with select?
+08:12  kerio: because it's so damn good
+08:13  kerio: nick125: you can make your own eventloop, though
+08:16  nick125: Hmm.
+08:16  kerio: there's no need to go threaded there
+08:16  kerio: unless the two things overlap somehow
+08:17  ivazquez|laptop: There's no need to go threaded, unless Y takes longer than 100ms. And probably not even then.
+08:18  ivazquez|laptop: All you need to do is return control to the event loop every so often.
+08:18  ivazquez|laptop: X taking longer than 100ms or Y taking longer than 500ms would be a problem though.
+08:20  nick125: That's what I'm concerned about
+08:24  jorrit: Hi
+08:40  Brend: nick125, what kind of X and Y are we talking about here?
+08:46  rasca: Hi everyone! Quick question, a have a regular string, with some newlines. I would like to escape those newlines so when I do a `print string` it prints "some text\n some text" instead of actually printing a newline. How can I do this?
+08:47  damd: rasca: .replace('\n', '\\n')
+08:48  rasca: damd: thanks! But how whould I do it for every escaped character? \n \b \", etc..
+08:49  Eevee: repr(string) maybe
+08:50  rasca: Yes! That did it! Thanks a lot!!
+08:50 --- wolfe is now known as insane_kangaroo
+08:57  Alberth: rasca: print "%r" % text    is an alternative (but it does the same as   print repr(text) )
+08:58  rasca: great, thanks!
+08:59  ron_frown: is there any easy way in python 2.5 that I can have it just take an object and dump it to a string?
+08:59  bob2: not like in php or perl, no
+08:59  Alberth: add a __str__(self)  method
+08:59  ron_frown: with the contents being what
+09:00  ron_frown: I was going to just use .format()
+09:00  ron_frown: but looks like 2.5 doesnt support that
+09:00  Alberth: code that returns a string representation of the object
+09:00  bob2: .format is unrelated
+09:00  bob2: the 2.5 version of string formatting is "%s" % someobject
+09:00  bob2: but that just calls __str__ on the instance
+09:01  Alberth: then do   str(myobj) <-- calls myobj.__str__() and gives the result back as result of str()
+--- Log closed Wed Oct 27 13:15:55 2010

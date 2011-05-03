@@ -1,0 +1,284 @@
+--- Log opened Fri Nov 26 00:00:49 2010
+00:03  checkers: hi, when awk is used in a shell pipeline instead of outputting to stdout it seems to not do any processing until it recieves 32 lines from stdin
+00:03  checkers: eg, `tail -F -n32 /var/log/apache/access_log | awk ...` outputs nothing
+00:03  checkers: umm, `tail -F -n33 /var/log/apache/access_log | awk ... | cat` outputs nothing
+00:03  checkers: *32
+00:04  checkers: but if I change -n32 to -n33, some stuff is output, or if I remove the cat, everything is output
+00:04  checkers: am I insane?
+00:06  checkers: actually, the magic threshold seems to be 34/35
+00:09  checkers: that was testing with awk 3.1.6 on ubuntu. testing with an ancient freebsd system shows something similar
+00:09  steve___: I think it has to do with tail -f and how it buffers
+00:17  steve___: checkers: maybe this http://stackoverflow.com/questions/972370/how-do-you-pipe-input-through-grep-to-another-utility
+00:20  checkers: works, damnit
+01:36  robert_: so, I have at a several dozen log files where I need to trigger on one line and pull out information from the line directly below. would that be a problem to do with awk?
+01:42  steve___: I don't think so.  Do you have sample data?
+01:44  steve___: 4# echo -e "blah\ntrigger\nimportant stuff\nblah" | awk '/trigger/ {getline;print}'
+01:44  shbot: steve___: important stuff
+01:45  steve___: robert_: ^^
+01:45  Riviera: what happens if trigger is the last line of input?
+01:46  steve___: hmm with a newline at the end you get 'trigger'
+01:46  steve___: 4# echo -e "blah\ntrigger\n" | awk '/trigger/ {getline;print}'
+01:46  shbot: steve___: no output
+01:46  steve___: err without a newline
+01:46  steve___: 4# echo -e "blah\ntrigger" | awk '/trigger/ {getline;print}'
+01:46  shbot: steve___: trigger
+01:47  steve___: Riviera: can something be done in END to prevent this?
+01:50  robert_: yeah
+01:50  Riviera: well,
+01:50  robert_: I have sample data.
+01:50  robert_: brb
+01:50  Riviera: what about
+01:51  Riviera: 4# printf %s\\n blah trigger | awk '/trigger/ && getline { print }'
+01:51  shbot: Riviera: no output
+01:51  Riviera: 4# printf %s\\n trigger blah | awk '/trigger/ && getline { print }'
+01:51  shbot: Riviera: blah
+01:51  Riviera: So
+01:51  Riviera: that's a start.
+01:51  Riviera: But what should happen if the input is like that:
+01:51  Riviera: trigger
+01:51  Riviera: trigger
+01:51  Riviera: blah
+01:51  Riviera: Should the output be:
+01:51  Riviera: trigger
+01:51  Riviera: or
+01:52  Riviera: trigger
+01:52  Riviera: blah
+01:52  Riviera: or
+01:52  Riviera: blah
+01:52  Riviera: :)
+01:52  Riviera: So many unanswered questions. :)
+01:52  robert_: heh
+01:52  robert_: pastebinning.
+01:53  robert_: Riviera; http://codepad.org/78uUBb9u
+01:53  robert_: something like that.
+01:54  steve___: robert_: is it always ERROR: STATEMENT:?  Is it ever ERROR: ERROR: ?
+01:54  robert_: oh, scratch that.. that was old.
+01:55  robert_: [ ? ? HST   u: ?, h: ?, transaction: ? ]ERROR:  duplicate key value violates unique constraint "enrollments_uid_key"
+01:55  robert_: that's the format.
+01:55  steve___: that is one line
+01:56  robert_: that's the error format.
+01:56  steve___: and you want the line after?
+01:56  steve___: awk '/ERROR:/ && getline { print }' FILE1 FILE2 .. FILEn
+01:57  steve___: robert_: as Riviera pointed out there might be warts.
+01:57  robert_: yeah
+01:57  robert_: I want the line after.
+01:57  Riviera: ... :)
+01:58  robert_: hm
+01:58  Riviera: I know
+01:58  Riviera: that you want the line after.
+01:58  Riviera: But that information does not suffice,
+01:58  Riviera: because there still are undefined situations.
+01:58  robert_: okay
+01:58  Riviera: Especially when two ERROR lines follow each other.
+01:58  Riviera: But ...
+01:58  robert_: I'll try my best to define them.
+01:58  Riviera: since that might just not happen in your input data
+01:58  Riviera: no ...
+01:58  Riviera: :)
+01:58  Riviera: Maybe don't bother :)
+01:58  robert_: there are never cases where two ERROR statements follow eachother.
+01:58  Riviera: good.
+01:58  Riviera: :)
+01:58  steve___: cool
+01:58  Riviera: Then you should be fine! :)
+01:58  robert_: at least in the sections that I want.
+01:59  Riviera: Try it .)
+02:00  robert_: trying it.
+02:01  robert_: sweet
+02:01  Riviera: cool :)
+02:01  robert_: so can I get awk to skip output, and give me only unique records?
+02:02  robert_: like, I'm trying to match on something called a medical records number
+02:02  robert_: I know this is asking a bit much
+02:04  Riviera: You think so?
+02:04  Riviera: I thought that I was the one with the too many questions.
+02:04  Riviera: So, here I go:
+02:04  Riviera: Is that medical records number in the same line with the trigger
+02:05  Riviera: or in the same line that you'd like to print?
+02:05  steve___: robert_: just show sample data and desired output...  that's the easiest way.
+02:06  robert_: the trigger line is the error, and the medical records# is in the desired data. I need to see if there the same # appears more than once, so it can be filtered.
+02:07  Riviera: robert_: okay
+02:07  Riviera: robert_: please give a line with the 
+02:07  Riviera: er
+02:07  Riviera: robert_: please give a line with the #
+02:07  Riviera: :)
+02:07  robert_: in my pasted example, the medical records no. would be N0PH104192
+02:07  Riviera: ah, cool
+02:08  robert_: yeah
+02:08  Riviera: or well, maybe not *so*;
+02:08  robert_: it's just a four-char identifier followed by the number.
+02:08  Riviera: robert_: would it be safe to assume that this number always is the
+02:08  Riviera: robert_: err, third field from right?
+02:09  robert_: this is a database, and that's the UID field.
+02:09  Riviera: robert_: okay, but the penultimate field, here CURRENT_TIMESTAMP
+02:09  robert_: I'm trying to get a listing of medical records #s from a particular time period to see if I can reconstruct anything.
+02:09  robert_: yes.
+02:09  Riviera: robert_: might contain something like "Jan 15 2010 10:10"?
+02:09  robert_: there are two CURRENT_TIMESTAMPs.
+02:10  Riviera: robert_: (spaces are the trouble here)
+02:10  robert_: my code inserts CURRENT_TIMESTAMP, and the database server transforms that into a date/time string.
+02:10  Riviera: but in the input to awk
+02:11  Riviera: there always would be "CURRENT_TIMESTAMP"?
+02:11  robert_: either CURRENT_TIMESTAMP or NULL.
+02:11  Riviera: i. e., no spaces in the last two comma-separated strings?
+02:11  Riviera: okay
+02:11  Riviera: same for the last field, yes?
+02:11  robert_: yes.
+02:11  Riviera: superb! :)
+02:11  Riviera: then, please give me one or two minutes
+02:11  robert_: there are two date fields at the end.
+02:11  robert_: okay.
+02:12  Riviera: robert_: awk '/ERROR/ && getline && !a[$(NF-2)]++'
+02:12  Riviera: robert_: try this, please.
+02:13  robert_: yeah.
+02:14  robert_: seems to work.
+02:14  Riviera: great
+02:14  Riviera: A short explanation in case something goes wrong,
+02:14  robert_: okay.
+02:15  Riviera: /ERROR/ is true if the current input line contains the string "ERROR" somewhere
+02:15  Riviera: if not, the current input line is skipped and the next read in
+02:15  Riviera: the next part "getline" will only be executed if the /ERROR/ part was true because of the && operator
+02:15  Riviera: so, getline reads in the next line from the input
+02:16  Riviera: if it was true, that is, if there was an input line (if the file isn't at its end), then (again because of the &&) the next condition is evaluated, the
+02:16  Riviera: !a[$(NF-2)]++ thing
+02:16  Riviera: that is a bit trickier
+02:17  Riviera: NF is a variable that contains the amount of whitespace-separated fields in the current input line
+02:17  Riviera: if you put a $ in front of some variable, it becomes the content of that field
+02:17  Riviera: like:
+02:17  Riviera: input "one two three"
+02:18  Riviera: $1 would be "one", $2 would be "two", NF would be 3 and $NF would be $3 would be "three"
+02:18  Riviera: so, here
+02:18  robert_: Oh, so it's always going to read two from the end.
+02:18  Riviera: $(NF-2) is that UID you referred to, because
+02:18  robert_: (of the array)
+02:18  robert_: yeah.
+02:18  Riviera: that UID is "two fields from the end"
+02:18  robert_: right.
+02:18  Riviera: a is some array
+02:18  Riviera: in awk, variables are initialised with 0 (or the empty string in string context)
+02:18  Riviera: so the first time your UID is seen
+02:19  Riviera: a[UID] will be 0
+02:19  Riviera: !0 is true, so the whole thing would be true and the line shown by default
+02:19  Riviera: also, a[UID] because of the ++ is incremented by one
+02:19  Riviera: so the next time the UID is seen
+02:19  Riviera: it will be
+02:19  Riviera: !1
+02:19  Riviera: which is false
+02:19  Riviera: line not shown again
+02:19  Riviera: that's about it
+02:20  robert_: I see.
+02:20  robert_: thank you very much. :D
+02:20  Riviera: hehe
+02:20  Riviera: welcome ;)
+02:20  robert_: so for now, I think that's what I need. I'm going to need parsing of the sql, no doubt, but that's for later. :p
+02:21  robert_: like, I'm going to need to pair uid=member id#
+02:21  robert_: but that can wait until I can think coherently.
+02:21  Riviera: if you go that far, better use something else than awk ;)
+02:21  robert_: yeah. :p
+02:21  Riviera: :)
+02:28  robert_: I'll fall asleep while this works.
+02:28  robert_: so just in case I come back when you're not here. :p
+02:28  Riviera: That'll certainly happen because I'm about to go to sleep 8)
+02:28  robert_: can I match on the an INSERT STATEMENT where UID is not an empty string? :p
+02:28  robert_: as am I. :p
+02:29  Riviera: probably, but, uhm. :)
+02:29  Riviera: What do you mean .. with "can I match ..."?:)
+02:29  robert_: can the trigger be the INSERT statement?
+02:29  robert_: heh
+02:30  Riviera: like, additionally to the ERROR thing or instead of?
+02:30  robert_: instead of.
+02:30  Riviera: so no business anymore with "next line of"
+02:30  Riviera: just
+02:30  Riviera: "look for all lines containing INSERT, see if the UID was seen already, if not, print"?
+02:31  robert_: yes.
+02:31  robert_: INSERT INTO enrollments << important, because we have several other tables. :p
+02:31  Riviera: robert_: awk '/INSERT/ && !a[$(NF-2)]++'
+02:32  robert_: awesome.
+02:32  robert_: I'm going to pass out now. :D
+02:32  Riviera: first try it, then say awesome ;)
+02:32  Riviera: because it might not work
+02:32  Riviera: and all that 8)
+02:32  robert_: "[
+02:32  robert_: :p*
+02:33  robert_: sweet.
+02:33  robert_: works.
+02:33  Riviera: cool
+02:33  Riviera: now
+02:33  Riviera: nite :)
+02:33  robert_: night. :p
+03:51  lykeus: When I call split("foo:bar", array, ":") it will return 2 as the number of fields. array[0] is empty the fields are stored in array[1] and array[2]. First I wanted to asked why the numbering doesn't start at 0, but by writing my question I remembered that the arrays in awk are anyway 'associative arrays'; does it have something to do with that and that it would just make more sense to store the first field in array[0] then?
+03:58  go|dfish: lykeus: Well, $0 is not the first 'field' $1 is, so I guess array[1] is consistent with that
+04:01  lykeus: Yes, it just struck me as odd in the first moment. But since awk arrays don't necassaryly start a 0 it makes sense.
+05:11  gnomon: lykeus, there has been ongoing debate about whether array indices should start at 0 or 1.  I side with Kelly-Bootle in believing that his proposed compromise of starting at 0.5 was not given due consideration.
+--- Log closed Fri Nov 26 09:16:33 2010
+--- Log opened Fri Nov 26 09:16:55 2010
+09:16 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+09:16 --- Server: [kornbluth.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+09:18 --- Channel #awk was synced in 115 seconds
+09:50  opalepatrick: I just want to filter out rows from a very big csv file where the value > 0 _ I am thinking gawk or awk but cant find a decent resource to do that quickly. Any ideas? I have no real knowledge of awk
+10:02  karthee: opalepatrick:  based on which column you want to chcek ? 
+10:02  karthee: check*
+10:03  opalepatrick: lol, the same man? I believe it would be $8
+10:03  pgas: awk won't work too well, if you can have fieds with a column inside like: "foo,bar", baz
+10:04  pgas: if it's not the case then it's quite trivial: awk -F, '$8 > 0'
+10:05  opalepatrick: OK, let me try that pgas - probably is trivial :-)
+11:12  opalepatrick: #gawk
+11:12  opalepatrick: lol
+11:30  opalepatrick: gawk -F; '$8 > 0'  old.csv > new.csv - this isn't working for me. I get a 'bash: $8 > 0: command not found' The separator is a semi-colon. $8 is meant to to refer to the 8th column. Any ideas?
+11:31  opalepatrick: I did bracket it as well - same thing
+11:55  geirha: escape the ;
+11:56  geirha: bash treats ; as end of command.  command1; command2; command3; ...
+11:56  geirha: Or shells in general
+12:32  opalepatrick: ahaa thanks geirha - just trying that
+12:34  opalepatrick: thanks all, that did it I think or at least it did something :-)
+13:46  migue: hello
+13:47  migue: i need some help 
+13:47  migue: i want to obtain web addresses from an html file
+13:48  migue: the addresses are in _one_ line in the file... a _very long_ line (without "line breaks")
+13:50  migue: i am trying fixing "http://" string as FS... but i can not to establish "end" of string...
+13:51  pgas: is the url inside quotes?
+13:51  migue: the links end with ".jpg" string
+13:51  migue: pgas: yes...
+13:51  pgas: then you can probably just sub(/".*/,$i)
+13:52  pgas: removing everything after the first quote in the field
+13:52  migue: pgas: wait a minute... my boss is talking to me :(
+13:53  pgas: 4# echo 'blahc="http://foobar/jpg"bleh' | awk IFS='http://' '{for (i=1;i<=NF;i++) { sub(/".*/,"",$i);print $i}'
+13:53  shbot: pgas: awk: IFS=http://
+13:53  shbot: pgas: awk:         ^ syntax error
+13:53  pgas: 4# echo 'blahc="http://foobar/jpg"bleh' | awk -F'http://' '{for (i=1;i<=NF;i++) { sub(/".*/,"",$i);print $i}}'
+13:53  shbot: pgas: blahc=
+13:53  shbot: pgas: foobar/jpg
+13:54  pgas: 4# echo 'blahc="http://foobar/jpg"bleh' | awk -F'http://' '{for (i=2;i<=NF;i++) { sub(/".*/,"",$i);print $i}}'
+13:54  shbot: pgas: foobar/jpg
+14:35  rkhshm: is there a way i can collect 2 return values from awk ? for eg::x,y=` awk -F" " '{print $1,$2}'`
+14:35  rkhshm: something like that.
+14:35  karthee: rkhshm: can you give a better example .. 
+14:36  pgas: var=$(awk ...) var1=${var% *} var2=${var#* }
+14:36  rkhshm: echo "one two three four" |awk -F" " '{print $1,$2}' I want to now collect $1 and $2 in 2 separate vars
+14:37  karthee: rkhshm:   echo "one two three four" |awk -F" " '{var1=$1; var2=$2}'
+14:38  karthee: did I get your question correct ??
+14:38  rkhshm: you got it right
+14:38  pgas: he probably talks about shell variable, not awk variable
+14:39  pgas: rkhshm: you cannot do what you want, you need to parse the output of awk 
+14:39  rkhshm: pgas: i think i figured it out.. karthee, does not work
+14:39  rkhshm: var1 is " "
+14:41  karthee: rkhshm: karthik@karthik-desktop:~/Documents$  echo "one two three four" |awk -F" " '{var1=$1; var2=$2; print var1, var2}'
+14:41  karthee: one two
+14:42  rkhshm: karthee: adding a print will work but i want it for later use.. so want to store it in var1 and var2 as is for future use...
+14:42  rkhshm: :)
+14:43  karthee: rkhshm: sorry didnt get you .  You store the values in var1 and var2 for later use only . isnt it ??  and it is having the right values  isnt it ??? 
+14:44  rkhshm: karthee: http://pastebin.ca/2002891
+14:45  pgas: it's a shell question, not an awk one
+14:46  karthee: pgas: yahh . you are correct .. 
+14:46  karthee: its a shell question .. 
+14:46  rkhshm: ok.
+14:46  rkhshm: so wrong channel ?
+14:46  karthee: rkhshm: how can a variable of  two different  languages have  same values ?
+14:46  pgas: well, I gave you an answer
+14:51 * robert_ yawns
+15:21  migue: pgas: thanks! :)
+15:21  migue: pgas: it work very fine!
+15:22  migue: pgas: i must  make some changes for mi case, but it work fine...
+15:22  migue: pgas: thanks!!!!
+17:16  stockholm: how do i print everything but the first column?
+17:16  stockholm: make that the first three
+--- Log closed Sat Nov 27 00:05:28 2010

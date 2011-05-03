@@ -1,0 +1,116 @@
+--- Log opened Fri Dec 03 13:04:41 2010
+--- Log closed Fri Dec 03 13:07:43 2010
+--- Log opened Fri Dec 03 13:07:52 2010
+13:07 --- Users 161 nicks [0 ops, 0 halfops, 0 voices, 161 normal]
+13:09 --- Channel #zsh was synced in 116 seconds
+13:31  netron: Hello! With my old zsh config i was able to type "cd -<tab>" and get the list of the last directories i was in and could chose like "cd -3" to get to the third listed directory. What's the proper option for that in the config?
+13:35  Mikachu: setopt autopushd
+13:37  ft: also, $DIRSTACKSIZE
+13:38  Mikachu: and pushdminus
+13:45  netron: thanks!
+14:56  catsup: apetrescu: indeed
+14:56  apetrescu: catsup, wow, excellent timing ;P
+14:57  catsup: =D
+16:12  teratorn: Mikachu: what's pushdminus?
+16:13  Mikachu: read the man page?
+16:15  teratorn: it's not in my man pages
+16:17  Mikachu: pushd_minus
+16:20  teratorn: ah
+16:57 --- mren|off is now known as mren
+17:45  resixian: apetrescu: (hashed hosts again) well anyone can easily get hostnames from .histfile, i was thinking more along what catsup has said
+19:02  variable: is there any way to tell if I'm SSHed in or local? I want to change the color of PS1 if I'm sshed in
+19:12  thrig: variable: what would you look at to see how two shell instances differ?
+19:12  variable: thrig, I was wondering if there was anything I could look at
+19:13  thrig: environment variables, for starters
+19:14  variable: SSH_CLIENT, SSH CONNECTION, SSH_TTY ?
+19:15  variable: if [ -n  $SSH_TTY ] perhaps
+19:15  thrig: what happens when you try that?
+19:16  variable: thrig, seems to work
+19:18  Mikachu: that shouldn't work
+19:18  Mikachu: [ -n $undefined ] always returns true
+19:18  variable: Mikachu, I added quotes
+19:18  Mikachu: because it expands to [ -n ]
+19:19  Mikachu: okay, then it should work in zsh
+19:21  variable: I can't seem to do %F{bold}%F{blue} :-(
+19:22  Mikachu: %B
+19:22  Mikachu: bold is not a color
+19:22  variable: perfect - thanks
+19:22  Yorokobi: variable, man -P 'less -p "Visual effects"' zshmisc
+19:24  variable: btw you don't need -P '' you could just use a pipe :-\
+19:25  Mikachu: or you can just say "look for Visual effects in the manpage" like any normal person ;)
+19:25  variable: a) what is the different between standout mode and bold b) is there a way to print out text using things modifiers (other than PS1 :-)"
+19:26  Yorokobi: the -P '' preserves color in man if color is enabled. Pick your poison.
+19:26  variable: man has color?!
+19:27  Yorokobi: man 2.5.9 does
+19:27  variable: also less is aliased to include -R :-)
+19:27  Mikachu: but man doesn't output colors if stdout isn't a tty
+19:27  variable: which revision is that in? -CURRENT ?
+19:27  variable: oh - woops - not on that channel
+19:28 * variable doesn't use GNU man
+20:04  ezzieyguywuf: if I'm going to write a shell script, should I use #!/bin/bash or #!/bin/zsh? I use zsh as my shell.
+20:05  ianp: whatever you want
+20:05  thrig: which are you writing the script for?
+20:06  ianp: i use /bin/sh (which is typically bash)
+20:06  ianp: since i write bas hscripts
+20:06  ianp: almost every unix mahine will have /bin/sh, and also /bin/bash
+20:06  ezzieyguywuf: thrig: I'm not sure. all its going to do is accept some user input and then do a cp based on that.
+20:06  ianp: many wont have zsh
+20:07  ezzieyguywuf: guess I'll just use /bin/bash then thanks guys.
+20:07  ianp: i use perl for anything too complicated for bash, though im sure zsh is much better
+20:07  ianp: than bash
+20:07  ianp: its just not as portable
+20:08  thrig: for a simple "accept some input and cp" script /bin/sh would likely suffice, and be more portable than bash
+20:10  ianp: on most machines /bin/sh points to bash anyway
+20:10  ianp: so i use /bin/sh
+20:10  emias: No, most machines run Windows.
+--- Log closed Fri Dec 03 20:13:33 2010
+--- Log opened Fri Dec 03 20:13:45 2010
+20:13 --- Users 164 nicks [0 ops, 0 halfops, 0 voices, 164 normal]
+20:14  ianp: teratorn: not really
+20:14  ianp: i prefer perl
+20:14  ianp: i learned a tad of python
+20:15  teratorn: it has the advantage of not being write-only
+20:15 --- Channel #zsh was synced in 121 seconds
+20:15  thrig: fork Python, add {, call it Cobra
+20:15  teratorn: thrig: hee
+20:16  teratorn: thrig: 4) ??? 5) PROFIT
+20:27  ianp: teratorn: read/write perl is possible, it just takes effort
+20:28  ianp: like any good software
+20:34  catsup: yes, bash does run in compatibility mode with #!/bin/sh
+21:04  __ls: someone has an idea for how to get a command, let's say cdu for cd-undo to change to the directory i was in before i was in the current directory?
+21:04  __ls: or is there already something like that?
+21:04  teratorn: cd -
+21:07  __ls: awesome. both you and zsh
+21:08  rudi_s: __ls: Also check auto_pushd and dirstacksize and pushd_minus.
+21:08  rudi_s: It allows you to have a longer cd history and you can tab-complete it with cd -<tab>
+21:09  __ls: rudi_s: thanks. for my purposes, one is usually enough, since i use a couple of terminals at once. i just noticed that i entered just "cd " to often (by accident) and wanted an easy way to get back
+21:11  __ls: another question: how to get vim to not autocomplete to hidden files (i.e. starting with a ".") when i didn't enter the first letter of the file but just want to use tab?
+21:11  __ls: and, another one: if i have entered, say, xpdf, can i then ask zsh to only complete to files with pdf ending?
+21:12  rudi_s: __ls: autoload -U compinit && compinit
+21:12  rudi_s: Add this to your .zshrc and you should get very good completion support for most programs.
+21:12  rudi_s: Including xpdf only completing PDFs.
+21:13  rudi_s: __ls: vim <tab> shouldn't complete hidden files by default, only if you put a . in front.
+21:16 --- y3llow_ is now known as y3llow
+21:16  __ls: rudi_s: hmm, i have autoload already in my zshrc, but somehow it doesn't work (after sourcing). xpdf e.g. still proposes folders and such things. need to say i copied the rc from somewhere on the web, so i don't have much of a clue what's in there
+21:16 --- pothos_ is now known as pothos
+21:17  invariable: __ls, pastebin it
+21:17  rudi_s: __ls: Well, that's not a very smart thing to do .. try starting with an empty zshrc and copy only things you need and unterstand, like autoload -U compinit && compinit .. for more information check man zshcompsys
+21:20  __ls: invariable: here's the pastebin without aliases and keybindings and such: http://pastebin.com/SjjDWFJK
+21:21  __ls: rudi_s: yeah i know it's not smart, but i try to go one tool at a time usually. right now i try to focus on vim ;) but this one is really bugging me, i don't want to see all those hidden files ... so, just asking. if we can't figure it out, i might just suck it up until i have time to look into it myself
+21:21  Mikachu: did you try grep hidden .zshrc ?
+21:22  __ls: Mikachu: yep. nothing in there
+21:25  invariable: Can zsh deal with a symlinked zshrc ?
+21:25  rudi_s: invariable: Sure.
+21:25  invariable: lrwxr-xr-x  1 foo  foo  - 5 Dec  3 15:24 /home/foo/.zshrc -> zshrc
+21:25  invariable: This is the Z Shell configuration function for new users,
+21:25  invariable: zsh-newuser-install.
+21:25  rudi_s: __ls: Why not just copy your old .zshrc step after step to a new clean one.
+21:26  invariable: oh wait - I'm an idiot --- I messed up the path 
+21:26  rudi_s: invariable: I was starting to get a little confused ^^
+21:27  __ls: rudi_s: something like that, yep :)
+21:27  invariable: __ls, see pm
+23:15  mikebling: greetings, I just switched to zshell and completions are working great...however i've got a function for ssh 's' that I would like to complete like ssh
+23:17  Mikachu: mikebling: compdef s=ssh
+23:17  Mikachu: iirc
+23:40 --- mren is now known as mren|off
+--- Log closed Sat Dec 04 00:00:40 2010

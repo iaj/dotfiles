@@ -1,0 +1,623 @@
+--- Log opened Sun Oct 31 19:12:55 2010
+19:12 --- Users 742 nicks [0 ops, 0 halfops, 0 voices, 742 normal]
+19:12 --- Server: [card.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+19:13  shylent: thyko: oh hai
+19:13  qnikst: nosklo: it doesn't work either..
+19:13  nosklo: locojay: you mean you want to match words
+19:13  deever: nosklo: but this seems to have it's own mainloop, doesn't it?
+19:13  locojay: yes it does not have to replace subsearches
+19:13  qnikst: maybe problem is on called program side but at first I'm trying to check python code..
+19:14  locojay: since test 12 is substring of test 123
+19:14  locojay: only replace exact matches
+19:14 --- Channel #python was synced in 99 seconds
+19:15  nosklo: deever: there's a qt reactor which makes twisted mainloop compatible with qt's mainloop. You only have to change some imports, and your mainloop start call. It's a 5 line modification to enable full ssh debugging console
+19:16  nosklo: qnikst: it works here. What are you running? can you pastebin the code?
+19:17  nosklo: locojay: how do you define a exact match?
+19:17  nosklo: locojay: is it the space character?
+19:17  deever: nosklo: aah, didn't specifically google for qt reactor...thank you so much! :)
+19:17  locojay: yes space thnks
+19:17  qnikst: yes, I'm running darks. here is snipplet reproducing problem: http://dpaste.com/267864/
+19:18  nosklo: locojay: you could split on space, and then look for specifc sequences on the resulting list
+19:18  qnikst: maybe it's darcs problem, currently I'm trying to ask them
+19:18  nosklo: locojay: or you could use some regular expressions
+19:18  locojay: works thnks
+19:18  nosklo: locojay: you could check for 'test 12 ' instead of 'test 12'
+19:19  nosklo: and handle the special case where the string ends with 'test 12'
+19:25  nosklo: qnikst: don't use shell=True
+19:25  nosklo: qnikst: ever
+19:27  klawd: can i have a class named Exception in my namespace? (deriving from the builtin Exception of course)
+19:28  DonQuestion: good evening! I'm looking for a pointer to a unicode/ascii related problem with the xml.sax module for python 2.6+
+19:28  Articate: class Exception(Exception):?
+19:28  bbear: Any one does n
+19:28  fliebel: Is anyone familiar with distribute? I'm building PyObjC but it blows up inside setup_py.py. The file contains if statements on object properties that might not exist.
+19:28  nosklo: bbear: yes
+19:28  nosklo: qnikst: http://bpaste.net/show/10507/
+19:28  bbear: anyone does know a numerical algorithm for finding local minima in python ?
+19:29  bbear: I always have it for global minima.
+19:29  DonQuestion: @bbear for what?
+19:29  nosklo: DonQuestion: you didn't mention what the problem is, code to reproduce it, pastebinned traceback, etc
+19:29  DonQuestion: @bbear: do you mean somethin aka the "simplex-algorithm" ?
+19:30  bbear: Yes. a simplex algorithm would be fine.
+19:30  bbear: If it does what I mean.
+19:30  bbear: Do you have a python routine to do it ?
+19:30 --- rizzuh_ is now known as rizzuh
+19:32  pinkisntwell: in the subprocess module, what exactly does the buffer setting control?
+19:33  hisral: nosklo: ref: reading from block device: ty, i was an idiot. i had a test to stop me reading forever, and it kindof stopped cause i had used the wrong method to get the device size. all is well now:)
+19:33  DonQuestion: @bbear: qould need to look into my old svn repository. my algorithm was used in a fem-simulation. so i don't know if it would be useful for you.
+19:33  klawd: Articate: yes
+19:33  qnikst: nosklo: thanks, that works
+19:36  bbear: DonQuestion: http://lvi.toile-libre.org/data/cubic_line.png
+19:36  bbear: DonQuestion: if you see this curve, you'll see the problem.
+19:36  bbear: it has a local minima for x~10.
+19:37  bbear: But I want to stay on it, eg when the derivative is zero.
+19:37  bbear: if Im looking for a minimum, the fmin routine will systematically go behind, toward - \infty.
+19:37  bbear: I dont want to have this.
+--- Log closed Sun Oct 31 19:44:06 2010
+--- Log opened Sun Oct 31 19:44:27 2010
+19:44 --- Users 743 nicks [0 ops, 0 halfops, 0 voices, 743 normal]
+19:44  shylent: haven't come across it yet, though :)
+19:45  DonQuestion: @nosklo: a short summary : http://bpaste.net/show/10508/
+19:45 --- Channel #python was synced in 87 seconds
+19:46  nosklo: DonQuestion: the traceback is incomplete - it is missing important information
+19:47  nosklo: DonQuestion: also, what is SaxOdfHandler? Did you create this class yourself?
+19:47  nosklo: DonQuestion: any reason you're using sax instead of, say, lxml, to parse xml?
+19:47  DonQuestion: @nosklo: yes and they are all o.k
+19:48  nosklo: DonQuestion: what?
+19:49  DonQuestion: @nosklo: sry. SaxOdfHandler is my class and not relevant because i traced the error in debug mode pack to the actual "built-in" X expat.Parse - routine
+19:50  DonQuestion: the problem vanishes if i set: reload(sys); sys.setdefaultencodint('utf-8')
+19:50  shylent: oh my!
+19:50  nosklo: DonQuestion: please don't do that
+19:50  nosklo: DonQuestion: pastebin the full traceback.
+19:50  nosklo: DonQuestion: and the complete, runnable code example
+19:51  nosklo: DonQuestion: because you're doing something wrong in your class that causes the problem
+19:51  DonQuestion: it's actual a dummy class : doint nothing
+19:51  nosklo: DonQuestion: ok, then it's easier to pastebin it
+19:52  nosklo: DonQuestion: I want code I can run to test your problem for you. I'm willing to help
+19:52  shylent: look, if you have to do sys.setdefaultencoding to make your code work, you are *definitely* doing something wrong :)
+19:52  nosklo: DonQuestion: just write some code that shows the problem and pastebin it. I will run it and tell you what's wrong... how hard can that be?
+19:54  nosklo: DonQuestion: also, consider moving to lxml for xml parsing... sax sux
+19:56  shylent: nosklo: I wonder what libxml does internally wrt data consuming / storage. I would imagine, that using an event-based parser (sax) might be a good idea at times (say, if you were to parse a huge file fishing for relatively small bits of data)
+19:56  shylent: but not as a general case, of course
+19:56  nosklo: shylent: lxml also includes a incremental parser
+19:56  nosklo: shylent: so if you have to do it, lxml is still the answer
+19:56  shylent: oh, we are talking about different, unrelated things then :) I thought you were referring to the parsing method, rather than a specific module
+19:56  shylent: considering that, sure, lxml is still the answer, no arguing with that
+19:58  sigmonsays: Hello, Where is telldir() function for python? I suspect it to be in os module
+19:59  nosklo: sigmonsays: what would that do?
+19:59  sigmonsays: It's specific to posix I suppose, but seeks through a directory stream. Like opendir/readdir
+20:00  nosklo: what are you trying to do?
+20:01  orneo1212: hello
+20:01  sigmonsays: nosklo, Call telldir
+20:02  sigmonsays: I'll do ctypes or write it in C. Just assumed it would be hidden away somewhere. If not, no biggie
+20:02  DonQuestion: @nosklo: http://bpaste.net/show/10509/  with complete traceback. for a unit-test class with dependecy injection and whistles i would have to post later.  - lxml has it's own quirks and i can't use it on the intended target machine for reasons not influencable by me
+20:04  shylent: ( I am most curious to hear about those quirks :P )
+20:05  DonQuestion: embeded system ...
+20:05  shylent: anyway, if I am reading it correctly, what I see is that you are reading in bytes and then pretend, that they are unicode (u''.join)
+20:06  nosklo: DonQuestion: I've tried to run your code after fixing it, but it doesn't do what you claimed
+20:07  Juhaz: even if lxml really is unavailable, elementtree should be the thing to fall back to
+20:07  DonQuestion: @shylent: if i'm not completly wrong this sould be a way for autoconversion. the source actualy is utf-8 encoded
+20:08  nosklo: DonQuestion: http://bpaste.net/show/10510/
+20:08  nosklo: DonQuestion: the class you provided doesn't have "search_for_element"
+20:08  nosklo: DonQuestion: please pastebin the actual class so I can test the code
+20:09 --- zer0c00l is now known as zer0c00l|zZz
+20:09  shylent: nosklo: anyway, isn't doing u''.join(content) where content is a list of bytestrings, a no-no?
+20:10  nosklo: shylent: yeah, but since that works, I guess there aren't any non-ascii chars on the xml
+20:11  ripero: is it normal that if I less / redirect to a file the output of a python program I get the lines in a different order?
+20:11  DonQuestion: i'll be back later with a better example and some workable code. actualy the xml file contains many non-ascii chars
+20:11  ripero: (for me it is completely nonsense)
+20:12  DonQuestion: an the join is not the problem
+20:12  MainFrame: Hey guys.. im just wondering People said earlier not to use input()  is this guide teaching me wrongly? http://learn-to-program.net/python/loops.htm
+20:12  DonQuestion: meanwhile thx for your patience and interest - till later
+20:12  nosklo: DonQuestion: maybe they are encoded to xml-ascii representations
+20:12  noobermin: I try to load an extension i made
+20:12  nosklo: DonQuestion: because if there were actual non-ascii bytes on the file, the join would yield error
+20:13  noobermin: it gives me an undefined symbol error
+20:13  noobermin: but i included the object file with the function it complains about, i think
+20:13  nosklo: MainFrame: yes
+20:13  nosklo: MainFrame: don't read that guide
+20:13  shylent: MainFrame: well, input is just calling raw_input and then calls `eval` on result. Which means running arbitrary code supplied by the user
+20:13  shylent: which can be anything really
+20:14  nosklo: MainFrame: read the book under "New Programmer" in the /TOPIC of the channel
+20:14  noobermin: I included the object using extra_objects in the Extension object I passed to setup
+20:14  noobermin: any ideas?
+20:14  MainFrame: then what? the page is a mess
+20:15  noobermin: MainFrame, are you asking me?
+20:15  nosklo: MainFrame: read the book under "New Programmer" in the /TOPIC of the channel
+20:15  nosklo: MainFrame: "| New Programmer? http://bit.ly/40CBHF |"
+20:16  noobermin: oh ok, nvmd sry
+20:16  nosklo: MainFrame: instead of that guide in a ms frontpage-generated site with 90's colors
+20:16  MainFrame: woops wrong link
+20:17  noobermin: does anyone know where I could get help?
+20:18  derdon: http://github.com/ricobl/python-chuck-norris :D
+--- Log closed Sun Oct 31 20:24:39 2010
+--- Log opened Sun Oct 31 20:25:01 2010
+20:25 --- Users 748 nicks [0 ops, 0 halfops, 0 voices, 748 normal]
+20:25  nosklo: ripero: no.
+20:25  Kaedenn: [x for x in l if x != '']
+20:25  euphidime: allu2: Replace where with if
+20:25  allu2: euphidime: thank you :)
+20:25  nosklo: ripero: unless you're using threading etc, which is far from "normal"
+20:25  allu2: Kaedenn: thank you too :)
+20:26 --- Channel #python was synced in 90 seconds
+20:26  ripero: nosklo: I'm not using threading, that I know
+20:26  phryk: in Image.new() can anyone tell me what the heck "mode" is?
+20:26  dborba: happyhessian, in the future do go to an appropriate channel though... #regex is a good place for regex help
+20:26  euphidime: phryk: The binary format of the colors
+20:27  dborba: oops - last message got sent to wrong channel ;P
+20:27  nosklo: phryk: the image mode
+20:27  phryk: euphidime: as in rgb/cmyk ?
+20:28  phryk: nosklo: i figured out that much…
+20:28  JodaZ: hmm, does python do big numbers ? like 64bit n stuff ?
+20:28  euphidime: phryk: Yes, as in, RGB, RGBA, etc.
+20:28  phryk: euphidime: thanks
+20:28  euphidime: I'm pretty sure you can also specify things like ABGR if that's the format your source data is in
+20:28  Kaedenn: JodaZ: python has bigints, yes
+20:28  nosklo: qnikst: have you tried the stderr=subprocess.STDOUT trick I mentioned eariler yet?
+20:28  qnikst: yes
+20:29  phryk: nice, but i have no source, generating for scratch, just gonna be a simple captcha
+20:29  phryk: at least for now
+20:29  nosklo: JodaZ: python's ints can grow up to infinite
+20:32  TheCommieDuck: Ugh. Eclipse seems to count ImportError and False as undefined variables.
+20:33  shylent: it does?
+20:34  shylent: maybe not, though :P
+20:34  ripero: nosklo: here's the code and the different outputs: http://fpaste.org/xouU/
+20:34  TheCommieDuck: Runs fine, just the display is icky.
+20:35  shylent: could you pastebin the code, that's giving you problems? I mean, I know, eclipse has some quirks, but mislabeling built-ins as undefined is not one of them
+20:36  TheCommieDuck: try: /  import io / except ImportError as error: / print(1) #This will cause it to do it, same if I did foo = False.
+20:36  ejo: Hey, is this a typo?  Here: http://docs.python.org/library/itertools.html#itertools-recipes in the 3rd recipe, the one for def consume(iterator, n):  shouldn't the if and else clauses use a return statement?
+20:37  shylent: TheCommieDuck: doesn't do this for me :/
+20:37  TheCommieDuck: shylent: Mebbe pydev is messed up, since I changed python from 3.1 to 2.7 without fiddling with settings (set to 2.7 grammar though).
+20:38  shylent: did you change the interpreter?
+20:38  shylent: in pydev, I mean
+20:38  TheCommieDuck: shylent: Uh...doing that now.
+20:38  TheCommieDuck: Probably the issue. :P
+20:38  TheCommieDuck: All better. Thanks. :D
+--- Log closed Sun Oct 31 20:45:00 2010
+--- Log opened Sun Oct 31 20:45:24 2010
+20:45 --- Users 752 nicks [0 ops, 0 halfops, 0 voices, 752 normal]
+20:46 --- Channel #python was synced in 87 seconds
+20:48  noobermin: My extension gives an undefined symbol error even though I included the object files that contain the functions, any help?
+20:48  phryk: wth
+20:49  phryk: is pil some kind of imagemagick binding?
+20:49  noobermin: no ideas?
+20:49  noobermin: suggestions?
+20:55  nosklo: deever: can you pastebin your code?
+20:56  noobermin: :/
+20:56  nosklo: ripero: you're replacing sys.stdout
+20:57  nosklo: ripero: don't do that. instead, explicity encode everything you want to output
+20:58  ni_noob: hey guys
+20:58  nosklo: ripero: also /dev/stdout is not the same thing as stdout - you're opening a separate fd
+21:00  ni_noob: I'm parsing a file and want to read 5 lines ahead when line.startswith('='). How do I do that?
+21:00  ni_noob: I'm usinge readlines() btw
+21:01  nosklo: ni_noob: readlines() means you've already read all lines
+21:01  deever: nosklo: http://paste.pocoo.org/show/284025/
+21:01  nosklo: ni_noob: x = myfile.readlines() # x is a list with **all lines**
+21:01  ni_noob: nosklo: Yeah, I'm going through the array.
+21:01  ni_noob: nosklo: Hmm, maybe I can just get the counter and then read line[x] + 5
+21:02  noobermin: line[x+5]
+21:03  ni_noob: Alright, any way to get a current count in a for loop when going through a list?
+21:03  ni_noob: Or do I just set it before and increment during...
+21:03  ejo: for x, y in enumerate (mylist):  foo bar blah
+21:04  nosklo: deever: you have to install the new reactor *before* importing reactor from twisted.internet
+21:04  ripero: nosklo: thanks for the help
+21:04  nosklo: deever: preferably you should do it on the very beginning of your file
+21:04  ripero: nosklo: I thought stdout and /dev/stdout were the same
+21:05  ripero: nosklo: and I found that workaround in http://bugs.debian.org/415968
+21:05  nosklo: ripero: it's a fail hack
+21:05  nosklo: ripero: being explicit is better
+21:05  ni_noob: ejo: thx, will try
+21:06  magicblaze007: how do i find the screen resolution of my screen using python?
+21:06  ni_noob: btw, does Python not support x++
+21:06  ni_noob: ?
+21:06  nosklo: ni_noob: no.
+21:06  nosklo: ni_noob: it supports ++x but that doesn't do what you think
+21:06  nosklo: ni_noob: there's x += 1
+21:06  ni_noob: nosklo: Ok, good enough. thx.
+21:06  noobermin: ok, one last time, then I'll give up. I have an extension module that gives Undefined symbol errors even though I include the object files that have the functions in the setup script.
+21:06  nosklo: magicblaze007: under which graphical environment?
+21:07  noobermin: Here is the setup.py file: http://fpaste.org/XbPT/
+21:07  magicblaze007: nosklo: cross platform perhaps?
+21:07  ripero: nosklo: it's ok for me, it's just that I expected such a high-level language to be able to do that kind of things without being explicit
+21:07  nosklo: magicblaze007: ok, using which cross-platform GUI toolkit?
+21:07  magicblaze007: pyqt4 perhaps?
+21:07  nosklo: ripero: huh, explicity is a feature of high-level languages
+21:08  nosklo: magicblaze007: QtGui.QDesktopWidget().screenGeometry()
+21:09  noobermin: nosklo: depends on what...I guess you can consider certain low-level occurences as "hidden" rather than implicit
+21:09  magicblaze007: nosklo: I guess that needs an application created?
+21:09  nosklo: noobermin: only when they're unambiguous
+21:10  magicblaze007: QWidget: Must construct a QApplication before a QPaintDevice
+21:10  nosklo: noobermin: otherwise they fail and you don't know why
+21:10  nosklo: magicblaze007: I'm not that familiar with pyqt. Just giving you pointers
+21:10  nosklo: I use pygtk
+21:11  magicblaze007: nosklo: got it...just needed to construct a Qapp
+21:11  magicblaze007: thanks
+21:17  ripero: nosklo: thanks for the lesson :)
+21:19  domas: hi! how can I unpack unpadded data structures? e.g. I have 10-byte string representing int,char,int,char
+21:20  domas: unpack() expects 13-byte string
+21:20  deever: nosklo: ah, now it works, yes!
+21:20  CryptoSec: Suiter: are you up for some code review?
+21:21  MostAwesomeDude: domas: struct module.
+21:21  domas: thanks!
+21:21  nosklo: domas: what do you mean? can you give an example of bytestring you want to unpack and the expected results?
+21:22  domas: nosklo: well, calcsize("IBIB") says it is 13 bytes
+21:22  therick: If anyone is interested in a python/django job in Miami Beach, Fl: http://jobs.innovativtech.com/python.html
+21:22 --- therick is now known as TheRick
+21:22  nosklo: hum, I guess he's already using struct module, or I don't know what "UNPACK" means
+21:22  domas: mostawesomedude: oh wait, I _am_ using struct
+21:22  domas: mostawesomedude: but it expects padding of data, and I don't know how to turn that off :(
+21:23  domas: nosklo: right :)
+21:23  domas: nosklo: I am using, and it doesn't do what I want it to do
+21:23  noobermin: so no ideas, no one who makes C extensions in the house :(
+21:24  nosklo: noobermin: are you using cython?
+21:24  MostAwesomeDude: domas: You need to use a standard alignment. Try =IBIB instead of @IBIB. Also you should figure out your endianness and specify < or > instead.
+21:24 * domas reads Notes 
+21:24  domas: okie, I missed that part, = does what I want
+21:24  noobermin: nosklo, no...sorry, just in plain c
+21:25  nosklo: noobermin: why not?
+21:25  nosklo: :)
+21:25  noobermin: haha, well, i haven't heard of it till now.
+21:25 * domas is living in world where logs are written in binary
+21:25  noobermin: just looked it up, it looks interesting
+21:26  domas: with varying header lengths etc
+21:26  MostAwesomeDude: domas: If you have complex formats, you may want to look at construct/reconstruct, which offer a lot more power than struct.
+21:27  noobermin: if it helps, here is the setup.py script using distutils: http://fpaste.org/XbPT/
+21:27  noobermin: the object file it is looking for is the ll.o one
+21:28  noobermin: at least, that's where the function it complains about it.
+21:28  nosklo: noobermin: it takes care of all the boring details and boilerplate for you
+21:28  noobermin: s/it/is
+21:28  nosklo: noobermin: so you don't have to deal with all this boringness
+21:28  noobermin: :/ ok, I'll look it up
+21:28  nosklo: noobermin: at the end it generates C code with all the INCREFS etc on place already
+21:29  noobermin: oh, that's kinda cool
+21:30  TheCommieDuck: [Newbie question] Can I use 'is' in replacement of the equality operator ==? If so, should I?
+21:30  nosklo: TheCommieDuck: no.
+21:30  Fuzzmz: Hi. I'm just starting out with python (running 2.7) and was wondering how to translate this C# for loop to python http://pastebin.com/TgQ42JRL
+21:30  infobob: http://paste.enzotools.org/show/1319/ (repasted for Fuzzmz)
+21:31  nosklo: TheCommieDuck: "is" is the "indentity" operator. It checks if the operands are the *same* object. "==" on the other hand checks for equality. Two objects can be equal even if they aren't *the same* object
+21:31  TheCommieDuck: Ah. I think I see you.
+21:31  kerio: and it doesn't mean an object is equal to itself either
+21:31  MostAwesomeDude: Fuzzmz: Have you read the tutorial? :3
+21:32  TheCommieDuck: Ah, so 'foo' is 'bar' is True, but 'foo' == 'bar' is not. I think.
+21:32  Fuzzmz: MostAwesomeDude, I know it should be something like for d in range(2, [something here] ,1) but I can't figure out the [something here part] and the tutorial didn't clear it out
+21:32  MostAwesomeDude: Fuzzmz: You'll probably need a while loop. Just lower the for to while in the normal fashion.
+21:32  TheCommieDuck: s/not/False.
+21:32  nosklo: TheCommieDuck: no, 'foo' is 'bar' is False. They're visibly different objects.
+21:32  MostAwesomeDude: Fuzzmz: Python only has foreach loops.
+21:32  kerio: TheCommieDuck: huh? no
+21:32  magicblaze007: C:\Python26\lib\site-packages\Crypto\Util\randpool.py:40: RandomPool_DeprecationWarning: This application uses RandomPool, which is BROKEN in older releases.  See http://www.pycrypto.org/randpool-broken   RandomPool_DeprecationWarning) -- Has this been fixed yet?
+21:32  kerio: x = y = 'foo'; x is y
+21:33  kerio: 'foo' is 'foo' is not guaranteed to be True
+21:33  Fuzzmz: MostAwesomeDude, OK, thanks, I'll modify the rest of the code
+21:33  TheCommieDuck: Ah, I misinterpreted what you said.
+21:33  TheCommieDuck: I thought you meant the type of object. Thanks for clearing that up, kerio and nosklo.
+21:34  JodaZ: hmm, i am used to just comment our or add a "if" in languages, in python that isn't so easy, how do you people cope with it
+21:34  nosklo: JodaZ: why it isn't easy?
+21:35  JodaZ: nosklo, well, because i need to fix the identation
+21:35  TheCommieDuck: JodaZ, could you try commenting out the conditional part and put if 1 == 1: or something?
+21:35  nosklo: JodaZ: select the text and hit TAB
+21:35  nosklo: JodaZ: your editor should ident all lines
+21:35  JodaZ: and for deidenting ?
+21:35  nosklo: JodaZ: shift-tab
+21:36  JodaZ: wow, is that a standard ?
+21:36  nosklo: for programmers editors yes
+21:36  JodaZ: coolio
+21:36  nosklo: most do that
+21:39  JodaZ: hmm, do you people use 4 space tabs ? my programs would look like christmas tree forest if i'd do that
+21:39  andar: no, we use 4 spaces
+21:40  Gentle: note: EVERYONE in the whole wide world uses the same, except you!
+21:40  JodaZ: andar, huh ?
+21:40  andar: don't use tabs
+21:40  andar: use 4 spaces
+21:40  JodaZ: andar, there is no tab
+21:41  JodaZ: andar, your mind is still thinking about the 0x09 too much
+21:45  MostAwesomeDude: JodaZ: If your code is so deeply nested that 4-space tabs destroy readability, maybe you should simplify your code flow.
+21:45  nosklo: JodaZ: you're nesting too much. Split your code into separate functions/methods/classes/modules
+21:45  JodaZ: nosklo, you mean flattening it out artificially ?
+21:45  deever: nosklo: do you know by accident, how to make things like sys.displayhook and completion work in the in-loop shell?
+21:45  nosklo: JodaZ: yes, by extracting pieces of functionality and procedurizing them
+21:46  nosklo: JodaZ: specially if you can identify reusable pieces that could be generically applied to other similar data later
+21:46  JodaZ: nosklo, i do that, if it makes sense
+21:47  JodaZ: but i enjoy python so much because i never have to write reusable code because everything reusable i import because other people have made it already
+21:48  deever: nosklo: i mean this http://paste.pocoo.org/show/284047/
+21:50  pedro3005: is after = {n: [] for n in unique} valid 2.6.6 syntax?
+21:50  Juhaz: no
+21:51  nosklo: deever: oh. No, I think you'd have to dig into manhole implementation to do that
+21:51  pedro3005: Juhaz, how can I make the equivalent?
+21:53  GrIM147: i want to have a config like file with py2exe ? that can be written to ? how do i get around this ?
+21:54  nosklo: GrIM147: what's preventing you from just doing it?
+21:54  Juhaz: pedro3005, after = dict((n, []) for n in unique)
+21:54  GrIM147: nosklo, py2exe compiles everything into byte code and puts in into some zip file
+21:54  nosklo: GrIM147: generate the config file outside your zip file
+21:55  nosklo: GrIM147: don't use code as config. Use an actual config file
+21:55  GrIM147: nosklo, how would i get the path of that file after py2exe does its magic ?
+21:56  nosklo: GrIM147: save it in a default path, like "user's folder/Configuration Data/YourApp"
+21:57  nosklo: GrIM147: if you want the path of the current file you can use os.path.realpath(os.path.dirname(sys.argv[0]))
+21:58  ni_noob: I can't get this right. I want to "trigger" on a line starting with '=' and append lines to a list until an empty line is reached. Code: http://fpaste.org/3sI1/
+21:59  GrIM147: nosklo, thanks ill give it a shot
+22:04  nosklo: ni_noob: http://bpaste.net/show/10514/
+22:05  neuro_sys: Is there an option for backward compatibility to run python programs with old syntax, having stuff like like print ""?
+22:05  GrIM147: nosklo, first problem is solved , you mentioned that my config should not be code ? how would i get around this ?
+22:05  nosklo: GrIM147: use a config file
+22:06  nosklo: GrIM147: then use config parser or json to load it
+22:06  Rhamphoryncus: neuro_sys: use 2.x
+22:07  neuro_sys: so I have to get python 2.x.
+22:08  Rhamphoryncus: It is the most widely used and supported, and if you have code using print "" then obviously it needs it
+22:08  TheCommieDuck: Is there a way of storing a function in a tuple? Or something.
+22:09  TheCommieDuck: Sorry, dictionary.
+22:09  TheCommieDuck: So if I have a dictionary of commands to actions, say.
+22:09  nosklo: TheCommieDuck: yes
+22:09  nosklo: TheCommieDuck: d = {} ; d['foo'] = my_foo_function
+22:09  nosklo: TheCommieDuck: then you can call it as d['foo'](param1, param2)
+22:09  TheCommieDuck: Ah, ok. Thanks! :D
+22:10  TheCommieDuck: Google didn't want to work for me.
+22:10  kerio: that's something impossible to imagine for C developers i guess
+22:10  nosklo: TheCommieDuck: you can store any object as value in a dict. And functions are just objects
+22:10  cached: nothing is impossible for C programmers
+22:10  nosklo: kerio: not really, if you use pointers to functions
+22:11  kerio: ok, a c++ class then
+22:11  TheCommieDuck: kerio: I've done similar with c++'s boost::function.
+22:11  kerio: boost is nonstandard
+22:12  TheCommieDuck: I think bind and function are being brought into the C++ standard in the 0x.
+22:12  kerio: nosklo: a factory function
+22:13  TheCommieDuck: Um, could I store a member function as well? so d['foo'](objectInstance, param1).
+22:13  TheCommieDuck: (Cannot currently test this, at the moment)
+22:14  cederman_: does anyone know how to generate random birtdates using the time module? I know how to compare user input with the date module but can I go the other way somehow?
+22:14  kerio: either store the method from the class and pass the object
+22:14  kerio: or store the bound method
+22:14  kerio: from the object
+22:14  nosklo: TheCommieDuck: if you take the member function (method) from the instance, you don't have to pass the instance when calling
+22:14  kerio: er, from the instance
+22:15  nosklo: TheCommieDuck: so d['foo'] = myobj.method  would mean d['foo'](param1) would work, myobj reference is saved together with the method object stored in dict
+22:16  TheCommieDuck: Ah, I see.
+22:16  TheCommieDuck: And I wouldn't have to worry about myobj going out of scope? (Paranoia from previous languages)
+22:16  nosklo: TheCommieDuck: no. the method object holds a reference to it, so as long as the dict lives, so will the method object and the object itself
+22:16  cached: TheCommieDuck: correct
+22:17  TheCommieDuck: Ok, thanks. :D
+22:17  TheCommieDuck: I rather like Python.
+22:17  TheCommieDuck: Certainly fresh air.
+22:18  cederman_: Anyone mind helping me? =/
+22:18  nosklo: cederman_: what?
+22:18  nosklo: cederman_: random birthdates?
+22:18  cederman_: yes
+22:18  nosklo: cederman_: what do you mean
+22:18  cederman_: I want it to generate a string like year/mont/day --> xxxxxx
+22:19  nosklo: cederman_: ok, but with any random date?
+22:19  cederman_: yes, exactly
+22:19  nosklo: cederman_: from the beginning of time until today?
+22:19  MostAwesomeDude: 1960BC/Festivus/32
+22:19  nosklo: cederman_: like, is 01/01/0001 valid?
+22:19  cederman_: And by using well 1900+ would be best
+22:20  TheCommieDuck: cederman_: Couldn't you just generate a random number from 1900 to 2010, then another from 1 to 12, and one from 1 to 31 (with checking for 28/30 days)?
+22:20  nosklo: cederman_: return '01/01/1900'
+22:20  cederman_: I'm using this for validation in my program: time.strptime("%s%s%s"%(year,month,day),"%Y%m%d")
+22:20  nosklo: cederman_: er '1900/01/01'
+22:20  cederman_: then it will consider leap years, know it's length of each month etc
+22:21  TheCommieDuck: Ah.
+22:21  cederman_: It could be a for-loop that generates a number between 1-31, if month os 2 then it tries if it is correct, let's say it generates 31, then it checks with date and then It returns false and tries again until i matches...
+22:21  cederman_: don't really know how though
+22:22  tapas: the readline module seems to be tailored to the python interpreter
+22:22  tapas: i would like to have libreadline style input support for an app i am writing..
+22:23  PauloRicardo: I noticed that os.walk() doesn't fill files list with symbolic links that target to directories. How I can "fix" this to behave like "find -type l -xtype d" shell command?
+22:23  tapas: is there a way to use the readline module from my own app?
+22:24  nosklo: cederman_: (datetime.datetime.now() - datetime.timedelta(days=random.randrange(365*100))).strftime('%Y%m%d')
+22:25  nosklo: cederman_: that's a random day between now and approximately 100 years ago
+22:25  Marcelo: What I can use to make multiplataform desktop apps?
+22:25  nosklo: Marcelo: gtk, qt, wx
+22:25  SeanInSeattle: Hey all.  How to give the cherrypy logger permission to log to a directory on the VPS file system?
+22:25  nosklo: Marcelo: web development
+22:26  nosklo: Marcelo: xul
+22:26  SeanInSeattle: In other words, what user does cherrypy log as?
+22:26  cederman_: but it has to generate a month first to know the day span right?
+22:26  nosklo: SeanInSeattle: it logs as the user that started it
+22:26  disappearedng_: Hey does datetime have methods for converting a datetime object to epoch ?
+22:26  nosklo: cederman_: what?
+22:26  nosklo: cederman_: no. the code I provided just works
+22:26  tapas: oh found it
+22:27  nosklo: cederman_: it will never fail, it uses python's datetime module
+22:27  SeanInSeattle: mosklo, so if cherrypy is operating in embedded form via mod_wsgi, what user would have started it?  www-data (apache2.2 user)?
+22:27  tapas: raw_input() after importing readline :D
+22:27  cederman_: ok, but it has to check the value of which month it is?
+22:27  Marcelo: nosklo, I made some tests with qt4 and pyqt but I confused when make a build
+22:27  nosklo: SeanInSeattle: yes, it would seem so. Although I think you can configure the user apache will use in apache's config files
+22:27  cederman_: If I want it to generate year/month/day
+22:27  nosklo: Marcelo: what do you mean "make a build"?
+22:27  nosklo: Marcelo: I'm a gtk user myself
+22:28  nosklo: cederman_: it already generates year/month/day
+22:28  nosklo: cederman_: did you run it?
+22:28  cederman_: hmm, I get an error with that string, the leading parenteses is that needed?
+22:28  Marcelo: nosklo, to build a bin file
+22:28  nosklo: cederman_: you have to type it exactly as I did
+22:29  cederman_: which module should I import?
+22:30  nosklo: cederman_: here's a full commented version http://codepad.org/XEgewEs2
+22:32  cederman_: thank you, it works perfectly!
+22:32  nosklo: Marcelo: bin file? Why would you build such a thing
+22:34  Marcelo: nosklo, I will make an app to work on windows and linux. Could I make an ".exe" file to run my app?
+22:34  Marcelo: nosklo, with pyqt
+22:34  Gentle: Marcelo: py2exe does what you want, it's not elegant but works
+22:34  klawd: guys. i'm finding myself putting classes in the __init__.py files of packages to avoid import foo.bar.Bar. how do you guys do that?
+22:34  nosklo: Marcelo: usually in windows, what you do is a installer program. A program that your end-user runs, and press "next,next,finish" to install. That program installs qt, python and your application and creates a nice start menu shortcut.
+22:35  Marcelo: thanks Gentle and nosklo. I will research more about.
+22:35  nosklo: Marcelo: trying to bundle python, qt, all libs you use and your script in a single runnable file is achievable, but boring, troublesome and not worth the trouble in my opnion
+22:35  tpratt: If my users were using Windows, I'd get new users.
+22:37  cederman_: nosklo: how do I implement it in a forloop to make it generate new ones, now I is already generated when the program starts
+22:38  nosklo: cederman_: just put it in a for loop
+22:41  ni_noob: nosklo: Was afk. Thanks for the paste :) Read up on the with statement to understand it correctly. But I'm unsure about "elif not line", does that mean if line is empty+
+22:41  ni_noob: ?
+22:41  cederman_: nosklo: I tried but I'm making some silly mistake: http://codepad.org/r0BdiOWK
+22:41  cederman_: ni_noob: yes, empy.
+22:42  nosklo: cederman_: read the python tutorial, part about for-loops
+22:42  cederman_: just as line = [] means that it is empty
+22:42  nosklo: cederman_: for loops don't work with comparisions
+22:42  nosklo: ni_noob: yes. strings are considered False in a boolean context if empty.
+22:43  ni_noob: nosklo: And since you used line.strip() it will be empty rather than my '\n'. Makes sense.
+22:43  tpratt: cederman_: you could use while, but you have another problem: your condition never changes.
+22:43  nosklo: ni_noob: you don't want whitespace and line endings anyway so I though it's best to strip them from the start
+22:44  ni_noob: nosklo: That's true, I just hadn't thought about it.
+22:44  tpratt: (at least)
+22:45  magicblaze007: how do i get rid of this : C:\Python26\lib\site-packages\Crypto\Util\randpool.py:40: RandomPool_Deprecation Warning: This application uses RandomPool, which is BROKEN in older releases.  S
+22:45  magicblaze007: ee http://www.pycrypto.org/randpool-broken   RandomPool_DeprecationWarning) -- has it been fixed yet?
+22:45  PauloRicardo: I noticed that os.walk() doesn't fill files list with symbolic links that target to directories. How I can "fix" this to behave like "find -type l -xtype d" shell command?
+22:45  ni_noob: nosklo: Thanks, the whole thing makes sense now. I just want to make sure I understand it. If I don't learn, no point right :)
+22:46  nosklo: PauloRicardo: os.walk(..., followlinks=True)
+22:47  cederman_: nosklo: solved it http://codepad.org/LCDFM9Kx
+22:47  nosklo: magicblaze007: stop using randpool
+22:48  disappearedng_: anyway to apply time.mktime to timedelta objects?
+22:48  magicblaze007: nosklo: Its being used by pycrypto i guess? Not my code I think
+22:48  magicblaze007: nosklo: http://gitweb.pycrypto.org/?p=crypto/pycrypto-2.x.git;a=commitdiff;h=4cf61f7ebbf7a4985dac5115ae667967b3db0848
+22:48  nosklo: magicblaze007: stop using pycrypto this way, then
+22:49  PauloRicardo: nosklo: I tried this but I got different results with find command.
+22:49  nosklo: PauloRicardo: like what
+22:50  nosklo: PauloRicardo: hm
+22:50  PauloRicardo: nosklo: http://pastie.org/private/fuzibfut3zpn4uigf4za
+22:51  PauloRicardo: I put all files in a log and sorted them.
+22:52  nosklo: PauloRicardo: oh now I see what you mean
+22:53  PauloRicardo: find command found 2 symbolic links that targets to directories. These 2 symlinks isn't present in os.walk() search o.O
+22:54  cached: PauloRicardo: do you want followlinks=True?
+22:55  PauloRicardo: cached: neither followlinks=True or False give me these 2 symlinks :S
+22:56  nosklo: PauloRicardo: http://bpaste.net/show/10517/
+22:56  disappearedng_: wait does epoch uses millisecond or second as standard?
+22:57  bob2: seconds, sometimes as a float
+22:58  bob2: magicblaze007: short answer: if the pycrypto doecs don't explain how to avoid it, you'll have to wait for it to be fixed
+22:58  magicblaze007: Thanks
+22:58  PauloRicardo: nosklo: hm
+22:58  aboudreault: hi. I'm looking for the UINT_MAX value in python.
+22:59  bob2: there is no max
+22:59  aboudreault: what's the needed module?
+22:59  aboudreault: hmm ok.
+22:59  bob2: it switches to bignum when you overflow regular ints
+22:59  bob2: what are you trying to do?
+22:59  PauloRicardo: nosklo: I think I got it. Python recognizes them as directories. find recognizes them as files. :)
+23:00  aboudreault: bob2, well, I'm working with cython. http://pastebin.ca/1978218 , trying to convert this into ctypedef  cython statement.
+23:00  infobob: http://paste.enzotools.org/show/1320/ (repasted for aboudreault)
+23:01  teolicy: Hi. Suppose I have an integer representing a file descriptor; how do I wrap it in a file?
+23:01  bob2: I can't imagine there;s a platform python runs on with 16-bit unsigned ints
+23:01  bob2: teolicy: os.fdopen I think
+23:01  verte: os.fdopen
+23:01  teolicy: bob2, verte: Ah, right. I knew it's there, just forgot the name...
+23:02  aboudreault: bob2, you are right. I could probably just ignore that ifdef.
+23:02  verte: I always used to too
+23:02  PauloRicardo: nosklo: Thank you for your clarification, it helped me a lot. (:
+23:02  bob2: but in general, I'm not sure if a python int is guaranteed to have the same range as a platform signed int
+23:03  verte: it isn't
+23:03  verte: on pypy it is 31 bits
+23:04  verte: you should consider the type irrelevant
+23:04  dropdrive: Are there any packages out there that take advantage of Cython's NumPy capabilities?  I'm trying to find some good, modern, idiomatic examples.
+23:04  verte: except for array types
+23:06 --- njan is now known as n
+23:07  cederman_: if I want to create a dictionary in which numbers 1-13 corresponds to the value "banana", can I write it as dict = {0-13, 'banana'} ?
+23:07  bob2: no
+23:08  bob2: dict.fromkeys(range(14), 'banana')
+23:08  nosklo: cederman_: d = dict.fromkeys(xrange(14), 'banana')
+23:08  bob2: but later, when you use a list, that will fuck up
+23:08  bob2: so probably best to explain what you're really after :)
+23:09  cederman_: Well I want a random number 0 to 100 look for it's equivalent in a list, like each number corresponds to a string, and more than one number can correspond to the same string
+23:09  cederman_: I figured I should use dictionaries
+23:10  cederman_: If I have a forloop that returns 55 I want it also to output the string for number 55
+23:11  nosklo: cederman_: why don't you have a list of strings, and then randomize an item from the list itself
+23:11  mastertogo: +r >.>
+23:12  cederman_: well it corresponds to the birtday generator I got help with earlier. If it generates year 01-13 I want it to return a certain string
+23:18 --- n is now known as gnu
+23:19 --- gnu is now known as njan
+23:21  exarkun: So, all the examples on http://docs.python.org/py3k/extending/newtypes.html of PyVarObject_HEAD_INIT pass NULL as the first parameter.
+23:21  TheRick: If anyone is interested in a python/django job in Miami Beach, Fl: http://jobs.innovativtech.com/python.html
+23:22  exarkun: Why don't they pass a pointer to the type?  And why is there a first parameter at all?
+23:22  teolicy: exarkun: Well, I finished implementing the special CGIScript (I didn't work on it straight from then till now :), but for some reason whatever I write in my CGI child does not reach the server.
+23:23  teolicy: exarkun: my spawnProcess has: childFDs={0: 0, 1: 1, 2: 2, self.ALT_STDIN: 'w', self.ALT_STDOUT: 'r'}
+23:23  teolicy: exarkun: and in the child I use os.fdopen() to make then into file descriptors.
+23:23  JodaZ: why can't i ctrl+c out of my program if it has a thread running ? ~_~
+23:23  exarkun: teolicy: strace is your friend
+23:23  teolicy: exarkun: I've also overridden dataReceived in CGIProcessProtocol so it will call outReceivd when the child writes to stdout, but I see nothing ever reaches there.
+23:23  teolicy: exarkun: I'm on OSX :( :( :(
+23:24  teolicy: exarkun: (I hate this OS!)
+23:24  exarkun: teolicy: Ah
+23:24  verte: rpctrace then
+23:24  exarkun: teolicy: dtrace is pretty darn powerful
+23:24  exarkun: Although a lot harder to get started with than strace
+23:24  teolicy: exarkun: True, but has a steep learning curve :)
+23:24  exarkun: Also quit iTunes before you try to use it.
+23:24  teolicy: exarkun: I actually read the bloody D language specification cover to cover when it came out (I was rather excited about dtrace at the time...), but I forgot everything as I didn't use it.
+23:25  teolicy: verte: rpctrace? hmm... Googling...
+23:25  verte: oh, I could be wrong about that
+23:25  verte: its literally a mach rpc trace tool
+23:26  teolicy: verte: Yes, I think you are wrong about that :)
+23:26  exarkun: prooobably you don't need tracing at that level
+23:26  teolicy: exarkun: Yes, but strace is SOOO useful in these cases. strace + /proc/<pid>/fd is amazing.
+23:26 --- soduko is now known as performance
+23:29  MostAwesomeDude: JodaZ: Your threads aren't set to be daemons. You shouldn't expect signals of any sort to behave predictably while threaded.
+23:29  ni_noob: Can I get the index number of an item in a list? Say list
+23:29  ni_noob: list = ['a', 'b', 'c'], how do I found out what index 'b' has?
+23:29  aboudreault: if there are any cython users.... I'm looking for the proper to wrap a class that has multiple constructor.
+23:30  exarkun: ni_noob: What if you call the "index" method?
+23:30  JodaZ: MostAwesomeDude, hmm, any quickfix, i mean this is just for comfortable debugging this program (quick exit to change a line)
+23:30  _habnabit: aboudreault, classmethods.
+23:31  aboudreault: _habnabit, thanks, will google this.
+23:31  aboudreault: _habnabit, I was currently reading: http://pythonconquerstheuniverse.wordpress.com/2010/03/17/multiple-constructors-in-a-python-class/
+23:31  aboudreault: which looks "ok" too, using **kwargs and isinstance.
+23:31  MostAwesomeDude: JodaZ: Everything's gonna come down to the uncomfortable truth about threads: Threads are painful and probably not what you wanted anyway.
+23:31  _habnabit: aboudreault, yeah, uh, that code is kinda shitty
+23:32  gordonjcp: evening
+23:32  _habnabit: aboudreault, you shouldn't be using isinstance for things like that.
+23:32  _habnabit: aboudreault, (or, basically, ever)
+23:32  aboudreault: _habnabit, all right. Will read about the python keyword you mentionned.
+23:32  gordonjcp: I have a bit of C code similar to inetd that calls a python program with execve()
+23:33  JodaZ: MostAwesomeDude, but i had this discussion here, someone advised me of two choices, writing some kinda subsystem for managing a threadpool for file writing or just using a normal thread
+23:33  gordonjcp: my python program uses sys.stdin.readline() to get input from stdio - except, it doesn't work
+23:33  gordonjcp: when I close the connection, my python program dies with "IOError: [Errno 107] Transport endpoint is not connected"
+23:33  gordonjcp: any hints as to where to start looking?
+23:34  J_A_Campbell: does anyone know of a program written in python that i can mess around with for practice?
+23:35  jaybee_: If I have a list a=[2010,11,1,11,33,0], and I want to call a function e.g. datetime.datetime(year, month,day,hour,minute,second), is there an easy way to pass it the individual values of the list without doing datetime.datetime(a[0],a[1],a[2],a[3],a[4],a[5]) ?
+23:35  Husio: jaybee_: use *
+23:35  KirkMcDonald: jaybee_: datetime.datetime(*a)
+23:35  jaybee_: ta muchly fine people :)
+23:36  anler: Hi all, I'm new to Python and I  have dummy question, I'm printing a multiline string to the terminal from a function and the output is indentend, Is there a way of remove it without using multiple print calls?
+23:36  KirkMcDonald: anler: To remove what, the leading whitespace on each line?
+23:37  anler: yeap!
+23:37  anler: KirkMcDonald: yes
+23:37  nosklo: anler: print textwrap.dedent(yourtext)
+23:38  dropdrive: anler: Your multiline string is indented, so the output is indented.  You can either not indent the multiline string in your source code, or use textwrap.dedent().
+23:39  anler: dropdrive: textwrap is in which module? or is available by default?
+23:39  KirkMcDonald: anler: It is a module.
+23:40  SeanInSeattle: cherrypy.config.update({ "environment": "embedded" })
+23:40  anler: KirkMcDonald: Oh! you're right. Thanks a lot!!
+23:40  SeanInSeattle: oops.. sorry.  This is what I meant to paste:  Can someone point out a good tutorial on how to write unittests for cherrypy web apps?
+23:43  ritzt3ch: where could i find a xls viwer
+23:44  nosklo: ritzt3ch: http://www.python-excel.org/
+23:46  ritzt3ch: how bout just viewing them in CLI so i can use the grep/awk i have 100s of .xls files that i just want to take info from collums ( and i cant just use links - dump cause its binary so
+23:46  aboudreault: _habnabit, so if I understand correctly, it isn't possible to use x = MyObj('test') and/or x = MyObj(objProto). I'll have to create that object using x = MyObj.staticConstructor1('test') ...etc. ?
+23:47  mastertogo: >.>
+23:48  aboudreault: I mean... just add in example another parameter to the second MyObj constructor
+23:51  SeanInSeattle: Hey all.  I've got a cherrypy web service, and I would like to test it by making a post request to a url.  What's the easiest way to do that?
+23:52  domas: hmmmm, my python code is only 3x slower than original C code
+23:52  domas: doing similar job
+23:53  bob2: urllib
+23:53  bob2: but maybe you want twill instead
+23:55  JodaZ: hmm, if i pass a list as a function argument, does a reference to the list get passed or the references to the containing objects ?
+23:55  teolicy: I have a file handle. How do I make sure it's unbuffered? (never needs a flush()?)
+23:55  Yhg1s: JodaZ: everything in Python is a reference. So, a reference to the list.
+23:56  mar77i: hello again :)
+23:56  JodaZ: Yhg1s, so if i delete an element from the list it will be removed in the original list too ?
+23:57  Yhg1s: teolicy: os.fdopen(f.fileno(), f.mode, 0)
+23:57  Yhg1s: JodaZ: well, they're the same list
+23:57  mar77i: I wanted to ask, \ # comments aren't allowed, but why?
+23:57  JodaZ: Yhg1s, how do i get a new list with the same contents ?
+23:57  Yhg1s: teolicy: although the OS may still buffer.
+23:57  Yhg1s: JodaZ: make a copy. L[:] or list(L)
+23:58  teolicy: Yhg1s: Ah, how careless of me; I already do an fdopen on this file, I just didn't notice the third paramter. And it's a pipe, I'm not worried about the OSs buffer. Thanks.
+23:58  Yhg1s: mar77i: I'm not sure what you mean.
+23:58  domas: what do people use instead of psyco on 64-bit os'es?
+23:58  Yhg1s: domas: the same thing they do on 32-bit OS'es: they don't use it.
+23:58  JodaZ: Yhg1s, which is preferable ?
+23:58  bob2: mar77i: # is the only comment character in python
+23:58  domas: yhg1s: heh
+23:58  mar77i: I have a line continuation on the 52nd line and wanted to add a comment there :)
+23:58  gordonjcp: I'm trying to pipe text to a python program, but I get "OSError: [Errno 107] Transport endpoint is not connected"
+23:58  Yhg1s: JodaZ: depends on whether you want the result to be a list or be the same type as L.
+23:58  JodaZ: Yhg1s, L will always be a list
+23:58  gordonjcp: there seems to be very little helpful out there about this error, though
+23:59  Yhg1s: gordonjcp: when you do what, exactly? (Pastebin the code and the traceback.)
+23:59  Yhg1s: JodaZ: then it doesn't matter.
+23:59  JodaZ: Yhg1s, [:] somehow looks strange
+23:59  Yhg1s: JodaZ: it's just slicing.
+23:59  Yhg1s: mar77i: you can't add a comment after a \ line continuation, but you shouldn't use \ line continuations anyway. Use implicit continuations using ()'s.
+23:59  mar77i: umm
+--- Log closed Mon Nov 01 00:00:27 2010

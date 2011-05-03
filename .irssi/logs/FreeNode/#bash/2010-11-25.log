@@ -1,0 +1,863 @@
+--- Log opened Thu Nov 25 08:25:10 2010
+--- Log closed Thu Nov 25 08:25:10 2010
+--- Log opened Thu Nov 25 08:30:31 2010
+08:30 --- Users 504 nicks [0 ops, 0 halfops, 0 voices, 504 normal]
+08:30  itr8r: awk is more of a general programming/scripting language
+08:31 --- Channel #bash was synced in 94 seconds
+08:32  ritztech: Now is it possibile to Do like an AND so i have another section i want to do
+08:32  ritztech: sed -n '/Description/,/Done/p' | sed -n '/Possible/,/Procedure/p'
+08:34  krzie: !expansion
+08:35  krzie: *shrug*
+08:35  pgas: !pe
+08:35  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+08:35  itr8r: ritztech: as long as the sections dont overlap you could use the same var in awk
+08:36  krzie: thanx, that was it
+08:36  ritztech: k cool just extra / /
+08:36  mustu: hi... my simple input redirection isn't working in Solaris BASH
+08:36  itr8r: ritztech: you can use || in between /pattern/
+08:36  itr8r: /Description/ || /Possible/ {
+08:37  mustu: I did this .. echo $i"123" | passwd "$i" --stdin
+08:38  pgas: have you checked if passwd reads from stdin in solaris?
+08:38  pgas: also you quote the wrong things: echo "$i123"
+08:38  pgas: rather: echo "${i}123"
+08:40  mustu: but in Solaris it isn't throing the input to the passwd command.. instead passwd comand return the usage message seems no input is given to passwd
+08:41 --- mikeplus32 is now known as mikeplus64
+08:42  pgas: mustu: ok, nothing bash can do about it. check with a channel related to Solaris what can be done. if everything fails there are things like expect
+08:42  mustu: pgas: ok...
+08:57  asfjio: hello! what is the difference between "command 2>&1 > result" and "command > result 2>&1"? why the first one didn't catch the errors?
+08:58  pgas: !faq 2>&1
+08:58  greybot: http://mywiki.wooledge.org/BashFAQ/055 -- Tell me all about 2>&1 -- what's the difference between 2>&1 >foo and >foo 2>&1, and when do I use which?
+09:06  apox: how do I chown a bunch of files/directories to user X only if it's owned by user Y?
+09:07  pgas: !find
+09:07  greybot: http://mywiki.wooledge.org/UsingFind
+09:17  krang: Does anyone here have any insight as to why the '+' in this regex causes no match?    echo "Tooltip('0'" | grep "Tooltip..[0-9]+"
+09:18  krang: The regex makes sense, so I can only assume that some odd shell thing is happening
+09:20  krang: Oh, egrep works with it. maybe it isn't a shell problem. Sorry!
+09:22  lhunath: krang: BRE doesn't have +
+09:22  itr8r: krang: yes. grep uses basic regex so you need to \+
+09:22  krang: I always thought that grep -e and egrep were equivalent!
+09:23  itr8r: krang: grep -E
+09:23  lhunath: -e means "expression: "
+09:23  krang: oh wow, I seem to have double-dumbed it. Yoish.....
+09:29  asfjio: pgas: thank you very much!
+09:29  massimo_: Hi. If I use the syntax   more <<< `ls -l`  instead of pipe I miss the line breaks?
+09:30  pgas: <<< "`ls -l`"
+09:30  massimo_: okay.
+09:30  krang: While I'm here, is there any utility that takes a bunch of lines and mushes them together on one output line?
+09:31  pgas: \+ is an extension to BRE, the standard bre for + would be \{1,\}
+09:31  lhunath: massimo_: more < <(ls -l) will mutilate your data less
+09:31  pgas: krang: paste -s
+09:31  lhunath: !`
+09:31  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+09:32  massimo_: lhunath: I know $(), but what about your <() ?
+09:32  krang: pgas: Ooh, thanks!
+09:32  lhunath: !<() > massimo_
+09:32  greybot: massimo_: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+09:32  lhunath: hmm; that was more informative.
+09:32  lhunath: before it got changed
+09:32  massimo_: Very nice.
+09:51  lhunath: !learn <<() command < <(othercommand) # Same thing as ''othercommand | command'' but without subshelling 'command'. Uses file redirection (<) to redirect a file created by process substitution (<()). The space between < and <(..) is important!
+09:51  greybot: OK, lhunath
+09:53  massimo_: Very very nice. That even works on bash 2.05 where <<< is not available.
+09:53  massimo_: Why would that not work?   more < $(ls -l)
+09:53  lhunath: because < is file redirection.  it takes a file.
+09:53  lhunath: what does $(ls -l) give you?
+09:54  massimo_: lhunath: And  <() makes a file out of the output?  $() gives me a string of the output?
+09:54  lhunath: the output of the ls -l command.
+09:54  lhunath: yes.
+09:54  lhunath: compare:  echo "$(ls -l)"
+09:54  lhunath: echo <(ls -l)
+09:54  lhunath: it shows you what each operator expands into.
+09:55  massimo_:  /dev/fd/63 ? :)
+09:55  lhunath: and if you were to read from that file, you'd get ls -l's output.
+09:55  lhunath: which is what < does.
+09:56  massimo_: ls -l /dev/fd/ |wc -l  has 257 file descriptors...
+09:57  massimo_: Nice workaround without really creating a file.
+09:57  lhunath: what really happens there is entirely OS dependant.
+09:57  lhunath: if supported the file is a fifo connected to the ls -l process' output.
+09:58  lhunath: avoiding disk io
+09:58  massimo_: Thank you.    Too bad, that does not work on ksh...
+09:58  lhunath: ksh may have something similar.
+09:58  itr8r: ksh has coprocesses
+09:58  lhunath: using bash code in ksh directly is badness anyway
+09:58  lhunath: well; bash has coprocesses; but the use case is slightly different.
+09:58  massimo_: lhunath: What about the other way?
+09:59  Liquido_: hello, is it possible to grep something from file using something similiar greater or less math symbols? For example "cat dmesg | grep aa >100 ?
+10:00  lhunath: I don't run my C++ code through an ObjC compiler; and not the other way around either.
+10:00  lhunath: Liquido_: no.
+10:00  Liquido_: is there any workaround ?
+10:00  itr8r: Liquido_: use awk
+10:00  lhunath: do it yourself.
+10:01  Liquido_: lhunath you mean by realing 10kk+ lines manually ?
+10:01  Liquido_: reading*
+10:01  lhunath: manually; or with a script.
+10:01  lhunath: the latter sounds more sane.
+10:01  Liquido_: itr8r how awk could be helpful here ?
+10:01  lhunath: write an awk script that does what you want.
+10:02  Liquido_: I can't imagine a working example
+10:02  itr8r: # { echo 10; echo 12; } | awk '$1 > 10 {print}'
+10:02  evalbot: itr8r: 12
+10:02  lhunath: take out a number, compare it to 100, if useful; print the line.
+10:02  Liquido_: ok thank you
+10:02  Liquido_: both of you
+10:02  itr8r: np
+10:15 --- ChanServ sets modes [#bash +o twkm]
+10:15 --- twkm sets modes [#bash -b [derek]!*@*$##fix_your_connection]
+10:15 --- ChanServ sets modes [#bash -o twkm]
+10:30  meowz: is it possible to create a macro that cds into directory simply when the absolute path is typed in the command line?
+10:30  meowz: or function
+10:32  pgas: without a command you mean?
+10:32  nomtv80: yeh sure use an alias or script, not sure what you mean
+10:32  iaj: lo there - I need to find a file with a certain name (eg got the substring foo in it) - how could I achieve that?
+10:32  itr8r: i think you can do sometihng like that with zsh.. maybe with bash im not sure
+10:32  iaj: in a whole /path/
+10:33  pgas: in bash4 there is an option
+10:33  pgas: iaj: with find
+10:33  iaj: pgas: can you gimme an example for that :\ i tried something already but didn't success
+10:33  iaj: succeed* sorry
+10:34  pgas: find dir -name '*foo*'
+10:34  pgas: !find > iaj
+10:34  greybot: iaj: http://mywiki.wooledge.org/UsingFind
+10:36  lhunath: meowz: autocd
+10:36  lhunath: shopt -s autocd
+10:36  meowz: nice thanks
+10:36  meowz: where can i see a list of description of all the shopt options?
+10:36  lhunath: shopt
+10:37  lhunath: !CDPATH
+10:37  greybot: CDPATH lets you specify a location where bash will search for directories when 'cd'ing. Can be handy to build shortcuts or "portals" to deep places in your filesystem. See http://stackoverflow.com/questions/670488/#676753
+10:37  lhunath: meowz: man bash
+10:38  iaj: pgas: thanks
+10:38  StaRetji: Hi there folks, I have simple bash script which is #!/bin/bash cd "/root/" wget -N http://www.mydomain.com/file1 and so on file10
+10:38  StaRetji: for some reason, not all files are downloaded correctly and will be overwritten with empty file
+10:39  StaRetji: script is executed via cron every few minutes
+10:39  meowz: lhunath: is there a way to suppress the output that shopt -s autocd produces?
+10:39  lhunath: that command produces no output.
+10:39  StaRetji: sometimes will download correctly and sometimes not. If ran manually it will download all files without a problem.
+10:40  lhunath: StaRetji: doesn't sound like a bash problem.
+10:40  StaRetji: I'm all lost here
+10:40  lhunath: ask wget to tell you what's going on.
+10:40  StaRetji: could it be a permission problem or something
+10:40  lhunath: so you can see what goes wrong.
+10:41  StaRetji: ah, tried, 2 days, no activity on their channel heh
+10:41  lhunath: put the error/output of the script somewhere you can see it; run via cron, and look at the log.
+10:41  lhunath: when I said "ask wget", I meant, give wget options to make it talk to you more verbosely.
+10:42  StaRetji: lhunath: thx for the tips, I'll google on how to make it more verbose and how to add error output
+10:42  Knirch: google? try --help to start with, then man wget :D
+10:43  lhunath: when I run: ''sleep 1; read -t0; echo $?'' and I type stuff while the sleep is ongoing, I expect read -t0 to exit with an exit code of 0.  it doesn't.  can anyone explain why?
+10:43  karthee: StaRetji: try with option -O - -q
+10:44  StaRetji: karthee: if you meant on wget -q remotefile -O localfile
+10:44  StaRetji: I get same result
+10:45  StaRetji: if I run script manually, it will download correctly
+10:45  karthee: StaRetji: it ll display the output on the screen ..
+10:45  StaRetji: karthee: how can I write that to a file instead of screen? thx
+10:47  karthee: StaRetji: what do you want to write ?? .. By default it downloads the html  / any other files ..
+10:47  StaRetji: I have bash myscript.sh in cron
+10:48  StaRetji: can I do something like bash myscript.sh > error.log
+10:48  StaRetji: ?
+10:48  twkm: usually.
+10:49  twkm: though errors are typically written to fd 2.
+10:49  StaRetji: I'm downloading txt files
+10:52  geirha: lhunath: I'm guessing read simply doesn't bother reading stdin when you give it 0 in timeout.
+10:53  lhunath: If TIMEOUT is 0, read returns success only if input is available on the specified file descriptor.
+10:55  geirha: lhunath: Oh, if I run that, and type foo<enter>, read returns 0, but it didn't read anything. foo is carried on to be run as a command.
+10:55  lhunath: yeah, that what I'd expect
+10:55  lhunath: so the sleep 1; read -t0; echo $? outputs 0?
+10:56  lhunath: Ah.  terminal driver must only provide the input data to the fd once you press enter.
+10:57  lhunath: mope, complain.
+10:57  StaRetji: well, no error if ran manually, will wait for cron
+10:58  Knirch: lhunath: the only thing the code does with -t0 is; return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+10:59  lhunath: wonder if I can use stty to change that
+10:59  Knirch: I'm curious what you intend to use it for?
+11:01  lhunath: I want to read out the cursor position.  to do that I need to send an ansi code to the terminal and read its response from stdin.  if the user has already written stuff on stdin, the terminal's response is appended to it; which sucks.
+11:01  lhunath: so the plan is to forgo the cursor position check whenever the user has input waiting.
+11:03  Knirch: ah
+11:04  lhunath: can't really "read in any existing stdin, echo ansi code, read response, put existing stdin back on stdin"
+11:05 --- [1]The-Bat is now known as The-Bat
+11:07 --- Rada_ is now known as Rada
+11:08  Bouki: hi, can someone knows if a script connecting to unsecured wifi only exists ?
+11:09  StaRetji: hah
+11:09  StaRetji: if ran manually it will work correctly
+11:10  lhunath: scripts aren't connected to wifis.  and you make no sense.
+11:10  StaRetji: I've also set to run on x startup, correctly
+11:10  StaRetji: but if ran via cron, failure, no error output
+11:10  lhunath: how are you capturing the error output?
+11:10  StaRetji: it seems that wget is making problem if ran via cron
+11:11  StaRetji: bash -x myscript.sh > /tmp/error.log
+11:11  lhunath: read what twkm said again.
+11:12  StaRetji: fd 2, well, google again lol
+11:12  lhunath: !google
+11:12  greybot: Google is NOT a preferred source for learning bash, because 90% of the "tutorials" and scripts out there are JUNK. Refer to the Guide and FAQ (see topic) instead.
+11:12  lhunath: bash -x myscript > /tmp/error.log 2>&1
+11:12  lhunath: !redir
+11:12  lhunath: !io
+11:12  greybot: Data and File Processing: http://mywiki.wooledge.org/BashGuide/InputAndOutput
+11:13  lhunath: !forget google
+11:13  greybot: OK, lhunath
+11:14  StaRetji: lhunath: thx man, sorry for being dumb :/
+11:14  massimo_: If I source .my_functions, can I have some functions inside declared as local, so don't get these internal helper functions exported?
+11:14  pgas: no
+11:14  lhunath: !learn google Google is NOT a preferred source for learning bash, because 90% of the "tutorials" and scripts out there are JUNK.  Instead, ask a good question here or refer to the Guide and FAQ (see topic)
+11:14  greybot: OK, lhunath
+11:15  StaRetji: lhunath: you're genius :D
+11:15  StaRetji: ifconfig: command not found
+11:16  StaRetji: that's the error
+11:16  StaRetji: hehe
+11:16  lhunath: set PATH properly.
+11:16  StaRetji: oh man lol
+11:16  lhunath: you can either do it in your crontab or in your script
+11:16  lhunath: the former may make more sense.
+11:22  massimo_: I meant, if I need a function check_environment() inside .my_functions, I would not want to use that function from outside after sourcing .my_functions. Is that possible to hide?
+11:25  massimo___: (..sorry for several disconnecting, qwebirc over proxy loses connection)
+11:26 --- nadir is now known as Guest10242
+11:32  Bouki: i'm looking for a script connecting automatically to unsecured wireless network (this means scanning wifi with iwlist and connect)
+11:34  lhunath: Bouki: #bash is not your package manager.
+11:35  lhunath: massimo___: you could always unset it.
+11:35  StaRetji: lhunath: thx one more time for helping out ;)
+11:35  lhunath: StaRetji: welcome
+11:35  StaRetji: everything works like a charm now :)
+11:36  Bouki: is there a way to run a script when internet connection is lost ?
+11:37  nomtv80: what do you mean?
+11:37  lhunath: bash does not hook into your operating system
+11:37  nomtv80: for another server?
+11:37  Bouki: for himself
+11:37  lhunath: !bashis > Bouki
+11:37  greybot: Bouki: Bash is a shell. That's a program which can do simple math, logic and run other programs. It's NOT a terminal, it's not a kernel, it doesn't manage the system's authentication or environment, it's not your OS and it's not X, KDE or Gnome.
+11:38  nomtv80: lol, nice at greybot
+11:38  lhunath: if you have any questions about your terminal, your kernel, your system's authentication or environment, your OS, X, KDE or Gnome or anything else utterly unrelated; ask them in the relevant channel.
+11:38  massimo___: lhunath: You mean at the end of .my_functions I would unset all functions I don't want to see outside?
+11:38  lhunath: mostly so because all of that stuff depends completely on how your specific system is set up which we don't know.
+11:39  lhunath: massimo___: after you determine you won't need it anymore.  heck; could even have a function in your .my_functions which unsets all functions declared in it.
+11:39  lhunath: cleanup_my_functions() { ..; }
+11:40  lhunath: source my_functions; my; function; calls; cleanup_my_functions;
+11:42  massimo___: lhunath: Ok. I would rather unset all functions I only need internally at the end of .my_func. So I source .my_func in .bashrc to have some interactive tools.
+11:45  cafaro: I'm making a recursive ls script, how can I do something like: ls $0/$file, right now that returns ls /file... ?
+11:45  lhunath: cafaro: what do you want it to do?
+11:45  lhunath: and define "recursive ls script"
+11:46  cafaro: ls to a subfolder
+11:46  lhunath: ls subfolder
+11:46  lhunath: define better.
+11:46  Mohan___: while read file; do echo "$file" ; done < <( find /path -type f -print )
+11:47  lhunath: Mohan___: is this too simple? find /path -type f
+11:48  Mohan___: lhunath: It depends on what he is trying to achieve, but this is also one way of doing it.
+11:50  lhunath: let's first try to figure out *what* he's trying to do instead of giving him solutions to a problem we don't even know; thus further leading him down the path of confusion
+11:50  karthee: lhunath is correct .. cafaro, please explain what you want to do ..
+11:50  lhunath: then again; he seems to have stopped caring, for the better.  a recursive ls script sounds like an odd thing to want
+11:51  lhunath: seeing as there is ls -R already
+11:51  lhunath: (and find, indeed)
+12:16  Mohan___: lhunath: agreed
+12:20  karthee: Mohan___: mohan.L ??
+12:21  Mohan___: karthee: nope, its Mohan
+12:21 --- Unknown[OFF] is now known as Unknown[NF]
+12:21  karthee: uhh .. sorry ..
+12:23 --- Unknown[NF] is now known as Unknown[OFF]
+12:29  RenatoSilva: how to check if a string starts with another?
+12:29  RenatoSilva: like if s.startsWith("error:")
+12:29  twkm: [[
+12:30  twkm: feh.
+12:30  karthee: $string =~^s
+12:31  pgas: !faq substring
+12:31  greybot: http://mywiki.wooledge.org/BashFAQ/041 -- How do I determine whether a variable contains a substring?
+12:31  bulletxt: how could I do a recursive ls and get only the absolute newest file? thanks
+12:31  twkm: don't use ls.  use find.
+12:33  karthee: twkm: is it  a puzzle ??
+12:34 --- Unknown[OFF] is now known as Unknown[NF]
+12:34  bulletxt: twkm: ok, any idea of how I could do it?
+12:36  twkm: uh.  find /start/here
+12:47  lhunath: !latest > bulletxt
+12:47  greybot: bulletxt: Find the latest modified file in a directory: latest() ( local file latest; for file in "${1:-.}"/*; do [[ $file -nt $latest ]] && latest=$file; done; printf %s "$latest" ) ## Usage: latest mydir
+12:47  lhunath: with bash4 you don't need find.
+12:47  lhunath: just change * to ** in that example.
+12:48  bulletxt: thanks lhunath
+12:49  twkm: i can almost smell you using ls' output, rather than merely reading or recording it.
+12:50  ChoHag: What safe, portable construct can I use to do eval $var=$val?
+12:50  ChoHag: Assuming $var doesn't expand to something evil that is.
+12:50  lhunath: bulletxt: you'll probably want to ignore directories.  add ! -d $file && to the beginning of [[
+12:50  ChoHag: Actually, scrap portable. This script is bash only.
+12:51  twkm: local or printf.
+12:51  lhunath: ChoHag: declare
+12:51  lhunath: or that ;x
+12:52  ChoHag: How will that protect escaping and quoting characters in $val?
+12:52  ChoHag: s/How//
+12:53  twkm: by eliminating the use of eval.
+12:56  geirha: An even better solution is to avoid indirection in the first place.
+13:01  poisonbit: !trim
+13:02  poisonbit: ah, is BashFAQ/067
+13:08  Bushmills: # var=foo; val=123; read $var <<< $val;   echo $foo
+13:08  evalbot: Bushmills: 123
+13:09  Bushmills: ChoHag: ^^^
+13:12  Bushmills: # var=foo; val=123; let $var=$val; echo $foo
+13:12  evalbot: Bushmills: 123
+13:13  geirha: The latter only works if the value is an integer
+13:13  Bushmills: right
+13:33  krzie: can you do parameter expansion on an array var?
+13:34  krzie: ie: can i replace this:   BALANCE[0]=$(echo "${BALANCE[0]}"|cut -d. -f1)   with something like BALANCE[0]=${BALANCE[0]%%.*}
+13:35  Bushmills: # a[5]=foobar; echo ${a[5]/foo/sure}
+13:35  evalbot: Bushmills: surebar
+13:35  trash: !varcaps
+13:35  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+13:36  ChoHag: Where did the convention for capitalising local variables come from?
+13:36  ChoHag: It's quite ugly.
+13:37  Bushmills: ${item[0]} is same as $item
+13:37  krzie: thanx bush
+13:45  twkm: surprising you didn't tias.
+13:46  lhunath: ChoHag: COBOL?
+13:46  twkm: ChoHag: most people are sheep.
+13:46  lhunath: maybe BASIC.  who knows; I'm probably not old enough.
+13:49  twkm: in the days of yore, and for how it was used, there was little point to having two cases.  letters, numbers and a few symbols.
+13:50  twkm: derived from (itself derived from wire services like telex and twx)
+13:50  jimbauwens: Anyone here have time to review some code?
+13:51  lhunath: post it and see.
+13:51  jimbauwens: http://pastebin.com/C8jj4dZarchivex
+13:51  jimbauwens: wrong
+13:52  jimbauwens: http://pastebin.com/C8jj4dZx
+13:53  lhunath: !quotewhen > jimbauwens
+13:53  greybot: jimbauwens: "Double quote" *EVERY* argument that contains whitespace or expansions ("$foo", "$(foo)", "`foo`"). 'Single Quotes' prevent expansions from happening at all. Also quote *, [, ], ? etc. if you don't want bash to expand them into filenames.
+13:53  lhunath: !for` > jimbauwens
+13:53  greybot: jimbauwens: Don't do this: for x in $(command) or `command`. for is used for iterating arguments, not output strings. Instead, use a while read loop: while read line; do ..; done < <(command)
+13:53  lhunath: jimbauwens: put your sleep in the while condition; that makes in interruptable.
+13:53  lhunath: !tests > jimbauwens
+13:53  greybot: jimbauwens: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+13:53  twkm: naive.
+13:54  jimbauwens: ok
+13:54  twkm: i presume this is an attempt to rewrite arpwatch in bash.
+13:54  jimbauwens: yep
+13:54  jimbauwens: :)
+13:54  jimbauwens: I'm lazy
+13:54  lhunath: echo $(..) is pointless.  if you want to output the output of .., just run ..
+13:55  twkm: lots of useless trailing ;'s.
+13:55  jimbauwens: Don't use alot of bash so
+13:55  jimbauwens: But the things is , the script works
+13:55  twkm: consider using arpwatch.
+13:56  jimbauwens: I considered it, and will probably use it, but I wanted to finish  the script
+13:58  jimbauwens: so if [ $? = 1 ] ; should be if [ [$? = 1 ]] ;
+13:59  trash: No.
+13:59  trash: if ! command; then ...; fi
+13:59  trash: command being an actual command.
+14:00  terrorpup: jimbauwens, like this if [ $i = "1" ] ; then echo 1 else echo something fi
+14:01  terrorpup: [ ] is your test case
+14:01  jimbauwens: I know
+14:01  twkm: except running yet another program isn't needed to test the 0 vs !0 result of a command.
+14:02  jimbauwens: grey bot said  In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh.
+14:02  jimbauwens: so, i wanted to know if i had to replace [condidtion] with [[condition]]
+14:03  jimbauwens: ah, i need (())
+14:03  jimbauwens: get it
+14:03  ucla: hello. sorry to ask again, but whats the faq item again related to substraction?
+14:04  geirha: jimbauwens: You're testing whether a command returns true or false?
+14:04  jimbauwens: geirha, yes
+14:04  jimbauwens: ofcourese...
+14:04  geirha: jimbauwens: Then:  if ! command; then
+14:04  jimbauwens: yeah, i see now
+14:04  geirha: as trash already pointed out
+14:04  jimbauwens: stupid me :)
+14:05  terrorpup: I use [] in bash all the time and works
+14:05  ucla: how to combine "cat file-1" and "grep" so that it lists only those lines that are not in "file-2"?
+14:05  geirha: You only want to test $? if you need to distinguish between different error codes
+14:05  pgas: !faq subtract > ucla
+14:05  greybot: ucla: http://mywiki.wooledge.org/BashFAQ/036 -- How can I get all lines that are: in both of two files (set intersection) or in only one of two files (set subtraction).
+14:05  jimbauwens: ok
+14:05  ucla: there! thanks
+14:06  geirha: terrorpup: Sure it works, but [[ is superior.
+14:07  jimbauwens: if the command returns 1, does it make the condition true?
+14:08  jimbauwens: i would think so, but i don't know
+14:08  wonslung: hello guys, i'm pretty new to bash.  I'm trying to make a script with will scp or rsync some files, I do not wish to actually keep the 2 directories in sync really, i only want to copy them one time.  I've figured i can use "touch" and a timestamp file, but the issue i'm running into is this:  Sometimes new files will show show up WHILE the script is running, I'm wondering if anyone has any suggestions for how to deal with this
+14:08  twkm: wait longer before running the script.
+14:08  wonslung: sigh...
+14:08  wonslung: that's not the solution
+14:09  ucla: wonslung: move processed files to another location so you can re-run the script on the destination
+14:09  Naib: not alot you can do if you are trying to backup/copy from an in-use folder with changes
+14:09  twkm: why is the script being run without knowing the file is ready to copy?
+14:10  ucla: so you always have in "incoming" whats not processed by the script
+14:10  wonslung: ucla that's not an option
+14:10  wonslung: ucla: The files need to stay where they are
+14:11  twkm: then you are fooked.
+14:11  wonslung: na
+14:11  wonslung: i think i can make it work
+14:11  twkm: only by racing.
+14:11  twkm: you might use fuser to hope you catch the file after it is done being used.  (not the same as done being uploaded)
+14:12  wonslung: I was thinking of using stat or date
+14:12  wonslung: somehow
+14:12  wonslung: i just need to wrap my brain around it...i'm not an expert with this stuff
+14:13  twkm: why not revise the receiving program to launch the script upon completion?
+14:13  wonslung: twkm: if i'm having trouble writing a bash script what makes you think i'm going to be able to do that
+14:14  jimbauwens: cut -d '	"
+14:14  jimbauwens: "oops
+14:15  twkm: wonslung: ahh, you are stupid and/or ignorant.  yeah that's hard.
+14:15  jimbauwens: cut -d "<tab>" or cut -d '<tab>' ?         " or ' ?
+14:15  wonslung: i'm not stupid
+14:16  wonslung: and i made it clear i was a beginner with bash
+14:16  twkm: jimbauwens: ''man cut''.
+14:17  jimbauwens: ofcourse, thanks twkm
+14:20  wonslung: I was thinking that i could use a lock file, then use a function which would check for files newer than some timestamp file, and keep calling the function until it didn't find files newer, then end
+14:20  wonslung: but i'm not quite sure how to do the last part
+14:21  wonslung: then of course, touch the timestamp file at the end again
+14:22  bash: twkm, stop being a smart ass ffs
+14:22  n1x0n: is there a way to do something like grep --color but to *just* change colour and not filterout ? :)
+14:22  karthee: wonslung: touch -d "yyyymmdd"  filename .. find  -newer filename
+14:24  wonslung: karthee: that's sort of what i'm doing now, but the issue comes in when some files show up durring the processing of the script itself
+14:24  bash: wonslung,  you want silent output ?
+14:24  koala_man: n1x0n: grep --colour -E '(foo|)'
+14:25  karthee: wonslung: what sort of issues ?
+14:25  wonslung: karthee: ok, I wish to scp some files from one server to another, i do not wish to maintain the files in both locations (or else i'd use rsync)
+14:25  n1x0n: koala_man:  mm doesn't seems to work, it's not changing the colour
+14:25  wonslung: i just want to copy them one time
+14:25  bash: wonslung, why dont u just use cp ?
+14:26  koala_man: n1x0n: are you piping it to a file or program?
+14:26  bash: wonslung, a remote, i get it
+14:26  jimbauwens: Can anyone tell me how to use a while read loop, Don't understand it so good from greybot. I'm stupid, i know.
+14:26  n1x0n: koala_man: nope, that's the last grep
+14:26  n1x0n: koala_man: tcpflow -c -i eth1 'port 80' | grep ^Referer | grep --colour -E '(foo|)'
+14:27  karthee: wonslung: if i understand you properly .. you want to check if the file's timestamp before scp'ing it  (if present in the remote) . right ?
+14:27  wonslung: basically, I want to somehow repeat the "copy files newer than timestamp file until no files are newer, then touch timestamp"
+14:28  koala_man: n1x0n: did you replace "foo" with something?
+14:28  wonslung: i've come up with a a couple ways to actually do the scp'in, either with "find" or a for loop
+14:28  wonslung: but every once in awhile some new files will be placed on the server WHILEthe script is running and they will get skipped
+14:28  wonslung: then i must manually copy them
+14:28  n1x0n: koala_man: yeah with bar ;-) of course I did duh ! it's odd as it get's coloured when I just do grep --color foo
+14:29  wrksx: hi there
+14:29  koala_man: n1x0n: maybe you have a complicated foo that works with grep but not egrep
+14:29  n1x0n: koala_man: no it's literally a 4 chars string - nothing fancy / not a regex
+14:29  wonslung: I'll figure it out, i think i need to use a "while" loop somehow
+14:30  n1x0n: koala_man: although maybe it does make a difference that my input is a set of lines instead of one long line ?
+14:30  koala_man: no
+14:30  wrksx: I got this in a case loop (don't know if this is really called a loop): @([0-9]))
+14:30  koala_man: n1x0n: how about echo lolbert | grep --colour -E '(lol|)'
+14:30  karthee: wonslung: I m sorry i couldnt get your question properly .. you have a server with many files. after sometime only few files get updated. and you want to scp only those updated files .right ???
+14:30  n1x0n: koala_man: works
+14:31  n1x0n: hmm
+14:31  wrksx: but I intended to intercept any number with any number of digit, apparently it only accept one digit currently
+14:31  wrksx: how should I rewrite this to accept multiple digits :  @([0-9]))
+14:31  jimbauwens: Can I do this :  while read line; do echo -e "$line\n"; done < file.txt >output
+14:32  koala_man: wrksx: s/@/+/
+14:32  n1x0n: koala_man: very odd, I can replicate it with echo etc.. but doesn't work otherwise - oh well - thanks , at least I know how to do it - I'll dig further :) thanks
+14:33  wrksx: koala_man, sorry I don't understand, shall I just write -> s/@/+/)
+14:33  wrksx: koala_man, to accept any int ?
+14:33  wonslung: karthee: ok, let's say i want to sync wonslung@box1:./home/wonslung/ with wonslung@home:/ and i do not wish to use rsync because i wish to delete the files adfter i unrar them (on the home server)
+14:33  twkm: bash: if you want to respond differently, go right ahead.
+14:34  wonslung: karthee: so i want to scp the files from box1 -> home one time, and i know i can use a timestamp file, but SOMETIMES new files get copied into box1: while the script is running, which causes those files toget skipped
+14:35  n1x0n: koala_man: it works only when foo is at the beginning of the line
+14:35  twkm: wonslung wants to race, there is no solution to it.
+14:35  wonslung: so i'm trying to figure out a way to check files newer than /tmp/timestamp and scp them (maybe with a function) and keep running it UNTIL no files are newer
+14:36  wrksx: koala_man, I figured out you meant I'd need to  write +([0-9])), at least i'm gonna test that. thanks =)
+14:36  karthee: find -newer timestampfile  -exec  scp {} user@remotemachine:/dir/name/   \;  .. whats the problem in this ?
+14:36  wonslung: karthee: that's fine until some new files get copied in while it's running
+14:37  wonslung: if files copied instantly, it wouldn't be an issue and that would work
+14:37  wrksx: koala_man, worked, thanks
+14:39  wonslung: karthee: so i think the solution is to do something like this in a function which can be re-run UNTIL no more files which are newer than timestamp exist, then touch timestamp
+14:39  wonslung: but i'm not sure exactly how to work that sort of logic out in bash yet
+14:40  twkm: why worry about it, just run the script again later to pick up the crumbs, and rsync will even fix the half-received files.
+14:40  sPiN: karthee: you didnt specify where it should search
+14:40  wonslung: you don't seem to be following the issue twkm
+14:40  twkm: i am.  you just don't like the answers i'm providing.
+14:40  wonslung: you aren't providing answers
+14:40  sPiN: hi twkm fancy bumping into you here
+14:42  wonslung: twkm: if i were using rsync that would be fine, but for the 4th time i'm NOT trying to keep 500 gb of files in 2 locations
+14:42  wonslung: twkm:  i want to scp them ONCE then unextact and sort them
+14:43  wonslung: and SOMETIMES files get missed
+14:43  sPiN: rsync is the best tool for that job..
+14:44  sPiN: it does preciesely what you want without any fuss
+14:44  wonslung: ok, so explain how to rsync a file one time, thne not keep copying it
+14:44  sPiN: wonslung: ohh the files change after initial copy and you dont want to copy that?
+14:45  wonslung: sPiN: yes, see, the server they come from is a seedbox seeding files for anywhere from a week to 2 months
+14:45  skered: <<< is bash only?
+14:45  wonslung: the sever they are getting copied to unrar's and processes the files
+14:46  karthee: wonslung:   timestamp2=when previously scp was done.....  timestampfile1(which is now and for the nextime scp runs this will be the start time) ...   and then find -newer  timestampfile2 ! -newer  timestamp1
+14:47  karthee: wonslung:  its like you you scp all files 5 pm to 6pm  save the 6pm somewhere and at 7pm , touch with 7pm and scp 6pm to 7pm  and so on..
+14:47  wonslung: karthee: yah, i was thinking 2 timestamp files might somehow work as well
+14:47  wonslung: but you do understand the issue right?
+14:47  wonslung: sometimes the files can take 40 minutes or so to copy
+14:47  wonslung: and if you touch the timestamp when the copy is done
+14:47  karthee: wonslung: After reading your messages again and again for a long time :-)
+14:48  wonslung: but yah, 2 timestamps may wrk
+14:48  sPiN: wonslung: rsync --ignore-existing       skip updating files that exist on receiver
+14:48  karthee: wonslung: no .. touch before scp ..
+14:49  wonslung: sPiN: that won't work, you're not understanding the issue
+14:49  sPiN: sorry i walked in midstream must have missted something..
+14:49  wonslung: it's ok
+14:49 --- cga_ is now known as cga
+14:49  wonslung: i think i've figured it out just by talking about it
+14:50  karthee: u already have a  5pm touched file..  touch a file with 6pm  and then do scp  between 5pm and 6pm..  if u want remove 5pm touched file for clarity..
+14:51  karthee: at 7pm .. touch a file with 7pm   and then scp  6pm(which you have already)  to 7pm .. and then remove 6pm file  ..
+14:51  karthee: wonslung: makes sense ??
+14:51  wonslung: yeah, i think i get what you are saying
+14:52  wonslung: thanks, i will try that
+14:52  karthee: wonslung:  i m not going to leave you today ..
+14:52  karthee: unless you clear it off ..
+14:53  jimbauwens: Is this correct?  while read line; do echo -e "$line\n"; done < file.txt >output
+14:53  jimbauwens:  done < file.txt >output         Can I do this
+14:54  karthee: jimbauwens: yes ..
+14:54  jimbauwens: karthee: ok, thanks was not sure if I could use < and > in the same line
+14:54  wonslung: i tell you what, on a side note, the program "tmux" has really made my life easier
+14:55  karthee: jimbauwens: you could have tried it and got the result by this time ..
+14:55  wonslung: i love how it splits windows
+14:55  Riviera: wonslung: how is your family?
+14:55  jimbauwens: karthee: was busy on something else :)
+14:56  jimbauwens: It was hailing here, went to check if it was not hailing in
+14:56  karthee: jimbauwens: i meant that by the time you ask the quesiton in irc  you might have got the result ..
+14:56  jimbauwens: I know
+14:57  wonslung: Riviera: my family is good, i have a giant get together today in 3-4 hours
+14:57  jimbauwens: I should be so lazy, will not happen again :)
+14:57  wonslung: looking forward to it
+14:58  karthee: jimbauwens: no .. its shows that you are over active that you  come here ask make it sure it works and then you run it in ..
+14:58  k1k0: hi all
+14:58  jimbauwens: yeah I understand
+14:59  karthee: :-)
+14:59  k1k0: how i verify if number is 1-32 for exemple
+15:00  yitz_: # n=12 ; (( n > 0 && n <= 32 )) && echo "It is"
+15:00  evalbot: yitz_: It is
+15:00  k1k0: regex
+15:01  karthee: k1k0:   [0-9][12]?
+15:01  k1k0: i need validate ip with CDIR
+15:03  karthee: CDIR ??
+15:03  k1k0: look
+15:04  twkm: ip/digits, where ip is "not quite trivial".
+15:04  wonslung: karthee: he means ip subnetting like /27
+15:04  k1k0: look
+15:04  karthee: wonslung: oh .. okay ..
+15:05  karthee: k1k0 : how are you going to validate ?
+15:05  k1k0: ip=192.168.39.155/25;if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[1-9]{1,2}$ ]];then echo "ok";else echo "not valid ip";fi
+15:05  karthee: wonslung: you got your problem solved ??
+15:05  twkm: ewww, a regex.  now you have a second problem.
+15:05  k1k0: works fine, but CDIR is 1-99
+15:05  k1k0: i need CDIR 1-32
+15:06  twkm: you need help with your regex.  i suggest #regex.
+15:06  twkm: as an aside, handling ipv4 only is a mistake.
+15:06  karthee: k1k0: whats the problem with [0-9][12]? ...  ??
+15:07  k1k0: look i need help just left "/", where CDIR is verified
+15:07  yitz_: k1k0: That matches 01 02 11 12 21 22 31 ... 91 92
+15:07  wonslung: you just want to create a regex which does 1-32 on the side od the /
+15:08  karthee: k1k0: whats the problem with [0-3][012]? ...  ??
+15:08  k1k0: karthee i try this
+15:08  wonslung: yah, that's how you do it
+15:08  twkm: he knows that.  now he just needs #regex help.
+15:09  yitz_: karthee: That doesn't match 19
+15:09  twkm: karthee: it fails for /4, which is valid.  (probably not for anything he'll be doing, but it is valid)
+15:09  twkm: why people want to use a regex for that part i don't quite understand.  a simple numeric range check would be much simpler.
+15:10  k1k0: karthee don't work
+15:11  jimbauwens: to empty a file, is '>file' ok, or is that considered bad?
+15:11  twkm: you need multiple possibilities, and an anchor.
+15:11  twkm: i suggest you just check that it is numeric, and let the subsequent use of the value do the real checking.
+15:12  lhunath: jimbauwens: it's fine
+15:12  jimbauwens: lhunath, ok :)
+15:13  twkm: there are people that would prefer a command, such as :, but it isn't necessary in bash.
+15:14  k1k0: see /[1-9]{1,2}$ work fine to 192.168.39.1/0-99, i just need 192.168.39.1/0-32
+15:14  wonslung: ([12]?[0-9]|3[01])
+15:14  twkm: earlier you said 1 to 32.  better decide which.
+15:14  k1k0: wonslung i try this thank you
+15:14  wonslung: sorry, that's 0-31
+15:15  wonslung: i mean
+15:15  wonslung: 1-31
+15:16  twkm: why just check that it is numerically within range?  because 192.168/16, 192.168/020 and 192.168/0x10 are all valid and identical.
+15:19  jimbauwens: When I do 'while ! sleep 40' the loop quits ofter sleep is done. But sleep returns 0, so I don't know what the problem is
+15:19  k1k0: wonslung i run this on shell and return error
+15:19  k1k0: bash. syntax error in conditional expression: unexpected token `|'
+15:19  k1k0: bash. syntax error near `|3'
+15:20  pgas: jimbauwens: 0 is true ! 0 is false, the loop continues while the condition is true, ! sleep 40 is false,the loop stops
+15:20  jimbauwens: Ah, 0 is true
+15:20  jimbauwens: or only when you execute a program
+15:20  pgas: 0 is success, non 0 is an error
+15:21  jimbauwens: But if i would do while ((1)) it would be ok?
+15:21  twkm: k1k0: and of course the regex before the / is flawed for the same reason, but with a less simple way to check ... 0x7f000001, 17700000001, 2130706433, 127.1, 127.0.1 and 127.0.0.1 are all valid and identical.
+15:21  pgas: yes, 1 is true inside (( )), but (( ) exits with 0
+15:21  pgas: # ((1));echo $?
+15:21  evalbot: pgas: 0
+15:21  pgas: # ((0));echo $?
+15:21  evalbot: pgas: 1
+15:21  jimbauwens: ok, thanks
+15:22  jimbauwens: I'm happy now
+15:26  jww: hello.
+15:26  jww: I got some basic problem with comparing 2 variables, here is the code :
+15:26  jww: http://pastebin.ca/2001987
+15:27  jww: I followed some doc, but I dunno why it make an error.
+15:27  karthee: jww: you are comparing a string with an integer ..
+15:27  jww: I want to compare those 2 as strings,
+15:27  pgas: you probably have something that is not a space aftre [
+15:27  jww: because version is 0.3, but can be 0.3a
+15:28  pgas: like a non breakable utf-8 space or something like that
+15:28  karthee:  "0.3" -eq  "$VERSION"
+15:28  pgas: karthee: no, you are wrong, jww is correct
+15:28  pgas: 0.3 is not an integer btw
+15:28  jww: let's hunt that hidden space.
+15:29  jww: pgas: you were right !
+15:29  jww: there was a space before ]
+15:29  jww: I mean one extra space.
+15:29  jww: thanks.
+15:30  karthee: pgas: ah .. you are correct .. i  confused myself .. sorry
+15:30  pgas: extra space are not a problem
+15:30  jww: pgas: really ? once removed there is no more error.
+15:30  pgas: really, your problem was between [ and 0.3
+15:30  karthee: jww's code worked on my machine pgas.
+15:31  pgas: karthee: sure
+15:31  jww: pgas: roger that.
+15:32  pgas: karthee: but he probably had something that looks like a space but that is not an ascii space between [ and 0.3
+15:33  pgas: # [ f = b ]
+15:33  evalbot: pgas: bash: [ f: command not found
+15:33  jww: what I did wat to suppress everything that looked like a space, then I added the needed ones again.
+15:34  pgas: # echo '[ f = b ]' | sed -n l
+15:34  evalbot: pgas: [\302\240f = b ]$
+15:35  karthee: pgas:  here you go .. he remove all the spaces and added them again .. Now it worked .. Some non-ascii was there previously ..
+15:35  lhunath: vim +'/ ' file
+15:35  lhunath: spaces in red!
+15:35  jww: hi lhunath .
+15:36  lhunath: hey.
+15:38  jimbauwens: Haha, i found a problem I had. I had $i somewhere instead of $mac... thanks bash -x
+15:39  ChoHag: bash -x is your friend.
+15:39  ChoHag: bash -x is everybody's friend.
+15:39  jimbauwens: :)
+15:40  jimbauwens: its works now :)
+15:40  geirha: I hate whoever thought it was a good idea for  alt gr+space to yield a non-breaking space.
+15:41  jimbauwens: What is the difference?
+15:41  lhunath: geirha: is that a french keyboard?
+15:41  geirha: jimbauwens: bash doesn't consider non breaking space as whitespace.
+15:42  geirha: lhunath: norwegian
+15:42  jimbauwens: geirha, ok, and you don't notice the difference. I get it
+15:43  geirha: Yeah, it looks like an ordinary space.
+15:43  lhunath: the day I tossed out my azerty and moved to a pure qwerty was a small victory for my programming fingers.
+15:43  pgas: geirha: it's pink in my emacs ;)
+15:43  geirha: pgas: Oh, good idea, I could probably coerce vim to do the same :)
+15:45  geirha: lhunath: French keyboards have az at the top left?
+15:46  Josay: yes
+15:46  Josay: azerty
+15:48  geirha: I guess it's got {[]} in weird place too, then
+15:48  geirha: *places
+15:49  geirha: Programming with norwegian qwerty layout is cumbersome, lots of finger gymnastics required. I've considered switching to english qwerty layout for that.
+15:51  lhunath: it's why I don't buy laptops in my home country anymore.
+16:08  Bruce_Wayne: Quick Question: How can I automatically copy into clipbord whatever I want through terminal? Is it possible?
+16:09  Bruce_Wayne: For example: copying pwd into clipbord
+16:09  pgas: !xclip
+16:09  greybot: is a tool to manipulate the X11 clipboard. xclip -o to print the clip and -i to set it. Not bash.
+16:13  Bruce_Wayne: pgas: but that clipboard stays only within X11 clipboard... what If I want to copy pwd through terminal and paste it here or gedit
+16:15  pgas: where is here?
+16:16  Bruce_Wayne: THIS IRC WINDOW
+16:16  pgas: gedit use the x11 clipboard
+16:16  erUSUL: Bruce_Wayne: paste with the third ( central ) mouse button.
+16:17  Bruce_Wayne: erUSUL: Holy! super!
+16:17  pgas: Bruce_Wayne: all right, IRC window could be anything...you could be using irc from your phone....
+16:17  pgas: the middle button paste the selection though, not the clipboard
+16:18  erUSUL: pgas: but xclip, afaics, manipulates selection by default
+16:19  Bruce_Wayne: & what may be the MIDDLE mouse button's keyboard shortcut..? Just wordering.. I know this is nabq
+16:19  pgas: ah maybe...I don't think I have ever used it I was relying on the factoid
+16:20  Uqbar: have a look at xsel as well. it automagically writes to or reads from the clipboard depending on whether the input comes from the terminal or not.
+16:20  scatterp-: how could i output blocks of 20 lines seperated by , all on the same line ?
+16:21  pgas: paste -s -d, - - - - - - - - - - - - - - - - - - - -
+16:22  scatterp-: pgas thanks
+16:22  kle77: Is it possible to string together boolean operators as follows: `cmd1 || (cmd2 && cmd3)` (i.e. run cmd2 and cmd3 if cmd1 fails?) Thanks
+16:23  pgas: yes
+16:23  lhunath: !conditionals > kle77
+16:23  greybot: kle77: Conditional Structures: http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+16:23  lhunath: see Conditional Operators
+16:23  karthee: want to count the number of occurances of pattern 'pgas thanks'  in #bash ..  ..
+16:23  kle77: The above isn't working as I expected, in case that wasn't clear :-)
+16:23  kle77: will check the link, thanks
+16:24  pgas: though using "if" doesn't take much more space and is less error prone imho
+16:24  Uqbar: well, cmd2 && cmd3 will run cmd3 only if cmd2 returns success. also, you can group them with { cmd1 ; cmd2 ; } instead of ( ) which runs them in a subshell.
+16:24  Bruce_Wayne: Uqbar: Thanks for suggestion about xsel.. Just installed it.. will have a look at it. :)
+16:24  kle77: pgas: had almost resigned myself to as much, but just thought i'd ask anyway
+16:25  kle77: for the sake of clarity, here is my example:
+16:25  kle77: [ -d "$i" ] || ((echo "Error: '$i' is not a dir" && exit))
+16:25  kle77: shit, sorry only meant to post one parenthesis
+16:25  kle77: [ -d "$i" ] || (echo "Error: '$i' is not a dir" && exit)
+16:26  pgas: if [ -d "$i" ];then echo echo "Error: '$i' is not a dir"; exit;fo
+16:26  kle77: pgas: aye, i know as much, just like the succinctness of the former
+16:26  mattt_: In a bash script I'm building I run ssh with a command similar to:  ssh foo@bar "command | sed -s -e 's/Inst //' -e 's/\[.*\]//' ..."  - I used set -x to examine the output which converts the outer double quotes to single quotes and converts the single quotes to '\''...'\''  I need the results of PIPESTATUS, but with my command as-is PIPESTATUS doesn't yield the exepected result, but  with the set -x command it does - why would this be?
+16:27  pgas: kle77: is it really ? have you tried to count how many byte you save? I'd bet it's less than 5 on one line
+16:27  pgas: die () { echo "$1";exit; }; [ -d "$i" ] || die "Error: '$i' is not a dir"
+16:28  kle77: pgas: its not a matter of saving bytes tbh, was just curious
+16:28  kle77: obsessiveness i guess :-)
+16:29  lhunath: kle77: what's the problem?
+16:29  pgas: if ! [ -d "$i" ];then echo "Error: '$i' is not a dir"; exit;fi
+16:29  pgas: [ -d "$i" ] || { echo "Error: '$i' is not a dir"; exit; }
+16:30  pgas: I'm just saying, the || is not much more concise than the if
+16:30  kle77: [ -d "$i" ] || { echo "Error: '$i' is not a dir"; exit; } is a nice solution
+16:31  sash_: i want to do something like: for ((i=0;i<791;i++)); do echo -e "<div class="imageElement">\n\t\t\t<h3>Picture $i</h3>[somecrap]" >> file.htm; done. it works like this, but i need the leading zeros. any ideas?
+16:31  pgas: the die function is a much better solution
+16:31  kle77: perhaps conciseness was a bit of a malipropism :-)
+16:31  sash_: i thougt of {001..790} but that doesnt work in " " or ' '
+16:31  pgas: it's just feel more l33t
+16:31  Sonderblade: in bash how can you run a command then after x minutes, if the command is still running, send sig INT to it?
+16:31  kle77: yeah, I usually create a killScript() function in most of my bash scripts, takes error message and error codes
+16:32  lhunath: [ -d "$dir" ] || err "Not a directory: %s" "$dir"
+16:32 * lhunath style nazi.
+16:32  kle77: but im putting this particular piece into a .bashrc, so i'd like it to be self-contained
+16:32  pgas: exit in a .bashrc is a bit dangerous
+16:32  lhunath: you probably want 'return'
+16:33  lhunath: then again; since you're using (), you're really not doing anything exiting.
+16:33  felixge: Is something like this possible? find . -type f | xargs -n1 -I % my-tool % || exit 255
+16:33  felixge: Basically I am trying to get xargs to terminate if any command it executes fails
+16:33  lhunath: felixge: don't use xargs with find.
+16:33  kle77: pgas: yes i learnt as much (r.e. dangerousness)...  just tried the previous, and got logged out of a ssh session :-)
+16:33  lhunath: no, xargs doesn't run bash code.
+16:33  felixge: lhunath: huh, why is that?
+16:34  lhunath: because find has -exec
+16:34  lhunath: and xargs is broken.
+16:34  lhunath: !xargs
+16:34  greybot: xargs(1) is dangerous (broken) when processing filenames that are not NUL-terminated. If you're working with filenames, use find's -exec {} + instead (yes, it does multiple-filenames-per-invocation, too).
+16:34  felixge: lhunath: yeah, but that doesn't allow me to abort find either, does it?
+16:34  lhunath: felixge: neither does xargs.
+16:34  lhunath: felixge: you probably want a while read loop.
+16:34  felixge: lhunath: with xargs I can at least do bash -c "my-tool % || exit 255"
+16:34  felixge: which isn't nice
+16:35  Riviera: felixge: with -exec too
+16:35  lhunath: felixge: and what do you expect that to do?
+16:35  Riviera: !find > felixge
+16:35  greybot: felixge: http://mywiki.wooledge.org/UsingFind
+16:35  felixge: lhunath: got a good pointer for that? I looked into looping over files but people warned about that as well ;)
+16:35  lhunath: felixge: it isn't going to stop the find.
+16:35  Riviera: felixge: read that and look for the example of using find with a while read loop.
+16:35  felixge: Riviera: thanks for the link
+16:35  Riviera: Oh.
+16:35  lhunath: felixge: it'll just stop the bash process you executed for that one particular file.
+16:35  Riviera: There isn't.
+16:35  felixge: lhunath: well with xargs it will stop xargs is what I said
+16:35  lhunath: no, it won't.
+16:36  Riviera: felixge: while IFS= read -r -d '' path; do ...; done < <(find ... -print0)
+16:36  lhunath: it will stop the BASH that XARGS executed.  Not XARGS.
+16:36  felixge: The xargs utility exits immediately (without processing any further input) if a command line cannot be assembled, utility cannot be invoked, an invocation of utility is terminated by a signal, or an invocation
+16:36  felixge:      of utility exits with a value of 255.
+16:36  felixge: in this case bash would be the utility exiting with 255
+16:36  lhunath: ugh; friggin bloated piece of crap.
+16:36  felixge: :)
+16:36  unfancy: uhrm.. newline in variables?
+16:36  lhunath: that's probably another GNU extension.
+16:37  unfancy: \n is just output as \n in bash :(
+16:37  felixge: lhunath: seems to have made it into darwin as well
+16:37  lhunath: screw processes that actually want to exit with 255
+16:37  Riviera: lhunath: nop, it's posix.
+16:37  felixge: Riviera: what's IFS?
+16:37  Riviera: !IFS
+16:37  greybot: Internal Field Separator (or Input Field Separator), used to break things into words. See http://mywiki.wooledge.org/IFS and http://mywiki.wooledge.org/BashFAQ/001 and http://bash-hackers.org/wiki/doku.php/syntax/words
+16:37  lhunath: !IFS
+16:37  greybot: Internal Field Separator (or Input Field Separator), used to break things into words. See http://mywiki.wooledge.org/IFS and http://mywiki.wooledge.org/BashFAQ/001 and http://bash-hackers.org/wiki/doku.php/syntax/words
+16:37  felixge: You guys are awesome : )
+16:38  felixge: thank you so much
+16:38  felixge: this stuff is difficult to google if you don't know what you're looking for
+16:38  lhunath: !google
+16:38  greybot: Google is NOT a preferred source for learning bash, because 90% of the "tutorials" and scripts out there are JUNK. Instead, ask a good question here or refer to the Guide and FAQ (see topic)
+16:38  pgas: unfancy: \n is not special for bash, unless it appears literally inside $'
+16:39  pff: Hey, how to test if we have a terminal output?
+16:39  pgas: unfancy: just put a literal newline in your variable
+16:39  lhunath: -t
+16:39  unfancy: $'\n' ?
+16:39  lhunath: # help test | grep -- -t
+16:39  evalbot: lhunath:         -t FD          True if FD is opened on a terminal.
+16:39  evalbot: lhunath:     less-than, less-than-or-equal, greater-than, or greater-than-or-equal
+16:39  pgas: unfancy: yes
+16:40  pff: lhunath: thanks
+16:42  felixge: !!read
+16:42  unfancy: pgas: that just outputs $'\n' :S
+16:42  felixge: !read
+16:42  greybot: help read <ENTER> read http://wiki.bash-hackers.org/commands/builtin/read
+16:42  Riviera: unfancy: did you do something like "$'\n'"?
+16:43  unfancy: that outputs nothing :)
+16:43  lhunath: !faq 1 > felixge
+16:43  greybot: felixge: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+16:43  unfancy: ..or at least doesn't break into a new line@bash :(
+16:43  lhunath: that has a find -> while read example, I think.
+16:43  unfancy: i got: append="#$2"$'\n'"more
+16:43  unfancy: and echo $append
+16:43 * lhunath bets on unfancy failing to quote
+16:43  lhunath: oh; guess I'm right.
+16:44  lhunath: !wordsplitting > unfancy
+16:44  greybot: unfancy: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+16:44  unfancy: what?
+16:44  lhunath: read the factoid.
+16:44  Riviera: unfancy: If you use '' inside of "", then there is no special meaning of ''.
+16:44  unfancy: what does that have to do with anything tho?
+16:44  lhunath: if you don't get it, ask a question I can actually answer.
+16:44  lhunath: unfancy: read the factoid.
+16:44  unfancy: \n should just be 1 char..
+16:44  Riviera: unfancy: similarly, since $'' also is just quoting, like "" and '' are, $'' does not have a special meaning inside "" too.
+16:45  Riviera: unfancy: so you could use "bla"$'\n'
+16:45  unfancy: lol
+16:45  Riviera: unfancy: or just $'bla\n'
+16:45  unfancy: no \n inside "?
+16:45  lhunath: his $'' is not quoted.
+16:45  Riviera: unfancy: but since you need parameter expansion, it would be like "#$2"$'\n'
+16:45  unfancy: why doesn't "#$2"$''"more" work then?
+16:45  Riviera: lhunath: 16:43 <unfancy> i got: append="#$2"$'\n'"more
+16:45  lhunath: unfancy: it does!
+16:46  Riviera: ah
+16:46  unfancy: why doesn't "#$2"$'\n'"more" work then?
+16:46  lhunath: unfancy: but you broke it!
+16:46  Riviera: lhunath: true :)
+16:46  unfancy: sorry
+16:46  Riviera: nevermind :D
+16:46  lhunath: unfancy: now read the factoid!
+16:46  unfancy: what in a.. now you confused me :(
+16:46  poisonbit: # or(){ (( $? > 0 )) && "$@" ; }; false; or echo hola    # does this 'or' has any pitfall ?
+16:46  evalbot: poisonbit: hola
+16:46  lhunath: !wordsplitting > unfancy
+16:46  greybot: unfancy: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+16:46  lhunath: unfancy: your assignment is fine.
+16:46  lhunath: now read the factoid until you get what it says.  then go back to the code.
+16:46  unfancy: but it doesn't break into the new line :(
+16:47  lhunath: friggin!
+16:47  unfancy: oh
+16:47 * unfancy hits head
+16:48  lhunath: maybe if we put red & blink ansi codes in the factoids people will notice them.
+16:48  felixge: does the while thingignore interrupts?
+16:48  felixge: * thing ignore
+16:48  lhunath: I'm not sure what you mean
+16:48  unfancy: ..i still don't get it.. when i "quote" it.. it doesn't seem to get interpreted just outputs $'\n' at the shell
+16:48  unfancy: so wth?
+16:48  lhunath: unfancy: the assignment is fine.
+16:49  unfancy: then i'm even more confused
+16:49  lhunath: # var="moo"$'\n'"cow; echo $var
+16:49  unfancy: i wanted a newline
+16:49  evalbot: lhunath: Missing terminating quote, bracket or keyword
+16:49  lhunath: # var="moo"$'\n'"cow"; echo $var
+16:49  evalbot: lhunath: moo cow
+16:49  lhunath: broken!
+16:49  lhunath: # var="moo"$'\n'"cow"; echo "$var"
+16:49  evalbot: lhunath: moo
+16:49  evalbot: lhunath: cow
+16:49  lhunath: fixed!
+16:49  lhunath: oh dear.  what did I change?
+16:49  unfancy: LOL
+16:50  unfancy: im such a fool sometimes :D
+16:50  unfancy: thanks
+16:50  lhunath: !wordsplitting > unfancy
+16:50  greybot: unfancy: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+16:50  jww: lhunath: remenber me something ;)
+16:50  unfancy: yeah, i stil kept concentrating on the var assignment, until you said echo "$var" ;)
+16:51  lhunath: jww: remember you something?  no comprende.
+16:53  jww: I meaned it remenber the problem I had yesterday, and you helped me to correct the same way.
+16:53  lhunath: heh; yeah, I remember
+16:54  unfancy: lol
+16:54  unfancy: i had brokened it :(
+16:54  unfancy: now it is fixered!
+16:55  lhunath: thankfully; this pain will now save you from ever leaving a PE unquoted in the future.
+16:56  unfancy: ..must quote my parameter expansion..
+16:56  unfancy: ..must quote my parameter expansion..
+16:56  unfancy: it shall be my new mantra!
+16:56  lhunath: the annoying thing is it also expands pathnames if you don't quote.  something not a lot of people know or expect until it hits them in the face.
+16:58  unfancy: like ~?
+16:58  unfancy: where would that hit me in the face?
+16:58  jww: when u got a path with space inside.
+16:58  unfancy: or do you mean a ln too?
+16:59  unfancy: ah!
+17:00  lhunath: # dailyCron="0 * * * *"; cd /; echo $dailyCron > mycrontab; cat mycrontab
+17:00  evalbot: lhunath: 0 bin dev etc lib proc root tmp bin dev etc lib proc root tmp bin dev etc lib proc root tmp bin dev etc lib proc root tm
+17:00  evalbot: lhunath: p
+17:00  lhunath: oh no, somebody hacked my crontab.
+17:01  lhunath: # dailyCron="0 * * * *"; cd /; echo "$dailyCron" > mycrontab; cat mycrontab
+17:01  evalbot: lhunath: 0 * * * *
+17:08  jww: w
+17:08  jww: ops.
+17:08  felixge: Another question: I want to pipe the output of a command through sed, but if the command piping to sed exists with > 0 I want to know about it
+17:09  Riviera: felixge: look for PIPE_STATUS
+17:09  Riviera: felixge: PIPESTATUS even
+17:09  felixge: Riviera: thanks, that's exactly what I need
+--- Log closed Thu Nov 25 17:22:01 2010
+--- Log opened Thu Nov 25 17:22:22 2010
+17:22 --- Users 529 nicks [0 ops, 0 halfops, 0 voices, 529 normal]
+--- Log closed Thu Nov 25 23:41:49 2010
+--- Log opened Thu Nov 25 23:47:19 2010
+23:47 --- Users 519 nicks [0 ops, 0 halfops, 0 voices, 519 normal]
+23:48 --- Channel #bash was synced in 99 seconds
+23:57  grummund: hi
+23:57  grummund: for X in *\ *; do mv -v "$X" "${X// /_}"; done
+23:58  grummund: will rename all files with spaces using _ instead
+23:58  grummund: but how can i do this for an entire tree?
+23:58  erUSUL: !faq rename
+23:58  greybot: http://mywiki.wooledge.org/BashFAQ/030 -- How can I rename all my *.foo files to *.bar, or convert spaces to underscores, or convert upper-case file names to lower case?
+--- Log closed Fri Nov 26 00:00:49 2010

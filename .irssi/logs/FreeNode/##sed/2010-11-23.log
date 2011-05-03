@@ -1,0 +1,193 @@
+--- Log opened Tue Nov 23 00:00:02 2010
+00:33  probonono: Bop, you can simply remove the ^ and $ to eliminate the start/end of line constraint.
+00:37  Bop: that wont filter
+00:37  Bop: wont remove the text , and just print the numbers
+01:00  probonono: So something like:  sed -n 's/[^0-9]*\(0\|[1-9][0-9]*\)\(,[0-9]*[1-9]\)\?.*/\1\2/p'
+01:02  Bop: probonono, looks good ! xD
+01:02  Bop: probonono, 0,0 and 01233 still matches :s
+--- Log closed Tue Nov 23 03:42:19 2010
+--- Log opened Tue Nov 23 03:42:41 2010
+03:42 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+03:44 --- Channel ##sed was synced in 97 seconds
+--- Log closed Tue Nov 23 07:42:08 2010
+--- Log opened Tue Nov 23 07:42:36 2010
+07:42 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+07:44 --- Channel ##sed was synced in 100 seconds
+--- Log closed Tue Nov 23 13:42:59 2010
+--- Log opened Tue Nov 23 13:43:23 2010
+13:43 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+13:43  Riviera: evelyette_: ah
+13:43  Riviera: sorry
+13:43  Riviera: 8)
+13:43  evelyette_: np
+13:43  Riviera: should have read the line in that you cleary state that ;)
+13:44  evelyette_: :)
+13:44  Riviera: sed -e '/passwd/!ba' -e '/shadow/!b' -e :a -e 's/files/&, ldap/'
+13:44 --- Channel ##sed was synced in 101 seconds
+13:45  Riviera: GNU sed has the alternation operator \|, with it you could just do: sed '/passwd\|shadow/s/files/&, ldap/'
+13:46  evelyette_: thanks
+13:46  Riviera: :)
+--- Log closed Tue Nov 23 14:34:50 2010
+--- Log opened Tue Nov 23 14:35:10 2010
+14:35 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+14:36 --- Channel ##sed was synced in 102 seconds
+14:50 --- maxim is now known as Guest25252
+--- Log closed Tue Nov 23 14:59:13 2010
+--- Log opened Tue Nov 23 14:59:37 2010
+14:59 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+15:01 --- Channel ##sed was synced in 99 seconds
+--- Log closed Tue Nov 23 16:20:33 2010
+--- Log opened Tue Nov 23 16:20:52 2010
+16:20 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+16:22 --- Channel ##sed was synced in 98 seconds
+16:59 --- kurohige is now known as barbanegra
+18:02 --- Vorpal_ is now known as Vorpal
+--- Log closed Tue Nov 23 18:08:13 2010
+--- Log opened Tue Nov 23 18:13:34 2010
+18:13 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+18:15 --- Channel ##sed was synced in 103 seconds
+18:20  nsisodiya: Hello, I want a sed expression which can extract all the matching between two pattern or word
+18:21  waldner: sed -n 's/.*word1\(.*\)word2.*/\1/p'
+18:21  waldner: if you only have one "word1" and one "word2" per line; otherwise, it's more complicated
+18:22  nsisodiya: even that is ok
+18:24  nsisodiya: not working
+18:24  nsisodiya: waldner,  word1 and word2 contains space
+18:24  waldner: it doesn't matter
+18:24  waldner: paste your line
+18:25  nsisodiya: sed -n 's/.*"The following NEW packages will be installed"\(.*\)"upgraded".*/\1/p'
+18:25  waldner: what's the input line? is it a single line or multiline?
+18:26  nsisodiya: Its a pipe - sudo apt-get install --dry-run eclipse  |  sed -n  ******************
+18:26  nsisodiya: multiple line
+18:27  waldner: no, if it's multiple line it won't work
+18:27  waldner: do this instead:
+18:27  waldner: sed -n ':a;$!{N;ba;};s/.*word1\(.*\)word2.*/\1/p'
+18:28  nsisodiya: I want this - http://groups.google.com/group/iitdlug/msg/923824d1d989b930
+18:28  nsisodiya: Let me try
+18:29  waldner: and, I probably see another issue
+18:29  waldner: most certainly the input doesn't have those double quotes
+18:31  nsisodiya: waldner, Your solution is working but 50% , it is printing the line containing word2
+18:31  waldner: paste on pastebin the output of  sudo apt-get install --dry-run eclipse
+18:32  waldner: it's either a greediness issue, or something else
+18:33  nsisodiya: waldner, https://gist.github.com/raw/712154/58e636da7ad06c4fe58a188fd67ac9e274b09775/gistfile1.txt
+18:34  waldner: greediness
+18:34  waldner: you basically want the list of packages right?
+18:34  nsisodiya: I want list of all packages which is lie between "The following NEW packages will be installed:" and "0 upgraded,"
+18:34  nsisodiya: waldner, Yes, What is greediness ?
+18:35  waldner: so you want this probably:
+18:36  nsisodiya: Got it,    word1 123 word2 456 word 2 6777 word 1 09987 word 1 85433 word 2  should print
+18:37  nsisodiya: 123  09987 word 1 85433
+18:38  nsisodiya: something line, match word 1 , start printing until you reach word 2, then again repeat this
+18:38  waldner: nm, it-s not even greediness
+18:38  waldner: sed -n '/The following NEW/{n; :a; $!N;s/\n  / /;ta;P;D;}'
+18:38  waldner: not sure it-s what you want either
+--- Log closed Tue Nov 23 18:44:46 2010
+--- Log opened Tue Nov 23 18:45:11 2010
+18:45 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+18:45  nsisodiya: waldner, Bingo, your expression worked for me
+18:45  nsisodiya: waldner,  last one
+18:46 --- Channel ##sed was synced in 102 seconds
+18:47  nsisodiya: waldner, how to learn sed,, my eye size become double after seeing your expression
+18:47  waldner: see the channel topic
+18:47  waldner: there are some good links there
+18:50  nsisodiya: waldner, Thanks
+18:50  waldner: np
+19:19  SiegeX: echo -e '[\nfoo\nbar\nbaz\n]' | sed '/\[$/{:loop N;/^]/!b loop}; s/\n//g'
+19:19  SiegeX: why does that fail but ...
+19:19  SiegeX: echo -e '[\nfoo\nbar\nbaz\n]' | sed '/\[$/{:loop N;/]$/!b loop}; s/\n//g'
+19:19  SiegeX: works
+19:19  SiegeX: the only thing I changed was '/^]/' to '/]$/'
+19:20  SiegeX: the '^' anchor seems to break it
+19:25  waldner: I'm surprised that even works at all
+19:26  waldner: you need a ; between :loop and N
+19:27  waldner: and the first one doesn't work because at that time you will not have the pattern space starting with ], because there will be other stuff before that
+19:28  waldner: /../ always matches against the pattern space, not the input line
+19:28  SiegeX: ahh, thanks for setting me straight
+19:28  waldner: most of the time they are the same, but if you use N they diverge
+19:29  SiegeX: why the ';' after the :loop, it's just a lable right?
+19:29  waldner: it is, but AFAIK it still needs to be separated from the following code
+19:29  waldner: apparently that's not the case there though
+19:30  waldner: and I'm too lazy now to check the specs
+--- Log closed Tue Nov 23 19:44:50 2010
+--- Log opened Tue Nov 23 19:45:11 2010
+19:45 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+19:45  waldner: I suppose sed comes after C, as it was part of the early unix tools
+19:46  waldner: in other words, it was written in C
+19:46 --- Channel ##sed was synced in 95 seconds
+19:46  SiegeX: hmm, so then if that's the case it would make sense why their label would be C-like
+19:47  SiegeX: maybe its just one of those things that people thought they needed but really didn't but having it or not didn't really make any difference
+19:47  SiegeX: or, it could just be a gnu-ism
+19:47  waldner: I wouldn't be the 'abc;def;ghi' syntax was part of that sed though
+19:47  waldner: *bet
+19:48  waldner: that probably required multiple -e's
+19:48  waldner: or even something else
+19:48  waldner: so it's hard to tell
+19:48  SiegeX: oh right, the -e syntax
+19:48  SiegeX: that was before my time =)
+19:48  SiegeX: but i see it every now and then
+19:50  waldner: http://sed.sourceforge.net/grabbag/tutorials/sed_mcmahon.txt
+19:50  waldner: this should be the first sed
+19:50  waldner: I think
+19:50  waldner: 1973 or so
+19:52  waldner: looks like it wanted -e
+19:55  SiegeX: -e after lables?
+19:56  waldner: it's not clear
+19:56  waldner: but I expect it needed something like
+19:56  ket: if i write a script: "#!/usr/bin/sed".. then for reading and writing files, i must use: R,r and w... meaning i can't just append <filename> and the end of some block, right?
+19:56  waldner: sed -e ':label' -e '/foo/p' etc.
+19:56  waldner: or whatever syntax the shell of then used
+19:57  waldner: ket: you want to read in an external file?
+19:58  ket: waldner: correct.. my intention is to avoid using a bash script which would be rather multiplexive...
+19:58  waldner: so use "r filename"
+19:59  waldner: what's your question?
+19:59  waldner: it's not clear from above
+19:59  ket: great: well actually i have none in particular .. just trying to fill in some holes ..
+20:00  ket: one confusing thing i also remember about sed is: "How do supply an address to read one specific line in <file> using R" ?
+20:00  waldner: but maybe I read betwwen the lines that you want to use sed to *edit* the file you read in with r?
+20:01  waldner: that's not possible
+20:02  ket: waldner: heh, that was my first questions (sorry about the confusin)
+20:02  ket: s/confusin/confusion
+20:02  waldner: no, you can't do that
+20:02  waldner: if you want to run sed on multiple files, either use multiple sed invocations (if processing differes between files), or just do sed 'your program' file1 file2 file3 ...
+20:03  ket: so: "$ sed '5Rp' /etc/passwd " is not possible..
+20:03  waldner: to read the 5th line of /etc/password?
+20:03  waldner: *passwd
+20:03  ket: correct..
+20:03  waldner: sed -n 5p /etc/passwd
+20:03  waldner: but then it depends what you want to do with it
+20:04  ket: waldner excuse me... it would be more like..
+20:04  waldner: I'm not sure you can, from within a sed script, read the nth line of an external file
+20:04  waldner: maybe with R, which however isn't standard
+20:04  waldner: but even then, you'd have to count lines yourself
+20:04  ket: "$sed '/^$/d ; 5R /etc/passwd' /tmp/myfile "
+20:05  ket: bugga...
+20:06  waldner: your code above reads and prints the FIRST line of /etc/passwd when you are at line 5 of /tmp/myfile, assuming it's not empty
+20:06  waldner: maybe it's better if you explain your real problem
+20:08  ket: i have no real problem: but what i want to do is read line 5 of /etc/passwd onto line 12 of /tmp/file..
+20:08  ket: using sed's R (read line)..
+20:09  waldner: the simplest and probably cleanest way of doing that is using awk
+20:09  ket: or does sed use R[eadline] like standard getline is used..?
+20:09  waldner: maybe not the answer you wanted
+20:09  waldner: read the docs
+20:09  waldner: R reads "the next" line from the given file, and queues it to be printed at the end of the current cycle
+20:10  ket: hmm i'm completely clueless of readline then..
+20:10  waldner: which incidentally also means that, even if you do R; R; R; R; R to get the 5th line, the previous lines will be printed as well
+20:11  ket: there are no ugly hacks to somewhat bypass the previous R declarations?
+20:11  ket: s/ugly//
+20:11  waldner: there are nice hacks, all of which involve using another tool
+20:11  waldner: I don't think you can do it with sed
+20:11  waldner: (I may be wrong though)
+20:12  waldner: what you can do is to run sed on both files, then output the relevant lines
+20:13  ket: hmm, that sounds about right... thanks alot waldner: much help
+21:02  ska: I have a var $unit that has slashes in it. how can I use $unit in a sed expression?
+21:02  ska: unit=/dev/hda3
+21:02  ska: sed seems to want myslashes to be escaped.
+21:03  waldner: sed "s_${unit}_bla_"
+21:03  ska: df  |  sed -e '/$unit/!d'
+21:04  ska: df  |  sed -e '/${unit}/!d'   ?
+21:04  waldner: sed "\_${unit}_!d"
+21:05  waldner: and perhaps you'll need to turn off history
+--- Log closed Tue Nov 23 21:44:41 2010
+--- Log opened Tue Nov 23 21:45:02 2010
+21:45 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+21:46 --- Channel ##sed was synced in 104 seconds
+--- Log closed Wed Nov 24 00:00:02 2010

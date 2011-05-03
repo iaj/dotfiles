@@ -1,0 +1,131 @@
+--- Log opened Wed Dec 01 00:00:07 2010
+--- Day changed Wed Dec 01 2010
+00:00  lautriv: guampa, however i went to bed, you could tell him then ;-)
+00:00  lautriv: CYA dudes
+00:00 --- lautriv is now known as lautriv|afk
+00:08  guampa: anyone tried this script that's been around this month on the net, that implements per tty cgrouping? (not the kernel patch)
+00:09  nightwalk: Why would you need that when you can use lxc to do the same thing?
+00:09 * guampa runs to google to find out about lxc
+00:09  guampa: looks a bit overkill doesn't it?
+00:10  guampa: OS virtualization?
+00:10  nightwalk: How so? just invoke 'lxc', and everything you run after that is in its own container
+00:11  nightwalk: It isn't "virtualization" per-se. It uses kernel container support to do its thing
+00:11  Harold_parker: anyone tried it?
+00:11  nightwalk: Of course!
+00:11  guampa: i'll peek at it
+00:12  nightwalk: I even killed my system 3 seperate times using earlier versions of it ;)
+00:12  Harold_parker: heheh
+00:12  Harold_parker: how's it perform?
+00:12  nightwalk: I'm *still* convinced I was doing something wrong network-wise, so it was probably my fault rather than the code's
+00:13  nightwalk: Well, it operates about as well as you'd expect. Commands completed in infinitesimally more time than they did outside of the lxc container
+00:14  nightwalk: It's probably still a little premature to use it in a production environment, but it should be stable enough to use for tinkering and  testing purposes
+00:15  Harold_parker: nice
+00:16  nightwalk: Yep...especially since one can use the 'host' root filesystem inside of the containers, and since that's the default ;)
+00:19  toka: I'm trying to read raw data of wacom tablet at ttyS0. Its working in current ubuntu, but not in archlinux. setserial configs are identical. Any ideas how to investigate this ?
+00:19  nightwalk: toka: first of all, make sure your kernel on arch isn't set to 'grab' the serial port for its own uses
+00:20  nightwalk: Check for gettys in /etc/inittab, and make sure there aren't any serial options being passed on the kernel command line, mainly
+00:20  toka: nightwalk: ugh, dont know about that. any hint to docs ?
+00:22  nightwalk: err.../serial/console=/
+00:22  toka: hm, if i do xxd /dev/ttyS0 there are not complains. if i do a second one at the same time, then complaining about lock
+00:22  toka: ive searched all /etc for ttyS0 or serial, but there is nothing ...
+00:24  razass: using a bash script can I somehow edit a certain location in a text file ?
+00:24  robinetd: razass: sed, awk.
+00:25  razass: robinetd: thanks i'll look intot hose
+00:25  razass: any prefernce?
+00:25  nightwalk: toka: only other thing I can think of is that the name changed for some reason. Check ttyS1, S2, etc
+00:26  robinetd: razass: They're both fine tools depending on the job.
+00:26  mr_daniel: I don't know how 'file' works and how it determines the type or content of a file, but most of the time it does a good job. But unfortunately some cases where 'file' fails to recognize the 'correct' type or content of a file.
+00:26  razass: robinetd: alright ill read up on both and see which fits the best, thanks again
+00:28  toka: $cat /proc/tty/driver/serial
+00:28  toka: 0: uart:16550A port:00000220 irq:4 tx:45231 rx:11251 fe:6076 RTS|DTR
+00:28  toka: 1: uart:unknown port:000002F8 irq:3
+00:28  toka: 2: uart:unknown port:000003E8 irq:4
+00:28  toka: 3: uart:16550A port:000002E8 irq:3 tx:0 rx:0 CTS|DSR|CD|RI
+00:28  toka: so it should be ttyS0, there is also traffic, but i cant dump it ...
+00:28  mr_daniel: I have a local css file (Cascading Style Sheets), but 'file' is not able to regcognize it as a css file, for example when I try 'file screen.css' file outputs:
+00:28  mr_daniel: screen.css: ASCII C program text
+00:29  tensorpudding: that's normal
+00:29  mr_daniel: This is a problem, because I guess that this is the reason why nginx is not able to regocnize a local css file as a css file, and because of that is not gzip'ing the file before transfer
+00:30  nightwalk: toka: maybe try disabling selinux?
+00:30  tensorpudding: can't you configure nginx to gzip by extension?
+00:30  guampa: mr_daniel: nginx relies on "file" to detect filetype?
+00:31  nightwalk: That would be really, really strange if it did
+00:31  mr_daniel: guampa: I don't know 100% for sure if relies on 'file' to determine the content of a file
+00:31  tensorpudding: iiuc file does not pay attention to extensions, but reads the text and makes a guess based on what it knows of syntax
+00:31  Agiofws: hello
+00:31  mr_daniel: tensorpudding: that's a good idea, I need to check the config for that, BUT on the other hand I am not sure if this could lead to a potential security risk
+00:32  guampa: tensorpudding: that's true, that's why it confuses CSS with C as it has a somewhat similar syntax (braces fe)
+00:32  tensorpudding: yes
+00:32  tensorpudding: also why it thinks python is java
+00:32  guampa: lol
+00:32  guampa: it's not the best ftype identifier
+00:32  nightwalk: python...java...what's the diff?
+00:33  tensorpudding: it can identify scripts with shebangs though
+00:33  Agiofws: hi
+00:33  Agiofws: can anyone help me with xorg ?
+00:33  Agiofws: http://codepad.org/3PgucNER ?
+00:33  tensorpudding: and lisp
+00:33  tensorpudding: though it can't tell lisps apart, that would be way too hard
+00:34  toka: nightwalk: i do not see traces of selinux
+00:35  nightwalk: toka: no /etc/selinux?
+00:36  toka: no
+00:37  mikey: nightwalk: what distribution of linux are you running?
+00:37  mikey: maybe /etc/sysconfig/selinux?
+00:37  nightwalk: You're either trying to access /dev/ttyS0 as root, or you've given your user/group access to it, right?
+00:38  nightwalk: mikey: I have no problems atm. We're trying to figure out why toka can access /dev/ttyS0 on one distro, but not on Arch
+00:38  toka: yes, root
+00:38  Stameni: Does anyone know if PythonCad is still being developed ?
+00:39  mikey: have you strace'd yet?
+00:39  marduk: carlopav pushed 1 commit(s) to R38 in the pythoncad Git repository posted by carlopav 1 days ago
+00:40  toka: mikey: how do i do that. which programm should i strace ?
+00:40  nightwalk: toka: only other thing I can think of is that some other module or app (ex: 'pilot'/phone apps) has locked it
+00:40  mikey: the one you are running
+00:40  Stameni: marduk: so R38 is still the latest ?
+00:41  marduk: Stameni: i dunno. i'm just pasting what a simple google search returned
+00:41  Stameni: marduk: thank you, i coludn't find anythink
+00:41  Stameni: anything*
+00:41  marduk: maybe you misspelled it
+00:42  Method: how do i stop make from adding dependencies that aren't in the Makefile?
+00:43  Stameni: probably
+00:43  DrSlony: Help, what command line tool can resolve an ip adress to a host name and vice-versa? same as /dns in an irc client
+00:44  guampa: dig
+00:49  DrSlony: thanks du!
+00:49  DrSlony: guampa!
+00:50  toka: nightwalk: that seems to point in the right way. i was able to see some data coming out of ttyS0 while removing some modules
+00:50  guampa: np buddy
+00:53  nightwalk: toka: good deal. my guess is it was a network driver. see if you removed any modules with 'net' or maybe 'ip' in them. Once you zero in on the problem module, you can blacklist it in /etc/modprobe.conf, /etc/modrobe.d/blacklist, or similar
+00:53  toka: how can i check, which programs/modules are reading from /dev/ttyS0 ?
+00:54  toka: it seems, that from time to time xdd is faster than the other program/module reading dev/ttyS0, but most of the time some other process is getting the data ....
+00:55  nightwalk: toka: for programs, use 'fuser /dev/ttyS0'
+00:55  sedulous: toka: inotifywatch
+00:57  sedulous: toka: sorry, inotifywatch doesn't tell you the PID, nevermind
+00:58  toka: sedulous: i am not able to find a package with inotifywatch in arch
+00:58  sedulous: toka: usually inotify-tools
+00:59  sedulous: but it doesn't do what you want, my bad
+01:00  nightwalk: sedulous: toka is using Arch. The impression I got from the brief time I played with an Arch vm is that it's...lacking. Lacking in packages, lacking in support for current-day technologies like virtio, etc
+01:01  nightwalk: Wouldn't surprise me if it didn't even have inotify-tools
+01:02  toka: i just installed inotify-tools
+01:02  nightwalk: Certainly not surprising there's brokenness out of the box ;)
+01:03  cmnky: didnt inotify just get replaced, or at least, in the process of being replaced
+01:03  nightwalk: dnotify was replaced by inotify, I remember that much...
+01:03  cmnky: nah ... this is new new
+01:03  cmnky: because inotify still has certain shortcommings
+01:04  nightwalk: Wouldn't surprise me. OSS devs like obsoleting still-useful technologies :/
+01:04  nightwalk: They're trying to replace iptables with something new too
+01:04  sako: can i set the compression level with tar?
+01:04  sako: for a gz format
+01:04  cmnky: well, in is certainly better than dn ... but it has flaws ... that the new in supposedly fixes
+01:05  cmnky: i tried to talk to rusty russell once, about his futex code ... because his "ibm sponsored propadanga/interview" said to email him ... he was a giant penis and of no help
+01:05  nightwalk: sako: if it does, I'd imagine you'd use --use-compress-progs="gzip <your_gzip_options>" to do it
+01:06  toka: sedulous: hm, when not running xxd, then there are not events counted by inotify. would id detect module access to /dev/ttyS0 ?
+01:07  nightwalk: toka: neither fuser nor inotify will show you kernel space activities
+01:07  Gorroth: i'd be happy with even dnotify
+01:07  nightwalk: cmnky: by all accounts I've heard, the debian & python people are the same way
+01:07  Gorroth: at my work, i get to make use of fcntl
+01:08  nickaugust: how do i add usbhid to my initrd.gz??  the command im running to make it is "mkinitrd -c -k 2.6.33.4-smp -m ext3 -f ext3 -r /dev/cryptvg/root -C /dev/sdx2 -L
+01:08  nickaugust: "
+01:08  Gorroth: nightwalk: i love python, but the creator is an idiot in a lot of ways.  i also don't like the peeps in the channel on here
+01:08  nightwalk: I'd actually be happier if they concentrated on making nfs a little more idiot-proof rather than coming out with yet another *notify incarnation
+01:11  nightwalk: Gorroth: I know very little about python, and even less about it's creators. I *have* heard that they have a habit of baselessly rejecting efficiency patches, so that'd earn him/them that title in my book as well
+01:11  nightwalk: Assuming it's true of course
+--- Log closed Wed Dec 01 01:15:19 2010

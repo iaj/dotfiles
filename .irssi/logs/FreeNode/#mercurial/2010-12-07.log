@@ -1,0 +1,276 @@
+--- Log opened Tue Dec 07 15:28:24 2010
+15:28 --- Users 194 nicks [0 ops, 0 halfops, 0 voices, 194 normal]
+15:28 --- Channel #mercurial was synced in 8 seconds
+15:28  iaj: lo there :-) is there any good gui tool for osx?
+15:29  marmoute: machg ?
+15:31  danchr: http://mercurial.selenic.com/wiki/OtherTools#Mac-native_GUIs
+15:32  klaus9: Is there no way to undo a commit?
+15:34  klaus9: How do I abandon a merge?
+15:36  marmoute: hg up -C anywhere
+15:37  klaus9: marmoute: Thanks.
+15:41  Kebianizao|work: Hello
+15:42  Kebianizao|work: I'd like to write a hook that automatically runs uncrustify on every commit to each commited file
+15:42  Kebianizao|work: I've been reading the available information: http://mercurial.selenic.com/wiki/HookExamples and http://hgbook.red-bean.com/read/handling-repository-events-with-hooks.html but I'd like to hear some hints on how I could easily get the commited file list
+15:48  klaus9: How can I get my working dir to a clean state?
+15:49  Kebianizao|work: klaus9: are you interested on changes?
+15:49  klaus9: No.
+15:49  Kebianizao|work: revert -a
+15:50  Kebianizao|work: or up -C
+15:50  klaus9: Tried that.  There's still lots of rubbish left over.
+15:50  Kebianizao|work: klaus9: maybe untracked files
+15:50  klaus9: Yes.  How can I get rid of them?
+15:50  Kebianizao|work: you could either ignore them (see hgignore) or maybe use the purge extension
+15:54  marmoute: klaus9: see the purge extension
+15:56  piranha: Kebianizao|work: in python hook for pre/postcommit you'll have parent1 argument
+15:56  piranha: ctx = repo[parent1]; print ctx.files()
+15:56  piranha: this will print all files changed in this revision
+15:56  piranha: hm, no, actually in pre-commit it will show you all files changed in parent revision ;)
+15:58  piranha: hm, I forgot how to get workingctx
+15:59  piranha: Kebianizao|work: you can do context.workingctx(repo).status(), which will give you information of what was changed, but I'm not sure that's the most straight way.
+15:59  piranha: and possibly in post-commit you'll get a commit itself...
+16:00  klaus9: What is this obsession with heads.  How can I commit to mercurial without it creating a new head?
+16:03  Kebianizao|work: klaus9: you need commit on top of a head, else you'll get a new one
+16:03  Kebianizao|work: piranha: that sounds helpful, thanks :)
+16:03  klaus9: Doesn't commit use a head by default?
+16:04  piranha: klaus9: it uses your current revision
+16:04  piranha: if you want to commit to head, you should update to (in other words - check out) head
+16:04  klaus9: hg pull -u should do that shouldn't it?
+16:04  piranha: it should
+16:05  klaus9: I wish there was a --dry-run option to hg push
+16:05  abuehl: hg outgoing
+16:06  danchr: abuehl: can you try out http://paste.pocoo.org/show/301835/ on Windows for me?
+16:07 * abuehl clicks
+16:08  abuehl: ugh, I never ran the testsuite on windows
+16:08  danchr: try running 'hg export .' and see if it works :)
+16:09  danchr: that should exercise the code path in question
+16:09  abuehl: I'd recommend pmezard :)
+16:09  danchr: pmezard: ping?
+16:10  danchr: abuehl: if you could verify that export or cat continues to work, that'd be great
+16:10  abuehl: ok, can do that a bit later
+16:11  danchr: the fileno()/dup() dance *should* work, but you never know with Windows :)
+16:11  abuehl: Windows is evil
+16:11  danchr: indeed
+16:14  klaus9: hg update -C rev doesn't do what I expected.
+16:15  klaus9: hg update -C 79988 ; hg log shows two later commits.  Why doesn't it actually go to the specified commit?
+16:17  durin42: gug
+16:18  Kebianizao|work: klaus9: maybe you committed after the pull
+16:19  klaus9: Kebianizao|work: So how do I get rid of that commit?
+16:20  Kebianizao|work: klaus9: a) have you already pushed it? and b) are you sure it's useless
+16:20  mg: !kickstart
+16:20  hgbot: "kickstart" could be http://mercurial.aragost.com/kick-start/
+16:20  mg: klaus9: please read the first guide there -- that explains the basics of Mercurial
+16:20  klaus9: Kebianizao|work: No. and Maybe, but I've got a patch.
+16:20  mg: including how to update your working copy to reflect a different place in the graph
+16:20  mg: and what that really means
+16:21  klaus9: mg: I've read the tutorial, but didn't follow most of it.
+16:21  mg: try following it
+16:21  usernkey: hi  
+16:21  klaus9: mg: I'm trying.  Asking here was one of the things it suggested IIRC.
+16:22  mg: klaus9: ah, heh :) I should update it then...
+16:22  mg: no, just kidding -- asking here is of course fine, it just sounded like you missed the basic ideas in Mercurial
+16:22  usernkey: I read here http://thread.gmane.org/gmane.comp.version-control.mercurial.devel/36414 about a possible problem with NFS 
+16:22  mg: I like this page a lot too: http://mercurial.selenic.com/wiki/UnderstandingMercurial
+16:22  klaus9: Yeah that's quite possible.
+16:23  usernkey: Do you have some more information ?
+16:23  usernkey: is it real ?
+16:23  piranha: Kebianizao|work: ah, working ctx: repo['.'], so changed files are: repo['.'].files() :)
+16:24  usernkey: I didn't find more information about that 
+16:25  Kebianizao|work: piranha: how do you test that? I'm a noob on python hooks, and I would like to avoid a commit per test
+16:26  piranha: Kebianizao|work: heh, I'm doing ci, rollb, ci, rollb :)))
+16:26  Kebianizao|work: hehe, that's ok :)
+16:27  klaus9: Well the tut doesn't actually answer the question.  How can I abandon local commits?
+16:27  klaus9: Without having to re-clone because that took 13 hours last time.
+16:27  mg: klaus9: you cannot -- you can use 'hg clone -r' to make a new clone that has a subset
+16:28  mg: usernkey: I suggest you follow up on the thread on the mailinglist
+16:29  Kebianizao|work: klaus9: look for strip, but be careful with that
+16:46  usernkey: at the end of all mails in the mail archive I didn't understand if it if fixed or no
+17:02  knittl: hi. is matt here?
+17:03  homa_rano: for commands in general, a return code of 0 means success, does a return code of 1 mean pseudosuccess?
+17:03  knittl: homa_rano: everything !=0 signals an error
+17:03  homa_rano: unfortunately not
+17:04  knittl: 1 usually is an uncritical error
+17:04  knittl: homa_rano: where not?
+17:04  homa_rano: I had that strategy for git, but there are 3 commands now that use 1 as "nothing to do"
+17:05  homa_rano: I don't want to blanket ok 1 if some commands have a serious error 1
+17:05  homa_rano: but I keep finding new ones that sometimes give 1...
+17:05  knittl: nothing to do means you can chain commands together
+17:06  knittl: git diff --quiet && echo 'no changes'
+17:06  homa_rano: how is that an error under any definition of the word?
+17:06  knittl: other way round :-/
+17:06  knittl: 1 means differences
+17:07  homa_rano: git merge-base gives 1 when there are no common ancestors
+17:07  homa_rano: breaking hg push for weird git subrepos
+17:08  homa_rano: you are convincing me towards a general go-ahead of any command returning 1
+17:09  knittl: usually commands list their exit codes in manpages or docs
+17:09  knittl: but 0 means everything is ok
+17:09  homa_rano: I couldn't find the error codes inthe man pages, no other docs found
+17:09  homa_rano: 0 and I are cool
+17:09  knittl: 1 can mean error or anything else
+17:10  knittl: static int show_merge_base(struct commit **rev, int rev_nr, int show_all) { …
+17:10  knittl: if(!result) return 1;
+17:11  knittl: i think that's your code ;)
+17:11  homa_rano: I just don't want to skim the git source for every command I'm using
+17:11  homa_rano: especially across 2 years of versions
+17:11  knittl: merge-base returns either 0 or 1
+17:12  knittl: 1 = no merge base found
+17:12  homa_rano: I figured that out eventually
+17:12  homa_rano: for my usage I don't care if it didn't find anything
+17:12  homa_rano: I'm just comparing the result to check for ancestry
+17:13  homa_rano: but the meta-question is which other commands will semi-fail with 1 in the future
+17:16  knittl: which is kind of an error
+17:16  knittl: (sorry, ssh hang)
+17:16  homa_rano: yeah, I can see why merge-base use of 1 is a semi-error
+17:16  homa_rano: as it doesn't produce any output
+17:17  homa_rano: some docs would be nice...
+17:17  homa_rano: but now the list is up to commit, status, merge-base, and diff
+17:17  homa_rano: use of 1s that I don't care about
+17:19  knittl: hm. maybe 1 is not an 'error' in case of git, but something you can use to chain commands together
+17:19  knittl: better ask the git devs directly
+17:20  homa_rano: #git is unhelpful
+17:20  homa_rano: maybe time to whine on the ml
+17:21  knittl: try git-dev(el)
+17:21 --- waschtl is now known as waschtl|gone
+17:23  homa_rano: I guess under the 'chainable' definition of 1, I do want to continue to run things afterwards so I do want chainable
+17:23 --- Meths_ is now known as Meths
+17:23  knittl: chainable means to use && or || in shells
+17:23  homa_rano: yes
+17:24  knittl: there's also $? and ;
+17:24  homa_rano: but if the use case they have envisioned is ||ing a bunch of git commands together
+17:24  homa_rano: then only an error>1 will abort out of the whole thing
+17:27  knittl: ; executes all commands. $? is used to access exit code
+17:30  homa_rano: yes I know
+17:30  knittl: ok
+18:05  usernkey: I'm using mercurial 1.7.2 and the script that the gui used to test the problem with NFS but I don't see any error of abandoned transaction in my case.
+18:06  usernkey: guy
+18:06  Kebianizao|work: thanks *, bye
+18:10  usernkey: I saw that nobody took his patch.  
+18:11  usernkey: so I would like undestand if it is e realy problem of just a fake. 
+18:12  usernkey: or just a problem of  that  NFS 
+18:12  marmoute: usernkey: I don't understand what you are trying to tell us.
+18:15  usernkey: I'm asking if I should be worried for my repo on nfs if I switch to 1.7.2
+18:16  usernkey: :)
+18:18  mpm: The issue is not specific to any Mercurial version.
+18:21 --- Meths_ is now known as Meths
+18:30  matthawley: hey everyone
+18:31  matthawley: I have a Convert question - I have a customer whom I'm helping bring over their SVN repo to Hg, but they have both a /branches and /releases folder that operate as branches
+18:31  matthawley: is there any way that the convert extension can handle both of these?
+18:32  Kowalczyk: hi.. im having a questio/7
+18:32  Kowalczyk: sorry..
+18:32  Kowalczyk: hehe. I figured it out
+18:41  pmezard: matthawley: not with a configuration option but it is easy to hack if you look at the code
+18:42  matthawley: pmezard, yah I figured it'd be easy w/ code, just trying to avoid that (technically I'm not supposed to look at the hg src due to my employer)
+18:42  pmezard: interesting
+18:43  __kW: Hello! Is it possible to retrospectively give a given branch a name?
+18:43  pmezard: no
+18:44  matthawley: pmezard, I will have to do a multi-step conversion, so wondering if it's possible to say svn.branches=foo, and then do a hg->hg convert specifying /branches/a => branchname=a
+18:46  pmezard: matthawley: it might be possible to run convert svn => hg several times with different branches/ dir
+18:47  pmezard: in theory it will just pick the new heads and add them to the existing repo
+18:47  pmezard: but i never tried it
+18:48  matthawley: pmezard I can give that a try, I also had a request that mid /branches/a that from rev 100-120 be branchA but 121-140 be branchB, so that gives an idea of the complexity of their structure
+18:49  matthawley: pmezard thanks for the tip, I'll see what can be done
+18:53 --- lorendavie is now known as lorendavie|away
+18:55 --- lorendavie|away is now known as lorendavie
+19:17  bkad: i'm trying to figure out the mercurial equivalent to 'git diff HEAD^'
+19:18  bkad: i thought hg had support for git style references to commit ancestors, but i cant find the reference page for it
+19:18  danchr: bkad: what does 'git diff HEAD^' do?
+19:20  bkad: it gives the diff between HEAD and the commit previous to HEAD
+19:20  danchr: hg diff -c tip
+19:21  bkad: so if I wanted something wacky like 'git diff HEAD~5 HEAD^^'
+19:22  bkad: is there an easy way to reference ancestors of tip?
+19:22  danchr: you can use revets for most of these things
+19:22  danchr: if you like the Git syntax, you can enable the parentrevspec extension
+19:23  bkad: what is a revet?
+19:23  danchr: !revset
+19:23  danchr: !revsets
+19:23  hgbot: "revsets" could be http://selenic.com/hg/help/revsets
+19:24  bkad: cool, thanks danchr
+19:41  zztr: can a bundle (created using hg bundle -a) effectively replace a mercurial repository?
+19:42 * muggs notices an uptick of git users in #mercurial in recent weeks
+19:43  zztr: I have tried moving around bundles and they seem to clone fine, but I just tried tarring up a .hg directory and it's significantly bigger which makes me wonder if mercurial is just awesome of if it's leaving something out because bundles are intended for unbundling or pulling from instead of starting from
+19:43  zztr: s/of if it's/or if it's/
+19:44  muggs: hmm, I would expect a tar of .hg to be similar in size to a bundle from the root changeset
+19:45  zztr: well, tar c .hg | bzip2 -cz1 | wc -c  gives  282531
+19:45  zztr: while for the hg bundle it's 153220
+19:45  muggs: what if you tar just .hg/store ?
+19:45  zztr: the tar is compressed with bzip2 at --best
+19:46  zztr: oh wait sorry
+19:46  zztr: tar c .hg | bzip2 -cz --best | wc -c  gives  278440
+19:46  ronny: bundle is allways smaller than .hg
+19:46  ronny: bundle is only deltas + bzip2 --best
+19:47  ronny: the store has extra data to retain O(1) retrival
+19:47  Dynetrekk: is the hg-git extension recommendable?
+19:47  zztr: ronny, thanks that answers it
+19:47  muggs: Dynetrekk: it's the best available for working with git repos
+19:48  danchr: doesn't scale all that well to very large repositories, in my experience, but other than that it works fine
+19:48  Dynetrekk: muggs:  ok, will hve a look
+19:48  ronny: Dynetrekk: it works pretty well, just be aware that git submodules are not supported atm
+19:48  Dynetrekk: ronny:  I don't know git :)
+19:48  Dynetrekk: ronny:  it's fora small project
+19:48  zztr: what is the standard way to pass around the whole repository as a single file? just tar?
+19:49  ronny: zztr: bundle
+19:49  zztr: ronny, oh so the extra data isn't necessary for reconstitution
+19:49  zztr: spifftastic. thanks
+19:49  muggs: a bundle is an effective backup of all metadata
+19:50  homa_rano: the bundle format doesn't have snapshots, and bzips the entire thing together
+19:50  homa_rano: I would expect it to be reasonably smaller than .hg tar'd
+19:51  homa_rano: the .hg format is optimized for speed of reading, bundle for small size
+19:52  zztr: what's a snapshot?
+19:53  muggs: when a delta chain for assembling a file revision is larger than the file itself, hg stores the file contents as a shortcut
+19:53  ronny: zztr: the normal hg on disk data store contains various full file copies (instead of deltas)
+19:53  ronny: zztr: its a tradeoff - disk-space for O(1) retrival of files
+19:54  ronny: bundle is the exact opposite
+19:54  zztr: good to know
+20:18 --- bmp_ is now known as bmp
+20:19  belak: How can I run a mercurial server with multiple repositories off of my own box?
+20:20  mpm: hg serve --web-conf
+20:21  belak: Ah, nice.
+20:21  mpm: Or: apache + hgweb.cgi/wsgi
+20:21  belak: Is it safe to run hg serve as root, or should there be another user?
+20:22  belak: What would you recommend? Apache or hg serve?
+20:22  mpm: If you want to allow push, you'll need a web server with proper authentication and SSL support.
+20:22  martinknyc: belak, You might want to try RhodeCode, for the auth+ssl
+20:23  belak: Can I run it with lighttpd?
+20:23  mpm: The official Mercurial repo uses http for pull/browse and ssh for push.
+20:24  mpm: Any webserver that supports CGI will do.
+20:24  belak: Wait, the official one? hg serve?
+20:24  ronny: belak: official as in mercurials own repo
+20:24  mpm: http://selenic.com/hg <- that repo.
+20:24  belak: How do they do it>
+20:24  belak: ?
+20:25  mpm: That's apache + hgweb.
+--- Log closed Tue Dec 07 21:50:41 2010
+--- Log opened Tue Dec 07 21:51:07 2010
+21:51 --- Users 208 nicks [0 ops, 0 halfops, 0 voices, 208 normal]
+21:51  inhere: bah! no luck... still thinks they are only 93% similar even with the extensions disabled
+21:51  muggs: it's probably too late at that point, if keywords are expanded
+21:52  inhere: but even if keywords are expanded would the file on the tip not be the same as the working directory?
+21:52  inhere: the keywords no longer exist after they have been expanded...
+21:53  inhere: suppose I'll just have to move each file manually...
+21:53 --- Channel #mercurial was synced in 174 seconds
+21:54  inhere: suppose I could write a batch file...
+21:54 * inhere procrastinates for a little longer
+22:07  danchr: pmezard: ping?
+22:19 --- Omnifarious is now known as Omni|AFK
+23:07  matthawley: I'm working with hg convert and --branchmap, knowing that this doesn't support whitespace in the names...
+23:07  matthawley: how do I get around the fact that my svn branches have a whitespace character
+23:07  matthawley: for example, I want to convert "release 1.2" to "1.2"
+23:09  matthawley: I'd be OK with a post-process history editing scenario
+23:25  matthawley: nevermind, i figured I can manually edit the branchcache file to remove the whitespace and convert again doing the branchmap
+23:28  Ry4an: At what point does "connections" start to level off?  I've just started bitcoind, and it's fun watching it climb.
+23:28  Ry4an: (bah, wrong channel)
+23:29  DanC: I've set up several hg repositories in our shop; I'd like to explain to a colleague why not just one big repository, and I'd like to do it using a pointer to some mature piece of writing. suggestions?
+23:29  DanC: I'm kinda surprised that this doesn't seem to be treated in http://hgbook.red-bean.com/read/migrating-to-mercurial.html
+23:29  DanC: nor http://hgbook.red-bean.com/read/ at all
+23:33  Ry4an: DanC: it's not terribly convincing, but here's something: http://stackoverflow.com/questions/2567430/mercurial-setup-one-central-repo-or-several
+23:33  hgbot: <http://ln-s.net/8CNt> (at stackoverflow.com)
+23:35  DanC: hmm... I failed to find anything at stack overflow when I looked
+23:37  DanC: thanks; that's pretty much what I was after
+23:48  bracki: How do I easily move changes to a branch?
+23:48  bracki: Or rather the last x changes?
+23:55  Ry4an: Changes never leave the branch on which you created them.  You can "merge" them into another branch, but not "move".
+23:58  bracki: How would I do that?
+23:59  Ry4an: hg update branchyouwantthemon ; hg merge branchyouwantthemfrom ; hg commit   # but that's hard-ish to undo, so make sure you understanding merging before you do it.
+23:59  Ry4an: give this a read if you have a few mins
+23:59  Ry4an: !branching
+23:59  hgbot: "branching" could be http://stevelosh.com/blog/entry/2009/8/30/a-guide-to-branching-in-mercurial/
+--- Log closed Wed Dec 08 00:00:07 2010

@@ -1,0 +1,105 @@
+--- Log opened Wed Dec 08 00:00:07 2010
+--- Day changed Wed Dec 08 2010
+00:00  bracki: I already read that but I couldnt find a solution for my problem
+00:00  Ry4an: so which of the four types of branches on that page are you using?
+00:00  bracki: hg branch new-feature-branch
+00:01  bracki: But I already have changes I want to "move" their.
+00:01  bracki: there
+00:01  bracki: So I thought I'd just branch and then "up -r" in the other one
+00:02  Ry4an: okay, so just so you completely understand "new-feature-branch" will never go away.  You'll be able to hide it from casual lists some say, but is you're picking named branches they become a permanent part of your repo.  Cool?
+00:03  bracki: But I can close the branch once I'm done right?
+00:03  bracki: I've got no problem with branch names in my metadata
+00:04  Ry4an: sounds good.
+00:05  Ry4an: if you made commits in the 'default' branch that want in 'new-feature-branch' you can merge them into new-feature-branch and then continue work from there, but the commits in 'default' will stay there.
+00:05  bracki: hm
+00:06  bracki: its the other way round.
+00:06  bracki: I made commits in default that shouldnt be there.
+00:06  bracki: Can't I transplant them and then delete them?
+00:08  Ry4an: something like that.  though if you've already pushed them anywhere they'll just come back to you still on default when next you pull
+00:08  bracki: yeah thats clear
+00:10  Ry4an: then you can probably just do: hg export --rev first:last > ../whoops.patch ; cd .. ; hg clone -r rightbeforefirst with without ; cd without ; hg import ../whoops.patch
+00:11  Ry4an: essentially export the patches to a file, create a new repo using 'clone -r' that excludes the patches you don't want, and then import the patches on the branch you want.
+00:11 --- bos31337 is now known as bos
+00:11  Ry4an: mq, strip, and some other extensions provide other ways to do that, but it's largely all the same 
+00:16  kiilerix: Ry4an: FYI: hgtester shows lot of failure on stable - it seems like "all" svn related tests times out
+00:18  danchr: anyone who runs the test suite on Windows present?
+00:19  Ry4an: Kiilerix: pmezard and I were working on that yesterday.  
+00:19  Ry4an: They pass when run from the console but fail when run with output redirected back through the push.
+00:19  kiilerix: danchr: apparently: http://hg.intevation.org/mercurial/pmezard/crew-w32.mq/
+00:19  kiilerix: Ry4an: ok, thanks for investigating
+00:20  kiilerix: sounds strange
+00:21  danchr: kiilerix: I've been trying to bug him, but unsuccessfully so far
+00:22  Ry4an: Kiilerix: yeah, I'm swamped now unfortunately but it should be something I can bisect back to whatever change stopped it working.
+00:22  Ry4an: Kiilerix: you still get results for everything not-svn, right?
+00:22  kiilerix: yes
+00:22  bracki: Ry4an: hm put hg import mangles all the commits into just one
+00:23  kiilerix: bracki: http://mercurial.selenic.com/wiki/EditingHistory
+00:24  bracki: kiilerix: saw that, looks complicated
+00:25  Ry4an: Bracki: when you do the export you can do '-o "patch-%r.patch" to get each changeset in a separate file, which you can then import individually
+00:25  kiilerix: considering that it is _impossible_ to edit history in Mercurial it actually is quite simple ;-)
+00:27  bracki: Thing is I'm already git poisoned, and its too late in the evening to figure it out
+00:38  bracki: Ry4an: thanks that worked out nicely.
+00:39  Ry4an: Bracki: good deal.  For there record, were I you I'd've lived with those changesets on 'default'. :)  I'm big into not rewriting history, but I recognize not everyone feels that away.
+00:39  Ry4an: s/there/the/
+00:40  bracki: Thing is I made some changes to a Django project which I deploy with fabric and these changes break the automated deployment and upgrade packages etc.
+00:40  bracki: So I'd rather have the default branch clean and production ready.
+00:41  bracki: That's also why I said "git poisoned". I have used it alot lately on other projects and it just has become common for me to rebase and move changes around.
+00:46  Mkop: bracki: if you change stuff and then change it back the bad history breaks the automatic deployment?
+00:52  bracki: no
+00:55  Mkop: so why do you need to clean the history?
+00:58  haypo: hi. i like rebase but i don't want to use meld to resolve conflicts. how can I configure mercurial to not open meld with 3 documents (it's too much for my brain), but insert conflits in files like svn or git do by default?
+01:02  kiilerix: see http://mercurial.selenic.com/wiki/MergeProgram and http://mercurial.selenic.com/wiki/MergeToolConfiguration#Choosing_internal_merge_with_conflict_markers
+01:02  hgbot: <http://ln-s.net/8CQD> (at mercurial.selenic.com)
+01:03  kiilerix: and finally: http://www.selenic.com/hg/help/merge-tools
+01:26  haypo: kiilerix: i already read these pages, but it's not easy to understand how to configure it. i tried [merge-patterns] ** = internal:merge
+01:26  haypo: but it looks like [ui] merge = internal:merge is better
+01:26  kiilerix: there is a lot of flexibility and there is no obvious "better"
+01:27  kiilerix: ui.merge is however a good candidate if you know what you want
+01:28  haypo: kiilerix: i want the <<< local === <<< other things in the file, no GUI tool
+01:28  haypo: kiilerix: should i configure merge-patterns.*, ui.merge, or both?
+01:29  kiilerix: http://www.selenic.com/hg/help/merge-tools lists how How Mercurial decides which merge program to use 
+01:29  haypo: anyway, for the first time, i fixed conflicts after a hg pull --rebase without loosing anything :)
+01:29  kiilerix: so one of them will work
+01:29  kiilerix: either one of them
+01:29  kiilerix: unless something overrules it
+01:30  haypo: i prefer rebase than merge to keep a linear and simple historic
+01:30  haypo: kiilerix: your last link says that merge-patterns.* is checked before ui.merge
+01:31  kiilerix: right
+01:31  kiilerix: but if ui.merge works for you then go for that ;-)
+01:31  haypo: yep
+01:32  haypo: oh, another question: what is the equivalent command of "git add -i"? interactive text interface to only commit some changes in a file
+01:33  kiilerix: you can use an extension
+01:33  kiilerix: I don't remember which 
+01:33  haypo: record?
+01:33  kiilerix: yes
+--- Log closed Wed Dec 08 01:48:25 2010
+--- Log opened Wed Dec 08 02:00:06 2010
+02:00 --- Users 195 nicks [0 ops, 0 halfops, 0 voices, 195 normal]
+02:02 --- Channel #mercurial was synced in 173 seconds
+02:04  tao_: what's the best way to restrict access to my hgweb?
+02:05  kiilerix: use the web servers functionality for that
+02:06  tao_: ah ok, I guess I'll make an .htaccess file
+--- Log closed Wed Dec 08 02:26:18 2010
+--- Log opened Wed Dec 08 02:26:46 2010
+02:26 --- Users 194 nicks [0 ops, 0 halfops, 0 voices, 194 normal]
+02:29 --- Channel #mercurial was synced in 174 seconds
+--- Log closed Wed Dec 08 02:55:00 2010
+--- Log opened Wed Dec 08 02:55:24 2010
+02:55 --- Users 192 nicks [0 ops, 0 halfops, 0 voices, 192 normal]
+02:58 --- Channel #mercurial was synced in 173 seconds
+--- Log closed Wed Dec 08 08:55:23 2010
+--- Log opened Wed Dec 08 09:05:50 2010
+09:05 --- Users 186 nicks [0 ops, 0 halfops, 0 voices, 186 normal]
+09:08 --- Channel #mercurial was synced in 173 seconds
+09:10  hstuart: mg: you're up early :)
+09:12  klaus9: I want to abandon an uncommitted merge.  How can I do that?
+09:14  TheSheep: hg update -C
+09:14  TheSheep: will abandon all uncommited changes
+09:14  klaus9: TheSheep: Thanks
+09:21  klaus9: Whenever I try to commit I get a message saying that permission is denied on one of the files.  How can I fix that?
+09:22  mg: hstuart: yeah, well, ..., I'm just around early
+09:37  hstuart: mg: all well again?
+09:37  hstuart: TheSheep: hg up -C .
+09:37  hstuart: that lil' period is teh important
+09:41  TheSheep: hstuart: what is one little period compared to infinity?
+09:41  hstuart: TheSheep: a happy user

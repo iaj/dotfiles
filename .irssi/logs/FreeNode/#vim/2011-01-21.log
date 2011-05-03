@@ -1,0 +1,412 @@
+--- Log opened Fri Jan 21 19:14:08 2011
+19:14 --- Users 616 nicks [0 ops, 0 halfops, 0 voices, 616 normal]
+19:15 --- Channel #vim was synced in 88 seconds
+19:16  dmsuperman: Is there a placeholder/variable for the current active filename?
+19:16  dmsuperman: :!svn add $CURRENT
+19:20  Combatjuan: dmsuperman: I think that "%" can be used that way, but I'mhaving trouble finding the documentation for it.
+19:20  rindolf: dmsuperman: also see C-R ; %
+19:21  dmsuperman: Ah I think I got it
+19:21  dmsuperman: %:h or %:t
+19:22  dmsuperman: Or rather %:h/%:t
+19:22  dmsuperman: thanks
+19:31  deryni: There's a vcscommand vim plugin you might want to look into for that sort of thing (I think that's the current one).
+19:33  pattern: i'm trying to get terminal vim to recognize various special key combinations, like CONTROL-F6
+19:33  pattern: and following the instructions here:  http://vim.wikia.com/wiki/Mapping_fast_keycodes_in_terminal_Vim
+19:34  pattern: they give a MapFastKeycode function, which is supposed to be called like, for example:    call <SID>MapFastKeycode('<C-F6>' "\e[17;5~")
+19:34  pattern: but when i call that from my .vimrc i get an error:   E116: Invalid arguments for function <SNR>41_MapFastKeycode
+19:35  paradigm: pattern: another option you could try is hitting ctrl-v in insert mode, then your key combination
+19:35  pattern: i've tried taking out the < and > from the call, and then vim accepts it.. but hitting C-F6 just inserts -F6
+19:35  pattern: paradigm: yeah, that works.. but i'm trying to map the keys, not just insert them
+19:35  dmsuperman: Yeah deryni that was just an example
+19:36  paradigm: pattern: maybe you misunderstood me.  :map [hit ctrl-v, ctrl-F5] whatever-you-want-the-map-to-do
+19:36  pattern: ah
+19:36  paradigm: then when you hit ctrl-F5, it'll do it
+19:36  paradigm: ctrl-v spits out whatever vim sees when you hit those keys
+19:36  pattern: right
+19:37  pattern: the problem then is that all those special keys start with ^[ whch is escape
+19:37  pattern: so then hitting escape by itself pauses
+19:37  paradigm: ahh
+19:37  pattern: and this MapFastKeycode function is supposed to be a way around that
+19:37  pattern: (don't really understand why.. but that's the claim)
+19:38  paradigm: you can tell your terminal not to wait for the rest of the escape sequence
+19:38  paradigm: forgot how I did that, gimme a few min
+19:38  deryni: :help 'timeout
+19:38  paradigm: that was it
+19:39  paradigm: set timeout ttimeoutlen=10 timeoutlen=1000
+19:39  paradigm: I've got that in my .vimrc
+19:39  paradigm: read what deryni linked for the details
+19:40  pankajm: i have ..... for spaces in vim , how do i unset this ... i think its should be in vimrc ??
+19:40  paradigm: pankajm: set nonlist
+19:40  paradigm: try that
+19:41  pankajm: paradigm: thr is no "set nonlist" in vimrc..
+19:41  Combatjuan: pankajm, paradigm: I think "nolist" versus "list"
+19:41  paradigm: pankajm: you may have a "set list" in there with "listchars" telling it to use .'s for spaces
+19:41  paradigm: pankajm: setting "set nolist" will turn that off, if that's the case
+19:42 --- aspaulding is now known as jfelchner
+19:45  pankajm: paradigm: thanks it worked
+19:45  paradigm: pankajm: happy to help
+19:45  pankajm: paradigm: :)
+19:47  Scala_: Do you think it would be possible to write a plugin that would do two things: split the window into two buffers, one for a CSS and the other for an HTML, and when the cursor is hovering over a tag in the HTML buffer, the split buffer next to it will automatically show relevant css blocks
+19:50  Combatjuan: Scala_: That doesn't sound so bad.  Although by "cursor", I hope you mean the text cursor and not the mouse cursor.  There is a CursorMoved autocmd, but I don't think there are autocmds for mouse movement.
+19:50  Scala_: Combatjuan: Of course the text cursor
+19:51  Scala_: The only problem I could picture would be manipulating the CSS buffer, and I feel like vimscript isn't powerful enough to be able to detect which CSS applies to which DOM element
+19:51  Combatjuan: Scala_: Yeah, that is the tricky part.  I was sort of assuming you had a ctags-like utility that would do that for you.
+19:51  deryni: Yeah, you'd want an external tool/library for that.
+19:52  Scala_: I was thinking of just throwing it over to some python module like beautiful soup or some other good xml parsing lib
+19:52  Scala_: Though adding dependencies sucks :/
+19:55  Scala_: So assuming I could get that part working, do you think there would be any major issues getting the CSS buffer to only show relevant sections?
+19:55  Scala_: and make it editable
+20:05  pattern: paradigm & deryni: thanks!
+20:11 --- aspaulding is now known as jfelchner
+20:11  somian[0]: Scala_, that's a really interesting proposal. I hope you have success. I believe that integrating an external library, like dernyi mentioned, would be important to get anywhere with it.
+20:12  somian[0]: Since styles "cascade" the task is far more complex than might first appear.
+20:13  Scala_: somian[0]: Yeah
+20:13  lepine: Couldn't you delegate that to an actual browser lib?
+20:13  lepine: (I don't know the extent to which beautiful soup can do stuff)
+20:13  Scala_: lepine: I don't either, I"m sure there's a library for it though
+20:14  somian[0]: Firefox / Mozilla addon projects are the only things that i recall being ready to do the job of finding declarations in a stylesheet that relate to chunks of HTML in the web page
+20:14  Scala_: Worst case, I can load the html up into a DOM simulation, and run the CSS attributes against it to see if they apply.  From there you can build a tree
+20:14  lepine: but imagine tying into webkit or ff, firebug already does exactly what you want
+20:15  Scala_: Is it possible to build a tree and have it persist in memory
+20:15  somian[0]: There's one FFx addon that uhh, (struggling to describe it) ...shows a list of all the styles that were loaded when the web document was loaded, which *aren't* being used in the rendering of said document.
+20:15  lepine: ^ ++
+20:16  lepine: That might be google page speed
+20:16  somian[0]: "Dust Me Selectors 2.2" is it
+20:17  Scala_: The problem is how often you would need to test this
+20:17  lepine: whoa, that looks kind of old though
+20:17  somian[0]: https://addons.mozilla.org/en-US/firefox/addon/dust-me-selectors/
+20:17  lepine: oh, wait, nm
+20:18  somian[0]: src files are in http://www.sitepoint.com/dustmeselectors/dustmeselectors-2.2.zip
+20:19  somian[0]: When I last played around with FFx addon code, I think my beard was far less gray and I didn't have arthritis yet ;-/
+20:19  Scala_: hey check this out http://blog.johang.se/2008/08/parse-html-using-css-selectors.html
+20:19  somian[0]: I recall almost nothing about the structure or key libraries or components that FFx addons entail
+20:19  Scala_: You could probably write the whole plugin with this
+20:19  somian[0]: I'll check that out right now
+20:20  Zevv: Hi, does there exist a default alternative key for deleting a single line, instead of 'dd'
+20:20  Scala_: Zevv: D
+20:20  Zevv: that deletes to end of line, no ?
+20:20  Scala_: Zevv: Oh yaeh, you're right
+20:20  Scala_: dd is what you're supposed to use
+20:20  Zevv: I find that hitting the same key twiese is a bit slowish
+20:21  Zevv: I'll map something then, no problem. I was just wondering if there might be a default mapping, though.
+20:21  Zevv: s/twiese/twice/
+20:21  Zevv: now that I'
+20:22  Zevv: 'm here: what is the jump-to-end-of-visual-block
+20:22 * somian[0] reads "lxml is a Pythonic binding for the libxml2 and libxslt libraries" and feels relieved. These are not marginal, half-finished code that has support likely to disappear tomorrow; these are major projects ...a good sign
+20:22  peter_w: Zevv: what is the end of a block?
+20:23  Zevv: visual selection
+20:23  Silex: o
+20:23  Silex: but by default you're there
+20:23  somian[0]: Scala_, fyi, I am a perl geek and collaboration on a python-based project might not work with my strengths, otherwise I'd immediately ask for your e-mail addy so we could correspond off-channel
+20:23  Zevv: ah I found em
+20:23  Silex: o switches between beggining and end of visual selection
+20:23  Scala_: somian[0]: I'm up for writing in perl
+20:23  Zevv: `> and `< jumps to begining and end
+20:24  Zevv: Ah o, is handy, didn't know that one
+20:24  Scala_: somian[0]: I've used it only briefly, but I think I can pick it up quickly enough to write this
+20:24  somian[0]: There's definitely a Perl binding (CPAN extension module) for libxml2
+20:24  Zevv: Man, every time I visit #vim I learn something new
+20:24  Scala_: somian[0]: Send me an email @ agscala@gmail.com
+20:25  somian[0]: Ok, ack
+20:25  Scala_: If you're interested in working on this
+20:25  Scala_: :D
+20:26  Sample: does vim have a way of nagivating whitespace?
+20:26  tbranyen: hjlk
+20:27  Combatjuan: Sample: w, b, W, B
+20:27  Sample: great thanks
+20:27  Sample: wait ..
+20:27  Sample: Combatjuan: okay I suppose you're right =
+20:28  Combatjuan: Sample: If you had a more specific question, I might be able to give a better answer.
+20:29  Scala_: somian[0]: The only issue with perl is I don't think that vim typically is build with perl support
+20:29  Scala_: built*
+20:30  somian[0]: It is generally available on any Debian-based distro as s'th like "vim-perl" (the build with Perl integrated as a an embedded interpreter). In that case Python is also always (in the debian context) enabled
+20:32  somian[0]: On MS Win* it is also not difficult to get such a (g)Vim, in my experience; what can be a hitch is that a Perl interpreter DLL of the appropriate release ("5.10.1", "5.8.9" for ex) has to be installed to the local machine as well.
+20:35  somian[0]: .oO(confirmed, on Ubuntu for ex, the pkg provided in the repositories is named "vim-perl", Scala_)
+20:40 --- aspaulding is now known as jfelchner
+20:43 --- Silex is now known as silex
+20:46  jamessan: somian[0]: actually, vim-perl is just a transitional package.  all the packages other than vim-tiny and vim have the language bindings enabled
+20:47  jamessan: somian[0]: Ubuntu deviates from Debian and also enables the python bindings in the vim package
+20:48 --- mikeplus64 is now known as mikeplus32
+20:54  gf3: is there a way to set an unlimited tabpagemax?
+20:54  gf3: 0 doesn't seem to do anything
+21:04  chairabanta: hi, often I edit css in vim and I have my firefox window at near and often I have to switch to firefox window and then refresh I am asking myself if there is a way to after saving my file it refresh automatically firefox is it possible?
+21:04  rindolf: chairabanta: yes, you can use :autocmd
+21:04  rindolf: chairabanta: with some firefox command line magic.
+21:04  chairabanta: rindolf, rah lovely!
+21:05  rindolf: chairabanta: :-)
+21:05 < rindolf> chairabanta: I don't know how to get FF to refresh a page from the command line.
+21:05 < rindolf> But it should be possible.
+21:06  chairabanta: rindolf, you mean with the firefox binary or with some other tool?
+21:06  rindolf: chairabanta: with the firefox binary, yes.
+21:06  rindolf: I think you can send firefox some JS commands.
+21:06  chairabanta: JS?!
+21:07  chairabanta: oh you are right but how from the cmd?
+21:07  rindolf: chairabanta: well, using the firefox command.
+21:08  chairabanta: oh I thouht you spoke about bash cmd ok I will check if it possible
+21:08  rindolf: chairabanta: http://groups.google.com/group/mozilla.support.firefox/browse_thread/thread/ae210d24ef5899e1?pli=1 - hmm....
+21:08  rindolf: chairabanta: maybe you'll need to use Selenium.
+21:09  chairabanta: rindolf, ok I look at it thx for the help :)
+21:09 --- aspaulding is now known as jfelchner
+21:12 --- mikeplus64 is now known as mikeplus32
+21:31  Sample: instead of specifying how many lines to delete, can you specify "delete from here to line 26"
+21:31  Sample: I would presume it might use G
+21:32  Sample: dd26G comes to mind but that doesn't work as expected
+21:32  Combatjuan: Sample: You can use the command line:  ".,26d"
+21:33  Sample: Combatjuan: the command line you get to when you type : ?
+21:34  Zathrus: Sample: d26G
+21:34  Combatjuan: Sample: Yes.  Would have been nicer if I'd have typed:  ":.,26d"
+21:34  Sample: Zathrus: oh sweet, works like a charm
+21:34  Combatjuan: Zathrus: Neat.
+21:34  Zathrus: Sample: d is the command. It's then expecting a motion.
+21:35  Zathrus: dd is just a shortcut for "this line", as is yy, etc
+21:35  Sample: ah, I had it in my head that the 'parameters' of the command had to come before the command
+21:35  Sample: i.e. 26G (line 26, go to it)
+21:35  Combatjuan: I didn't realize that G took an optional count.
+21:36  Sample: but being that you can do things like d4W
+21:36  Sample: that makes perfect sense
+21:36  Sample: i was just hell bent on thinking "dd deletes lines"
+21:37  Zathrus: Combatjuan: there is no "gg" in vi, so if you wanted to go to the first line you did 0G or 1G
+21:37  Zathrus: or :0 :1 etc
+21:38  Zathrus: but the command line versions aren't so useful as a motion
+21:38  RusAlex: hi guys.
+21:39  RusAlex: why vim so freeze when im editing php with syntax highlight
+21:40  sleepynate: RusAlex: because the PHP syntax file is ridonculous
+21:40  peter_w: Zathrus: what makes you say that vi didn't have gg?
+21:40  RusAlex: anyone have a good php syntax file ?
+21:40  Zathrus: peter_w: the fact that I've used vi(m) for 20 years
+21:40  Zathrus: peter_w: in original vi "g" was not mapped to anything.
+21:41  sleepynate: RusAlex: the other problem is that you're probably using a PHP file that's more than hundreds of lines longs
+21:41  peter_w: then the vim help is incomplete :)
+21:41  Zathrus: peter_w: yeah, that should be marked as {not in vi}
+21:41  RusAlex: sleepynate: can you give me advice for highlight php file ?
+21:42  sleepynate: RusAlex: you can try removing some of the special syntax checks like checking each string for SQL statements and checking php files for inline-HTML highlighting
+21:43 --- JusticeFries_ is now known as JusticeFries
+21:45  Zathrus: peter_w: and just to confirm I'm not insane, I just tested it on real vi. It happily beeps at me.
+21:47  peter_w: Zathrus: I can't imagine anyone actually using real vi, I base all my vi knowledge on the vim help
+21:47  peter_w: Zathrus: which doesn't work too well if it's incomplete :)
+21:48  Zathrus: peter_w: if you ever use a real Unix then you're likely to only have vi available
+21:50  Sample: newb question, if I'm on the letter L of something like "nonlogged" and I want to put a space between "non logged" is there an insert that doesn't stay in insert mode? something more efficient than "i<space>ESC"
+21:50  Zathrus: no.
+21:50  Sample: k
+22:01  Sample: Zathrus: 20 years in vim has me thinking you're probably riddled with little efficient obscure techniques, you should devote like 10 minutes of your life to doing a screencast of you operating in VIM and giving a couple of your favorite tips =)
+22:02  Sample: it sucks to think you're really zipping along and then realize the keystroke count from habits you've employed could actually be cut in half =P
+22:03  Combatjuan: I wonder if this can be asked without starting world flame war III...  Is there any advantage to using "vi" instead of "vim"?  Is it used on platforms where vim is too expensive (in terms of cpu/memory)?
+22:03  Zathrus: sadly, I've spent most of the past year in Eclipse :(
+22:03  sleepynate: oh! Sample. or anyone. anyone know a linux app that will make my keystrokes show up at the bottom like on screecasts?
+22:04  Zathrus: Combatjuan: depends on the system... in most Linux's "vi" runs a tiny build of vim, while "vim" runs a feature-full one; the reduced vim is safer for root
+22:04  Sample: sleepynate: no but that's an awesome idea
+22:04  Sample: Zathrus: no matter, I'm doing all my VIM through eclipse now as well
+22:04  Zathrus: Combatjuan: on Unix systems (AIX, HP-UX, Solaris) they still ship AT&T vi, simply because That's The Way It's Done.
+22:04  Sample: via Vrapper
+22:05  Zathrus: Sample: vrapper? I'll have to look into it.
+22:05  Sample: wow sheesh yah
+22:05  Sample: it's amazing, I don't know how you're not already using it =P
+22:05  Araxia_: yeah, if you're using eclipse, vrapper is nice.
+22:05  Combatjuan: Zathrus: "When I was your age we didn't have the letter 'm', so we used vi.  And we liked it!"
+22:05  Zathrus: Combatjuan: and there's some systems that are truely memory constrained (like busybox), so a very basic vi is the best/only solution
+22:06  Combatjuan: Zathrus: Fair enough.  Thanks for the info.
+22:06  Sample: the only limitation (unless I'm just a noob) is that I don't think wrapper can do vim visual mode Inserts
+22:06  Sample: to like, comment out a bunch of rows
+22:06  Araxia_: netbeans has jVi, which is better imho, but you may not have the option to switch.
+22:06  Zathrus: no, really don't have the option
+22:06  Sample: but eclipse luckily can do that already via Ctrl+/
+22:07  Tuju: how can i search 0xc3 with vim?
+22:07  Sample: sleepynate: do you do vim screencasts? is that why you're asking?
+22:07  Zathrus: Tuju: /\xc3
+22:08  Tuju: Zathrus: mmmm...i think i tried that already, i guess it's not in the file then.
+22:08  sleepynate: Sample: no, it's for a class i'm teaching
+22:09  Sample: ah gotcha
+22:09  Tuju: Zathrus: well, V should be 0x56 but it doesn't find that either.
+22:09  Zathrus: Sample, Araxia_: hope vrapper will play nice with Galileo
+22:10  Combatjuan: Tuju: Zathrus:  I also am trying this.  And the docs clearly say that "\x" should work... but they aren't.  Maybe there is an option?  Maybe gvim on windows does weird things?
+22:10  Araxia_: afaik, they've been keeping it fairly up-to-date. i'm doing ruby now, not java, though. so no more eclipse/nebeans.
+22:11  Tuju: Combatjuan: thanks for confirming my doubt.
+22:11  Zathrus: Tuju: yeah, /\x20 isn't finding spaces...
+22:11  Zathrus: oops
+22:11  Sample: Zathrus: do you work in java?
+22:12  Zathrus: /\%c3
+22:12  Zathrus: Sample: unfortunately I do now
+22:12  lepine: is working Java in vim *realistic* ?
+22:13  Combatjuan: Tuju: I think rather "/\%xc3"
+22:13  Zathrus: grumble, I left off the x on that
+22:13  Araxia_: lepine: it's not pleasant, especially with a large codebase.
+22:13  Sample: lepine: i can't speak for java but I do PHP via Eclipse w/ a Vim rapper and it is completely
+22:14  Tuju: Combatjuan: yeah, i got that working too
+22:14  homekevin: Yeah, \x20 is for inside a collection.
+22:14  Combatjuan: Ah.  "\x" specifies any hex character.  Apparently I'm mostly illiterate.
+22:14  Tuju: with the /\%56 but still can't find the damn 0xc3
+22:14  Sample: wrapper*, not a VIM rapper... that would be unusual
+22:14  homekevin: Tuju: /\%x56
+22:14  Zathrus: that's my fault -- I searched :h pattern for "hex" and stopped at the first hit
+22:14  lepine: Sample: Is it the headless eclipse thing? or a vim editor in eclipsee?
+22:15  Tuju: homekevin: yes, i stand corrected. :)
+22:15  Araxia_: lepine: no, that's eclim. vrapper is a plugin that provides a small subset of vim keybindings.
+22:15  Sample: lepine: plugin called Vrapper, it's really amazing to have VIM movements in an environment like eclipse
+22:16  lepine: Ah, ok. So not really vim then.
+22:16  Sample: right
+22:16  Sample: eclim is coming along but I've heard it's pretty buggy thus far
+22:16  Araxia_: buggy isn't the biggest problem with eclim. it's getting it configured in such a way that it's useable. it really, really needs some well-considered default bindings.
+22:16  Sample: they should have called it .. vlipse eclim makes me think it involves emacs
+22:17  lepine: eh, right
+22:17  Zathrus: Araxia_: it also adversely impacts non-eclipse vim usage, at least the time I tried it
+22:18  Araxia_: Zathrus: maybe use a separate instance of vim dedicated to eclim?
+22:18  Zathrus: Araxia_: that's the only solution I could think of
+22:19  lepine: I'll stick to vim and refuse to do maladapted languages then :)
+22:19  Araxia_: heh. not a bad idea.
+22:20  Araxia_: i'm still fairly green ruby-wise, but vimming through ruby code (with the decent set of plugins available) is quite a pleasure.
+22:20 --- Sample is now known as cowmatic69
+22:22  geneg1: Without using plug-ins, what would be a nice, fast way to wrap the following 3 words in double-quotes, starting from normal mode.
+22:22  tlp: Is there an easy way to create an ASCII table in vim? Similar to the thing emacs spits out. The vimwiki script does one, but I'd like to do it outside of that.
+22:23  Araxia_: tlp: the easy way is to use a plugin that does it.
+22:23  tlp: yes
+22:23  tlp: but I don't know what that plugin would be :)
+22:23  veilig_abt: how do I make a split window bigger?  ie: adjust the divider?
+22:23  tlp: I found something called 'CharTab' that creates a character map. Not quite what I was looking for.
+22:23  Zathrus: vimgor: surround.vim
+22:23  vimgor: A plugin by tpope at http://github.com/tpope/vim-surround for deleting, changing, and adding surroundings
+22:23  homekevin: How about :!man ascii
+22:23  Combatjuan: tlp: Not sure what exactly emacs does, but I occassonally use the "align" plugin.
+22:23  Zathrus: tlp: that's what you want
+22:24  homekevin: Or :%!man ascii
+22:24  tlp: surround? I don't think it is. What I mean is something that will automagically line up | Columns |
+22:24  tlp: as they expand
+22:24  Combatjuan: veilig_abt: C-W + makes it taller.  C-W - Makes it shorter.  C-W > makes it wider.  C-W < Makes it narrower.  :h ctrl-w
+22:24  tlp: align might be it
+22:25  Combatjuan: veilig_abt: You can prefix the +/-/</> with numbers to change by more than 1 at a time.
+22:25  Zathrus: geneg1: i"<ESC>EEEa"<ESC>
+22:25  Zathrus: tlp: sorry, I crossed threads there
+22:25  Zathrus: vimgor: align.vim
+22:25  vimgor: Wish I knew.
+22:25  Zathrus: vimgor: align
+22:25  vimgor: There are some plugins used to align text in a buffer. Align.vim is the most popular, but I've heard around that godlygeek's Tabular is a much better alternative, ask me about 'Tabular' for more info.
+22:26  Zathrus: tlp: thus, the answer is tabular :)
+22:26  tlp: cool, I'll check that out. Thanks Zathrus / Combatjuan
+22:26  Combatjuan: tlp: My pleasure.
+22:26  geneg1: Zathrus: ok thanks, was looking for something a little quicker. I guess i"<ESC>3Ea" would do it too
+22:26  Zathrus: geneg1: yup
+22:27  geneg1: Zathrus: will probably just create a little mapping for it where the # can vary
+22:35  Tuju: thanks guys, i got my issue solved.
+22:39  veilig_abt: Combatjua: thanks!! got caught up into a nerf war
+22:40  Combatjuan: veilig_abt: Be sure to wear protective eyewear.  Those foam darts can be brutal.
+22:41  homekevin: I've always heard that it's not fun and games until someone loses an eye.
+22:42  homekevin: At least I think that's how it went.
+22:42  Araxia_: heh
+22:46  ralxz: hey guys. i have 1 word on each line in a txt file. is there any way to remove lines that have more than 8 characters?
+22:46  ralxz: with a search and replace
+22:47  peter_w: yes
+22:47  homekevin: But :g is easier
+22:47  mgedmin: look up :g
+22:48  Combatjuan: Really?  ":%s/\<\w\{8,}//"
+22:49  Combatjuan: I must just not have the magic :g/v touch.
+22:49  ralxz: Combatjuan, haha great, thanks
+22:49  homekevin: Combatjuan: That would only replace the word with an empty line, not remove the line
+22:49  ralxz: is :g more powerful or something? most of the vim examples i see use %s
+22:49  Combatjuan: ralxz: That might work.  Depends on what you mean by "word".
+22:50  homekevin: :g/.{8,}/d
+22:50  peter_w: no
+22:50  Combatjuan: ralxz: Ah.  I misunderstood the problem.  Indeed.  What homekevin said.
+22:50  peter_w: \{ or \v
+22:50  homekevin: You might want a more specific pattern, though.
+22:50  homekevin: Oh, right.
+22:50  Combatjuan: Although you probably don't want ".".  You probably want "\w"
+22:51  homekevin: :g/\v.{8,}/d
+22:51  peter_w: he said 8 characters, so . would be good
+22:53  ralxz: thanks everyone :)
+22:54  Combatjuan: homekevin: Why "\v." instead of "."?  Isn't magic the default?
+22:54  peter_w: Combatjuan: very magic for using {} instead of \{}
+22:55  Combatjuan: peter_w: Ah.  Thanks.
+22:55  Combatjuan: Do all the cool vimmers use very magic?
+22:55  mgedmin: pay two characters to save, uh, one :)
+22:55  homekevin: I don't like magic. It should be called "half magic"
+22:55 * mgedmin doesn't use \v, but /me doesn't know if he counts as a cool vimmer
+22:56  homekevin: Why memorize the "magic" characters when you can just use \v?
+22:56  spiiph: You still have to remember what to escape, if you want to look for the actual characters
+22:57  Combatjuan: Well I know I'm not a cool vimmer.  But I do know that vim regexes have ruined me for perl/python/posix ones.  I always escape the wrong things when I'm not in vim.
+22:57  homekevin: Yeah, but it's basically all punctuation
+22:58  spiiph: I know Vim's better by far, but can usually get around posix ones pretty well too, since those were the first that I learned.
+22:59  Combatjuan: spiiph: You, by the way, are a cool vimmer.  I think you've been present and active on this channel every time I've been on it in the last 2 years.
+23:01  spiiph: That might say more about me getting things done at work. :/
+23:04  chairabanta: I have a def foo ... end block in ruby and I would like to delete all its content how do I do?
+23:07  homekevin: chairabanta: I would visually select it and press d
+23:08  chairabanta: homekevin, ah ok I thought surround plugin can do it or something else
+23:08  homekevin: Maybe V/end<CR>kd
+23:08  homekevin: Maybe. I don't use it.
+23:13  spiiph: % should work
+23:13  spiiph: Either on the def or on the end
+23:13  spiiph: At least if you use matchit.vim
+23:25  sleepynate: spiiph: chairabanta: doesn't da{ still work?
+23:26  chairabanta: sleepynate, it does nothing for me da{
+23:26  sleepynate: interesting
+23:26  sleepynate: % works on the "end" but not on the def
+23:27  sleepynate: i believe the only solution here is to rewrite it in python.
+23:30  sleepynate: chairabanta: aha!
+23:30  sleepynate: chairabanta: put the cursor on def and do: d}
+23:31  sleepynate: which is similar to da{, which removes "the block" but leaves the definition
+23:31  sleepynate: d} goes "til the end of this block"
+23:32  spiiph: } goes to the next blank line.
+23:32  sleepynate: but apparently ruby.vim has to define blocks weird
+23:32  spiiph: Why is that weird?
+23:32  sleepynate: o rearry
+23:33  sleepynate: shit i'm still thinking python
+23:33  chairabanta: I think spiiph is right it deletes more than the block
+23:34  spiiph: No, this has nothing to do with blocks.
+23:34  sleepynate: yea, i'm fucked up
+23:34  sleepynate: well, not inerbriated... just wrong
+23:34  chairabanta: I have read in the doc daB but in ruby it doesn't work :(
+23:35  spiiph: And you really don't have to think I'm right, you can just do :h } and find out.
+23:35  sleepynate: http://www.expertulpc.com/tech/select-blocks-of-ruby-code-in-vim-with-rubyblock-28127275 <--- apparently this is enough of an issue that there's a plugin
+23:35  spiiph: No, because blocks are not defined for all languages.
+23:35  spiiph: Because that would be impossible.
+23:35  chairabanta: spiiph, erf
+23:36  sleepynate: i'm going back to "write it in python"
+23:37  sleepynate: i can't be inept at things i'm pretending don't exist like all of the ruby language.
+23:41  Geralt: Hi, how can I diff a buffer against its file, i.e. get a diff of the changes I made?
+23:42  mgedmin: Geralt, yes, :help even has an example somewhere
+23:42  mgedmin: :h DiffOrig
+23:42  Geralt: mgedmin: thank you :)
+23:42  mgedmin: so, hey, if I do something stupid like :py while True: pass; my vim hangs and cannot be interrupted with ctrl-c
+23:43  homekevin: Cool.
+23:43  Combatjuan: mgedmin: I second this problem.
+23:43  sleepynate: mgedmin: you can't "stop" it?
+23:43  mgedmin: not with ctrl-c
+23:43  mgedmin: not with killall vim
+23:43  mgedmin: I need to killall -9 vim
+23:44  sleepynate: mgedmin: "stop" is ctrl-z
+23:44  mgedmin: nope
+23:44  homekevin: I wonder what happens to the signal mask and KeyboardInterrupt
+23:44  mgedmin: I mean, no reaction to ctrl-z
+23:44  sleepynate: well, what platform? i should check
+23:44  mgedmin: no reaction to ctrl-\
+23:44  mgedmin: ubuntu linux, in gnome-terminal
+23:45  sleepynate: huh.
+23:45  sleepynate: ctrl-z should work...
+23:45  WakiMiko: ctrl+z is background
+23:45  WakiMiko: nvm
+23:45  sleepynate: WakiMiko: you could use it to background
+23:45  cowmatic69: noob Q: what's the opposite of h
+23:45  Geralt: Would be cool if Vim had a way to display such a diff when asking "file has changed since editing it...really save? [yn]" (like emacs ;))
+23:45  cowmatic69: 'page down'
+23:46  mgedmin: cowmatic69, h is not page down; h is character left -- and the opposite is l
+23:46  cowmatic69: oh my
+23:46  cowmatic69: oh okay
+23:46  cowmatic69: i mean H
+23:46  cowmatic69: which appears to be "cursor to top of page"
+23:46  sleepynate: mgedmin: wow! that's fun
+23:46  mgedmin: L
+23:46  paradigm: cowmatic69: L
+23:46  homekevin: I was thinking maybe h was :help, and it's opposite would be "bug people on #vim"
+23:46  paradigm: cowmatic69: also look into M
+23:46  cowmatic69: oh well that makes sense
+23:46  cowmatic69: will do thanks
+23:47  mgedmin: it's worth trying to do :h H and looking around for similar commands
+23:47  cowmatic69: I cannot
+23:47  cowmatic69: I'm using a vim wrapper in eclipse
+23:48  cowmatic69: oh M is nice
+23:48  paradigm: yep
+23:48  paradigm: I use it all the time
+23:48  cowmatic69: i feel like H and L should be J and K since j and k are up and down
+23:48  Combatjuan: mgedmin: map <ESC> :lua while 1 do end<CR>
+23:49  Combatjuan: mgedmin: I think that'll fix it.  ;-)
+23:49  mgedmin: actually that's a good question: is it just python, or do other plugins suffer from the same issue?
+23:49  Combatjuan: mgedmin: Yeah, lua does it to.  And yes, I've accidentally done it with both.
+--- Log closed Sat Jan 22 00:00:47 2011

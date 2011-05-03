@@ -1,0 +1,1235 @@
+--- Log opened Tue Jan 18 00:00:37 2011
+00:09  belak: Can I request a user mask? ANd how would I do this?
+--- Log closed Tue Jan 18 00:13:44 2011
+--- Log opened Tue Jan 18 00:14:04 2011
+00:14 --- Users 609 nicks [0 ops, 0 halfops, 0 voices, 609 normal]
+00:15 --- Channel #vim was synced in 80 seconds
+00:29  khamer: There a way to prepend to a register?
+00:29  jamessan: if you uset setreg(), sure
+00:30  khamer: no already defined actions though?
+00:30  jamessan: nope. those only replace or append
+00:31  khamer: can you append a character and not a line?
+00:32  homekevin: It seems like that should work if you are specifying the register
+00:34  homekevin: I tried it, and it works but in a weird way.
+00:34  homekevin: If the register is line-wise, appending a character adds a new line with that single character.
+00:37  khamer: iabc  <Esc>^"fx  l"Fx  "fp seems to work
+00:41  Flak: if I have two gVim windows open, is it possible to convert that to two tabs in one window?
+00:42  ormaaj: Can I get access to a running vim from an external python repl?
+00:42  ormaaj: import vim etc
+00:42  spiiph: via --remote possibly
+00:45  ormaaj: Like subprocess.getoutput("vim --remote-expr :py ....")
+00:46  ormaaj: probably wouldn't work for most things where vim returns a dict
+00:46  spiiph: No, probably not.
+00:46  ormaaj: or buffer objects
+00:46  jamessan: ormaaj: what are you wanting to do? maybe there's a better way to do it
+00:47  ormaaj: jamessan: Thinking of writing a simple script to keep track of which buffers are opened in which tabs and cycle through those lists independently and possibly use the python api and test expressions in bpython (since it's a little easier)
+00:48  ormaaj: but it looks like there aren't any functions dealing with tabs so I'll probably have to go with native vimscript
+00:49  rson: ormaaj: do you mean which buffers are active in each tab?  and in each window in each tab?  because every tab can access every buffer
+00:49  ormaaj: rson: Yes, that's the behavior I want to change, keep an independent list of buffers associated with a tab so it isn't global.
+00:50  rson: ormaaj: that's probably going to be tough
+00:50  jamessan: and not very worthwhile
+00:52  ormaaj: Not necessarily tabs I suppose, just some independent way of grouping them so you could have say all your .css files grouped to a window (or in the case of tabs, a collection of windows)
+00:53  bairui: Flak: you could save one of your gvim sessions and load it into a tab within the other.  In the one you will save,    :set ssop-=tabpages   :mksession /tmp/foo    Then in your other gvim session,   :tabe   :so /tmp/foo
+00:53  ormaaj: You can already do that by vimgrepping the .css but you get the idea.
+00:53  jamessan: ormaaj: why? it sounds like you're trying to replace good buffer managmenent/navigation with artificial restrictions
+00:54  ormaaj: jamessan: Not replace, :ls would still show you everything. This would be an additional grouping mechanism so that if you have lots of files open you can cycle between certain subsets without having to have all of them open in a set of windows assicoated with a tab
+00:55  bairui: like tagging
+00:55  jamessan: ormaaj: :b *.css<Tab>
+00:55  Flak: bairui, I'll give it a shot, thanks
+00:55  jamessan: if you know part of the name, you can include more of it
+00:56  Flak: < bairui> Flak: you could save one of your gvim sessions and load it into a tab within the other.  In the one you will save,    :set ssop-=tabpages   :mksession /tmp/foo Then in your other gvim session,   :tabe   :so /tmp/foo
+00:56  bairui: Flak: np
+00:57  bairui: so, ormaaj, you could simply keep a list of globs to be used with   :b   for each window. Map   :b {list-of-globs}<C-D>   to a key
+00:59  ormaaj: Yes I guess that could work in cases where you care about filenames. By tagging you mean there's a way to customize the way buffers match?
+01:01  bairui: well, my reference to tagging was in response to your description. I then switched to   a list of globs   following jamessan's idea.
+01:01  jamessan: if ctags handles css files, then you could also use tags to jump around
+01:02 --- ChanServ sets modes [#vim +o jamessan]
+01:02  bairui: a quick look suggests not :(
+01:02 --- jamessan has changed the topic to: Can't Talk? Get Registered on FreeNode (HOWTO: http://tinyurl.com/27a4cnw) | Vim 7.3.102 http://vim.sf.net | Don't ask to ask! | Before  you ask :help, and :helpgrep, and google | SITE: http://vi-improved.org | WIKI: http://vim.wikia.com | FACEBOOK: http://tinyurl.com/vim-facebook | PASTE:  http://vim.pastey.net | DONATE: http://www.vim.org/sponsor
+01:02 --- jamessan sets modes [#vim -o jamessan]
+01:05  rson: is there any difference between python <<ENDPYTHON ... ENDPYTHON and just putting py before every line of python?  The latter would keep your vimscript indented as it should be up to the python level, the prior is ugly as sin if you've got it nested within vimscript
+01:07  ormaaj: Those are supposed to resemble Bash heredocs I assume
+01:07  rson: indeed
+01:07  rson: but you can't indent your python code to the level of your vimscript if you use that syntax
+01:08  ormaaj: eww
+01:09  kuhrt: has anyone used NERDTree and bound NERDTreeToggle ? I'm using MacVim and the binding (shift+t) works but upon second try instead of closing the NERDTree it opens a new tab with NERDTree. NERDTree behaves normally if I use the commands like ":NERDTreeToggle" but binding this screws up and I have no idea why
+01:09  rson: ormaaj: for instance: https://gist.github.com/73a756e4f76b52147c70
+01:10  bairui: rson: I'm a vimscripter, so I could be talking out of turn here, but from a casual reading of   :help python   it seems to suggest that the two are different.   :python   executes a statement, whereas the other is for a script. You could test by setting a variable in one statement and referencing it in the next, I guess.
+01:10  bairui: kuhrt: show us your map
+01:10  jamessan: kuhrt: that's because you're pressing T in the NERDTree window, which is bound to opening the highlighted file in a new tab
+01:11  bairui: hehe... or that.    bairui doesn't ue NERDTree  :s
+01:11  adulteratedjedi: kuhrt: T is already bound, either unbind it or think of a different map
+01:11  adulteratedjedi: kuhrt: as jamessan said..
+01:11  kuhrt: jamessan: ah ok! I'll give that a shot right away, thanks
+01:11  kuhrt: ya
+01:11  rson: bairui: indeed, that's annoying. incredibly annoying
+01:12  bairui: rson: or... you could look at it as beautifully obvious. Look! There's some python code! I know this because the indentation starts at zero! Love... :)
+01:13  bairui: OR... use vimscript :p
+01:13  kuhrt: to bairui, jamessan, adulteratedjedi, problem solved, indeed I did not map carefully enough, thanks a lot
+01:13  rson: bairui: this is a great example of why it sucks: https://gist.github.com/73a756e4f76b52147c70
+01:13  rson: bairui: oops, wrong link
+01:13  rson: bairui: https://github.com/sjl/gundo.vim/blob/master/plugin/gundo.vim
+01:13  rson: an otherwise beautiful plugin, littered with indentation insanity
+01:14  bairui: hmm... well baste me as a heretic, but that looks no uglier than plain python...
+01:15 * bairui ducks the shoe
+01:15  rson: lol
+01:18  jerojasro: wow, bairui's reflexes match those of GW Bush! - no offense }:-)
+01:19  bairui: well, being mentioned in the same sentence as GWB is a little offensive... :-/
+01:19  bairui: :)
+01:20  jamessan: rson: to be fair, you've added lots of useless "python <<ENDPYTHON ... ENDPYTHON" sections.  you could drop most of them
+01:22  jerojasro: bairui: I mean you're dashing-shoes ninja :)
+01:22  bairui: hehe... yeah, I got it. He was a master at that, I must say. :p
+01:22  rson: jamessan: i didn't do that, but i'm sure he did that so he could move code around more easily.  The heredoc isn't really my gripe it's that vim doesn't chop off indentation up to the level of the current indentation in vimscript, however I understand why it wouldn't, since vimscript doesn't give a crap about indentation
+01:23  bairui: *cough* good languages don't *cough*
+01:23 * rson shakes head in shame
+01:23 * bairui might be starting to make language enemies so he'll back the rhetoric down now. Apologies to the offended. :)
+01:24  rson: everyone's got their preferences
+01:24  bairui: indeed. I'm just teasing.
+01:27  bairui: however (and this isn't a python gripe), I find the interface between Vim and external languages to be tenuous at best. It's such a thin link that it really seems a waste unless you're doing some really heavy lifting in the external language. Sure, I can imagine scenarios where it makes sense, but as much as possible, I think stuff that can be done in VimL should be. I assume almost all big Vims come with
+01:27  bairui: python bindings these days, but what about the other bindings?
+01:28  dive: having some fold problems: I can open a file as user and it works fine. Open as root with same .vimrc and all folds are open. zM doesn't appear to work. Any ideas?
+01:28  spiiph: The regular debian vim-full doesn't come with any language bindings
+01:28  bairui: ouch
+01:28  spiiph: You need vim-gnome, vim-gtk or vim-nox for that
+01:28  fow: dive, check :se fdm?  with the question mark
+01:29  dive: hmm manual
+01:29  bairui: so where do you stand on that, spiiph? Or are you implementation agnostic?
+--- Log closed Tue Jan 18 01:33:10 2011
+--- Log opened Tue Jan 18 01:33:30 2011
+01:33 --- Users 598 nicks [0 ops, 0 halfops, 0 voices, 598 normal]
+01:34  fow: dive, your vim must not be reading modelines when root
+01:34  dive: strange
+01:34  bairui: dive: you probably shouldn't be editing with root in the first place... but, I thought Vim didn't allow root to execute modelines... maybe that's a bad memory.
+01:34 --- Channel #vim was synced in 78 seconds
+01:34  bairui: use sudoedit instead
+01:34  dive: ah maybe
+01:34  spiiph: It's just off by default, iirc
+01:35  fow: ah, by default Vim disables modelines for root, probably for security reasons
+01:35  dive: is there a way of overriding that
+01:35  kuhrt: I'm not sure how to phrase this question but how would one go about mapping a command to a shorter version? For instance creating an alias of :NERDTree in the form of :nt ?
+01:35  bairui: in root's ~/.vimrc
+01:35  spiiph: kuhrt, :h :command
+01:35  dive: right maybe just put the marker lines there
+01:35  spiiph: you can't use lowercase, though
+01:36  kuhrt: spilph: ok thanks I'll check it out
+01:36  dive: bairui, fow, yeah fixed, thanks.
+01:37  fow: you're welcome
+01:51  jamessan: spiiph: there is no vim-full
+01:51  spiiph: Ah, hmm, it's just vim then?
+01:51  jamessan: spiiph: and when there was, it did have all the language bindings enabled
+01:51  spiiph: Yes, right.
+01:51  spiiph: My memory fails me
+01:52  bairui: i have weeks like that too ;)
+01:53  jamessan: so, yes, the vim-tiny and vim packages lack language bindings.  the rest have them enabled.  I'm waiting on one language binding to be dynamically loadable on *nix systems and then the vim-nox package will replace the vim package
+01:53  bairui: which one?
+01:54  ISF_ec09: hi, how do I refer to the user vim runtime in a vimscript? (I want to match both ~/.vim (unix) and _vimfiles (windows))
+01:54  jamessan: bairui: I forget off-hand
+01:54  bairui: np
+01:55  jamessan: bairui: looks like tcl
+01:55  jamessan: I still haven't enabled the ruby dynamic loading, but that should work now
+01:55  bairui: hmm... interesting.
+01:55  jamessan: just hasn't made it into the packaging
+01:56  deitarion: What's the proper way to detect gVim from inside a vimscript? (I want to :redr! iff the script is running in gVim to workaround a redraw issue that doesn't manifest in curses vim or, according to the script's developer, in MacVim)
+01:57  bairui: deitarion: if has('gui_running')
+01:57  deitarion: bairui: Wouldn't that also return true on MacVim? I'm trying to be specific to gVim.
+01:58  bairui: well, then make sure you're not on a mac too - :help feature-list
+01:59  jerojasro: ISF_ec09: not quite sure, but it seems to me you'll have to check for the OS to solve that
+01:59  jerojasro: *maybe* :help vimfiles will be useful for you
+02:01  ISF_ec09: jerojasro: hum, I think vimfiles will be enough, thanks
+02:01  deitarion: I suppose checking has('gui_gtk') and has('gui_running') is the closest I'll be able to get to what I want. (I suspect it's still possible it'd get erroneously fired on at least one user's MacVim or Win32 Vim built from a codebase that also produced gVim in the same build but if they're doing that, it's their own fault if their MacVim/WinVim performs an unnecessary clear-redraw cycle every time they select a new buffer)
+02:02  bairui: ISF_ec09: you could have a look at &runtimepath
+02:03  ISF_ec09: bairui: yep, I meant that
+--- Log closed Tue Jan 18 02:20:02 2011
+--- Log opened Tue Jan 18 02:20:26 2011
+02:20 --- Users 591 nicks [0 ops, 0 halfops, 0 voices, 591 normal]
+02:20 --- Server: [calvino.freenode.net] [freenode-info] channel trolls and no channel staff around to help? please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+02:21 --- Channel #vim was synced in 75 seconds
+--- Log closed Tue Jan 18 02:51:41 2011
+--- Log opened Tue Jan 18 02:52:04 2011
+02:52 --- Users 589 nicks [0 ops, 0 halfops, 0 voices, 589 normal]
+02:53 --- Channel #vim was synced in 75 seconds
+03:14  Hoyt: hi , how can i edit multi files once ? i.e i won't need to type :sp /path/to/file2
+03:14  jamessan: :e /path/to/file2
+03:14  Hoyt: in command line with vim
+03:15  Hoyt: vim file1 file2 doesn't work
+03:15  jamessan: sure it does
+03:15  Hoyt: i need window to be separated like :sp does
+03:15  jamessan: vim -o file1 file2
+03:15  jamessan: but you don't need splits to see multiple files
+03:16  jamessan: you can change which buffer is being displayed in the current window
+03:16  Hoyt: hotkeys ?
+03:16  jamessan: :bn/:bN to move to the next/previous buffer
+03:16  Hoyt: is there direct keyboard command like ^W can switch window ?
+03:16 --- tbranyen is now known as everyone
+03:17 --- everyone is now known as tbranyen
+03:17  jamessan: :help window-move-cursor
+03:17  Araxia_: fwiw, vim -O file1 file2 will open a split for each file.
+03:17  rson: Hoyt: you could map something lke ^B to cycle buffers if you wanted
+03:18  Hoyt: rson: good idea , just wondering if it's already defined in VIM
+03:18  jamessan: Araxia_: so does -o like I suggested :)
+03:18  rson: Hoyt: the standard way in vim is to run :bn and :bN
+03:18  Araxia_: jamessan: oops. missed that.
+03:18  rson: or :bp
+03:18  Hoyt: rson: yes.
+03:19  Hoyt: rson: fine , i'll do a key mapping
+03:19  rson: Hoyt: you can use ^6 to switch between the most recent two buffers
+03:19  rson: if that suffices
+03:19  Hoyt: thanks
+03:20  Araxia_: :b <partialfilename><Tab> works well, too.
+03:21  jaysun: how do i fix all of the indenting on a ruby class?  seems i have tabs mixed with spaces
+03:22  rson: jaysun: :retab will probably work
+03:22  jaysun: i was shown long ago, but im failing to remember
+03:22  rson: or you could use = to format a range of lines
+03:23  jaysun: reading up on :retab, do i need to visual block it all first?
+03:23  kuhrt: someone mentioned before that commands must begin with capital characters, but abbreviations dont, is that a normal thing to do then, use abbreviations like to ntb to become NERDTreeFromBookmark
+03:23  rson: :retab will reindent the whole file by default, but you can give it a range if you want
+03:24  jaysun: rson:  k, doesnt seem to be doing anything
+03:24  Araxia_: kuhrt: abbreviations are more for inserting text. i think it's more common that people will assign mappings to commands or use tab completion for them.
+03:24  rson: jaysun: the mixed tabs and spaces aren't replaced by your tab settings?
+03:25  jaysun: rson:  nope, file is unchanged
+03:25  rson: jaysun: try something like gg=G then
+03:25  rson: kuhrt: I use cabbrev like this sometimes
+03:25  jamessan: jaysun: that's probably because you have 'noexpandtab' instead of 'expandtab'
+03:25  rson: kuhrt: I do some trickery to have :h turn in to :Help
+03:26  kuhrt: Araxia: alright, in the case of cabbrev though?
+03:26  kuhrt: rson: what's the advantage of turning :h into :Help?
+03:26  jaysun: looking to make it all 2 spaces rather than tabs
+03:26  rson: kuhrt: because I have :Help defined to open in a vertically split window
+03:26  rson: jaysun: :set et | retab
+03:26  kuhrt: rson: ah ok
+03:26  Araxia_: kuhrt: never even considered that, myself. easy enough to use completion.
+03:27  kuhrt: Araxia_: ya, in the case of NERDTree I get slightly anoyed because it requires to tab completions
+03:27  kuhrt: two*
+03:27  jamessan: jaysun: you'll also want to change 'tabstop', temporarily, so the tabs are replaced by 2 spaces
+03:27  kuhrt: I'm tired, phew
+03:28  jamessan: kuhrt: only for the toggle command. :NERDTree will open it and if the NERDTree window is focused, you can press q to close it
+03:28  Araxia_: kuhrt: i've got NERDTreeToggle mapped to \]
+03:28  jaysun: have set tabstop=2 in my .vimrc
+03:28  jaysun: as well as set softtabstop=2
+03:29  jamessan: eh, tabstop shouldn't be changed in general.  'shiftwidth' is what affects indentation
+03:30  kuhrt: Araxia_: for now I chose shift+t, it relates to my other key mapping of command+t for the CommandT plugin. And the reason I use command+t is because of conditioning from text-mate. Maybe I should rethink it
+03:31  jaysun: aight, got it..  thanks folks!
+03:31  Araxia_: kuhrt: yeah T is a nice navigation key. worth keeping, i'd say.
+03:31  kuhrt: jamessan: I was thinking of of the NERDTreeFromBookmark command
+03:34  kuhrt: Araxia_: woops I meant command+T (i.e. shift+command+t) so (I think) that should be safe from screwing regular T or t usage
+03:35  jamessan: kuhrt: that won't work in terminal vim
+03:35  Araxia_: kuhrt: ah, heh. yeah, that doesn't sound bad.
+03:35  kuhrt: jamessan: ah ok.. good to know, why is that?
+03:37  jamessan: kuhrt: hysterial raisins :) there are people working on making it possible for terminals to better understand the wide variety of key chords that can be done now that didn't exist decades ago, but it'll be a while until that gets finished and becomes widespread
+03:38  Araxia_: in terminal.app in particular, it will get intercepted by the app to execute tab comman.
+03:38  Araxia_: s/comman/commands.
+03:39  jamessan: well, if your stuck with terminal.app you'll have more problems than just not being able to use shift+control key chords
+03:39  Araxia_: heh
+03:39  kuhrt: obviously it's generally a good idea to make vimrc portable but if I were to choose to leave it as is would it cause errors in another environment or just be ignored?
+03:40  jamessan: it shouldn't cause errors anywhere. it just wouldn't be recognized in the terminal
+03:40  kuhrt: for now I know I'm going to be working mostly from this lowly machine via macVim
+03:40  jamessan: in the terminal, ctrl+shift+t is the same as ctrl+t
+03:41  kuhrt: bummer
+03:42  jamessan: another fun relic of the initial design behind terminal communication is that you can't communicate mouse positions to terminal applications past column 223... luckily there's active development on an extended mouse control sequence that isn't so limiting
+03:44  kuhrt: what are the implications of that column limit?
+03:44  kuhrt: i.e. what is it to say "communicate mouse positions
+03:44  kuhrt: "
+03:45  jamessan: when you have the terminal set up so that Vim handles mouse actions and you click somewhere past column 223, Vim won't get accurate information.  so if the click was supposed to move your cursor, it won't move to the right spot
+03:46  kuhrt: ah ok.. wonderful ha
+03:46  kuhrt: by the way where can I find a reference of Terminal's movement commands, like end-of-line start-of-line?
+03:48  jamessan: that depends on your shell, which is likely bash.  "man bash" and find the readline section.  should describe what you want
+03:49  falconindy: bash might not be compiled against readline, as in the case of ubuntu
+03:52  jamessan: afaik, it still honors .inputrc and the described behavior in the readline section of the man page
+03:57  kuhrt: jamessan: thanks found it
+03:57  falconindy: nah, its compiled against libedit inthat case, which uses .editrc or something to that effect
+03:57  falconindy: went through this with a friend at work... couldn't figure out why his history wouldn't function
+03:57  csgeek: .edrc ?
+03:58  csgeek: I think ed using that file..
+03:58  falconindy: editrc(5) makes me think its .editrc =P
+03:58  jamessan: yeah, csgeek just missed a couple letters :)
+03:58  falconindy: ed man, man ed.
+03:59  csgeek: well.. eitherways.. that stuff is too old for my expertise... or lack thereof
+04:00  falconindy: ed is a wonderful (portable) tool for inline file editing in scripts
+04:01  jamessan: afaict, bash doesn't use libeditline on Ubuntu
+04:01  falconindy: it does. libedit is linked against ncurses
+04:01  falconindy: ldd shows the inheritance, readelf does not
+04:02  csgeek: hmm.. I don't know..    isn't sed a streamline editor as well..
+04:02  jamessan: considering bash is an essential package and libeditline is in universe, I don't think so
+04:02  falconindy: csgeek: the -i flag to sed isn't portable
+04:03  falconindy: it's a GNU extension
+04:03  jamessan: neither the bash nor libncurses packages depend on libeditline
+04:03  csgeek: ah.. okay.
+04:03  csgeek: hence the appeal of ed
+04:04  falconindy: interesting... i wonder what i was looking at last week then
+04:04  falconindy: in any event, its not compiled againt readline either, which just boggles my mind
+04:05  jamessan: I'll give you that :)
+--- Log closed Tue Jan 18 04:12:07 2011
+--- Log opened Tue Jan 18 04:12:30 2011
+04:12 --- Users 580 nicks [0 ops, 0 halfops, 0 voices, 580 normal]
+04:13 --- Channel #vim was synced in 80 seconds
+--- Log closed Tue Jan 18 04:37:43 2011
+--- Log opened Tue Jan 18 04:38:05 2011
+04:38 --- Users 575 nicks [0 ops, 0 halfops, 0 voices, 575 normal]
+04:39 --- Channel #vim was synced in 75 seconds
+04:49  somian[0]: Could someone share with me a vim cmdline that would save the *history* in this session to a file?
+04:50  fritzophrenic: what history?
+04:52  somian[0]: Ex history
+04:52  fritzophrenic: it's written to your .viminfo file if you have the appropriate options set
+04:52  jamessan: that would require Vim knowing what part of the history was only from this editing session
+04:53  fritzophrenic: ah, right
+04:53  somian[0]: Unfortunately I had a setting of history=20 and that bit me bad, 2 nights ago
+04:53  fritzophrenic: well if you don't care about the "in this session" part you can just use the viminfo file, possibly with :rviminfo and :wviminfo
+04:53  fritzophrenic: it bit you how?
+04:54  somian[0]: I was trying to do some difficult (for me) s/// operations and lost a lot of work over the oversight
+04:55  somian[0]: I had one expression to do what I needed quite adequately and then started in on working out another one. Lost the first one completely to "history scroll". I'd not paid attention to how this box was set up wrt that setting, previously. It was grievous.
+04:56  somian[0]: Mental fatigue is an adversary I'd like to have many weapons and strategies to defend against
+04:58  fritzophrenic: maybe copy/paste from the cmdline window, or maybe use :wviminfo before moving on
+05:00  fritzophrenic: When making a ftplugin which should run in addition to the default plugin, I get the idea that setting b:did_ftplugin might be a bad idea. Should I still check for it? Or just use my own b: scope variable?
+05:01  somian[0]: I wish for a pony, cotton candy, and a simple way to save *just the ex history* to a file (without any other stuff that viminfo files preserve)
+--- Log closed Tue Jan 18 05:05:17 2011
+--- Log opened Tue Jan 18 05:05:37 2011
+05:05 --- Users 570 nicks [0 ops, 0 halfops, 0 voices, 570 normal]
+05:06  somian[0]: [ http://vim.wikia.com/wiki/Restore_state_of_edited_files_when_reopened ] fritzophrenic fyi
+05:06 --- Channel #vim was synced in 78 seconds
+05:07  fritzophrenic: hey that's kind of cool, sort of creating a session-specific .viminfo file
+--- Log closed Tue Jan 18 05:34:51 2011
+--- Log opened Tue Jan 18 05:35:12 2011
+05:35 --- Users 564 nicks [0 ops, 0 halfops, 0 voices, 564 normal]
+05:36 --- Channel #vim was synced in 76 seconds
+06:16  jdhore: How would i delete the contents of a line up until the last word?
+06:17  peth: ":s/.* "
+06:17  jdhore: Let's say i have 500 lines like: "I like pants"...Without specifically deleting "I like ", how could i make it so that only "pants" is left?
+06:19  pattern: jdhore: peth's suggestion will work for one line
+06:20  pattern: if you want to do the same for the whole file use :%s stead of :s
+06:20  jdhore: pattern, It doesn't though
+06:20  pattern: jdhore: what's your line?
+06:21  pattern: also, don't use double quotes when you type peth's suggestion
+06:21  jdhore: It looks like: shadowircd.net.		300	IN	A	66.212.21.30
+06:21  jdhore: I want to leave just the IP
+06:21  pattern: that should work
+06:21  jdhore: (The file has about 40 lines that are similar
+06:21  peth: :%s/.*\s
+06:21  pattern: that's another way to do it
+06:22  peth: sorry for being short, i'm back :)
+06:22  peth: was distracted
+06:22  pattern: jdhore: try positioning your cursor on that line and typing what jdhore wrote
+06:22  pattern: err.. i mean what peth wrote
+06:22  jdhore: yeah, it worked with peth's second suggestion
+06:22  jdhore: Thanks dude
+06:25  peth: jdhore: the problem with the first was the space, which your lines don't have. so you'd have to use the \s from the second which includes tabs
+06:26  jdhore: ah
+06:26  peth: if this is mildly interesting to you, for the future you can look up :help pattern
+06:27  peth: and :help :s
+06:28  jdhore: I'm getting decent with regex and :s, but just not great at present.
+06:30  pattern: just keep practicing..
+06:30  pattern: the vim help is a great reference
+06:31  pattern: it's be great if there was some set of vim regex exercises out there..
+06:31  pattern: a set of exercises that gradually increases in difficulty from the most basic regex to something reasonably complex and powerful
+06:33  jdhore: Well i'm learning perl so i really should learn normal regex well.
+06:33  pattern: learning them both at once might be a bit confusing..
+06:34  jdhore: It's possible, but we'll see :D
+--- Log closed Tue Jan 18 06:53:13 2011
+--- Log opened Tue Jan 18 06:53:31 2011
+06:53 --- Users 563 nicks [0 ops, 0 halfops, 0 voices, 563 normal]
+06:54 --- Channel #vim was synced in 80 seconds
+--- Log closed Tue Jan 18 07:19:45 2011
+--- Log opened Tue Jan 18 07:20:04 2011
+07:20 --- Users 563 nicks [0 ops, 0 halfops, 0 voices, 563 normal]
+07:21 --- Channel #vim was synced in 78 seconds
+08:08  scp1: Is there a way to 'globally' in a syntax.vim file tell vim to only match code that's indented with 2 tabs?
+08:08  scp1: And leave all other text as-is
+08:09  MarcWeber: scp1: Why are you asking?
+08:09  scp1: https://assets1.github.com/img/44a0b831fd87072e02d49b09e0a982734ab23be7?repo=&url=http%3A%2F%2Fperl.japh.se%2Fdevel%2Fvimpager%2Fvimpager-perldoc.png&path= <-- I do not want the description text etc to be hilighted
+08:09  scp1: marcweber, ^
+08:11  Araxia: scp1: i suppose you could precede all of your match regex's with ^\t\t
+08:11  scp1: Yeah. That'll be a lot of work though...
+08:11  Araxia: yup
+08:12  MarcWeber: scp1: How did you open that file (filetype?)
+08:12  scp1: marcweber, perldoc Foo::Bar
+08:12  scp1: The filetype is perl
+08:13  MarcWeber: scp1: Probably you can fix it using a syntax/after/filetype.vim easily by changing the colours of "NAME, SYNOPSIS" etc
+08:13  MarcWeber: scp1: HOw to start perldoc?
+08:13  scp1: by typing 'perldoc Foo::Bar' in the shell
+08:14  MarcWeber: scp1: does perldoc print show something? (this would mean my installation is borked)
+08:14  scp1: marcweber, no. perldoc -f print, though
+08:15  MarcWeber: :r! perldoc -f print.
+08:15  MarcWeber: Now where do you get your colours from?
+08:15  MarcWeber: scp1: Do you know abou VAM?
+08:16  scp1: The colors are from my perldoc.vim which is a modified perl.vim . It's not enough though...
+08:16  scp1: No, VAM?
+08:16  scp1: Now I know. But how is that related?
+08:16  MarcWeber: vim-addon-manager. You can use it to get reload.vim which will reload colours when you write buffer (it does almost always wokr .. if in doubt restart vim)
+08:17  MarcWeber: scp1: I want to reproduce your behaviour. If you don't help I'll stop.
+08:17  MarcWeber: So tell me where to get the vim files sot hat I get the same colours.
+08:17  scp1: marcweber, https://github.com/trapd00r/vimpager-perlmod
+08:17  scp1: and then PAGER=vimpager perldoc perlop
+08:21  MarcWeber: I don't have vimpager. But I don't need it.
+08:21  scp1: Ok, but the perldoc.vim is there; https://github.com/trapd00r/vimpager-perlmod/raw/master/syntax/perldoc.vim
+08:22  MarcWeber: I got it. I don't know perl very well. Can you tell me a bout a different class my perldoc knows about?
+08:22  scp1: class?
+08:22  MarcWeber: Foo::Bar
+08:22  scp1: IO::File
+08:22  scp1: or just perlop, perlvar, perlipc
+08:22  jorrit: Hi
+08:23  MarcWeber: scp1: :echo colors_name
+08:23  MarcWeber: hi jorrit
+08:23  scp1: marcweber, neverland
+08:23  MarcWeber: scp1: from now on vim-addon-manager knows about vimpager-perlmod: https://github.com/MarcWeber/vim-addon-manager-known-repositories/commit/f089ffac7cdbcf128be4830471af11c78abda1a4
+08:24  scp1: heh, cool
+08:25  MarcWeber: scp1: Are you using any other git related vim stuff from trapd00r ?
+08:25  scp1: marcweber, Well I use all of it :)
+08:26  scp1: I guess this https://github.com/trapd00r/neverland-vim-theme is what might be useful for others
+08:26  scp1: perhaps this https://github.com/trapd00r/time-spent-in-vim ... maybe
+08:26  MarcWeber: scp1: You didn't understand what I'm up to. Befdore I starte adding one repo of him I'd like to add all ..
+08:26  MarcWeber: Then I don't have to make dozenz of commits
+08:27  scp1: Him == me :)
+08:28  MarcWeber: scp1: So what's the difference perldoc.vim and vimpager-perlmod ?
+08:28  MarcWeber: both provide syntax/perldoc.vim
+08:29  scp1: marcweber, nothing right now... I just thought I should add perldoc.vim to a new repo and get it fully working some day
+08:30  MarcWeber: scp1: Which colorscheme are you using exactly? using IO::File everything has the same colour (?)
+08:31  scp1: marcweber, neverland.vim ... how do you invoke perldoc?
+08:31  MarcWeber: :r! perldoc File::IO
+08:31  MarcWeber: then :set ft=perldoc
+08:32  scp1: hmm, that doesnt work at all for me
+08:32  MarcWeber: You use perldoc.vim not vimpager-...
+08:32  scp1: what?
+08:32  scp1: I use both
+08:32  MarcWeber: Only one will be taken I suppose.
+08:33  MarcWeber: scp1: But nothing is indented by 2 tabs ?
+08:33  MarcWeber: I like your colourscheme.
+08:34  scp1: That was an example; I think the formatted document uses 2 or 4 spaces
+08:34  scp1: I thought they were converted to tabs, doesnt seem like so
+08:35  MarcWeber: scp1: So what do you want to change? I'm really tired of asking nasty questions.
+08:35  MarcWeber: Have you installed reload.vim?
+08:36  MarcWeber: I'm stopping trying to solve your issue.
+08:36  scp1: I want to make a rule so that code only gets hilighted if /^\s{12,}/ # seems to be the standard
+08:37  scp1: Eh? Ok.
+08:38  MarcWeber: Is this perl regex syntax?
+08:38  MarcWeber: Does it mean at least 12 spaces?
+08:38  MarcWeber: It translates to /^\s\{12,}.* or such in vim
+08:38  MarcWeber: Try it and use :set hlsearch
+08:38  scp1: yes. at least 12 spaces from beginning of string ( 'line' )
+08:39  MarcWeber: in File::IO it highlights everything within { .. }
+08:39  MarcWeber: So I doubt its what you want
+08:40  iaj: How can I make a search for a pattern open the fold?
+08:40  scp1: yeah, 10 or more \s .
+08:41  MarcWeber: iaj: It works here. Can you retry?
+08:42  MarcWeber: scp1: usually you do this by defining a container which starts after 10 spaces.
+08:42  MarcWeber: Then you say everything must be contained within that.
+08:42  iaj: MarcWeber: well when all folds are closed and I search for a pattern, I have to hit 'n' first to make it open
+08:42  scp1: yeah, that sounds awesome
+08:42  MarcWeber: Eg see :h syntax -> containedIn etc
+08:43  MarcWeber: iaj: So you want vim to open the folds when adding chars in the / search buffer before pressing <cr>?
+08:44  iaj: for me it just highlighting the fold that the stuff is in... i have to hit space which is 'za' afterwards
+08:44  iaj: to have it opened
+08:44  iaj: brb, have to switch locations
+08:44  iaj: :-)
+08:44  MarcWeber: iaj: So comment everything in your syntax file (make first line be a "finish"). Then try to define the container and assign it a colour. Then all the samples should have one colour. Then make it transparent and try to make everything else in the file contained in that. :)
+08:45  MarcWeber: Or consider writing to the mailinglist aksing for a simpler way ..
+--- Log closed Tue Jan 18 09:02:36 2011
+--- Log opened Tue Jan 18 10:14:48 2011
+10:14 --- Users 584 nicks [0 ops, 0 halfops, 0 voices, 584 normal]
+10:15  the_isz: vimgor: vimtutor
+10:15  vimgor: Vim's built-in tutorial is highly recommended for beginners. Just run vimtutor (from your shell or your application menu) to begin.
+10:15  bilegt: i've just install vim gnome
+10:15  the_isz: bilegt: see above
+10:15 --- Channel #vim was synced in 73 seconds
+10:16  bilegt: i see
+10:17  bilegt: any plugins to recommend?
+10:18  mavvert: whats causing this? : http://img339.imageshack.us/img339/3582/vimh.png
+10:18  bairui: matchit & surround
+10:18  mavvert: both files are unix:utf-8:sh
+10:18  the_isz: bilegt: i suggest you learn to use the basics first, then see which plugins you need.
+10:18  bairui: mavvert: probably cursorcolumn
+10:18  bairui: and cursorline
+10:18  mavvert: i mean the red $( )
+10:18  mavvert: in the second file
+10:19  bairui: that's bash syntax highlighting... IIRC
+10:19  mavvert: indeed
+10:19  the_isz: bilegt: everyone uses different parts of vim and in different ways, so you should customize your vim to how you need it. but the basics are always first :)
+10:19  bilegt: the_isz: ok
+10:20  bairui: mavvert: what I mean is... I have seen this for a long time in shell scripts. It's either intended by the syntax author, or it's a LONG STANDING bug.
+10:20  mavvert: bairui: its weird though, it usually works OK.. but then it doesnt :)
+10:20  the_isz: bilegt: once you're done with vimtutor and got a feeling for vim, you can always come back here and ask for directions to any of your problems. or for plugins which that might make your life easier.
+10:21  bairui: well, mavvert, at least that's orthogonal with coding in sh in the first place :p
+10:22  bilegt: the_isz: ok, I'll come back
+10:23  mavvert: bairui: yeah i guess :p
+10:23  bairui: :)
+10:28  mavvert: bairui: if i :bd and reopen the file its OK
+10:44  clownish: is there a way to use syn match with a variable instead of a given regex? "syn match Func display mystring" where mystring is a variable
+10:47  kartoshin: How do i edit my previous search? When I press /-key the old regex is deleted and I have to type everything once more
+10:48  clownish: use /-key, arrow-up key?
+10:49  kartoshin: nope
+10:49  kartoshin: I'm using vi
+10:56  kartoshin: Well, navigating through history with arrow-up key works in vim and doesn't work in vi. Seems like vi simply doesn't support it.
+10:56  LeoNerd: Er.. yes. :)
+10:56  LeoNerd: That being partly the point
+10:56  the_isz: kartoshin: the  "/  register should contain your last search. i must admit i don't have experience with plain vi, though.
+10:56  LeoNerd: Also, this is #vim :)
+10:56  the_isz: kartoshin: try  :echo @/
+10:57  strull: clownish: :he :exe
+10:57  kartoshin: Yeah, I know this is #vim. I just thought maybe you sometimes also work in vi, when there are no vim somewhere near.
+10:58  the_isz: kartoshin: if that works, you might try  :/<C-R>/
+10:59  kartoshin: the_isz, yeah, it worked (:echo @/). I'm too lame to figure out how to edit it =(
+11:00  the_isz: kartoshin: read my next suggestion...
+11:01  the_isz: kartoshin: i already have you the answer, did you see it?
+11:02  the_isz: s/h\zeave/g/
+11:02  kartoshin: the_isz, I'meant I didn't understand it. After I echoed my last search I type : then / then press enter and it searches for the next occurence, now when I type last / I start with a blank search. Sorry =)
+11:02  clownish: strull: should this work: ex 'syn match Func display' | echo mystring ?
+11:03  the_isz: kartoshin: i asked you to try  :/<C-R>/
+11:03  the_isz: kartoshin: sorry, that should be  /<C-R>/
+11:04  kartoshin: the_isz, <C-R> means I must press Enter, am I right?
+11:05  the_isz: kartoshin: no, it means hold Control and while holding it, press r
+11:05  the_isz: kartoshin: Enter would be <CR>
+11:05  kartoshin: hell
+11:06  kartoshin: yeaaaaah!
+11:06  kartoshin: now that works. Thanks a lot
+11:07  the_isz: kartoshin: you're welcome :)
+11:09  eroomde: hi - is there a simple way to get vim to regenerate/update a tags file upon saving?
+11:10  the_isz: eroomde: maybe  :he BufWritePost  ?
+11:12  eroomde: the_isz: thanks
+11:14  the_isz: eroomde: you're welcome
+11:39  chairabanta: hi, how do I reevaluate vimrc without restarting vim?
+11:40  the_isz: chairabanta: you can just  :source  it, but it's not recommended.
+11:40  chairabanta: the_isz, so the correct way is to restart vim?
+11:40  iaj: When I got ftp access to a page I shall be able to use netrw.. shouldn't I?
+11:41  the_isz: chairabanta: as far as i know, yes. or to make sure that all your plugins and your vimrc check if they are already loaded.
+11:41  the_isz: chairabanta: that'd be quite a lot of work, though, so restarting is probably the better solution.
+11:55  Axioplase_: How do I edit a file given its file name with vimscript?
+11:58  the_isz: Axioplase_: you could use vim's -s argument, but i might be misunderstanding you.
+11:58  Axioplase_: the_isz: from a script
+11:58  Axioplase_: the_isz: :edit("foo.txt")
+11:58  Axioplase_: the_isz: :call edit("foo.txt")
+11:59  the_isz: Axioplase_: is that the answer you found already? or is that a question? i'm sorry, i still don't get your problem...
+12:00  Axioplase_: Oh, :exe ":e " . a:file   works
+12:00  Axioplase_: the_isz: I just found the (an) answer
+12:00  the_isz: Axioplase_: ok :)
+12:01  pfarrell: hey. I have a question. what's the easiest way to do a case-insensitive find-and-replace? i.e. I want to replace "DESTROY" -> "DUPLICATE" and "destroy" -> "duplicate"
+12:02  pfarrell: preferably with only one find-and-replace, rather than two
+12:02  kurkale6ka: won't be possible with one
+12:05  the_isz: pfarrell: you can, however, easily modify your former  :s  command. do your first :s, then go  :s<Up>  and edit it or  <C-F>  to enter the command-line window, in which you can do stuff like  0gU$
+12:07  kurkale6ka: or use DESTROY first then use the i flag for s
+12:07  pfarrell: what does the i flag do?
+12:07  kurkale6ka: :h s_flags
+12:07  pfarrell: thanks
+12:09  the_isz: i really should force myself to use the command-line window more often. i love that thing...
+12:16 --- _Unode is now known as Unode
+12:19  kaste: hi is it possible to move split windows without rotation (which vim doesn't like for certain splits)
+12:19  kurkale6ka: I'd love it if we had all vim capabilities for the command line...
+12:20  kurkale6ka: kaste: you could use ^wH, ^w J...
+12:21  kaste: hmm that moves it to the furthest position in that direction?
+12:22  kaste: is there some way to move the windws but keep the same layout
+12:23  kaste: as in exchanging certain two of these
+12:23  kurkale6ka: ^wx
+12:23  kurkale6ka: :h
+12:23  vext01: does anyone know the color class for the current match when doing a confirmed regex replace?
+12:23  kaste: thanks
+12:23  vext01: eg :%s/x/y/gc
+12:24  the_isz: kurkale6ka: what do you mean with missing vim capabilities for the command line?
+12:24  kurkale6ka: the_isz: meaning that to do normal editing you need ^f. I'de like to have it all directly
+12:26  the_isz: kurkale6ka: yeah, totally agree. that's one of the very few things that emacs has over vim: once you learned the movement keys (<C-N> etc), they count in whatever mode you're in. in vim, commandline-mode is an exception...
+12:26  kurkale6ka: yeah :(
+12:26  kaste: well how'd you type thouh if even movement is a printable key in insert mode?
+12:27  kaste: vim's shortcuts would really have to be rearranged first
+12:27  Chib: the stuff they do for windows allows what i think you're wanting
+12:27  Chib: gvim that is
+12:28  kurkale6ka: what we mean is that the commande line would be a normal buffer kaste
+12:28  Chib: you want the ability to move cursor left and right type of thing
+12:28  Chib: ?
+12:29  the_isz: Chib: well, we want all of vim's editing features to edit the command line. just as you get in commandline-window.
+12:29  Chib: oh
+12:29  Chib: yah that would be handy (:
+12:29  kaste: i know or at least i think i understood that part
+12:29  kaste: but most of the time in the command line you spent inserting characters
+12:30  the_isz: we feel it's strange that we need to learn new keys to move and edit for commandline-mode.
+12:30  kaste: i just don't think it's possible the way vim is arranged
+12:30  the_isz: kaste: it is possible. see commandline-window :)
+12:31  the_isz: we're just lazy bummers who don't want to activate that thing every time ;)
+12:31  kaste: i hope you are using vimperator
+12:32  the_isz: no, pentadactly ;)
+12:32  the_isz: s/ly/yl/
+12:32  the_isz: which is vimperator's successor
+12:32  kaste: counts
+12:33  kurkale6ka: hmm, penta... lemme see
+12:33  Chib: lol i love the way people correct typos in this channel (:
+12:33  kaste: isn't that somewhat standard?
+12:33  kaste: i see that in others quite a bit too
+12:33  Chib: i doubt it
+12:34  kaste: you know that skype actually has support for that?
+12:34  Chib: never seen it before myself
+12:34  kaste: wrong channels ;)
+12:34  the_isz: i saw that behaviour on this channel, too, and adopted it :)
+12:36  Chib: i'd adopt it but i'm too lazy to correct typos (:
+12:36  Chib: plus i prefer to wait for other people to correct my typos and then mock them! d:
+12:37  the_isz: trains the regular expression muscles
+12:37  Chib: heh
+12:39  avinashhm: hi, is there any way, we can select a block of statements and indent them appropriately ... i tried selecting them in visual mode and then 'tab' .. didn't work .. any help ??
+12:40  Chib: if you've got them selected in visual mode
+12:40  Chib: hit shift-.
+12:40  kaste: ok the help seems to indicate there is no command for what i want :(. Thanks for the help anyway
+12:41  kaste: you indent with > avinashhm
+12:41 --- MinceR_ is now known as MinceR
+12:41  babilen: avinashhm: Or use '=' for auto-indentation
+12:43  avinashhm: Chib, kaste , babilen .. thanks very much .. both > and = worked ..helped me ..
+12:44  babilen: avinashhm: The inverse of ">" is (surprise!) "<"
+12:47  avinashhm: babilen, yes tried this .. :-) ... was wondering if we have some plugin to manage auto indentation ... have you come across any ??
+13:11  bosie: so how do you guys solve the problem of automatically resized window layouts
+13:12  the_isz: bosie: <C-W>=  ?
+13:12  bosie: the_isz: i meant the other way around actually ;)
+13:13  bosie: the_isz: if i have 3 windows and they are individually sized, some windows when toggled resize all the others
+13:13  the_isz: bosie: hmm... i rarely use window resizing commands other than <C-W>=...
+13:13  bosie: ok
+13:14  kurkale6ka: bosie: :h noea ?
+13:14  bosie: 3 vertical windows... 100|150|90 ... toggle command-t and it is 113|113|113
+13:15  bosie: kurkale6ka: oh, lets see
+13:15  frogonwheels: bosie: there's an option to disable.. um
+13:16  bosie: kurkale6ka: yea! at least for command-t it worked
+13:16  frogonwheels: oh yeah noea  duh. kurkale6ka ^^
+13:17  bosie: thanks guys
+13:23  bosie: ok
+13:23  bosie: that wasn't it
+13:23  bosie: nvm
+13:42  affebollen: Hello. Is it possible to set the repeat rate in vim? it's really fast in the terminal but once i enter vim it gets really slow. I ssh into a box running SuSE SLED11. I do not have this problem in SuSE10. I can't find any config option in vim for keyboard repeat rate. Is there one?
+13:42  kapu: I am thinking but not knowing yet, how complicated would it be to write someting that makes vim/gvim recognise when cursor is over string of format easily regexed (####unixtime####) and use status area to show unixtime in human friendly formart?
+13:45  spiiph: affebollen, input rate is solely controlled by the terminal.
+13:46  kapu: affebollen: I'm pretty sure vim aint got anything to do with that
+13:46  jerojasro: kapu: I would tackle that problem like this: define a syntax element for the string you're looking for
+13:46  Ulfalizer: is there some way to resize/maximize the gvim window using ex commands?
+13:47  rindolf: Ulfalizer: yes.
+13:47  Ulfalizer: how?
+13:47  rindolf: Ulfalizer: oh, sorry, misread.
+13:47  spiiph: Ulfalizer, depending on OS. :h :simalt
+13:47  rindolf: I thought you meant the viewport.
+13:47  jerojasro: then define a function that checks for the syntax ID (synID() and friends) of the element under the cursor
+13:47  Ulfalizer: spiiph: looks like it could work. thanks.
+13:48  Ulfalizer: oh.. "only for Win32 versions" :/
+13:48  jerojasro: and if the proper term is below the cursor, do something (put the date in the status line, echo it, or whatever)
+13:48  Chib: Ulfalizer :help lines and :help columns
+13:49  jerojasro: maybe calling that function as an autocommand would do the trick (CursorHold, or CursorMoved)
+13:49  the_isz: Ulfalizer: just get a proper window manager already ;)
+13:49  kapu: jerojasro: very nice
+13:49  kapu: jerojasro: ty for your input
+13:50  kapu: 03:33 < kapu> I am thinking but not knowing yet, how complicated would it be to write someting that makes vim/gvim recognise
+13:50  kapu: oops
+13:51  jerojasro: or maybe putting the function directly in the status line would do it; iirc, you can define a part of the status line to be a function, and, again iirc, that function gets called with every cursor move
+13:51  jerojasro: vimgor: statusline
+13:51  vimgor: Check out scrooloose's blog entry for all your 'statusline' needs: http://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
+13:51  kapu: tried to copy from securecrt using mouse and almost flooded
+13:51  Ulfalizer: Chib: thanks
+13:52  Ulfalizer: the_isz: :P
+13:52  kapu: luckily irssi has the logic built in to recognise a potential error and asked if i really wanted to paste that much
+13:53  jerojasro: hehe, yeah, irssi is nice :)
+13:53  kapu: im kinda new to securecrt
+13:54  ahf: irssi is pwn.
+13:54  the_isz: have you irssi users ever tried weechat? i think it's kinda nice...
+13:54  kapu: no
+13:55  kapu: what do you like about weechat?
+13:57  jerojasro: the_isz: hi there!
+13:57  the_isz: i find it more easy to configure than irssi, it's got sane defaults and the scripting support is nice. i think there's more, but i haven't used irssi extensively enough prior to switching to judge.
+13:57  the_isz: jerojasro: hi :)
+13:57  jerojasro: I've seen weechat, and kind of meant to try it
+13:57  jerojasro: but, you know, laziness
+14:00  jeromz: Is there something useful for wide-screen vim? Vertical statusline, must have plugins or smth.
+14:00  kapu: i too found irssi (two weeks ago) a little to bs intense , but am having faith that it pays off
+14:01  kapu: and am slowly finding out why it is well liked
+14:02  caruso_g: jeromz: add     set cursorcolumn
+14:02  caruso_g: to your .vimrc
+14:03  jeromz: Nope, I mean: I have too much space right of my code and looking for something to fill it.
+14:04  the_isz: jeromz: how about  :vsplit  ?
+14:06  paleywiener: any way to get a tarball of the vim docs in html format? the main website doesn't have it visible to me
+14:06  paleywiener: http://vimdoc.sourceforge.net/htmldoc/help.html
+14:07  caruso_g: jeromz: could be I understood. You should set textwidth in your .vimrc to keep text to a fixed columns width
+14:07  caruso_g: e.g. I use 78
+14:07  caruso_g:     set textwidth=78
+14:14  ViRUS: How can I set a different path for VIM to look for its .vim files? I'm connected to a rather ugly platform (HP NonStop OSS) and the installed VIM lacks all its syntax/etc. files. I want to provide my own but can't seam to find a way to make VIM look in a different folder. I'd compile VIM myself, but curses and most other POSIX stuff is missing. So I'm left with a broken VIM unless I find a way to make VIM look in a different directory.
+14:15  paleywiener: set viewdir  =$HOME/.vim/junk/vimviews/ etc
+14:18  spiiph: ViRUS, :h 'runtimepath
+14:18  ViRUS: no help there - even this is broken - but I got my local vim to workaround this. It's a shame. :P
+14:19  spiiph: Wow, that's broken.
+14:19  spiiph: ANyway, you can find the help on 'runtimepath' on vimdoc
+14:19  ViRUS: it's a horrible platform - and even more horrible is the administration
+14:19  pfarrell: ViRUS: isn't there a sysadmin whose job this is?
+14:20  ViRUS: pfarrell: theoretically I'm not even supposed to be there, but I'm supposed to develop for that platform. It's hilarious. ;)
+14:23  ViRUS: export RUNTIMEPATH=$HOME/Sources/vim72/runtime - works like a charm. Aaah, finally syntax hiliting and all the VIM goodness :)
+14:24  paleywiener: in vi ex mode if i have :s/cow/pig/ and i need to change cow to pow.. how do i do that quickly??
+14:24  paleywiener: C-Left will jump to EOL
+14:25  paleywiener: without using the mouse
+14:25  the_isz: paleywiener: try  <C-F>
+14:25  LeoNerd: (as I said on #perl): Are you sure you mean vi and not vim?
+14:25  paleywiener: vi is aliased to vim
+14:25  paleywiener: i'm using vim
+14:26  LeoNerd: OK. Then Ctrl-Left ought to work
+14:26  LeoNerd: If it doesn't, blame terminal/vim/$TERM/terminfo/... and repeat
+14:26  rson: paleywiener: <Ctrl-F>fcrp<Enter>
+14:27  elif: Is there any reported use of vim server ?
+14:28  elif: I read about, but never found any usefull reported use.
+14:28  elif: ow, what a terrible english :)
+14:29  the_isz: elif: you mean  --servername  and stuff?
+14:29  elif: the_isz: run vim as a server
+14:30  the_isz: elif: yeah, i don't know exactly what you mean. do you mean running it with the  --servername  argument?
+14:30  elif: the_isz: yep
+14:30  rson: elif: for instance, you can run gvim as a server, then open files remotely by specifying which server to open it in
+14:31  the_isz: elif: usage example: sometimes i use QtCreator to debug some code. i can then open files at the right place in the same vim instance to edit.
+14:32  ViRUS: aaarrrgh. next problem - how can I make VIM recognize my color terminal? ls —color works as expected, but vim only supports bold and underline in syntax highlighting. I'm gonna kill that sysop.
+14:33  ViRUS: I tried setting my TERM variable to xterm and xterm-color with no change in output
+14:33  mgedmin: ViRUS, in vim, what does :echo &t_Co print?
+14:34  LeoNerd: Is it a Solaris box?
+14:34  ViRUS: LeoNerd: HP NonStop
+14:34  LeoNerd: Older Solarises had  xtermc
+14:34  LeoNerd: Try TERM=xtermc
+14:34  elif: the_isz: that can be achieved with the netrw ? (kinda open/broswer files in remote hosts)
+14:35  elif: *browser
+14:35  ViRUS: mgedmin: it prints nothing
+14:36  the_isz: elif: hmm... haven't tried that yet, but why not? if your vim runs on another host, you just have to run the vim command on that host, e.g. through ssh.
+14:36  ViRUS: the_isz: not SSH either. It's an plain old sucky telnet session.
+14:37  ViRUS: take a mediocre platform - add good tools, but break them horrible - receive unusable platform. done.
+14:37  paleywiener: rson, thanks :) Fcrp :p neat!
+14:38  paleywiener: ViRUS, xterm-color256 it should be.. you need to check terminfo for the exact thing it's called
+14:39  spiiph: xterm-256color
+14:39  paleywiener: try: xterm-256color
+14:39  paleywiener: ah.. nm
+14:39  ViRUS: I don't think this thing got a termcap
+14:39  paleywiener: find /lib/terminfo/ -iname "*256*" works on my linux box
+14:40  LeoNerd: It is justabout entirely possible that it doesn't -have- a terminfo ;)
+14:40  LeoNerd: terminfo is quite a newfangled recent thing, comparitively
+14:40  LeoNerd: Probably less than 20 years old you know
+14:40  paleywiener: hmm then it'll be termcap
+14:41  ViRUS: got to state that this is originally not a UNIX system
+14:41  rindolf: ViRUS: originally?
+14:41  paleywiener: Oh.. hmm.. does it have an strace or somethin.. ltrace
+14:42  ViRUS: rindolf: it got some extra libs to make it somewhat POSIX compliant, but not much more.
+14:42  rindolf: ViRUS: what is this OS?
+14:44  ViRUS: ah, crap. Hit the wrong button.
+14:44  ViRUS: Yes, found an /etc/termcap. At least something.
+14:44  pandeiro: newbie question: is there some way to go UP to the first character of the next line, the way Enter does, going downward?
+--- Log opened Tue Jan 18 14:48:25 2011
+14:48 --- Users 620 nicks [0 ops, 0 halfops, 0 voices, 620 normal]
+14:48  pandeiro: one more: is there a built-in way to add both parentheses around a word, WORD, or other term?
+14:48  pyrho: Hi all, there's just one rule of my indenting rules which bothers me for my C++ synthax. I think it's part of the builtin cindent behaviour, how can I modify it ?
+14:49  pyrho: pandeiro: afaik no, but surround.vim does this kind of thing.
+14:49  pandeiro: pyrho: cool thanks for the lead
+14:49 --- Channel #vim was synced in 77 seconds
+14:55  ViRUS: ohmy. this termcap file is frelling old. Copyright 2003 Open Software Foundation, Inc.
+14:57  pfarrell: ViRUS: what on earth are you developing on this clunking dinosaur, anyhow?
+14:57  ViRUS: pfarrell: some software which allows smooth transition away from that dinosaur
+14:58  ViRUS: pfarrell: I'm kinda happy that I got a normal shell with the OSS layer. Some people work with the original Guardian Console that doesn't even have nested directories. 8 character filesnames including the extension, etc.
+15:06  rson: paleywiener: ah yeah, typo when i put it in here, f indeed was supposed to be F
+15:09 --- axiom is now known as majoh
+15:12 --- Godslastering is now known as Guest48246
+15:20 --- mephux_ is now known as mephux
+15:20 --- ml|_ is now known as ml|
+15:20 --- Maletor__ is now known as Maletor
+15:41  pigdude: is there a way to hook into the tab open event?
+15:41  pigdude: i'd like my plugin to perform some action when a tab is  opened
+15:41  pigdude: it needs to set a variable local to the new tab
+15:42  pigdude: (that's all)
+15:49  kurkale6ka: :h TabEnter?
+16:01  pigdude: kurkale6ka: how do i know if the tab entered is the newly opened tab??
+16:01  pigdude: kurkale6ka: that's what i mean. i already listen on TabEnter with this plugin
+16:01  pigdude: kurkale6ka: (for other reasons)
+16:02  bairui: pigdude: :help tabline-menu and read the last part of that section
+16:02  pandeiro: why do i always get bad_content_type 'Content-Type must be application/json' errors when trying to replicate?
+16:03 --- babilen_ is now known as babilen
+16:03 --- chrischambers_ is now known as chrischambers
+16:03  pigdude: bairui: thanks, seems so roundabout but this will work
+16:03  bairui: np
+16:05  pandeiro: this is the syntax i'm using per the couchdb guide's chapter on replication:
+16:05  pandeiro: curl -X POST http://user:pass@localhost:5984/_replicate -d '{"source":"schwa","target":"http://user:pass@192.168.0.111:5984/schwa"}'
+16:05  pandeiro: anyone see a problem there?
+16:05  imganquan: hi all. I defined a struct like this: typedef struct _s S; In my situation, the cursor now is on S in a .c file, this file already has cscope and ctags data. Now, my question is how to jump to the definition of _s, rather than S. I know the command and shortcut of cscope, ctags. But it jumps to S, not _s.
+16:07  pandeiro: lol wrong channel
+16:11  bairui: imganquan: tag jumping works based on the identifier under the cursor. If you want _s rather than S, move back a word using    b   first. A less lame solution would involve mapping that to a key/sequence.
+16:13  bairui: well, that's me. I'm spent. Night, lads. :)
+16:15  imganquan: bairui: Thank you. But key mapping is really a lame way. Any smart way to make vim jump to the definition of _s when I press "c-]"?
+16:16  mgedmin: massage your tags file to point to the definition of _s for the entry of "S"
+16:16 --- Gaga is now known as Juri_Agarin
+16:16  mgedmin: how to do that is left as an exercise for the reader
+16:19  spiiph: Oh, gvim crashed
+16:19  spiiph: That hasn't happened in almost a year.
+16:19  kurkale6ka: bug report
+16:20  spiiph: *shrug* I don't think I can reproduce it
+16:23  spiiph: Hmm, it's omni completion related
+16:29  clownish: is there a easy way to search a regex in the open file and pass the results into an array?
+16:30  rindolf: clownish: :g ?
+16:35  spiiph: clownish, using vimscript. What are you going to use the array for?
+16:35  retif_: is there anything similiar to End button in edit mode, End button is too far
+16:36  clownish: spiiph: i try to write a function which saves all words (not lines) after a given string into an array, to highlight them with syn match.
+16:36  spiiph: retif_, Use normal mode to move around.
+16:37  spiiph: clownish, You could use :g/re/p and :redirect, if you just want a quick hack. Otherwise, :h search( and investigate if any of the search functions there can help you.
+16:38  clownish: spiiph: okay ill try that, thank you
+16:40  spiiph: np
+16:42  retif_: spiiph: leave insert mode, push Shift+$, push a, to put ";" after each line, i think its not right
+16:43  spiiph: No, it's not.
+16:43  spiiph: You should press A;<Esc>
+16:43  clownish: spiiph: :g gives me the full line, right? how do i get the single word?
+16:44  spiiph: clownish, I'd say save the file to a temporary file, and use :s instead, in that case.
+16:47  clownish: spiiph: mh okay. my intention is to highlight all functions in scala. there for i want to search all function-names which where defined with "def" and color them somehow. so i have to run this function very often. is there maybe a better way to do this? sorry im quite new to vim(scripting)
+16:51  spiiph: clownish, matchstr( and loop over all lines in the buffer.
+16:52  clownish: spiiph: okay thanks again
+17:08  hendry: i use vim under arch, and my colorscheme evening has a wierd grey background. How can I force it black, like it is on Debian? :)
+17:12  ViRUS: any clue why VIM doesn't seam to work with color escape codes for syntax highlighting? I'm still fighting with HP NonStop OSS and found that setting the t_Sf and t_Sb manually causes the escape codes to be print. I guess it has to do with t_ti and t_ks being wrong, but I can't seam to find the correct strings. Any ideas how to find out the right sequence. "ls —color" works from within bash so I guess there must be a way.
+--- Log closed Tue Jan 18 17:15:31 2011
+--- Log opened Tue Jan 18 17:15:41 2011
+17:15 --- Users 630 nicks [0 ops, 0 halfops, 0 voices, 630 normal]
+17:16  ViRUS: paleywiener: genious! I dried all available terminal types and builtin_pcansi did the trick.
+17:16  paleywiener: thanks pattern.
+17:16  pattern: and even vimscript itself can't manipulate vim all that powerfully... a lot is left to primitive vim commands
+17:16 --- Channel #vim was synced in 84 seconds
+17:17  paleywiener: ViRUS, heh how did you try them all??
+17:17  paleywiener: xargs??
+17:17  ViRUS: paleywiener: just start one vim after another with another term setting
+17:18  paleywiener: and the term names you were reading from?? termcap?
+17:18  ViRUS: builtin_pcansi and builtin_vt320 seam to work. Got to figure out what's difference
+17:18  ViRUS: paleywiener: when selecting a wrong terminal vim outputs the available ones. In my case only builtin_* terms
+17:18  paleywiener: ah! kay
+17:21  paleywiener: i don't understand one thing though.. if you use a vim builtin term, won;t you then have to get xterm to use that same terminal??
+17:21  paleywiener: which means configuring termcap or some such thing
+17:22  ViRUS: paleywiener: the system I'm on is horribly broken. Just don't ask. ;)
+17:22  ViRUS: I'm just fixing some symptoms to finally get some work done
+17:23  paleywiener: err..  i think xterm would use  X11's terminal mapping..
+17:23  paleywiener: oh well..
+17:25  LeoNerd: paleywiener: "builtin" simply means vim is using its internal idea of what the terminal control sequences are
+17:26  LeoNerd: Rather than consulting termcap/terminfo
+17:26  LeoNerd: Which to be honest; it's 2011.. that's preferrable
+17:26  LeoNerd: If your terminal doesn't understand the portable intersection of ANSI/ECMA-48/xterm, then take it out and shoot it, and get yourself a Real Terminal
+17:27  paleywiener: i don't think he's using a hardware terminal??
+17:27  ViRUS: ok, only vt320 works with my cursor keys… looks like i finally got a fully working VIM with colors on that platform. :)
+17:28  LeoNerd: :)
+17:28  LeoNerd: paleywiener: indeed :)
+17:28  paleywiener: ViRUS, are you on a hardware terminal?
+17:28  LeoNerd: And therefore -highly- likely his terminal will understand ECMA-48
+17:28  ViRUS: paleywiener: no. it's a telnet session
+17:28  LeoNerd: Since, as I observed, it's 2011, not 1970
+17:28  LeoNerd: telnet is a transport. What terminal?
+17:29  paleywiener: that would be vt100 if it's unix.. telnet uses vt100
+17:29  ViRUS: LeoNerd: you were asking about "hardware" terminal. Always assumed that would be some kind of console directly attached to the system. I'm running gnome-terminal on my ubuntu box.
+17:29  ViRUS: "hardware terminal" != "terminal emulation", no?
+17:30  LeoNerd: I said nothing about hardware.
+17:30  LeoNerd: gnome-terminal   is the answer I was after.
+17:30  LeoNerd: gnome-terminal   will cope fine with ECMA-48... (well, giveortake ;) )
+17:30  ViRUS: LeoNerd: I was answering paleywiener - he asked ;)
+17:31  paleywiener: okay so you telnet from gnometerminal to some other box and run vi??
+17:31  paleywiener: and it's not working
+17:31  LeoNerd: Probably because $otherbox doesn't have a termcap entry for "gnome-terminal"
+17:32  LeoNerd: And thus we run into the exact reason why the whole model is fatally flawed
+17:32  ViRUS: paleywiener: it's been working all the time, but without color support. Now I've forced term=builtin_vt320" and colors and cursor keys while in insert mode work. Previously colors were not working (setting t_Co did not help) and hitting cursor keys in insert mode would insert arbitary characters.
+17:32  ViRUS: LeoNerd: TERM is/was set to "xterm" and that's included in the termcap
+17:33  LeoNerd: Yup...
+17:33  LeoNerd: And here's the problem. gnome-terminal isn't xterm. :)
+17:33  LeoNerd: It just likes to think it is.
+17:33  paleywiener: yes but gnome-terminal will support xterm
+17:33  LeoNerd: Ish. Give or take.
+17:33  LeoNerd: Last time I looked it still wasn't very good at it
+17:33  paleywiener: it should work with xterm-256color
+17:33  LeoNerd: E.g. it had the wrong encoding for Ctrl-F1
+17:34  paleywiener: lemme experiment :)
+17:34  LeoNerd: It sends a CSI-arg-style SS3.. which is bizarre and most out of spec.
+17:34  ViRUS: I just checked with "original" xterm and it doesn't work without enforcing the term option either
+17:34  LeoNerd: Unlike a real xterm which -actually- sends the correct CSI
+17:34  ViRUS: LeoNerd: the "real" xterm doesn't work either.
+17:35  LeoNerd: Mmmm?
+17:37  ViRUS: I guess that precompiled VIM (got it from: http://ituglib.connect-community.org/apps/Ituglib/SrchOpenSrcLib.jsf
+17:37  ViRUS: ) is just flawed in one way or another. Or it's the system I'm connected to.
+17:37  LeoNerd: The very -idea- is flawed.. :)
+17:38  LeoNerd: It's justabout solveable one way or another by hackery..
+17:40  Xaphiosis: I'm trying to write a function that can be invoked using a map in visual mode, but rather than execute it just sits there waiting for me to do something, like press space
+17:40  Xaphiosis: vnoremap <Leader>r :<C-U>call VisualRed()<CR>
+17:40  lucs: LeoNerd: Oh, by the way, I had no luck with inotify (not quite sure what the exact problem was), but an autocmd watching BufUnload events got the job done.
+17:40  LeoNerd: Ah.. :/ OK
+17:41  ViRUS: LeoNerd: I'm so much used to systems where VIM just-works™ - This damned HP NonStop thing is giving me non-stop headaches.
+17:41  ViRUS: s/VIM/everything/
+17:41  LeoNerd: ViRUS: Ya...  !blame term{cap,info
+17:41  LeoNerd: ViRUS: Ya...  !blame term{cap,info}
+17:41  LeoNerd: !blame a world that believes making these things configurable is actually a good idea
+17:41  LeoNerd: !blame a world afraid of picking ONE (1) standard
+17:42  NET||abuse: hey there folks, i'm reasearching a bit about using ctags or exuberant-ctags with php, i'm starting using ZendFramework a bit.
+17:43  NET||abuse: having some inline interpreter support would be nice.
+17:43  ViRUS: LeoNerd: multiple standards with partially broken implementations is just more fun. *sighs*
+17:43  NET||abuse: is ctags probably a better implementation?
+17:43  NET||abuse: probably the best implementation of this/
+17:43  NET||abuse: Do you have to run the tagging scripts for ctags every time you update your functions?
+17:44  NET||abuse: so if i update my models with new methods, my controllers don't see the tags till i re-run the tagging script?
+17:46  Xaphiosis: never mind, it turns out that vnoremap doesn't work for <Leader>r for some reason. it works on <Leader>R just fine though.
+18:08  phoe6: is there anyway to do a three way diff/merge using vimdiff ?
+18:09  phoe6: If you need the context for e.g. when using it as git mergetool
+18:25  sleepynate: phoe6: vimdiff will take 3 files no problem
+18:26  sleepynate: do you want the easy way or hard way
+18:27  pattern: vimdiff can do 3-way diffs now?  last i checked it couldn't..
+18:27  sleepynate: http://vimdoc.sourceforge.net/htmldoc/diff.html <--- doesn't it?
+18:28  strull_: pattern: when was this?
+18:28  pattern: i dunno.. a year or two ago..
+18:28  sleepynate: "This file describes the +diff feature: Showing differences between two,
+18:28  sleepynate: three or four versions of the same file.
+18:28  sleepynate: "
+18:29  pattern: cool
+18:29  sleepynate: i thought i'd done 3-way with it before but i usually only do 2
+18:39  MarcWeber: pattern: use :diffthis 3 times ?
+19:01  int3__: hi
+19:02  int3__: I'm trying to write some vimscript
+19:02  int3__: when I'm defining an autocmd
+19:02  int3__: the {cmd} portion being `bdelete b:myvar`
+19:02  int3__: vim seems to treat b:myvar as a literal instead of a variable
+19:02  int3__: how do I get it to do the latter?
+19:03  peter_w: :he :exe
+19:06  int3__: peter_w: thank you!
+19:06  MarcWeber: int3__: there is also getvar or such.
+19:07  peter_w: that doesn't help him
+19:13 --- WebDragon|away is now known as WebDragon
+19:16  kisielk: hm, has anyone seen any problems with Python omnicompletion?
+19:16  kisielk: whenever I try to use it, I just get "pattern not found", even for really obvious things like variables already in scope
+19:16  kisielk: omnifunc is set to the pythoncomplete#Complete...
+19:18  MarcWeber: kisielk: vim-addon-async (python repl completion) could be an alternative.
+19:18  MarcWeber: kisielk: Maybe have a look at the function to find out what it is expected to do ?
+19:27  kisielk: MarcWeber: well, I have a good idea of what it should do
+19:27  rson: can someone try to reproduce this?  open vim with no paramaters so you have just a no-name buffer.  :e new_file. :echo bufnr('#') => 1, isn't this unexpected behavior?  I would expect that there would be no alternate buffer in this case
+19:27  kisielk: but it doesn't seem to be working
+19:29  peth: rson: not here
+19:29  peth: returns -1
+19:29  rson: peth: :/
+19:29  peth: oh wait, sorry. didn't do :e
+19:30  peth: but doesn't make /kinda/ sense?
+19:30  rson: how so? the active buffer shouldn't also be the alternate buffer.
+19:31  MattDiPasquale: how do i exit replace mode?
+19:32  wide_awake: MattDiPasquale: esc
+19:32  rson: <Esc>
+19:32  MattDiPasquale: something is wrong with my vim
+19:33  wide_awake: MattDiPasquale: caps lock on?  :)
+19:33  MattDiPasquale: when i press the down key, it displays lines like 10 lines down
+19:33  MattDiPasquale: i recently installed some plugins. i'll try uninstalling them...
+19:33  peth: rson: well, only "kinda" but it isn't the "same" buffer anymore, you :e'd a newfile.
+19:33  MattDiPasquale: when i do :q it quits w/o problem, so i don't think any changes are actually being made.. it just looks like they are
+19:34  peth: no, not really.
+19:35  bnk: hi all..anybody know how to make a shortcut key in vimrc to move your tab over to the left or right when you have multiple tabs open?
+19:35  rson: peth: yes, but the new file's buffer has the same id as the alternate buffer, so bufnr('%') == bufnr('#')
+19:35  rson: which doesn't make sense, also no alternate buffer is shown in :ls
+19:36  peth: what's confusing me more at the moment is that bufnr("$") on a fresh vim gives 2
+19:36  rson: not here, started with -u NONE --noplugin
+19:36  rson: here it's 1
+19:37  peth: probably something with by buffer persistence but :ls! doesn't list any
+19:37  peth: ok, i'm clearly not qualified to partake. sorry for meddling.
+19:38  rson: peth: no you're at least confirming what i'm seeing, which is good
+19:41  peth: i guess it's a peculiarity with the internal handling. you start with an unnamed empty buffer and :e a newfile, which would otherwise get another bufnr, but seeing the old one was an unused one, you keep the same bufnr.
+19:41  peth: :ls! doesn't show the # flag, but in a way the same bufnr is a different buffer, so there.
+19:42  peth: but i agree it's not intuitive and should probably be different.
+19:45  rson: peth: i just sent an email to vim_use to get an explaination, hopefully someone will have one
+19:46  peth: the quality of answers is very likely to exceed mine :)
+19:48  Araxia_: bnk: you could just use gt and gT for that.
+19:49  Araxia_: or do you want to rearrange the tabs?
+19:50  jagguli: hi, i m trying to diasble autoindent for a file using modeline like so /* vim: noai nocin nosi inde= */
+19:50 --- tonymec_ is now known as tonymec
+19:50  jagguli: but that dont seem to work
+19:53  bnk: Araxia_: thanks..yeh rearrange..but I just found it searching on the web
+19:55 --- tonymec__ is now known as tonymec|away
+19:57  peth: jagguli: if you want text after vim modeline settings, you have to use the set syntax. see :help modeline
+20:07  MarcWeber: kisielk: Can I help you find a patch ?
+20:11  jagguli: peth: so this should work /* vim: set noai nocin nosi inde= : */
+20:16  peth: jagguli: if those are the settings you want, i think it should
+20:18  jagguli: i need an indent expression that will indent everything inside braces
+20:18  jagguli: the indent files for scss dont seem to indent the brace ..
+20:22  MarcWeber: jagguli: Have you found the vim documentation telling you how to write indent expressions?
+20:23  caruso_g: Hi, I have a text like:
+20:23  caruso_g: h5. title
+20:23  caruso_g: h6. title
+20:23  caruso_g: *strong*
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:23  caruso_g: h5. title
+20:23  caruso_g: h6. title
+20:23  caruso_g: *strong*
+20:23  caruso_g: an item list
+20:23  caruso_g: an item list
+20:24  Nyoxi: don't do that
+20:24  _rane: lol
+20:24  caruso_g: Oh…
+20:24  caruso_g: sorry
+20:24  elik: caruso_g: that is very annoying
+20:24  caruso_g: I forgot to paste it. I apologize.
+20:25  caruso_g: I am really sorry.
+20:25  MarcWeber: caruso_g: or use ZenCoding syntax :) Start talking about your problem.
+20:25  caruso_g: thanks, and sorry again
+20:26  caruso_g: I was saying, I have a some blank lines in between as well
+20:26  caruso_g: I would like to use a RE to ass to list items a "* " to make them ul (it's textile)
+20:26  caruso_g: but I was not able to build a RE to do that, could you help me?
+20:27  MarcWeber: caruso_g: Paste two lines. One which shows how it is and one which shows how it should look like.
+20:28  caruso_g: how it is: a list item
+20:29  caruso_g: how it should be: * a list item
+20:30 --- agruman_ is now known as agruman
+20:30  caruso_g: before: http://pastebin.com/mfdjNded
+20:31  peth: caruso_g: you got to find out how they can be singled out. are they the only lines starting with X or not containing Y, or are they indented a special way, or...
+20:32  caruso_g: after: http://pastebin.com/hXxGc6wA
+20:33  caruso_g: peth: yep, I tried to build a RE by using :g!
+20:33  caruso_g: only I don't remeber how to buil a pattern with more logic ORs
+20:34  agruman: i have a problem with swap files in vim, im using clearcase and sometimes i end up editing the same file in different clearcase views, vim then complains that a swap file is already present (and recovery and all that). I dont want the swap file to end in the current dir (which would solve my problem), what i would want is to have a new subdir (or something) in my swapdir based on the view im using in clearcase. Is this possible?
+20:35  peth: in the example you posted, you could do :v/\v^(h\d.|\*)/s/^/ * /
+20:35  peth: caruso_g: ^
+20:35  strull_: agruman: that would invalidate the whole point of them
+20:37  agruman: strull_, why? The problem is that vim thinks the files are identical, when they are in fact not, they share the same name but are completely different versions, perhaps months appart in some cases.
+20:38  agruman: strull_, the problem is only apparent when im editing them at the same time
+20:38  agruman: (as expected)
+20:38  strull_: what does :set dir give?
+20:39  caruso_g: peth: thanks a lot, I only need to avoid blank lines as well so I edited it to: v/\v^(h\d.|\*|^$)/s/^/* /
+20:39  peth: caruso_g: np. to make sure, use \. instead of the .
+20:39  peth: i messed that up
+20:39  caruso_g: peth: but what is the \v^ for?
+20:40  peth: the \v tell the re that ( and | don't need to be \ escaped
+20:40  peth: the ^ is for beginning of line
+20:41  caruso_g: peth: \v that's the trick, I always confuse on escaping and, more, I tried to add ^ on all occurrencies (what and idiot… :) )
+20:41  caruso_g: peth: thanks to much again
+20:41  agruman: strull_, i have it set to ~/.vim_tmp
+20:42  peth: caruso_g: i normally don't use \v but when it gets too much with the (s and |s, it helps :)
+20:42  strull_: try ~/.vim_tmp//
+20:42  agruman: caruso_g, i always use \v (have a / remaped to /\v) and would recommend it
+20:44  agruman: strull_, ok, what does // do? (is it similar to ** and ; )?
+20:44  strull_: :he 'dir
+20:44  agruman: :)
+20:46  agruman: strull_, ah ok, i will try that, but i dont think it will make any difference with CC since the files share the same path as well (it just the CC view that differs)
+20:46  agruman: strull_, thanks for the help
+20:47  strull_: what is CC ?
+20:48  strull_: and if they share the same path then the files are equal, aren't they?
+20:50  agruman: strull_, CC = clearcase, its a vcs
+20:51  caruso_g: agruman: so "v/\v^(h\d\.|\*|^$)/s/^/* /" normally would have been "v/^\(h\d\.\|\*\|^$\)/s/^/* /" right?
+20:55  agruman: caruso_g, i cant really say, but i prefer to always have "very magic", ':help /\v' has a nice summary.
+20:56  peth: caruso_g: that's right
+--- Log closed Tue Jan 18 21:21:56 2011
+--- Log opened Tue Jan 18 21:22:18 2011
+21:22 --- Users 628 nicks [0 ops, 0 halfops, 0 voices, 628 normal]
+21:22  agruman: to find a solution to my problem. which i already have
+21:23  agruman: using :set dir=~/.vim_tmp/$view//
+21:23 --- Channel #vim was synced in 84 seconds
+21:23  agruman: with $view set to the working view, or empty if none (should be one / less above)
+21:35 --- altamic_ is now known as altamic
+21:55 --- y3llow_ is now known as y3llow
+21:57  ThiefMaster: hi, which options do i have if i want to edit remote files (ssh/scp/sftp/ftp/webdav.. i don't care what protocol i use) on windows WITHOUT a shell window being opened every f...ing time i save a file?
+21:57  ThiefMaster: netrw looks nice but has exactly the problem i just mentioned
+21:58  strull_: mount the directory
+22:01  kwtm: ThiefMaster: fish will
+22:01  kwtm: ThiefMaster: Never mind, you said Windows.  Pretend I didn't say anything.
+22:01  ThiefMaster: bah
+22:02  ThiefMaster: < strull_> mount the directory  <- sounds good. is it possible to make vim store its swap file somewhere else?
+22:02  strull_: yes, :he 'dir
+22:03  sachael: hi, I'm trying to use gvim in fullscreen (=maximized window + no titlbar) in KDE/Kwin. However, it seems the monospaced font is restricting the size of the windows, leaving two gray stripes on the bottom and right edges. I really doubt it bit is there a way to remedy that? (res is 1920x1080)
+22:03  ThiefMaster: ty, is it possbile to do this selective only for certain drives (e.g. the one which maps to webdav)? i.e. i want the swap file in the same folder as the file for all files but those on my mounted drive
+22:04  strull_: ThiefMaster: not sure, I doubt it though
+22:05  agruman: strull_, thanks for all the help before.
+22:06  strull_: np, have fun!
+22:22  MattDiPasquale: anyone know how to solve this? http://stackoverflow.com/questions/4729108/vim-replaces-lines-when-i-move-to-a-new-line
+22:23  spiiph: Terminal problems, perhaps?
+22:23  spiiph: That problem description isn't particularly good, though.
+22:23  graywh: lots of people using terminal.app use a bad value for $TERM
+22:23  jamessan: and why not just configure $EDITOR (or hg) so that it uses macvim?
+22:23  rindolf: MattDiPasquale: sounds like a terminal problem.
+22:24 * graywh only uses macvim on os x, even in the terminal
+22:28 --- ISF_ec09 is now known as ISF
+22:29  patrick99e99: is there a way to get vim to display ansi color codes?  I am trying to edit a document and it's full of " ^[[4;35;1m"
+22:29  patrick99e99: making it very hard to read...
+22:29  graywh: look at AnsiEsc.vim
+22:30  patrick99e99: thanks
+22:30  graywh: and vim 7.3 has the conceal patch included...
+22:30  MattDiPasquale: rindolf: how do i fix terminal problems?
+22:30  homekevin: MattDiPasquale: What is your terminal, $TERM, and 'term'?
+22:30  rindolf: MattDiPasquale: what does your $TERM say?
+22:31  strull_: someone should patch vim to conceal fold-lines
+22:31  MattDiPasquale: rindolf: xterm-color
+22:31  rindolf: MattDiPasquale: ah.
+22:31  rindolf: MattDiPasquale: and you terminal operator?
+22:31  graywh: emulator
+22:31  rindolf: MattDiPasquale: and you terminal emulator?
+22:31  rindolf: Yes, my bad.
+22:32  homekevin: Stop calling him a terminal emulator. That's so rude.
+22:32  MattDiPasquale: rindolf: how do i find that? It's Mac Snow Leopard standard Terminal app
+22:32  graywh: so, terminal.app
+22:32  MattDiPasquale: 10.6.6
+22:32  MattDiPasquale: graywh: cool. thanks
+22:32  graywh: first problem, $TERM is wrong
+22:32  MattDiPasquale: graywh: what's it supposed to be?
+22:33  graywh: use dtterm instead
+22:33  homekevin: MattDiPasquale: Then make sure 'term' in Vim is the same as $TERM
+22:33  homekevin: If it's still broken then, the terminal description may be wrong.
+22:34  MattDiPasquale: graywh: how do u know it should be dtterm? i don't think i ever changed it..
+22:34  graywh: experience
+22:34  MattDiPasquale: what's the difference? i'd like to read up on those
+22:35  homekevin: MattDiPasquale: The difference is in the terminal description file that applications will use.
+22:35  homekevin: If applications use a description that doesn't actually describe the real terminal being used, things break.
+22:36  MattDiPasquale: homekevin: how do i make sure 'term' is the same as $TERM in vim?
+22:36  homekevin: You might be able to use infocmp to compare xterm-color to dtterm (if it's installed)
+22:36  MattDiPasquale: .vimrc?
+22:36  graywh: just :echo &term
+22:36  homekevin: MattDiPasquale: You should rarely if ever change 'term'. It will be initialized to $TERM
+22:36 --- ISF_ec09 is now known as ISF
+22:36  homekevin: MattDiPasquale: But once Vim is running you can check it as graywh suggested
+22:37  homekevin: Or with :set term?
+22:37  homekevin: But :set term? confuses people on IRC who leave off the question mark.
+22:37  graywh: that's why i like to suggest using :echo &option
+22:37  homekevin: (Which is fine in this particular case, but not in general)
+22:38  homekevin: Clarifying: Leaving off the question mark is fine in this particular case, but it causes the setting to be changed if it's a boolean setting.
+22:38  homekevin: :echo &option is always fine.
+22:39  MattDiPasquale: homekevin: thanks. how do i check 'term' once vim is running?
+22:39  strull_: but this aproach doesn't honor verbose
+22:39  graywh: turns on boolean settings that are off
+22:39  graywh: strull_, true
+22:39  strull_: kind of a dilemma
+22:39  homekevin: MattDiPasquale: That was just explained in great detail
+22:41 --- Unode is now known as _Unode
+22:42  MattDiPasquale: homekevin: oops. sorry bout that. didn't see that. got it
+22:45  MattDiPasquale: homekevin: :echo &term doesn't show anything
+22:45  MattDiPasquale: homekevin: when i do vim README.txt it doesn't
+22:45  MattDiPasquale: when i just do vim, it shows xterm-color
+22:45  MattDiPasquale: and works fine
+22:45  MattDiPasquale: when i open old files, it's blank
+22:46  spiiph: uh?
+22:46  spiiph: That's not possible.
+22:46  spiiph: Sounds like terminal problems, once again.
+22:46  homekevin: Anything's possible gremlins.
+22:46  homekevin: That's my guess. Gremlins.
+22:51  MattDiPasquale: spiiph: actually, i think it's just that i can't see what it is returning
+22:51  homekevin: That was supposed to be "Anything's possible with gremlins"
+22:52  homekevin: MattDiPasquale: What about :verbose set term??
+22:52  homekevin: With one question mark
+22:52  homekevin: Or zero, in this case.
+22:53  homekevin: I mean, it sounds like you already confirmed it's still being set to xterm-color, MattDiPasquale. Maybe you should focus on why that is.
+22:54  MattDiPasquale: homekevin: that just returns ll
+22:54  MattDiPasquale: now it doesn't even work when i just start it with vim
+22:54  MattDiPasquale: homekevin: but i don't think that's really what it is. it's just that i can't see the output i think
+22:54  homekevin: MattDiPasquale: Have you tried using CTRL-L to redraw the screen?
+22:54  MattDiPasquale: homekevin: it's all messed up
+22:55  homekevin: If things aren't being drawn correctly, CTRL-L may help.
+22:57  MattDiPasquale: homekevin: in vim or just in :q
+22:57  homekevin: It generally works anywhere in the terminal
+22:58  homekevin: But you can't see Vim's output if you've closed it.
+22:58  MattDiPasquale: homekevin: that worked. i can see it says xterm-color now. but it still gets messed up when i move up and down
+22:58  peth: MattDiPasquale: verify that it's indeed being swallowed with :echomsg &term and :messages
+22:58  homekevin: MattDiPasquale: We've established that xterm-color is wrong.
+22:58  MattDiPasquale: it like copies the lines 6 lines below to wherever my cursor is
+22:59  homekevin: MattDiPasquale: Don't care.
+22:59  MattDiPasquale: homekevin: how do i change $TERM?
+22:59  homekevin: xterm-color is wrong. Anything can happen.
+22:59  homekevin: MattDiPasquale: You can do it temporarily from the command line like this: $ TERM=dtterm
+22:59  graywh: MattDiPasquale, terminal.app preferences
+22:59  graywh: no $
+23:00  homekevin: As for how to do it more permanently, it depends on your terminal and I wouldn't know. I trust graywh, though.
+23:00 --- ISF is now known as ISF_
+23:00  denisesball: hey all. would anyone mind explaining why in vi regexs operators have to be prefaced with a backslash?
+23:01 --- ISF_ is now known as ISF__
+23:01 --- ISF__ is now known as ISF
+23:01  spiiph: denisesball, vi regexps are OOOOOOOOOOOOOOLD (true story)
+23:03  homekevin: Back in olden tymes you had to put backslashes on everything
+23:04  peth: also it makes sense. either you mark all characters that you want to have special meaning or you mark characters to not have their normally special meaning. vim chooses to have you mark special meaning so you can type literal meaning most of the time
+23:04  homekevin: That lasted until the great backslash shortage of '72
+23:04  graywh: people think larry wall invented regex
+23:04  tbranyen: larry hilarious
+23:04  denisesball: its just funky when you learn regexs the opposite way and really not much else does it that way
+23:04  homekevin: He invented grep, right?
+23:05  graywh: homekevin, perl
+23:05  spiiph: denisesball, context switching!
+23:05  homekevin: Oh. But he invented the backslash, right?
+23:05  graywh: grep comes from ed, and thus shares the same regex history as vi/vim
+23:05  graywh: :g/re/p
+23:05  homekevin: Wait, didn't he invent newlines?
+23:06  homekevin: That's why . doesn't match a newline. They weren't invented yet.
+23:06  graywh: does . match a newline in perl?
+23:06  denisesball: graywh: no
+23:06  homekevin: You can use newlines in perl now?
+23:08  MattDiPasquale: homekevin: I changed it to dtterm, but it's still messed up.. it might be something with git...
+23:08  homekevin: Don't be so hard on yourself.
+23:08  cjuner: on my system (default Ubuntu install) with my custom .vimrc, vim does not remember the last entered commands after exiting. What's wrong? Do I have to set some option? (which I might have accidentally unset?
+23:08  MattDiPasquale: cause it first happened when doing a git rebase -i HEAD~5
+23:08 --- hacker is now known as Guest4304
+23:08  homekevin: MattDiPasquale: You are using a modified Vim?
+23:08  graywh: cjuner, check the permissions on .viminfo
+23:08  graywh: and stop doing "sudo vim"
+23:09  homekevin: I don't think it's reasonable to ask us to debug your modified Vim.
+23:09  MattDiPasquale: graywh: thanks. still didn't work tho... maybe git messed it up...
+23:09  denisesball: peth: I'm curious, was that an actual decision made? "we want to type literally most of the time, to regex operators must be backslashed?"
+23:09  cjuner: graywh, d'uh ok thanks, never thought of that
+23:09  MattDiPasquale: homekevin: not that i know of.. native mac snow leopard vim
+23:09  peth: don't think so, denisesball. like graywh said, it's historical development
+23:09  homekevin: MattDiPasquale: Then what does git have to do with it?
+23:10  peth: probably owes it to the decisions ed took
+23:10  graywh: MattDiPasquale, find the mvim script that came with macvim and use that in the terminal
+23:10  MattDiPasquale: git uses vi if you don't have an editor set
+23:10  denisesball: i almost thought it was a unixy thing sinc sed has it too
+23:10  homekevin: MattDiPasquale: OK, what do you get for echo $TERM
+23:10  peth: ed => sed
+23:11  peth: there's a family tree online somewhere
+23:11  denisesball: yeah i know
+23:11  denisesball: just syaing
+23:11  denisesball: but at least if you use -E with grep you dont need to backslash the operator
+23:11  peth: and yes, it is kinda unixy except pcre deemed it unfit for their advanced text processing it seems
+23:11  MattDiPasquale: graywh: i use mvim too, but i want to use vim, not mvim
+23:12  graywh: ??
+23:12  graywh: you can run it in the terminal with -v
+23:12  MattDiPasquale: homekevin: dtterm
+23:12  graywh: or a symlink named vim
+23:13  cjuner: what's mvim?
+23:14  graywh: script for starting macvim from the terminal
+23:14  homekevin: MattDiPasquale: Can you run vim with -u NONE and check 'term'?
+23:15  MattDiPasquale: homekevin: dtterm
+23:16  MattDiPasquale: graywh: maybe i'll just simlink vim to mvim -v then
+23:16  MattDiPasquale: vim & vi
+23:16  MattDiPasquale: graywh: but it'd be nice if vim worked i guess..
+23:16  MattDiPasquale: esp since i think git runs /usr/bin/vim and not the alias vim
+23:17  graywh: don't alias
+23:17  ThiefMaster: is it possible to make vim not hand when writing a file takes some time? i'm someone who usually presses the "save file" shortcut every few seconds and on a webdav drive that's horribly slow
+23:17  homekevin: MattDiPasquale: If the problem still happens when 'term' is dtterm, I don't think there's much I can do. You can start trying to verify the terminfo capabilities are correct, but that's not easy.
+23:18  spiiph: ThiefMaster, learn to trust swap files
+23:18  MattDiPasquale: homekevin: okay. thanks for your help
+23:18  graywh: "ln -s $(which mvim) /usr/local/bin/vim" should be sufficient
+23:18  ThiefMaster: it's hard to get rid of things you did for years ;)
+23:18  spiiph: ThiefMaster, oh, don't I know it.
+23:18  homekevin: ThiefMaster: I think local editing would be a reasonable option to consider.
+23:19  ThiefMaster: not really as i'd have to manually copy files in that case
+23:20  homekevin: Upgrade your network?
+23:21  homekevin: If saving is too slow, and none of the available options are acceptable, you'll have to learn to deal with it being slow.
+23:22  sven^: is there a reason you don't trust the swap files, ThiefMaster?
+23:23  dsetchell: hey all is there a way to pass an argument to autoloads that call functions, like so: `au BufUnload <buffer> call s:myFunc(arg, expand("<abuf>"))`
+23:24  dsetchell: does that "arg" need to be script scoped ( s:arg )?
+23:28  homekevin: dsetchell: I don't see any obvious reason that wouldn't work (sci
+23:28  homekevin: oops
+23:28  homekevin: (script variable or not)
+23:28  dsetchell: homekevin: well the "arg" is a function var and the :au is called in the function. Give E121 variable not defined
+23:28  homekevin: dsetchell: The autocmd may be *created* in a function, but it's not invoked in that scope.
+23:30  homekevin: The variable has to exist in the script's scope.
+23:30  homekevin: So it can be s: or g:.
+23:30  dsetchell: homekevin: yeah, kinda what i was thinking, cool. Are their buffer local vars?  My concern is that there could be more than one of these buffers open at once
+23:30  dsetchell: so I need a different actual storage for each buffer
+23:30  dsetchell: so script local would only equal one of the values if two+ buffers were open
+23:30  homekevin: Yes there are buffer-local variables, but I would
+23:30  homekevin: oops.
+23:30  homekevin: Stupid Enter key.
+23:30  dsetchell: homekevin: heh :)
+23:31  homekevin: Yes there are buffer-local variables, but I wouldn't count on the current buffer being the one you want at the time the command is invoked.
+23:31  homekevin: Maybe for BufUnload it would be.
+23:31  homekevin: I've learned not to assume autocmds work in a sensible way.
+--- Log closed Tue Jan 18 23:35:29 2011
+--- Log opened Tue Jan 18 23:40:54 2011
+23:40 --- Users 615 nicks [0 ops, 0 halfops, 0 voices, 615 normal]
+23:42 --- Channel #vim was synced in 81 seconds
+23:42  iaj: Ok so here I go, I got 3 question at once.. First is more like a poll - for those of you who use relativenumbers - how do you handle to delete, 13 lines for example? eg. delete to the 13. offset..?   Second one: How can I have (when everything is folded) the fold open when I search for something by / and then hit <CR> ...   And last one is: I have :map <tab> %  but somehow my tab acts not like the % key ... how comes?
+23:44  homekevin: For #3 I'm pretty sure the problem is poltergeists.
+23:44  Araxia_: iaj: #2: :help 'foldopen'
+23:44  fow: iaj, 1: d13j 2: if I understood the question correctly, it does that for me already 3: what homekevin said/how does it work?
+23:45  fow: *how does it act
+23:46  iaj: on a </div> it only jumps from < to > and back... % goes back to the opening div.
+23:46  iaj: omg... ok.. sorry.. I just found out...
+23:47  iaj: nevermind.. its still there.. :map <tab>   gives:  v <Tab> * %
+23:47  homekevin: See, I knew it was poltergeists.
+23:47  iaj: n <Tab> * %
+23:47  rson: iaj: what do you want tab to do?
+23:47  homekevin: iaj: % is mapped to something else.
+23:48  homekevin: iaj: And you used noremap.
+23:48  iaj: Hmm oh I simply need to use :map ?
+23:48  homekevin: In short, you told it *not* to do what % does.
+23:48  homekevin: You told it to do what % did before it was mapped to something else.
+23:49  jkyle: Is there a setting that'll keep vim from jumping to the error line when running the makeprg?
+23:49  iaj: I see, thanks y'all :-)
+23:49  iaj: Now just the foldopen problem left.
+23:50  bairui: jkyle: :help :make
+23:50  iaj: Hmm my 'foldopen' contains 'search'
+23:50  Zone: when copying and pasting a long line from a small terminal window into a large terminal window, the line breaks where it visually wraps in the small terminal window instead of at the actual line breaks.  Using Debian, rxvt-unicode/Eterm.  Solution?
+23:51  iaj: Strange thing is, when I use /foo it doesn't work, but n afterwards opens it then.
+23:54  rudi_s: Zone: Does :set paste work? (Disable after the paste with :set nopaste).
+23:54  rudi_s: You could also try "*p or "+p if your vim supports the X11 clipboard.
+23:55  Somelauw: When joining lines, and the first line doesn't end on a space, vim will automatically insert a space.
+23:56  rson: Somelauw: unless you uses gJ
+23:57  Zone: rudi_s: :set paste and "*p both do the same as highlight-and-paste
+23:58  bairui: Zone: what does   :set wrap? textwidth?   say? (both with ?)
+--- Log closed Wed Jan 19 00:00:10 2011

@@ -1,0 +1,83 @@
+--- Log opened Mon Jan 10 00:00:50 2011
+00:03  blueyed: I would like to prefix each value returned from a glob.. e.g. "foo:{*}" would list all files, refixed by "foo:". I remember having seen something like that..
+00:04  Mikachu: blueyed: *(e:'REPLY="foo:$REPLY"':)
+00:05  fow: you need to use something other than :
+00:06  blueyed: yes, using "," it works. Thanks.
+00:24  blueyed: Can I make the selector at the end apply to all matches, not to every alternative from curly braces? E.g. *{a,a}*([1,5]) should only list 5 items.
+00:25  fow: use (a|b) instead of {a,b}
+00:26  blueyed: ok. makes more sense anyway, since it should exist, correct?
+00:26  Mikachu: yeah, i always make that mistake :)
+00:26  fow: yeah
+00:26  Mikachu: blueyed: {} expands before globs, so it's as if you wrote two separate glob patterns
+00:26  blueyed: Thanks. I see. Makes sense.
+00:41  blueyed: Given an array, how can I pass this as command args (elements may contain spaces). "rsync ... ${(q)array}"?
+00:41  Mikachu: why the (q)?
+00:45  blueyed: otherwise it gets split on spaces (by rsync)
+00:45  Mikachu: so what's the problem?
+00:47  blueyed: they should not get split on spaces.. it works like above.. I am just unsure if it's the right way.
+00:50  blueyed: I would have expected that it works without "(q)", as in zsh makes each array element an argument to the command.
+00:50  Mikachu: if rsync splits it, there's not much zsh can do about it
+00:52  blueyed: I thought there was some difference between arg passing. Just like using RSYNC_OPTS="-a -v" with "rsync $RSYNC_OPTS" does not work (because it gets passed as a single argument).
+00:53  Mikachu: i can't know, you haven't told me what is in the array or what ... is
+00:53  Mikachu: and also, i only barely know how rsync works
+00:53  Arrowmaster: can you use "-av" instead?
+00:54 * Arrowmaster never uses rsync either
+00:54  blueyed: Arrowmaster: that would work probably.. I am using an array for this (opts) now.
+00:54  blueyed: the other array contains paths, which may contain spaces.
+00:55  blueyed: I would need to pass them like $string is passed (with the opts): as a single argument.
+00:55  Arrowmaster: i know it depends entirely on the command, some have options that you cant combine into a single argument so it wont work for all so there has to be a better solution
+00:55  blueyed: rsync is like any other prog in this regard I think.
+00:56 * Arrowmaster knows his way around a shell pretty well but is no expert
+00:57  blueyed: a=("1" "2 3" 3); print -l $a; print -l ${(q)a} - it is the same in this regard.
+00:58  Mikachu: you are maybe confusing yourself there
+00:58  Mikachu: print interprets escapes, you want print -r -l
+00:58  blueyed: ..also when passed to rsync now. must have messed something. yes.
+00:59  blueyed: ah. differs now. but a quick test using rsync instead of print showed the same error (used "2 3" too)
+02:31  peth: this isn't really a zsh question: i know it's possible to trap sigwinch on term resize. can i use that somehow to automatically reformat open man pages?
+02:40  Mikachu: sure, just write a manpage viewer that listens to sigwinch
+02:46 --- adj_ is now known as KarlHungus
+02:46  peth: will get right on it :p
+02:47  Mikachu: TRAPWINCH() { echo winch wonch }
+02:47  Mikachu: resize terminal, see output
+02:48  Mikachu: run cat, resize terminal, no output
+02:48  Mikachu: zsh is not involved while you are looking at the manpage
+02:50  peth: didn't think it through. i did a similar test myself, but had hoped for some alien magic.
+02:51  thrig: alien magic tends to crash the mothership (see: Independence Day)
+03:09 --- peth_ is now known as peth
+04:42 --- f|l is now known as f8l
+07:58 --- wuehlmau1 is now known as wuehlmaus
+--- Log closed Mon Jan 10 08:42:48 2011
+--- Log opened Mon Jan 10 11:13:22 2011
+11:13 --- Users 154 nicks [0 ops, 0 halfops, 0 voices, 154 normal]
+11:14 --- Channel #zsh was synced in 76 seconds
+--- Log closed Mon Jan 10 12:48:20 2011
+--- Log opened Mon Jan 10 13:29:41 2011
+13:29 --- Users 154 nicks [0 ops, 0 halfops, 0 voices, 154 normal]
+13:31 --- Channel #zsh was synced in 93 seconds
+14:44  nics: Hi all, I've just switched from bash to zsh. How can I get colored completion?
+14:45  nics: Setting ZLS_COLORS="d" doesn't worl
+14:47  peth: what do you think that should do, and why?
+14:48  nics: peth: I think that it should color my directories in a listing I get when hitting TAB.
+14:52  peth: try man zshmodules | less -p 'Colored completion listings' and man zshcompsys | less -p '^\s*list-colors'
+14:57  zizo: Hi all, is there a function similar to "history-search-backward/forward" which searchs for the whole typed string or similar to "history-beginning-search-backward/forward" which moves the cursor to the end of the line? Thanks
+14:58  nics: peth: Thank you very much!
+15:02  Mikachu: zizo: the way the search works is it looks at the string up to the cursor, so if you move it to the end, you can't search anymore
+15:20  zizo: Mikachu: and something similar to history-search-backward but which searchs for the full string and not also the first word?
+15:20  Mikachu: that's what history-beginning-search-backward/forward does
+15:21  zizo: Mikachu: ok, thanks
+--- Log closed Mon Jan 10 17:47:21 2011
+--- Log opened Mon Jan 10 17:53:30 2011
+17:53 --- Users 155 nicks [0 ops, 0 halfops, 0 voices, 155 normal]
+17:54 --- Channel #zsh was synced in 80 seconds
+18:03 --- probably_ is now known as probablycorey
+19:30 --- mren|off is now known as mren
+--- Log closed Mon Jan 10 20:52:54 2011
+--- Log opened Mon Jan 10 20:53:15 2011
+20:53 --- Users 155 nicks [0 ops, 0 halfops, 0 voices, 155 normal]
+20:54 --- Channel #zsh was synced in 81 seconds
+--- Log closed Mon Jan 10 21:19:29 2011
+--- Log opened Mon Jan 10 21:24:50 2011
+21:24 --- Users 153 nicks [0 ops, 0 halfops, 0 voices, 153 normal]
+21:26 --- Channel #zsh was synced in 80 seconds
+21:59 --- pothos_ is now known as pothos
+--- Log closed Tue Jan 11 00:00:53 2011

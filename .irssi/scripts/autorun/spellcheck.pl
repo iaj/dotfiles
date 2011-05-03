@@ -1,0 +1,1 @@
+/Users/iaj/.irssi/scripts/spellcheck.pl

@@ -1,0 +1,552 @@
+--- Log opened Wed Nov 24 13:41:41 2010
+13:41 --- Users 565 nicks [0 ops, 0 halfops, 0 voices, 565 normal]
+13:41 --- Channel ##linux was synced in 1 seconds
+13:41  iaj: hey there
+13:41  iaj: does anyone know whether theres a shell utilty to convert CSV to xls?
+13:42  lautriv: iaj, you jbow you're in ##linux ?
+13:43  iaj: lautriv: i don't know where else I could ask.. heh because of the commandline utility
+13:43  iaj: I thought that would be the 'right' place to ask
+13:43  petisnnake: how can I print the date in simple dd/mm/yy format? I've tried date "%D", date(%D), nothing works
+13:43  lautriv: sickn3ss, APM is deprecated, not even sure your box does the trick.
+13:44  zooz: I have a general LVM and dd question
+13:44  zooz: let's say my current directory is /root which is on /dev/vg/lv0 logical volume
+13:44  zooz: I take a snapshot of /dev/vg/lv0
+13:45  zooz: and I want to create an image of that snapshot at block level
+13:45  zooz: using for example dd and piping everything out to gzip to compress empty space
+13:45  zooz: so does my snapshot grow as I am taking an image of it?
+13:45  gordboy: petisnnake: try date +%x
+13:45  ananke: zooz: uhmm, you made sense until the last question :)
+13:45  petisnnake: gordboy: thanks so much
+13:45  zooz: ananke, what do you mean?
+13:46  sedulous: petisnnake: %x depends on your locale. date +%d/%m/%y is locale-independent.
+13:46  blip-: hi all, I'm attacking a USB device and trying to find out what ttyUSB device it's getting mapped to:  dmesg | grep FT232  -> [ 1117.466393] usb 3-4: Detected FT232RL   ...............  does that mean it's /dev/ttyUSB3 , 4 ?  or I need more info from another place ?
+13:46  blip-: *attaching
+13:46  ananke: zooz: what exactly are you concerned about?
+13:47  zooz: ananke, my concern is that if I am in the directory which is on the LV I've taken a snapshot of
+13:48  Psi-Jack: zooz: And what exactly are you using to take said snapshot?
+13:48  zooz: and if I use dd to create an image of that snapshot, so the size of an image increases three times
+13:48  ananke: zooz: your cwd has no impact on anything, unless you are creating your image into that directory
+13:48  zooz: Psi-Jack, lvcreate -s ..
+13:48  zooz: ananke, I am creating an image into that directory
+13:48  Psi-Jack: You can make instant snapshots that are also already gzipped to a file, for you.
+13:48  ananke: zooz: then you're doing it wrong :)
+13:49  lautriv: blip-, that usb 3-4 is the bus, no correlation with major/minor or name. just ls -l /dev/ttyUSB* b/c you'll have not that much.
+13:49  Psi-Jack: ananke: You got this one I take it? I'm about to be heading home. :)
+13:49  ananke: Psi-Jack: sure
+13:49 --- lautriv is now known as lautriv|afk
+13:50 * Psi-Jack beats lautriv|afk's auto-afk script to stop doing that nick change. 
+13:50  ananke: zooz: when you create a snapshot, you specify the size of it. now, that size is the amount of space reserved for changes from the moment you take a snapshot, until it's removed. it's the changes on the original LV
+13:51  zwamkat: I'm looking for a MIB lib. for specific Canon printers. I've tried Google, Canon-dev, tried mailing them, I even picked up the phone. Any suggestions?
+13:51  zooz: ananke, I specify exact same size as the origin LV
+13:51  ananke: zooz: by dumping data back into the original LV, you're causing that snapshot to be filled up. and guess what, you'll always end up loosing that battle
+13:52  blip-: I'm confused, ls -l /dev/ttyUSB* only shows USB0..... but I have 3 USB devices connected - granted two of them are mouse/keyboard
+13:52  blip-: lautriv|afk: ^
+13:52  Psi-Jack: zwamkat: Well, what 'specific' Canon printers?
+13:52  zooz: ananke, that was my feeling as well
+13:52  zwamkat: Psi-Jack:  Do you want the model #'s?
+13:52  Psi-Jack: zwamkat: I don't, but you're asking a specific question, without providing specifics obviously needed.
+13:53  Psi-Jack: Just a thought. ;)
+13:53  ananke: zooz: yeah, so now you get to create same amount of changes as your snapshot, so you end with full snapshot at the end [and thanks to lvm, it will just disappear]
+13:53  zooz: ananke, I thought the snapshot is read-only state of the origin LV
+13:53  ananke: zooz: yes, it is. but how do you think it can exist?
+13:53  Psi-Jack: Welp, off I go
+13:53  karthick87: what is the best video/audio capturing program???
+13:54  zooz: ananke, so why does it change its contents if I am making changes to the origin LV?
+13:54  ananke: zooz: the snapshot doesn't.
+13:54  koala_man: blip-: ttyUSB* is only for usb-to-serial adapters
+13:54  zooz: ananke, well clearly it does
+13:54  ananke: zooz: nope, it doesn't
+13:55  zooz: ananke, so why is the size of an image of that particular snapshot is three times larger than of its origin?
+13:55  petisnnake: how can I link [ $a -eq $a2 ] [ $b -eq $b2 ] with an AND, since && doesn't work for me ? thanks in advance
+13:55  petisnnake: in bash*
+13:56  skunkyfone_: petisnnake: && means something different in bash.
+13:56  koala_man: petisnnake: && works fine for you, you just have to put it between the "] [" rather than instead of them
+13:56 --- skunkyfone_ is now known as SkunkyFone
+13:56  petisnnake: koala_man: thanks a lot
+13:56  ananke: zooz: i can't answer that, since i haven't seen any actual data to back that up. i'm still of an opinion you should be dumping the results to another device
+13:56  blip-: koala_man: ah ok.  Yes I have a hardware device that does uses the USB port to talk with some on-board hardware serially.  On other machine it works fine, but on this machine it's unable to find my device
+13:56  blip-: koala_man: ok that's fine. thanks
+13:57  zooz: ananke, sure, if I am dumping the data onto other LV for example everything is fine
+13:57  koala_man: petisnnake: you could also have used [[ $a -eq $a2 && $b -eq $b2 ]]  , which also happens to handle empty vars and vars with spaces
+13:58  petisnnake: oh, thanks so much
+13:59 --- lautriv|afk is now known as lautriv
+13:59  sickn3ss: so any way to tell if I'm running with apm or not ?
+14:00  petisnnake: what is the oppossite of -eq ? i have a feeling it's not -!eq
+14:00  koala_man: -ne
+14:00  lautriv: blip-, ttyUSB is only meant for serial, your device has to load the ftdi-module, mose and kbd are not ttyUSB but /dev/{kbd*|mouse*|event*}
+14:01  petisnnake: ty!
+14:01  koala_man: petisnnake: also note that -eq/-ne is only for numbers. for strings it's = and !=
+14:01  petisnnake: oh, i see
+14:02  sickn3ss: ping pong, so any way to figure out if apm is running ?
+14:03  blip-: lautriv: ftdi is getting loaded as shown by this lsmod output:  "ftdi_sio               37981  0"    "usbserial              39131  1 ftdi_sio"
+14:03  blip-: lautriv: any other idea what the connection issue could be ?   The software is indeed looking for the device on ttyUSB0... I don't get why it cannot find it
+14:04  lautriv: blip-, maybe you forgot some baudrate/parity ? what's the device behind ?
+14:05  karthick87: Is it possible to have seperate X screen with seperate sound??
+14:05  blip-: lautriv: device isn't commercial, it's something internal part of a small project.  It works on Windows and Linux just fine on all desktops and laptops I've tried.  Except for this Ubuntu 10.04 laptop.   There is one difference though - I'm using GCC 4.4 on this laptop rather than 4.2 on others
+14:05  blip-: would be really strange if GCC can cause this though :/
+14:06  lautriv: blip-, i doubt that'S gcc but ubu, check ya freakin selinux/appArmor and what the hell they carp up.
+14:07  blip-: lautriv: ok. one more thing that's different is a libboost version, I haven't looked at the connection could but that also shouldn't affect things
+14:07  blip-: *connection code
+14:07  lautriv: blip-, you know the device on the other side ?
+14:07  blip-: damn baboontoo
+14:07  blip-: lautriv: what do you mean by device on other side ?
+14:08  blip-: the hardware ?
+14:08  lautriv: blip-, yep
+14:09  blip-: It's a Lenovo laptop.  I'm connecting to it a non-commercial educational device, it's a simple circuit board with some firmware and micro processor.  It connects to PC via usb port - the PC-side software then looks for it on several ttyUSB locations including USB0
+14:09  blip-: lautriv: ^
+14:10  lautriv: blip-, let me ask in other words........do you know the proper baudrate/parity etc. and is this thingie console-like ?
+14:10  blip-: lautriv: ah
+14:10  blip-: no sorry I don't have that info
+14:11  blip-: I just remembered, I have instructions to access the device via serial port with that info.  I'll test it out
+14:11  lautriv: blip-, try a simple "screen ttyUSB0,9600"
+14:12  blip-: lautriv: yes here is the info http://pastey.net/143235-2jm8
+14:13  blip-: does linux have something like HyperTerminal ?
+14:13  lautriv: blip-, "screen ttyUSB0,57600" then
+14:13  grindcrusher: minicom
+14:14  blip-: lautriv: Cannot Exec 'ttyUSB0,57600'.  No such file or directory
+14:14  blip-: tried /dev/ttyUSB0... same
+14:15  SkunkyFone: blip-: minicom
+14:15  blip-: yep trying now
+14:15  SkunkyFone: blip-: or kermit or ....
+14:17  lautriv: blip you need apt-het install screen
+14:17  lautriv: *get
+14:17  SkunkyFone: screen doesn't talk to serial ports
+14:22  lautriv: SkunkyFone, it does, use it myself
+14:23  blip-: lautriv, grindcrusher, SkunkyFone:  When you connect to the device over serial, the firmware spits out diagnostic info.   I was unable to connect... this confirms that there is a Linux/hardware connection issue and the problem isn't related to the device's PC-side software
+14:23  blip-: I'm using Putty to connect.  Work fine on other machines
+14:24  lautriv: blip how did you connect now ?
+14:24  lautriv: blip *try to*
+14:24  blip-: oh wait I think I found something. 1 minute
+14:25  sickn3ss: darn still can't find a way to shutdown my laptop with acpi=off
+14:26  dyek: Hi! Is there a way I can capture the kernel stack of a process that is put to sleep when the process was running in the kernel mode?
+14:28  lautriv: sickn3ss, what forces you to acpi=off ?
+14:28  sickn3ss: lautriv, OS won't boot unless it's off
+14:28  sickn3ss: I get blank screen at boot
+14:28  lautriv: sickn3ss, what os ?
+14:28  sickn3ss: lautriv, Backtrack 4 R2
+14:28  sickn3ss: need it for work O_o
+14:29  lautriv: sickn3ss, HAHA
+14:29  sickn3ss: lautriv, w00t ?
+14:29  lautriv: sickn3ss, BT for work
+14:29  sickn3ss: lautriv, I work as a security administrator in a phone company
+14:29  sickn3ss: so yea I kind of need it
+14:29  lautriv: sickn3ss, what machine ?
+14:30  sickn3ss: lautriv, fujitsu siemens esprimo mobile v6535
+14:30  sickn3ss: I think it's a bug with this kernel
+14:30  sickn3ss: only the latest version os BT with this kernel requires acpi=off
+14:30 * Psi-Jack- beats lautriv again just for good sense of his |afk script.
+14:30  sickn3ss: other distros work
+14:30  lautriv: sickn3ss, what card ?
+14:30  sickn3ss: lautriv, video card ?
+14:31  lautriv: Psi-Jack-, just to tell ppl "don't tell to a wall"
+14:31  lautriv: sickn3ss, yes
+14:31  sickn3ss: lautriv,  Intel Corporation Mobile 4 Series Chipset Integrated Graphics Controller
+14:32  lautriv: sickn3ss, ever tries to either use vgafb or set some default ?
+14:32  Psi-Jack-: lautriv; Heh, yeah, but it's still annoying. /away is sufficient, and most IRC clients these days, GUI-oriented, will show you're in away mode. ;)
+14:32  sickn3ss: lautriv, nop
+14:33  lautriv: Psi-Jack-, may i tell you what else in this channel is annoying ?
+14:33  Psi-Jack-: lautriv: Trolls that want to cause trouble? ;)
+14:33  lautriv: Psi-Jack-, at least :)
+14:33  Psi-Jack-: heh
+14:34  lautriv: ok, then
+14:34 * lautriv goes away :P
+14:36  sickn3ss: lautriv, any ideas ?
+14:37 --- TDNet is now known as TDNet|Mac
+14:38  karthick87: what is the best video/audio capturing program???
+14:47  SolomonKull: recordmydesktop, cheese and kdenlive
+14:47  SolomonKull: screencasts, webcam and editing\
+14:47  gordboy: depends on what capture means tho :)
+14:47  SolomonKull: Adacity for audio.
+14:47  SolomonKull: audacity*
+14:48  gordboy: i find cp works pretty well for .avi files
+14:48  SolomonKull: hurp durp
+15:12  pythonholum: does anyone know of an undelete program for ext3 filesystem that works? I need to delete a file that is on an lvm volume ( spanned accrosed 2 physical disk's ) that is formated in ext3, I did a rm -rf /disk/* and need one file off of there
+15:13  pythonholum: cost does not matter at this point
+15:14  ananke: pythonholum: photorec
+15:14  ananke: or foremost
+15:15  pythonholum: ananke: thanks, ill look into htem
+15:15  pythonholum: them
+15:16  ananke: of course, first things first: make sure you don't write to that filesystem until you recover everything you wanted
+15:16  Dominian: I've heard good things about photorec
+15:16  brammator: I have some kind of server that receives http-queries like "GET /path/execute?par1=val1&par2=val2&.." and answers are like <?xml version="1.0" encoding="windows-1251"?>\n<data id="333349" status="ok"/>
+15:17  brammator: how to handle and use that from perl?
+15:17  Dominian: You might be better off asking in #perl
+15:17  brammator: I mean, with minimal re-inventing (currently script utilizes system(/usr/bin/wget ...) and parses output)
+15:17  ananke: brammator: and perl has XML::Parse, etc
+15:18  Dominian: my point is, its a programming issue, not something directly involving linux itself..
+15:18  Dominian: best asking in #perl
+15:18  karthick87: I cant connect to freenode.It says that i have open proxy.I have installed squid in a standalone system to block some sites and downloads.How to enable squid authentication?Can anybody help me??
+15:19  crashanddie: karthick87, don't allow connections from the outside
+15:19  ananke: karthick87: likely you have an open proxy to the world. easiest thing to do is to limit the IP ranges of acceptable clients
+15:19  crashanddie: karthick87, only from your local (non-routable) IP address
+15:20  karthick87: Oh oke i will tried that then
+15:20  karthick87: Oh oke i will try that then
+15:21  ananke: squid has documentation on it
+15:21  Number5_: hello guys, it's about C programming. To use strnlen() I included <string.h> and #define _GNU_SOURCE, according to the manpage. But still get a warning of implicit function declaration. I use Debian Lenny.
+15:22  pythonholum: does anyone know can gzip be appended?, for example could I do cat file1.txt|gzip > text.gz && cat file2.txt| gzip >> text.gz
+15:23  crashanddie: pythonholum, yes
+15:24  pythonholum: ok :) good, thanks :)
+15:24  Fieldy: as far as I know it cannot be appended
+15:25  Number5_: sorry my fault, I solved it now by define it in the Makefile.
+15:25 --- JmZ_ is now known as JmZ
+15:25  Number5_: make -D_GNU_SOURCE
+15:25  crashanddie: Fieldy, sure it works
+15:26  Number5_: or more precisely: gcc -D_GNU_SOURCE
+15:28  Compgenius999: hey guys, is there support for the xbox 360 wireless adapter in the kernel yet?
+15:29  Compgenius999: can't find anything about it on google,
+15:30  crashanddie: Compgenius999, IIRC, there's some module you need to compile/load
+15:32  crashanddie: Number5_, you need to define the _GNU_SOURCE before including.
+15:33  blip-: lautriv, SkunkyFone: sorry I had to go for a while.  I discovered a strange thing, I am able to connect to the device over ttyUSB0 only if I run the program as admin ?  ie sudo etc...    Do you think I need to be in a particular group ?
+15:33  Number5_: crashanddie: yes exactly, I also did that and the warning dissapeared :) But thnx anyway.
+15:33  sickn3ss: anyone know if running kernel with noapic acpi=off can damage my laptop ?
+15:34  Compgenius999: sickn3ss, only if your laptop fans use ACPI
+15:34  Compgenius999: if they do, generally they'll just be stuck at full speed.
+15:34  Compgenius999: other than that, i'd say nothing really
+15:34  sickn3ss: Compgenius999, aaa I don't really know if they use ACPI, how do I determine that ?
+15:34  sickn3ss: and is it bad if they run at full speed ? :))
+15:36  gordboy: sickn3ss: how many times are you going to ask that question ?
+15:36  SkunkyFone: sickn3ss: yes.
+15:36  sickn3ss: gordboy, yea I know I got it that it's safe, just having that darn shutdown issue
+15:36  sickn3ss: that's what I'm concerned about
+15:37  gordboy: try another distro maybe. which one you using ?
+15:37  sickn3ss: gordboy, Backtrack ... I need it for work :))
+15:37  sickn3ss: I think it has something to do with thie kernel
+15:38  sickn3ss: 2.6.35.8 O_o
+15:38  sickn3ss: previous kernel worked fine with acpi
+15:38  gordboy: no, you most certainly do *not* need it. backtrack doesn't have anything that other major distros don't have
+15:38  lautriv: blip-, it's the device itself
+15:38  sickn3ss: gordboy, I work as a security admin at a phone company,
+15:38  gordboy: and ?
+15:38  sickn3ss: yea I can get tools manually on other distribution
+15:38  sickn3ss: but it will take ages.
+15:39  blip-: lautriv: but how come it doesn't need running as root on other machines ?  I have 2 Linux laptops in front of me... one works fine as normal user, the other needs to be run as root
+15:39  gordboy: security admin ? you don't have a clue about admin. come on, let's get real here
+15:39  blip-: I added myself as member of tty group, didn't help
+15:39  sickn3ss: gordboy, I'm serious O_o ...
+15:39  SkunkyFone: blip-: did you log out and log in again?
+15:39  SkunkyFone: blip-: groups info is only read at login
+15:39  blip-: SkunkyFone: ooh I thought was enough to start a new shell.  thanks
+15:40  crashanddie: gordboy, I've been a security expert for major banks, governments and telco companies, and have rarely had to slap out Backtrack.
+15:40  lautriv: blip-, ls -l /dev/ttyusb will show you the owner, maybe you need another group or some udev-rule to change permission.
+15:40  crashanddie: gordboy, sorry, wrong nick
+15:40  sickn3ss: crashanddie, I am aware I could get those tools on another distro, but the problem is time O_o
+15:41  crashanddie: sickn3ss, just get your company to buy you VMWare or run Backtrack inside virtualbox
+15:41  crashanddie: sickn3ss, trust me, you do *not* want those tools on the same partition as your corporate documents
+15:41  blip-: lautriv: on both laptops /dev/ttyUSB is owned by user root and group dialout.  Does that mean I need to be member of dialout or tty group ?
+15:41  sickn3ss: crashanddie, well yes that will work, but Injection support is lost without USB wireless
+15:41  sickn3ss: can't use the whole CPU
+15:41  lautriv: blip-, sure
+15:42  SkunkyFone: blip-: dialout
+15:42  blip-: brb
+15:42  crashanddie: sickn3ss, now you're just finding excuses for yourself. I doubt any company worth anything would allow you to run Backtrack on your corporate laptop anyway. Now either fess up, or go ask in #backtrack
+15:43  Cap_J_L_Picard: gordboy: he probably does do more penetration testing and the like, then Backtrack is usefull as it already has the right set of tools on a live CD.
+15:43  sickn3ss: crashanddie, I am a mod there, and i'm the only one having
+15:43  sickn3ss: this kind of issue O_o
+15:43  Cap_J_L_Picard: crashanddie: actually, give me a pen tester who doesn't use backtrack.
+15:43  Cap_J_L_Picard: crashanddie: there is a whole perfectly legal business for it.
+15:43  crashanddie: Cap_J_L_Picard, I've seen quite a few pentesters, never seen one who ran backtrack natively
+15:44  sickn3ss: crashanddie, it's a laptop only for pentesting
+15:44  Cap_J_L_Picard: crashanddie: I would only on a clean laptop straight from the liveCD
+15:44  sickn3ss: I have another one for my daily usage
+15:44  sickn3ss: and a PC
+15:44  gordboy: Cap_J_L_Picard: maybe i was a little harsh. but this pantomime has been going on for days. he could have installed debian or fedora by now, with everything needed. no problem
+15:44  Cap_J_L_Picard: crashanddie: for pentesting purposes only.
+15:44  lautriv: sickn3ss, now, you tried my suggestion ?
+15:45  sickn3ss: lautriv, which one ?
+15:45  lautriv: sickn3ss, changing fb
+15:46  sickn3ss: hmm going to try it now and see what happens if not
+15:46  crashanddie: sickn3ss, why don't you ask your devs then? Or ask the devs of the parent distro? Or provide some useful logs? Or do anything that could remotely be useful?
+15:46  sickn3ss: I'm reverting back to previous
+15:46  sickn3ss: kernel
+15:46  sickn3ss: crashanddie, I told you I'm the only one having the issue
+15:46  Cap_J_L_Picard: gordboy: sure, although when backtrack first came out it was usefull as it came with the packet injection wireless drivers by default, no need to patch and compile them oneselve.
+15:46 * gordboy nods
+15:47  Cap_J_L_Picard: crashanddie: you probably don't want to meet my pentessting memory stick either....
+15:47  Cap_J_L_Picard: crashanddie: that's really fun.
+15:47  crashanddie: Cap_J_L_Picard, yeah, you and the hak5 enterprise crew are really scary.
+15:47  Cap_J_L_Picard: has backtrack to run live on that, amongst other things and distros.
+15:48  Cap_J_L_Picard: crashanddie: are you making fun of my very old nick I got when I was like 15?
+15:48  sickn3ss: lautriv, you want me to use vgafb or not ?
+15:48  gordboy: i'd like to be a penetration tester for hustler. i'm just wondering if my hard drive is big enough
+15:48  Cap_J_L_Picard: gordboy: lols
+15:48  blip-: Skunky:  problem solved.  thanks :)
+15:49  blip-: lautriv left I guess.  thanks to him too
+15:52  lautriv: sickn3ss, i want nothing but if you don't get some screen you should try this.
+16:00  windowshasyou: can anyone think of a reason to go with kde4 over kde3 or xfce?
+16:01  Cap_J_L_Picard: well, kde apps are using the kde4 libs now.
+16:01  Cap_J_L_Picard: and it is prettier.
+16:01  Cap_J_L_Picard: of course, there is xfce and gnome.
+16:05  windowshasyou: Cap_J_L_Picard: I'll pass on gnome... don't want to wait years for gentoo to finish compiling that spaghetti mess of dependencies. everytime I run emerge -avuD world, portage wants to replace kde3 with 4
+16:07  Cap_J_L_Picard: KDE has a spaghetti of dependancies too...
+16:07  Cap_J_L_Picard: and xfce is getting there.
+16:07  linus: Hi, I've got a webserver with virtualmin (php5+apache 2 installed). Everything works perfectly but at times I see some of my sites, which are all using WordPress (not all of them) that have a Error 500 and I've to reboot the machine to fix it, PHP memory was 128M and the server is pretty underused (1-2% CPU in use median) and these are the server logs, what can the problem be?
+16:07  linus: [Wed Nov 24 14:47:08 2010] [warn] mod_fcgid: read data timeout in 31 seconds [Wed Nov 24 14:47:08 2010] [error] [client 78.134.72.224] Premature end of script headers: index.php
+16:08  linus: Please advise if I left out any important information
+16:08  windowshasyou: Cap_J_L_Picard: While thats true for both, it doesn't appear to be anywhere near as bad for kde as it does for gnome. portage shows 53 deps for kde3, 157 for kde4, 41 for xfce, and 703 for gnome
+16:08  Cap_J_L_Picard: linus: Using cgi access to apache not the module?
+16:09  Cap_J_L_Picard: linus: for PHP that is.
+16:09  linus: Cap_J_L_Picard: I don't understand
+16:09  linus: care to elaborate?
+16:09  Cap_J_L_Picard: there are several ways apache can call the PHP interpreter.
+16:10  Cap_J_L_Picard: windowshasyou: that's just cause kde bundles them into bigger tarballs.
+16:11  Cap_J_L_Picard: linus: usually, with apache, there is an apache module that comes with PHP for this.
+16:11  tobylane: anyone know of a program or website that translates language files please
+16:11  windowshasyou: Cap_J_L_Picard: Gentoo counts every little app in those tarballs as separate deps or apps
+16:12  linus: Cap_J_L_Picard: which is mod_fcgid or something else?
+16:12  tobylane: or does someone know where to look
+16:13  linus: PHP script execution mode 	Apache mod_php (run as Apache's user) CGI wrapper (run as virtual server owner) FCGId (run as virtual server owner)
+16:13  linus: I found this
+16:13  gordboy: windowshasyou: maybe gentoo isn't the best idea ever for people in a hurry ...
+16:14  __name__: hi
+16:14  Cap_J_L_Picard: however, that log is mentioning the fast cgi module, which suggest it's trying to run something as cgi, which is a way to run any binary to generate the page (including it can do it with the PHP binary, this is how apache runs other services (perl) or other servers that don't have plugin support manage to run the interpreter).
+16:14  linus: since i own the whole server can i change it to Apache mod_php or I should use the CGI wrapper then?
+16:14  tobylane: how long does a gentoo boot take?
+16:14  __name__: do you know of a tool to downscale all pixel images in a pdf?
+16:14  linus: Cap_J_L_Picard: if you was asking me if I only use PHP on that server the answers is yes
+16:14  linus: were*
+16:15  Cap_J_L_Picard: linus: I'd suggest running it as the module.
+16:16  Cap_J_L_Picard: windowshasyou: KDE doesn't quite allow gentoo to split it up so much. To many libraries depend on each other.
+16:18  linus: Cap_J_L_Picard: apache mod_php then?
+16:18  Cap_J_L_Picard: linus: yes
+16:18  kimjongil:  16:18:56 up 31 days, 12:45, 10 users,  load average: 0.11, 0.12, 0.14
+16:18  kimjongil: yay ubuntu
+16:19  gordboy: kimjongil: 10.04 ?
+16:19  Aufwind: I want to parse some pdf documents for certain parts. (Affiliations) They pdf-files do have the same format. Would it be a good idea to first convert the pdf to xml and then to parse the xml files? Or is there a better approach?
+16:20  kimjongil: 10.4.1 lts
+16:20  kimjongil: yeah
+16:21  kimjongil: is that some kind of record ? ;
+16:21  kimjongil: ;)
+16:21  linus: Cap_J_L_Picard: thank you.
+16:21  linus: Actually I just saw that I have to option of letting FCGID having subprocesses (until now it had none), maybe this can be better or mod_php is still the better option?
+16:21  gordboy: kimjongil: no. but i think i'd want to install the latest kernel 2.6.32-26 pdq
+16:22  kimjongil: gordboy, any remote security exploits?
+16:22  kimjongil: i have 25
+16:22  gordboy: long uptimes is a sure sign of a lackadaisical attitude to security. but hey, it's your business, not mine
+16:23  Cap_J_L_Picard: gordboy: or a sign of overzealous stability.
+16:23  ElectRo`:  16:23pm  up 133 days 23:07,  0 users,  load average: 1.49, 1.82, 1.86
+16:23  tobylane: is that thing that patches the kernel live acceptable from a security point of view
+16:23  crashanddie: bonus points to gordboy for knowing the meaning of lackadaisical
+16:23  kimjongil: electro`, any kernel updates skipped?
+16:25  linus: I'll repeat if anyone from the netsplit didn't read: <linus> Actually I just saw that I have to option of letting FCGID having subprocesses (until now it had none), maybe this can be better or mod_php is still the better option?
+16:25  ElectRo`: kimjongil: its freebsd :)
+16:26  spitzi: diff has a flag for telling it to ignore white spaces. Can it also ignore newlines, i.e. compare two files as two long strings ?
+16:27  crashanddie: spitzi, -B
+16:28  spitzi: crashanddie - but the manual says -B only skips empty lines
+16:29  crashanddie: yes, and?
+16:29  crashanddie: spitzi, cat myfile.txt | tr "\n" "" > myfile_withoutnewlines.txt
+16:30  spitzi: crashanddie - I know I can use tr, I wondered if I could use diff without going through creating intermediate files.
+16:30  ziro`: HELP
+16:30  ziro`: iv started a daemon i cant stop
+16:30  crashanddie: spitzi, but that's effectively what you were looking for, yes?
+16:30  ziro`: i cant find it in a process list
+16:31  spitzi: crashanddie - yes
+16:31  Dominian: ziro`: how did you 'start' it
+16:31  ziro`: its sending 3 emails per minute :P
+16:31  crashanddie: spitzi, no idea how to do that with diff, though, sorry
+16:31  ziro`: sudo perl launcher.pl
+16:31  Dominian: ps aux | grep perl
+16:31  ziro`: no perl running
+16:31  Dominian: ps aux | grep launch
+16:31  spitzi: crashanddie - ok, thanks
+16:31  ziro`: ntohijgn
+16:31  Dominian: ziro`: if its still sending, then something is triggering it
+16:31  kimjongil: electro`, does freebsd never issue security updates to its kernel?
+16:31  crashanddie: ziro`, what app is it from?
+16:31  kimjongil: electro`, i recall it recently had an ipdate
+16:31  ziro`: i made it
+16:31  ziro`: liol
+16:32  ziro`: nothing for launch eaitehr
+16:32  ziro`: there are exactly 3 instances of udevd --daemon though
+16:33  ziro`: the pid it dumped to my txt is non existant
+16:33  ziro`: if i kill those udevd will something go wrong?
+16:33  Dominian: does typing mailq as root reveal anything?
+16:33  mcsmurf: hi, I have a rather strange problem, I want to run Matlab with nohup so that I can close the console I launch the Matlab GUI from
+16:33  Dominian: maybe it shoved a ton of email into the local mail server?
+16:33  mcsmurf: problem is: Matlab only consumes 100% of CPU when I launch it with nohup and the GUI never appears
+16:34  mcsmurf: someone knows an alternative to nohup?
+16:34  __name__: use your window manager?
+16:34  mcsmurf: the KDE run command item in the k-menu has the same problem, GUI never appears..
+16:34  __name__: odd
+16:35  SkunkyFone: start from a screen session?
+16:35  mcsmurf: oh well, maybe I can actually figure out where it spends the 100% cpu ;) (as Matlab itself uses a shell script to launch)
+16:35  mcsmurf: screen session, that could be an idea
+16:35  mcsmurf: I'll try
+16:36  manixor: Hi all.
+16:37  supe: hi
+16:37  mcsmurf: ah, the screen way works
+16:37  ziro`: fs
+16:37  ziro`: im gonna have to restart
+16:37  ziro`: where the fk is the process
+16:37  manixor: It's possible to cat a text file and exclude from output all lines that contains the word "test"?
+16:38  __name__: yes, it is
+16:38  skinder: grep -v?
+16:38  ziro`: seriously how can a process go awol
+16:39  manixor: __name__: How? :)
+16:39  __name__: manixor: what skinder said
+16:40  crashanddie: ziro`, don't write crap code?
+16:41  ziro`: i didnt write anything
+16:41  mcsmurf: :D heh I found out what Matlab does in the 100% CPU loop; looks like it thought it runs in console only (no X)
+16:41  ziro`: my code is
+16:41  ziro`: simple
+16:41  mcsmurf: and writes "Bad file descriptor" to nohup.out many many MANY times
+16:41  __name__: manixor: fail
+16:41  __name__: sorrz
+16:41  __name__: mcsmurf: fail
+16:41  mcsmurf: 700MB log file in only two minutes or so
+16:41  __name__: arghlud dammit different keyboard layouts
+16:47  manixor: skinder: If I need to put more then one word on arg, how to do this?   grep -v "aaa" "bbb" file.txt
+16:49  SkunkyFone: manixor: use egrep?
+16:49  blsecres: manixor: egrep -v 'aaa|bbb'
+16:50  prudhvi: Hi, i added a user to foo group after he is logged in to the system. So, it doesnt show up when he type id on the command line. How can i force it to properly display the newly assigned Group? without forcing him to re-login?
+16:50  blsecres: prudhvi: newgrp
+16:51  prudhvi: blsecres: thanks, Never knew that
+17:01 --- zlinux_ is now known as zlinux
+17:02  Cmdr_W_T_Riker: i didn't know that one, nice
+17:03  Guest30629: has anybody benchmarked gfs vs sshfs?
+17:03  everythingWorks: ok
+17:07  blsecres: aren't they both FUSE based?
+17:09  gordboy: blsecres: is that a bad thing ?
+17:10  moijk: Hi. I'm wondering if it is possible to use a linux box as a "DAS". Not only network storage, but connect a different computer through a firewire 800 or esata for maximum speed?
+17:10  blsecres: nothing wrong with it, FUSE usually means slower
+17:11  coppermine: with lvm can i use a IDE and SATA drive on the same logical drive? i.e vgreate vg /dev/sda1 /dev/hda1
+17:11  moijk: I know I can do that with a mac (only using firewire though), but curious if it is a solution that works with linux?
+17:13  kimjongil: stuff that's written in wxpython
+17:13  kimjongil: how much slower is it than c stuff
+17:15  gordboy: kimjongil: it depends. if you do lots of number crunching, it will be many times slower. if you do one-off dialog boxes then the quick devel time prolly makes it worth it
+17:17  gordboy: kimjongil: altho the granularity matters also. take matlab or octave. it is interpreted, but the actual crunching-routines are lovingly hand-crafted assembler very often. so if you call something 1000 times it will be slow. but if you call it once and it does 1000 things, then obviously that will be much faster
+17:17  prodigel: hi all. I need to duplicate my Escape key so that it replaces the Caps_lock one, usually I'm using xkeycaps for this but now it's breaks my directional keys and who knows what else. I would like to do that editing the .xmodmap file directly
+17:20  gordboy: kimjongil: at the level of bittornado (prolly the best known example of wxpython use) there would be virtually no gain in doing it all in c
+17:20  kimjongil: that's very inform,ative
+17:20  AndyGraybeal: does anyone else remember studying for netware certs?  i'm surprised novell was purchased.  i didn't see it coming.
+17:22  crashanddie: AndyGraybeal, I remember going in and having to recover an LDAP server still running on netware  4
+17:23  crashanddie: well, NDS server, about 2 years ago
+17:23  kimjongil: i remember seeing NOVELL printed on windows login screens
+17:23  AndyGraybeal: crashanddie:  :)  nice
+17:24  kimjongil: then last week, i saw  NOVELL written on linux
+17:24  kimjongil: opensuse was so slow i had to remove it. oh, thankfully
+17:24  hoho`: hello
+17:24  hoho`: is there anyway to recover a deleted but still running perl script
+17:24  hoho`: ?
+17:25  kimjongil: you can recover it from trash
+17:25  kimjongil: or run extundelete on the drive
+17:26  hoho`: hmm tnx
+17:26  blsecres: or restore from backup
+17:29 --- sanchaz-away is now known as sanchaz
+17:29  Cap_J_L_Picard: surely, if it's still running, it'll be technically in the cache/memory.
+17:30  Cap_J_L_Picard: finding it and extracting it out would be the trick.
+17:33  Cap_J_L_Picard: of course, it's probably cached in some bytcode format and not as readable perl code.
+17:33  iratik: What i'm not sure about is exactly how the $PATH environment variable works with respect to cron and user accounts.  I know each user usually has a $PATH .. is there a system wide $PATH definition that each user runs off of adding additional locations ..  or do I just need to always manually set path in crontab ?
+17:36  Cap_J_L_Picard: iratik: it depends if cron reads any of the environment on start, if it reads system environment /etc/profile /etc/bashrc (interactive and non-interactive bash shells).
+17:36  iratik: I guess that would depend on the distro wouldn't it
+17:37  gordboy: iratik: you could just quote full paths
+17:37  iratik: I suddenly don't even understand why i'm asking
+17:37  iratik: you are completely right
+17:40  Cap_J_L_Picard: it depends on the cron implentation, the way it launches the shell...
+17:40  Cap_J_L_Picard: tradition is one just uses full path for cron
+17:40  Ryvius: Help, I'm trying to install Samba but is says "A new version of configuration file /ect/samba/smb.conf is available, but the version installed currently has been locally modified", what do i do??
+17:40  Ryvius: I can install package maintainer's version, keep the local version, or do an experimental 3-way merge
+17:40  Cap_J_L_Picard: Ryvius: debian, or debian based distro?
+17:40  Ryvius: Yes, debian
+17:40  Cap_J_L_Picard: urm, I would diff and merge them manually, but not sure debian's 3 way merge allows that.
+17:42  Cap_J_L_Picard: Ryvius: back up you old config in a seperate terminal.
+17:42  Cap_J_L_Picard: then choose either the experimental, or the package maintainer and check the config afterwards?
+17:43  Ryvius: okay.. I should pick 'start a new shell' then?
+17:43  Ryvius: Please guide me through this, in my darkest hour...
+17:47  Ryvius: ...
+17:47  kavelot: I need a 10 MBs .img of a FAT16 filesystem... any clever ideas on how to get that?
+17:47  mrcarrot: kavelot: use dd
+17:47  kavelot: but first I need to partition my HD?
+17:48  mrcarrot: so what exactly do you want to do?
+17:48  Cmdr_W_T_Riker: kavelot: just use dd to create an 10 MB image, then either create the filesystem directly on the image, or use losetup to loop mount it
+17:49  kavelot: thanks
+17:50 --- ikonia_ is now known as ikonia
+17:52  EdwardIII: hey
+17:53  Ryvius: Okay, if I don't back it up and installs the new version, in worst case scenario, what will happen?
+17:56  EdwardIII: hrm i have a device with 3 NIC interfaces, one of them is plugged into a dhcp-enabled network, easy enough to identify. the other is plugged into a switch with no dhcp, and one is empty
+17:56  EdwardIII: how can i identify the latter 2?
+17:56  EdwardIII: ah, the one that's plugged in will have 'RUNNING' in it's status?
+17:56  salparadise: if I have an SVN repo and I want some users to have access to all dirs. and some other users to only have access to certain dirs. what is the best way to do this?
+17:56  salparadise: but I want everyone to be able to SVN check out from root
+17:57  Ryvius: I'll ask in the debian channel too then, if you don't mind..
+18:00  thebloggu: i have apache installed and i want to put a symbolic link with write execute and read permission for /var/www/ for 4 users. i was able to make a group, assign those users to that group and assign the ownership of folder file to it too as well as chmod 775. i can edit and view files from ssh but i can't open it from a windows machine with winscp. can someone help?
+18:02 --- TomMan81 is now known as TomManAway
+18:03  Crell: Hi folks.  I have been led to believe that the SSH command suite has a directive for "log into this remote system and dump my public key there."  I have not been able to determine what that is from the man pages so far, though.  Can anyone point me in the right direction?
+18:04  vandemar: ssh-copy-id
+18:04  doolph: there's any check if the eth0 has link or not
+18:05  salparadise: doolph: mii-tool
+18:05  Crell: Hm.  That has no man page, at least on my system.
+18:05  Crell: Ah, it has one on Linux, but not on Mac.  Figures.
+18:05  Crell: ... Because it doesn't exist on Mac.  But does on my Linux box.
+18:05  Crell: Mac fail. :-(
+18:06  Crell: vandemar: Thanks, I'll go stab Steve Jobs.
+18:06  vandemar: no surprise there
+18:06  trialbyfire: any recommendations for an open office replacement?
+18:06  vandemar: libreoffice?
+18:06  infojunky: Crell: 'man ssh' might not work on mac, but I'm pretty sure there is a "man page"/readme  for it somewhere on the system
+18:06  Crell: LibreOffice is the direct inheritor.  KOffice is supposed to be pretty good too.
+18:07  Crell: infojunky: Well when I started typing ssh-co and did tab complete, it didn't find anything.
+18:07  salparadise: you can just copy the key, cat ~/.ssh/id-rsa.pub | ssh host "cat >> .ssh/authorized-keys"
+18:07  trialbyfire: vandemar:that looks pretty good actually
+18:07  btfx: Hey guys, I ran "xev" and spied one laptop making an "XF86Display" event using a hardware key. Is there a way I can trigger that event on another laptop (with no such hardware key) somehow?
+18:07  Crell: Which suggests to me it's not there.
+18:07  blip-: lautriv: thanks for the help earlier.  Indeed I needed to be part of the dialup group
+18:07  Crell: Ah, the manual way. :-)  I'll give that a try.
+18:07  doolph: how do I know if a nic has the link up or down?
+18:07  doolph: there's any check?
+18:07  Crell: Thanks.
+18:07 * Crell needs to sign off to do so due to VPN issues.  *sigh*
+18:07  Crell: Thanks guys.
+18:07  infojunky: Crell: mac terminal environment is fairly different than your standard linux dist shell
+18:07  kavelot: Cmdr_W_T_Riker: it seems newfs_msdos doesn't work on normal files ("fat16.img is not a character device")... any suggestions?
+18:07  trialbyfire: thanks vandemar , crell
+18:22  wing0: how can i create an spi device under the /dev directory? i have the drivers compiled in the kernell, but don't know how to access the device... any tips?
+18:23  wing0:  cat /proc/devices shows "153 spi"
+18:24  mcsmurf: usually(?) you use mknot for that
+18:24  mcsmurf: mknod
+18:25  mcsmurf: so like mknod /dev/spi0 c 153 0
+18:31  frozenfoxx: Have a quick question about scripting.  I've been making small and medium-size, purposebuilt scripts for a few years now and feel it'd be a terrible shame to keep that knowledge and experience to myself.  Is there an established site where I could upload these to share them to the world or should I just fire up Blogger or something?
+18:32  frozenfoxx: I found shellscripts.org but it's such a small site I can't determine if it's really going to be around for any period of time.
+18:33  scp1: frozenfoxx, github?
+18:34  frozenfoxx: scp1: I'm actually not overly familiar with github though I've been thinking about it.  Is it really appropriate for a public script repository?  My only experience with it is seeing that projects like Cyanogenmod use it for collaboration.
+18:34  scp1: frozenfoxx, Yes.
+18:34  scp1: frozenfoxx, And git is awesome. And github is awesome.
+18:34  frozenfoxx: scp1: for reference I *do* use SF.net for my small projects (yes, using git as I agree it's awesome)
+18:34  scp1: sf sucks. really
+18:34  scp1: they ban people from accessing their site
+18:34  frozenfoxx: Really?  Seems to do okay by me.
+18:35  scp1: well, not people - countries
+18:35  boos: anyone know a good software for software requirements
+18:35  boos: management ?
+18:35  metalfoo: Project management?
+18:35  mcsmurf: Rational.. ;)
+18:35  boos: yes, for requirements management
+18:36  boos: commercial insert a request
+18:36  scp1: frozenfoxx, yes, you should really use github. Now, go create an account and start pushing!
+18:36  metalfoo: trac, redmine.
+18:36  boos: is handled the process of feature request with revision
+18:36  boos: interdependency
+18:36  boos: test case
+18:36  frozenfoxx: scp1: Hmm, okay.  I'll reserve the right to disagree with you about SF.net being awesome or not though.  :)
+18:36  boos: and son on ?
+18:36  metalfoo: Perhaps you mean a trouble ticket systeam then? Like OTRS
+18:37  metalfoo: system
+18:37  boos: nono, not trouble ticket
+18:37  boos: a software for tracking requirements on software, not bugs
+18:37  scp1: frozenfoxx, http://en.wikipedia.org/wiki/SourceForge#Banned_countries_and_controversy , and I think the whole site just is un-userfriendly and doesnt give you a chance co collaborate, fork, follow and watch projects / people like github does.
+18:38  metalfoo: Well, take a look on either trac or redmine. They should fit for most of your requirements.
+18:38  karthick87: any converter for chm to pdf??
+18:38  boos: ok, i check it
+18:41  versatiletech: how can the root user modify a file that's owned another user. Let's say perhaps test.txt is chmod 700, the root user can edit it. Is it possible to create another user, not with the same all-access level as root, but enough to edit test.text without modifying test.txt's permissions?
+18:42  frozenfoxx: scp1: I can only say I don't have a big problem with them personally, they host a *huge* number of open source projects for free, and have been around forever.
+18:42  frozenfoxx: scp1: Collaboration is a subjective thing, I think.  I personally wouldn't want my collaboration done through the site itself.
+18:42  frozenfoxx: scp1: Give me a central code repository and project hosting, and let my team figure out how we want to communicate.
+18:42  frozenfoxx: Side note, I'm not a career programmer so my methods may be foreign
+18:43  frozenfoxx: I did just now create a github account, though, and will probably set up git later.
+18:43  scp1: frozenfoxx, point being that you dont have to be a team. I can fork your project, make some changes, send you a pull request, and suddenly I've contributed to your project
+18:43  Miesco: Only half of the hostnames I go to get resolved: Host name lookup failure.  What is the first thing to troubleshoot?
+18:43  Dominian: your upstream DNS server
+18:43  frozenfoxx: scp1: I would imagine that's not necessarily something every project wants.  Shouldn't we be happy that SF.net and Github exist to satisfy both?
+18:44  koollman: scp1: it's not there to help people collaborate. it's a free hosting provider, for projects. you have a project, you put it there. it works (mostly). and it's been there since... almost forever, so it helped a lot of projects to get published half-decently
+18:44  scp1: frozenfoxx, take it easy, I'm not beefing. ;) Just telling you why I think github rocks for open source projects
+18:45  scp1: koollman, sure. except that not everybody can access the site
+--- Log closed Thu Nov 25 08:25:10 2010

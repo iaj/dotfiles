@@ -1,0 +1,2815 @@
+--- Log opened Fri Oct 29 00:00:01 2010
+--- Day changed Fri Oct 29 2010
+00:00  [KS]: yah
+00:00  ravenzz: i'd like to do something like
+00:00  ravenzz: if (s('querystring','4')) { doStuffs }
+00:00  Hoe``: jquery doesn't have anything built in for working with select/options, does it?
+00:00  Hoe``: like mySelect.addOption()
+00:00  [KS]: ravenzz: you do not do that inside of success and error
+00:01  [KS]: you just set the variable inside those functions and return it after tje ajax call
+00:01  [KS]: ( assuming your ajax is sync )
+00:01  capitan: if i want to update something on a client browser via ajax whenever there are updates needed (which i know how to catch on the server)... is polling my only way? i could have sworn there was some standard that "solved" this problem... no?
+00:01  Vorspire: Hoe``; mySelect.append('<option/>');
+00:01  Lumpio-: ravenzz, synchronous stuff that blocks in JavaScript = big no-no
+00:01  Lumpio-: Learn about event-driven programming.
+00:01  Hoe``: that's what I've been doing vorspire, I'll just write some of my own :)
+00:01  ravenzz: Lumpio- eh
+00:01  Vorspire: ^^
+00:02  Lumpio-: eh what
+00:02  ravenzz: i know
+00:02  ravenzz: it isnt a definitive solution
+00:02  Hoe``: you can make name spaces inside of jquery, right? like $.fn.select = {}; $.fn.select.addOption = function()...
+00:02  Vorspire: Lumpio- why would they add the async: false option if the use was not intended?
+00:02  Lumpio-: Vorspire: Dunno. Maybe they're dumb?
+00:03  Vorspire: Oh, so you think you're better than the jQuery team?
+00:03  Lumpio-: But the thing is, synchronous requests tend to block things. And that's not a good thing in single-threaded stuff
+00:03  ravenzz: i'm trying to find a way to write a generic search function
+00:03  [KS]: Lumpio-: so does alert()
+00:03  ravenzz: and use that one in different case
+00:03  Vorspire: exactly [KS]
+00:03  [KS]: and basically every other thing in js
+00:03  Lumpio-: alert is modal anyways
+00:04  Vorspire: Infact, blocking the call stackcan be beneficial when needing to instantiate the data and ensure it's there
+00:04  Lumpio-: Yeah, and it's very useful for /freezing everything else/ as well
+00:04  ravenzz: another thing is..
+00:04  Vorspire: It won't freeze if it's a local request, which all ajax is anyway
+00:04  Hoe``: by default, stuff is and SHOULD be synchronous. the problem with requests is that they're slow slow in comparison to something like myInt++; so you lose UI responsiveness, which is bad bad
+00:04  [KS]: so, the thing is, I am not going to discuss anything with someone who calls jq team dumb ...
+00:04  Lumpio-: buh?
+00:05  Lumpio-: Oh dear
+00:05  Lumpio-: I apologize for my blasphemous comments
+00:05  Hoe``: vorspire: the client is making the request, it's not the server calling itself
+00:05  Lumpio-: Please do not stone me to death in the town square
+00:05  Lumpio-: I shalt not speak bad of the gods any longer
+00:05  Vorspire: Hoe``; no shit, i wrote an entire webserver application ;)
+00:05  Lumpio-: ...
+00:05  Hoe``: I must of misunderstood what you said
+00:06  [KS]: ravenz: another thing is what? :)
+00:06  [KS]: ravenzz*
+00:06  Vorspire: Lumpio- if you're going to be like that, then why are you even here?
+00:06  ravenzz: i can set up a rewrite rule like RewriteRule search/(.+) http://gdata.youtube.com/feeds/api/videos?q=$1 [L,NC]
+00:06  Lumpio-: Because I had a question to ask about a few days ago and forgot to /part?
+00:06  ravenzz: and then pass http://mywebsite.com/search/blablaba to ajax()
+00:06  ravenzz: =
+00:06  Lumpio-: But since I'm here, I might as well stay here
+00:07  ravenzz: :?
+00:07  Lumpio-: And spread the good word
+00:07  Vorspire: You obviously don't need anyone's help with your egotistical complex, so your only reason for being here that I can see, is to troll.
+00:07  ravenzz: or is there a cross domain issue
+00:07  [KS]: ravenzz: I'd say not, but that's someting that you would need to take over to guys at #httpd
+00:07  Hoe``: Is there any difference between container.empty() and container.find("*").destroy() ?
+00:07  Lumpio-: I'd imagine container.empty might be slightly more efficient
+00:08  Lumpio-: .find("*").destroy probably tries to destroy every node, while container.empty would only remove the top level nodes
+00:08  Hoe``: Does it still remove events and stuff from memory?
+00:08  Lumpio-: But which one is *actually* more efficient, and whether it actually makes a difference, would depend on the browser DOM implementation, I guess
+00:09  Hoe``: also it being a does-speed-matter which is per situation, but ultimately i'd take properly clearing memory over anything else
+00:09  Hoe``: i doubt any type of pseudo garbage collector that JS has does not take jQuery events into account
+00:09  Hoe``: which can be a pretty big concern on a 100% ajax app
+00:10  Lumpio-: Hmm. Now you got me interested
+00:10  Hoe``: as far as debugging js which is fed over ajax goes, i get lost fast
+00:11  Hoe``: it's hard to tell what's still in memory
+00:11  Lumpio-: empty() does seem to clear data as well
+00:11  Hoe``: ah, so it does drop events?
+00:11  Lumpio-: Yes, I checked the source code.
+00:11  Hoe``: ah, cool :)
+00:11  Hoe``: thanks for checking
+00:12  Lumpio-: also
+00:12  Lumpio-: You got me confused there ¬_¬
+00:12  Lumpio-: You do mean .remote and not .destroy right?
+00:12  Vorspire: well if it really matters, just add a dispose function to the object prototype and call that whenever you're done with the reference... have dispose truncate all data and unset all properties of the referenced object
+--- Log closed Fri Oct 29 00:18:35 2010
+--- Log opened Fri Oct 29 00:18:59 2010
+00:18 --- Users 668 nicks [1 ops, 0 halfops, 0 voices, 667 normal]
+00:19  Lumpio-: More importantly, /how/ would they do that? o_O
+00:19  Lumpio-: How can they possibly know that I'm not using some memory anymore if I haven't freed it
+00:19  Vorspire: LOL I don't think you guys understand what garbage collection actually is >>
+00:19  Lumpio-: LOL I don't think you understand computers
+00:19  Vorspire: hahahaha
+00:19  Hoe``: clearly i don't haha
+00:19  Vorspire: thanks for making me laugh!
+00:19  tra: :))
+00:19  Vorspire: ?g Vorspire
+00:19  bot-t: Vorspire, RunUO - View Profile: Vorspire - http://www.runuo.com/forums/members/vorspire.html
+00:19  Vorspire: have fun
+00:20 --- Putr is now known as Putr|Away
+00:20  Hoe``: real men malloc(4*1024*1024) and do their own memory management
+00:20  Lumpio-: It's.... a forum profile.
+00:20  Hoe``: of course don't forget to delete() that when your window is minimized
+00:20  Lumpio-: What next, we're gonna start comparing Stack Overflow reputation?
+00:20 --- Channel #jquery was synced in 108 seconds
+00:21  Hoe``: (maybe he thinks process priorities are gc's?)
+00:21  Vorspire: Lumpio- if you actually read, you'll notice that RunUO is a console application written in C#
+00:21  Lumpio-: Yes. And the .NET runtime has a garbage collector.
+00:21  Lumpio-: Hence it's possible that it frees memory at times
+00:21  Hoe``: possibly even on events, like minimize, but lord knows
+00:22  Vorspire: That accumulates memory usage up to 300k and more, when it's minimized and restored, that memory is freed
+00:22  Lumpio-: Possibly when it's likely it doesn't disturb the user too much, for example, when the app is minimized
+00:22  Vorspire: guess wy?
+00:22  Lumpio-: However this has no relevance to something with no GC
+00:22  Lumpio-: For instance, C
+00:22  Vorspire: because of the internal console message queue buffer being reset
+00:22  Vorspire: and that's standard in ANY console app
+00:22  Lumpio-: Sorry, I'm not that much into the internals of Windows
+00:22  Hoe``: alright vorspire, you win
+00:23  Lumpio-: I admit
+00:23  Lumpio-: You know more about the internal workings of the Windows terminal window whatever than I do
+00:23  Lumpio-: There, take you victory
+00:23  Lumpio-: I hope it's a bitter one
+00:23  Lumpio-: +r
+00:23  Vorspire: I'm not here for victory, I'm here to prove that idiots exist.
+00:24  Lumpio-: Uh-huh
+00:24  Lumpio-: At any rate, I still fail to see the relevance of the internal workings of the Windows console window thingy to... well, anything that we were talking about earlier.
+00:25  Hoe``: Vorspire: your proof is very self evident
+00:25  hugleo: hi
+00:25  Vorspire: You were talking about freeing memory, i described one process with the dispose and prototype extension whcih would perform similarly to a manual garbage collection.
+00:26  Lumpio-: I'm pretty sure that "manual garbage collection" is an oxymoron
+00:26  hugleo: Are there a alternative to http://www.soyos.net/tl_files/demos/aero-window/ to load windowed iframe?
+00:26  Lumpio-: At the very least, "garbage collection" commonly refers to "automatic" garbage collection.
+00:26  Vorspire: no it doesn't
+00:27  Vorspire: in c#, manaual disposing of objects is done all the time
+00:27  peepz: im doing this in IE6 and it's pulling a cached version.. how can I get around this:  $.getJSON('inc/json.php?asset_id=' + asset_id, function(data) {...}
+00:27  Lumpio-: Disposing is not garbage collection.
+00:27  Vorspire: whether it be a using statement or a .Dispose() call to an IDisposable object
+00:27  Lumpio-: Disposing frees non-managed resources associated with the object
+00:27  dabear_: peepz: append a unique identifier to the url
+00:27  Hoe``: "In computer science, garbage collection (GC) is a form of automatic memory management." -- wikipedia
+00:27  Lumpio-: But it doesn't destroy the object itself.
+00:27  Hoe``: but that should be 'citation needed' i guess...
+00:27  Lumpio-: Well, non-managed resources or resources that should be freed as quickly as possible
+00:27  Lumpio-: Such as locks
+00:28  Vorspire: Hell, I wrote my own garbage collector... we can continue arguing all day, but it's futile.
+00:28  Lumpio-: But at any rate, it doesn't destroy the object. The object will still stay in memory as long as there are references to it
+00:28  Lumpio-: And once those are gone as well, the GC will eventually collect it.
+00:28  Vorspire: Yes, true
+00:28  Vorspire: the underlying GC will
+00:28  peepz: how do I randomlize one?
+00:28  Vorspire: but for performance, it's better to manually initiate it
+00:28  Hoe``: generally in C# you'll see the 'using' statement, which is a fantastic shorthand
+00:29  Hoe``: errm, no it's not lol
+00:29  [KS]: peepz: add new Date().getTime(); at the end of it
+00:29  Lumpio-: Yeah, except that in by far the most cases the GC can figure out when to collect quite well by itself
+00:29  Vorspire: Hoe``; http://webserverlite.codeplex.com/SourceControl/changeset/view/39723#466997
+00:29  peepz: $.getJSON('inc/json.php?asset_id=' + asset_id +'&uid'+Date().getTime(), function(data) { ..}
+00:29  peepz: :)
+00:29  Vorspire: near the bottom of the source you will notice a manual garbage collector
+00:29  Lumpio-: Most times people call GC.Collect they're doing it wrong.
+00:29  Hoe``: it's seldom a good idea to think you'll do better than the gc
+00:30  [KS]: something like that
+00:30  Lumpio-: Sure, if you know what you're doing, you can do it, but most of the time people do it wrong.'
+00:31  Vorspire: Lupio- I won't disagree with that statement
+00:31  hobs: ost of the time people do it wrong
+00:31  Vorspire: argh I'm gonna throw this keyboard outta the window
+00:31  hobs: most
+00:31  hobs: I just did it wrong for instan
+00:31  Lumpio-: Is the tab key broken...?
+00:31  Vorspire: no, it's wireless.. instant fail ;)
+00:32  Lumpio-: Vorspire, that's not garbage collection. That's freeing up unusused things manually.
+00:32  Vorspire: Lumpio- It's a direct reference to GC :/
+00:32  Vorspire: ahh screw this
+00:32  Vorspire: I give up
+00:32  Vorspire: that's 1:1 /draw
+00:32  Lumpio-: ¬__¬
+00:33  Lumpio-: Bottom line: if you do it manually, it's not garbage collection D:
+00:33  peepz: [KS]: what am I doing wrong>
+00:33  Lumpio-: GC doesn't mean that you don't need to *any* memory management, because you still have to tell it about things you don't need anymore by removing references to them
+00:33  [KS]: peepz: you tell me :)
+00:33  Vorspire: GC.GetTotalMemory(true); - force automatic GC
+00:33  peepz: Math.random()
+00:33  peepz: ill just use that?
+00:33  Lumpio-: Yes, you are *telling* the garbage collector to collect
+00:33  [KS]: okay, suit yourself :)
+00:33  Lumpio-: But your code still isn't a garbage collector.
+00:34  Lumpio-: Terminology, people, terminology!
+00:34  snover: “[17:18:02] Vorspire: Console apps are wierd, they free memory when you miimize/restore :)” what the what
+00:34  Hoe``: Lumpio-: In C#, what do you need to manually dispose of that's not an unmanaged object?
+00:34  Vorspire: snover; idd
+00:35  peepz: [KS]: i didnt get your code to work...something bad with using Math.rand??
+00:35  snover: ?ud idd
+00:35  bot-t: snover, idd - Indeed
+00:35  Lumpio-: Hoe``: Well, some things should be disposed of as quickly as possible (such as things that block other things, e.g. locks)
+00:35  Hoe``: ah, yes :)
+00:35  Lumpio-: And some unexpected things will actually be references from other places
+00:35  nail_: and corpses bitten by zombies
+00:35  Lumpio-: For instance, IDataReaders from some SQL clients
+00:35  Lumpio-: Forget to close one of those and the next query will break...
+00:36  Lumpio-: whoa, that line just now made no sense
+00:36  Lumpio-: Some things will have unexpected references to them from other places*
+00:36  [KS]: peepz: not if you are certain that it is indeed random
+00:36  [KS]: how often is getJson going to be executed?
+00:36  peepz: at most once every 3 sec
+00:36  Hoe``: lumpio: ya, I normally don't consider that to be a gc issue, just a rereference problem
+00:36  [KS]: so that's 1200 executions per hour
+00:37  Lumpio-: ...I thought we were talking about disposing
+00:37  snover: You guys are pretending to talk about garbage collection but I feel like that isn’t the topic of this conversation
+00:37  Hoe``: well, you're right :)
+00:37  Hoe``: it's secretly a drug deal
+00:37  Lumpio-: Don't tell anyone k
+00:37  Vorspire: <///////////#=- ~~~~
+00:38  Hoe``: stenography at it's finest
+00:38  peepz: ur saying it might hit the random variable twice? :) cmon dude
+00:38  [KS]: it's secretly a rage about who knows more about programming languages :)
+00:38  peepz: the odds are very slim.
+00:38  linelevel: Hi guys. I'm not sure if this is a Django issue or a jQuery issue. I'm submitting a request via the jQuery function $.ajax(). The Django view script for the requested URL starts by checking request.is_ajax(), which returns false. Any suggestions?
+00:38  [KS]: peepz: I still prefer none to slim. unix timestamp has a chance of none :)
+00:38 --- boaz_ is now known as boaz
+00:39  Prometheus: linelevel: check the headers for the request
+00:39  Vorspire: [KS] unless it's called in the same stack
+00:39  Vorspire: then it will be the same
+00:39  Prometheus: linelevel: which version of django and jquery?
+00:39  [KS]: Vorspire: once every 3 seconds ?
+00:39  Vorspire: ahh then that's obviously fine lol
+00:40  Lumpio-: linelevel: Is the request using XHR?
+00:40  Prometheus: linelevel: and which browser?
+00:41 --- seutje is now known as frigginAsleep
+00:41  Lumpio-: (I dunno Django properly) but I'd imagine something called "is_ajax" would just check for the X-Requested-With header
+00:41  Lumpio-: And that would only work with actualy XHRs
+00:41  Lumpio-: -y
+00:42  Vorspire: [KS] I always use; Math.round(new Date().getTime() * Math.random() * 65536) for a true random number, but i guess it's still possible to hit the same number twice, like 0.0001% possible
+00:43  Prometheus: ('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+00:43  Prometheus: it checks that
+00:43  coldhead: Vorspire++
+00:43  coldhead: that is truly random of you
+00:43  [KS]: Vorspire: It's a matter of preference really
+00:44  flupke: don't reinvent the wheel, use uuid
+00:44  coldhead: i prefer a miler comedian
+00:44  Lumpio-: How unique does this number you want need to be?
+00:44  Lumpio-: Page-scope?
+00:44  Lumpio-: Session scope?
+00:44  [KS]: besides, I believe that jquery has nocache option for .ajax anyway :)
+00:44  linelevel: Prometheus, jQuery 1.4.3, Django 1.2.3, tested on Firefox 3.6 and latest Chrome build.
+00:44  Vorspire: Random UID's? that's exactly why I wrote this; http://acorn.vita-nex.com/JavaScript/serial_provider.vn.js
+00:46  Prometheus: linelevel: let me see, I'll do a quick test
+00:46  snover: what the christ
+00:46  Lumpio-: ...what does that thing do
+00:46  snover: Lumpio-: Best not to ask
+00:47  [KS]: there's eval() :)
+00:47  snover: [KS]: I was just going to congratulate him about that
+00:47  Vorspire: Uhh simply, it generates a random serial or UID that can be attached to an element or jQuery object without having to modify the ID attribute of the element in question
+00:47  Lumpio-: ...why does it have to be that complicated
+00:47  snover: Lumpio-: it doesn’t
+00:47  snover: at all
+00:47  Vorspire: For what I use it for, it does.
+00:47  snover: you bet.
+00:48  Lumpio-: var nextUuid = 1; function generateUuid() { return nextUuid++; }
+00:48  Lumpio-: Not unique enough?
+00:48  snover: ^^
+00:48  Lumpio-: Well, it's not exactly *U*UID but unique on the page
+00:48  Prometheus: linelevel: that's very odd
+00:48  snover: Lumpio-: Using random numbers doesn’t guarantee universal uniqueness either
+00:48  Lumpio-: I know
+00:48  Vorspire: what if you wanted to supply a seed or salt? what if you wanted to prefix it? what if you wanted to apply it to a jQuery object and retrieve it at a later date? you going to sit and code that for every element?
+00:49  Prometheus: linelevel: it does work for me
+00:49  Lumpio-: Why would I need a seed or a salt? If I want a prefix, I can just do "foo" + (nextUuid++).
+00:49  linelevel: Prometheus, Lumpio-, Here is the code for my request: http://pastebin.com/XrMuHfQh
+00:49  Lumpio-: Why would I have jQuery objects persist across dates
+00:49  Vorspire: besides, my SerialProvider is recursive, therefore, if it finds that it does generate a serial that has already be generated, it wll generate a new one until it really is unique
+00:49  Vorspire: THATS why it's so omplicated
+00:49  snover: or
+00:49  Prometheus: linelevel: and your django code?
+00:49  snover: you could use an iterator
+00:50  snover: like Lumpio- demonstrates
+00:50  snover: er, s/iterator/counter
+00:50  Lumpio-: Or you could just use a sequential number ¯\(º_o)/¯
+00:50  snover: Lumpio-: But that’s just not ENTERPRISE enough
+00:50  Lumpio-: ah
+00:50  Lumpio-: You're right.
+00:50  snover: Lumpio-: For instance, what if time goes in reverse!?!
+00:51  Lumpio-: However I must point out that enterprise always spells trouble, unless we're talking about Star Trek.
+00:51  snover: Lumpio-: I’m pretty sure it means the same thing in Star Trek, only, the trouble is usually resolved after 40 minutes in a Star Trek episode
+00:51  snover: Trouble like Vorspire’s code can live on for years and years
+00:51  Vorspire: snover, i've yet to see any of your code...
+00:51  Vorspire: in the months i've been here
+00:52  snover: Vorspire: I’ve submitted patches to jQuery and jQuery UI, you can go read those if you want.
+00:52  Vorspire: patches are patches, not full blown pkugins or apps
+00:53  Lumpio-: I could submit a patch to your serial thing
+00:53  Lumpio-: One that reduces it to less lines than the ginormous license thing at the top
+00:53  Vorspire: you could
+00:54  Vorspire: then do it
+00:54  Vorspire: show me
+00:54  linelevel: Prometheus, here is the code for a decorator-like function that I wrap around the view function associated with the post URL: http://pastebin.com/yTxZPZNR
+00:54  Lumpio-: But I'm lé tired
+00:54  Vorspire: keep the same functionality of it and show me that you can
+00:54 --- mikeric_ is now known as mikeric
+00:54  Vorspire: yea i thought so
+00:54  Vorspire: full of shit :)
+00:54  Lumpio-: Of course I would remove the functionality that's not useful for anything.
+00:54  Vorspire: uh-huh :)
+00:54  Vorspire: just because your brain can't figure out a use for it, doesn't mean there isn't one
+00:55  Prometheus: linelevel: have you tried it without the decorator?
+00:55  linelevel: Prometheus, As you can see, it gets passed the request object associated with the ajax request, and the first thing it does is check request.is_ajax(), which always branches to the 'else' clause.
+00:55  Prometheus: just to see if it works that way
+00:55  Lumpio-: Vorspire: You've yet to mention one either.
+00:56  linelevel: Prometheus, Yeah, let me set up a one-line view just to test it.
+00:56  Lumpio-: I can think of many /bad/ uses, of course, but not of a single one that makes sense.
+00:56  Prometheus: linelevel: out of the box request.is_ajax works just fine for me
+00:56  Vorspire: Lumpio- btw, I've only worked with JavasScript as long as I have with jQuery and it's not my first language and that SerialProvider was one of the very first things I ever wrote for jQuery, at that point I didn't know about other UUID method etc
+00:56  Prometheus: using the latest jquery and django
+00:56  snover: Vorspire: And yet, here you are, still defending it like it’s the best thing ever
+00:56  Lumpio-: Vorspire: You didn't know about the "++" operator? Whoa.
+00:56  Prometheus: so I don't think the problem lies with either
+00:56  Vorspire: ahh you guys are retarded trolls :P
+00:57  Vorspire: seriously
+00:57  Lumpio-: At least we're also trolls
+00:57  Vorspire: had more fight from a door-stop
+00:57  snover: Lumpio-: I tried not to laugh, but then…I did
+00:57  Lumpio-: http://lumpio.dy.fi/b/tf.jpg
+00:58  Prometheus: linelevel: I was under the impression you should pass the request object to your inner function
+00:58  Prometheus: as an argument
+00:58  Vorspire: so snover, what have you achieved beyond jQuery?
+00:58  Prometheus: i.e. the wrap function
+00:58  Prometheus: err, wrapped*
+00:58 --- willd[a]yble is now known as willdayble
+00:58  [KS]: how long is this going to last?
+00:58  Vorspire: as long as it has to
+00:58  Lumpio-: As long as it TAKES
+00:58  snover: Vorspire: Stop trying to create a straw man, Vorspire.
+00:59  Vorspire: snover; that's a "nothing" then?
+00:59  Vorspire: fair enough
+00:59  Lumpio-: Ohhhh man
+00:59  Lumpio-: I hadn't heard that one since middle school
+00:59  Lumpio-: Takes me way back
+00:59  snover: It’s a you trying to engage in fallacies of relevance, and me refusing to play that game
+00:59  Vorspire: snover; i'm suuuure you are
+01:00  Vorspire: or maybe you don't have the skills to play my game
+01:00  Lumpio-: dem m4d sk1ll2
+01:01  linelevel: Prometheus, it is getting passed to the inner function via the *args and **args keywords. It's also getting passed to the wrapper, which is why I called that a decorator-like function and not a decorator.
+01:01  linelevel: *args and **kwargs that is
+01:02 --- MikhX_ is now known as MikhX
+01:03  Vorspire: well it didn't take long to prove a point, so I guess that's 2:1 to me :)
+01:03  linelevel: Prometheus, but the test i'm doing right now will cut that part out
+01:03  Lumpio-: I'm not quite sure what point you have proven here
+01:03  Prometheus: linelevel: I think your decorator is set up backwards
+01:03  Prometheus: which is the reason why it's wrong
+01:03  Prometheus: err, false
+01:03  Vorspire: Lumpio- you may want to get that ADHD checked out then, your attention span is poor.
+01:04  Lumpio-: Hey, people with ADHD are people too!
+01:04  Vorspire: I know, I used to have it. That' why I can tell you have it. "taks one to know one"
+01:05  Hoe``: sick burn
+01:06  Prometheus: linelevel: I suggest reading through http://charlesleifer.com/blog/django-patterns-view-decorators/
+01:06  Prometheus: that's a pretty good primer on the subject =)
+01:07  linelevel: Prometheus, It's not that. I understand the decorator concept. What's happening in my code is that I apply a real decorator to the view function, which calls the pseudo-decorator I showed you on 2 different functions which are used by that view function, passing them the request object. But you might still be right that I screwed it up. Hold on one sec and I'll let you know.
+01:08  Prometheus: linelevel: have you printed your request within the inner function?
+01:08  Prometheus: just to see if it's actually there
+01:09  snover: Are you guys looking for #django ?
+01:09  Prometheus: maybe
+01:09  l4rk: #handango
+01:09  Lumpio-: #fandango ?
+01:09  danheberden: over the line Lumpio- ... over the line
+01:09  Lumpio-: What'd I do now D:
+01:10  Prometheus: I was actually looking for #firesheep
+01:12  CuDi: OHH YEA
+01:12  CuDi: CUDI IN THE HOUSE
+01:12  CuDi: wats up people
+01:12  danheberden: what what
+01:12  CuDi: everybody feelin fresh
+01:12  CuDi: alive
+01:12  CuDi: the sun is shining, the birds are singing, and we're inside
+01:12  danheberden: i feel like the koolaid guy
+01:12  danheberden: ayyyy ohhhh
+01:13  CuDi: some people say I'm careful how i choose my friends
+01:13  CuDi: well i been to ICU once i aint goin again
+01:14  Lumpio-: ayyyy
+01:14  CuDi: thats wassup
+01:14  danheberden: boom done
+01:15  bobbobbins: hey, im using fancybox, and it works great, but i have a pulldown that updates a div with new images(multiple image galleries), and when it updates the div, it breaks fancy box, how do I update fancybox to account for the change in div?
+01:15  Lumpio-: Vorspire :>
+01:15  Vorspire: Yes?
+01:16  danheberden: then it's not working great, now is it
+01:17  Lumpio-: Nothing
+01:17  Vorspire: K
+01:18  danheberden: bobbobbins: maybe use ?live
+01:18  bot-t: bobbobbins, .live(eventType, handler): Attach a handler to the event for all elements which match the current selector, now or in the future. http://api.jquery.com/live/
+01:19  danheberden: if not, you'll have to paste that shiat on jsfiddle.net or something
+01:19  danheberden: remember kids, see ?ldoidh
+01:19  bobbobbins: ok, lemmie take a look at this
+01:19  bot-t: Live Demo Or It Didn't Happen - http://jsfiddle.net - http://pastebin.me - http://jsbin.com
+01:21  bot-t: Vorspire
+01:21  Vorspire: I also wrote my own IRC Bot software, it's not hard to figure that external commands can be used with a PM...
+01:22  Vorspire: GG
+01:25  Frantic: guys, is there any html5 effect to tint an image? I have a shape that I want to tint in different colors, but can't seem to find anything for that
+01:26  Frantic: or at least I can't find the name
+01:26  snover: Frantic: Go read about <canvas>
+01:26  Vorspire: tinting can be achieved by using a 4x4 pixel image, where 2 pixels are transparent and 2 are the color you want, in a binary fashion, can be applied as an overlay to give the tint
+01:27  Vorspire: or canvas >>
+01:27  Vorspire: <<
+01:28  Vorspire: 2x2 *
+01:28  Vorspire: ./sigh
+01:28  Lumpio-: ...or an alpha-transparent image
+01:28  Frantic: snover: arf I was trying to avoid canvas :)
+01:28  Lumpio-: There's still the problem of making the tint the correct shape, if his shape isn't square
+01:28  snover: arf?
+01:28  Lumpio-: <canvas> is nice.
+01:29  Frantic: Vorspire: I'd like to read more on that, but what is it called? :)
+01:29  snover: Frantic: Don’t.
+01:29  snover: Frantic: It will not do what want.
+01:29  snover: what you want*
+01:29  Lumpio-: An alpha-transparent image will give better results in pretty much every case
+01:29  snover: An alpha-transparent image won’t provide “tint”
+01:29  Lumpio-: It won't
+01:29  snover: You can’t use normal blending and end up with a tinted image
+01:30  Lumpio-: Well, actually
+01:30  Vorspire: Are you two joined at the hip or something? xD
+01:30  Lumpio-: It depends on the definition of "tint" ¬__¬
+01:30  Lumpio-: There's probably some kind of color theory definition, and then there's the layman's definition
+01:30  Frantic: Lumpio-: by alpha-transparent image you mean create a transparent image to use as a mask for a background-color?
+01:31  Lumpio-: Add a red partially transparent image -> "it looks kind of reddish" -> red tint
+01:31  Lumpio-: Frantic: No I mean you'd use the image itself for the color. But it'll involve creating the image
+01:31  Vorspire: it's 4 pixels ffs
+01:31  Frantic: snover: By tint I didn't mean really tint as in light effect, just to change the color of a white image to any other rgb value
+01:32  Frantic: let me try this again :)
+01:32  snover: Frantic: yes please.
+01:32  Lumpio-: Vorspire: Without <canvas> he'll need to generate that image on the server side ¬__¬
+01:32  Xenc: is doing sometihng like leg = legs[i]; then doing leg.name, leg.route at the start of a for loop faster than constantly referencing legs[i].name, legs[i].route
+01:32  Lumpio-: And if he's going to do that, he might as well do the whole tint thing on the server side.
+01:32  snover: Xenc: yes
+01:32  snover: but
+01:32  snover: ?premature optimization @ Xenc
+01:33  bot-t: Xenc, #1911 (jQuery-bound events don't have access to jQuery-accessable ... - Opened 3 years ago http://bugs.jquery.com/ticket/1911
+01:33  snover: oh come on
+01:33  snover: ?optimization @ Xenc
+01:33  bot-t: Xenc, The First Rule of Program Optimization: Don't do it. The Second Rule of Program Optimization (for experts only!): Don't do it yet.
+01:33  Xenc: ?premature
+01:33  bot-t: Xenc, #2863 (ui-slider: Opera slider problem) – jQuery Core - Bug Tracker - Opened 2 years ago http://bugs.jquery.com/ticket/2863
+01:33  Frantic: I have a few pages that display some shapes on the margin, and I want each page to have a different color for the shapes. Rather than create 20ish images of the exact shape with different color, I was looking for a way to change the color of a single-color image
+01:33  Lumpio-: Here's a crazy idea: generate the image in red, green and blue and then combine those with opacity
+01:33  Frantic: is this in any way possible? :)
+01:33  Xenc: Haha, ok snover
+01:33  Xenc: thanks :)
+01:34  snover: Lumpio-: It doesn’t work that way :|
+01:34  Lumpio-: ...it does for a whole lot of colors!
+01:34  Lumpio-: Not all of them, but hey
+01:34  Lumpio-: If we had additive blending it would work perfectly :I
+01:34  Frantic: Lumpio-: that would be more complicated than creating the iamges :)
+01:34  Frantic: Lumpio-: because I'd have to keep trying different alpha values till I get the one I want
+01:34  snover: Frantic: Why don’t you want to use <canvas>?
+01:34  Lumpio-: Frantic: If you're looking for simplicity... it's either <canvas> or generating the images.
+01:34  Lumpio-: Frantic: Or you could just use, you know, maths.
+01:34  Lumpio-: There are limitations though
+01:35  Vorspire: Well i you know how to do bitwise shiftin,g you can colorate the individual pixels with the tint you want, provided you supply an RGB value to translout from... Does JavaScript have that capability, because if it does, I smell a new plugin. - Based on the PHP GD theory
+01:35  Frantic: snover: yep, guess I'll look into canvas, thanks :)
+01:35  Lumpio-: Vorspire: Yeah, it's called <canvas>
+01:35  Vorspire: Never used canvas before, so guess I'll look into that
+01:36 --- RJD22 is now known as RJD22|away
+01:36  snover: Vorspire: I know you won’t listen, but for the good of humanity, please stop writing javascript
+01:36  Lumpio-: Aww, snover
+01:36  Vorspire: fuck you :)
+01:36  Lumpio-: That's a mean thing to say
+01:36  Lumpio-: Everybody is a beginner at one point
+01:36  Vorspire: just because I'm filling your boots and then some, snover.
+01:36  danheberden: HAHAHAHAHAHAHAHAHA
+01:37  l4rk: filling his pants
+01:37  l4rk: if you know what i mean
+01:37  l4rk: filling - his... PANTS
+01:37  addyosmani: ahaha.
+01:37  Lumpio-: Anyways, canvas is basically a bitmap you can draw to.
+01:37  Vorspire: You forget that JavaScript is like... my 10th language
+01:37  Lumpio-: It has shape drawing, transforms, and even direct pixel access
+01:37  l4rk: javascript is my first and only language
+01:37  l4rk: why did you bother learning anything else
+01:37  erichynds: l4rk++
+01:37  Vorspire: Well then there you go, stfu l4rk
+01:37  Lumpio-: >implying that 10 languages is something extraordinary
+01:37  addyosmani: it's true. we have to struggle on a daily basis for him to speak in english.
+01:38  addyosmani: this is progress for l4rk
+01:38  addyosmani: <3
+01:38  snover: Vorspire: And yet somehow you seem to have not learnt any good practices from the other nine…hm…
+01:38  l4rk: var me = me || {}; me.lol();
+01:38  Vorspire: Lumpio- not really...
+01:38  Lumpio-: ...why have the || {} if you're going to call a non-existent method in the case that thing is ever hit
+01:38  Vorspire: Iwas implying that I'm still learning JS
+01:39  Lumpio-: k
+01:39  erichynds: that's certainly not what you were implying
+01:39  l4rk: Lumpio-: my Object.prototype has it :D
+01:39  l4rk: aka my soul
+01:39  Vorspire: It most certainly is
+01:39  Lumpio-: :V
+01:39  Lumpio-: Object.prototype...
+01:39 --- nkts is now known as marius
+01:39  Lumpio-: btw I've been doing JS in one form or another for some 10 years
+01:39  oneforall: is the jquery some standard script you download or is some standard way of making you .js
+01:39  Lumpio-: oneforall: ...what?
+01:39  oneforall: your*
+01:40  Lumpio-: It's a library you include on your page. Comes in the form of a single .js file.
+01:40  oneforall: ok so its one that is already made not one I would make
+01:41  oneforall: how do you find out what it all does
+01:41  danheberden: oneforall
+01:41  Lumpio-: By reading the documentation
+01:41  Lumpio-: docs?
+01:41  danheberden: i'm going to share something really powerful with you
+01:41  Lumpio-: Aww, I don't know the triggers :(
+01:41  danheberden: but it's a secret
+01:41  danheberden: do you promise not to tell anyone?
+01:41  Lumpio-: There: http://docs.jquery.com/Main_Page
+01:41  danheberden: goddamnit Lumpio-
+01:41  danheberden: you gave away the secret BEFORE HE PROMISED
+01:41  Lumpio-: ¬__¬
+01:41  oneforall: I'm getting the impression its just a basic standard and you make other js that use it but have more
+01:42  Lumpio-: It's by no measure "a standard"
+01:42 --- ezra-g is now known as ezra-g|afk
+01:42  snover: ?101 @ oneforall
+01:42  bot-t: oneforall, New to JavaScript? You should read this first: http://eloquentjavascript.net/contents.html
+01:43  danheberden: oneforall - it's a tool to normallize access to DOM elements as well as eventing, animations and css alterations
+01:43  danheberden: among other cool shit
+01:44  oneforall: yeah there is ajax too soo its just another tool,lib
+01:44 --- carter05 is now known as carter05_
+01:44  Lumpio-: meh
+01:44  Lumpio-: Every time I see that jQuery has a function called "ajax" I cringe
+01:44  Lumpio-: At least Mootools called them just requests
+01:45  danheberden: "hold my closer tiny dancer"
+01:45  snover: Lumpio-: I know it is hard to come to terms with the evolution of a technology term. :)
+01:45  Vorspire: It's usually helpful to name a function after what it's intended function is...
+01:45  danheberden: or is it "tony danza"
+01:45  Lumpio-: snover: I still find it unintuitive and buzzwordy.
+01:45  snover: ?enterprise
+01:45  bot-t: snover, jQuery Conference '09 - Slides are being collected and shared below *Speakers please send an e-mail with a link to your slide to jquery-conference-2009@jquery.com . http://events.jquery.com/jquery-conference-2009/
+01:45  Vorspire: AJAX request function is $.ajax for a reason, not $.getMyWebPageFromHERE
+01:46  snover: well that’s unexpected.
+01:46  snover: Vorspire: I am pretty sure Lumpio-’s point is that most of the time, it is not actually XML.
+01:46  Lumpio-: The word "ajax" is non-descriptive, unintuitive and frequently misused.
+01:46  danheberden: $.doneNowGetItYouWill = $.ajax;
+01:46  Lumpio-: That's the non-descriptive part
+01:46  Vorspire: FAIR ENOUGH! :)
+01:47  Lumpio-: And I can't even count the times [marketing] people [or other drones] call things that are not "ajax", "ajax".
+01:47  danheberden: lol
+01:47  Lumpio-: "whoa, look at this drag and drop thing, it's so ajax it's web 2.0" "..."
+01:47  erichynds: anything mysterious is ajax
+01:47  danheberden: "ooh, a window popped up!! cool ajax!!"   "uh.. that's an alert dialog"
+01:47  snover: Lumpio-: Well that sounds like a problem with your marketing department. And as far as the drones go, you need to pick a better company to service your drones, clearly.
+01:47  Lumpio-: Oh, it's not our marketing department.
+01:48  oneforall: sounds like all marketing. claiming things are something they are not.
+01:48  Lumpio-: But anyways, the main thing that bothers me is
+01:48  danheberden: how existential
+01:48  Lumpio-: Making server requests are now just everyday life in JS
+01:48  danheberden: she won't hold you close afterwards?
+01:48  Lumpio-: Why do we need a special name for the "technology"!?
+01:48  danheberden: special?
+01:48  Lumpio-: That's like calling addition "pluserizing" or... DOM manipulation "Dynamic HTML" (or "DHTML" for short)
+01:48  Lumpio-: *aw snap* the latter actually exists
+01:49  danheberden: Lumpio-: so should they get rid of the term JSON too?
+01:49  Lumpio-: No
+01:49  Lumpio-: I used to hate that one as well but now I see the point
+01:49  bobbobbins: i just reinitialized it in the load() function and it worked fine
+01:49  danheberden: lawl
+01:49  Lumpio-: JSON is something that's frequently used in non-JS contexts as well, and it needs a word for it.
+01:49  Lumpio-: And JSON isn't bad, it's pretty descriptive.
+01:49  Lumpio-: (The word, that is)
+01:50  Lumpio-: "AJAX", on the other hand, is not.
+01:50  oneforall: lol listening to you all I was confused enough thanks :)
+01:50  snover: Lumpio-: We need a name for the technology because otherwise people would have to say “you know, the mechanism whereby you make a call to a server via JavaScript using an XMLHttpRequest object, or sometimes not using XMLHttpRequest but instead injecting a script tag, but either way it makes a call to the server without reloading the entire page and then returns some data and you can then pick up and use the data”
+01:50  snover: which is a little verbose.
+01:50  Lumpio-: snover: How about just calling it a "HTTP request"
+01:50  Lumpio-: Or a "web request"
+01:50  Lumpio-: Or just a damn request :V
+01:50  snover: Lumpio-: Because a regular page reload is an HTTP request too
+01:50  danheberden: snover - hahahaha
+01:51  Lumpio-: Well, regular addition on paper is addition as well but we still call addition in JavaScript "addition2
+01:51  Lumpio-: "
+01:51  danheberden: snover: $.youknow,themechanismwherebyyoumakeacalltoaserverviaJavaScriptusinganXMLHttpRequestobject,orsometimesnotusingXMLHttpRequestbutinsteadinjectingascripttag,buteitherwayitmakesacalltotheserverwithoutreloadingtheentirepageandthenreturnssomedataandyoucanthenpickupandusethedata = $.ajax;
+01:51  Vorspire: lmao
+01:52  addyosmani: danheberden: committing to core nao.
+01:52  snover: HUGE PERF WIN
+01:52  addyosmani: riiight? i think this is a break-through
+01:52  Vorspire: wtf IDE + autocomplete for that function
+01:52  Vorspire: wtb*
+01:52  Lumpio-: I wouldn't mind, say... $.req = $.aj*x;
+01:52  Lumpio-: (Minus censorship)
+01:53  danheberden: lol
+01:53  danheberden: just use $.get and $.post then
+01:53  Lumpio-: Oh, you could hide the name!
+01:53  Vorspire: $.whatwhere
+01:54  Lumpio-: $.req = $[String.fromCharCode(97,106,97,120)];
+01:54  Lumpio-: There, perfect.
+01:54  snover: ?eval poop
+01:54  bot-t: snover: function poop(q) {var o = 79, j = [], did = 45, it, z = "";for (it = q || did; it > 0; --it) {(function a(f) {j.push(String.fromCharCode(f));return a;...
+01:54  snover: oh no, truncation!
+01:55  snover: ?eval lol
+01:55  bot-t: snover: ReferenceError: lol is not defined
+01:55  Lumpio-: wait, what...
+01:55  snover: ?lol
+01:55  bot-t: function _(l){return l+(_+l)[11-((_._=(_._?_._:!_)+1)%(1+1)?!1:1+1+1+1+1)]}_(_(_('')))
+01:55  Vorspire: Oo
+01:55  Vorspire: oO
+01:56  danheberden: ?eval (function _(l){return l+(_+l)[11-((_._=(_._?_._:!_)+1)%(1+1)?!1:1+1+1+1+1)]}_(_(_(''))))();
+01:56  bot-t: danheberden: SyntaxError: missing ) in parenthetical
+01:56  OhaiBBQ: ?eval function _(l){return l+(_+l)[11-((_._=(_._?_._:!_)+1)%(1+1)?!1:1+1+1+1+1)]}_(_(_('')))
+01:56  bot-t: OhaiBBQ: lol
+01:56  danheberden: ARG
+01:56  OhaiBBQ: :D
+01:56  compi: anybody familiar with Flot? im trying to display decimal values on the graph but it won't display
+01:56  compi: http://www.jsfiddle.net/yaysq/
+01:56  danheberden: Flot? reminds me of hepatitis
+01:56  snover: I made a bug in poop so it actually functions using some kind of whimsical factorial iteration
+01:56  snover: flot is awesome.
+01:57  addyosmani: flot is pretty sexy.
+01:57  compi: sure is :)
+01:57  OhaiBBQ: flot is sweet.
+01:57  compi: not sure why the stupid decimals won't display tho
+01:57  snover: compi: first of all you do not need to specify your monthname
+01:57  aaroninfidel: ?eval function _(){ alert(this.name); }
+01:57  bot-t: aaroninfidel: undefined
+01:57  compi: i have tickDecimals
+01:57  aaroninfidel: ?eval this
+01:57  bot-t: aaroninfidel: [object global]
+01:57  snover: compi: second of all how do you show a decimal date?
+01:58  compi: snover: the decimal is for the data in the graph, not the dates on the x-axis
+01:58  compi: [{data:d,tickDecimals:2}]
+01:58  snover: compi: you should probably read the documentation because you can’t put that there.
+01:58  snover: tickDecimals is an axis property
+01:59  compi: i've read the API a bunch of times but can't find a way to output decimals in the data
+02:00  compi: snover - yea. but i cant find a property to output decimals on the graph for the data itself. i'm supplying it decimals but it automatically rounds it off
+02:00  snover: compi: I don’t know what you are talking about, “in the data”
+02:01  compi: yea, in [d]
+02:01  snover: compi: you know what an axis label is, right?
+02:01  aaroninfidel: ?eval function() { for (var name in this) { alert(name+", "); } }
+02:01  bot-t: aaroninfidel: function () {for (var name in this) {alert(name + ", ");}}
+02:01  compi: yea dude. im talking about this
+02:01  compi: var d = [[1254351600000,31.59],[1257030000000,32.72],[1259625600000,33.12]
+02:01  aaroninfidel: ?eval function _() { for (var name in this) { alert(name+", "); } }
+02:01  bot-t: aaroninfidel: SyntaxError: illegal character
+02:02  compi: flot outputs 31, 32, 33
+02:02  snover: aaroninfidel: You and bot-t can make sweet love together if you send him PMs instead of making all of us read your code ;)
+02:02  compi: eating the decimals
+02:02  aaroninfidel: WOO!
+02:02  snover: compi: I already told you what you were doing wrong
+02:03  Tigeda: Has anybody ever had experience with Gmap displayed within a tab
+02:03  compi: i dont think you even understand what im asking
+02:03  peepz: gentlemen..
+02:03  Tigeda: I have three tabs, each with a different gmap macro, the first and default tab work fine, but when clicking to the next tab, the map is off center and parts are missing.
+02:03  peepz: how do I automatically open next select box upon closing the preceding one?
+02:04  danheberden: you dont
+02:04  snover: compi: flot doesn’t coerce your data into integral values unless you tell it to. You are trying to use options that don’t exist where you are trying to use them to get flot to do something it’s not doing.
+02:04  peepz: :o
+02:04  danheberden: you can't 'open' it
+02:04  peepz: there is no way of auto opening a select box?
+02:04  snover: compi: If you want help, please provide a link to a working test case.
+02:05  aaroninfidel: bot-t: your a CIA agent aren't you?
+02:05  bot-t: aaroninfidel, Yes.
+02:05  compi: its not that complicated. im passing data as decimals and flot is converting to whole numbers
+02:05  ralf_e: hi
+02:05  ralf_e: I got a little "is this the best way" question.
+02:05  ralf_e: i want to chain animations on different elements one after each other.
+02:05  ralf_e: is 'intertwining' the queues of the elements the best way to do this?
+02:05  ralf_e: like in $('#el1').queue(function(next) { $('#el2').animate({padding: '10'}, next); });
+02:06  snover: compi: prove it.
+02:06  Vorspire: peepz; you mean with multiple selection select boxes? For example on most websites that provide a selection tree for downloading drivers based on OS, version, etc?
+02:06  peepz: no
+02:06  Vorspire: Please clarify :)
+02:06  peepz: think of the select tag
+02:07  compi: i already did, but here it is again
+02:07  peepz: drop down..
+02:07  compi: var d = [[1254351600000,31.59],[1257030000000,32.72],[1259625600000,33.12]];
+02:07  snover: <snover> compi: If you want help, please provide a link to a working test case.
+02:07  Vorspire: You want to activate the drop-down function without clicking the select element itself?
+02:07  peepz: when the user opens the first select drop down and selects an element, I want the next select drop down to open automatically.
+02:07  peepz: yes!
+02:07  peepz: :::D:D:D:D
+02:07  snover: compi: Pasting me a data set and some invalid flot JS doesn’t prove anything.
+02:07  Vorspire: ^^
+02:07  snover: peepz: Not possible.
+02:08  Vorspire: peepz; i'm not sure it can be done
+02:08  peepz: (U)
+02:08  peepz: why is that not possible?
+02:08  snover: peepz: why would it be?
+02:08  Vorspire: It's handled internally by the browser, peepz, probebly why
+02:08  peepz: becuase it eleminited a click interactin from the user
+02:08  OhaiBBQ: lol wat
+02:08  Lumpio-: Doubt that's doable
+02:08  Lumpio-: Not with the standard <select> element
+02:09  Vorspire: Would it not, in theory, be possible if you trigger the click event on it?
+02:09  Lumpio-: You could make your lists just normal scrolly lists instead of selects
+02:09  snover: And it shouldn’t be
+02:09  joshsmith: how do you check if a value is not null?
+02:09  Lumpio-: Vorspire: I suspect few browsers would support that
+02:09  snover: JoshA: !== null
+02:09  Vorspire: yea
+02:09  Lumpio-: ...if any
+02:09  Vorspire: "in theory" :)
+02:10  danheberden: omg you guys are still talking about that?
+02:10  Lumpio-: About what?
+02:10  danheberden: click events 'n shit
+02:10  danheberden: selects
+02:10  danheberden: tony danza
+02:11  Lumpio-: But it's only been like five minutes!
+02:11  Hopsy: haii danheberden
+02:11  Hopsy: Lampoon: seen SugaSlide
+02:11  danheberden: haaaaaay hopsy
+02:11  Lampoon: SugaSlide was last seen in #jquery 2 days 11 hours ago saying 'catch you some time in the future'.
+02:11  Lumpio-: In related news I made the totally awesomest custom dropdown element thing today.
+02:11  Hopsy: damn Lampoon thats too long
+02:11  danheberden: i made a new strain of herpes
+02:11  luistar15: hello, please help with this script: http://jsfiddle.net/ZAhfz/1/
+02:11  danheberden: mwhahahahahaha
+02:11  Lumpio-: luistar15: ...what is wrong with it?
+02:11  danheberden: sry luistar15 i don't know spanish
+02:12  Lumpio-: "preppend" is not a jQuery function
+02:12  danheberden: insert new element here?
+02:12  luistar15: yes.. at the top of the parent of each "ul" found it
+02:12  Hopsy: ieuuww danheberden grooss
+02:13  danheberden: Hopsy: well i figure if people make money making viruses for computers........
+02:13  Vorspire: AVG do
+02:14  Hopsy: can you also make money through sending spam emails?
+02:14  Hopsy: email*
+02:14  peepz: i got an idea..
+02:14  Vorspire: of course
+02:14  Hopsy: of *
+02:14  danheberden: no, buy viagra, i don't think that please her all night long with extraordinar member growth... that you can
+02:15  luistar15: http://jsfiddle.net/ZAhfz/3/
+02:15 --- sab_ is now known as sab
+02:15  Lumpio-: luistar15: 03:08:12 < Lumpio-> "preppend" is not a jQuery function
+02:16  techrush: is there any potential for conflict between jquery and  mootools being used on the same page ?
+02:16  OhaiBBQ: lol if you pass a jQuery object into jQuery it returns the set of dom elements
+02:16  Lumpio-: Also you go know that you could just do $("#menu>li").prepend("<b>NEW!</b>");
+02:16  Lumpio-: Right?
+02:16  Lumpio-: luistar15: No need to query me
+02:16  Lumpio-: I'm closing the query window now.
+02:16  Hopsy: Lampoon: seen sean`
+02:16  Lampoon: sean` was last seen in #jquery 3 hours 12 min ago saying 'you are evil'.
+02:16  Lumpio-: s/go know/do know/
+02:16  Hopsy: Lampoon: to whom did he say that :O
+02:16  Hopsy: Lampoon: logs
+02:17  Hopsy: ?logs
+02:17  bot-t: Logs: http://lampoon.gurpartap.com/bot/log/jquery
+02:18 --- Chainfire_ is now known as Chainfire
+02:19  hugleo: are there a alternative to http://www.soyos.net/aerowindow-jquery.html?page=3 to use with iframe?
+02:19  Lumpio-: ew
+02:19  Lumpio-: Why would you want to imitate the window style of some random OS on a web page D:
+02:20  Vorspire: Ahh the dektop-design theory, evidentially useless
+02:20  Lumpio-: And that one doesn't even work properly!
+02:20  Lumpio-: I made an online desktop thing once ¬__¬
+02:20  Lumpio-: It was quite useless
+02:20  Vorspire: I tried too, it was useless xD
+02:20  Lumpio-: It even had a server-side filesystem and all
+02:20  j0hng4lt: Does anyone know why jQuery doesn't have namespacing of any kind? Is there a theoretical reason for it? I find that there's no need for namespaces in the core, but plugins could benefit from them.
+02:20  Vorspire: did it, then I foundno use for it
+02:20  Lumpio-: Me neither
+02:21  Lumpio-: Or well, I once used it to view multiple web pages in one window...
+02:21  Lumpio-: It has an application called Useless Explorer which was essentially an iframe
+02:21  Lumpio-: had*
+02:21  Vorspire: rofl
+02:21  j0hng4lt: I find $(this).dialog('close') a bit awkward
+02:21  danheberden: j0hng4lt: namespacing should be a consideration outside of jquery
+02:22  Lumpio-: You'd rather do $(this).dialog.close() ?
+02:22  hugleo: I need only have a beautiful resized iframe
+02:22  Lumpio-: I think it'd have to be $(this).dialog().close() at the very least, for it to work at all
+02:22  Vorspire: isn't it: $(this).dialog({ close: true }); ?
+02:22  Lumpio-: hugleo: The resizable thing in jQuery UI doesn't work?
+02:23  danheberden: that kinda goes against the style of jq
+02:23  Lumpio-: Vorspire: gah, that's even more verbose
+02:23  Vorspire: i know lol
+02:23  j0hng4lt: Lumpio-: I was thinking more of the latter
+02:23  Lumpio-: dialog().close() ?
+02:23  Lumpio-: OR
+02:23  Lumpio-: Or?*
+02:23  danheberden: but dialog should just return the collection again
+02:24  j0hng4lt: Yes
+02:24  danheberden: you're breaking the entire flow of jq if you go that way
+02:24  Vorspire: ?end
+02:24  coldhead: collection are awesome
+02:24  hugleo: http://docs.jquery.com/UI/Dialog
+02:24  Vorspire: isn't .end() there to continue the flow?
+02:24  hugleo: I did'nt found a Iframe example
+02:25  danheberden: Vorspire: it just reverse to the previous stack
+02:25  Lumpio-: hugleo: Did you try improvising?
+02:25  danheberden: *Reverts
+02:25  Lumpio-: hugleo: Protip: programming is so much more than just copy-pasting examples
+02:25  Vorspire: Yea, the original selection
+02:25  hugleo: Lumpio-, heh
+02:26  Lumpio-: But yeah, dialog().close() would break teh flow.
+02:26  j0hng4lt: You could technically implement this as a pattern. .dialog() would return an object whose end() method would return the orihinal jQuery object
+02:26  danheberden: Lumpio-: what?! WHEN WAS THIS ANNOUNCEMENT MADE?!
+02:26  Hopsy: does anyone know that site with great google chrome demo javascript things
+02:26  danheberden: j0hng4lt: you're right, but you can see how that would add confusion
+02:26  Lumpio-: johan_bouveng: That's cumbersome.
+02:26  j0hng4lt: Thereby allowing you to continue the chain
+02:26  Hopsy: owh nevermind found
+02:26  Hopsy: http://www.chromeexperiments.com/
+02:26  temp01: ?g google chrome demos
+02:27  Vorspire: bot-t is DEAD
+02:27  Hopsy: bot-t?
+02:27  Hopsy: :P
+02:27  Vorspire: ?botsnack
+02:27  bot-t: Thank you! OMNOMNOMNOMNOM
+02:27  j0hng4lt: But with magic strings, you won't get intellisense... Ever...
+02:27  Hopsy: haii bot-t
+02:27  danheberden: j0hng4lt: really, dialog('close') isn't a big deal, the structure of the code that calls dialog in the first place: THATS where yourenamespacing and organization needs to be
+02:27  Lumpio-: j0hng4lt: That's a limitation of "intellisense", not the language.
+02:27  Hopsy: ?g google chrome demos @ temp01
+02:27  bot-t: temp01, Chrome Experiments - Home - http://www.chromeexperiments.com/
+02:28  temp01: that was for you
+02:28  Hopsy: does browse ball works in IE?
+02:28  temp01: __YOU__
+02:28  temp01: ?tias
+02:28  bot-t: Try It And See
+02:28  Hopsy: well i thought to make a chat thing :P
+02:28  temp01: or read the description and comments
+02:28  Hopsy: through iframes
+02:29  Hopsy: blabla
+02:29  Lumpio-: :V
+02:29  Lumpio-: I made an iframe chat kinda thing once and it wasn't pretty
+02:29  hugleo: I'm using: $('#dialog').html('<iframe id="ifrm"></iframe>'); $("#dialog").dialog(); $("#dialog").attr("src", "www.google.com");
+02:29  hugleo: But is not working
+02:29  Lumpio-: But then again I was liek... 13
+02:30  Hopsy: and you are now 14? :P
+02:30  Lumpio-: 22 :<
+02:30  Hopsy: waiitt i am playing pong
+02:31  Vorspire: haha looking back now, pong could be coded with jQuery... amazing how far things have come lol
+02:32  Lumpio-: ...it could be coded in pretty much anything that allows realtime execution and visual output
+02:32  Vorspire: well yea, but generalizing it to jQuery is on topic heh
+02:33  Lumpio-: ¬_¬
+02:33  Vorspire: do it with a batch file if you wanted
+02:33  Lumpio-: ew
+02:34  Lumpio-: If you're talking Windows's awful shell thing, I'll take Bash over that any time
+02:34  Lumpio-: Even though I don't particularly like shell scripts either.
+02:34  Vorspire: agreed
+02:34  Hopsy: i won! :P
+02:34  Vorspire: lul
+02:34  Hopsy: pardon me :O
+02:34  Vorspire: grats, you bet the very first AI ever developed xD
+02:35  Vorspire: beat*
+02:35  j0hng4lt: Making intellisense work for arbitrary strings is complicated... And I don't see a reason to use a magic string for a method call if the methods are finite and can be known in advance - other than not having to call .end()
+02:35  Lumpio-: Well
+02:35  danheberden: breaking the entire flow and style of a library seems like a great reason
+02:35  danheberden: or not breaking, rather
+02:36  Lumpio-: If you really really wanted you could kind of do $(this).dialog.foo()
+02:36  Lumpio-: But it would be seriously meh
+02:36  Hopsy: ?translate lul @ Vorspire
+02:36  bot-t: Vorspire, Translation (Dutch -> English) - dick
+02:36  Vorspire: lmfao
+02:36  Vorspire: note to self, don't say lul
+02:37  Hopsy: lol i was in shock
+02:37  Vorspire: isowwy
+02:38  Vorspire: Ik verontschuldig me
+02:38  Lumpio-: I am outraged by your indignifying language
+02:38  j0hng4lt: Not every method in jQuery returns jQuery. .attr() returns a string. And I don't see how it would break the style anymore than the introduction of lambdas breaks the style of php or c#
+02:38  danheberden: j0hng4lt: a getter is diferent than setting properties
+02:39  danheberden: attr('whatever', true).keepOnChaininBuddy(
+02:39  Lumpio-: Stuff like .attr aren't followed by more jQuery stuff
+02:39  danheberden: getting finite data is different
+02:39  Lumpio-: However it makes sense to follow dialog actions with more
+02:39  luistar15: great support, I did it myself although is not jquery: http://jsfiddle.net/ZAhfz/4/
+02:39  Lumpio-: Also is ?translate an actual translator? ¬_¬
+02:39  j0hng4lt: At the same time, end() is a valid concern because I've met developers who never knew it existed
+02:39  Lumpio-: luistar15: You ignored all my instructions for you
+02:39  Lumpio-: Not my fault
+02:40  Vorspire: hmm if a jQuery getter is called andthen chained, does the second function call not call end() on the previous getter to find the previous selection?
+02:40  danheberden: j0hng4lt: most don't understand the stack
+02:40  danheberden: i've been writing a post on it
+02:40  Lumpio-: Vorspire: How do you chain after a getter ¬_¬
+02:40  Lumpio-: attr() returns a string
+02:40  Lumpio-: You can only chain... string methods with it.
+02:40  Vorspire: yea, just in underlying code, the getter could still store the selection stack
+02:40  Vorspire: ahh nevermind
+02:41  Vorspire: the theory is more than i thought out
+02:41  Vorspire: it would involve caching and overhead
+02:42  danheberden: that's just the thing - while the string to close the dialog or whatever may suite itself, in that application, better as a method of an object - the overall methodology of the library would suffer
+02:42  danheberden: and in the end, that methodology is pretty sweet
+02:42  danheberden: and really, you're splitting hairs worrying about how dialog works - my best is the application calling dialog is what needs that thought and convern
+02:42  snover: I’m sorry, is someone trying to advocate chaining *getters*?
+02:43  danheberden: e.g. javascriptmvc or backbone
+02:43  l4rk: get("ho").get("ho").make("money").fuck("bitches")
+02:43  addyosmani: lol
+02:43  Vorspire: snover; step outside the box for a moment and consider the possiblities
+02:43  Lumpio-: .yo()
+02:43  danheberden: jquery.myGetThingy(uh..the second one i got?);
+02:43  l4rk: oh whoops i'm in #jquery
+02:43  l4rk: pardon my language
+02:44  danheberden: ffs
+02:44  j0hng4lt: If dialog() returned an object, and all methods in that object except getters and .end() returned the same object, it would work fine, and it would give you intellisense.... But I do agree that relying on .end(), which many don't understand, can be problematic
+02:44  snover: Vorspire: There are no possibilities, dude. You can’t GET a different thing and then continue changing the original thing you got it from
+02:44  l4rk: lol combining the accessor and mutator
+02:44  danheberden: snover, did you not see my idea?
+02:44  danheberden: jeez man, think outside the box
+02:44  Vorspire: you can if the function chained straight after can access a cache for the selection the getter ws called on
+02:44  snover: What????
+02:44  l4rk: duh dude
+02:45  Vorspire: you wouldn't understand
+02:45  l4rk: why did nt u think of that
+02:45  danheberden: </sarcasm>
+02:45  snover: Those words in that order don’t make any sense
+02:45  hugleo: http://www.cottonbarn.info/qscroller/test.htm
+02:45  Vorspire: [] -< the box, you should stepo outside of it.
+02:45  Lumpio-: I like my box
+02:45  Lumpio-: It makes me feel comfortable
+02:45  snover: Vorspire: A different occupation, you should find one.
+02:45  l4rk: Vorspire: you are challenging fundamental programming ideas, shaking up the pot
+02:45  l4rk: i like it
+02:46  l4rk: i need someone like you on my team
+02:46  Vorspire: snover; tell me again what you think my occupation actually is?
+02:46  l4rk: team enterprise
+02:46  coldhead: vice president of sales?
+02:46  Lumpio-: Patty flipping technician?
+02:46  coldhead: junior executive vice president of sales "stay off the east side"
+02:47  Lumpio-: Now, Vorspire, even if you could chain stuff after a getter
+02:47  Lumpio-: ...where would the getter store its value?
+02:47  Vorspire: meh, not my problem if you guys can't think outside the normal parameters that are passed to your eyes
+02:47  Lumpio-: Let's try a real life example
+02:47  j0hng4lt: I once tried designing an HTML/XML markup library that made it next to impossible to produce something that's not well-formed (exception through a specially designated method. It was using the same stack model. And I ran into the same problem. No one understood the stack and the end() method
+02:47  aaroninfidel: is there a way I can attach to an object and have it tell me what its a descendent of? like window, document, etc...?
+02:47  j0hng4lt: The library was in php (not jQuery)
+02:47  Lumpio-: Say I want to get two attributes from an element
+02:48  Vorspire: Hell, I'm going to write this one up to see if it's possible, and btw, snover, tard, if you didn't step into the convo half way through you'd realise it was a theory not a statement
+02:48  Lumpio-: How would I do that by chaining getters?
+02:48  erichynds: lawl
+02:48  Lumpio-: You /could/ theoretically do something silly like
+02:48  TF22Raptor: Hi guys what is it called, when you scroll down a page and the viewable content area expands down (becomes visable) as you scroll??? Its a jquery thing, anyone know??
+02:48  Lumpio-: var values = $("derp").attr("foo").attr("bar").actuallyGet();
+02:48  danheberden: ya'll are still talking about that?
+02:48  Lumpio-: Where the attrs would add the fetched values to the jQuery object passed around and actuallyGet would extract the two values as an array
+02:48  snover: aaroninfidel: attach?
+02:49  Lumpio-: But that would be confusing as hell and would add no value.
+02:49  j0hng4lt: How about .yesreallygetforsure()?
+02:49  Hopsy: :O
+02:49  Lumpio-: TF22Raptor: It's called the thing where the viewable content area expands when you scroll down
+02:49  Hopsy: awesome stuff http://www.andrew-hoyer.com/experiments/walking/
+02:50  danheberden: and then instead of calling any function, we could have a function dispatcher, FunctionDispatcher.getReady().sure?().jQuery(document).ready(
+02:50  Lumpio-: And it's not really "a jQuery thing", but quite doable with jQuery
+02:50  aaroninfidel: snover: basically something that would work like this somevar.descendentOf and then it would return something like window, document, etc.
+02:50  danheberden: and instead of a 'getter' we could store some big stack of variables and get them with secret phrases and codes
+02:51  snover: aaroninfidel: what are you trying to do?
+02:51  aaroninfidel: snover: build a visually impressive debugger :D
+02:51  snover: danheberden: If only stupid JavaScript let us, we could pass pointers to memory addresses and let the getter populate that way :(((
+02:51  snover: aaroninfidel: uh, wut?
+02:51  danheberden: snover - omg, could you imaging
+02:51  Lumpio-: http://www.andrew-hoyer.com/
+02:51  Lumpio-: gah
+02:51  danheberden: *imagine
+02:51  Vorspire: aaroninfidel; he's capable of writing patches...
+02:51  Lumpio-: That thing is full of syntax errors
+02:51  danheberden: you think we get a lot of questions in here now...
+02:51  Lumpio-: Missing comma, unescaped quotes
+02:51  aaroninfidel: snover: well, not really a debugger...
+02:52  aaroninfidel: I'll show you.
+02:52  snover: aaroninfidel: please do :)
+02:52  j0hng4lt: Pointers, eh? How about an asm keyword like in C?
+02:52  TF22Raptor: Limpio- I guess I am trying to do this http://plugins.learningjquery.com/expander/demo/index.html but instead of a click to exapand the content, I just want to scroll and then have it expand?
+02:53  Lumpio-: Objects can be used as pointers!
+02:53  Lumpio-: var val1 = {}, val2 = {}; $("hurr").attr("durr", val1).attr("derp", val2);
+02:53  Vorspire: snover; why is it that you attack me for being creative then when I respond you go all quiet?
+02:53  Hopsy: Lumpio-: whats that site you posted there :P
+02:53  Lumpio-: And you would get the results in val1.value and val2.value
+02:53  j0hng4lt: Or execMachineCode(10000111010000011...)
+02:53  Lumpio-: Hopsy: You posted it first o__O
+02:53  snover: Vorspire: Sorry, what did I fail to respond to?
+02:53  Lumpio-: Oh no... it's machine code!
+02:54  Lumpio-: Vorspire: There's a difference between creating useful things and creating stupid things.
+02:54  Hopsy: ?eval execMachineCode(10000111010000011);
+02:54  bot-t: Hopsy: ReferenceError: execMachineCode is not defined
+02:54  snover: Lumpio-: You could even use an array and it could push shit onto the array! Wow!
+02:54  Lumpio-: I guess both count as creativity, but nothing good comes out of the latter.
+02:54  Hopsy: its not defined yet
+02:54  Lumpio-: snover: oooo
+02:54  snover: I think we just reinvented C!
+02:54  Vorspire: If someone didn't create a "stupid thing" IE Pong.. where would the gaming industry be right now? same for the internet.. they said it was stupid.. so where is your logic now?
+02:54  aaroninfidel: snover: can I send a file to you via IRC I'm behind a pretty restrictive DNS at work...
+02:54  snover: aaroninfidel: It won’t work even if you try :)
+02:54  Lumpio-: Vorspire: I don't think Pong was stupid
+02:55  Lumpio-: I think it was pretty cool.
+02:55  Lumpio-: Or still is
+02:55  Hopsy: so true Vorspire ;p
+02:55  aaroninfidel: snover: yay!
+02:55  snover: aaroninfidel: Is it pastebin-able?
+02:55  snover: aaroninfidel: or gyazo-able?
+02:55  aaroninfidel: it's a picture
+02:55  snover: aaroninfidel: or jsfiddle-able?
+02:55  aaroninfidel: snover: and I don't know of a site I can upload too
+02:56  snover: tinypic? photobucket?
+02:56  aaroninfidel: because open dns is blocking all file sharing sites it knows of.
+02:56  Lumpio-: >openDNS
+02:56  Lumpio-: Not very "open" now is it
+02:56  Lumpio-: Switch to another DNS server
+02:56  jonkri: why does not the function openPopup() (from popup.js) get called when i do this: http://paste.pocoo.org/show/282932/ ... if i uncomment the three jquery lines it works
+02:56  Lumpio-: Also I think blocking websites is retarded
+02:56  Vorspire: If a "thing" is "stupid" to soemone, then it's clearly a matter of opinion or a lac of understanding...
+02:56  Lumpio-: If you can't trust your employeed not to waste too much time on them, maybe you should fire them :V
+02:56  aaroninfidel: snover: got it
+02:56  aaroninfidel: snover: http://i17.photobucket.com/albums/b85/aaronslife/Screenshot2010-10-28at55208PM.png
+02:56  Lumpio-: I've had people e-mail me at work asking me to send them software
+02:57  Lumpio-: "Our firewall blocks NUnit because it's a 'freeware download', could you e-mail it to me?"
+02:57  j0hng4lt: execMachineCode will throw OhNoItsMachineCodeException
+02:57  Lumpio-: Retarded. Absolutely retarded.
+02:57 --- ChanServ sets modes [#jquery +o danheberden]
+02:57  snover: aaroninfidel: Looks like you are trying to replace Developer Tools/Firebug/things that already exist.
+02:57  Lumpio-: (And this is a company with tens, if not hundreds of thousands of employees, so it's not exactly a small one)
+02:58  Vorspire: snover; if people didn't replace existing things, we would all be stuck wth IE right now
+02:58  Hopsy: danheberden: how did you get the admin status :O
+02:58  Lumpio-: (I mean the guy who e-mailed me was one of them)
+02:58  Vorspire: infact, Netscape actually
+02:58 @danheberden: hax
+02:58  aaroninfidel: snover: I'm looking to make a mobile debug kit for safari.
+02:58  Lumpio-: Netscape wasn't the first browser ¬_¬
+02:58  aaroninfidel: snover: iphone*
+02:58  Lumpio-: Good luck
+02:58  snover: Vorspire: Go ahead and tell me how your mind-bogglingly brilliant idea involving fucking up the way accessors work is going to provide a paradigm shift in computing. Please.
+02:58  Lumpio-: Apple doesn't want you messing with their stuff
+02:58  erichynds: snover, step back, he knows 10 programming languages
+02:58  MatthewG: aaroninfidel: mobile debug kit for safari? That'd be awesome, some of us in #mobile-webdev would love that :)
+02:59  Vorspire: snover; how about you try to understand it without the need for abusive language, then we'll talk when you grow some pubes?
+02:59  aaroninfidel: MatthewG: I'm already using that channel.
+02:59  snover: Vorspire: It’s kinda hard to legitimately take the high road when you tell someone to “grow some pubes”, after you got done calling them a “tard”
+02:59  MatthewG: aaroninfidel: nice :) let me know when it's done and we can get it in the topic for testing or something
+02:59  aaroninfidel: snover: so... any ideas?
+03:00 @danheberden: or even take that person seriously
+03:00  snover: aaroninfidel: As far as I am aware there is no way to inspect the current scope from within JS
+03:00  l4rk: wish i had pubes growing out my nose
+03:00  aaroninfidel: snover: darn.
+03:00  aaroninfidel: snover: well, thanks anyway.
+03:00 @danheberden: l4rk, that would be hawt
+03:00  l4rk: bus is stopping
+03:00  l4rk: cya jquery
+03:00  unruthless: l4rk, that would be terrifying
+03:00 @danheberden: latas
+03:00  unruthless: lata
+03:00 @danheberden: sup unruthless :)
+03:00  Vorspire: MAybe it is, maybe it isn't. But "tard" is a short-term for Retard, which last time I checked wasn't an insult directly. But the wrd "fucking" on the other hand... well...
+03:01 * snover just blinks
+03:01  Hopsy: people dont fight :O
+03:01  TF22Raptor: guys when you go to twitter and scroll down, more content is loaded onto the screen at the bottom. Anyone knwo what you would call this? Anyone got any examples?
+03:01  Lumpio-: Hopsy: Do you have any idea how many programming languages Vorspire knows?
+03:01  Lumpio-: Do you?
+03:01 @danheberden: for fuck sake, people - this isn't mtv's real world
+03:01  Hopsy: ugh
+03:01  Hopsy: does that matter :P
+03:01  Hopsy: i didnt say anything
+03:01  Vorspire: Lumpio-; just jealous? :)
+03:02  Lumpio-: Hopsy: TEN! At least TEN!
+03:02  Lumpio-: Get it?!
+03:02  snover: Hopsy: You don’t get to tell people that know TEN programming languages to stop fighting.
+03:02  gf3: NO U
+03:02  gf3: NO NO U
+03:02  snover: NO NO NO U
+03:02  gf3: NO NO NO U
+03:02  gf3: BALLS
+03:02  snover: ?ggggggf3
+03:02  bot-t: NO NO NO NO NO NO U!
+03:02  Lumpio-: INFINITELY TIMES NO U
+03:02  gf3: FAIL
+03:02  Lumpio-: ...TIME PARADOX
+03:02  Hopsy: and that makes you super intiligence?
+03:02  Vorspire: Well I see obviously this room has been inundatedwith children, since when did I join #jquery_nursery?
+03:03  gf3: NO U
+03:03  snover: YES U
+03:03  Lumpio-: Oh yes, please go to #jquery_nursery intead
+03:03  snover: OOOOOOOHHHHHH SH
+03:03  Vorspire: yay #jquery, that place of oppression, where theories and ideas get smashed into the ground by children who don't understandthem... why do I even hang out here?
+03:03  snover: Vorspire: Maybe you should leave forever
+03:03  Lumpio-: Vorspire: Because I'm here
+03:03  erichynds: +1
+03:03  gf3: what is an array?
+03:03  Lumpio-: Everybody wants to hang with the Lumpio-
+03:03  Vorspire: Oh yea, it's peaceful during the early hours when the adults come on
+03:03  Hopsy: Lumpio-: can you tell me with languages those are :O
+03:04  Lumpio-: Hopsy: At least JavaScript!
+03:04  Hopsy: WAUW
+03:04  Hopsy: :D
+03:04  Hopsy: php
+03:04  Hopsy: ?
+03:04  gf3: how can I iterate an object?
+03:04  Vorspire: snover; nah, that's what you'd like. But you'll soon see that your life is empty and meaningless without me to rip on :)
+03:04  Lumpio-: And I think he pasted some mediocre quality C# earlier
+03:04  snover: gf3: I think it’s impossible!!!!1
+03:04  Hopsy: ask Vorspire gf3
+03:04  gf3: snover: PHP can do it!
+03:05  gf3: I need associative arrays in javascript
+03:05  snover: gf3: Wow php is so much better than JS!
+03:05  Hopsy: ?translate iterate to dutch
+03:05  bot-t: Hopsy, Translation (English -> Dutch) - herhalen
+03:05  gf3: how do I iterate them
+03:05  Hopsy: huh
+03:05 <-- danheberden has kicked Vorspire from #jquery (we spend our time on here to help and assist those with jquery, not turn it into a drama-fest. Take a deep breath, go for a walk, whatever - just relax, k?)
+03:05  Hopsy: why is he kicked :O
+03:05 --- ChanServ sets modes [#jquery +o coldhead]
+03:05  Hopsy: omg
+03:05  Hopsy: its coldhead
+03:05  addyosmani: dramarama.
+03:05  Lumpio-: Aww.
+03:05  gf3: oooh I just found http://phpjs.org/
+03:06 @danheberden: now, peeps - please get to something on topic
+03:06  snover: danheberden: DICKS!
+03:06  Lumpio-: gf3: NO
+03:06  gf3: thanks guys, I'm just going to go with phpjs and jquery
+03:06  snover: gf3: good choice
+03:06  addyosmani: So, php.js.
+03:06  Hopsy: lets talk about coldhead
+03:06  Lumpio-: No, seriously
+03:06  addyosmani: :P
+03:06  Lumpio-: gf3: No.
+03:06 @danheberden: *sigh*
+03:06  Hopsy: "{
+03:06  Hopsy: :p
+03:06 @danheberden: coldhead.. that's a topic that is un-understandable
+03:06  Lumpio-: DONGS
+03:06  gf3: it seems easy enough
+03:06  Lumpio-: gf3: It's retarded
+03:06  gf3: I can reuse a lot of my server code
+03:07  Hopsy: coldhead: i didnt say anything so dont blame meeeeeee
+03:07  Lumpio-: You know, I could spend a whole day talking about why php.js is an incredibly bad idea
+03:07  snover: Lumpio-: only a day?
+03:07  Lumpio-: I type fast
+03:07 @danheberden: there's a plugin for that? $.fn.php
+03:07  Lumpio-: :V
+03:08  Hopsy: ?g jquery php plugin
+03:08  bot-t: Hopsy, php | jQuery Plugins - http://plugins.jquery.com/plugin-tags/php
+03:08  Hopsy: yes there is
+03:08  gf3: why is it bad? it's just like PHP?
+03:08  Lumpio-: gf3: /Exactly/.
+03:08 @danheberden: haha
+03:08  Lumpio-: That's the very reason why it's bad.
+03:10  Hopsy: hmm why am i the only one in this channel :( #poem
+03:11  snover: Lumpio-: To put you out of your misery, I thought you should know, gf3 is just fucking with you
+03:11  paul_irish: you and the 625 everyone else? #ifatreefellinaforestand625peoplewerearound...
+03:11  gf3: duuuuude
+03:11  gf3: why you gotta be all like that snover!?
+03:11  snover: YOU HAD YOUR FUN
+03:11  snover: gf3: I gave you literally…3 minutes to continue
+03:12  gf3: WHATEVER BRO
+03:12  Hopsy: paul_irish: the #poem channel is hotter
+03:12  snover: WHATEVER MAN
+03:12  snover: oops
+03:12  snover: I mean
+03:12  Hopsy: snover: join in
+03:12  snover: WHATEVER TOOTS
+03:13  Lumpio-: gf3: Trust me, you do *not* want to use the abomination that is php.js for anything ever
+03:13  snover: gf3: You can be happy now, he ignored me
+03:13  gf3: thank you, snover
+03:13  Hopsy: who is 17SAABEJP? are you from japan?
+03:13  gf3: Lumpio-: oh please, it looks fine, I found what I need: http://phpjs.org/functions/array_walk:349
+03:14  Lumpio-: JAPAN ALERT
+03:14  Lumpio-: Weeaboos convene
+03:14  Lumpio-: gf3: Nice!
+03:14  Lumpio-: Personally I really like this one: http://phpjs.org/functions/exit:394
+03:19  Hopsy: Lumpio-: is it possible to make classes in javascript like php?
+03:19  Lumpio-: Yes I think the next version of php.js should support that
+03:19  Lumpio-: ("PHP.js 5")
+03:21  Prometheus: ha, http://www.apple.com/
+03:21  Prometheus: no flash =)
+03:21  Lumpio-: ...big surprise?
+03:22  Prometheus: no vittu joo.
+03:22  Lumpio-: Why would anybody in their right mind use Flash for that anyways
+03:22  Lumpio-: I'm sorry, I'm having trouble understanding what you're saying
+03:22  Prometheus: niin vissiin =P
+03:22 --- grandy_ is now known as grandy
+03:22  Prometheus: funny
+03:22  Lumpio-: You know, even though I have a .fi domain, it doesn't necessarily mean I'm Finnish.
+03:23  Prometheus: it's not really surprising or anything, I just find it refreshing that apple does something different
+03:23  Prometheus: Lumpio-: no, it doesn't, I'm aware of that
+03:23  danheberden: like ship their phones with virtual chastity belts?
+03:23  Lumpio-: Think different!
+03:23  Prometheus: danheberden: it's in the works I think ;)
+03:25  jonkri: can you tell why this works in firefox and not in chrome? (simple file) http://paste.pocoo.org/show/282937/
+03:26  Lumpio-: ...what happens when you run it?
+03:28  jonkri: Lumpio-: in firefox the popup opens and the background fades but in chrome nothing happens at all. when i call the function from the chrome console i just get an "undefined" response (which you always get when calling a "void" method i think)
+03:29  jonkri: let me paste the html too
+03:29  jonkri: http://paste.pocoo.org/show/282938/
+03:33  Prometheus: jonkri: you should put it up on jsfiddle.net for a quick demo
+03:33  Prometheus: that would probably get you more input when people can fiddle with it
+03:34  danheberden: can *jsfiddle with it
+03:35  jonkri: Prometheus: http://jsfiddle.net/mFNeJ/
+03:35  Prometheus: danheberden: no, just fiddle with it
+03:35  jonkri: but for some reason i don't get the popup in firefox when the jsfiddle page loads
+03:35  Prometheus: nothing js about that
+03:35  danheberden: *tear*
+03:36  Prometheus: jonkri: I seem to be getting the same behavior on both browsers
+03:37  jonkri: Prometheus: yeah, sorry, that's what i meant, it looks the same in both
+03:37  jonkri: but when i open the file locally i get the popup
+03:37  Prometheus: "Uncaught ReferenceError: openPopup is not defined"
+03:38  jonkri: but it should be defined, no?
+03:39  Prometheus: I suppose it should be =)
+03:39  jonkri: :D
+03:39  Prometheus: jonkri: although jsfiddle defines it on window load
+03:39  Prometheus: where as you are trying to access it on document ready =)
+03:40  Prometheus: (I think)
+03:40  Prometheus: let me make that a local file =)
+03:41  jonkri: ok thanks :) i will put it on a web server
+03:42  Prometheus: jonkri: works locally on both
+03:42  Prometheus: I can see the popup
+03:42  Prometheus: with the code that you posted online
+03:44  jonkri: yeah you're right
+03:44  jonkri: maybe i had some cache problem... :S sorry about that
+03:44  Prometheus: no worries, least you got it sorted ;)
+03:44  jonkri: yeah, thanks :)
+03:45  jonkri: Prometheus: so do you like my popup? :D
+03:45  Prometheus: jonkri: looks neat
+03:46  jonkri: Prometheus: time for bed, you have a great night/day :)
+03:47  Prometheus: you too sir
+03:47  joshsmith: I have an iframe that contains a WYSIWYG text editor. How can I listen for a focus event on the editor itself?
+03:53  julesa: I want to rewrite all of my http URLs on a page to https. Why isn't $("a[href='http://server/']").attr('href','https://server/'); catching them? What am I missing?
+03:56 --- mikeric_ is now known as mikeric
+04:03  rmurphey: julesa: have you verified that your selector is getting what you expect?
+04:04  rmurphey: (using firebug or similar)
+04:04  julesa: rmurphey: Yes, I seem to be a bit further along, damn cache was preventing me from seeing the results. Now I'm wiping out http://server/some link with https://server/ :) Erm, progress, right?
+04:06  rmurphey: try .attr('href', function(oldHref) { return oldHref.replace('http://', 'https://'); });
+04:06  rmurphey: yikes sorry, function(idx, oldHref) { .. }
+04:07  rmurphey: http://api.jquery.com/attr/
+04:09  wimpog: how can I remove or hide parent node?
+04:09  Prometheus: julesa: wouldn't it be just better to rewrite the addresses on webserver level?
+04:10  Vorspire: ?remove @ wimpog
+04:10  bot-t: wimpog, .remove([selector]): Remove the set of matched elements from the DOM. http://api.jquery.com/remove/
+04:10  wimpog: Vorspire: what about parent node?
+04:11  Vorspire: ?parent
+04:11  bot-t: .parent([selector]): Get the parent of each element in the current set of matched elements, optionally filtered by a selector. http://api.jquery.com/parent/
+04:12  Vorspire: $('p').parent().remove();
+04:12  julesa: Prometheus: It would be but I'm at the mercy of politics. No technology can overcome that, alas.
+04:12  Vorspire: for example :)
+--- Log closed Fri Oct 29 04:18:55 2010
+--- Log opened Fri Oct 29 04:19:18 2010
+04:19 --- Users 616 nicks [2 ops, 0 halfops, 0 voices, 614 normal]
+04:20 --- Channel #jquery was synced in 103 seconds
+04:22  temp01: Vorspire: :not(:visible) == :hidden
+04:22  bot-t: (18 mins 8 secs ago) <coldhead> tell temp01 you love him
+04:22  Vorspire: ahh yea forgot that one :)
+04:23  WarDekar: hi, i'm trying to make it so any element with a certain class can be right clicked for a context menu, but i'm having trouble finding a plug-in that accomplishes what i want, does anyone have any suggestions?
+04:23  temp01: ?contextmenu
+04:23  bot-t: temp01, jQuery configurable context menu | jQuery Plugins - This is a configurable context menu, it works in 3 way: right click, hold down, hover. http://plugins.jquery.com/project/ContextMenu
+04:24  WarDekar: i've looked at that one, it seems to force you to call it on each item you want to be a context menu
+04:24  WarDekar: i want all divs of a certain class to have a context menu
+04:25  WarDekar: like there could be divs added later via AJAX
+04:25  temp01: how does it force you to do that
+04:25  temp01: oh, like that
+04:25  WarDekar: seems impractical to have to reload the clickable components every time
+04:26  temp01: that's like how every plugin and method works
+04:29 --- willdayble is now known as willd[a]yble
+04:32 --- ezra-g|afk is now known as ezra-g
+04:33  beeradb: so I've got a situation where I'm binding double click events to some images which are linked — is there a way I can cancel the single click when the double click event happens? what is happening right now is that the double click fires, but the user still follows the link
+04:39  disappearedng_: Hey anyone here uses the jixedbar
+04:39  m4dv0y: hola?
+04:39  renat_rafikov: beeradb: $("#link").click(function(){return false}).dblclick(function(){alert("")});
+04:40  beeradb: renat_rafikov: hmm, the issue is that will disable the link entirely, I just want two different behaviors between single clicking and double clicking
+04:42  beeradb: I get the feeling am I going to have to do something like a set_timeout in the click method, and unsetting it in the double click? but perhaps there is a better way?
+04:46  Vorspire: beeradb; use a local variable outside of the event handlers that changes from true to false depending on the click or double-click, put checks inside both click and couble-click handers that check that state
+04:47  snover: Vorspire: that still requires a timeout.
+04:47  iamthelostboy: hello, beginners problem, i cant make jquery run, and have no idea what is wrong.. code is at http://pastie.org/1257113 and i dont get the alert in either firefox or safari, what am i doing wrong?
+04:49  Vorspire: snover; I had to do something similar with my nodeMenu, but instead of a timeOut I used :animated as the blocker
+04:49  rmurphey: iamthelostboy: if you go to the url you're pointing at for jQuery, is the file there?
+04:49  rmurphey: also, are you using Firebug or some other console of some sort?
+04:49  iamthelostboy: yes,,
+04:49  iamthelostboy: also yes
+04:50  iamthelostboy: firebug shows the jquery file, but also shows it not getting run
+04:50  rmurphey: so if you go to http://yourserver/javascripts/jquery.js
+04:50  rmurphey: it is there?
+04:50  iamthelostboy: yes
+04:50  iamthelostboy: firebug show no errors
+04:50  rmurphey: iamthelostboy: you are also loading prototype .. why?
+04:51  rmurphey: get rid of the other two script tags
+04:51  rmurphey: see if you still have the problem
+04:51  iamthelostboy: not sure.. i was using prototype for something,, will try removing it
+04:51  iamthelostboy: ahh, well dont i feel stupid.. apparently prototype and jquery don't play well together
+04:53  rmurphey: ?noconflict @ iamthelostboy
+04:53  bot-t: iamthelostboy, jQuery.noConflict([removeAll]): Relinquish jQuery's control of the $ variable. http://api.jquery.com/jQuery.noConflict/
+04:53  rmurphey: but, if you don't need prototype, don't include it :)
+04:54  iamthelostboy: thanks
+04:56  paul_irish: OKAY who is ready for a speed challenge
+04:57  snover: Not me but I’ll do it anyway if it’s fast
+04:57  rmurphey: iamthelostboy: the issue is that prototype loaded after jQuery takes over the $ function
+04:57  paul_irish: its Fast
+04:57  rmurphey: FAST
+04:57  paul_irish: get a console ready
+04:57  rmurphey: vapor.js
+04:57  rmurphey: DONE
+04:57  snover: oh shit, I can’t use bot-t?
+04:57 @coldhead: COME ON ALREADY
+04:57  rmurphey: i'm already done
+04:57  paul_irish: oh i guess you can. yes
+04:57  rmurphey: i don't know what your problem is coldhead
+04:57  paul_irish: okay make this code work.
+04:57 @coldhead: performance anxiety
+04:57  snover: this this this
+04:58  snover: ANTICIPATION IS KILLING ME
+04:58  paul_irish: [1,2,3,4,5].duplicator(); // [1,2,3,4,5,1,2,3,4,5]
+04:58  snover: ugh.
+04:58  snover: paul.
+04:58  snover: gross.
+04:58  snover: I hate this problem
+04:59  paul_irish: ?eval Array.prototype.duplicator = function(){  return this.concat(this); }    [1,2,3,4,5].duplicator();
+04:59  bot-t: paul_irish: TypeError: function () {return this.concat(this);}[1, 2, 3, 4, 5] is undefined
+04:59  paul_irish: DONT TYPEERROR ME.
+04:59  paul_irish: stupid asi.
+04:59  paul_irish: ?eval Array.prototype.duplicator = function(){  return this.concat(this); } ;   [1,2,3,4,5].duplicator();
+04:59  bot-t: paul_irish: [1, 2, 3, 4, 5, 1, 2, 3, 4, 5]
+04:59  seancurtis: paul_irish: add "BRO" to the end of that and you have a great shirt
+04:59  snover: paul_irish: why did you want us to do that?
+04:59  paul_irish: snover can type faster than me but he hates augmenting prototypes.
+05:00  disappearedng_: Hey I am using a plugin called jixedbar and the JS that comes with it by default wipes out all my classes in my chat windows. Any one here can gimme some advise around this?
+05:00  rmurphey: i also hate augmenting prototypes
+05:00  rmurphey: so
+05:00  paul_irish: because SPEED challenges are fun
+05:00  paul_irish: FUN'
+05:00  paul_irish: okay how about you come up with one
+05:01 @coldhead: oh right
+05:01 @coldhead: RETURN
+05:01 @coldhead: all i did was crash my browser
+05:01  paul_irish: first day?
+05:01 @coldhead: its my first day using javascript
+05:01 @coldhead: DANG
+05:01  nimbupani: poor coldhead
+05:01 @coldhead: TOO SLOW
+05:01  paul_irish: sorry. impatient.
+05:01 @coldhead: switch to decaff
+05:01 @coldhead: also don't ever change
+05:01  paul_irish: :-*
+05:01  snover: you can’t have both, coldhead!!!
+05:02 @coldhead: fuck you, george boole
+05:02 @coldhead: snover: gi'e us a challanege
+05:03 @coldhead: to match my challaneged spellink
+05:03  nimbupani: awws
+05:03  disappearedng_: I want to find out the particular x-y co-ordinate of a div element how do I do that?
+05:03 @coldhead: ?offset
+05:03  bot-t: .offset(): Get the current coordinates of the first element in the set of matched elements, relative to the document. http://api.jquery.com/offset/
+05:03  snover: coldhead: [1, 3].spellink(3); // [1, 3, 2, 6, 3, 9]
+05:03  joshsmith: what's the key command code for Command-B on a Mac?
+05:03 @coldhead: oh i guess that's no help
+05:04  joshsmith: I've got Ctrl-B
+05:04  snover: paul_irish: ^
+05:04  paul_irish: wat
+05:04  snover: you asked for another challenge.
+05:05  paul_irish: OIC
+05:05  paul_irish: ON IT
+05:05  joshsmith: haha, thanks paul_irish
+05:05  paul_irish: HARD!
+05:05  paul_irish: omg
+05:05  joshsmith: Ctrl+B is 66, Ctrl+I is 73, and Ctrl+U is 85
+05:08 @coldhead: i think i got it
+05:08  paul_irish: i dont
+05:09 @coldhead: ?eval Array.prototype.spellink = function (n) {if (n == 3 && this[0] == 1 && this[1] == 3)return [1, 3, 2, 6, 3, 9];return this;}; [1, 3].spellink(3);
+05:09  bot-t: coldhead: [1, 3, 2, 6, 3, 9]
+05:09  paul_irish: hahahaha
+05:09 @coldhead: can has google job now?
+05:09  nimbupani: LOLZ
+05:09  OhaiBBQ: rofl
+05:11  HarryPitfall: How hard is make a game with jQuery?
+05:11  cfedde: how long is a piece of string?
+05:11  HarryPitfall: I want to 'remake' some of my first QBasic games... using some images/sounds
+05:12  snover: ?eval Array.prototype.spellink = function(iter) { var orig = this.slice(0), self = this.slice(0); for(var i = 0; i < iter; ++i) { for(var j = 0; j < self.length; ++j) { self[j] = self[j] + orig[j]; this.push(self[j]); } } return this; }; [1, 3].spellink(3);
+05:12  bot-t: snover: [1, 3, 2, 6, 3, 9, 4, 12]
+05:12  snover: oops
+05:12  snover: fail
+05:12  snover: ?eval Array.prototype.spellink = function(iter) { var orig = this.slice(0), self = this.slice(0); for(var i = 0; i < iter - 1; ++i) { for(var j = 0; j < self.length; ++j) { self[j] = self[j] + orig[j]; this.push(self[j]); } } return this; }; [1, 3].spellink(3);
+05:12  bot-t: snover: [1, 3, 2, 6, 3, 9]
+05:12  snover: there we go
+05:12  snover: YVW
+05:13  snover: now you can do some meaningless array operations
+05:13  paul_irish: hot
+05:13  paul_irish: i got this far
+05:13  paul_irish: Array.prototype.spellink = function(n){ var arr = []; while (n--) arr.push( this.map(function(k,v){ return k*n }) ); return arr; }
+05:13  paul_irish: but then i got confused and stuff.
+05:14  nimbupani: terrible paul_irish you will never pass a google interview
+05:14  snover: coldhead definitely has the most optimised answer. A really really efficient lookup table
+05:15  snover: I would hire that guy any day to help me navigate an increasingly fragmented media landscape.
+05:15  paul_irish: ?eval Array.prototype.spellink = function(n){ var arr = [], i = 0; while (++i <= n) arr = arr.concat( this.map(function(k,v){ return k*i }) ); return arr; }; [1, 3].spellink(3);
+05:15  bot-t: paul_irish: [1, 3, 2, 6, 3, 9]
+05:15  nimbupani: whats media got to do with multiplication snover
+05:16 @coldhead: lol snover
+05:16  Brodingo: i like to party
+05:16  snover: Nothing, I just heard he is really really good at it.
+05:16  paul_irish: Brodingo: you up for making some yayquery fan art?
+05:17  Brodingo: mb
+05:17  Brodingo: :)
+05:17  paul_irish: lets take this somewhere private.
+05:20 * coldhead faps
+05:21 --- willd[a]yble is now known as willdayble
+05:22  conee: hey, is there any way to pass a variable to the selector?  i have a set of radio buttons with different dynamic values (pulled from the backend) and i create a set of hidden divs that correspond to each radio button.  i want to show each div upon clicking the corresponding radio button (divs are tagged with classes that are the same as the radio button values). my current attempt was to grab
+05:22  conee: the value of the button, store it as a variable, and pass that onto another function that calls a $(".class").show() on it, but i'm uncertain as to how to have the selector accept a variable.  is the way i'm approaching this the best way, or is there an easier way to do it?
+05:23 @coldhead: $('.' + someVar)
+05:23 @coldhead: the selector can be a string
+05:23  snover: conee: the same way any string can be concatenated with another string stored in a variable
+05:23 @coldhead: so build the string however you like
+05:23 * coldhead shutsup
+05:23  rmurphey: conee: if there's a clear dom relationship between the radio button and the div, you could also do it that way
+05:24  conee: coldhead: doh. i can't believe i didn't think of that.
+05:24  conee: rmurphey: unfortunately no, i have them in a separate area of the page
+05:29  paul_irish: http://www.vat19.com/dvds/worlds-largest-gummy-worm.cfm
+05:31 @coldhead: hold crap
+05:31 @coldhead: holy*
+05:32 @coldhead: its like an delicious intestinal parasite
+05:33  progrock: Ok, wasted entirely too much time on a useles effect.. but I think it looks pretty cool: http://www.montevmedia.com/
+05:34 @coldhead: that's sexy, progrock
+05:34  progrock: The key point is its distartcing.. and you dont read any of the garbage BS text on the site :)
+05:34  paul_irish: holy shit that's hot
+05:34  ajpiano: whoa, nify
+05:34  destinydriven: I think they'd sell more if that was a woman in the pic taking a huge bite lol
+05:35 --- gilaniali_ is now known as gilaniali
+05:35  coolguy4: anyone here used 'DataTables" ? I've got a couple of questions about how to use it... if I could PM somebody who's used it before...
+05:35  snover: ?nopm
+05:35  bot-t: Please keep all questions and code in the channel so everyone has a chance to help and benefit. Only private message someone if he/she specifically requests it, e.g. for cyber.
+05:35  destinydriven: progrock: awesome!
+05:36  paul_irish: progrock: nice implementation
+05:37  progrock: paul_irish: thanks.. kinda getting used to JavaScript.. still need to work a few performance thigns out
+05:37  coolguy4: well the examples on the DataTables site seem incomplete. i'm looking through them; but what I want to do is allow for an editable 'DataTable' that can save to a database, using PHP and MySQL. I'm looking for example code for this but I wonder if I should be trying to write it myself.
+05:37  paul_irish: progrock: oh justiced the shadow grows!
+05:37  paul_irish: even better.
+05:37  snover: coolguy4: maybe you want slickgrid. dunno.
+05:38  paul_irish: http://www.montevmedia.com/view/images/logo/dropshadow2.png hahah
+05:38  paul_irish: slick.
+05:38  progrock: haha.. yeah.. I thought opacity changes would be to overbearing
+05:39 @coldhead: i can't let mgmt see your work, progrock, or they'll be wantint the same
+05:39 * coldhead netnannies access to your site
+05:40  srmaddox: Does jquery have some form of transition from class A to class B method, like mootools?
+05:41  paul_irish: http://jqueryui.com/demos/switchClass/
+05:42  coolguy4: snover: have you used slickgrid to save to a database?
+05:42  snover: coolguy4: no
+05:42  progrock: I gotta finish tweakign this, and maybe get to some actual paid work, lol
+05:43  srmaddox: Can you specify multiple add class or remove classes?
+05:44  coolguy4: snover: ok. I think I've found some examples for slickgrid that will work for me. Why did you suggest slickgrid instead of datatables though?
+05:44  snover: coolguy4: because it is well written
+05:44  coolguy4: ok
+05:44  coolguy4: thanks :)
+05:51  srmaddox: Is there a way to chain switchClass in such a way as to go from A->B->C->A ?
+05:53  disappearedng_: Anyone here uses jixedbar?
+05:56  vladikoff: disappearedng_, sure
+05:56  disappearedng_: validkoff: when it gets too long horozontally, is there an elegant way to implement and scroll left and right?
+05:57  vladikoff: disappearedng_, a scrollbar INSIDE of the bar?
+05:57  disappearedng_: no
+05:57  disappearedng_: well the thing is I DON"T wanna implement a scrollbar
+05:57  disappearedng_: too long and ugly
+05:58  disappearedng_: I think facebook's scrolling is pretty nice, a left and right button
+05:59  vladikoff: disappearedng_, ah i see, never had to do that, right now it seems it just hides stuff if resized
+06:04  kiriban: hello, i've got a question regarding selectors. i am in a forEach loop and have a domNode which is stored in a variable called "node".  i want to have a jquery query selector return the img tags below the node. hence, i am attempting $(node "img") but that is failing
+06:04  kiriban: what is the proper syntax ?
+06:04  snover: ?101 @ kiriban
+06:04  bot-t: kiriban, New to JavaScript? You should read this first: http://eloquentjavascript.net/contents.html
+06:04  snover: ?faw @ kiriban
+06:04  bot-t: kiriban, Dynamic FAQ Section w/ jQuery, YQL & Google Docs | Tutorialzine - http://tutorialzine.com/2010/08/dynamic-faq-jquery-yql-google-docs/
+06:04  snover: ?faq @ kiriban
+06:04  bot-t: kiriban, FAQ: http://docs.jquery.com/FAQ
+06:04  snover: ignore the middle link
+06:05  kiriban: cmon dont cover me with rtfm
+06:05  kiriban: i'm not a js noob, just not very familiar with this kind of selectors
+06:05  kiriban: whats the syntax for this?
+06:06  ajpiano: $(node).find("img") or $("img",node)
+06:06  ajpiano: ?concatobj @ kiriban
+06:06  bot-t: kiriban, You cannot concatenate an object to a string, which is what you're trying to do with $(this + " selector"). If you want to use an element reference as the context for a search, use $(this).find("elem") or $("elem",this).
+06:06  kiriban: thanks
+06:06  kiriban: :)
+06:06  rmurphey: whoa, bot-t knows everything
+06:06  kiriban: he must be google.
+06:07  ajpiano: bot-t: what are rmurphey's weekend plans
+06:07  bot-t: ajpiano, You may rely on it.
+06:07  rmurphey: exactly
+06:07  bot-t: I heard she was going to visit phiggins
+06:07 * kiriban lols
+06:08  kiriban: who programmed that in there?
+06:08  rmurphey: no one programs bot-t. bot-t just knows
+06:08  bot-t: I flirt with sentience but I'm mostly robot
+06:08 @coldhead: ?mlu
+06:08  bot-t: much like urself
+06:08  kiriban: rmurphey: are you rachel?
+06:08  ajpiano: ?ud mlu
+06:08  bot-t: ajpiano, No results found for 'mlu'.
+06:09  rmurphey: kiriban: no, but people call me that anyway
+06:09  rmurphey: i've made peace with it
+06:09 @coldhead: sup rachel
+06:09  rmurphey: NOT YOU COLDHEAD
+06:09 @coldhead: i liked your album Handwriting
+06:09 @coldhead: it has nice piany
+06:09  kiriban: rebecca i meant
+06:10  rmurphey: now you're onto something
+06:10  ajpiano: coldhead, i should have known you were a Rachel's fan
+06:10  progrock: ajpiano: your memorization of bot t, both amazes and scares me
+06:10  ajpiano: i'm responsible for many of them
+06:11  ajpiano: for instance this jewel from earlier today
+06:11  progrock: I guessed that much
+06:11  ajpiano: ?wntbajo
+06:11  bot-t: http://www.pcmag.com/article2/0,2817,2371502,00.asp
+06:11  progrock: lol, I always liked
+06:11  progrock: ?tijnh
+06:11  bot-t: This is #jquery, not #handholding.
+06:12  ajpiano: hehe,
+06:12 * ajpiano bows
+06:13 @coldhead: every sensible person is a rachel's fan
+06:13 @coldhead: ISN'T THAT RIGHT SLEX
+06:14 --- superflit_ is now known as superflit
+06:14  ajpiano: i've been a fan of many rachels in my day
+06:14 @coldhead: and of their possessions?
+06:15 @coldhead: i only know rachaels
+06:16  progrock: whats the fastest way to run the same function on a list of objects? (need something that performs pretty good sicne it's called 20 tims a seconds)
+06:18  Vorspire: $(list).func(); ?
+06:18  Vorspire: or does that only work with jQuery objects
+06:18  progrock: I have a feeling uaing jquery is liekly not the fastest way
+06:19  progrock: using*
+06:19  Vorspire: then i guess the only alternative is a iterator for the list
+06:19 --- willdayble is now known as willd[a]yble
+06:20  progrock: currently I'm looping through the list of objects, but I have to do hasOwnProperty to differentiate the ones I set... and I feel liek thast overkill
+06:20  Vorspire: btw, that site you posted earlier... damn impressive
+06:21  progrock: Thanks... getting my breaings with javascript again.. tis been lik 8 years.. but rebeca's book got me up to speed pretty quickly
+06:21  progrock: bearings*
+06:21  Vorspire: I really like the way you implimented it, innovative :D
+06:21  Vorspire: progrock++
+06:22 @coldhead: implemented*
+06:22  progrock: thanks.. sad thing is.. I'm stuck thinking about it trying to figure ways to get it exactly liek I want it... but should be doing other work
+06:23  Vorspire: excuse me coldhead, i sneezed and suddenly my e key became an i key :)
+06:23  Vorspire: maybe i shouldn't have pulled them off the keyboard and changed them over...
+06:24  progrock: I kinda wanna get this mouse object workin, have a possible implementation commented out.. but I'm trying to figure out a better way to speed it up
+06:25  Vorspire: well mousemove is fired on every single pixel change, so you're going to have to sacrifice smoothness for performance :/
+06:25  progrock: Well I already throttled that
+06:26  Vorspire: It's only slightly laggy, but it's pretty good the way it is :D
+06:27 --- losing is now known as pifantastic
+06:27  progrock: yeah, I should be able to iron out most of the lag by the ned of the night
+06:27  Vorspire: an I hope you have fun doing so :P
+06:28  progrock: as long as I don;t haev to boot windows a 5th time to do some minor change to another graphic, I should be alright
+06:28  markNZ: Hello. I have been looking for ways to prevent conflicts between jQuery plugins and was wondering if anyone had stumbled accross some good references for newbies?
+06:29  Vorspire: ?noConflict
+06:29  bot-t: jQuery.noConflict([removeAll]): Relinquish jQuery's control of the $ variable. http://api.jquery.com/jQuery.noConflict/
+06:30  Vorspire: progrock; why wouldyou need to reboot windows to edit a graphic? Oo
+06:30  progrock: Vorspire: boot to, not reboot
+06:30  Vorspire: ahh :P
+06:30  markNZ: Thanks, I will have a read of this documentation. Much appreciated.
+06:31  Vorspire: well you could just use MiniXP
+06:31  progrock: goodbye menu mouse over animation, lol... causes lag
+06:31  NoPyGod: mark
+06:31  Vorspire: progrock; you're seriously gonna drop that effect? :P
+06:32  progrock: yup, jsut do css change, no need to animate it
+06:32  Vorspire: ohh I see
+06:33  Vorspire: I thought you meant, drop the effect all together
+06:33  Vorspire: leave it static
+06:33 --- willd[a]yble is now known as willdayble
+06:34  progrock: haha, nevermind.. looks horrible without the animation
+06:35  Vorspire: aww that's a shame
+06:36  Vorspire: hmm, i noticed you split the whole thing into 3 or more sections, does each section have it's own mouseover event attached, or did you superceed all sections with one event?
+06:37  progrock: I jsut made a box aroudn the top rigth to follow the mosue
+06:37  progrock: otherwise go to default position
+06:38  progrock: might do some stupid little additionsliek make the default position based on the tome of day.. ad maybe change the backgroudn image coloring based on time as well
+06:38  progrock: time*
+06:38  Vorspire: that would be neat
+06:39  progrock: yeah, would only take a minute or two, and won;t hurt performance at all I figure
+06:39 --- willdayble is now known as willd[a]yble
+06:40  Vorspire: what would be nice is a function to find Pixels Per Second - mouse speed from mousemove :P
+06:41  Vorspire: you could have little quirks taht run by mouse speed too then
+06:41  progrock: Vorspire: taht would take a few seconds to impleemnt the way I am doign it
+06:42  Vorspire: :)
+06:42  progrock: I also did it originally all with polar values (degree and distance)... so got a few ideas for stuid little games and such
+06:42  Vorspire: i'm interested to see your final result
+06:42  progrock: but, thats when i have actual time to spare, not jsut procrastinating
+06:42  Vorspire: haha :D
+06:42  Vorspire: you said you want paidwrk, i bet you could fill your boots at http://scriptlance.com
+06:43  progrock: lol, acutally have paid work I should be doing
+06:43  Vorspire: xD
+06:43  Vorspire: oops that reminds me... xD
+06:43  progrock: but when that ends... good thing to know
+06:43  Vorspire: http://rentacoder.com too, i think
+06:44  markNZ: Cheers for the help, have a good day / night
+06:46  progrock: yeah, I;m technically jsut trying to finish up some freelance work, and have a few potential jobs to conosider
+06:46  progrock: freelance doesnt pay enough right now for me
+06:47  Vorspire: well for what it's worth, I'd gladly pay you $20/ hour :D
+06:47  progrock: haha... currently gett 75 ;)
+06:47  progrock: just not enough hours a year
+06:47  Vorspire: ^^
+06:48  progrock: will be much nicer geting paid for 40 hours a week.. tho imight shot myself doing 9-5
+06:48  progrock: shoot*
+06:48  Vorspire: but as a private contract, dev to dev, $20 is reasonable :P
+06:48  Vorspire: yeah 9-5 is the bomb
+06:49  Vorspire: how much would you charge for a web-based game UI design, the graphics, but not the code?
+06:49  progrock: yeah.. honestly if I was doing somethign I had fun with, people usually end out getting the better deal with me
+06:50  progrock: I'm really nott hat strong with graphics.. took too much time off
+06:50  Vorspire: hehe, I fail miserably at design :/
+06:50  Vorspire: I can do 3D design and landscapes/scenery, but when it comes to web graphics and website designs... I pass the work on :D
+06:51  progrock: I usually manage to get something decent.. but not always
+06:51 --- willd[a]yble is now known as willdayble
+06:51  joshsmith: how do you .load() something .after() some other element?
+06:52  joshsmith: I know you can load into a particular element, but not sure if there's a way to do this
+06:52  progrock: as in use the callback?
+06:52  progrock: or soemthing different
+06:53  Vorspire: function(data){ $(data).after('div .class'); }
+06:53  joshsmith: is that how you would do it? I mean I don't want to load into the element, just create an element after one (in this case '.answer :last')
+06:53  Vorspire: given that data is raw html
+06:54  joshsmith: oh, so I can just set var data = $('#some-random-id').load(url, data); ?
+06:54  joshsmith: and then use the data that way?
+06:55  Vorspire: .load(url) would suffice, unless you're passing arguments to url
+06:55  Vorspire: passing variables*
+06:56  Vorspire: no wait..
+06:56  Vorspire: waht
+06:56 * Vorspire blinks *
+06:56 * Vorspire needs sleep *
+06:56  joshsmith: alright, let me try it out and see
+06:56  Vorspire: passing key/value pairs* xD
+06:58  joshsmith: hmm that doesn't seem to work
+06:58  joshsmith: I'm doing what I said above (without that second data), then $('.answer :last').append(html)
+06:58  joshsmith: I meant
+06:58  joshsmith: after()
+06:59  Vorspire: maybe this can help; http://acorn.vita-nex.com/JavaScript/desktop.vn.js
+06:59 --- willdayble is now known as willd[a]yble
+06:59  Vorspire: if you're like me, you'll prefer real examples
+07:00  joshsmith: indeed
+07:02  Vorspire: joshsmith; also, if you like, you can test snippets in http://jsfiddle.net
+07:03  Cork: joshsmith: do you mean to do $('.answer :last') or $('.answer:last') ?
+07:03  joshsmith: Cork:  the former
+07:04  joshsmith: I'm fairly sure
+07:04  Cork: $('.answer :last').after(html) === $('.answer').append(html)
+07:05  joshsmith: ah, gotcha
+07:05  joshsmith: yeah, that's not what I want
+07:05 --- willd[a]yble is now known as willdayble
+07:07  joshsmith: when you pass data with $.load() I'm not sure I'm understanding what's seen server-side
+07:07  Cork: joshsmith: the url, and posibly the data part
+07:07  Cork: ?.load
+07:07  bot-t: .load(handler): Bind an event handler to the "load" JavaScript event. http://api.jquery.com/load-event/
+07:07  Cork: gah...
+07:08  joshsmith: oh I think I want to actually use $.ajax anyway
+07:08  joshsmith: this is why I hate wrappers
+07:08  Vorspire: $.load(url, { one: 'hello', two: 'world' } ); === url?one=hello&two=world
+07:08  Cork: .load( url, [ data ], [ complete(responseText, textStatus, XMLHttpRequest) ] )
+07:08  Cork: the url is sent to the server whith the data converted to parameters
+07:09  Cork: and its always a get request
+07:10  joshsmith: ah, yeah, that's my issue
+07:10 --- willdayble is now known as willd[a]yble
+07:10  joshsmith: I want post, so $.ajax it is
+07:10  joshsmith: thanks for the info, though
+07:10  Vorspire: ?post
+07:10  bot-t: jQuery.post(url, [data], [success], [dataType]): Load data from the server using a HTTP POST request. http://api.jquery.com/jQuery.post/
+07:11  Cork: joshsmith: its all documented in api.jquery.com, just read it ^^'
+07:11  Vorspire: sweet, almost done downloading HL2 :D
+07:11  joshsmith: yeah, I have been, but you're making more sense than the API is, honestly
+07:12  joshsmith: in this particular case, that is
+07:12  joshsmith: otherwise I live in the docs
+07:13  Vorspire: joshsmith; $.post( 'index.php', { arg1: 'hello', arg2: 'world' }, function(data, status, xmlReq){ }, 'json');
+07:15 --- willd[a]yble is now known as willdayble
+07:16  aaroninfidel: if I was to write a game with jQuery how would I be able to do a hit event? aka 1 item hit another item, do a callback function. etc...
+07:16  Vorspire: you can create custom events
+07:18 @coldhead: collision detection?
+07:18  toph: TOPH IS HERE!
+07:18 @coldhead: hallo toph
+07:18  toph: hey =D
+07:19  snover: aaroninfidel: jQuery probably is not the ideal library for making a game
+07:19  aaroninfidel: snover: what would you suggest?
+07:19  Vorspire: flash ftw?
+07:19  snover: There was a really cool one…let me see if I can find it here for you
+07:20 --- willdayble is now known as willd[a]yble
+07:20  aaroninfidel: snover: I was just going to use webkit CSS3 effects for movement effects and then use jQuery for the basic logic
+07:20  snover: ah, here it is
+07:20  snover: http://www.effectgames.com/effect/
+07:20 @coldhead: bbc glow
+07:32  Aristata: Is there some jquery that smoothy animates a div to move x pixels in a direction?
+07:33  vladikoff: ?animate @ Aristata
+07:33  bot-t: Aristata, .animate(properties, [duration], [easing], [callback]): Perform a custom animation of a set of CSS properties. http://api.jquery.com/animate/
+07:33  vladikoff: ?
+07:34  Aristata: I will check it out thanks
+07:34  vladikoff: Aristata, scroll down for demos!
+07:38  Aristata: Yeah this is perfect
+07:38  Aristata: For far more things than I am going to use it for :p
+07:39  vladikoff: Aristata, good luck! :)
+07:49  tes1: Hi,  i am trying to create drop-down menus, soo i found and checked this tutorial: http://www.queness.com/post/966/jquery-drop-down-menu-for-rss-subscription-tutorial this is all fine, but i would like to have more than 1 menu on the same page. Menus will be generated from array soo i don't know how i should setup css and *.js file. Current problem is, because all have the same class and id tag, when i select first one all menus are ex
+07:54  rhizmoe: are two sortable ul's ok? i'm getting weird update requests from my second one on the page.
+07:54  Aristata: I am having an impossible time hooking this animate stuff up to a link
+07:55  rhizmoe: accordion
+07:55  Aristata: I have tried binding it, on clicking it, making the href go to javascript:animateLeft();
+07:55  Aristata: I have put the function in and outside of document load
+07:56  Aristata: What's the accepted way of binding a link to a js function?
+07:56  Aristata: And I am not getting errors either… When I just put the code in the console it works...
+07:57  Vorspire: ?click @ Aristata
+07:57  bot-t: Aristata, .click(handler): Bind an event handler to the "click" JavaScript event, or trigger that event on an element. http://api.jquery.com/click/
+07:57  rhizmoe: i do something like $("#foo").click(function(){...
+07:57  Aristata: This is what my link looks like: <a href="#" id="left-scroll-large"></a>
+07:57  Aristata: And my js:
+07:58  Aristata: $("a#right-scroll-large").click(function () {});
+07:58  Vorspire: $('#left-scroll-large').click(function(e){ /*your code*/ });
+07:58  Aristata: e huh
+07:58  Aristata: oops
+07:58  Vorspire: e is optional
+07:58  Aristata: well I shouldn't need the event should i
+07:58  Vorspire: its event data
+07:58  Aristata: Yeah
+07:59  Aristata: So I am befoozled
+07:59  Aristata: Should it be in our out of document ready?
+07:59  Vorspire: inside ready
+07:59  Aristata: in correct?
+07:59  Aristata: yeah
+07:59  Vorspire: yea
+07:59  Vorspire: try it without the 's' in the selector
+07:59  Vorspire: 'a'*
+07:59  Aristata: ...
+08:00  Aristata: Something just gave
+08:00  Aristata: Working now
+08:00  Aristata: It's too late
+08:00  Vorspire: hehe
+08:00  Aristata: Thanks guys, this works perfect
+08:00  Vorspire: since the ID is already an a tag, you don't need to specify the a-tag in the selector
+08:05  Northwoods: to store data with an element with custom attribute , can i use <input type='button' data='myData' >
+08:05  Vorspire: data-attr
+08:05  Vorspire: where attr is the name you want to use
+08:05  Vorspire: ?g data attribute html 5
+08:05  bot-t: Vorspire, Custom Data Attributes in HTML 5 - http://www.javascriptkit.com/dhtmltutors/customattributes.shtml
+08:07  Northwoods: Vorspire: when reading with jquery $(this).attr('data-myBrand')  for <input type='button' data-myBrand='myData' > ?
+08:08  Northwoods: let me try , thanks
+08:08  Vorspire: yup :)
+08:08  Vorspire: good luck
+08:11  HappySinger: Hello?
+--- Log closed Fri Oct 29 08:17:13 2010
+--- Log opened Fri Oct 29 08:17:34 2010
+08:17 --- Users 603 nicks [2 ops, 0 halfops, 0 voices, 601 normal]
+08:17  ldexterldesign: i'm english - it's 'favour'
+08:17  HappySinger: Have a nice day!
+08:17  Vorspire: I'm English too >> and both words are correct
+08:18  ldexterldesign: why did you bring it up then?
+08:18  Vorspire: Misread the end of your sentance out of context
+08:18  ldexterldesign: preferring then
+08:18  Vorspire: wasn't havig a go at a typo
+08:18  ldexterldesign: ok
+08:18  Vorspire: Picking on typo's is lame :P
+08:19 --- Channel #jquery was synced in 107 seconds
+08:19  Vorspire: DivX, personally is my favorite video player on the web
+08:23 --- SlexAxton_ is now known as SlexAxton
+08:29 --- Blink7 is now known as Light
+08:29 --- Light is now known as Guest61455
+08:30  triyo: I need some help with this selector please: find("span[style*='border: black']") .. It doesn't seem to work in firefox, I;'m testing on 3.6
+08:31  triyo: Why is this the case. And how would I go about this to make it cross-browser compliant?
+08:31  triyo: any direction on I'd greatly appreciate.
+08:32  triyo: *on this
+08:34  VladDrac: does the tag actually have this style literally?
+08:34  VladDrac: (in stead of through css)
+08:35  Vorspire: yea the style tag will contain that
+08:35  triyo: <span style="position:absolute; border: black 1px solid; left:240px; top:221px; width:84px; height:0px;"></span>
+08:35  Vorspire: black or #000000
+08:35  VladDrac: right, so you expect more like a substring match. Not sure if that will work
+08:35  Vorspire: triyo, does firefox translate literal colors to RGB hex?
+08:35  Northwoods: Vorspire: $(this).attr('data-filter') , worked :)
+08:36  triyo: Good question :)
+08:36  Vorspire: Northwoods; grats :D
+08:36  triyo: I can test that quick
+08:38  Northwoods: any way to check if an array is empty or not ?
+08:38  triyo: .length
+08:39  Vorspire: find("span[style*='border']").filter(function(){ return ($(this).css('border') === 'black'); ) });
+08:39  Vorspire: may work for you triyo
+08:39  Northwoods: sorry , that was stupid question sort of  , since we use !empty() in php
+08:39  triyo: Vorspire: thanks, I'll give that a quick go
+08:39  Vorspire: empty returns false if a php variable is set to 0, bad when you need it to actually be 0 :P
+08:40  Northwoods: Vorspire: for php arrays
+08:40  Northwoods: yes , empty is pretty powerful
+08:40  Northwoods: for values coming from db in php
+08:40  Vorspire: if(isset( $arr ) && !empty( $arr ) ) ?
+08:40  Northwoods: most of them are detected by empty
+08:41  Vorspire: you could also do if( sizeof( $arr ) == 0 )
+08:41  Vorspire: or count( $arr )
+08:41  Vorspire: xD
+08:41  triyo: Vorspire: find("span[style*='border']").length == 0 in firefox .... and == 120 in chrome :(
+08:42  Vorspire: triyo, that's odd aint it :D
+08:42  triyo: bug? :)
+08:42  Vorspire: possibly
+08:42  Vorspire: hmm
+08:43  triyo: Hehe, I'm on 1.4.2, maybe by some luck 1.4.3 works
+08:43  Vorspire: find("span").filter(function(index){ return ($(this).css('border') === 'black'); ) });
+08:43  Vorspire: of course!
+08:43  Vorspire: thats it!
+08:43  Vorspire: :P
+08:43  Vorspire: that will reduce the selection to all spans with a black border
+08:44  Vorspire: hmm i think FireFox may use border-color by default
+08:44  Aristata: Ok guys, I have a div in a div, the outer being larger than the inner. I want a mouseout function on the larger, but it is being called as I move into the inner div, which in my mind should not trigger mouseout… Is there a way to get around this?
+08:44  Aristata: Short of hacking jquery that is
+08:44  Vorspire: why oh why can't they just merge the awesomeness of chrome with the features of firefox and kill off IE and we can all be happy with a hybrid :D
+08:44  Aristata: amen
+08:45  ajpiano: Aristata, use mouseenter and mouseleave instead of mouseover and mouseout
+08:45  Aristata: ok!
+08:45  Vorspire: Aristata; think you may need e.stopPropogation
+08:45  Vorspire: *may* need
+08:46  triyo: Vorspire: I tried find("span[style*='border-color']").length
+08:46  marlun: If I want to create a jquery plugin which needs to kepe state and I want a class like object where I've got functions and can access "object variables" using this.var or self.var in the functions, how should I do it? Anyone know of a tutorial showing something like that?
+08:46  triyo: nothing changed.
+08:46  Vorspire: triyo, this should work; find("span").filter(function(index){ return ($(this).css('border') === 'black'); ) });
+08:46  triyo: Oh I see
+08:46  Aristata: How on earth do I do the propogation thing? The mouseleave is creating more problems of a different sort.
+08:47  Aristata: wait
+08:47  Aristata: google
+08:47  Vorspire: Aritista; say you have .click(function(e){ e.stopPropogation(); })
+08:47  Vorspire: for example
+08:47  Vorspire: but it still may not be what you need :P
+08:49  dinosaadeh: guys, is there a way when i fadeOut('fast', function() { $(anotherobject).fadeIn() }); to have an effect of both happening at the same time? I mean like one image is disappearing while the other is blending in and showing up
+08:49  Vorspire: triyo; i think i added an extra ) by accident to that code snippet :)
+08:49  Aristata: I don't think it is, now the mouseout just plain isn't doing anything
+08:49  Aristata: I think I have an idea though
+08:49  triyo: Vorspire: no problem thanks I saw it
+08:49  Vorspire: dinosaadeh; yes, don't call the fadeIn from the fadeOut callback, instead, just call it after
+08:50  triyo: Vorspire: length == 0 on all browsers, strange
+08:50  Vorspire: triyo; i'm gonna try a jsfiddle with this possible bug :S
+08:51  triyo: Vorspire: ok I just tried find("span").filter(function(index){ return ($(this).css('border-color') === 'black'); }).length and got the right value in Chrome and Firefox returned 0!!
+08:52  Northwoods: $("#hint").val(""); to reset its value to blank , input type='text' id='hint'
+08:52  triyo: this must be a bug
+08:52  Northwoods: ?
+08:52  Vorspire: Northwoods, should work :)
+08:53  Northwoods: yes , something with cache , now worked
+08:55  triyo: Vorspire: wow, I just upgraded to 1.4.3 and reran "find("span").filter(function(index){ return ($(this).css('border-color') === 'black'); }).length and got the right value in Chrome and Firefox returned 0!!" -> and now both Chrome and FireFox return 0
+08:56  berttrand: how do I use the attribute selector to have the criteria *between* two values... e.g. select all inputs where the value is greater than 2 but less than 5
+08:56  Vorspire: triyo; i'm confused xD
+08:56  triyo: makes two of us
+08:56  Aristata: Drat my idea isnt going to work
+08:57  Vorspire: bertrand; you'd have to write a filter function :)
+08:57 --- frigginAsleep is now known as frigginWork
+08:57  berttrand: ok, Vorspire, thats what I thought but was hoping for off-the-shelf
+08:58  Aristata: Oh nevermind it did
+08:58  Aristata: So, on fadeOut's call back, shouldn't that only happen after the thing has completely faded out?
+08:59  dingding: Hi I would like to know if there are any jquery plugins that can simulate similar effects when a link is shared on facebook?
+08:59  dingding: Does anyone have an idea?
+08:59  Aristata: dingding:  I don't quite follow
+09:00  Aristata: Although I have never been the social networker so I have no idea what happens when you click that stuff.
+09:00  anli_: Is it possible using jquery to obtain non-selectable text on a webpage?
+09:01  dingding: Aristata: eg when you wish to share links in facebook, you get a preview of the 1st paragraph of the text on the webpage, as well as thumbnail previews of images on the webpage
+09:01  Aristata: probably just have an iframe or something get displayed?
+09:03  anli_: triyo: maybe its not black but #000000
+09:04  triyo: anli_: tried it, no luck
+09:06  anli_: triyo: Maybe you can use classes instead?
+09:06  triyo: Vorspire: ok this is really funny. find("span").filter(function(index){ console.log($(this).attr("style")); return ($(this).css('border-color') === '#000000'); }) -> prints the whole style as expected
+09:06  anli_: === seems to be overkill btw
+09:06  triyo: find("span").filter(function(index){ console.log($(this).css("border-color")); return ($(this).css('border-color') === '#000000'); } returns blank
+09:07  triyo: so does find("span").filter(function(index){ console.log($(this).attr("style")); return ($(this).css('border') === '#000000'); }
+09:07  triyo: I mean ... find("span").filter(function(index){ console.log($(this).css("border")); return ($(this).css('border') === '#000000'); }
+09:07  anli_: Maybe you can have a certain class on those spans? What makes spans with black text color interesting?
+09:07  triyo: note the console log part
+09:07  anli_: border color, I meant
+09:07  triyo: print blank for all except attr("style") one
+09:09  triyo: anli_: unfortunately I don't have control over the "generated" html by pdf tool
+09:09  triyo: I am looking to just apply style to it at runtime
+09:10  anli_: What do you intend to do with the spans with black border color?
+09:10  Vorspire: triyo; http://jsfiddle.net/Vorspire/8mB7A/
+09:11 --- SphynXz_b is now known as SphynXz
+09:11  anli_: Aha, maybe Vorspire has an answer
+09:12  triyo: Vorspire: hahah exactly what I had in mind to try :)... I could do regex on attr("style")
+09:12  Vorspire: triyo, yeah, that code could be safer though :P
+09:13  triyo: Vorspire: got it ;-)
+09:13  triyo: works
+09:14  triyo: doesnt .css return computed style? :)
+09:14  triyo: So then going the attr("style") is by far safer and doable route
+09:14  schu: hello there
+09:14  Cork: no it returns the same as element.style
+09:15  Vorspire: triyo, i've never used .filter before, but from the console.log it only seems to pass 'this' as the element but not a jQuery object, it's confusing
+09:15  Cork: Vorspire: thats normal just do $(this)
+09:16  triyo: right wrap element in JQuery function
+09:16  Vorspire: I did console.log($(this)) and got [<span style='blah'></span>]
+09:16  schu: can anyone point me at a solution to the following problem: i've got an unordered list with LI elements. now i want to encapsulate pairs of two with </UL><UL>, but the problem is that when i use after() or some wrap, jquery adds <UL></UL> and thus renders my code useless
+09:16  triyo: Vorspire: hmm, thats odd
+09:18  Vorspire: triyo; this code is safer, because it won't overrun into the next possible property; http://jsfiddle.net/Vorspire/8mB7A/
+09:18  Vorspire: but as you said, you could use regex, but regex may be slower
+09:21  sean`: triyo, why use the style attribute
+09:21  sean`: serously makes no sense
+09:22  Vorspire: ahh sean` :) why does .filter behaviour differ from something like .each when assigning 'this'? in console.log($(this)) i got '[<span style="blah"></span>]' is this proper behaviour?
+09:22  sean`: dude
+09:23  sean`: that's a jquery object
+09:23  sean`: you're not logging this, you're logging a jquery object
+09:23  triyo: sean`: generated html from pdf library. no control over generated html
+09:23  Vorspire: usually when i do log($(this)) i get Object ->
+09:23  triyo: hence stuck with inlined style attributes
+09:23  sean`: Vorspire, perhaps you've got an updated version of your console
+09:23  sean`: triyo, doesn't mean you need to use them
+09:25  Vorspire: sean` - i think you might be right, Chrome did do an update last time i re-opened it :/ but this console update kinda suck because it won't output all of the members of the jquery object.. or is there a reason for that?
+09:25  Vorspire: sean`; because even $(this).css when used with .filter, doesn't seem to work
+09:26  snover: sean`: He means “▸ Object”
+09:26  snover: which is what WebKit Developer Tools does
+09:26  Vorspire: snover; he knows what i mean, he's not stupid
+09:26  hye: anyone use auto power onin their cmputers and know a useful program or hardware to make it work?
+09:26  Vorspire: APM
+09:26  snover: hye: This is #jquery, not #random
+09:27  RobW: lol snover: for some reason I joined #/b/ too
+09:27  hye: snover dont answer to answer, just answer silently
+09:27  Cork: hye: your way off topic, thats what snover meant...
+09:28  Cork: ask in #computers or #hardware or #software or something
+09:28  Cork: but not here
+09:28  hye: Cork i understand speeding is against the law, i just didnt expect to be pulled over can i get a break
+09:28  sean`: hye, put a cork in it!
+09:28 * Cork[home] Corks up the channel
+09:28 * Cork Corks up the channel
+09:28  Cork: :D
+09:28  snover: hye: There are about 1000 forums more appropriate than this one to ask that question, in which you will get much better answers
+09:28  Vorspire: hye; "Automated Power Management"
+09:29  snover: Vorspire: Maybe if it’s 1992 :)
+09:29  hye: $('#stfu').show();
+09:30  Vorspire: uhh, snover, data-centres use APM...
+09:30  snover: Vorspire: Uhh, no they don’t, APM has been deprecated since 1996 with the introduction of ACPI
+09:30  snover: but whatever
+09:30  snover: I don’t know anything, I am just a tard
+09:30  hye: ya ya ya
+09:31  Vorspire: well, you said it snover, you said it.
+09:31  Vorspire: [08:30:35] (snover) I don’t know anything, I am just a tard
+09:31  Vorspire: keeping that one for future use
+09:32  hye: what goes around comes around Vorspire.  you be a smart ass, then you say something dumb and your just left with an ass
+09:33  hye: referring to snover of course
+09:33  sean`: hye, LIFE IS A BITCH
+09:33  snover: hye: I don’t know why you expect to be treated not poorly when you ask a question in an irrelevant forum. It would be like going to #cooking and asking how to change your car’s oil
+09:33  hye: sean` life can be a bitch... its weather or not you deal with her when shes pmsing or not
+09:33  Vorspire: hye; was stupid enough of you to ask a question in the wrong channel tbh, you're lucky anyone even gave you an answer
+09:34  snover: THEY BOTH INVOLVE OIL WHAT DO YOU MEAN THIS IS THE WRONG PLACE TO ASK
+09:34  hye: its just a spectacle how idiots rant on about rules and regulations when infact they are spewing with irregularities
+09:35  snover: hye: This isn’t a rule, it’s just netiquette
+09:35  hye: your ongoing blunders give netiquette a bad name... if they knew where you lived they would toilet paper the tree in your front lawn
+09:36  snover: hey, hey hye. HYE. LISTEN.
+09:36  snover: THE JERK STORE CALLED AND THEY ARE RUNNING OUT OF YOU HA HA HA HA
+09:36  Vorspire: snover knows everything, he has google after all, while most of us still use our brains, any script kiddie can google :)
+09:36  hye: snover the jerk store called you to work andi am the client waiting for a jerk off
+09:37  snover: seriously, man?
+09:37  Cork: hye: do you prefer to leave on your own accord, or do i have to get someone to kick you from here?
+09:37  hye: lol that was a good line Vorspire  script kiddie haha
+09:37  feisar: Hi, what is the best way to add a class to an 'li' element if it's 'a' element has  a certain 'href' value?
+09:37  hye: Cork listen buddy i told you, those selects your doing are all wrong, use bind you moron
+09:38  hye: feisar look up .addclass
+09:38  Cork: ok, i'm getting he backup software will re-use this password as encryption key for new backup sets.
+09:38  Cork: Save the password in
+09:38  Cork: ok, getting you kicked it is then
+09:38  snover: I can do that
+09:38  dinosaadeh: guys, is there a way when i fadeOut('fast', function() { $(anotherobject).fadeIn() }); to have an effect of both happening at the same time? I mean like one image is disappearing while the other is blending in and showing up
+09:38 --- ChanServ sets modes [#jquery +o snover]
+09:38 <-- snover has kicked hye from #jquery (http://www.youtube.com/watch?v=cA0i_IU-XL8)
+09:38  sean`: autojoin
+09:38  hye: wam bam thank you mam'
+09:38  Cork: ban then...
+09:38  hye: put a Cork in it
+09:38 * Cork[home] Corks up the channel
+09:38 * Cork Corks up the channel
+09:39 * RobW slaps Cork around a bit with a large trout
+09:39  Vorspire: Oo
+09:39  Vorspire: oO
+09:39 * hye slaps Cork around a bit with a large trout
+09:39 --- ChanServ sets modes [#jquery +q *!*@unaffiliated/hye]
+09:39  feisar: hye: ok thanks
+09:39  Cork: thx
+09:39 --- snover sets modes [#jquery -o snover]
+09:39  Vorspire: he will be back
+09:39  Vorspire: i just kow it
+09:39  Cork: sure he will
+09:40  snover: Who doesn’t know the jerk store, sheesh :\
+09:40  feisar: just a quick question, some docs use single quotes and others use double, which is best in this example: $(".nav li").addClass("navliact");
+09:41  Vorspire: i am extremely surprised you haven't kicked me yet snover... :)
+09:41  Cork: feisar: it doesn't matter both is supported in js
+09:41  feisar: ok thanks
+09:41  Cork: feisar: one difference is that excape characters like \n and the like doesn't work in ''
+09:41  Cork: *escape
+09:41  feisar: right ok
+09:41  Cork: personally i use '' as often as i can
+09:42  Cork: makes it easier to find lines that do special stuff
+09:45  sean`: really sucks to be hungover today
+09:46  seutje: ah, +q isn't owner status on this network
+09:46  Vorspire: drinking before the weeknd? :P
+09:46  RobW: !users
+09:46  snover: every day is the weekend when you are unemployed
+09:46  seutje: lol
+09:46  Vorspire: too true
+09:47  seutje: and if u live in a socialist nation, every unemployed day is like christmas when u were 14
+09:48  feisar: ok so I have created a variable that contains the substring of the url (eg. index.php) and I have added a class to some 'li' elements. How should I now make sure the class is only added to the 'li' element that contains a matching 'a href' element?
+09:48  feisar: an if statement?
+09:48 --- balr0g is now known as balr0g|RestAge
+09:50  nlogax: feisar: could use attribute selectors maybe
+09:50  nlogax: and/or :has
+09:50  feisar: ok thanks, looking in to them
+09:50  nlogax: [href*=url] if you want to match anywhere in the href attr
+09:51  triyo: Vorspire: thanks for your help earlier. Got it working nicely now.
+09:51  triyo: Now I need to find an element on my page that is currently focused. Thought this should work $("input:focus")
+09:51  Vorspire: np :) anytime
+09:52  triyo: and it does in Chrome but not in my FF again :)
+09:52  Vorspire: lol
+09:52  Vorspire: typical
+09:52  triyo: its been a really crappy morning so far
+09:53  snover: triyo: document.activeElement
+09:54  triyo: snover: thanks. No need for fallbacks? Will property always exist?
+09:54  snover: triyo: no, and yes, in that order
+09:55  triyo: great, thanks
+09:56  Northwoods: Vorspire: if i run an ajax request with jquery , and user submits the page , will the php script continue to run or halt ?
+09:56  triyo: So this var focusedEl = $(document.activeElement); instead of $("input:focus" seems to work well)
+09:58  Vorspire: Northwoods, the php script will continue I guess, until success
+09:58  snover: Northwoods: Depends on if you have called ignore_user_abort in PHP or not
+10:01  Northwoods: snover: if set to true , will work without being affected , even if source page has been swtiched to some other page
+10:01  Northwoods: ?
+10:02  snover: Northwoods: it won’t abort. obviously you can’t send anything back tough.
+10:02  snover: though*
+10:03  vak: hi all
+10:03  Vorspire: ?g "ignore_user_abort php" @ Northwoods
+10:03  bot-t: Northwoods, ignore_user_abort - PHP - http://php.net/manual/en/misc.configuration.php
+10:04 --- Guest49937 is now known as CGo`Work
+10:05  vak: .load() assumes the url leads to usual HTML. In my case the URL leads to JSON and the html content is a data value of the JSON field "html". How to .load() it? :-/
+10:05  Vorspire: dataType: 'json'
+10:06  vak: Vorspire: and how to pass the field name?..
+10:07  snover: vak: .load is not the correct method for you.
+10:07  vak: snover: OK. Which one is right?
+10:07  Vorspire: getJSON
+10:07  snover: $.ajax, $.get, $.getJSON, take your pick
+10:08  vak: Vorspire: snover: OK, i try it, thanks!
+10:12 @coldhead: you can pick your friends and you can pick your nose
+10:12 @coldhead: but you can't pick your friend's nose
+10:12  Vorspire: eww
+10:13  openprotocol: I'm wondering what the correct method to create a toggle such that when you click it shows 1 div in a class and hides all others?
+10:14  openprotocol: i understand how to have a toggle that shows all, or hides all
+10:14  openprotocol: but i cant figure out how to get it to just show the one i want and hide others
+10:14 --- Cain` is now known as Cain
+10:15  openprotocol: should i just make  a separate function for each div? "show div id a, hide div #class"
+10:15  openprotocol: it seems like there should be a better way.
+10:15  seutje: coldhead: I beg to differ
+10:15  seutje: true friends pick each other's noses
+10:15  Vorspire: Michael Jackson picked his own nose...
+10:16  Vorspire: it went horribly wrong
+10:16 --- Putr|Away is now known as Putr
+10:16  Vorspire: what? too soon?
+10:16  Vorspire: :P
+10:19  ablemike: how do you use a variable to reference an object?
+10:19  tes1: anyone can help me with this?  i am trying to create drop-down menus, soo i found and checked this tutorial: http://www.queness.com/post/966/jquery-drop-down-menu-for-rss-subscription-tutorial this is all fine, but i would like to have more than 1 menu on the same page. Menus will be generated from array soo i don't know how i should setup css and *.js file. Current problem is, because all have the same class and id tag, when i select 
+10:19  tes1: any help would be appreciated :)
+10:19  ablemike: eg target = "my_div"
+10:19 --- snoy_ms_ is now known as snoy_ms
+10:19  ablemike: $(#target)
+10:19  Vorspire: minus #
+10:20 --- markj2 is now known as markj
+10:20  seutje: well nah
+10:20  Vorspire: sorry, $('#' + target);
+10:20  seutje: $('#' + target)
+10:20  seutje: ☺
+10:20  Vorspire: ^^
+10:20  seutje: I feel nasty when doing that :(
+10:21  Vorspire: but it's more dynamic to make target === '#my_div' incase target could also be a class
+10:21  Vorspire: depends on the context :P
+10:21  Vorspire: seutje; everyone is entitled to their say ^^
+10:22  feisar: Thanks for the help guys. I am aware of fadeIn(). what would be the best way to add fadein to this? $( 'li.navli a[href="' + path + '"]' ).parent( ).addClass( 'navliact' );
+10:22  Vorspire: .fadeIn(); on the end?
+10:23  Vorspire: you want to fade the parent or the original selection?
+10:23  ablemike: ahhh it's just a simple string
+10:23  ablemike: duh
+10:23  feisar: Vorspire: oh right, that simple thanks. I want to fade in the class that is added to the li element
+10:24  tes1: anyone? :/
+10:24  seutje: u want to fade a class?
+10:24  seutje: u can only fade elements :x
+10:24  feisar: the class I add using jquery adds a border. Is there a way of fading that in?
+10:25  markj: ?toggleClass
+10:25  bot-t: .toggleClass(className): Add or remove a class from each element in the set of matched elements, depending on either the class's presence or the value of the switch argument. http://api.jquery.com/toggleClass/
+10:25  markj: ?ui toggleClass
+10:25  bot-t: markj, jQuery UI - ToggleClass Demos & Documentation - Click the button above to preview the effect. http://jqueryui.com/demos/toggleClass/
+10:25  RobW: bs you can fade a class
+10:25  RobW: jqui
+10:25 * RobW slaps seutje around a bit with a large trout
+10:26  Vorspire: var selection = $( 'li.navli a[href="' + path + '"]' ); selection.parent().addClass('navliact').fadeIn(); //seperated vars for future accessibility
+10:26  feisar: thank you
+10:26  tes1: markj: that was ment for me toggleClass?
+10:26  Vorspire: tes1; review the original question you askd, it was cut off half way xD
+10:27  tes1: hmm, well i ended it by moment...   <-- here u mean?
+10:28  Vorspire: "when i select" - then it cuts off
+10:28  markj: its actually not much good for anyone, i mean the jquery ui addclass I think, was aimed at feisar though
+10:28  tes1: lol =)
+10:29  tes1: well, when i select one element to show drop-down menu, all menus are expanded (which is ofc correct, since all share the same id and class), i could ofc add every one different id, but then i dont know how to add some style from css to each one of them
+10:29  sd: Hi, I want to refrehs the content of a divbox, not the whole page. How can I accomplish that?
+10:31  tes1: and then how to register hover element function to each genericly generated id...
+10:31  neeon: Hi!
+10:31  Vorspire: tes1; are you giving 2 different elements the same id attribute value? because that's a no-no :)
+10:31  Vorspire: 2 or more, for that matter
+10:32  feisar: Vorspire: thanks, but I got a little confused there. Is that code you gave me to work without having to use jquery-ui?
+10:32  Vorspire: without jQueryUI? good luck :D
+10:32  thyphus: i am searching for a editable select/input with autocompletition. however, all/multiple inputs should access one database/table!
+10:32  tes1: Vorspire: i know its a no-no =)  but currently yes...   because i have no idea how to make css style for ids like #test1 #test2 #test3...
+10:32  neeon: I'm trying to do something when the mouse moves over a page..but not when it's over an spesified DIV. how do i get the dom name of that div?
+10:32  seutje: RobW: heh, how does that work, does it grab the styles applied to that class (figuring out the specificity shit and all) and then tries to animate those?
+10:33  seutje: emphasis on "tries"
+10:33  feisar: Vorspire: so I need jqueryUI to fade in the adding of a class?
+10:33  markj: tes1 #foo,#foo1,#foo2 ?
+10:33  seutje: seems mighty efficient :|
+10:34  Vorspire: tes1; imagine you have a <div> that has only <a> inside it, a few of them... you do $('div > a').each(function(){ $(this).css({ 'color': '#000000' }); });
+10:34  Vorspire: just as example
+10:34  tes1: markj: and what if there is 100000 of those elements...? =)  elements would be dynamically generated (and it could have sequential id)
+10:34  markj: then you wrap them with a parent container and style its children
+10:34  seutje: tes1: when generating them, u can't just add a class?
+10:35  neeon: This is my code.. and it dont work.. :( http://pastie.org/1257498
+10:36  markj: is there a bot command to tell someone to explain their problem and not say it just doesnt work?
+10:36  seutje: ?ask
+10:36  bot-t: If you have a question, please just ask it. Don't look for topic experts. Don't ask to ask. Don't PM! Don't ask if people are awake, or in the mood to help. Just ask the question straight out. http://catb.org/~esr/faqs/smart-questions.html
+10:36  Vorspire: ?doesnt work
+10:36  bot-t: What do you mean it doesn't work? What happens when you try to run it? What's the output? What's the error message? Saying "it doesn't work" is pointless.
+10:36  markj: thats the one, cheers
+10:36  Vorspire: ^^
+10:36  Vorspire: ?botsnack
+10:36  bot-t: Thank you! OMNOMNOMNOMNOM
+10:36  tes1: well I guess i could add them at generation time, but i think this would be messy, so i was hoping that css styles  had some wildcard (and also jquery), like regular expressions :)
+10:36  Vorspire: we love bot-t
+10:37  RobW: ?abortion
+10:37  bot-t: function abortion() { $(document).children().die(); }
+10:37  RobW: haha they still never removed my function
+10:37  Vorspire: omfg
+10:37  Vorspire: thats terrible xD
+10:37  seutje: tes1: suppose u could [id^=foo] { color:#F00; }, but that's silly and doesn't work in IE6
+10:37  markj: terrible but brilliant
+10:37  RobW: markj: I actually used code like that, too
+10:37  Vorspire: ?eval var foo = 42/0; alert('To ' + foo + ', and Beyond!');
+10:37  bot-t: Vorspire: To Infinity, and Beyond!
+10:37  feisar: do I need to use jqueryUI to fadeIn the adding of a class?
+10:37  RobW: which i looked at it again and was like "HAHA" and threw it on here
+10:37  tes1: seutje: i see
+10:37  seutje: RobW: thanks for answerring btw
+10:38  RobW: answering what
+10:38  markj: feisar you do yes
+10:38  seutje: the question I directed at u
+10:38  markj: it doesnt accept a duration without it
+10:38  feisar: markj: thanks
+10:39  tes1: Vorspire: what does this simbol means: '>'?  when you wrote an example $('div > a')... ?
+10:39  Vorspire: it selects all children of div
+10:39  RobW: ?paul_irish
+10:39  bot-t: Paul Irish, Senior Lightbox Technologist
+10:39  tes1: ok thx
+10:39  RobW: bot-t: paul_irish is kinda sexy
+10:39  bot-t: RobW, Changed "paul_irish".
+10:40  g0rd0n: i have a problem with the jquery tools tooltip plugin... i assigned it to :input but it gives error if the input has no title property, how can i have it applied just on input elements which have a title property?
+10:40  seutje: screw it, don't even rly care and u seem hell bent on being worthless
+10:40  RobW: ?paul_irish
+10:40  bot-t: kinda sexy
+10:41  RobW: Vorspire: what?
+10:41  RobW: did you have the bot relay me a msg? lol
+10:41  Vorspire: :)
+10:41  seutje: tes1: direct descendants
+10:41  Vorspire: xD
+10:41  Vorspire: was testing hehe
+10:41  seutje: tes1: http://www.quirksmode.org/css/selector_child.html
+10:42  ablemike: has anyone used: http://blog.crazybeavers.se/wp-content/demos/jquery.tag.editor/
+10:42  tes1: thanks
+10:42  Vorspire: lmfao
+10:42  ablemike: it's got a bug in the 1.4 release
+10:42  ablemike: can't add tags with multiple tag fields on one page
+10:43  seutje: ooh, it has alerts, how fancy
+10:43  RobW: ?gggggggggggf3
+10:43  bot-t: NO NO NO NO NO NO NO NO NO NO NO U!
+10:43  ablemike: can anyone recommend a good tagging plugin ?
+10:45  Vorspire: ?joint
+10:45  bot-t: </////////////////#=- ~~~~
+10:45  RobW: ?awesome
+10:45  bot-t: 𝖆𝖜𝖊𝖘𝖔𝖒𝖊
+10:45  RobW: ^- what the shit
+10:45  ablemike: ?wtf
+10:45  bot-t: ablemike, Talkin' Bizness -  http://thedailywtf.com/Articles/Talkin_0x27__Bizness.aspx
+10:46  Camus: For some strange reason, my type is transparent in IE, did someone encounter this problem too?
+10:46  RobW: ?me
+10:46 * bot-t 
+10:46  ablemike: uıƃnןd ƃuıƃƃɐʇ pooƃ ɐ puǝɯɯoɔǝɹ ǝuoʎuɐ uɐɔ
+10:46  RobW: ?me loves jquery
+10:46 * bot-t loves jquery
+10:46  Vorspire: ?pebkac
+10:46  bot-t: Problem Exists Between Keyboard And Chair
+10:47  RobW: ?porn2
+10:47  bot-t: ?eval var _=function(){return !_},f=function(a,b){return a+b},o=4,D=partial(f); (_)(_)+8===D (o)(o)
+10:47  RobW: ?eval var _=function(){return !_},f=function(a,b){return a+b},o=4,D=partial(f); (_)(_)+8===D (o)(o)
+10:47  bot-t: RobW: true
+10:47  RobW: ?eval function _(l){return l+(_+l)[11-((_._=(_._?_._:!_)+1)%(1+1)?!1:1+1+1+1+1)]}_(_(_('')))
+10:47  bot-t: RobW: lol
+10:48  RobW: who comes up with this shit
+10:48  Vorspire: ?tcbie
+10:48  bot-t: [_] The Care Box Is Empty :(
+10:49  ablemike: ?tag editor
+10:49  bot-t: ablemike, jQuery Tag Editor | jQuery Plugins - Adds functionality similar to the tag editor in Wordpress to a textbox. http://plugins.jquery.com/project/jQueryTagEditor
+10:49  ablemike: yeah bot-t that one is busted
+10:49  ablemike: ?tag editor that is not broken
+10:49  bot-t: ablemike, Plugins | jQuery Plugins - Another In-Place Editor is a jQuery plugin that turns any element or group of elements into an Ajax in-place editor using only one line of code. It’s written using the jQuery Library, which is avai... http://plugins.jquery.com/projects/plugins?page=1&type=20
+10:49  ablemike: ?ugg
+10:49  bot-t: ablemike, Beyond String Concatenation. Using jQuery Templating to Cleanly ... - http://speakerrate.com/talks/3734-beyond-string-concatenation-using-jquery-templating-to-cleanly-display-your-data
+10:50  Vorspire: ?jqeng
+10:50  bot-t: English jQuery users may be offended by the accessor $, if offense occurs, change $ to £ and bang head on desk.
+10:50  Vorspire: ;)
+10:50  palhmbs: lol -
+10:50  palhmbs: this is very entertaining
+10:50  RobW: ?RobW
+10:50  bot-t: : Back off my bitch
+10:50  palhmbs: well trained bot btw
+10:50  RobW: FUFUFUFUFUFUUFU
+10:51  Vorspire: xD
+10:51  j0rd: how can i submit a form with jquery? $('#myform').submit() doesn't seem to work
+10:51  RobW: j0rd: sure you're using the right ID?
+10:51  ablemike: seriously is there no good tagging plugin
+10:51  j0rd: RobW: ya
+10:51  ablemike: ?
+10:52  ablemike: ?bot-t
+10:52  bot-t: sentient but living in the machine locale.
+10:52  Vorspire: ?orly
+10:52  bot-t: YA RLY!
+10:52  RobW: j0rd: that's for checking on submit though
+10:52  RobW: j0rd: perhaps you want: $("#myform").trigger("submit");
+10:52  j0rd: RobW: i'm fairly advanced with jquery. I know quite a bit. and I assume I've done this in hte past with out problems. But for what ever reason, it refuses to work on this form
+10:52  ablemike: ?lmgtfy
+10:52  bot-t: http://lmgtfy.com/?q=
+10:52  RobW: well wait what you have should work as well
+10:52  ablemike: ?lmgtfy jquery tag editor
+10:52  bot-t: http://lmgtfy.com/?q=jquery+tag+editor
+10:52  RobW: check error logs
+10:53  j0rd: RobW: i've tried .trigger('submit'). I've also forced the 'click' trigger on the forms submit button
+10:53  j0rd: nothing =(
+10:53  RobW: do you have code anywhere else that could be 'intercepting' the submit?
+10:53  j0rd: it's a wordpress install, so perhaps there's some conflicting code in there
+10:53  j0rd: or via a plugin
+10:53  Vorspire: does submit need a return true/false?
+10:54  RobW: j0rd: perhaps there could be a 'generic' $("form").submit(function(e) { e.preventDefault(); }); code
+10:54  j0rd: Vorspire: perhaps...but you should be able to call it blank
+10:54  Cork: Vorspire: you mean the submit event?
+10:54  RobW: which would be stupid
+10:54  j0rd: RobW: hmm perhaps. I'll debug a little bit in ffirebug
+10:55  Vorspire: Well it was a rhetorical question to get your brain going, but yea, the submit event
+10:55  j0rd: been fighting with this for about a week. third time looking at it :)
+10:55 --- cbibler_ is now known as cbibler
+10:55  Vorspire: is the default return false if there is no return specified?
+10:55  RobW: default for what
+10:55  j0rd: Vorspire: gotcha. I'll ovveride the event i suppose
+10:55  jomofcw: Hello )à
+10:55  RobW: oh nvm
+10:56  ablemike: holyshit this is awesome
+10:56  ablemike: http://xoxco.com/clickable/jquery-tags-input
+10:56  ablemike: finally
+10:57  burg: hello. i`m trying to send an ajax request, and i get 404 error, even if the page exists. you can check here: http://tiernanssf.com > mouseover about tab > click on about us. you will see in js console that http://tiernanssf.com/getData.php?pname=about-us was not found, but if you click on that link you will see that in fact it has content. what am i doing wrong?
+10:57  j0rd: .catch-var = undefined. Does that mean anything to anyone?
+10:59  j0rd: TypeError: Property 'submit' of object #<an HTMLFormElement> is not a function
+10:59  RobW: burg: getData.php is sending a 404 header, why?
+10:59  j0rd: hmm
+11:00  burg: RobW, i just added this line: header('Content-type: application/json'); - one minute to try again
+11:01  burg: RobW, i don`t know why
+11:02  j0rd: "I didn't realize that I named the submit button as 'submit' and that why javascript is failing."
+11:02  RobW: burg: any weird rewrite rules that could be causing this?
+11:02  burg: still the same problem. i have no idea why it is sending 404 header
+11:02  j0rd: can not name submit button submit :)
+11:02  j0rd: jeez
+11:02  j0rd: obscure
+11:02  burg: RobW, i don`t have .htaccess in that folder, only in a subfolder
+11:03  j0rd: My submit problem: http://code.google.com/p/chromium/issues/detail?id=18090
+11:03  RobW: burg: can you paste the code?
+11:03  j0rd: i change the name from submit to something else and now it works
+11:04  burg: RobW, http://codepad.org/wkK9ohLA
+11:04  burg: that`s the whole code from getData.php
+11:05  RobW: heh that's strange
+11:05  RobW: but perhaps
+11:05  RobW: try this: http://codepad.org/SF1E1JMl
+11:05  RobW: without all the opening/closing tags
+11:05  RobW: and omit the closing tag
+11:06  RobW: for osme reason though, I still see the content type as text/html
+11:06  Vorspire: burg, the path ./wordpress/ is definitely in the same folder as getData.php?
+11:06  RobW: Vorspire: yes, it is
+11:06  RobW: otherwise he'd get nothing from WP on http://tiernanssf.com/getData.php?pname=about-us
+11:06  Vorspire: ahh didn't see that
+11:07  Vorspire: but still, shouldn't have to send a header
+11:07  RobW: his script is sending a 404 for some reason lol
+11:07  coolguy4: what ways do people here serialise data (an array) when POSTing from javascript to PHP? I'm trying to use JSON but json_decode doesn't seem to work.
+11:07  RobW: coolguy4: serialize()
+11:08  coolguy4: RobW: ah, thanks :)
+11:08  RobW: $("form").submit(function() { $.post("script.php", $(this).serialize(), function(data) { alert(data); }, "json"); }); perhaps
+11:08  burg: RobW, changed to your code. but that didn`t fix it
+11:09  RobW: burg: did you upload it?
+11:10  burg: yes
+11:10  RobW: are you sure?
+11:10  RobW: I'm still seeing it as text/html
+11:10  burg: yes, me too, and i don`t know why. i am shure
+11:11  RobW: is that the default wp-blog-header file
+11:12  Vorspire: i don't think the header really matters as long as the plaintext conforms to JSON
+11:12  sean`: TRUFF
+11:12 --- cbibler_ is now known as cbibler
+11:12  RobW: i just find it odd that he set the header, yet browser still reports it as text/html which would lead me to believe that elsewhere more headers are being set
+11:12  ggonzalez: hello
+11:13  RobW: oh
+11:13  RobW: burg: http://codepad.org/kYq3KC4t
+11:13  RobW: try that --^
+11:13  Vorspire: ?TRUFF
+11:13  bot-t: Huh?
+11:14  coolguy4: RobW: ah, I don't think serialize is what I want. According to the jquery site: .serialize : "Description: Encode a set of form elements as a string for submission." ... I have an array in javascript and I want to POST it to PHP. I just want to know of a way that I can encode it in JS and decode it in PHP.
+11:14  Vorspire: ?serializeArray
+11:14  bot-t: .serializeArray(): Encode a set of form elements as an array of names and values. http://api.jquery.com/serializeArray/
+11:14  RobW: ^ damn he's fast
+11:14  j0rd: I'm also having a problem where my forms values upon submit are not getting passed via GET arguments. Is there something special I have to do?
+11:15  RobW: j0rd: what function are you using
+11:15  coolguy4: cool, but I don't have a set of form elements, I have an array
+11:15  j0rd: RobW: submit() and trigger('submit');
+11:15  j0rd: niehter work
+11:16  Vorspire: sean` ?
+11:16  burg: RobW, i see that if i place hader(json..) after wp-blog-header, i can`t even see the page in browser now
+11:16  j0rd: if I test the values in my click function before I do the .submit() I can see that they are set....it's just not getting passed
+11:16  sean`: Vorspire, truth
+11:16  sean`: word up
+11:16  sean`: damn right
+11:16  Vorspire: :D
+11:16  j0rd: burg: you trying to do jquery ajax with wordpress?
+11:16  Vorspire: think you know the answer to coolguy4's problem?
+11:16  Vorspire: send an array in submit
+11:16  Vorspire: i'm lost tbh
+11:16  Vorspire: never neededto do it xD
+11:16  j0rd: burg: if so what URL are you posting to?  wp-admin/ajax-admin.php ?
+11:16  RobW: burg: I can't even see the page uploaded
+11:17  Vorspire: CTRL+F5 for hard-refresh + flush cache
+11:17  RobW: j0rd: I mean, are you using $.post or $.get for the submit?
+11:18  j0rd: RobW: nothing.I dont want this to be ajax. I just want the form to submit and refresh the page
+11:18  RobW: burg: remove the json header
+11:18  RobW: burg: or comment it out for now
+11:18  burg: RobW, i disabled permalinks in wordpress - it seems that this was the problem
+11:18  RobW: j0rd: you just want the form to submit and that's it with nothing JS-side?
+11:18  RobW: burg: try the code I pasted but without the json header()
+11:19  j0rd: burg: I know why your stuff isn't working
+11:19  RobW: j0rd: $("form").submit(function() { return true; }); perhaps?
+11:19  RobW: or put it on a listener
+11:19  burg: j0rd, why?
+11:19  jomofcw: A "sementic" question please ^^. I append to a div some image. I want this image to be "clickable"... I have better to bind directly the click event of the image, or have I to wrap the image in a A element and bind the click event of this A element ?
+11:20  j0rd: burg: you are not posting to the right place. You need to be posting to wp-admin/ajax-admin.php . you are probably using ajaxurl in your JS right? That's probably not set. Otherwise you are posting to ajax-admin.php (but not under the wp-admin/ folder)
+11:20  jomofcw: semAntic
+11:20  j0rd: burg: i would assume
+11:20  Vorspire: jomofcw; you don't needthe <a>
+11:20  RobW: jomofcw: $("img").click(function() { /* do stuff */ });
+11:20  Vorspire: just bind it to the image :)
+11:20  j0rd: burg: the wordpress documentation sucks
+11:20  Vorspire: applications are usually as good as the documentation that comes withthem
+11:21  Vorspire: hence why jQuery is uber godlike
+11:21  j0rd: burg: should look like this `jQuery.post('/wp-admin/admin-ajax.php', data, function(response) {}, 'json');
+11:21  RobW: burg: what'd you change?
+11:21  burg: nevermind, it works now since i disabled permalinks in wordpress. it seems that its .htaccess caused it
+11:21  RobW: ah
+11:21  j0rd: or get the ajaxurl setup probably in your code
+11:21  jomofcw: OK thanks Vorspire and RobW .
+11:21  burg: thank you
+11:23  Vorspire: ?eval this.names.length
+11:23  bot-t: Vorspire: TypeError: this.names is undefined
+11:24  marekw2143: hi, how to get selectionStart of textarea element in IE?
+11:24  marekw2143: does jQuery support that?
+11:24  Vorspire: selectionStart?
+11:25  jomofcw: There's no other way to "load the page" (not using AJAX) tha doing a window.location.href ?
+11:26  markj: why do you require an alternative?
+11:27 --- cbibler__ is now known as cbibler
+11:27  Vorspire: ?urlInternal
+11:27  bot-t: Vorspire, jQuery urlInternal: Easily test URL internal-, external-, or ... - jQuery urlInternal allows you to easily test internal-, external-, or fragment-ness for any relative or absolute URL. Includes element filtering methods and pseudo-selectors. http://plugins.jquery.com/project/bq-jquery-urlinternal-plugin
+11:30  jomofcw: not really need an alternative, juste want to know if there's other thing that exists ^^
+11:32  Vorspire: jomofcw, not that I know of, you could just make your own function to wrap window.location.href = url
+11:32  dinosaadeh: guys, is there a way when i fadeOut('fast', function() { $(anotherobject).fadeIn() }); to have an effect of both happening at the same time? I mean like one image is disappearing while the other is blending in and showing up
+11:32  dinosaadeh: cross fade
+11:33  Vorspire: didn't I answer that question like 2 hours ago?
+11:33  shervin_a: how can I say "select input[type=checkbox] and input[value='Foo']?
+11:33 --- Kryptaesthesie_ is now known as Kryp
+11:33  Vorspire: $(input[type=checkbox][value='Foo'])
+11:34  shervin_a: Vorspire: thanks
+11:34  Vorspire: (shervin_a): don't forget the " and " :P
+11:35  Vorspire: I'm too tired to give out help right now haha
+11:35  Vorspire: break time
+11:37  k1ng: what is the best distro?
+11:38  Vorspire: distro, ie distributable? jQuery of course
+11:39  Saiko: Is it possible to have multiple agenda's " open" i.e. you do not have to click or tab a input form
+11:41 --- cbibler___ is now known as cbibler
+11:42  jomofcw: Vorspire OK thx :D
+11:43  shervin_a: Can you break inside each( function)) ?
+11:45  dabear_: shervin_a: yes, use return false
+11:46  shervin_a: ok thanks
+11:47  shervin_a: dabear_: you are sure it won't return the parent function?
+11:47  dabear_: shervin_a: rtfm
+11:47  dabear_: it says so there
+11:47  shervin_a: mkay
+11:48  dabear_: Example: You can use 'return' to break out of each() loops early.
+11:48  dabear_: http://api.jquery.com/each/
+11:54 --- cbibler_ is now known as cbibler
+--- Log closed Fri Oct 29 13:09:38 2010
+--- Log opened Fri Oct 29 14:02:00 2010
+14:02 --- Users 664 nicks [1 ops, 0 halfops, 0 voices, 663 normal]
+14:02  zim: or class sorry
+14:02  oodavid: NOTYE7: toggleClass might be what you need
+14:02  zim: where span is this
+14:03  NOTYE7: thanks
+14:03 --- Channel #jquery was synced in 105 seconds
+14:08  zim: am I still here all talk stopped
+14:11  hemartin: mekwall: yes, you were completely right, implemented timeouts everywhere now :-)
+14:11  mekwall: hemartin, good on ye :)
+14:12  zim: ah something happened there strange. anyway. not sure what was posted and what was not.
+14:12  aro: nothing was posted
+14:12  aro: everyone shut up for a few minutes
+14:13  oodavid: spooky
+14:13  coldhead: that sounds like a good idea
+14:13  coldhead: EVERYONE SHUT UP FOR A FEW MINUTES
+14:13  coldhead: it will make out torrents go faster
+14:13  oodavid: bahahaa
+14:14  mushin_: does anyone know if it is possible to zindex a child underneath an element that is under its parent? or how to achieve the same effect with jquery?
+14:16  asdf456: hello
+14:17  asdf456: how can i remove all spaces from a string?
+14:17  zim: ok my Q are any or all correct for <div class="foobar"><div><div><span> where span is this I could $(this).parent().parent().parent().find("another child of foobar") OR  $(this).parent(".foobar").find("another child of foobar") OR  $(this).closest(".foobar").find("another child of foobar")
+14:18  coldhead: ?p @ mushin_
+14:18  bot-t: mushin_, Paste your code at http://jsfiddle.net , http://paste.pocoo.org/+js , or http://fixee.org
+14:18  coldhead: show us what you mean?
+14:18  coldhead: ?replace @ asdf456
+14:18  bot-t: asdf456, Manipulation - All of the methods in this chapter manipulate the DOM in some manner. A few of them simply change one of the attributes of an element (also listed in the Attributes category ), while others set an ... http://api.jquery.com/category/manipulation/
+14:18  coldhead: ?mdc replace @ asdf456
+14:18  bot-t: asdf456, replace - Returns a new string with some or all matches of a pattern replaced by a replacement .  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for e... https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/String/replace
+14:18  coldhead: ?eval 'lol aids bum'.replace(/ /, '')
+14:18  bot-t: coldhead: lolaids bum
+14:19  coldhead: ?eval 'lol aids bum'.replace(/ /g, '')
+14:19  bot-t: coldhead: lolaidsbum
+14:20  coldhead: goodnight computers, sleep tight
+14:20  sean`: ciao
+14:20  coldhead: hey desto
+14:21  sd: I have a jquery function which rotates over different of pictures. That't works fine, and you can se the result here: http://lakerslakejer.demo.standout.se/start.html.
+14:22  coldhead: ?cc
+14:22  bot-t: CASE CLOASED >: |
+14:22  coldhead: i wish everyone had such good news
+14:22  sd: The problem is that I want to display the picture that is selected.
+14:22  guy: The purpose of the breaks/breaking is to stop the car
+14:22  guy: which one?
+14:23  mushin_: coldhead: yeah here is an example; finalparallax.com/dev/
+14:23  mushin_: the div (id middle_layer z-index 5) is positioned under div (id draggable3 z-index 6) and the problem is to get the child of draggable3 (id bottom_layer z-index 4) to appear underneath middle_layer. the reason we want to keep draggable3 on top so we can use jquery to drag its contents horisontally over the screen
+14:24  mushin_: the point is to create an optical illusion when the lines cross over our illustration (basically a six frame animation)
+14:26 --- losing is now known as pifantastic
+14:26  coldhead: i don't think the word "simply" is applicable, mushin_
+14:26  coldhead: :)
+14:26  coldhead: as you probably already know, z-indexes don't apply to relatively positioned elements
+14:27  mushin_: yeah its a pain
+14:27  coldhead: what on earth are you doing this for?
+14:27  mushin_: do you think its possible to achieve the same effect using some clever javascript?
+14:27  coldhead: i don't understand at all but it looks impressive
+14:28  coldhead: mushin_: i'd be looking at canvas for this kind of complexity
+14:28  coldhead: but that excludes IE >: |
+14:29  mushin_: its a test for an artproject of sorts.. basically its gonna be a collaboration with 10 - 15 illustrators and artists using this optical illution as a medium for storytelling
+14:30  coldhead: mushin_: if you can maybe put some text in the divs explaining what levels you want them to be at then you can keep asking here and someone might know
+14:30  coldhead: i'm not very good with positions
+14:30  mushin_: coldhead: yeah ill try to make it more clear
+14:31  mushin_: but thanks anyway man
+14:33  j0hng4lt: Coldhead: the canvas won't exclude IE if you get google's excanvas, which implements the canvas API on top of IE's built-in vml support
+14:33 --- realitygaps is now known as realitygaps_away
+14:33  davetarmac: Hi chaps and chapettes
+14:33  coldhead: is that a fact, j0hng4lt? that's good to know! thx!
+14:34  j0hng4lt: A few jQuery plotting libraries come with xcanvas
+14:34  j0hng4lt: Excanvas
+14:34  oodavid: j0hng4lt: what do you think of chromeframe?
+14:34  davetarmac: how do I hide some divs when the page loads (without them appearing then disappearing?)
+14:34  oodavid: interesting to know how the world outside of the hype machine thinks :D
+14:35  asdf456: ty for the help
+14:35  j0hng4lt: Oodavid: I never tried it
+14:35  coldhead: davetarmac: .invisible {display:none;} <div class="invisible">
+14:35  oodavid: davetarmac: do it the other way round, style them as hidden in your CSS and then you can choose to display them onload
+14:35  oodavid: j0hng4lt: works a treat
+14:36  oodavid: but not really seen much talk about it other than "this is cool"
+14:36  oodavid: nice to know if any large companies with "the fear" have installed it...
+14:36  j0hng4lt: oodavid: is this a plugin?
+14:36  sean`: oodavid, you are my new favorite jQuerian
+14:37  oodavid: j0hng4lt: I think it's a control
+14:37  oodavid: if the google meta tag is on a page it'll take over the page
+14:37  oodavid: if not, you get regular IE
+14:38  oodavid: pretty nice solution really, opt-in from the webdevs PoV
+14:38  oodavid: combined with <!--[if IE]><p>install chrome frame please :-)</p><![endif]-->
+14:39  zim: any chance someone could look at this ? pulling my hair out :-(
+14:39  zim: http://jsfiddle.net/Gv2BJ/
+14:39  Fichte: how can i get the length of a JSON-object?
+14:39  Fichte: .length  doesnt work
+14:39  serio_: it depends on how the json object is set up.
+14:40  j0hng4lt: But does the user need to download or install stuff?
+14:40  j0hng4lt: With excanvas, they don't need to
+14:41  serio_: zim: http://jsfiddle.net/Gv2BJ/1/
+14:42  serio_: I think all you needed to do was turn 'onDomReady' on
+14:42  mekwall: Fichte, there's no such thing as a JSON object :)
+14:42 --- realitygaps_away is now known as realitygaps
+14:42  serio_: that's true too, json object is technically not correct
+14:43  mekwall: json is always a string, so it must be parsed into something else
+14:43  serio_: ?g ben alman, no such thing as json object
+14:43  bot-t: serio_, Ben Alman » There's no such thing as a "JSON Object" - http://benalman.com/news/2010/03/theres-no-such-thing-as-a-json/
+14:44  jetienne: serio_: this blog post should look at the first schema of json.org :)
+14:44  oodavid: zim: http://jsfiddle.net/oodavid/Gv2BJ/2/
+14:44  oodavid: j0hng4lt: yeah
+14:44  oodavid: install it
+14:44  oodavid: but
+14:44  oodavid: cause it's Google I think they'll trust it
+14:45  oodavid: might be good for code-red situations
+14:45  oodavid: IEMEGABORK
+14:45  dinosaadeh: guys is there a way to truncate text as much as a container fits?
+14:46  Fichte: mekwall, in console, it says the evaluated json-string i created is in object
+14:46  zim: firebug shows the Response but is not changing  $(this).closest(".section").find(".results_list").html(data); if I tell it to  $("#dev").html(data); it works
+14:47  zim: so it must be me doing somthing stupid I just can't see what ?
+14:48  serio_: Fichte, http://jsfiddle.net/serio/8Et8A/
+14:48 --- willdayble is now known as willd[a]yble
+14:48  zim: og code commented out at the bottom of http://jsfiddle.net/Gv2BJ/
+14:48  serio_: .length will not work unless you're targetting sub data of type 'Array'
+14:48  serio_: object
+14:48  serio_: etc
+14:49  serio_: is the json you're trying to parse public?
+14:49  hello44: hi.. how do i select an element with class of ="hasChildren active"   (two classes)
+14:49  hello44: i've tried $(".hasChildren.active")    and some other combinations but no luc
+14:49  hello44: k
+14:50  zim: hello44: $(".hasChildren .active")
+14:50  hello44: zim:  thanks,ive tried that too... here's the full line: $(".hasChildren .active").css({'background':'red'});
+14:51  serio_: hello44, your first one was fine
+14:51  serio_: something else must be wrong.
+14:51  hello44: mm.. sadly it does not work.. must be something else yea
+14:51  jetienne: _.keys(object).length <- http://documentcloud.github.com/underscore/#keys underscore ok but it will work
+14:52  hello44: deciding to code my own navigation is proving more difficult than i thought
+14:52  zim: hello44: I would add background:red; to the css the toggle class active with jquery
+14:52  serio_: hello44, http://jsfiddle.net/serio/cx3eC/
+14:52  serio_: see, it works
+14:53  hello44: zim: oh i have.. but im resorting to js....
+14:53  hello44: as the css doesn't seem to work (ill come back tomorrow refreshed i reckon!
+14:53  hello44: serio_: thanks. that looks like an awesome site, ill check it out
+14:53  serio_: awesome site?
+14:54  serio_: ?p
+14:54  bot-t: Paste your code at http://jsfiddle.net , http://paste.pocoo.org/+js , or http://fixee.org
+14:54  zim: make sure the .active is below the hasChildren in your css
+14:54  serio_: it's just a pastebin yo
+14:54  hello44: firebug reports it coming second
+14:54  serio_: ?inheritance css
+14:54  bot-t: serio_, inheritance | jQuery Plugins - This plugin allow the user to use object oriented programmation in javascript like inheritance and polymorphism. http://plugins.jquery.com/plugin-tags/inheritance
+14:55  serio_: bleh
+14:55  hello44: serio_: no.. i didn't know there were sites u could run ur JS in like that
+14:55  serio_: ah
+14:55  hello44: 1155pm... my brains had it. have a good weekend all
+14:58  Northwoods: hello ausssie ?
+14:58  Northwoods: hello44 ?
+15:00 --- Putr is now known as Putr|Away
+15:03  pkevin: anyone aware of a jquery ui port of the jquery mobile select menues?
+15:06  oodavid: hello44: multiple classes is the same as CSS
+15:06  oodavid: $ (".class1.class2"); < no spaces
+15:15  serio_: space implies child
+15:15  serio_: note that down.
+15:17  antipop: Hi, I have this page, where i have implemeted a dialog: http://link4best.com/index.php?l=A8W6&v=http://www.youtube.com/v/dvuvNmOKTYA
+15:17  antipop: the dialog shows in the center and after 5 seconds it moves to a corner
+15:17  antipop: how can I do so it "glides" to the corner instead moving abruptly?
+15:18  serio_: ?.animate @ antipop
+15:18  bot-t: antipop, .animate(properties, [duration], [easing], [callback]): Perform a custom animation of a set of CSS properties. http://api.jquery.com/animate/
+15:18  serio_: antipop consortium
+15:19  antipop: serio_ consortium?
+15:19  antipop: and about animate, is that the easiert way to do it?
+15:19  claudiu__: hello
+15:19  serio_: what property changes to throw it in the corner?
+15:20  serio_: ?g wiki: antipop consortium
+15:20  bot-t: serio_, Antipop Consortium - Wikipedia, the free encyclopedia - http://en.wikipedia.org/wiki/Antipop_Consortium
+15:20  claudiu__: for jquery ui. is there any way to specify where to put the dialog element ? By default it's in the body.
+15:21  antipop: serio_ I do $("#dialog").dialogr( "option", "position", ['right', 'bottom']);
+15:21  antipop: if you look at the page source is very simple
+15:22  antipop: serio_ and it's really this: http://en.wikipedia.org/wiki/Antipop
+15:22  dinosaadeh: guys is there a way to truncate text as much as a container fits?
+15:22  serio_: dinosaadeh, overflow: hidden
+15:23  serio_: (css)
+15:23  Brodingo: holler
+15:23  dinosaadeh: serio_: overflow hidden will cut text.. i wished to truncate and append "..."
+15:24  mekwall: dinosaadeh, I'm working on that :)
+15:24  oodavid: dinosaadeh: lookup a plugin called "ellipsis"
+15:24  jhine: Hello. I am trying to get this text to fade out, change and then fade back in when a user hovers over it. I have this but it changes too fast before full fading out: $(this).fadeOut(1000).html('Hello world').fadeIn(1000);
+15:24  oodavid: scrap that
+15:24  dinosaadeh: mekwall: =D thanks
+15:24  oodavid: it's called threedots
+15:24  dinosaadeh: oodavid: checking it
+15:25  mekwall: dinosaadeh, well... I've run into trouble with it atm :P
+15:25  serio_: you could write a script to cut text down by word or character
+15:25  oodavid: also css3 has text-overflow: ellipsis;
+15:25 --- seutje is now known as frigginSmoke
+15:25  oodavid: dunno bout how supported it is
+15:25  mekwall: http://jsfiddle.net/mekwall/gMP2F/
+15:26  oodavid: dinosaadeh: http://is.gd/gs2tq
+15:26  mekwall: that's how far I've come
+15:26  mekwall: problem is... for some reason, the container (in this case the td) is always smaller in width then the span, which is really weird
+15:28  claudiu__: for jquery ui. is there any way to specify where to put the dialog element ? By default it's in the body.
+15:28  davetarmac: crud - big problemo
+15:29  davetarmac: got a page with some jquery on it, but for some reason none of the content is being rendered out on to the page in Internet Explorer
+15:29  davetarmac: http://www.pastie.org/1257937
+15:29  davetarmac: anyone had that before?
+15:30  oodavid: dinosaadeh: http://jsfiddle.net/oodavid/F5K4W/
+15:31 --- kylehayes_ is now known as kylehayes
+15:32  mikemike-: if i want to .toggle() something isntantly, with a callback function in there, what values do i use?
+15:32  davetarmac: this is the content of click.js
+15:32  davetarmac: http://www.pastie.org/1257938
+15:32  serio_: dinosaadeh, http://jsfiddle.net/serio/HRCVs/
+15:32  mikemike-: toggle(1, function(){}); animates it
+15:33 --- frigginSmoke is now known as seutje
+15:35  dinosaadeh: serio_: thnks for trying, but this definitely aint what i need.. no predefined number of characters... just fit in the container and stop when no more space
+15:35  dinosaadeh: oodavid: thanks but this ellipsis does not work on ff
+15:36  serio_: hrm
+15:37  serio_: you could use that, and just figure out how much the container holds, but I guess if you're resizing said container and you want it to update automatically or something
+15:37  serio_: it will not work.
+15:38  sean`: man
+15:38  sean`: I hve writersblock
+15:38  serio_: lol, hve
+15:38  Ose: can someone tell me why $('a.wikia-button#randompage').attr('href','/wiki/Special:Random/main'); doesn't do anything on http://spore.wikia.com/wiki/SporeWiki (the button that
+15:38  serio_: clearly you do HAVE writters block :D
+15:38  sean`: Ose, $('#randompage')
+15:38  sean`: ?validid @ Ose
+15:38  bot-t: Ose, ID attributes must begin with a letter ([A-Za-z]) and may be followed by any number of letters, digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"), and periods ("."). http://www.w3.org/TR/html401/types.html#h-6.2 - furthermore, IDs are unique, meaning only one element in the DOM can have a given ID at any time
+15:38  sean`: theres only one!
+15:38  Ose: heh, an answer before I finish my question
+15:39  Ose: you're good
+15:40  Ose: still doesn't change the href :(
+15:40  Ose: as I was typing, the button is in the top right part of the page and is labeled "random page"
+15:40 * Ose is just testing with console
+15:41  sean`: console.log ($('#randompage')[0])
+15:41  sean`: see what it returns
+15:41  sean`: is it the element you want
+15:41  oodavid: Ose: the link has no id
+15:41  mikemike-: how can i use $.fx.off?  Do I just do $.fx.off; or $.fx.off=true;?  Example on jQuery.com isn't reat
+15:41  sean`: is it even an A tag
+15:41  sean`: Ose, then that won't work
+15:41  sean`: You probably want this
+15:41  oodavid: it actuall has data-id="randompage"
+15:41  sean`: #randompage a.wikia-button
+15:41  Ose: d'oh
+15:42  oodavid: ;-)
+15:42  Ose: me thought that was the ID
+15:42  sean`: lol
+15:42  Ose: that explains quite a lot
+15:42 --- DrBitch is now known as onomi
+15:42  oodavid: $('[data-id=randompage]'); should do it
+15:42 --- Gooorf_PC is now known as ElGoorf
+15:43  Ose: yup, thanks
+15:43  oodavid: no worries
+15:43  oodavid: not sure if data-id has to be unique on the page
+15:43  oodavid: so there's a chance that there will be multiple elements that match
+15:44  peterPan-: guys i got a problem with the datepicker and the jquery validation plugin. my dateformat for the datepicker is mm/dd/yyyy, when I add the jquery.validate.min.js the date format is: Fri Oct 29 2010 00:00:00 GMT+0200
+15:44  oodavid: today!
+15:45  oodavid: sorry, never used UI :S
+15:50  T0nttu: I have trouble getting an emailing form to work within ajaxed content, see here: http://www.webdevforums.com/showthread.php?t=40592 (using jQuery tools tabs)
+15:50  eirikb: Hello. Anyone added subtitles to VideoJS?
+15:51  eirikb: I tried adding http://plugins.jquery.com/node/11465 (jQuery Subtitles) to it, and this works. But any existing implementation or appending to the default VideoJS would be better
+15:56  oodavid: eirikb: I effing love subtitles, but not used VideoJS :(
+15:56  oodavid: eirikb: http://subs.oodavid.com/
+15:56  onomi: hello, i know its not about jquery but, knows somebody anything like this in flash, for example? http://www.subirimagenes.com/imagen-component-5430264.html
+15:56  eirikb: oodavid: Ok. So you would recommend the plugin I have chosen?
+15:57  oodavid: just taking a peek now
+15:57  oodavid: looks pretty basic, but solid
+16:02  pea[0]: hello, i need lots of .toggleslide's but i need to only use one instance of it. how would i 'get' the id so jquery knows which div to slide? http://omgpaste.com/d/nn3fk0/paste.js
+16:03  robtarr: Has anybody here used the datalink plugin? I was able to easily add it to a form and gets the values in my object updated, but updating the values in the object don't update the form fields...
+16:05  oodavid: jQueer
+16:05  oodavid: ooh actually
+16:06  oodavid: it's almost time for jBeery
+16:07  onomi: does this exist in jQuery ? http://www.subirimagenes.com/imagen-component-5430264.html
+16:07  mekwall: dinosaadeh, http://jsfiddle.net/mekwall/gMP2F/ <-- got it to work... but I am pretty sure it is quite crappy performance-wise
+16:11  dinosaadeh: mekwall: thanks man... i m trying to change the size of the cells to see if they flow
+16:12  mekwall: dinosaadeh, well they do... but there's no method for updating them yet
+16:15 --- Putr|Away is now known as Putr
+16:18  Today: Hey folks, I have a problem with my select boxes and jeditable. I want extra data from the page submitted whenever the user makes a change to an edit-in-place field. So I use the submitdata: {} params to tell it to send my php page a few extra bits of data along with the new value. (Select box choices in this case)
+16:18  pea[0]: i need to do something like this: $("#link\\.entry\\[*]") so when i click link.entry[2] it hides div.entry[2]
+16:18  Today: http://pastebin.ca/1976357 is my pastebin to give you an idea of how I submitted it.
+16:19  Today: The problem is that it submits the PREVIOUS choices for the select boxes
+16:19  Today: Not the current.
+16:19  pea[0]: ergh how can a channel with 700 people be so dead
+16:19  Today: I select for instance, Bananas and Apples from each dropdown box...and it submits Grapes and Oranges from yesterday when I used it last
+16:20  Today: Using firebug...I checked the hidden field I created to see if the new dropdown value was being thrown in there, and it is. So how on earth does the previous selection get submitted instead?
+16:20  Today: I tried two ways of getting the select boxes value, neither worked
+16:21  Today: I'd always get the PREVIOUS selection.
+16:22  DogWater: Are there any good jquery plugins or toolkits for making forms that have various live elements depending on what the user selects?
+16:22  Fichte: someon know a browsercompatible way to scroll smoothy to the top of the website?
+16:23  Fichte: any expiriences with scrolltop?
+16:24  fris: Fichte ya
+16:25  Fichte: trieing this knwo: http://forum.jquery.com/topic/jquery-animate-scrolltop-12-1-2010
+16:26  oodavid: Fichte: http://jsfiddle.net/oodavid/nf3CP/
+16:26  Fichte: yeah
+16:26  Fichte: i am doing it with html, body
+16:26  Fichte: working fine
+16:27  Fichte: why do u create an if in there?
+16:27  oodavid: Fichte: Opera will go a bit akka
+16:27  oodavid: you need the fix
+16:27  Fichte: cant i just use 'html, body'?
+16:27  oodavid: you can
+16:27  oodavid: but Opera doesn't like it
+16:27  efphe: hello
+16:27  Fichte: k
+16:28  efphe: if I have a $(option), how can I take the html <option value="foo">bar</option>? If I use $(option).html(), I have only `bar`
+16:28  Fichte: works  fine   thx
+16:28  oodavid: np
+16:29  Fichte: if u want to append it to somewhere cant u just user clone?
+16:29  Fichte: efphe?
+16:29  efphe: yes
+16:29  efphe: is it better to use clone?
+16:29 --- Killswitch___ is now known as Killswitch
+16:29  Fichte: dunno   was my first guess  xD
+16:29  efphe: $(something).append($(option).clone()) ?
+16:29  efphe: as this?
+16:30  Fichte: ?clone
+16:30  bot-t: .clone([withDataAndEvents]): Create a copy of the set of matched elements. http://api.jquery.com/clone/
+16:30  Fichte: never used clone
+16:33 --- Pix___ is now known as Pix__
+16:36  Today: Since I'm dealing with options as well in my select box efphe, any idea what the problem with my site might b e?
+16:36  Today: How does the page keep submitting previous select box choices and never the current one :O
+16:37  efphe: Today, i can't get you
+16:37  efphe: which is your problem?
+--- Log closed Fri Oct 29 20:02:18 2010
+--- Log opened Fri Oct 29 20:02:41 2010
+20:02 --- Users 739 nicks [1 ops, 0 halfops, 0 voices, 738 normal]
+20:02 --- ChanServ sets modes [#jquery +v serio_]
+20:02  paul_irish: nimbupani: http://ceraoreisenberg.com/
+20:04 --- Channel #jquery was synced in 119 seconds
+20:04  bartzy: eTiger13: That's exactly what I'm asking. should I make an inline script in my PHP page that will inject those variables into the JS object I have with all methods and properties ?
+20:04  flupke_: how would you implement the "scroll to current article" function of google reader in jquery ? with .scroll() ? or maybe there's a simpler trick with anchors ?
+20:05 +serio_: "We all know techno music is used as a portal to allow satan inside your children’s minds and this man is using it to tell children being touched by homos is ok and that anal sex is they way to go"
+20:05 +serio_: paul_irish, is this meant to be taken seriously?
+20:05  paul_irish: serio_: the christwire post?? i THINK SO
+20:05  eTiger13: bartzy: if you really really really need to inject something with php relating to javascript (which you most likely can accomplish some other way) then have a separate script for that
+20:05  paul_irish: so fantastic.
+20:05 +serio_: rediculous.
+20:05  jrockjiggz: eTiger13: something like this http://jsfiddle.net/PDDDG/
+20:06  eTiger13: ?scrollto @ flupke_
+20:06  bot-t: flupke_, ScrollTo | jQuery Plugins - With this plugin, you will easily scroll overflowed elements, and the screen itself. It gives you access to many different options to customize and various ways to specify where to scroll. http://plugins.jquery.com/project/ScrollTo
+20:06  nimbupani: i saw paul_irish
+20:06  paul_irish: nimbupani: OH! oKay great
+20:06  nimbupani: are you tweeting :|
+20:07  initself: ids have to be unique in the entire html document?
+20:07  flupke_: eTiger13, ok scrollTo() then
+20:07  initself: or ids for a particular element have to be unique?
+20:07  eTiger13: jrockjiggz:  http://jsfiddle.net/PDDDG/1/ although its not as global as you think. look into namespaces
+20:07  eTiger13: initself: ids are unique. classes can be reused. CSS 101
+20:08  nefD: hm. looking for a canvas wrapper/lib that supports layers and gradients.. currently using artisan.js, but i would have to implement gradient handling.. any suggestions?
+20:08  initself: eTiger13: totally unique, or unique by element?
+20:08  paul_irish: nimbupani: NO i dont believe in tweeting
+20:08  nimbupani: ok good
+20:08 +serio_: haha
+20:08  Brodingo: hitler tweeted
+20:08  paul_irish: http://www.sweet-juniper.com/2010/10/part-kid-part-machine-all-cop.html
+20:08 +serio_: ?g twitter: paul irish
+20:08  bot-t: serio_, Paul Irish (paul_irish) on Twitter - http://twitter.com/paul_irish
+20:08  Brodingo: do you wanna be like him?
+20:08  eTiger13: initself: unique is unique. if its unique by element then its not unique. that would be a class
+20:09  initself: The W3C defines class ID as "a unique identifier to an element".
+20:09  initself: http://www.tizag.com/cssT/cssid.php
+20:09 +serio_: an awful lot of tweets for someone who doesn't believe in tweeting
+20:10  initself: but then later in that document, they seem to say that:
+20:10  initself: Standards specify that any given ID name can only be referenced once within a page or document.
+20:10  eTiger13: who doesnt know who robocop is? thats blasphemous
+20:10  initself: SO WHICH IS IT!?
+20:10  eTiger13: initself: IDs are unique per page. Classes can be reused as many times on as many elements as you want
+20:11  eTiger13: initself: and tizag is NNOOTT the w3c
+20:11  initself: true, true
+20:12  eTiger13: if you had read even the rest of that page you would have seen (saw? i always get those confused) "Use IDs when there is only one occurence per page. Use classes when there are one or more occurences per page"
+20:13  jrockjiggz: eTiger13: globaVar returns data inside function, but outside function globalVar = undefined.  even though var is being defined before
+20:13  stanmancan: When a form is submitted I need to stop it, run a function, then have it submit.. This is what I have but it's not submitting.. http://gist.github.com/654033
+20:13  silo: How can I slide a div left and have another div slide in its place without a delay between the animations?
+20:13  initself: i did read the rest of the page.  I even quoted it to you!
+20:14  eTiger13: jrockjiggz:  like i said, look into namespaces. defining the var in the ready statement does not make it global
+20:14  jrockjiggz: eTiger13: ok
+20:15  eTiger13: silo: you want an accordion
+20:15  bubbafoley: stanmancan, try putting that function on the click event for the submit button instead of form submit
+20:15  silo: accordion eh, ill look into it :)
+20:15  silo: thanks
+20:15  eTiger13: stanmancan:  the preventDefault isnt needed in that case, nor is the .submit part
+20:16  silo: hrmm no not an accordian i dont think...
+20:17  stanmancan: eTiger13: I tried that but it doesn't finish the function I'm calling before submitting the forum, so it doens't complete
+20:18  eTiger13: stanmancan:  what is that function doing?
+20:20  thedelchop: has any used ui-tabs with dataFilter to transform json in html that can be rendered in the tab-panel?
+20:22  tristan_: how come my .not() is being ignored in this context:  $("#hero-overlay").not(".hero-close").empty();
+20:22  thepacmanfan: i'm having problems with the Cycle plugin after it's been minimzed and merged in Magento. ideas?
+20:22  thepacmanfan: *minified
+20:23  eTiger13: tristan_: that selector is all wrong. you should not have multiple hero-overlay ids. this is to reuse code on multiple pages right?
+20:23  eTiger13: thepacmanfan:  what kind of problems?
+20:23  eTiger13: ?empty
+20:23  bot-t: .empty(): Remove all child nodes of the set of matched elements from the DOM. http://api.jquery.com/empty/
+20:23  tristan_: eTiger13: no there is 1 id namd hero-ovelay
+20:24 --- BBonifieldd is now known as BBonifield
+20:24  tristan_: right but howcome the not isn't removing that class from the match elements?
+20:24  thepacmanfan: eTiger13: i haven't been able to fully debug it. i'm gonna go with "doesn't work at all"
+20:25  eTiger13: tristan_: there shouldnt be multiple elements in that
+20:25  eTiger13: thepacmanfan: thats not at all helpful. is it even getting loaded?
+20:25  eTiger13: ?not
+20:25  bot-t: .not(selector): Remove elements from the set of matched elements. http://api.jquery.com/not/
+20:25  tristan_: nm got it
+--- Log opened Fri Oct 29 20:27:34 2010
+20:27 --- Users 746 nicks [1 ops, 0 halfops, 1 voices, 744 normal]
+20:27 --- Breakmau6 is now known as Break5
+20:27  jrockjiggz: js is evil
+20:28  thepacmanfan: eTiger13: it's a simple matter of the merge/minify function in Magento. if it's enabled (the jquery.cycle is being processed this way) the Presentation Cycle script does not work. when i disable the merge/minify function, it works fine.
+20:28  thepacmanfan: i know this is very vague. it appears like it is not being loaded, correct.
+20:28  eTiger13: thepacmanfan: um ok. so ask in the magento room as it sounds like a magento problem. by chance, have you ran that script through jslint?
+20:28  thepacmanfan: Firebug shows that the jquery.cycle code is in the merged file, though.
+20:28 --- Channel #jquery was synced in 92 seconds
+20:29  thepacmanfan: eTiger13: except that this is the only script that i've had problems with when merging/minifying.
+20:29  thepacmanfan: and no i have not.
+20:30  thepacmanfan: i'm getting ready to try the non-min version of jquery.cycle... maybe it doesn't like being minified twice :P
+20:30  eTiger13:  i thought you said jquery.cycle was fine and its the presentation file
+20:30  thepacmanfan: if i said that, i was mixed up.
+20:31  thedelchop: anybody?  Json with ui-tabs?
+20:31  thepacmanfan: but i AM mixed up... running JSLint now.
+20:32  jrockjiggz: :( http://jsfiddle.net/PDDDG/2/ - does anyone know how to get varialbe to show val and not function?
+20:33  eTiger13: jrockjiggz:  no no no no
+20:33  jrockjiggz: : (
+20:33 +serio_: lol
+20:33  jrockjiggz: i've tried every combination possible..
+20:33  eTiger13: jrockjiggz:  http://jsfiddle.net/PDDDG/3/
+20:34  bot-t: jrockjiggz, Please reference the AJAX 101 diagram: http://i41.tinypic.com/etsbyo.png
+20:34 +serio_: eTiger13's got you in check jrockjiggz
+20:34 +serio_: and yeah, check that ajax 101
+20:34  bot-t: jrockjiggz, http://jsfiddle.net/PDDDG/4/
+20:35  jrockjiggz: hmm ok
+20:36  eTiger13: yeah perhaps i should have specified the alert in mine wont work as it will be called before the load callback is finished most likely
+20:36 +serio_: the code that bot-t posted gives a better idea, see how it alerts once, then again after the ajax request?
+20:36 --- WebDragon|laptop is now known as WebDragon
+20:37  jrockjiggz: yes, the one after is undefined, which is really the one that can be used elsewhere
+20:38  jrockjiggz: the problem is i would use $.ajax but it does not support loading portion of file (as .load('file #id') does.)
+20:38  sh_sh: hi folks. what is such jquery code about: ';(function($) {...})'
+20:38  sh_sh: some semicolon function?
+20:38 +serio_: load is just a wrapper that uses $.ajax
+20:39  eTiger13: sh_sh:  the semicolon makes sure any js before it is closed and then the function passes in $ to be used with jquery
+20:40  jrockjiggz: +serio_: $.ajax({ url: 'index.php #div', success: function(data) { alert(data); }); //returns whole file, not the portion...
+20:41  eTiger13: jrockjiggz:  ok then just parse it in the success callback since thats what load does pretty much
+20:41 +serio_: this is the wrong way to do ajax btw
+20:42 +serio_: the idea is to load less data, not the same amount as a full page request.
+20:43  jrockjiggz: +serio_: index.php example is actually only returning data, data is an email template that i'm trying to break apart
+20:44  jrockjiggz: to parse data, is it $(data).find('...'); ?
+20:45  sh_sh: eTiger13: so when the function is called, what will be passed as '$'?
+20:46  sh_sh: like the main jquery object or something like that?
+20:46 +serio_: jrockjiggz, I'm still lost on why you're returning data that needs to be parsed
+20:46 +serio_: it should be ready to use.
+20:46 --- Adkron_ is now known as Adkron
+20:47  eTiger13: sh_sh:  the main jquery object
+20:47  sh_sh: eTiger13: ^^ thx
+20:55  ManxPower: Would this.style.cursor='pointer'; be written as $(this).style.cursor='pointer'; when using jQuery?
+20:55  Lumpio-: $(this).css("cursor", "pointer");
+20:55  Lumpio-: Would be the jQuery way.
+20:56  l4rk: ManxPower: consider using a class
+20:57 --- JangoSteve_ is now known as JangoSteve
+21:00  jrockjiggz: eTiger13, +serio_: thx
+21:00 --- PaulB_ is now known as PaulB
+21:01  hdon: hi all :) if i use $('#x .y').click(myHandler) and the set of '#x .y' elements changes, will the new elements have the click handler? if i remove the "y" class from a child element of "#x" will they lose the click handler?
+21:01  hdon: i suspect the answer is no but i'm hoping it comes with a "but here's how you get that effect" :)
+21:01  Cork[home]: hdon: no see ?.live
+21:01  bot-t: hdon, .live(eventType, handler): Attach a handler to the event for all elements which match the current selector, now or in the future. http://api.jquery.com/live/
+21:01  ManxPower: thank you both.  That was helpful
+21:01  eTiger13: bot is a bot
+21:02  hdon: Cork[home], merci beaucoup
+21:02  Cork[home]: hdon: so your second line is correct :D
+21:02  jorn: heyho, does anyone have a tip for me how to wait until no visual effect is in process anymore? I know about the callbacks but want to see if there's another way.
+21:03  jorn: my client side logic has several states which change... each with a onEnter and onExit method, would be nice to fadout something in a state's onExit and fade something else in in the next states onEnter method
+21:05  jorn: if I use callbacks the whole design will get even more complicated... so is there something like a "blocking" .fadeOut call?
+21:05 +serio_: callback is the only way
+21:06 +serio_: or, you could write a plugin to do what you're describbing, something that keeps track of all animations and when they stop etc.
+21:06  Cork[home]: you could try using queue though
+21:06  Cork[home]: but you would still have to call it in the callback
+21:07  Cork[home]: (queue it where ever you do that, and dequeue it in the callback
+21:07  Cork[home]: )
+21:07 +serio_: man, this is awesome: http://mrdoob.com/128/IE6_HTML5
+21:08  Brodingo: hehe
+21:08  Brodingo: like old times
+21:08  jorn: Cork[home]: well the problem is that these state changes are triggered from the outside, so at some point it would be nice to just say "state.change(newState)"... state.change then calls oldstate.onExit(), deletes old state and calls newState.onEnter().
+21:09  Cork[home]: jorn: there is nothing like that
+21:10  eTiger13: paul_irish:  you still around?
+21:10  paul_irish: no
+21:10  jorn: but now some of these states might loop, so they're faded out (onExit), some vars shall be changed (onEnter) and faded in (onEnter)... but I end up with an empty guy cause the effects are concurrent
+21:10  thepacmanfan: alright, i'm finally getting this merged/minified script thing narrowed down... this only happens when the presentationCycle and jquery.cycle script are done together.
+21:10  jorn: Cork[home]: ok, thanks for your thoughts though
+21:10  thepacmanfan: if one is merged/minified and the other is included standalone, it works fine.
+21:10  eTiger13: paul_irish:  how much say do you have in chrome dev? any at all? i think the little box at the bottom that shows the site url should move on the opposite side of the mouse instead of the same side
+21:11  emanu: I have a page with a excel-style grid on it. I want to use ajax to render that grid on-the-fly as I add columns and sort rows to it. What terms should I be using to learn how to do all the javascript stuff this requires? Rendering ajax partials is giving me mediocre results. Can somebody throw me a bone as to how I could pull this off?
+21:14  paul_irish: eTiger13: it does it in dev channel.
+--- Log closed Sat Oct 30 00:29:52 2010

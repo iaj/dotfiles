@@ -1,0 +1,477 @@
+--- Log opened Thu Nov 11 00:00:39 2010
+00:00  NickAdmin: I only have one website connecting to the same mysql database using one file that's always included with require_once()
+00:01  seekwill: You're likely going to have to look to your system in more detail
+00:04  dub54: is it possible to get the total cost of an order where order_id = '4' on this table with 1 query? http://grab.by/grabs/32df0980da38002d609d23345e78b9fc.png
+00:07  sven_oostenbrink: Is there something I can do to avoid mysql aborting to bash on CTRL-C? with CTRL-C I want to abort the query only (which it sometimes actually does), but not the entire mysql program.. anythign?
+00:08  Lenhix: sven_oostenbrink: not that I know of. Open another mysql cli and use KILL QUERY <id>
+00:08  gtowey: sven_oostenbrink: newer mysql cients should do that
+00:08  mutk: sven_oostenbrink, man mysql  says :  " As of MySQL 5.1.10, typing Control-C causes mysql to attempt to kill the current statement. If this cannot be done, or Control-C is typed again before the statement is killed, mysql exits. Previously, Control-C caused mysql to exit in all cases."
+00:08  sven_oostenbrink: gtowey: from what version on? its a detail, I know, but its so very very anoying to write a query, only to have bash tell you that SELECT is not found.... :S
+00:09  mutk: gtowey, THere you go ;)
+00:09  mutk: sven_oostenbrink, I just showed you..
+00:09  gtowey: mutk++
+00:09  sven_oostenbrink: mutk: I just saw it
+00:09  sven_oostenbrink: mutk:  I have that version.. guess I'll have to be careful not to type CTRL-C too much :)
+00:10  mutk: sven_oostenbrink, Essentially if the Control C cannot abort the current statement it elevates and kills the entire mysql process.
+00:10  dub54: is it possible to get the total cost of an order where order_id = '4' on this table with 1 query? http://grab.by/grabs/32df0980da38002d609d23345e78b9fc.png
+00:13  [Relic]: Hello :)
+00:15  alus: "Mysql::Error: Lock wait timeout exceeded; try restarting transaction" :/
+00:18 --- dub54_ is now known as dub54
+00:19  mgriffin: alus: it sounds like you had a transaction waiting on a lock but hit the lock timeout, so you should retry the transaction
+00:20  mgriffin: also, try to figure out why some long running transactions are not doing a commit sooner
+00:22  alus: mgriffin: unfortunately slow query log only shows single queries, not transactions
+00:25  erkules: alus: show engine innodb status show the lastest deadlock also
+00:26  erkules: latest
+00:27  mgriffin: erkules: that is not an error indicating a dead lock fwiw
+00:28  mgriffin: alus: you could use innodb monitor if this is a common problem
+00:28  mgriffin: look at the open xacts
+00:28  erkules: mgriffin: thx
+00:29  alus: erkules: where does it show the latest dead lock?
+00:29  HearWa: Hi, I'm trying to create a prepared statement with the following expression: "SELECT COUNT(*) FROM ? WHERE ? LIKE ?" and I'm getting an invalid syntax error. The problem seems to be with using ? for the table name... can I do this?
+00:29  mgriffin: !tell HearWa about evil
+00:29  the_wench: HearWa evil is clearly defined at http://www.parseerror.com/sql/select*isevil.html
+00:30  HearWa: Ok, let me have a look at that first.
+00:30  alus: mgriffin: hm. all I have to do is create that table?
+00:30  mgriffin: well and find stuff in logs
+00:31  erkules: mgriffin: hmm sure it is not an error indication a deadlock?
+00:32 --- hobodave_ is now known as hobodave
+00:33  HearWa: mcgriffin: That page only explains why using select with a wildcard for getting all the columns is evil, which I 100% agree with. I always specify which columns I want.
+00:34  HearWa: select isn't made out to be evil, select * is.
+00:35  HearWa: mgriffin, actually.
+00:36  HearWa: I'm using SELECT COUNT(*) anyways, so that website would have no problem with what I'm doing.
+00:37  alus: mgriffin: could you point me in the right direction? I'm not familiar with reasonable values here: http://codepad.org/LF2Gn1FY
+00:38  gtowey: !tell HearWa about dynamic sql
+00:38  the_wench: HearWa SET @sql := CONCAT('SELECT * FROM ', @tableName); PREPARE mySt FROM @sql; EXECUTE mySt;
+00:38  gtowey: HearWa: table names cannot be varibles in normal mysql statements
+00:38  HearWa: gtowey: Thank you. :)
+00:39  erkules: alus: MySQL thread id 53, query id 21422688 localhost mydb User lock
+00:42  mgriffin: " Deadlock found when trying to get lock"
+00:45  alus: erkules: yes, I use GET_LOCK
+00:46  alus: erkules: but the timeout error I pasted earlier was for a INSERT INTO
+00:46  alus: erkules: not a GET_LOCK
+00:47  erkules: alus: you are using innodb-engine
+00:47  erkules: ?
+00:49  dub54: any idea why this won't work: SELECT order_id FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id WHERE SUM(price * quantity) = '273.70'
+00:49  alus: erkules: I'm using innodb. I don't know what "innodb-engine" is
+00:49  dub54: SELECT orders.order_id FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id WHERE SUM(price * quantity) = '273.70' sorry
+00:50  thumbs: dub54: define "doesn't work"
+00:50  webereinc: Hello - Can any point me in a direction of why Workbench is not showing the updated data in InnoDB tables being updated by a PHP script?
+00:50  gtowey: dub54: aggregates don't exist when the WHERE clause is evaluated. Use HAVING SUM( ... ) ;
+00:51  thumbs: webereinc: try #workbench
+00:51  webereinc: OK Thank
+00:54  dub54: gtowey: like so? SELECT * FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id HAVING SUM(price * quantity) = '273.70'
+00:54  thumbs: dub54: tias
+00:54  dub54: thumbs: i did.. but didn't get the expected result
+00:54  thumbs: dub54: show what you obtained, and what you expected.
+00:54  webereinc: thumbs: Nobody answering in #workbench - any other thoughts?
+00:55  thumbs: webereinc: wait in #workbench?
+00:55  adaptr: webereinc: just ask your question in #workbench and check in  afew hours
+00:55  webereinc: thumbs: OK - I just don't know if its a Workbench issue or an InnoDB issue...
+00:56  dub54: i
+00:56  dub54: thumbs: i expected order_id 4, but got nothing. http://grab.by/7l2a
+00:56  thumbs: webereinc: use the mysql client, and see if the data was updated.
+00:56  chad: dub54: maybe you didn't commit!
+00:57  thumbs: dub54: that's not 'nothing'
+00:57  dub54: that's my table, it returned 0 results..
+00:57  thumbs: dub54: show data from both tables.
+00:58  webereinc: Here is scenario - appreciate any help:  In Workbench, use a database that has InnoDB tables.  Select * from the table and returns 121 rows.  Next, execute PHP script in browser window that deletes all 121 rows.  Next, re-run the select statement in Workbench and I still see the 121 rows (which are actually gone.)  Shut down Workbench and reload it and then it shows that they are gone.
+00:59  dub54: thumbs: http://grab.by/7l2p
+00:59  thumbs: webereinc: take workbench out of the equation first.
+00:59  thumbs: dub54: SELECT SUM(price * quantity) FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id
+01:00  webereinc: thumbs: PHP script shows records being properly deleted - and not there on subsequent queries...  But I don't know if it is some Commit issue with InnoDB or a buggy workbench....
+01:00  thumbs: webereinc: take workbench out of the equation first.
+01:00  thumbs: webereinc: show the SELECT output using the mysql client instead.
+01:00  chad: webereinc: why can't it be both?
+01:01  dub54: thumbs: I need to return the order_id where total value = 123.45 for example
+01:01  thumbs: dub54: I know.
+01:01  webereinc: chad: Once deleted, the refresh in Workbench should show them gone, but they're still there on a re-query.
+01:01  thumbs: dub54: I gave you a select that shows you what the sum is.
+01:01  thumbs: dub54: what data types are you using for price and quantity?
+01:01  dub54: decimal and int
+01:01  chad: webereinc: i've never used workbench
+01:02  dub54: thumbs: it's returning just 1 number
+01:02  thumbs: dub54: you didn't answer my question.
+01:02  dub54: decimal(9,2) and int(100)
+01:02  webereinc: chad: still using MySQL Query Browser or something else?
+01:02  dub54: 10*
+01:02  chad: webereinc: something else.
+01:03  webereinc: chad: what else?
+01:03  thumbs: dub54: try SELECT order_id, SUM(price * quantity) FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id group by order_id
+01:03  chad: webereinc: mysql client
+01:03  thumbs: chad: apparently, webereinc is ignoring me.
+01:03  splic: Hi, is there a way to load an xml file into a table without specifying a preexisting table? I have a massive file and can't open it to find the schema to make a table first.
+01:04  chad: thumbs: it seems so
+01:04  dub54: thumbs: that worked, thank you
+01:04  webereinc: thumbs: Sorry - not ignoring you... I've been using graphical clients only
+01:04  webereinc: thumbs: are you both referring to mysqli from the command line?
+01:05  chad: webereinc: almost
+01:05  thumbs: webereinc: no.
+01:05  thumbs: webereinc: the mysql CLI client.
+01:05  thumbs: dub54: now, look at your results.
+01:06  webereinc: The only 'client' I have worked with since I started using MySQL was the Admin Tools and Query Browser that were part of the GUI tools.
+01:06  dub54: SELECT orders.order_id, SUM(price * quantity) as `totalPrice` FROM orders LEFT JOIN orderProducts ON orders.order_id = orderProducts.order_id group by orders.order_id having totalPrice = '273.70' looks to be producing the right results
+01:06  thumbs: dub54: ah, terrific.
+01:06  webereinc: How do I run the mysql CLI client?
+01:06  dub54: thumbs: thanks for the help :)
+01:06  thumbs: dub54: you're welcome.
+01:06  thumbs: webereinc: in a terminal.
+01:07 * thumbs goes back to being depressed
+01:07  webereinc: When typing mysql from the CMD line, I get an error:
+01:07  webereinc: C:\Documents and Settings\Ed>mysql
+01:07  webereinc: mysql: unknown variable 'default-storage-engine=innodb'
+01:07  thumbs: wow.
+01:07  thumbs: fix your installation.
+01:08  gtowey: the my.ini, look at the [client] or [mysql] section
+01:08  webereinc: thumbs:  The installation (via the graphic interface) says that innodb is running just fine?!
+01:08  gtowey: you probably put options meant for [mysqld] in [mysql]
+01:08  thumbs: your my.ini is busted.
+01:08  thumbs: windows--
+01:09  webereinc: thumbs: Is there some sort of verifier that can be run against the ini to identify busted-ness?
+01:09  thumbs: webereinc: see what gtowey just told you.
+01:10  webereinc: thumbs: possibly... but since I was editing via the GUI, I'm not really sure how I would know which parameters were stuck in the wrong section, etc.
+01:10  thumbs: webereinc: well, since the error is unknown variable 'default-storage-engine=innodb', you can guess easily.
+01:10  thumbs: you don't even need to guess!
+01:11  thumbs: chad: can I kill will now?
+01:13  adaptr: we should all kill will
+01:14  thumbs: bill, will, what's the difference?
+01:19  gtowey: thumbs: Levenshtein says it's 1
+01:26  adaptr: whosee, then
+01:35  xslashxr: hi guys, i have a master and slave but my slave is out of sync right now by couple of records.... how can i get them to sync up again without me shutting down any of the servers?
+01:41  gtowey: !tell xslashxr about maatkit
+01:41  the_wench: xslashxr xaprb's MySQL Toolkit now called Maatkit http://www.maatkit.org/ includes tools to compare databases across servers (such as master to slave) and bring them back into sync, profile queries, and other handy features.
+01:42  mgriffin: xslashxr: mk-table-checksum mk-checksum-filter mk-table-sync (--print at first)
+01:48  xslashxr: that sucks
+01:48  xslashxr: i used to run load data from master to sync up databaess
+01:48  xslashxr: which was amazingly great at what it does for me but now i check its deprecated =(
+01:51  gtowey: it was never a good idea
+01:53  mgriffin: it was super buggy
+01:54  morphine: SELECT .... FROM ( posts LEFT JOIN users AS u1 ON id_poster=u1.id ) LEFT JOIN users AS u2 ON id_editor=u2.id
+01:54  morphine: this is doing the first join right, but the second not quite as intended, it's fetching all rows from the users table in the second join
+01:57  thumbs: morphine: that's not valid sql.
+01:58 * mgriffin was wondering
+01:59  morphine: sorry, dropped... anyone replied?
+02:00  mgriffin: morphine: that does not look like valid sql
+02:00  morphine: but it is :) it runs fine, but returns me all the rows in the users table, which I assume come from the second join :)
+02:02  morphine: ah, just forgot to add "... WHERE posts.id=1"
+02:02  morphine: (sorry)
+02:04  gtowey: morphine: not valid.  lose the parenthesis
+02:05  morphine: I just added those for readability. The query runs the same either way (v5.1), quite unfortunately :(
+02:06  morphine: basically I have a situation where I have table A, and need to join it to table B twice, but with left joins, as the join record might not exist in table B
+02:09  gtowey: we can see that, try showing us the results you are getting which you think are incorrect, and what the results should be
+02:09  gtowey: in a pastebin
+02:09  thumbs: morphine: for a moment, I was thinking that you were trying to use a derived table
+02:10  morphine: ok, setting up some test tables
+02:30  morphine: disregard my previous problem, guys... turns out I typed the sample query *here* correctly, but was joining across two different table aliases
+02:30  morphine: it now works as expected -_-
+02:30  morphine: lesson learned: copy-pasting SQL statements, even a line, is bad for your health
+02:30  lenswipe: guys
+02:31  lenswipe: i have a foreign key in my database but its not properly set as a foreign key - im just using it as that with application logic
+02:31  lenswipe: is there a way to retrospectively set it as a foreign key without deleting the coulmn?
+02:31  lenswipe: im reading a tutorial and it says ALTER TABLE ORDERS
+02:31  lenswipe: ADD FOREIGN KEY (customer_sid) REFERENCES CUSTOMER(SID);
+02:31  lenswipe: is that possible without deleting the column?
+02:32  mgriffin: !tell lenswipe about test cases
+02:32  the_wench: lenswipe testing in mysql is easy see http://gtowey.blogspot.com/2009/10/simple-test-case-techiques.html for hints
+02:37  thumbs: I don't know who's worse... latenite, or lenswipe.
+02:38  mgriffin: gtowey++
+02:38  mgriffin: tias is less useful everyday
+02:40  lenswipe: hey guysd
+02:41  lenswipe: i think i setup referntial integrity properly, can someone tell me how i test it?
+02:41  morphine: delete a row from one table and see if it lets you
+02:42  lenswipe: morphine, from the parent table presumably?
+02:43  morphine: I think from either, but yeah, from parent should do it
+02:43  lenswipe: so for example delete a user and see if all their forum posts disappear
+02:43  morphine: aye
+02:43  mgriffin: !tell lenswipe about rce
+02:43  the_wench: lenswipe Resume Changing Event. Often when the need to revert to backups arrises and either none are available or existing ones are borked.
+02:43  mgriffin: !tell lenswipe about test cases
+02:43  the_wench: lenswipe testing in mysql is easy see http://gtowey.blogspot.com/2009/10/simple-test-case-techiques.html for hints
+02:44  MrZhi: Hypothetical situation: Run 'mysqlcheck -Ao', it hits a huge table 'phpbb_posts' and freezes. Would it be safe to Ctrl+C that operation?
+02:44  mgriffin: do you have some desire to stop it?
+02:44  kaizen: does anyone know what db permissions 20 and 21 are in mysql? i only see this with ubuntu installs
+02:45  mgriffin: kaizen: context please
+02:45  mgriffin: MrZhi: you can send the mysql thread a 'kill tid;' if you need the table
+02:45  MrZhi: mgriffin: yes because it appeared to be hung....
+02:45  mgriffin: MrZhi: show processlist will show seconds incrementing
+02:45  kaizen: when i go to create permissions for a user i see two extra ones i have never seen before called 20 and 21
+02:46  mgriffin: kaizen: context please
+02:46  MrZhi: mgriffin, say I did Ctrl+C, would that cause corruption in the table?
+02:47  mgriffin: MrZhi: go to mysql and run 'show processlist;'
+02:47  mgriffin: you will see it is not hung
+02:47  mgriffin: sure kill it it will be fine
+02:48  MrZhi: that is both good and bad news to me... thank you :D
+02:48  mgriffin: whatever.
+02:48  mgriffin: you dont want the right answer
+02:49  mgriffin: next time run in screen(1) so you dont have to care so much
+02:49  MrZhi: Seriously, I do, I just can't replicate what happened earlier
+02:49  mgriffin: you mean what was happening before you hit control-c?
+02:49  mgriffin: show processlist would have told you.
+02:50  MrZhi: I knew it was a large table, but i wasn't running in screen, so I should have spawned another session, but I didn't. I had a guy emailing me the site was down while that command was running
+02:51  MrZhi: I assumed the optimization was spiking the server load so I ctrl+c the process. that table is suddenly corrupted, then I further compounded the problem my running myisamchk -o and lost a boat load of post data....
+02:52  mgriffin: MrZhi: everything cool now?
+02:52  MrZhi: knowing now I should have checked the process list to confirm this, I see what steps I should have taken..
+02:53  lenswipe: guys i have something really weird going on
+02:53  MrZhi: mgriffin: I had to bump it up to the VPS admins to restore it from a weekly backup... but it just feels like something that shouldn't have happened
+02:53  MrZhi: worst part was the client was running top watchin' everything...
+02:53  mgriffin: MrZhi: i agree. you should have issued a repair on the problem table
+02:53  lenswipe: i have referntial integrity (or so i thought) between forum_posts and my users table
+02:53  lenswipe: i deleted a user
+02:53  lenswipe: their posts are still there
+02:53  mgriffin: lenswipe: you did it wrong
+02:53  mgriffin: perhaps you should not test on production data
+02:54  lenswipe: this isnt production data
+02:54  lenswipe: mgriffin, and i think its prety obvious i did it wrong
+02:54  MrZhi: think he was talking to me
+02:54  lenswipe: whats also intersting is the user appers to be web app to still be in the databse
+02:54  mgriffin: MrZhi: no i wasnt
+02:54  MrZhi: Oh, my mistake
+02:54  mgriffin: !tell lenswipe about idfma
+02:54  the_wench: lenswipe IDFMA - Insufficient Data For Meaningful Answer :: You have not provided nearly enough information for us to help you. Write up a clear description of your issue, provide structures and sample data in a pastebin with results and expected results.
+02:54  lenswipe: oh wait
+02:54  lenswipe: i know what the problem is
+02:55 * mgriffin tilts
+02:55  lenswipe: yeah the user is gone
+02:55  lenswipe: but their posts are still there O_O
+02:55  lenswipe: gmm
+02:55  lenswipe: hmm*
+02:56  threnody: referential un-inegrity
+02:56  threnody: referential un-integrity
+02:57  threnody: (check those table storage engines)
+02:57  lenswipe: threnody, lmao it would seem so
+02:58  vpv4oo: a triple JOIN doesnt work: SELECT * FROM ... JOIN ..AS..ON ..JOIN..AS..ON ..JOIN..AS..ON ?
+02:58  lenswipe: also i want this development server to sync itself with the live data whilst leaving the live data unaffected by any cock ups on here
+02:58  lenswipe: threnody, is it replication im looking for?
+02:58  lenswipe: asin i want to be able to screw up the development database as much as i want and then have the development server just download a new one automatically
+02:58  threnody: lenswipe: no, you want cascading deletes, apparently
+02:58  lenswipe: threnody, this is something else
+02:59  lenswipe: im talking about mysql server
+02:59  lenswipe: mysql servers*
+02:59  threnody: lenswipe: ah, yes, missed that line
+02:59  lenswipe: yeah, so is it replicaiton im after?
+02:59  threnody: lenswipe: what's wrong with mysqldump?
+02:59  lenswipe: threnody, its a pain in the ass to keep doing it when a cock the database up
+03:00  lenswipe: it would be handy to set something up like i mentioned above
+03:00  mgriffin: yet not possible.
+03:00  mgriffin: reimport the same dump?
+03:00  lenswipe: yeah i am doing
+03:00  mgriffin: change master to the same position?
+03:00  threnody: lenswipe: replication is fragile enough without you pooching the slave and starting over
+03:00  lenswipe: but its just keeping the dump up to date with the master
+03:00  mgriffin: lenswipe: come again?
+03:00  lenswipe: i have to keep dumping and then importing the dump into the development server
+03:00  mgriffin: 20:00 < mgriffin> reimport the same dump?
+03:00  mgriffin: 20:00 < lenswipe> yeah i am doing
+03:01  mgriffin: 20:00 < lenswipe> i have to keep dumping and then importing the dump into the development server
+03:01 * mgriffin tilts
+03:01  lenswipe: yes
+03:01  lenswipe: i dump from the production and import into the development
+03:01  threnody: vpv4oo: multiple joins are no problem
+03:01  lenswipe: i keep having to do it to keep things in sync
+03:01  threnody: vpv4oo: I assume you didn't get an error, just unexpected results?
+03:02  lenswipe: so anyway its not yet possible to do master/slave with mysql server?
+03:02  threnody: vpv4oo: select t1.col, t2.col, t3.col from t1 join t2 on t1.pk = t2.pk join t3 on t2.pk = t3.pk;
+03:02  mgriffin: lenswipe: are you not using replication?
+03:03  threnody: vpv4oo: select t1.col from t1 left join t2 on t1.pk = t2.fk left join t3 on t2.pk = t3.fk;
+03:03  lenswipe: mgolisch, no not right now im dumping from the production server and importing the dump into the development server manually everytime i break the database
+03:04  threnody: lenswipe: trivial bash script
+03:05  lenswipe: threnody, indeed, but again, as i said it would be great if mysql could do this stuff automatically
+03:05  lenswipe: threnody, you're sure that replication isnt what im looking for?
+03:07  threnody: lenswipe: you want to monkey with the slave and have it magically fix itself?
+03:07  lenswipe: yeah
+03:08  lenswipe: thats what i want it to do
+03:08  mgriffin: lenswipe: why do you need the data to be more up to date than the dump you already have if just testing?
+03:08  threnody: good luck
+03:08  lenswipe: mgriffin, it saves alot of headaches
+03:08  threnody: mgriffin++
+03:08  mgriffin: lenswipe: well then you want to learn what replication is about then
+03:08  mgriffin: and reinit the slave every time you do a single write to it
+03:09  lenswipe: right
+03:09  threnody: lenswipe: you might find out that replication is not that .. robust
+03:09  lenswipe: okay
+03:09  threnody: lenswipe: use replciation to a 3rd server, and mysqldump off that when you want to reset your dev server
+03:10  threnody: lenswipe: then you get to play with all the toys
+03:10  lenswipe: k
+03:11  threnody: lenswipe: that was mostly a joke, but if you've got the time, hardware, etc...
+03:11  lenswipe: k
+03:13  mgriffin: or mysql sandbox...
+03:14  dorgan: OK I am probably asking for it but....can someone take a look at this query and tell me if there is anything more I can do to optimize it: http://pastie.org/private/6jyavqyxylfyviofcyfksa
+03:15  mgriffin: show explain
+03:15  guudgames: hi, i found a way to get stored procedues to work on some old code using the regular mysql extention, and it works, but coming out of the procedures and going into another db call, i get Query failed: Commands out of sync; you can't run this command now
+03:15  guudgames: anyone know what i can try? I put in a mysql_free_result($result), but that not help (this was not in the procedure but outside
+03:15  mgriffin: dorgan: get rid of the subquery
+--- Log closed Thu Nov 11 03:21:38 2010
+--- Log opened Thu Nov 11 03:27:05 2010
+03:27 --- Users 547 nicks [0 ops, 0 halfops, 0 voices, 547 normal]
+03:27  dorgan: well there only one account with that table_prefix
+03:28  gtowey: but your account isn't related to the other two tables in any way
+03:28  dorgan: hmmm
+03:28  gtowey: step 1. get the correct results.
+03:28  dorgan: ok
+03:28  dorgan: i may be able to eliminate that join
+03:28  gtowey: once you've done that, then you can eliminate the subquery by rewriting it as a join
+03:28  gtowey: !m dorgan rew
+03:28  the_wench: dorgan see http://dev.mysql.com/doc/refman/5.1/en/rewriting-subqueries.html
+03:29 --- Channel #mysql was synced in 157 seconds
+03:30  dasKreech: Hallo :)
+03:30  dasKreech: How can I find out why mysql won't stop
+03:31  tekhneek: kill -9 mysql pid here
+03:31  tekhneek: that'll tell you
+03:31  gtowey: ew
+03:31  tekhneek: lol
+03:31  gtowey: kill -3 is graceful shutdown
+03:32  gtowey: if it's already shutting down, then innodb is flushing logs, or it's waiting on some query/process
+03:32  dasKreech:  * Stopping MySQL database server mysqld                     [fail]
+03:32  tekhneek: -9
+03:32  dasKreech: Doesn't seem to be stopping
+03:33  tekhneek: it's pointless to tinker with it, just kill it and restart and get some information
+03:33  gtowey: dasKreech: look at .err log
+03:33  tekhneek: unless the database is critical which, dump it first, then try it
+03:33  dasKreech: .err log is 0 bytes big
+03:33  tekhneek: dasKreech: -9
+03:33  dasKreech: :-)
+03:33  dasKreech: Hmm I should try to dump it though it's telling me I have no tables existing
+03:37  dasKreech: :-(
+03:55  threnody: dasKreech: debian-based systems misdirect mysql server errors to syslog
+03:55  dasKreech: threnody: thanks
+03:55  dasKreech: Got it to start and stop correctly
+03:56  threnody: good news indeed
+03:56  dasKreech: now to see if I can get it to give me a table
+03:56  dasKreech: >_<
+03:58 --- kthomas_vh is now known as M_orbus
+03:59 --- M_orbus is now known as kthomas
+03:59  tekhneek: I'm trying to select all the orders per hour in a given day and join that order with a table and then sum the total and group by hour... can somehelp me walk through this? I'm somewhat new to MySQL -- here's what I have so far: SELECT HOUR(date_purchased) AS hour_purchased, count(*) AS orders FROM orders WHERE DATE(date_purchased) >= '2010-11-10' AND purchased_from_site = 'GD' GROUP BY hour_purchased;
+04:00  tekhneek: I can't figure out how to do 2 things: 1) get an additional SELECT value with a running TOTAL # of Orders like (x, x, ..., x) and the dollar amount for that hour
+04:00  dorgan: gtowey: Excellent...getting rid of the subquery helped ALOT
+04:02  mgriffin: gtowey: you know about lowering innodb_max_dirty_pages_pct before restart trick?
+04:02  mgriffin: dorgan: subqueries are suboptimal in mysql
+04:02  mgriffin: you should not use them or views
+04:02  gtowey: mgriffin: yup
+04:03  mgriffin: have you patched init scripts to handle that?
+04:03 * mgriffin was considering it..
+04:03  dorgan: mgriffin: well i am ahead of the game in that fact...I dont use views
+04:03  gtowey: no, that's an interesting idea though.  I don't do alot of restart on the cmdline though, so I have scripts that restart mysql and set the var & wait.
+04:04  mgriffin: someone contributed their init script on percona's comment section irrc
+04:04  mgriffin: iirc..
+04:04 * mgriffin has been drinking dayquil
+04:04  gtowey: nice
+04:04  gtowey: ok, gotta run
+04:04  mgriffin: ciao
+04:09  dools: i want to group by "least common match" on a text field (i don't even know if that terminology is correct) here is a sample data set and the query result set i'm after: http://pastie.org/1288877
+04:09  dools: does anyone know of something that will do that in mysql?
+04:14  magglass1: dools: mysql isn't made for that, though it might be possible if you structure the data correctly
+04:15  dools: magglass1: structure the data correctly?
+04:15  magglass1: a join might do the trick
+04:15  dools: hmm join ...
+04:15  magglass1: but that's assuming each of your rows is a table
+04:16  dools: i could split by space then self join to find chunks of matching text
+04:16  magglass1: your example is pretty vague
+04:16  magglass1: are those strings?
+04:17  magglass1: do they have to be in order?
+04:18  magglass1: how is your data stored right now?
+04:19  petelat: hi, here's my query from microsoft sql server, im trying to do this in mysql, but its not working... anyone know why? http://pastebin.com/QWGF7b4s
+04:19  razass: I have an sql dump for a database im in the terminal with the correct database selected but now I can't remember how to run the sql dump file...i think the command starts with an S
+04:19  dools: magglass1: okay here's another example: http://pastie.org/1288890
+04:20  dools: well, an elaboration
+04:20  razass: Source!!!!
+04:20  magglass1: petelat: define "not working"
+04:20  dorgan: petelat: I dont believe you can use EXCEPT
+04:20  dools: oops that AS something is a red herring
+04:21  dools: magglass1: should i correct that faux sql or do you get what i mean?
+04:21  dools: that should be group by chunk too
+04:22  magglass1: dools: I would think doing that processing outside of mysql would be much faster
+04:22  dools: magglass1: well - unless mysql has a built in function to do it :)
+04:22  magglass1: even then it may not be faster...
+04:23  magglass1: but built in? I doubt it
+04:23  dools: i might play around with self joins a bit ... that's an interesting tack ... okay thanks
+04:24  magglass1: dools: if your data were just sets of objects you could easily find the largest common set
+04:24  magglass1: but with strings it's different
+04:29  petelat: dorgan: hmm yeah thats what i figured but im not sure what to use in place of 'EXCEPT'
+04:29  dorgan: petelat: http://forums.mysql.com/read.php?10,268452,268456#msg-268456
+05:12  petelat: hey thanks for the link
+05:26 --- chadmaynard is now known as chad
+06:19  logan_wolf: hi all
+06:19  the_wench: oh hai logan_wolf
+06:19  sasori: question: how will i find out the relation ship between two tables via mysql cmd ?
+06:20  sasori: if i do 'desc' it doesn't show any foreign key related infos
+06:22  Jonano: I dont see my error on: http://pastebin.com/Z4jP2S0D , I get this error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'condition, implication, courriele) VALUES ('$courriel', 'd', 'd', 'd', 'd', 'd',' at line 1
+06:23  phpninja: Can anyone reccomend a mysql tuning guide for a system with 24 gigs of ram? I noticed the my-huge.cnf that comes with mysql says that it is for a large system with only 1G-2G of ram.
+06:23  ajdonnison: sasori, use show create tables;
+06:24  logan_wolf: Jonano, can you write the query you are typing
+06:24  phpninja: he wrote it in pastebin
+06:24  sasori: thanks aj
+06:24  ajdonnison: phpninja, no he didn't, he put his PHP code in pastebin.  Not the same thing.
+06:25  Jonano: the guery:
+06:25  phpninja: oh true dat
+06:25  phpninja: echo it
+06:25  ajdonnison: And the code is asking for an SQL injection.
+06:25  Jonano: $sql1 = "INSERT INTO annoncedetail (courriel, raison, employe, stade, concurrence, nom, compagnie, titre, web, adresse, code, telephone, autre, fax, quelque, sexe, condition, implication, courriele) VALUES ('$courriel', '$raison', '$employe', '$stade', '$concurrence', '$nom', '$compagnie', '$titre', '$web', '$adresse', '$code', '$telephone', '$autre', '$fax', '$quelque', '$monsieur', '$condition', '$implication', '$courriele')";
+06:26  ajdonnison: Again, that isn't the query.
+06:26  ajdonnison: That is the code that generates the query.
+06:26  phpninja: echo $sql1; exit;
+06:26  phpninja: right before the results execute jonano
+06:26  Jonano: $result1 = mysql_query($sql1) or die(mysql_error());
+06:27  ajdonnison: tuning
+06:27  the_wench: http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/
+06:27  phpninja: $sql1 = "INSERT INTO annoncedetail (courriel, raison, employe, stade, concurrence, nom, compagnie, titre, web, adresse, code, telephone, autre, fax, quelque, sexe, condition, implication, courriele) VALUES ('$courriel', '$raison', '$employe', '$stade'...)"; echo $sql1; exit;
+06:27  Jonano: ok
+06:27  phpninja: should how your code looks joano, except put the part back in that i truncated off
+06:28  ajdonnison: !tell phpninja about tuning
+06:28  the_wench: phpninja http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/
+06:28  phpninja: thank you
+06:28  the_wench: you're welcome
+06:28  Jonano: INSERT INTO annoncedetail (courriel, raison, employe, stade, concurrence, nom, compagnie, titre, web, adresse, code, telephone, autre, fax, quelque, sexe, condition, implication, courriele) VALUES ('$courriel', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'dd', 'd', 'd', 'd', 'd', 'd', 'd', 'Mr', 'd', 'd', 'd')
+06:28  Jonano: I quess it's $courriel
+06:29  ajdonnison: No, its 'condition'
+06:29  phpninja: yes it's spelled wrong
+06:29  phpninja: for one
+06:29  ajdonnison: It is a reserved word.
+06:29  ajdonnison: !tell Jonano about quotes
+06:29  the_wench: Jonano Use ` around identifiers (database/table/column/alias names) and ' around strings and dates. MySQL does allow " for strings, but ANSI standard uses " for identifiers (which you can enable with ANSI QUOTES option). Don't quote numbers http://pento.net/2009/03/03/dont-quote-your-numbers/
+06:30  Jonano: phpninja what is spelled wrong ?
+06:30  Jonano: condition ?
+06:30  Jonano: or $courriel ?
+06:30  phpninja: oh wait nevermind
+06:31  phpninja: got mixed up with $courriel  and 23.$courriele
+06:31  ajdonnison: MySQL doesn't spell check your data.
+06:32  ajdonnison: Or your identifiers for that matter, provided they don't collide with a reserved word.
+06:32  Jonano: thanks guys
+06:32  the_wench: don't forget to thank the bots!
+06:35  alpha^: If I have a "user" table with userID column and a "meat" table with "meatID" column, what is the best way to associate users with potentially multiple types of meat that they like?
+06:37  ajdonnison: alpha^, the best way would be for them to become vegetarian, but that aside why wouldn't you have a user_meat table, with userID and meatID?
+06:37  Raphomet: alpha^: join table with userID and meatID foreign keys
+06:38  ajdonnison: Much more succinct, Raphomet :)
+06:38 --- h4x0r` is now known as h4x0rham
+06:38  Raphomet: but not as healthy
+06:39 --- h4x0rham is now known as h4x0r`
+06:43  alpha^: ajdonnison, Raphomet OK thank you guys. And if I wanted to track what type of drinks they like, I'd create a "user_drink" table with userID and drinkID? Just wondering if there's an issue with an arbitrary number of JOINs for new things I want to track
+06:44  ajdonnison: You could generalise it to likeable items and have a type column that defines if it is a meat/drink/whatever.
+06:45  ajdonnison: Then you don't need to change the structure each time you add something new.
+06:45  ajdonnison: Or you could go with separate tables and joins.
+06:46  alpha^: ajdonnison, I'm inclined to do separate tables due to simplicity, but I am interested in the other option
+06:46  alpha^: ajdonnison, The other option entails only the user table, likeable items with userID and itemID, and N number of item tables
+06:46  alpha^: ?
+06:47  ajdonnison: Well, it is hardly simple to have to add a new table, new join table and new query each time you want to add something, so I'd go with the latter.
+06:47  ajdonnison: No, not n number of item tables.
+06:47  ajdonnison: one item table. one join table, one user table.
+06:47  ajdonnison: item table has itemID and itemType
+06:49  alpha^: ajdonnison, That makes sense. Thanks for the help man
+06:49  ajdonnison: It will depend on the types of queries you want to do, of course.
+06:57  guudgames: hrmph, i do a $stmt = $db->prepare( and it works all fine.. but when i call a function that is in an include, i pass the $db handle because its not GLOBAL... and if i do a $stmp->prepare, then like a bind or execute i get errors "Call to a member function execute() on a non-object "
+06:58  guudgames: not sure wwhy this is happening? my prepare statement was dumbed down to SELECT id from table;
+06:59  guudgames: so that i know its not related to prepare being wrong
+07:02  guudgames: sorry wrong channel :/
+07:12  phpninja: bin logs
+--- Log closed Thu Nov 11 07:22:24 2010
+--- Log opened Thu Nov 11 07:22:46 2010
+07:22 --- Users 526 nicks [0 ops, 0 halfops, 0 voices, 526 normal]
+07:24  tonci: morning folks
+07:25 --- Channel #mysql was synced in 152 seconds
+07:25  logan_wolf: good morning tonci
+07:25  tonci: hey
+07:33  silv3r_m00n: dupes
+07:33  the_wench: find them with SELECT COUNT(*) as qty,dupefield[,otherfields] FROM table GROUP BY dupefield[,otherfields] HAVING qty > 1
+07:33  sasori: question: if I add a foreign key like this .. alter table tablename add foreign key (colulmnname) references  'tablename'(columnname) , ..is that valid enough? or do I need to include the ADD Constraint words ?
+--- Log closed Thu Nov 11 09:02:32 2010
+--- Log opened Thu Nov 11 09:02:58 2010
+09:02 --- Users 530 nicks [0 ops, 0 halfops, 0 voices, 530 normal]
+09:05 --- Channel #mysql was synced in 159 seconds

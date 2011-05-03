@@ -1,0 +1,135 @@
+--- Log opened Sat Oct 30 00:29:52 2010
+--- Log closed Sat Oct 30 00:34:53 2010
+--- Log opened Sat Oct 30 00:35:25 2010
+00:35 --- Users 518 nicks [0 ops, 0 halfops, 0 voices, 518 normal]
+00:35  isaacs: Tramp: don't suppose you know where it gets its info from?
+00:35  isaacs: if it's just a doc or something i could cli-ify that thing
+00:35  c00kiemon5ter: thnx Tramp
+00:36  Bushmills: read linecount _ < <(wc -l file)
+00:36 --- Channel #bash was synced in 91 seconds
+00:37 --- muzer is now known as MuzerAway
+00:37  Tramp: isaacs: sure. ask it about "factoids"
+00:38  Tramp: isaacs: and the FAQ / PF stuff etc is in the /topic
+00:38  Tramp: wc -l <file
+00:39  Bushmills: temp=a/b ;  result=temp/c   is same as   result=a/(b*c)
+00:41 --- MuzerAway is now known as muzer
+00:41  Bushmills: i'd try to do integer math instead, and don't depend on bc at al
+00:41  c00kiemon5ter: I cant do that :/ ^
+00:42  c00kiemon5ter: http://github.com/c00kiemon5ter/zipf/raw/master/data/results/bvalues.map
+00:42  c00kiemon5ter: look at the values
+00:42  c00kiemon5ter: :S :P
+00:43  Bushmills: using fixed point math :P
+00:44  ferret_0567: # [[ 1 != 1 ]] || echo eq && echo neq
+00:44  evalbot: ferret_0567: eq
+00:44  evalbot: ferret_0567: neq
+00:44  ferret_0567: :(
+00:45  Bushmills: seems your first echo was successful
+00:46  ferret_0567: I'll have to hack around it
+00:47  c00kiemon5ter: # [[ 1 != 1 ]] && echo neq || echo eq
+00:47  evalbot: c00kiemon5ter: eq
+00:47  c00kiemon5ter: :P
+00:47  c00kiemon5ter: # [[ 1 != 1 ]] && echo eq || echo neq
+00:47  evalbot: c00kiemon5ter: neq
+00:47  ferret_0567: I'm trying to avoid not_in_mtab sda3 || mount ... && echo EMOUNT: sda3
+00:48  ferret_0567: opps
+00:48  ferret_0567: I meant: non_in_mtab sda3 && echo EMOUNT: sda3 || mount ...
+00:49  ferret_0567: I want to put the meat (the mount command) first, instead of putting the boilerplate error handling code first
+00:49  RadSurfer: Can someone please help me: I wish to load a series of shell scripts into gedit, using something like: "gedit g*.sh &", but I only want 'g'+'digit'+'anything else'.sh to be loaded, how would I do this please?
+00:49  ferret_0567: RadSurfer, gedit g[0-9]*.sh
+00:49  RadSurfer: That certainly looks easy.
+00:50  ferret_0567: RadSurfer, they are called character classes
+00:50  RadSurfer: ok. I did that. just one point.
+00:50  RadSurfer: Is there anyway to get them to load in numerical order? if not fine, just thought I'd ask.
+00:51  ferret_0567: RadSurfer, I think so
+00:51  RadSurfer: its following ASCII order now? not numerical? I reckon.
+00:52  ferret_0567: yes
+00:54  ferret_0567: grrr...even sort -h doesn't sort properly1
+00:54  ferret_0567: !
+00:54  RadSurfer: Thanks for trying.
+00:55  go|dfish: sort -n .. ?
+00:55  ferret_0567: RadSurfer, I've found it
+00:55  ferret_0567: sort -V
+00:55  RadSurfer: complete syntax please.
+00:55  ferret_0567: try this
+00:57  ferret_0567: RadSurfer, do you want the file with the biggest number first or last?
+00:57  RadSurfer: in numerical order to me, defaults to ascending (1,2,3,4)
+00:57  ferret_0567: ok
+00:58  RadSurfer: love versatility of linux!
+00:58  ferret_0567: gedit $(echo g[0-9]*.sh|sed 's/ /\n/g'|sort -V)
+00:58  RadSurfer: Yikes.
+00:58  ferret_0567: that's not really that hard
+00:59  ferret_0567: the sed command just replaces the spaces with a new line
+00:59  ferret_0567: the sort sorts the filenames in ascending order, and echo prints the filenames with spaces in between
+01:00  ferret_0567: RadSurfer, sounds simple enough?
+01:00  c00kiemon5ter: brabo: how should  a bash script be named? is there a proper suffix or just the script name ?
+01:00  RadSurfer: Marvelous! Wicked! I need to memorize how to do this.
+01:00  cthuluh: !.sh > c00kiemon5ter
+01:00  greybot: c00kiemon5ter: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+01:00  brabo: just the name will do fine, no suffix needed
+01:01  c00kiemon5ter: thanks
+01:01  brabo: i admit, i make the same mistake in some situation, deliberately
+01:01  brabo: just becaues the users expect a .sh extension to know it's a shell script
+01:01  brabo: still unforgivable, i know
+01:01  ferret_0567: try file :)
+01:02  ferret_0567: RadSurfer, did my command work?
+01:02  RadSurfer: "[19:00] <RadSurfer> Marvelous! Wicked! I need to memorize how to do this."
+01:02  ferret_0567: :)
+01:02  RadSurfer: Indeed. Spot-on.
+01:03  go|dfish: lol @ "is retarded"
+01:03 * cthuluh is getting his eyes bleeding: gedit $(echo g[0-9]*.sh|sed 's/ /\n/g'|sort -V)
+01:03  geirha: As long as the files doesn't contain any odd characters ...
+01:03  geirha: s/files doesn't/filenames don't/
+01:04  ferret_0567: geirha, how could I guard against that? replace spaces with nulls?
+01:05  geirha: By avoiding turning a list of filenames into a string.
+01:05  cthuluh: GNU sort has -z, but my version doesn't have a -V switch
+01:05  cthuluh: printf '%s\0' * # may be the start of a solution
+01:06  c00kiemon5ter: I'm looking at http://mywiki.wooledge.org/BashFAQ/004 - How can I check whether a directory is empty or not? - and it says I should do 'shopt -s nullglob dotglob' does that affect the shell after the script exits ?
+01:06  ferret_0567: for files in g[0-9]*.sh; do printf '%s\0'; done |  sort -zV
+01:08  cthuluh: printf '%s\0' * | sort -zV | xargs -0 gedit # was rather what I was thinking about
+01:10  cthuluh: *shrug*
+01:11  ferret_0567: cthuluh, your solution beat me in execution time, but only by ~.060 sec
+01:13  ferret_0567: make that ~.43 sec
+01:13  ferret_0567: err... ~.043 sec
+01:13  cthuluh: ferret_0567: I don't think that performance was the point, here. your solution may lead to problems with weird file names, and weird file names are allowed on unix filesystems
+01:13  ferret_0567: oh
+01:14  c00kiemon5ter: I think I got all you said. One last question is line 18: I use 'for file in {1..2000}' to make 2000 loops, I cant however substitute 2000 with $loopcount, is there a better way for this ?
+01:15  cthuluh: ferret_0567: anyway, bash is slow, so performance is rarely the problem
+01:15  nDuff: !seq > c00kiemon5ter (no, don't use seq, but the alternatives are here)
+01:15  greybot: c00kiemon5ter (no, don't use seq, but the alternatives are here): seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+01:15  erUSUL: !cfor | c00kiemon5ter
+01:15  nDuff: c00kiemon5ter, ...see the for loop in that factoid.
+01:17  clcont: hi guys
+01:17  clcont: anyone know how i could enter alt+0149 or the middle dot into the shell
+01:17  c00kiemon5ter: hmm, nice :)
+01:19  geirha: !nabq > clcont
+01:19  greybot: clcont: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+01:19  pragma_: !cfor
+01:19  greybot: C-style for loop: for (( expr; expr; expr )); do COMMANDS; done # Each expr is done in a math context. Example: for ((i=i; i<=n; i++)); do echo "$i"; done
+01:19  clcont: i asked in ##linux and they told me to ask here
+01:19  c00kiemon5ter: lol
+01:20  pragma_: !quotes | pragma_
+01:20  cthuluh: clcont: it depends on your tty / terminal emulator / locale / who knows?
+01:20 * pragma_ glares at erUSUL with confusion.
+01:20  clcont: it was working before and i didnt do anything to change anything
+01:20  clcont: im gonna reboot
+01:20  clcont: lol
+01:21  pragma_: clcont: lol
+01:21  pragma_: clcont: Yeah, that's really fucking funny, lol.
+01:21  c00kiemon5ter: you need to have extended keyboard keymap set ·
+01:21  c00kiemon5ter: ·.·.·.·.·.·
+01:24  geirha: he rebooted in the hopes that windows keybindings would magically start working in his linux system
+01:24  c00kiemon5ter: but they told him on #ubuntu
+01:25  cthuluh: if he's on ubuntu and if he comes back, he may want to read /usr/share/X11/locale/en_US.UTF-8/Compose
+01:28  c00kiemon5ter: http://github.com/c00kiemon5ter/zipf/blob/master/retrieve fixed I hope, thanks all :)
+01:41  ferret_0567: is there an OR operator in Bash like C's |?
+01:41  ferret_0567: !or
+01:42  c00kiemon5ter: # [ 2 -eq 1 ] || [ "a" = "a" ] && echo aha
+01:42  evalbot: c00kiemon5ter: aha
+01:42  ferret_0567: nvm
+01:43  ferret_0567: c00kiemon5ter, that's not it
+01:43  cthuluh: ferret_0567: yes: '|'
+01:43  ferret_0567: that's not bitwise OR
+01:43  c00kiemon5ter: yep, ^
+01:44  cthuluh: 4# echo $((2 | 4))
+01:44  shbot: cthuluh: 6
+--- Log closed Sun Oct 31 09:45:37 2010

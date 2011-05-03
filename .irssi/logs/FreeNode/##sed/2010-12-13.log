@@ -1,0 +1,128 @@
+--- Log opened Mon Dec 13 00:45:14 2010
+--- Log closed Mon Dec 13 00:45:14 2010
+--- Log opened Mon Dec 13 08:43:16 2010
+08:43 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+08:45 --- Channel ##sed was synced in 119 seconds
+--- Log closed Mon Dec 13 09:27:00 2010
+--- Log opened Mon Dec 13 09:42:19 2010
+09:42 --- Users 103 nicks [0 ops, 0 halfops, 0 voices, 103 normal]
+09:44 --- Channel ##sed was synced in 112 seconds
+--- Log closed Mon Dec 13 09:49:19 2010
+--- Log opened Mon Dec 13 09:54:42 2010
+09:54 --- Users 102 nicks [0 ops, 0 halfops, 0 voices, 102 normal]
+09:56 --- Channel ##sed was synced in 112 seconds
+11:28  ldfsilva: folks, do you know any trick to bypass posix sed error "label too long" or "sed: 0602-417 The label  ... is greater than eight characters" in GNU sed everything ran smoothly
+11:28  waldner: show the code
+11:29  waldner: (shorten the label maybe?)
+11:33  ldfsilva: I'm gonna put in pastebin
+11:39  ldfsilva: this is what I need to parse ( http://pastebin.com/1dCrBJBf  )
+11:40  ldfsilva: having an output like that in a FILE.txt file, I've used the following line to parse
+11:40  ldfsilva: sed ': label; $!{ N;b label;}; s/\(.\)\n/\1,/g;{s/VTD *\|Status *\|LUN *\|Backing device *\|Physloc *//g}' FILE.txt |sed 's/.*,\(vhost[0-9]*\) *\([^ ]* *\) .*/\1 \2/' |sed '/,/!{h;d;};G;s/\(.*\)\n\(.*\)/\2,\1/'
+11:40  ldfsilva: getting the following as output
+11:40  ldfsilva: vhost105 U9117.MMA.1008CEF-V3-C105                   ,105_0BB4,Available,0x8100000000000000,hdisk260,U789D.001.DQD83CG-P1-C1-T1-W50050768011015BD-L35000000000000,
+11:40  ldfsilva: vhost105 U9117.MMA.1008CEF-V3-C105                   ,105_0BB5,Available,0x8200000000000000,hdisk261,U789D.001.DQD83CG-P1-C1-T1-W50050768011015BD-L36000000000000,
+11:40  ldfsilva: vhost106 U9117.MMA.1008CEF-V3-C106                   ,NO VIRTUAL TARGET DEVICE FOUND,
+11:40  ldfsilva: vhost107 U9117.MMA.1008CEF-V3-C107                   ,NO VIRTUAL TARGET DEVICE FOUND,
+11:42  waldner: you can't use \| with non-gnu sed
+11:45  ldfsilva: idea for parsing that kind of output without gnu-sed ?
+11:48  waldner: do you have to use sed? because awk is probably better suite to that
+11:50  ldfsilva: can be awk also
+11:50  ldfsilva:  
+11:53  waldner: so you want
+11:53  waldner: for each vhost block
+11:53  waldner: the vhost name and physloc
+11:54  waldner: followed by the VTD information, compressed in a single line?
+11:54  ldfsilva: yep .. I need to keep the vhost for the block, followed by everything else comma separated
+11:54  ldfsilva: yes
+11:54  waldner: ie, for each VTD
+11:54  waldner: vhostname physloc,vtdinfo
+11:55  waldner: there's no comma between the vhost and physloc though
+11:55  waldner: is that correct?
+11:57  ldfsilva: it should be a comma,
+11:57  ldfsilva: vhost102,U9117.MMA.1008CEF-V3-C102,102_0A8E,Available,0x8100000000000000,hdisk237,U789D.001.DQD83CG-P1-C1-T1-W50050768011015BD-L24000000000000
+11:57  ldfsilva: vhost102,U9117.MMA.1008CEF-V3-C102,102_0A8F,Available,0x8200000000000000,hdisk238,U789D.001.DQD83CG-P1-C1-T1-W50050768011015BD-L25000000000000
+11:58  ldfsilva: following the example in pastebin for vhost102, the output would be the above that I've pasted
+11:58  waldner: ok
+12:04  waldner: awk '/^SVSA/{for(i=1;i<=np;i++)print line[i]; np=0; nr=NR}NR==nr+2{base=$1","$2}/^VTD/{line[++np]=base}/^(VTD|Status|LUN|Backing device|Physloc)/{line[np]=line[np]","$2}END{for(i=1;i<=np;i++)print line[i]}'
+12:04  waldner: however that doesn't work well for VTD with "NO VIRTUAL TARGET DEVICE FOUND"
+12:04  waldner: what do you want to do with those?
+12:06  ldfsilva: that could be just the vhost followed by the Physloc then with "NO VIRTUAL TARGET DEVICE FOUND" ( 3 fields )
+12:06  waldner: ok
+12:09  waldner: awk '/^SVSA/{for(i=1;i<=np;i++)print line[i]; np=0; nr=NR}NR==nr+2{base=$1","$2}/^VTD/{line[++np]=base}/^(VTD|Status|LUN|Backing device|Physloc)/{line[np]=line[np]","((/^VTD/&&$2=="NO")?"NO VIRTUAL TARGET DEVICE FOUND":$2)}END{for(i=1;i<=np;i++)print line[i]}'
+12:09  waldner: I don't like it too much though
+12:13  ldfsilva: it worked pretty good
+12:13  waldner: cool
+12:14  ldfsilva: I still need to improve my awk knowledge
+12:15  waldner: in general, it will help you mre than sed, so I recommend you do it
+12:15  waldner: *more
+12:15  ldfsilva: waldner what would be the clause to for stops, np= what ?
+12:15  waldner: what do you mean?
+12:17  ldfsilva: I did not understand the for(i=1;i<=np;i++)print line[i]; np=0
+12:17  waldner: that just prints the lines, and resets np
+12:17  waldner: n counts how many VTDs there were
+12:17  waldner: *np
+12:18  waldner: the idea is that when a new SVSA block is found, the lines for the previous one are printed
+12:19  ldfsilva: got it, I guess that's is definitely not a easy one
+12:20  waldner: see if this is clearer: http://pastebin.com/LhUViKns
+12:20  waldner: perhaps not the easiest, but still pretty much basic awk
+12:21  waldner: "base" stores the SVSA and physloc to be prepended to all VTDs
+12:22  waldner: so each element of the array "line" is formed by "base" plus all the VTD fields, comma separated
+12:22  waldner: each field is added when it's encountered
+12:22  waldner: the case of NO VIRTUAL etc. is handled as a special case
+12:26  ldfsilva: got it, on pastebin is better to understand ..
+12:26  ldfsilva: thank you waldner.. really helpfull !!
+12:26  waldner: I'm pasting a slightly better version
+12:28  ldfsilva: ok
+12:30  waldner: http://pastebin.com/zZBmLP3i
+12:30  waldner: that doesn't need to special case the NO VIRTUAL
+12:31  waldner: there's a syntax error
+12:31  ldfsilva: device is showing instead of hdiskX
+12:31  ldfsilva: did you see that ?
+12:31  waldner: http://pastebin.com/PJCELBKV
+12:35  ldfsilva: \o/
+12:46  ldfsilva: waldnet, http://pastebin.com/fQ9G5iYK just changed the base variable, I think the third field would be important as well, the hexadecimal value
+12:47  waldner: ok fine
+12:47  waldner: you surely know better what the output should be
+12:48  waldner: if you understand how it works, it should be fairly easy to adapt it to whatever you need
+13:02  ldfsilva: yeah.. thank you very much for al your help and explanation
+13:02  ldfsilva: *all
+13:06  waldner: np
+--- Log closed Mon Dec 13 13:38:19 2010
+--- Log opened Mon Dec 13 13:38:43 2010
+13:38 --- Users 101 nicks [0 ops, 0 halfops, 0 voices, 101 normal]
+13:40 --- Channel ##sed was synced in 119 seconds
+16:21  Synthead: # echo test
+16:21  Synthead: 4# echo test
+16:21  shbot: Synthead: test
+16:22  Synthead: 4# echo "qwe" | sed "s/qw(e|r)/ass/"
+16:22  shbot: Synthead: qwe
+16:22  Synthead: why doesn't this work?
+16:22  Synthead: ohh :P  had to ask to figure it out myself
+16:22  Synthead: 4# echo "qwe" | sed "s/qw\(e\|r\)/ass/"
+16:22  shbot: Synthead: ass
+16:22  gnubien: syntax
+16:24  gnubien: 4# echo "qwe" | sed "s/qw[er]/ass/"
+16:24  shbot: gnubien: ass
+16:29  Riviera: Synthead: GNU sed has -r for using extended regular expressions
+16:29  Riviera: or well.
+16:29  Riviera: actually.
+16:29  Riviera: Bullshit.
+16:29  Riviera: :)
+16:30  Synthead: :D
+16:30  Riviera: For using GNU sed regular expressions without backslashes for certain sequences.
+16:30  Synthead: 4# echo "qwe" | sed -r "s/qw(e|r)/ass/"
+16:30  Riviera: 4# sed -r 's/qw(e|r)/arse/' <<< qwe
+16:30  shbot: Synthead: ass
+16:30  shbot: Riviera: arse
+16:30  Riviera: Yes.
+16:30  Synthead: tight
+16:31  Riviera: Tight arse?
+16:31  Riviera: :O
+16:31  Riviera: :)
+16:31  Synthead: yeah!
+16:31  Synthead: sweet
+16:50  tktiddle: Hi I have about 100 lines I want to convert from this format "0: 1.01848,-3.13457,12.7027" to "{ 1.01848,-3.13457,12.7027}," can you hepl me out please?
+16:51  gnubien: tktiddle: sed can use ^ and $ for begin and end of line in a sed sub
+16:52  gnubien: 4# echo "0: 1.01848,-3.13457,12.7027" |sed 's/^/{/;s/$/}/'
+16:52  shbot: gnubien: {0: 1.01848,-3.13457,12.7027}
+--- Log closed Tue Dec 14 11:47:24 2010

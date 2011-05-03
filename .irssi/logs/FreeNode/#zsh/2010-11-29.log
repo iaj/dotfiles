@@ -1,0 +1,92 @@
+--- Log opened Mon Nov 29 08:19:22 2010
+--- Log closed Mon Nov 29 08:24:24 2010
+--- Log opened Mon Nov 29 08:24:47 2010
+08:24 --- Users 142 nicks [0 ops, 0 halfops, 0 voices, 142 normal]
+08:26 --- Channel #zsh was synced in 96 seconds
+09:17 --- insomnia1alt is now known as insomniaSalt
+09:34  Mikachu: it doesn't work if your &&-command fails, then the ||-command is also executed
+09:38  ft: yeah. but echo doesn't fail. unless there's something that's really fucking broken. :)
+09:39  Mikachu: well, one example had "foo" and "bar"
+09:39  Mikachu: you can protect against it by running a subshell pipe that ends with ;true i guess, but it's still much worse than just using if;then;else;fi
+09:48  ft: agreed.
+09:48  ft: I usually only use [[ ]] && || for quick one liners where I know it can't fail.
+10:03  deitarion: Does anyone here know of any docs for optimizing completions loaded via the bash compatibility? About half the time I'm using zsh, my system is so heavily loaded that I have to Ctrl+C an in-progress completion and just type it manually because it's taking more than a few seconds thrashing the hard drive.
+10:05  deitarion: If not, could someone point me to all known docs for the bash compatibility? (So I can look into how much freedom I have to mix Gentoo's bashcomp controls, zen's included completions, etc. to pare it down to just the completions I actually use)
+10:32 --- aep_ is now known as aep
+10:45 --- mren|off is now known as mren
+10:46  zemacsh: so quiet
+10:58  deitarion: zemacsh: Well, it IS 5AM in EST, 2AM in PST, and 10AM in the UK on a Monday.
+11:00  danielsh: is there an equivalent of 'setopt unset' for $(...) substitutions?
+11:01  danielsh: I'd like    ps $(pgrep foo)   to error out if pgrep outputted nothing
+12:12  quotemstr_: Is it possible to customize command-word completion?
+12:13  quotemstr_: I use a system (Cygwin) that effectively lies about the executable bit. I have a custom bash patch that ignores the exec bit for completion purposes for filenames matching a pattern given in EXECIGNORE (e.g., *.dll).
+12:13  quotemstr_: Is it possible to do the same in zsh without hacking the source?
+12:17  ft: you could use the `ignored-patterns' style in the appropriate context.
+12:18  ft: zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*.dll'
+12:18  ft: [x] untested.
+12:19  quotemstr_: I have to look up what that does.
+12:19  ft: man zshcompsys | less -p 'ignored-patterns'
+12:20  quotemstr_: Groovy.
+12:22  quotemstr_: There's Cygwin another oddity I've addressed with a bash patch: every executable implicitly has two names in the filesystem, foo and foo.exe. Only the latter shows up in readdir() though. My patch augments the completion code to check, for every foo.exe in a completion set, whether there exists a 'foo' that is actually the same file (via inode and filesystem) and uses it if so. Is that possible in zsh?
+12:23  ft: zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*.(exe|dll)'
+12:23  ft: I'd do that.
+12:23  quotemstr_: No, only the .exe shows up in readdir() though.
+12:23  quotemstr_: So if there's, say, a /windows/system32/ping.exe, and we ignore *.exe, ping won't be completed at all. I'd like "pin" to be completed as "ping", not "ping.exe".
+12:24  quotemstr_: I realize this is a bizarre request. :-)
+12:24  ft: I've got a cygwin machine here.
+12:24  ft: I always get both `cmp' and `cmp.exe'.
+12:24  quotemstr_: Try ping.
+12:25  ft: got both.
+12:25  quotemstr_: uname -a?
+12:26  ft: cygwin_nt-6.1-WOW64 ... 1.7.7(0.230/5/3) ... i686 Cygwin
+12:27  ft: zsh 4.3.10
+12:27  quotemstr_: And what does ls "$(cygpath -u $SYSTEMROOT)"/system32/pin* output?
+12:27  quotemstr_: I only get ping.exe here.
+12:28  ft: bah, I can't cutnpaste... since the chat client is running on my laptop. :)
+12:28  quotemstr_: Or, actually, ls "$(cygpath -u $SYSTEMROOT)"/system32 | grep -i ping, since that doesn't use shell globbing.
+12:29  ft: large directories are so damn slow on windoze...
+12:29  quotemstr_: It's Cygwin, not Windows, and it's a long story.
+12:29  ft: PING.EXE
+12:29 * quotemstr_ hangs out on cygwin-devel.
+12:29  ft: heh. :)
+12:30  quotemstr_: Then again, I'm insane enough to patch bash so I can better pretend I'm on a real Unix. :-)
+12:30  quotemstr_: So where does the unprefixed 'ping' come from if not readdir()?
+12:30  quotemstr_: s/prefix/suffix/
+12:31  ft: my guess is, that zsh adds it.
+12:31  quotemstr_: Interesting if true.
+12:31 * quotemstr_ compiles zsh.
+12:32  quotemstr_: Ooh, git! bash doesn't even use a VCS.
+12:32  ft: print -l ${^path}/(#i)*ping*(N)
+12:32  ft: that yields /bin/ping.exe and /usr/bin/ping.exe
+12:34 * ft .o( food )
+12:41  quotemstr_: (Also, fork is *really* slow on 64-bit systems.)
+12:42  quotemstr_: (When it works at all.)
+13:07  quotemstr_: Okay.
+13:07  quotemstr_: Installed zsh, finally. Two issues: The hack above doesn't work when there exists files 'foo' and 'foo.exe' that are *not* the same file.
+13:07  quotemstr_: In that case, I want completion to use the .exe version. I imagine this will be more complicated.
+13:11  quotemstr_: Second, reading the source, zsh uses rather... outdated Cygwin interface functions.
+13:18  ft: might be. you'd probably have to take that up on the -workers mailinglist.
+13:18  quotemstr_: Though I do appreciate the effort. :-)
+13:18  Mikachu: doesn't pws use cygwin?
+13:18  ft: I think he does. (probably at work)
+13:18  quotemstr_: That explains why there are Cygwin customizations in the first place. Most packages don't even bother.
+14:42 --- guide_ is now known as guide
+--- Log closed Mon Nov 29 15:27:31 2010
+--- Log opened Mon Nov 29 15:27:55 2010
+15:27 --- Users 148 nicks [0 ops, 0 halfops, 0 voices, 148 normal]
+15:30 --- Channel #zsh was synced in 140 seconds
+15:45 --- deley is now known as yeled
+--- Log closed Mon Nov 29 16:20:12 2010
+--- Log opened Mon Nov 29 16:20:35 2010
+16:20 --- Users 142 nicks [0 ops, 0 halfops, 0 voices, 142 normal]
+16:22 --- Channel #zsh was synced in 97 seconds
+18:04  paradigm: how would I go about telling zshell to not prompt to correct the second argument in a cp, mv or ln command but still correct everything else?
+18:09  paradigm: ah, aliasing it with nocorrect
+18:09  paradigm: zsh devs have thought of everything :D
+18:11  paradigm: wish there was a way to prompt to nocorrect only the second argument, though, and not the whole thing ):
+18:12  Mikachu: you mean the second, if there are only two, but i doubt you can
+18:12  paradigm: aww
+18:13  paradigm: nonetheless alias'ing in nocorrect is close enough for my needs
+18:28  Dieterbe: Hi, I'm trying to substitute newlines in a parameter to 'A', however none of the following works:
+18:28  Dieterbe:  echo ${foo/\\n/A} ${foo//"\n"/A} ${foo//'\n'/A}
+--- Log closed Mon Nov 29 21:30:22 2010

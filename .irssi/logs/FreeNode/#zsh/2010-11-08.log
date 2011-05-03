@@ -1,0 +1,161 @@
+--- Log opened Mon Nov 08 00:00:15 2010
+00:00 --- Channel #zsh was synced in 91 seconds
+01:02 --- mren is now known as mren|off
+01:24 --- f8l is now known as f8l-s_ghost
+--- Log closed Mon Nov 08 01:53:02 2010
+--- Log opened Mon Nov 08 02:03:28 2010
+02:03 --- Users 145 nicks [0 ops, 0 halfops, 0 voices, 145 normal]
+02:04 --- Channel #zsh was synced in 92 seconds
+02:58 --- estragib_ is now known as estragib
+04:27  AB3JU: any particular good place to share a zstyle line that fixes song number completion for newer versions of mpc?
+--- Log closed Mon Nov 08 05:59:24 2010
+--- Log opened Mon Nov 08 05:59:47 2010
+05:59 --- Users 147 nicks [0 ops, 0 halfops, 0 voices, 147 normal]
+06:02 --- Channel #zsh was synced in 166 seconds
+08:03  dbbolton: i'm trying to use the zed script. i can edit a file but when i press Ctrl+x Ctrl+w it doesn't write the file
+08:03  dbbolton: isn't that what ^X^W means?
+08:09  teratorn: can anyone say in which version of zsh the option COMBINING_CHARS appeared?
+08:09  teratorn: I want to avoid the error in setting this option if it doesn't exist
+08:11  teratorn: ah, the 'options' associative array... excellent
+08:11  teratorn: <3 zsh
+09:10 --- wuehlmau1 is now known as wuehlmaus
+09:40 --- insomnia1alt is now known as insomniaSalt
+10:54  cYmen: Hm.
+10:54  cYmen: Easiest way to make a bunch of filenames all lowercase?
+10:55  strull: cYmen: mmv
+10:55  cYmen: strull: I don't have that.
+10:55  strull: easy to install
+10:55  strull: it's great.
+10:56  cYmen: Is it better than zmv?
+10:56  strull: i doubt it
+10:56  cYmen: Then I would rather use what I already have. :)
+10:56  strull: ok. 
+10:56  strull: the mmv-line would be mmv "*" "#l1" 
+10:57  cYmen: OK, definitely concise.
+10:58  strull: and save. It performs checks to make sure you don't loose a file
+11:00  cYmen: zmv '(*)' '$1:l' seems to be the equivalent
+11:01  cYmen: I would like to test if it performs such checks but my filesystem doesn't seem to allow filenames that only differ in case.
+11:02  cYmen: OK, zmv checks, too.
+11:02  strull: mmm ... why don't I have zmv ?
+11:04  cYmen: autload -U zmv
+11:04  cYmen: eh autoload
+11:05  cYmen: Now, how do I do the same but only after the first dot in the filename..
+11:05  cYmen: Sometimes zsh reminds me of sudoku.
+11:06  strull: hehe
+11:06  cYmen: OK, this doesn't match anything: zmv -n '([^.]).(*)' '$1.$2:l'
+11:07  cYmen: This prints no errors but also doesn't do anything: zmv -n '(*).(*)' '$1.$2:l'
+11:08  cYmen: And this is the point where I decide that this is a waste of time and use a for file in * loop instead.
+11:10  cYmen: Which turns out to only be simpler because the stuff before the first dot has a fixed length and I can use cut.
+11:10  cYmen: Mikachu: Any magical ideas for this?
+11:17  Mikachu: cYmen: can you list some example file names you want to match?
+11:18  cYmen: Stuffname.anYthInG to Stuffname.anything
+11:19  Mikachu: oh
+11:19  Mikachu: hm no that wasn't it
+11:19  Mikachu: but [^.] still only matches one character, you at least need a # after it
+11:20  cYmen: ah
+11:20  Mikachu: didn't help though
+11:20  cYmen: It doesn't?
+11:20  cYmen: It seems to...
+11:20  cYmen: zmv -n '([^.]#).(*)' '$1.$2:l'
+11:21  Mikachu: oh yeah it does work
+11:21  Mikachu: i just didn't have any capital letters in my test file
+11:21  Mikachu: zmv of course doesn't do anything if the filename doesn't change
+11:22  cYmen: Excellent.
+11:22  Mikachu: (*).(*) should be enough if you only have one dot
+11:22  Mikachu: besides, if you only want to lowercase the extension, you want the second group to be the not-dot, not the first
+11:24  Mikachu: zmv -n '(*)' '$1:r.$1:e:l'
+11:24  cYmen: True but I want to lowercase all but the name of a bunch of show episodes.
+11:24  Mikachu: that should work too
+11:24  Mikachu: okay
+11:24  Mikachu: that last one just lowercases extensions obviously
+11:24  cYmen: It's not that obvious.
+11:24  Mikachu: the obviously was a joke
+11:24  Mikachu: ;)
+11:24  cYmen: :)
+11:24  cYmen: So how does it work?
+11:24  Mikachu: i actually had to check the manpage for that
+11:25  Mikachu: :r removes the extension, :e keeps only the extension, :l lowercases as you know
+11:25  cYmen: Ah.
+11:25  Mikachu: usually i would probably use ${(L)1} for that
+11:25  Mikachu: not that it's really better in any way
+11:28  cYmen: So if the filename consists of several dot separated parts
+11:28  cYmen: How is this for taking first, second and last:
+11:28  cYmen: zmv -n '([^.]#).([^.]#).*.([^.]#)' '$1.$2.$3'
+11:36  Mikachu: should work i suppose
+11:37  Mikachu: % zmv -n '([^.]#).([^.]#).*.([^.]#)' '$1.$2.$3'
+11:37  Mikachu: mv -- this.file.has.lots.of.dots this.file.dots
+11:38  Mikachu: it's a bit boring you can't take several slices of an array
+11:38  Mikachu: % zmv -n '(*.*.*.*)' '${(j:.:)${(s:.:)1}[1,2]}'
+11:38  Mikachu: mv -- this.file.has.lots.of.dots this.file
+11:38  Mikachu: but not
+11:38  Mikachu: % zmv -n '(*.*.*.*)' '${(j:.:)${(s:.:)1}[1,2,4]}'
+11:38  Mikachu: zmv: syntax error in replacement
+11:54  cYmen: Wow.
+11:54  cYmen: I didn't know about this syntax.
+11:57  Mikachu: which one?
+12:04  cYmen: The array slicing.
+12:05  Mikachu: ah
+12:05  Mikachu: it's a range, so you can't fetch item 1 2 and last
+12:05  Mikachu: (to my knowledge)
+12:05  cYmen: Yeah, I get it.
+12:06  Mikachu: i have this keybind that reverses a word, just made it for "fun"
+12:06  Mikachu: modify-current-argument '${(j::)${(@Oa)${(s::)ARG}}}'
+12:08  cYmen: ..
+12:08  Mikachu: yeah, thought you'd like it
+12:11  cYmen: It's probably not even that complicated when you know what you're doing.
+12:14  Mikachu: the trick is that Oa reverses an array
+13:49  anon33_: this is a pretty general question but - is there a way to run commands in the background? ie - evince <.pdf> and then being able to close the terminal?
+13:49  ft: evince foo.pdf &!
+13:50  anon33_: ft: could you explain what &! does?
+13:52  ft: it pushes the process into the background and disowns it.
+13:52  ft: you could also run it `nohup'.
+13:53  anon33_: ft: is that the same as nohup evince <.pdf>?
+13:53  ft: no.
+13:53  ft: if you disown the process, the shell loses its connection to it.
+14:26  cYmen: Ugh. So complicated. So I changed my tab completion to allow lowercase as uppercase..now after a few weeks I get confused because * doesn't behave the same way.
+14:27  cYmen: Human minds...
+14:29  cYmen: I just type the first couple of letters, press tab add a * and give the target directory
+14:29  cYmen: of course the tab in the beginning didn't really do what it was supposed to...
+14:29  Mikachu: you'd need to put (#i) before the letters
+15:04  corecode: heya
+15:05  corecode: zsh doesn't seem to do variable expansion before parameter splitting
+15:05  corecode: when typing, at least
+15:06  corecode: what should i read up on regarding this feature?
+15:06  Mikachu: er
+15:06  Mikachu: those words you said don't mean anything, i think :)
+15:07  corecode: i.e. variables always wind up as one argument
+15:07  Mikachu: right
+15:07  corecode: and are not split at spaces
+15:07  Mikachu: but parameter and variable is the same thing
+15:07  Mikachu: you can use $=param to force a split on $IFS characters
+15:07  corecode: ah
+15:07  corecode: thanks
+15:07  corecode: that will do
+15:08  Mikachu: if you're writing zsh code, you probably want an array
+15:08  corecode: i'm just typing on the command line
+15:10  ft: still.
+15:10  ft: foo=(this is 'an array')
+15:10  Mikachu: if it's CFLAGS i guess you don't have much of a choice
+15:10  corecode: the list came out of a shell command
+15:21  ft: foo=( ${(f)"$(my_command -opts)"} )
+--- Log closed Mon Nov 08 18:38:51 2010
+--- Log opened Mon Nov 08 18:38:59 2010
+18:38 --- Users 154 nicks [0 ops, 0 halfops, 0 voices, 154 normal]
+18:40 --- Channel #zsh was synced in 90 seconds
+--- Log closed Mon Nov 08 19:21:43 2010
+--- Log opened Mon Nov 08 19:26:56 2010
+19:26 --- Users 156 nicks [0 ops, 0 halfops, 0 voices, 156 normal]
+19:28 --- Channel #zsh was synced in 86 seconds
+19:40  dahlgren: Any converts from the bash shell here?
+19:42  dahlgren: zsh is used in grml (http://grml.org/) so I thought I'd investigate switching over
+19:57  mika: dahlgren: several of switched from bash to zsh once ;)
+19:57  Mikachu: i never used bash
+20:03  iaj: Mikachu: wheres your zsh knowledge coming from :-)?
+20:05  Mikachu: the manpage mostly
+20:10  teratorn: huh, how come I don't get completion for the "." command?
+20:10  Mikachu: works here
+20:12  teratorn: my completion is so screwed up
+20:12  teratorn: Ive got to debug my rc file :(
+20:13  teratorn: it's not just this
+20:13  teratorn: or build a test case and bisect my darcs repo :)
+--- Log closed Mon Nov 08 22:08:36 2010

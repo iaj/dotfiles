@@ -1,0 +1,105 @@
+--- Log opened Sat Jan 15 00:00:40 2011
+00:27  Giles: I am confused... if I used grep "[A-Za-z]" file   it hilights every instance of the things I want to match, but if I then do
+00:27  Giles: sed "s/\([A-Za-z]*\)/<\1>/" file
+00:28  Giles: its putting < and > around spaces...
+00:28  Giles: how can [A-Za-z] match white space?!
+00:28  cthuluh: * means 0 or more, so an empty string will also get matched
+00:28  Giles: so I need +
+00:29  cthuluh: yes, \+ if your sed supports it
+00:29  Giles: ah \+
+00:29  vkues: \{1,\}
+00:29  Giles: cthuluh: there was my mistake
+00:29  vkues: a tad more portable
+00:29  cthuluh: Giles: using [[:alpha:]] may prevent locale problems
+00:30  Giles: cthuluh: hey I am just playing around.
+00:30  cthuluh: fine
+00:30  vkues: Giles: you mean, playing, for learning? :)
+00:30  Giles: vkues: yes
+00:30  vkues: Giles: see :)
+00:31  Giles: I didn't expect + to need to be escaped.
+00:31 * Giles has learned lex first
+00:31  cthuluh: Giles: /msg greybot bre
+00:31  Giles: s/lex/flex/ ;)
+00:35  geirha: Giles: In basic regular expressions (that sed uses) + is not special, so it matches a + character.
+00:36  Giles: I get it.
+00:36  geirha: In extended regular expressions, + means 1 or more of the previous regex
+00:37  geirha: Some implementations of sed allow you to escape + to mean 1 or more ..., and some allow you to use ERE instead of BRE
+00:38  vkues: i wonder if flex uses GNU-flavoured regular expressions too
+00:38  geirha: There are also more regex "dialects", like pcre, but I don't think any sed implementations support them
+00:39  geirha: Giles: Anyway, sticking to what is described here will do wonders to portability  http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_03
+00:40  Giles: How do I do   s/.*\n\t\t:/::=/
+00:40  Giles: I have forgotten
+00:40  Giles: something todo with N
+00:41  vkues: not necessarily with N
+00:41  vkues: it's just that somehow you need to get multiple lines into the buffer
+00:41  Giles: something to do with N iirc, I guess I didn't rc
+00:41  vkues: there are several ways to do that, N being one of them
+00:46  geirha: sed -n '1{h;b};/^\t\t:/{s//::=/p;b};x;p'
+00:47  geirha: Only some implementation will match \t as a tab character. For portability you should use literal tabs.
+00:48  Giles: you guys are obsessed with portability.
+00:49  geirha: Without knowing what sed you have available, I'm trying to cover my bases :P
+00:49  Giles: I am on linux, using gnu sed, and ascii
+00:50  geirha: If you only need it to run with GNU sed, the above should work.
+00:50  Giles: geirha: yeah, but I don't have a clue what it means.
+00:51  geirha: Hm. Not quite. It'll strip the last line.
+00:51  Giles: sed  "N;s/\n.*:.*/ ::=\n/"
+00:51  vkues: note that some sed versions have problems dealing with N when processing the last line of input
+00:51  vkues: ;)
+00:52  geirha: Hm. Does that do what you want?
+00:53  Giles: geirha: not quite.
+00:54 * Giles wonders if the file has normalised line endings
+00:54  geirha: It'll only subsitute odd->even lines
+00:54  Giles: ah
+00:54  Giles: lol
+00:54  geirha: e.g line1 and line2, but not line2 and line3
+00:54  Giles: geirha: yep with you.
+00:54  geirha: sed -n '1{h;b};/^\t\t:/{s//::=/p;b};x;p;${x;p}'
+00:55  geirha: That can probably be written shorter/better though.
+00:55  Giles: whats 1{h;b}
+00:55  geirha: if line is line 1, execute the command h and b
+00:56  geirha: see man sed to see what h and b does.
+00:56  Giles: right
+00:56  geirha: If you are able to match the line preceeding the \t\t:, you could use N.
+00:57  Giles: ah ok easy
+00:58  Giles: grep "^[A-Za-z]$" matches the lines
+00:58  Giles: so would it be "^[A-Za-z] N;s/\n.*:.*/ ::=\n/"
+00:58  cthuluh: that contain one char in the ranges A-Z and a-z, which could be anything, according to some locales
+00:59  Giles: cthuluh: oops one or more
+00:59  geirha: sed '/^[[:alpha:]]$/{N;s/.*\n\t\t:/::=/}'
+00:59  geirha: sed '/^[[:alpha:]][[:alpha:]]*$/{N;s/.*\n\t\t:/::=/}'
+01:03  Giles: now I am getting somewhere
+01:03  Giles: but I don't understand the significance of the the {'s
+01:08  cthuluh: do you have the sed manpage near you?
+01:11  Giles: cthuluh: I do, but I am not going to start reading that a 12:11 on a friday night.
+01:41  e36freak: what do people have against man pages?
+02:01  vkues: that's kinda cool, i mean,
+02:02  vkues: naively i'd think that there's hardly any better time for reading than 12:11 on a friday night
+02:02  vkues: so to me, giles way of thinking is a bit "interesting"
+02:03  vkues: like imagining that reading is something done professionally
+02:09  e36freak: hahaha
+--- Log closed Sat Jan 15 02:28:17 2011
+--- Log opened Sat Jan 15 02:28:43 2011
+02:28 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+02:28 --- Server: [niven.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+02:30 --- Channel ##sed was synced in 106 seconds
+--- Log closed Sat Jan 15 08:09:34 2011
+--- Log opened Sat Jan 15 08:14:44 2011
+08:14 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+08:16 --- Channel ##sed was synced in 110 seconds
+10:36  `Assassin: Will somebody sed something for me? :D
+10:37  `Assassin: wget -q -O - "http://www.xe.com/currency/iqd-iraqi-dinar"|grep "USDIQD11"|sed -e 's/<[^>]*>//g' I need only 0.00085 from this. I had no idea what I was doing with sed.
+11:05  dualbus: `Assassin, that's a tag soup
+11:05  dualbus: you could use html2
+11:05  `Assassin: wget -q -O - "http://www.xe.com/currency/iqd-iraqi-dinar" | sed '/USDIQD11/!d;s/.*"USDIQD11">//;s/<\/a>//'
+11:05  `Assassin: Thanks anyways. I asked on four different networks in bunches of channels.
+11:05  `Assassin: :D
+11:09  dualbus: wget -q -O - "http://www.xe.com/currency/iqd-iraqi-dinar"| html2 2>/dev/null| awk -F '>' '/USDIQD11/ {print $NF}'
+--- Log closed Sat Jan 15 22:32:51 2011
+--- Log opened Sat Jan 15 22:44:32 2011
+22:44 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+22:46 --- Channel ##sed was synced in 121 seconds
+--- Log closed Sat Jan 15 23:10:59 2011
+--- Log opened Sat Jan 15 23:11:19 2011
+23:11 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+23:13 --- Channel ##sed was synced in 122 seconds
+--- Log closed Sun Jan 16 00:00:51 2011

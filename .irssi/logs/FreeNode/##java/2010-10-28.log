@@ -1,0 +1,1149 @@
+--- Log opened Thu Oct 28 12:08:10 2010
+12:08 --- Users 316 nicks [7 ops, 0 halfops, 0 voices, 309 normal]
+12:08 --- Channel ##java was synced in 1 seconds
+12:08  ioexception: did you try google retif ?
+12:08  ioexception: ~g Illegal key size or default parameters
+12:08  javabot: http://www.google.com/search?q=Illegal+key+size+or+default+parameters
+12:08  iaj: lo there - ive got a really large messed up java program where everything is just plugged into the /bin structure - now the first thing I wanna do is to refactor that whole project - eg ... have different src and bin folders
+12:08  iaj: is tehre any good guide for on how to doing so?
+12:09  Wizard: ioexception: thank you
+12:11  ioexception: what would be the problem doing so with having different src folders? not sure if the IDE will let you have different bin folders(eclipse I suppose, but applies to most of them)
+12:11  progzer: Excuse me, I'm implementing an image cache. I'm looking for a data structure to map a Label and a String together. Though the String (imageName) may be used by (common to) multiple Label, so a straight forward Hashtable wouldn't work (my network code calls an event with the imageName that just got loaded - so a data structure which can return the array of Labels currently requesting the same imageName..
+12:12  iaj: ioexception: refering to me? well... yeah - eclipse- all of the users who are gonna stick to that project are goonna use eclipse anyhow
+12:13  ioexception: iaj: Usually when I have a huge project, I use maven with modules...
+12:13  ioexception: unless the company doesn't "use" or "understand" maven
+12:13  progzer: hmm actually I can "hashtable" imageName and array together.
+12:15  ioexception: iaj: If you're not using a build tool which I think you should, then create eclipse dependent project, you can setup project dependencies. A project can depend on another project to build
+12:16  ioexception: so basically you would split your project into smaller ones as modules
+12:17  ronr_: anyone knows of an open source implementation of rtsj? real time java?
+12:17  rubydiamond: Does increasing :MaxPermSize jvm option increase my app performance
+12:17  rubydiamond: it's set to 192MB
+12:17  rubydiamond: and my app seems to be using 90MB .. of Perm Size
+12:18  iaj: ioexception: problem is I need to enhance the current project which currelntly is placed in a svn repo which I should use
+12:20  ioexception: iaj: The first step to enhancement would probably be cleaning the code(bad code, poor code reuse, etc.) and optimizing it(if performance is an issue)
+12:20  iaj: shouldn't I care about its structure firsT?
+12:20  ioexception: iaj: if you cannot split the project into smaller modules, then you can't, I can't either.
+12:21  ioexception: iaj: If the company doesn't allow that, suggest it, if they don't want to, I would suggest not to care, at least you told them and they ignored it.
+12:22  ioexception: iaj: It's not uncommon to see large projects with 300K to a million lines of code
+12:22  ioexception: all in one
+12:27  ioexception: ronr_: I doubt that you'll find a good free rtsj implementation.
+12:27  ioexception: maybe no free rtsj implementation
+12:28  iaj: ioexception: hmmm yeah ok.. well right - but theres just folders which contain everything txt. testfiles... a java class.. some mixed up stuff and so on...
+12:28  iaj: isn't it common to have the stuff that's to be compiled in /src/ ?
+12:30  ronr_: ioexception: I guess what interests me most about it is the scoped memory of it. we have an app that processes thousands of entities per second (which in turn leads to 10's of thousands and even more objects to be created and discarded in that time). some here are worried about GC performance and I'm looking for ways around it. Someone here suggested using object pools but I'd rather avoid it if possible.
+12:31  ioexception: iaj: it depends by what you mean by common, it's common to find deprecated libs, people who write stuff from scratch for no purpose when well tested libraries or frameworks exist. It's common to find CVS, makefiles in java projects, huge non modular projects with everything inside a single package. Is it good, I'm not sure it is.
+12:32  surial: iaj: In src, or in src/subdir.
+12:32  surial: iaj: Or even in src/subdir/language. I.e. maven goes overboard and dumps your source in src/main/java.
+12:32  surial: ronr_: Hold on. Object pools are usually SLOWER than creating a bajillion objects.
+12:32  ioexception: iaj: I would use a maven multi-project, if I were you and if I could
+12:33  surial: ronr_: Creating a bajillion objects, provided these objects are short lived, is very very fast.
+12:33  iaj: ioexception: surial: thanks...   ioexception, I never heard of maven :(
+12:33  surial: ronr_: Don't guess at performance unless (A) you're a rocket scientist that is actively working on the JVM, or (B) You've got a report from your profiler to prove there's a problem.
+12:33  ioexception: iaj: not having heard about maven is not unusual
+12:33  ztj: ronr_: Do not worry. Do profile.
+12:34  surial: ronr_: This is vastly oversimplifying things, but basically java has a smallish (and IN CACHE! This makes a gigantic difference on modern platforms!) block of memory where new objects are created. When it is full, java copies all objects that are still relevant over to a longer-lived memory block, and then just starts from pointer 0 again. This means garbage collecting a short lived object costs 0. Not 0.00001. Absolute 0.
+12:34  ronr_: okay, guys, you don't need to convince me about that. I agree that the problem should be approached only if it actually exists.
+12:34  ronr_: unfortunately, my development manager (who's actually a C/C++ programmer) is forcing us to work around it.
+12:35  surial: ronr_: Then you have a political problem, or possibly an "I'm out of a job because I called my boss a fucking idiot" problem. Neither are relevant for this channel.
+12:35  ztj: indeed
+12:35 --- rubydiamond is now known as zz_rubydiamond
+12:35  ronr_: that's true
+12:35  ioexception: ronr_: well, you can't fight the system most of the time it is not worth it anyway.
+12:35  ronr_: but I'm really trying to avoid using object pools.
+12:36  ioexception: just create the objects and see what happens
+12:36  ronr_: does anyone maybe know of an online article that mentions how crap that is as a solution? :)
+12:36  surial: ronr_: I hope you understand that asking this channel for advice to solve a non-existent problem, in a way that is going to lead to crappy code and actual performance problems, is not really a fair thing to do, and is very unlikely to lead to satisfactory answers. As there aren't any, I am stumped as to see how this channel could magic one out of a top hat.
+12:36  ronr_: I know about the eden and such parts of the memory heap.. that's really not a problem.
+12:36  ztj: ronr_: actually, it's often effective for various scenarios (not yours) and so it's hard to find dissent
+12:37  surial: ronr_: http://www.theserverside.com/news/thread.tss?thread_id=37146
+12:37  ronr_: Of course I don't expect you to magic solve my issues.
+12:37  surial: ronr_: If your boss does not accept the word of Brian Goetz as probably the MOST authoritative person on this entire earth as far as JVM performance is concerned... quit.
+12:37  ronr_: But maybe I could bring your points up to my boss and he'd... err.. agree.
+12:37  ztj: it's kind of hard to take anything from TSS seriously, especially 5 years old things from TSS.  Not to say it's not true or relevant... but still :)
+12:37  surial: ronr_: At any rate, I suggest you check that post or in general google around for Brian Goetz-authored articles on JVM performance, and throw these at your boss.
+12:38  ioexception: ronr_: that guy wrote java concurrency in practice, a known book
+12:38  surial: ronr_: ... and is currently working on the JVM, and has been for quite a while.
+12:38  ronr_: surial: the most my boss is willing to say regarding Java is "Java is shit" and "Java programmers are shit" :)
+12:38  mapreduce: Then stop using Java now.
+12:38  mapreduce: Or stop working there.
+12:38  ioexception: ronr_: you're know asking us, to help you handle your relationship with your boss
+12:39  ronr_: yes, it's not that easy.
+12:39  ronr_: well, sometimes he's reasonable . it's more of a guessing game with him.
+12:39  mapreduce: If you're a Java programmer and he's saying Java programmers are shit, then you personally have a problem.
+12:40  mapreduce: If he thought you were good, he wouldn't be saying that.
+12:40  ronr_: that's true. he has absolutely no people skills.
+12:40  mapreduce: No, he doesn't have the problem, you do.
+12:40  ronr_: ok, ok, I wasn't looking for that sort of advice. but thanks for clarifying things :) have a good one ;)
+12:41  mapreduce: So why mention the boss?..
+12:41  ioexception: he left :-)
+12:42  mapreduce: I was wondering what the message 'ronr_ has left ##java' meant.
+12:42  mapreduce: Thank you for clueing me in so helpfully.
+12:42 * ztj throws ioexception 
+12:43  ioexception: ztj: you HD is full
+12:43  ztj: my Hair Dryer *IS* full.  That's a fire hazard.
+12:43  mapreduce: ioexception: You keyboad is missing a lette
+12:44  ioexception: hehe, yes indeed
+12:44  ioexception: almost time for another day at the office... I can't wait :-)
+12:45  mapreduce: I'm nearly halfway through it.  I can tell you now, you're better off in bed.
+12:46  mapreduce: The 'server guys' outnumber us 'client guys' 20:2, and they're all trying to make the server (historically full of holes) secure, and keep breaking things for the client.
+12:46  mapreduce: Great fun firefighting.
+12:46  Hail_Spacecake: can you define a method fn(String a, String b) { ... }
+12:47  ioexception: yes we can
+12:47  ioexception: can you?
+12:47  Hail_Spacecake: and then overload it with fn(String a) { return fn(a, "default");}
+12:47  Hail_Spacecake: ?
+12:47  Hail_Spacecake: I mean, call the original method from within the overloaded one with a default value like that?
+12:47  ioexception: ~tias
+12:47  javabot: Try it and see. You learn much more by experimentation than by asking without having even tried.
+12:47  mapreduce: Hail_Spacecake: Have you tried it?
+12:48  Hail_Spacecake: mapreduce, yes, several years ago, the last time I used java
+12:48  Hail_Spacecake: and i don't remember whether or not that worked
+12:48  mapreduce: So try it now.
+12:48  mapreduce: Holy fuck.
+12:48  ioexception: hehe
+12:49  dihedral: hello
+12:49  ioexception: Once a guy came to me asking me to deploy quickly in JBoss without compiling the code because it took too long . I answered "You want me to stop compiling code that is expected to be compiled? sure"
+12:50  dihedral: does this make sense ?  http://pastie.org/1255173
+12:50  dihedral: or is there a better way of handling something like that
+12:50  ioexception: "so we would divide by zero? sure"
+12:50  mapreduce: ioexception: Perhaps he would prefer PHP.
+12:51  ztj: dihedral: something like what? It seems like a totally unnecessary thing to do, using a map there.
+12:51  Hail_Spacecake: sigh
+12:52  Hail_Spacecake: how do you run a just-compiled class in the directory you compiled it in?
+12:52  mapreduce: Hail_Spacecake: java NameOfClass
+12:52  ioexception: ~classpath
+12:52  javabot: The classpath tells Java or the compiler in which jar files and folders to look for classes and resources. Use the -cp/-classpath run-time options to specify the classpath (does NOT work with -jar!). Also see http://is.gd/j4gM [sun.com] for more info. If you're on windows see: http://is.gd/9qq26 [sun.com].
+12:52 @jottinger: morning
+12:53 @jottinger: heh
+12:53  Hail_Spacecake: why doesn't java -cp . test.class work?
+12:53  mapreduce: Hail_Spacecake: Because it's wrong.
+12:53  ioexception: Hail_Spacecake: I would suggest that you take some time to read basic documentation, you'll save time at the end
+12:53  progzer: If I mark two methods marked synchronized and the first has a call to the second. While another thread might have attempted to call second. Will this be okay or will it cause a dead lock. I had read an article that synchronized keyword was implemented by locking the instance itself, so this should be fine? (can't find the article)
+12:53  mapreduce: There is no class named test.class
+12:53 --- zz_rubydiamond is now known as rubydiamond
+12:53 @jottinger: Hail_Spacecake: you should learn the classpath
+12:53 @jottinger: it's neato!
+12:53  mapreduce: Your code does not say class test.class { ... }
+12:53  mapreduce: So anything expecting a class name won't expect test.class
+12:53 @jottinger: progzer: it won't cause a deadlock. However, it will block and *could* cause a deadlock if the second method calls the first.
+12:54  dihedral: ztj what would you do instead
+12:54  dihedral: what can i correct
+12:54 @jottinger: depends on what's wrong
+12:55  ztj: dihedral: use fields, that example gives absolutely no reason whatsoever to use Class objects, or a map
+12:55  ioexception: dihedral: you're using a map for 2 concrete class instances returned by 2 methods, it's not "wrong" but instead of using a map you could just declare 2 variables
+12:55  ztj: without further reasoning, it *IS* wrong
+12:55  dihedral: ok, what if i do not know the number of possible additions in the HashMap?
+12:55 @jottinger: overarchitecture is pleasurable, akin to the joy one finds in a good meal, a good companion, or excellent entertainment.
+12:56  ioexception: map.put(
+12:56  ztj: SO he either needs to do a damn better job explaining what he's up to or not do what he's submitted
+12:56  dihedral: would it then make sense?
+12:56  ioexception: oops
+12:56  ztj: dihedral: produce a less contrived example of your actual problem then perhaps we can evaluate better
+12:56 @jottinger: dihedral: what are you trying to do
+12:56  ioexception: dihedral: would you also write an unknown number of methods of each kind of entry in the map?
+12:56  dihedral: nopes ^^
+12:57  progzer: I'd want the other thread[s] to block - its not an CPU intensive operation, updating a Set with a few elements. The second clears the set/list and doesn't call the first, so I should be fine (its only called directly if some data arrived over the network).
+12:57  dihedral: i would have a single get method
+12:57 @jottinger: dihedral: maybe you should just use a map.
+12:57  progzer: Thanks, jottinger
+12:57  ioexception: map.put(aPool, new aPool) -> getAPool, getBPool
+12:57  ioexception: dihedral: see what jottinger said then
+12:58  dihedral: that is an idea
+12:59  ztj: le sigh
+12:59  dihedral: i am trying to have my app extended by SPI, and then seeing that i may not know the possible number of Pools
+12:59  dihedral: i thought it could make sense to use a hashmap which could be extended
+12:59  ztj: if you're making a habit of making maps of Class -> instance of Class, then there's a decent chance you ought to be using a DI framework (actually, there's a good chance of that by default)
+13:00  dihedral: ~di
+13:00  javabot: dihedral, I have no idea what di is.
+13:00  ztj: SPI is poopy
+13:00  dihedral: yeah - not going into that discussion again
+13:00  dihedral: SPI can do what i need
+13:00  ztj: Then stop bringing it up
+13:00  ztj: SPI stands for "Shittiest Plugin Interface" I think, based one example
+13:00  ztj: s/one/on
+13:01 @jottinger: haha
+13:01 @jottinger: nothing wrong with SPI, it's just not very flexible
+13:01  ztj: right which, to me, is entirely oppositional to the goal of a plugin system
+13:02 @jottinger: well, from the code standpoint, it's fine
+13:02 @jottinger: from every other standpoint, it's creaky
+13:02  dihedral: if i need to travel 1km a day i do not need a mercedes, when the smart will do
+13:03  ztj: dihedral: please keep making 100% irrelevant and also flatly wrong metaphors. Please do.
+13:03  ztj: Programming is not driving cars
+13:03  ztj: and 1km could be STRAIGHT UP, you won't be doing that in a smart car OR a mercedes.
+13:04  topriddy: ztj: ever heard the Automobile Industry/Software industry(M$ OS) joke?
+13:04  dihedral: ztj, thankfully they way the app is extended is not causing any issues
+13:04  ztj: topriddy: that was funny before MS software was deeply intertwined into thousands of cars on the road that get the highest reliability ratings of any american car company :)
+13:04  dihedral: how i handle stuff internally is limited (regardless of SPI or not SPI)
+13:05  ztj: dihedral: you're here asking about an "issue"
+13:05  ztj: that's dealt with by more complete plugin systems, just sayin'
+13:05 * ztj has absolutely no concern for whatever you're doing, ultimately
+13:06  ztj: topriddy: but yes I can't imagine anyone not having heard that old tired yarn
+13:06  progzer: jottinger: when you said "*could* cause a deadlock if the second method calls the first", did you mean deadlock in terms of threads or infinite recursion?
+13:06  mapreduce: Deadlock is unrelated to recursion.
+13:06 @jottinger: not sure what you mean
+13:06  topriddy: ztj: you think the metaphorical joke should have used linux/unix instead of M$ OS? ***just asking
+13:06 @jottinger: it's a simple deadlock in that case, as the monitors would wait for OTHER monitors to be released
+13:06  progzer: I'll pastebin some code. brb
+13:07  progzer: ~pastebin
+13:07  javabot: http://mysticpaste.com - Paste the final url after you've pasted your stuff there.
+13:07  ztj: topriddy: you've invested infinitely more thought into this subject than I have
+13:08  topriddy: ztj: hehehe...just kidding around...***now getting back to work
+13:09  ztj: I'm so happy, my company finally after 3 years of asking, relented and gave permission for us to use EPL licensed libraries. Only 2 years after we had to commit to alternatives... but still.  One less barrier is always a happy thing!
+13:24  progzer: http://mysticpaste.com/private/gZPZuWTvm7
+13:30  progzer: Let me know how (terrible?) I'm doing with that approach. Is that going to deadlock? (@ jottinger or anyone else who cares to take a look)
+13:34 --- Natch is now known as Natch|
+13:38  shervin_a: Can anyone spot whats wrong with this regex: .*(:|-).*)
+13:39  shervin_a: never mind I saw it
+13:39  shervin_a: What I meant is this regex: .*(\\:|\\-).*
+13:42  shervin_a: I want to find one or more ':' and/or '-'
+13:43  Slush-: shervin_a: that regex finds only one : or - ?
+13:44  surial: shervin_a: Try .find("[-|]");
+13:44  surial: shervin_a: A few bajillion times simpler.
+13:44  shervin_a: surial: who has find method?
+13:45  surial: That'll also find ----|||---. In general when asking regexp questions. Show us some examples of what should and shouldn't match, and describe why you need to match it (i.e. need to capture it, replace, just trigger off of whether or not its there, etc).
+13:45  surial: shervin_a: Matcher.
+13:46  shervin_a: surial: I did write what I want to find. ':' or '-' one or more times
+13:46  surial: progzer: It won't deadlock, but I wouldn't give this an A+ either.
+13:46  shervin_a: surial: Matcher does not have find(String)
+13:46  surial: shervin_a: That's ambiguous.
+13:46  surial: shervin_a: Does ::--::: count, or does it have to be a series of EITHER *ALL* colons, or *ALL* dashes?
+13:46  surial: shervin_a: Actual inputs, not a description.
+13:46  surial: shervin_a: Yes it does.
+13:46  surial: ~javadoc Matcher
+13:46  javabot: surial: http://is.gd/3lqNK [JDK: java.util.regex.Matcher]
+13:47  surial: find(). It's right there.
+13:47  surial: shervin_a: If you're not going to bother reading the javadoc to know how to use libraries, sod off.
+13:48  shervin_a: surial: now you are just pissing me off. You said and I quote:  Try .find("[-|]"); This suggest .find(String) which Matcher does not have
+13:48  shervin_a: there is find() and find(int)
+13:48  surial: progzer: A few hints: 'synchronized' as a method keyword is basically broken; use an explicit locker object.
+13:48  shervin_a: no find(String)
+13:48  surial: shervin_a: I assumed you were smarter than a 3 year old and could interpolate from there.
+13:49  surial: shervin_a: The proper way to do it is Pattern.compile("[-:]").matcher(yourInput).find(). But that's wordy. And if you can't figure it out from what I told you, then go away.
+13:49  shervin_a: surial: well apparently you assumed wrong, you cannot write find("some string") and assume I know you are talking about Matcher class
+13:49  shervin_a: could be tons of objects that have find(string)
+13:49 @tjsnell: heh
+13:49  surial: shervin_a: I got annoyed when you said Matcher.find(String) didn't exist. I wasn't annoyed when you asked me which class has the find method.
+13:49 @tjsnell: you wrongly assumed he was smarter than a 3 year old surial
+13:50  surial: tjsnell: That was pretty stupid of me, huh? I should know better.
+13:50 @jottinger: you should.
+13:50 @tjsnell: at least he agreed
+13:50 @jottinger: start learning.
+13:50  shervin_a: yes you should know better
+13:50 @jottinger: I get sick and tired of people who are smarter than I am, acting WAY STUPIDER than i can act when I'm drunk and stoned.
+13:50 @jottinger: shervin_a: you: shut the fuck up.
+13:51  surial: jottinger: Well, he was right, for once.
+13:51 @jottinger: surial: you can shut up too.
+13:51  surial: .... but I was right!
+13:51 * surial pouts.
+13:51 <-- jottinger has kicked surial from ##java (I don't care.)
+13:56  eug-su: how can iterate files in a directory without getting the full list of files. The problem is: I have a directory with about 50.000 files and I need to process them iteratively. java.io.File.list() returns array with all files which is not very convenient
+13:57 @tjsnell: heh
+13:57  eug-su: missed question sign
+13:57 @tjsnell: what would be convenient?
+13:57 @jottinger: if only there were a filter of some kind.
+13:57  eug-su: no appropriate filter. It would be convenient to get a kind of iterator
+13:58 * jottinger snickers
+13:58 @tjsnell: you can iterate on an array I think
+13:58 @tjsnell: and 50k files in one directory! wow, that's an impressive fail
+13:58  eug-su: tjsnell: right, but i don't want such a huge array to be created
+13:59 @tjsnell: if you can't filter and can't fix the file system fail you really don't have a choice
+13:59 @tjsnell: unless the file names aren't random
+14:00  rubydiamond: guys.. can changing XX:MaxPermSize=192m to 1GB will improve my application performance...  my app is taking around 90MB of perm mem
+14:00 @jottinger: rubydiamond: it depends.
+14:24 --- teralaser_ is now known as teralaser
+14:25  paulweb515: eug-su: any of the filter methods call list(), so at the minimum you'll have a String[50k]
+14:34  eug-su: paulweb515: Thanks for pointing that out
+14:38  juxta: i'm invoking an external process in java under win32 - the process has some debug info which goes to stderr, but I only care for the output on stdout. however, the process becomes blocking if I don't deal with the output on stderr - what's the best way to get around this?
+14:39  bohl: i would like to add a maven dependency SuperCSV 1.5.2, any ideas how to find a server that hosts it?
+14:39  StoneCypher: just scan stderr and throw the output away, or log it, because eventually you will care
+14:41  juxta: StoneCypher, okay - no way to tell java to redirect that stream to null?
+14:42 @jottinger: bohl: doesn't look like any of the publicly known repos have it. You'll have to deploy it locally.
+14:42 * StoneCypher shrugs
+14:42  StoneCypher: prolly
+14:42 @jottinger: and then complain to the supercsv people to get on it.
+14:43 @jottinger: juxta: um.
+14:43  StoneCypher: hit four.  http://www.google.com/search?q=java+redirect+stderr+null&ie=utf-8&oe=utf-8&aq=t&rls=org.mozilla:en-US:official&client=firefox-a
+14:43  StoneCypher: i mean, it's a spectacularly bad idea to ignore stderr
+14:43  StoneCypher: things that matter go there
+14:43  StoneCypher: but have fun,
+14:43 * jottinger points and laughs at StoneCypher for using firefox
+14:43  StoneCypher: jottinger: i use all major browsers, because i test in parallel instead of after it's built
+14:44  StoneCypher: also, what's wrong with firefox?
+14:44 * jottinger points and laughs at StoneCypher for developing for browsers
+14:44 * StoneCypher hangs his head in shame
+14:44  StoneCypher: yeah
+14:44  StoneCypher: i know :(
+14:44  StoneCypher: but it's where the money is
+14:44 @jottinger: chrome is the only browser that doesn't suck for me
+14:44  StoneCypher: fucking web.
+14:44  StoneCypher: yeah, that's what opera users say too
+14:44 * jottinger doesn't do web dev, but... is gainfully employed
+14:44  StoneCypher: browsers, it turns out, are also subject to blub.
+14:44 @jottinger: opera users lie, though
+14:44  StoneCypher: true.
+14:45  StoneCypher: getting around opera's ridiculous choices is like pulling teeth
+14:45 @jottinger: opera's very heavy in terms of use compared to chrome
+14:45  Planck_: I still use lynx occasionally.
+14:45  StoneCypher: and the fact that they support the corner cases of standards nobody cares about makes them immune to constructive criticism
+14:45 @jottinger: I *like* opening the browser and then, like, using it instead of interacting with it
+14:45  Planck_: Or wget | less
+14:45 @jottinger: Planck_: me too
+14:45 * StoneCypher uses lynx for degredation testing
+14:45 @jottinger: Planck_: I prefer links to lynx, but I work behind enough idiot vpns that I sometimes need text browsers
+14:46  Planck_: Some sites are surprisingly usable.  Some just die in confusion.
+14:46  StoneCypher: Planck_: i try to stay in the first half, personally
+14:46 @jottinger: I'm all for death.
+14:47  StoneCypher: i'm not sure i'm going to bother this time, since my new saas is pretty damned comet heavy
+14:47  StoneCypher: and honestly fairly graphics heavy (charting, not useless nonsense)
+14:49  Planck_: Yes, there's some web-based content that makes no very little sense to try to use in a text environment.
+14:49  StoneCypher: eg charts
+14:49  StoneCypher: sometimes i want to go to stack overflow and herp derp a total nonsense question in with a bunch of buzzwords, and watch as the hilarious upboats sail in
+14:49  bouzu: hi
+14:49  Planck_: I've found stack overflow entertaining on occasions
+14:49 * jottinger zangbands StoneCypher 
+14:49  StoneCypher: so have i.  for all the wrong reasons
+14:49  frxstrem: is there some kind of Map that would sort the keys in keySet() in the same order as they were added?
+14:49  StoneCypher: jottinger: ... NNNNNNNNNNGGGGGGGGGG AT WORK MUST NOT
+14:49  Planck_: I quickly learned not to use it for getting serious answers to Java questions when I was learning the most
+14:49 * StoneCypher struggles
+14:49  bouzu: any one can help me please?
+14:49  StoneCypher: bouzu: just ask the question
+14:50  StoneCypher: frxstrem: maps are sorted.  if you want things insert-ordered, keep a vector of tuples.
+14:50  StoneCypher: or an arraylist or whatever container they made this month to cover for their last set of botch decisions.
+14:50 @jottinger: hahaha
+14:50 @jottinger: StoneCypher: shhh
+14:50  bouzu: http://pastebin.com/LT3tj9DX , http://pastebin.com/JYLfv6Jb : so i need to know how i can write "the name" and "the message" in  run() thank you
+14:50 @jottinger: maps are NOT sorted
+14:51  StoneCypher: uh.  yes they are.  by definition.
+14:51 @jottinger: second, LinkedHashMap
+14:51  bouzu: i'm trying to do a mini chat (very simple)
+14:51 @jottinger: StoneCypher: in what order?
+14:51  Planck_: frxstrem: There is ... yeah, what jottinger said
+14:51  paulweb515: StoneCypher: even HashMap ...
+14:51  Planck_: I was trying to remember the name of it :)
+14:51  StoneCypher: that's container defined, but generally lte on key.
+14:51  StoneCypher: what the hell is the point of keeping it in an actual map if he doesn't want key sorting
+14:51 @jottinger: StoneCypher: are you referring to the MAP, or to the sets that comprise the maps?
+14:51  StoneCypher: if he just wants insert ordering, all that overhead is wasted
+14:51 * jottinger giggles
+14:52  paulweb515: StoneCypher: only TreeMap does that kind of sorting
+14:52 * StoneCypher sighs
+14:52 @jottinger: hee hee hee hee
+14:52  StoneCypher: either you guys are retarded or java's map isn't actually a map.  and jottinger isn't retarded.
+14:52  paulweb515: StoneCypher: but your point about him not using a Map if he wants insert order is fine
+14:52 @jottinger: sure I am
+14:52  StoneCypher: why can't java use names correctly :(
+14:52  StoneCypher: so fucking depressing
+14:52 @jottinger: I'm not even in the top 50% in terms of intellect in the channel, I think
+14:52  StoneCypher: map is a well defined concept that predates java by 180 years
+14:52 @jottinger: StoneCypher: think "dictionary"
+14:53  bouzu: so any one ?
+14:53  StoneCypher: dictionaries are also sorted.
+14:53  frxstrem: jottinger: thanks, LinkedHashMap worked the way I wanted it to
+14:53 @jottinger: "map" is shorter, and it's better than "table"
+14:53  Planck_: Still looking at your code bouzu
+14:53  StoneCypher: frxstrem: just use a damn vector
+14:53 @jottinger: StoneCypher: you know, the thing is, you're right - but the sort order for most maps is not worth using. Therefore, for all intents and purposes: unsorted.
+14:53  frxstrem: StoneCypher: alright...
+14:53  Planck_: It has been what, 2 minutes?
+14:53  StoneCypher: "but i want to keep referential overhead that i'll never use, o(lg n) insert and read for lyfe"
+14:53  StoneCypher: jottinger: what?
+14:53 @jottinger: StoneCypher: "laife"
+14:53 @jottinger: dumbass
+14:54  StoneCypher: jottinger: the hell it isn't used
+14:54  StoneCypher: jottinger: where do you think the lg n comes from?
+14:54 * jottinger sighs
+14:54  StoneCypher: jottinger: every single read or write, that ordering is used, and occasionally the amort hit comes
+14:54  ahughes: good evening, I am trying to work out how I can generate a class at compiletime using just the JDK alone.... what I want is an enum that holds all of the environment variables/properties at compile time. Any ideas?
+14:54 @jottinger: you and my son, both so retardedly literal that you can't see the forest for teh LEAVES
+14:54  StoneCypher: "for all intents and purposes this ordered container isn't ordered"   <-- uh huh
+14:54 @jottinger: ahughes: you'll have to generate them
+14:54  bouzu: hello ?
+14:54  StoneCypher: sorry for being aware of what work the system is actually doing
+14:55  Planck_: In math, a map isn't sorted.
+14:55  paulweb515: ahughes: there are compile libraries available
+14:55  paulweb515: ~BPEL
+14:55  javabot: paulweb515, I have no idea what BPEL is.
+14:55 @jottinger: StoneCypher: I know what you're talking about. However, the ordering is *normally* internal-only, in the case of the most common maps (Hashmap) - it's ordered, but by a hash value.
+14:55  StoneCypher: bouzu: it's been less than five minutes, and someone told you they were looking.  calm down.
+14:55  StoneCypher: jottinger: maps are iterable.
+14:55  bouzu: ok thnks :)
+14:55  paulweb515: ~~ ahughes bcel
+14:55  javabot: ahughes, bcel is the Byte-Code Engineering Library - http://jakarta.apache.org/bcel/
+14:55 @jottinger: and they are, yes. But that doesn't mean that you can predict the order going in JUST by the keys set.
+14:55  StoneCypher: jottinger: just because nobody ever bothers to doesn't mean that work doesn't exist or isn't being wasted.
+14:56  StoneCypher: jottinger: i never said you could. in fact i explicitly said you couldn't.
+14:56 @jottinger: Nobody said it wasn't doing stuff to make access or mutation efficient in some way.
+14:56 * jottinger sighs
+14:56 @jottinger: my son isn't online, I KNOW it.
+14:56 * jottinger eyes the kid upstairs.
+14:57  ahughes: paulweb515, bcel is runtime.. I need compile time :'(
+14:57  StoneCypher: the point is, minimum effort is always desirable; what he actually wanted was an array of pod
+14:57  StoneCypher: sorry, pojo
+14:57  StoneCypher: i keep forgetting that java only uses an existing name when it can use it wrongly
+14:57  ahughes: paulweb515, also no movement on that project since 2006... might leave that option alone :)
+14:58  Planck_: bouzu: It's pretty bad form to catch an exception and do absoutely nothing with it
+14:58  StoneCypher: ahughes: occasionally that just means there's no call for further work
+14:58  bouzu: Planck_ : its not problem thet
+14:58  bouzu: just i want to know how i can put "msg" and "sonNom" in Run()
+14:59  bouzu: i want to print those 2 Strings
+14:59  paulweb515: ahughes: so why not run a java class that generates your MyBigEnvEnum, and then compile it with the rest of your stuff (it sounds like a bad idea, but it would work)
+14:59  StoneCypher: METHOD DE LA CLASSE
+15:00  StoneCypher: this is homework
+15:00 * StoneCypher washes his hands ofit
+15:00  Planck_: bouzu: I'm not entirely sure what you're asking ... do you mean the String literals "msg" and "sonNom"?
+15:00  StoneCypher: bouzu: the fastest way to fail a class is to have other people figure out your homework for you
+15:00  jink: ~homework
+15:00  javabot: Homework is meant to be done by YOU, so that YOU learn something. Stop cheating; we don't like doing our own, why should we do yours? Also, answering homework questions is extremely frustrating. See "~why no homework" for more reasons why we won't answer your questions.
+15:00  bouzu: i'm not
+15:00  ahughes: paulweb515, mostly becuase I can't get eclipse to pickup that generated class on it's classpath... so my other modules can't code against it.. which makes it useless :( If I can't do this with the compiler api or something low in the JDK then all hope is kinda lost.
+15:00  Planck_: If all you want to do is print them, there's System.out.println()
+15:01  bouzu: i need to know how print 2 string in run() thats all
+15:01  bouzu: i cant do System.out.println()  because i'm not in same class
+15:02  paulweb515: ahughes: within eclipse you have a couple of options.  Use Ant to generate the file.  Ant in eclipse comes with a "refresh this file" task
+15:02 @jottinger: Has anyone on channel done any profiling of atomic integers in Java?
+15:03  paulweb515: ahughes: write a plugin:  Eclipse comes with an AST API.  That's more work than spewing out a text (.java) file, but it's also integrated with eclipse
+15:03  Planck_: You can use System.out.println in any class ... 'out' is a static field of the System class
+15:03 @jottinger: like, I have millions of updates to perform, from N threads, wondering if I shouldn't build N tuples and collate them at the end
+15:03  ahughes: paulweb515, we use maven... I can get a solution in maven but it requires people to install additional m2eclipse-extras plugins e.t.c. and tweak the poms e.t.c.... basically it's a delicate "soltuion" that I don't like.
+15:04 @jottinger: ahughes: why m2eclipse-extras?
+15:04  paulweb515: ahughes: would you not just generate the class and then check it into your SCM?
+15:04 @jottinger: ahughes: if it's a maven plugin - and those are easy to write - it doesn't have anything to do with m2eclipse
+15:04  Planck_: jottinger: I think I'd prefer updating non-shared fields and collating them at the end anyway, if that's an option.
+15:04 @jottinger: Planck_: yeah, it's an option, it's just five more minutes of code
+15:04 * jottinger sighs
+15:05  kurtis: Hey guys, is there any *easy* way to generate a random, 10 digit string of numbers? I was thinking of just generating two 5 digit numbers and combining them...
+15:06  Planck_: Oh hmm, I would have expected there to be a Random.nextLong(long) method, but there isn't.
+15:07  ahughes: paulweb515, the whole point is that this is done at compile time... nothing to check into scm.
+15:08  paulweb515: ahughes: what is changing so frequently about the env variables that you'd like it done at compile time?
+15:08  ahughes: jottinger, yes maven plugins are easy to write.. and I have one that "works" but eclipse doesn't care about your plugins unless you do "extra" things to tell it to care.. and that's flakey.
+15:08  ahughes: paulweb515, mostly the release version. Rather important information.
+15:08  Planck_: So yeah, probably nextInt(100000) * 100000 + nextInt(100000) or something.
+15:09 @tjsnell: ~eclipse--
+15:09  javabot: eclipse has a karma level of -334, tjsnell
+15:09 @jottinger: why not nextInt(10^11)+10^10-1?
+15:09 @jottinger: actually, you should make that 1^10, 10^10 is too large a number
+15:10  kurtis: Planck_: Cool thanks
+15:10  Planck_: Well, first because nextInt only takes an int argument ...
+15:10  ahughes: paulweb515, I really want this as a class and not a properties file e.t.c. because I want this serializable and compiled into the gwt classes/javascript at compiletime too... it's silly to go back to the server for such info.
+15:10  kurtis: Yeah, I'm just going to go with two random numbers and combine them. Thanks guys!
+15:10 * jottinger snickers
+15:11  Planck_: Oh eww, I had forgotten that Random was constrained by the API to use a 48-bit linear congruential generator.  Eww.
+15:13  paulweb515: ahughes: if you do something in eclipse, won't you have to do something else for maven?
+15:14  xerox1: i am trying to add a jar file to my eclipse project: up to now i can see the jar-archive under the lib directory and under referenced libraries; the archive is also visible in the build path window; concrete: i am trying to use the sqlitejdbc...how to solve this?
+15:14  paulweb515: ~tech support
+15:14  javabot: Hello, ##java is not a technical support channel for your Java apps or virtual machines, it is a development enthusiast channel which prefers to receive questions and discussion on the topic of programming with the Java language.  Please consider seeking help with the vendor of your software if you can't figure out how to use it.
+15:15  ahughes: the maven soln is easy.. there is a copy plugin, and a build helper that will add the copy/filtered *.java src and then shove it on the (maven) compiler classpath. But eclipse doesn't care about the maven build helper plugin... so the src is never on a downstream eclipse project... this is kinda like a step back in time for me. Main thing I am trying to establish is if there is something in the JDK that I can use/abuse to generate a class :/
+15:16  StoneCypher: "how come my random ten digit numbers never have 4-9 in these two digit places"
+15:17 * StoneCypher sighs
+15:17 @jottinger: StoneCypher: he means concatenating them
+15:17  StoneCypher: yep.
+15:17 @jottinger: which is still retarded, but hey
+15:17  paulweb515: ahughes: write a little ant file that generates it into the src within eclipse.  Then you can either run it or create an "external builder" to run it automatically
+15:17  StoneCypher: and if they're 5-digit, they're either 2^16 or 2^16-32768
+15:18  StoneCypher: which will mean hilarious gaps in the providend distribution
+15:18  StoneCypher: the two places in question are digit 0 and digit 6
+15:18  Planck_: StoneCypher: Umm, what?
+15:18  StoneCypher: seriously?
+15:19  Planck_: Linear congruential generators aren't very good, but they're not *that* bad.
+15:19  ahughes: paulweb515, thats basically what I am doing. It doesn't work.. thanks for your help. I can't stay awake anymore.... if I do find out how to get this going I will just write the plugin and make it public :D
+15:19  freeone3000: There's SecureRandom if you need a better one.
+15:20  paulweb515: ahughes: drop by #eclipse and let us know how it goes
+15:22  ahughes: will do
+15:22 @pr3d4t0r: Good morning.
+15:24 * StoneCypher just sort of stares at Planck_ 
+15:25  Planck_: The incomprehension is mutual.
+15:25  StoneCypher: no, it isn't.
+15:25  StoneCypher: it's unidirectional.
+15:25  StoneCypher: you don't understand that the range expressed by a short is not a result of the type of random generator.
+15:25  Planck_: What short?
+15:25  StoneCypher: and as such when someone stares at you in disbelief, you assume it's because they don't getyou.
+15:26 * StoneCypher gives up
+15:26  Planck_: Random.nextInt(int) takes an int range.
+15:26  Planck_: Not a short.
+15:26  StoneCypher: uh huh.  and if it isn't matched to the size of a fundamental type, by definition it's imbalanced.
+15:26  StoneCypher: welcome to the very basics of randomness.
+15:27  StoneCypher: next tell us we should multiply by a float, because what's a distribution banding
+15:27  Planck_: Slight imbalance is nothing close to "never have 4-9 in these two digit places"
+15:27  StoneCypher: kay.
+15:27  StoneCypher: i gave up, chachi.  just feel correct and move on, please.
+15:28 * toresbe waves
+15:29  toresbe: Very trivial question - System.out.println('a'+'b') will add the ASCII values of the two characters and output a character with that ASCII value?
+15:29  toresbe: Or will they be concatenated?
+15:29 @jottinger: ~tias
+15:29  javabot: Try it and see. You learn much more by experimentation than by asking without having even tried.
+15:29  StoneCypher: toresbe: try it and see
+15:29 @jottinger: very trivial effort to figure out what it does by trying it
+15:29  StoneCypher: WHAT WILL HAPAN WEN I PRES POWAR BUTAN
+15:30  toresbe: StoneCypher: I don't have access to a Java development environment right now, and I figured it would be a a lot of work for just an answer to that question.
+15:30  StoneCypher: mmm.
+15:30 @jottinger: toresbe: oh, you're in class?
+15:31  StoneCypher: he's taking a dump in a soccer stadium
+15:31  freeone3000: How would you have IRC but no JDK?
+15:31  StoneCypher: iphone
+15:31  freeone3000: Well, on a phone, I suppose, but then I wouldn't be asking questions about Java.
+15:31 @jottinger: freeone3000: unless he was in class!
+15:31 @jottinger: And stumped!
+15:31  toresbe: Nope. It's just a part of a discussion about languages here. I'm on a Linux box I'm SSHing into.
+15:31  StoneCypher: or taking a dump in a soccer stadium
+15:31  freeone3000: jottinger: We have JDK access in class.
+15:31 <-- tjsnell has kicked toresbe from ##java (toresbe)
+15:32  StoneCypher: "i'm having a discussion about languages and i'm commenting on a language in terms of the operators on fundamental types which conveniently i do not know, which makes me entirely qualified to discuss said language"
+15:32  toresbe: I am _not_ in class, I am _not_ doing this as a part of anything school-related, I just want to settle the discussion and thought that asking some nice friendly people about a language I have no direct knowledge of at all
+15:32 @jottinger: we're not nice or friendly.
+15:32  StoneCypher: irc.  nice friendly people.
+15:32 @jottinger: We hate people.
+15:33 @jottinger: ~be jottinger
+15:33  javabot: There are no stupid questions, only stupid people.
+15:33  toresbe: Well, moderate hatred is OK, but this is just gratuitous misanthropy. :P
+15:33  StoneCypher: yeah, that isn't what misanthropy means.
+15:33  StoneCypher: and it's not gratuitous.
+15:33  StoneCypher: it's entertaining.
+15:33 @jottinger: It's understated sociopathy.
+15:33  StoneCypher: "they're making fun of me, THAT MEANS THEY HATE ALL HUMANITY"
+15:34  c00kiemon5ter: hi all
+15:34  toresbe: Whatever. I thought it was a fairly reasonable question and we've both spent far more time than necessary debating this.
+15:34  StoneCypher: lol, simula
+15:34 @cheeser: baby formula++
+15:34 @cheeser: oh, that's similac.
+15:34  StoneCypher: cheeser: six of one
+15:35  c00kiemon5ter: when do I need a class to be a singleton, and when do I need to declare it static(its methods) ?
+15:35  StoneCypher: c00kiemon5ter: when there should be only one of them, and when you want it to not need an instance
+15:35 @cheeser: the linkedin java dev group actually had a good answer for that one.
+15:35  StoneCypher: cheeser: i have a hard time believing that sentence is ever true about anything.
+15:36 @cheeser: use a singleton if you will ever need polymorphism, different impls based on env, etc.
+15:36 @cheeser: StoneCypher: i was kinda shocked, too, actually.
+15:36 @cheeser: after reading through "== vs. equals" and "pass by value vs reference"
+15:37  StoneCypher: wait i thought everything but primitive types in java was passed by poin^H^H^H^Hreference
+15:37  StoneCypher: also, officially, fuck the spring docuemntation
+15:38  StoneCypher: if you (incomprehensibly vague,) it will auto-happen
+15:38  StoneCypher: NO IT DOESN'T
+15:38 * StoneCypher stab
+15:39  StoneCypher: <springTeam> what is this "example code" you speak of
+15:39  c00kiemon5ter: StoneCypher: when wouldnt I want a class to not need an instance? I mean is a call to 'new SingletonClass(..)' and 'StaticClass.foo(..)' the only difference? or is there some concept behind it? cheeser->polymorphism I hadnt thought of polymorphism when thinking about singletons before, that's a good point
+15:40  StoneCypher: crimeny
+15:40  StoneCypher: did java overload the word singleton to mean some random thing it doesn't actually mean?
+15:40 @jottinger: no
+15:40 @jottinger: people are just stupid
+15:40  StoneCypher: singleton: a class which self manages construction to prevent the instance count from ever going over 1
+15:41  StoneCypher: has nothing to do with polymorphism
+15:41 @cheeser: "new Singleton()" is not a singleton pattern
+15:41  c00kiemon5ter: yep true ^ :P
+15:41 @jottinger: StoneCypher: note that java doesn't support singletons
+15:41 @jottinger: at all
+15:41  StoneCypher: sure it does
+15:41  c00kiemon5ter: getInstance() or something
+15:41 @cheeser: no, it doesn't.
+15:41 @jottinger: no, it doesn't.
+15:42 @jottinger: Give me a "singleton object" and I will create two of them in about two minutes (which is about how much time it takes for me to write the code.)
+15:42 @jottinger: probably less. Just estimating time to switch contexts.
+15:42  Planck_: Even Runtime?
+15:42  StoneCypher: by fighting its intended usage?
+15:42  topriddy: jottinger: what is the name given to what StoneCypher described then?
+15:42 @jottinger: public class Foo { private Foo() {} public static Foo getInstance() { return instance; } private Foo instance; }
+15:43  StoneCypher: that's like saying c++ doesn't have member privacy because you can get to the item by void pointer and sizeof()
+15:43 @jottinger: StoneCypher: is that a "singleton?"
+15:43  StoneCypher: yes.
+15:43  StoneCypher: well
+15:43 @jottinger: StoneCypher: note that subverting singleton-ness in java is not only trivial but common
+15:43  StoneCypher: i mean you should check if there's a member already
+15:43 @jottinger: StoneCypher: look carefully at the code, if you would
+15:43  topriddy: jottinger: Foo = new Foo(); make the damn constructor private then
+15:43  StoneCypher: instance should be static
+15:43  StoneCypher: you're not checking if there's already a member there
+15:43  StoneCypher: etc
+15:43 @jottinger: topriddy: note that the constructor IS private
+15:43  StoneCypher: but that's the general attack
+15:44  StoneCypher: also it should be protected
+15:44 @jottinger: it wasn't a complete code sample, let's fix it for the pedants
+15:44  StoneCypher: not private
+15:44 @jottinger: public class Foo { private Foo() {} public static Foo getInstance() { return instance; } private final static Foo instance=new Foo(); }
+15:44  StoneCypher: instead of playing riddle of the sphinx, why not just mention what you believe to be the actual problem
+15:44 @jottinger: StoneCypher: java uses these classloaders, see
+15:44 @jottinger: you actually can't do java without 'em
+15:44  StoneCypher: kay
+15:44 @jottinger: and your Foo there is scoped... to the classloader.
+15:45 @cheeser: a differenct CL can load a new copy of that class where the instance ref will be null.
+15:45  StoneCypher: lol really?
+15:45 @jottinger: create another classloader, and you can immediately create another Foo. In the same process.
+15:45 @cheeser: yep
+15:45  StoneCypher: that's hilariously broken
+15:45 @cheeser: und hence, no singleton!
+15:45 @cheeser: no, it's not.
+15:45  StoneCypher: we haev differing opinions
+15:45  StoneCypher: apparently static is useless because classloaders
+15:45 @cheeser: what's broken is your opinion of how things should work.
+15:45  topriddy: multiple class loaders within a single JVM?
+15:45  Planck_: That's why I was asking about the Runtime class.
+15:45 @cheeser: topriddy: servlet container much?
+15:46  StoneCypher: cheeser: and my opinion is "static should do what it says it does"
+15:46 @cheeser: static does do what it says.
+15:46 @jottinger: StoneCypher: and it does. Within the scope of classloaders. Just like it says.
+15:46  Planck_: It does do what it says it does.
+15:46 @cheeser: static and singleton are orthogonal
+15:46  StoneCypher: i'm not saying singleton is broken
+15:46 @cheeser: we are
+15:46  StoneCypher: bully for you; the case i see you making is "static cannot be used because classloader"
+15:47 @cheeser: but you're saying *static* is broken because you can't truly create a singleton.
+15:47 @jottinger: no.
+15:47  StoneCypher: and that does not, to me, spell a problem with singleton
+15:47 @cheeser: and that's bullshit
+15:47  StoneCypher: okay
+15:47  StoneCypher: because when i have an opinion it's an opinion, but when you do it's a fact
+15:47 * StoneCypher goes quiet
+15:47 @cheeser: not at all
+15:47 @jottinger: We're saying that you, O pedant, are making an assumption that most know better about.
+15:47  StoneCypher: yeah, maybe stop misusing the word pedant
+15:47  topriddy: cheeser: better suggestions, solutions or conclusions...lets make a full* point
+15:47 @cheeser: topriddy: say what now?
+15:47  StoneCypher: i'm not teaching anything
+15:48 @jottinger: Singletons are scoped in Java. Period. You can live with that or not. When people usually say singleton, they mean in languages where the scoping isn't present; therefore, it's important to note the difference.
+15:48 @cheeser: hopefully you're learning something at least
+15:48  StoneCypher: cheeser: i am, but what i learned you say is bullshit.
+15:48  StoneCypher: jottinger: there are other ways to make singletons, fwiw, than static members.
+15:48 @cheeser: what exactly have i said that's bullshit?
+15:48 @cheeser: StoneCypher: show us
+15:48 @jottinger: We are not misusing the word "pedant."
+15:48  StoneCypher: 09:47 <@cheeser> and that's bullshit
+15:48  StoneCypher: can i be done soon?
+15:48 --- cheeser sets modes [##java +b *!*john@*.f6bccf.client.atlantech.net]
+15:48 <-- cheeser has kicked StoneCypher from ##java (how about now?)
+15:48 @tjsnell: damn
+15:49 @tjsnell: you beat me
+15:49 * nmx smirks
+15:49 * cheeser bows.
+15:49  sbalmos: just another day in teh neighborhood it looks like
+15:49 @cheeser: indeed
+15:49  c00kiemon5ter: lol, that's all my fault
+15:49  c00kiemon5ter: :P
+15:49  topriddy: java doesn't support Singleton, it is scoped (#fact), or there are other ways to implement true Singletons in java...
+15:50 --- cheeser sets modes [##java -b *!*john@*.f6bccf.client.atlantech.net]
+15:50  c00kiemon5ter: I should probably be quiet now :)
+15:50 @tjsnell: it's your fault stonecyper is an elistist asshole?
+15:50 @cheeser: topriddy: we *said* java doesn't support singleton and why.
+15:50 @cheeser: how much more detail do you need?
+15:50  topriddy: my own conclusion as long as we aren't sharing data through the Singleton pattern, all should be fine
+15:50  nmx: just don't use singletons. problem solved!
+15:51 @dmlloyd: they're fine for things which carry no state
+15:51  topriddy: i.e at least its better having a singleton per class loader than having multiple instances* in a class loader across class loaders
+15:51  topriddy: ~dmlloyd++
+15:51  javabot: dmlloyd has a karma level of 236, topriddy
+15:52  topriddy: cheeser: i now understand *fully...thanks to al of you
+15:52 * cheeser nods.
+15:53  nmx: dmlloyd: fair point
+15:53 @dmlloyd: though in this case we usually call them "constants" :)
+15:54  topriddy: dmlloyd: why would i need a singleton? to manage system resources, i.e maybe connect create a connection to db once (at least across class loaders) and share them across...
+15:54 @cheeser: connection pools++
+15:54 @dmlloyd: nah normally you'd keep an instance aroudn
+15:54 @dmlloyd: the reason is because it's hard to manage resources when all you have is a global variable
+15:55 @dmlloyd: i.e. when can I safely close the connection?
+15:56  topriddy: dmlloyd: when the application exits()...
+15:56 @cheeser: uh...
+15:56 @cheeser: transactions much?
+15:57  bohl: I have to parse some csv files and create a java object from each row. However, some properties are not directly within the object but within another object referenced as an instance variable. I figured SuperCSV can't do that; is there another nice csv parsing framework around?
+15:57 @cheeser: you figured?  or tested and found out?
+15:57  bohl: I didn't find the feature in the documentation.
+15:58  topriddy: bohl: write the script yourself shouldnt be difficult...simple actually
+16:00 @dmlloyd: yeah I'm a little boggled that one needs a framework for CSV :)
+16:00  sbalmos: dmlloyd: String escaping, varying support of optional record fields, etc
+16:01 @dmlloyd: regex
+16:01  hrad: if I have Class from classloader.loadClass(..) method, how do I call static methods of that class ?
+16:01 @dmlloyd: done@!@
+16:01  hrad: I don't need .newInstance()
+16:01 @dmlloyd: hrad: usually you don't do that stuff at runtime.  However...
+16:01 @dmlloyd: ~~ hrad javadoc Class
+16:01  javabot: hrad: http://is.gd/3m1Tu [JDK: java.lang.Class]
+16:01 @dmlloyd: it's all there.
+16:01 @dmlloyd: ~~ hrad javadoc Method
+16:01  javabot: hrad: http://is.gd/45mJm [JDK: java.lang.reflect.Method]
+16:02  topriddy: sbalmos: if there are optional fields just put a field seperator as a place holder for null fields...
+16:04  sbalmos: topriddy: How about in the case where CSV files may or may not have padded out field separators for records that have less fields with values at the end than other records?
+16:04  sbalmos: (e.g. a value in A5, and a value in B1... does line 2 for record B get padded out with separators to the CSV equivalent of B5?)
+16:05  hrad: dmlloyd, so the only way to do that is method.invoke(null, argumentList);
+16:06 --- Cain` is now known as Cain
+16:07 @dmlloyd: hrad: right.  Use getMethod() to get the method (unless it isn't public, in which case your really need to ask yourself what you're doing)
+16:07  topriddy: sbalmos: my use case , I generate my csv from a decent spreadsheet, and when there are blanks i have something like : name,age,sex,weight = john,23,,11.2 => the 3rd field is null
+16:10  StoneCypher: sbalmos: note that many csv implementations assume csv has value escaping, and only about two thirds of them believe it should be double quotes and backslash
+16:11  hrad: I understand all this, what is weird is, that I can load a class and get an instance of that class, but I can't load a class and use it to call static methods without using reflection, it's like there is one piece missing in JDK
+16:14  Planck_: Once you have an instance of a passed-in class, what do you do with it without reflection?
+16:15  barq: If I add a jar file to my project in NetBeans, how do I make sure the compiler knows about it when I run the project?
+16:16  magentar: it has to be part of the classpath when compiling and when running the prog
+16:20  freeone3000: hrad: You also can't call regular instance methods without casting.
+16:20  freeone3000: hrad: The only way you could is if you know what type of class you have, in which case, you could just use the classname.
+16:21  freeone3000: (Class<T>.instanceOf() returns a T, sure, but nothing else *gives* you a Class<T>)
+16:21  Xgc: hrad: or at least know what interface(s) it supports and use them.
+16:21  freeone3000: barq: Add it to the classpath in your ant file that's used for both build and run.
+16:23 --- pschriner is now known as DerSchreiner
+16:46  hrad: yeah, I'm starting to understand what is the fact preventing me from doing that...thanks
+16:53  hrad: executing the static method on a class without knowing the class type , respective knowing class type but not allowed to declare the class of the type because it would be loaded by current thread classloader
+16:53  hrad: right ?
+16:54  hrad: that's the thing I was dealing with
+16:55  juxta: I'm invoking a Process in Java, which expects an EOF (normally CTRL-D) character - I'm trying to send this through the OutputStream as (char)4, but not having any luck - is there something else I could try?
+16:56  Ragnor: Close the stream?
+16:56  juxta: hey, that's a good idea, I'd better try that.
+16:56  nmx: ~ Ragnor++
+16:56  javabot: ragnor has a karma level of 4, nmx
+16:57  Ramen: hehe
+16:57  juxta: awesome, thanks Ragnor :)
+--- Log closed Thu Oct 28 20:58:53 2010
+--- Log opened Thu Oct 28 20:59:18 2010
+20:59 --- Users 341 nicks [7 ops, 0 halfops, 0 voices, 334 normal]
+20:59  svm_invictvs: authorblues: Does your program use any shutdown hooks?
+20:59 @jottinger: aix doesn't have code in it to fail on running glassfish?
+20:59 @cheeser: svm_invictvs: considering he's writing a hello world i doubt it
+21:00  mapreduce: cheeser: I suppose that could be used as ammo against Oracle's case.
+21:00  svm_invictvs: cheeser: I ddint' see that.
+21:00  authorblues: svm_invictvs: the code of interest is a C program, not the Java program
+21:00  authorblues: I asked here because the C program was ptracing a JVM process
+21:01 @cheeser: mapreduce: well, shit.
+21:01  svm_invictvs: authorblues: Yeah.  Are you checking the return code of *every* function that can return an error in you C program?
+21:01 --- Channel ##java was synced in 125 seconds
+21:01  sproingie: ~exceptions++
+21:01  javabot: exceptions has a karma level of -2, sproingie
+21:01  svm_invictvs: authorblues: There's probably something goin gon that ptrace doesnt' expect.
+21:02  authorblues: svm_invictvs: Yes. The problem is that the main process dies, and the program expects that to kill the other processes, and it tries to find out information about the dead process.
+21:02  svm_invictvs: authorblues: As it was well established.  the JVM just does a lot of shit to get up and running.
+21:02  authorblues: svm_invictvs: Everything that is going wrong is my fault, I was trying to get info about what I was doing wrong.
+21:04  daedeloth: hi, still have trouble accessing a webservice trough javascript, tried to use JSON binding for it, but I can't seem to get the libraries right
+21:05 @cheeser: ~javascript
+21:05  javabot: Java is to javascript as ham is to hamster. http://www.ericgiguere.com/articles/javascript-is-not-java.html  See ##javascript
+21:05  daedeloth: obviously it's the java part that's going wrong.
+21:05 @cheeser: that's not obvious at all
+21:05 --- Natch is now known as Natch|
+21:06  daedeloth: ok, sorry then :) anyway, I'm using a regular jax-ws webservice with their json bindings. It seems to work fine, but whenever I try to call a function I get following error:
+21:07  daedeloth: Caused by: java.lang.NoSuchMethodError: org.codehaus.jettison.Node.<init>(Ljava/lang/String;Lorg/json/JSONObject;Lorg/codehaus/jettison/Convention;)V
+21:07  daedeloth: so I thought I had the wrong version of jettison, but I think i've tried every single provided jar now and still no success
+21:08 @cheeser: ~show us
+21:08  javabot: Paste the code (and any errors) in the pastebin where we can see it.  See ~pastebin for options.  Also see ~testcase for good examples as to how to help us help you quickly diagnose and solve problems.
+21:09  daedeloth: http://java.pastebin.com/ejcEE3fe
+21:16  mapreduce: I have something called a JViewer that subclasses JPanel.  When it renders there is a small border that I want to get rid of but I can't seem to find out where it comes from.
+21:16  mapreduce: If I replace the JViewer with a JLabel of the same size there is no border.  setBorder(BorderFactory.createEmptyBorder()) has no effect.
+21:17  mapreduce: Overriding paintComponent and update to make them do nothing has no effect.
+21:17  mapreduce: (well, it has an effect, but not on the border)
+21:17  ernimril: mapreduce: does it have a specific ui installed?
+21:18  mapreduce: No, commenting out any setUI calls makes no difference.
+21:19  mapreduce: s/any/all/
+21:19  ernimril: mapreduce: did you comment that out in the source for JViewer?
+21:22  b0red: why maven wouldn't add a dependency from my local repo?
+21:25  mshaw: WHHHHHYYYY?!!!!
+21:25  ojacobson: mshaw: that's spelled "WRRYYYYYY"
+21:29  mapreduce: ernimril: No, I just did a search project-wide.
+21:39  smartboyathome: how do you draw in a JPanel after it has been initialized? http://pastebin.com/NtJpLtjU that is what i got, but obviously it is wrong.
+21:40  wfq: sorry, I know it isn't the channel but I don't know where to ask a question about Use Case diagrams. Is there anyone who can spend 1 minute with me please? We can make it private to not disturb the channel. Thanks.
+21:47  andern: in javadoc, is <code>String</code> and {@code String} the same? if so, what is the preferred notation?
+21:49  b0red: oh, it wasn't adding the dependency to the classpath because the dependent project is in the workspace
+21:50  Wicked: hello all. Im looking for a way to calculate the distances from two gp coordinates(long,lat)....i found this http://pastebin.ca/1975795 that implements the formula that i want...only problem is i dont know java script and i dont know trig. Can anyone try to give me a hand and convert that into some java code?
+21:51  Wicked: im only really confused on what the data types should be and things like that.
+21:51  ojacobson: Wicked: under what geoid?
+21:51  ojacobson: The further apart the two points are, the more your choice of geodetic data affects accuracy
+21:52  np0lar: isn't that just a great circle calculation?
+21:52  qwp: why are annotations so annoyingly verbose? if you have multiple resources to inject, you need to use an extra @Resources annotation to contain them, like @Resources ({ @Resource (name="myDB" type=java.sql.DataSource), @Resource(name="myMQ" type=javax.jms.ConnectionFactory) })
+21:52  ojacobson: np0lar: it would be, if the earth was a sphere
+21:52  Wicked: hmm. well...i am be no means an expert..in fact i know very little about this stuff. but from the reading i did...that Vincenty algo is more accurate then the other one(havenstine?)..
+21:52  ojacobson: qwp: The design decision was to only allow a single occurrence of each annotation
+21:53  qwp: also why would you need an explicit @WebInitParam in something like @WebServlet(urlPatterns="/MyPattern", initParams= {@WebInitParam(name="ccc", value="333")}) ??
+21:53  qwp: ojacobson: i criticize it?
+21:53  ojacobson: That's great. Get a blog.
+21:53  ojacobson: Whether or not anyone here agrees or disagrees with you is pretty much immaterial. Not too many people who affect the language development are here.
+21:54  cbeust: Well, I was part of the annotations JSR :)
+21:54  qwp: i will blog, and im gonna have the time of my life
+21:54 @jottinger: cbeust: shh, don't encourage him, please
+21:54  cbeust: lol
+21:54  qwp: tearing java ee to shreds
+21:54  qwp: heh
+21:54 @cheeser: yeah.  because you have the chops for that
+21:54 @jottinger: please do, we wait with bated breath
+21:55  cbeust: Can't wait to read it
+21:55  qwp: whats chops
+21:55 * tjsnell hands jottinger a mint
+21:55  cbeust: Whether it's founded or unfounded, I'm sure it will be highly entertaining
+21:55 @cheeser: Q.E.D.  8^)=
+21:55 @jottinger: cbeust: HIGHLY
+21:55  qwp: anyway it could have been a bit more concise and clean is all im saying, wouldnt have expected that from sun
+21:55 @jottinger: in other news, I'm going to have my 8-year-old attack ObjC with great fervor
+21:55 @tjsnell: that's shredding all right
+21:55  cbeust: You expected concise and clean from Sun?
+21:56  cbeust: Besides, it wasn't done by Sun but by a group of concerned and competent professionals
+21:56  qwp: cbeust: hm..ok shouldnt
+21:56 @cheeser: yep
+21:56 * jottinger was one of those concerned professionals, too
+21:56 @cheeser: so qwp, until you know what you're talking about, you should probably hold off pontificating
+21:56 @jottinger: competence is debatable, mind
+21:57  cbeust: Fair enough, but I would argue that JSR 175 was one of the few well done and useful JSR's if there ever was one, but of course I'm biased
+21:58  qwp: ~jsr
+21:58  javabot: qwp, I have no idea what jsr is.
+21:58  whaley: you need the number at the end
+21:58  whaley: ~jsr 175
+21:58  javabot: 'JSR 175: A Metadata Facility for the JavaTM Programming Language' can be found at http://www.jcp.org/en/jsr/detail?id=175
+21:58 @cheeser: annotations are awesome
+21:58 @jottinger: the servlet spec was always good for what it was. It wasn't meant to be a one-size-fits-all, but it did what it needed to do marvelously well, as does the rest of Java EE.
+21:58  rdg: i'm making a noob mistake somewhere and can't figure it out.. I have a Provider class.. which I only added a get/set to .. and when I compile another app that includes the jar, it's claiming the get/set don't exist even though I'm including the jar and it's been compiled
+21:58  cbeust: qwp, if you don't know the meaning of JSR, you really need to read up a bit more about how Java works and is designed
+21:59 @jottinger: Just because Rod Johnson exploited the Java ecosystem's massive ignorance and ego for his own purposes doesn't mean he was right.
+21:59 @cheeser: especially if you're going to "rip EE to shreds"
+21:59 * qwp takes notes
+22:01  qwp: cheeser: well i definitely like the idea of annotations because i hate xml, just not how theyre implemented
+22:01  wfq: anyone who knows uml please?
+22:01  gabbler: hi, very quick basic q, how can i remove a specific value in an ArrayList, please
+22:01 @cheeser: wfq: try ##uml
+22:01 @tjsnell: wfq: try asking a question
+22:01 @cheeser: ~~ gabbler javadoc ArrayList
+22:01  javabot: gabbler: http://is.gd/3DLBr [JDK: java.util.ArrayList]
+22:02  wfq: the channel over there is death :)
+22:02 @tjsnell: just like uml!
+22:02  qwp: heh
+22:02 @cheeser: yeah, well, not really our problem here
+22:02  wfq: tried before but we are only 4
+22:02  qwp: i hate uml too btw
+22:02  wfq: hehhehehe
+22:02 @tjsnell: that's so good to know
+22:03  wfq: I am in your club guys. As soon as I finish my assignments, that is it I hope
+22:03 * jottinger reconsiders UML. if qwp hates it, there must be merit to it...
+22:03  cbeust: Might be one of these cases where he's accidentally right?
+22:03 @jottinger: maybe.
+22:03 @jottinger: But it's worth considering.
+22:03  ojacobson: Twice a day...
+22:03 @cheeser: blind hogs and truffles
+22:03  qwp: jottinger: note how i falsified your initial estimate of me not seeing the implementation flaws
+22:03 @cheeser: 8^)=
+22:04  pantsman: I remain quite cold and emotionless in the face of UML and most other 3-letter initialisms
+22:04  cbeust: Out of all the stupid things I say every right, I'm sure at least one of them is occasionally insightful
+22:04  cbeust: Basic statistics.
+22:04 @jottinger: cbeust: that was your one, right there
+22:04  pantsman: it's all in the interpretation
+22:04 @tjsnell: you've been falsified!
+22:04  cbeust: Guess I'm done with insightful quotes for the day
+22:04  qwp: :) anyway bbl
+22:05  qwp: .j blogosphere
+22:06  gabbler: hi cheeser, thanks, is this the only/best way, e.g. a.remove(new Integer(26));
+22:06  gabbler: where a is my ArrayList and 26 is my value to remove
+22:06  cbeust: Make sure the equals() method of your objects is implemented correctly
+22:06  cbeust: and keep in mind this is O(n)
+22:06 @jottinger: heh
+22:07 @tjsnell: heh linkinus maps that to O thumbs down
+22:10  ojacobson: tjsnell: So is O(y) the complexity of an upwards thumb?
+22:10 @tjsnell: yep
+22:11 @tjsnell: ojacobson: http://i.imgur.com/ztF6w.png
+22:11  xPhilosx: Quick question: is it possible to see if a write stream is busy, ie sending data?
+22:11  ojacobson: I can't believe people in a technical channel would have emoticons turned on
+22:11 @dmlloyd: nope
+22:11  ojacobson: that would drive me up the wall
+22:11  cbeust: tjsnell: lol
+22:12 @jottinger: ojacobson: :) :) (_._)
+22:13  xPhilosx: on a custom socket class I made I am attempting to socket.send(object) twice in a row, but unless I sleep briefly the second object is never sent
+22:13 @dmlloyd: xPhilosx: then you have a bug in your custom socket class.
+22:13  xPhilosx: I need to queue up the objects to send, but I'm unsure how to check the outstream
+22:13  ernimril: xPhilosx: your understanding of sockets is flawed
+22:14 @dmlloyd: indeed
+22:14  ernimril: xPhilosx: if you want non blocking io you can use channels, but before you try to do that you should really try to understand why your sockets behave like they do
+22:14  ernimril: xPhilosx: did you try to flush the stream to force any unsent data to be written?
+22:15  ernimril: xPhilosx: did you try to set TCPNoDelay?
+22:15  ojacobson: ernimril: tsk
+22:15  ojacobson: turning off nagle is almost always the wrong thing to do
+22:15 @dmlloyd: it's probably a java bug, not a socket tuning issue
+22:15  ernimril: xPhilosx: most sockets try to buffer some data since that will give you better throughput
+22:16 @jottinger: I just decided the "s" is an evil letter! right, qwp?
+22:16 @jottinger: (an errant "s" was preventing a run.)
+22:16  xPhilosx: (I'm still here, just thoughtfully considering what you are typing)
+22:16 @dmlloyd: if both pieces of data were in fact written to the socket, ernimril, then they would both show up.
+22:16 @dmlloyd: it's clear that there's some bug preventing one side from writing to the socket.
+22:16  ernimril: dmlloyd: eventually, yes
+22:16  ernimril: xPhilosx: what does the other end of the socket do?
+22:16 @dmlloyd: or a lack of understanding: writing two chunks of bytes to a TCP socket doesn't mean you'll get two chunks of bytes out the other end
+22:17 @dmlloyd: you could get one, or three
+22:17  qwp: well "s" is redundant like java annotations for sure, we already have "z"
+22:18  xPhilosx: ernimril: the other side is a listener which does readStream.readObject()
+22:18  ojacobson: serialization as network protocol, or, how to add a denial of service vector to your app in one easy step
+22:19  xPhilosx: then it checks to see what type of object was sent
+22:19  cbeust: ojacobson: how does serialization make DDOS more possible than any other network endpoint?
+22:20  ernimril: cbeust: it allows all objects and all array sizes, but giving you zero control over the sizes of the objects/classes/array lengths
+22:21  ernimril: cbeust: zero control to check/stop/handle
+22:21  cbeust: ernimril: but DDOS happens at a lower level, the kind of protocol is irrelevant
+22:21  svm_invictvs: I's say it's "too automatic"
+22:21 @dmlloyd: he's saying "DoS" not "DDoS", though really I think he meant "attack/exploit vector"
+22:21  svm_invictvs: Garbage In.  Garbage Out.
+22:23  ojacobson: cbeust: If some untrusted soul hands you a deep object graph (which doesn't need to be terribly *large*, just deeply nested) to deserialize, you're going to get an Error
+22:23  ernimril: cbeust: I can send something like 10 bytes and if you try to do a readObject you will find a byte[] with size max_int (or something a little bit more advanced if you want to get fancy)
+22:23  ojacobson: you can't check that that's happened before it gets parsed, you can't limit the parser, and you can't necessarily recover once it has happened
+22:23  xPhilosx: I believe my problem might be that every time socket.send() is called it opens a new thread to write the object, sleeping the main thread allows the sending thread to finish before starting a second sending thread
+22:23  svm_invictvs: ojacobson: You could filter the stream as you're reading it, eh?
+22:23  ojacobson: svm_invictvs: sure, if you want to implement the entire stream protocol yourself
+22:24  svm_invictvs: ojacobson: If it gets larger than a reasonable size, jsut stop it.
+22:24  xPhilosx: I think its trying to open the same stream twice
+22:24  ojacobson: svm_invictvs: you don't need a large message to fuck OIS
+22:24  svm_invictvs: ojacobson: Oh.
+22:24  svm_invictvs: ojacobson: Deep recursion?
+22:24  ernimril: svm_invictvs: something like 10-20 bytes for whatever sized array you want
+22:24  ojacobson: deep recursion, large empty arrays...
+22:24  svm_invictvs: I see.
+22:24  ernimril: svm_invictvs: I do not have to send the array contents
+22:25  ernimril: svm_invictvs: you will see byte[123412431] ok, I try to allocate that array and _then_ read the data for it
+22:25  svm_invictvs: ernimril, ojacobson: Didn't know that.  But there's aslo hundreds of other really great reasons not to use OIS/OOS as a protocol.
+22:25  ojacobson: Sure.
+22:27 @jottinger: I love how this test brings a UCS blade server to its knees
+22:27  xPhilosx: ernimril: and dmlloyd thanks for your help, I'm a bit ignorant with sockets, but hopefully I found the cause
+22:28 @dmlloyd: ~~ xPhilosx jcip
+22:28  javabot: xPhilosx, jcip is Java Concurrency In Practice, a book focused on implementing threaded and concurrent applications in Java.  http://jcip.net/
+22:28  sbalmos: jottinger: The server or the whole backplane?
+22:29 @jottinger: hard to tell, VNC is responding too slowly
+22:29  qwp: jsp isnt really mentioned in the java ee tutorial, is it dead and/or superseded by java server faces?
+22:30 @cheeser: JSF is a user a of JSP
+22:30 @cheeser: but no, JSP is not dead or superseded by anything.
+22:30  qwp: ok
+22:30 @cheeser: sadly, it's still alive
+22:30  qwp: :)
+22:31  ojacobson: If you're disciplined it's an alright template language
+22:31  ojacobson: but that's all it should ever be
+22:31  ojacobson: and there are better template engines out there
+22:32  javaPythonSnake: How do I add vertical text to a panel with a JLabel?
+22:33  sbalmos: jottinger: <industry-anal-yst-wonk> But UCS was supposed to be able to dynamically allocate vNICs and vCPUs to handle ever-increasing mind-boggling loads! </industry-anal-yst-wonk>
+22:34  qwp: ojacobson: ok, but sun once promoted model 1 where its more than that, why does sun constantly produce stuff that gets replaced by better alternatives? jpa, swing, jsp, whos next
+22:35  ojacobson: You need to be a subtler troll.
+22:35  sbalmos: ojacobson: He doesn't even know how to troll properly.
+22:35  ojacobson: quite
+22:35  sbalmos: ojacobson: Needs to read up on the Java Troll specs
+22:35  ojacobson: JTS?
+22:35  ojacobson: Or is it JTA?
+22:35  sbalmos: JTA
+22:35  qwp: it just sucks to learn a 1000 pages tutorial to find in the end that it all got replaced
+22:36 --- dmlloyd sets modes [##java +q *!*@gateway/tor-sasl/qwp]
+22:36  javaPythonSnake: Anyone, vertical text :) ?
+22:37 @jottinger: sbalmos: I don't think this is UCS' fault, actually
+22:37  sbalmos: javaPythonSnake: Pick up monitor, rotate 90 degrees
+22:37 @jottinger: I think this is cisco's fault
+22:37  sbalmos: jottinger: Well that's a first. </sarc>
+22:37 @jottinger: heh
+22:37 @jottinger: you're just a hata.
+22:37  javaPythonSnake: Lol.. Actually that gave me an idea maybe I can rotate the pen
+22:39  sproingie: qwp: how have you not been banned yet?
+22:39 * ojacobson scrolls up half a page.
+22:39 * ojacobson scrolls back down.
+22:39  ojacobson: sproingie: Funny you should ask that.
+22:39  sproingie: lemme boil it all down: he joins, he bitches about javaee til kicked
+22:39  jink: I think the guy's asking for a perm-ban.  This has been going on for days now.
+22:39  javaPythonSnake: No easy way to do it?
+22:39 @jottinger: sproingie: you left out "incompetently"
+22:41 @cheeser: yes.  he usually gets incompetently kicked
+22:42 <-- jottinger has kicked qwp from ##java (BULLSEYE. Competent kick, right here!)
+22:44  Bfig: i'm getting an error on line String ip = ex.get... http://www.copypastecode.com/48486/
+22:45 @pr3d4t0r: Bfig: And the error is...?
+22:45  Bfig: null poiner, can't get the httpExchange
+22:45 @pr3d4t0r: Bfig: We don't enjoy playing 20 Questions.  Error, expected result, etc. when you ask help.
+22:45  dougmencken: hi
+22:46  Bfig: sorry, i am very tired with all this... i am trying to get the ip of the service user, the code is pasted all over the net
+22:46 @cheeser: qwp: stop messaging me.  i don't want to hear it.
+22:46 @pr3d4t0r: Bfig: OKi - so that type cast isn't working.  Which API is this?
+22:46  Bfig: metro (you mean this?)?
+22:47  ojacobson: Neat, he's evading bans, too?
+22:47  dougmencken: I need java virtual machine; I got JamVM, but it complains on any class: java/lang/NoClassDefFoundError: java/lang/Class
+22:47  jink: ojacobson: It's +q, not +b.
+22:47  ojacobson: qwp: I don't want to hear it either.
+22:47  ojacobson: jink: Ah, good point.
+22:47  dougmencken: I got classpath, but it says in turn: configure:35003: checking if jamvm works ... configure:35036: CLASSPATH=.: jamvm  Test ... java/lang/NoClassDefFoundError: java/lang/Class
+22:47  dougmencken: it is a rucursion
+22:47  dougmencken: so how to bootstrap a working jvm?
+22:47  jink: ojacobson: I was surprised, too.  Then I looked closer. :D
+22:48  ojacobson: ~~ dougmencken download
+22:48  javabot: dougmencken, Find current releases for Java at http://java.sun.com/javase/downloads/index.jsp and a comprehensive archive of current and older releases of various Java related products at http://java.sun.com/products/archive/
+22:48 @pr3d4t0r: dougmencken: Use a standard JVM.
+22:48  ojacobson: dougmencken: Or install the Sun (Oracle) JVM from your OS's package manager
+22:48  dougmencken: ojacobson: I'm not on x86 and compatibles
+22:48 @pr3d4t0r: dougmencken: Follow the links that ojacobson gave you.
+22:48  dougmencken: no sun binary vm
+22:49  dougmencken: the only way to get it is to build it
+22:49  Bfig: pr3d4t0r, is metro the name of the api? i am very confused about all this, sorry for being such an asshole :(. sleep deprivation + deadline on sunday and haven't been able to make all ws work properly
+22:50 @pr3d4t0r: Bfig: I have no idea which API you're using ;)
+22:50  Bfig: i am not sure what you mean by api, is soap you are talking about?
+22:50  Bfig: jax ws?
+22:51  poseidon: I have two unsorted arrays.  How could I go about seeing if they both contain the same contents (even if it's not in the same order).  Also if there are duplicates, each has to have the same amount of duplicates.
+22:51  poseidon: Can anybody lead me to an alogorithm to look up for this?
+22:51  Bfig: poseidon, inclusion -> and <- ?
+22:51  ojacobson: You can do it in O(n) time
+22:52  guidj0s: poseidon: look it up in Knuth.
+22:52  javaPythonSnake: I mean he wrote a lot guidj0s :p
+22:52  ojacobson: maintaining a pair of Map<V, Integer> objects for the counts of each distinct element in each array and comparing the two will do it
+22:52  cbeust: sort, compare in parallel
+22:52  ojacobson: cbeust: O(n log n)
+22:53  ojacobson: easy to implement, though
+22:53  cbeust: yeah
+22:53  guidj0s: javaPythonSnake: which makes there be a good chance he wrote something about that.
+22:53  cbeust: exactly
+22:53  javaPythonSnake: haahaa nice
+22:53  dougmencken: ojacobson: why did you gave me that link? only "Linux", "Linux x84" and "Linux Itanium" there
+22:53  intuition: hey I know I asked this question a while ago, but I think I'm in a better position to understand the answer more thuroughly at this point.  Is there any way to use reflection to explore which classes are contained within a certain package?
+22:54  ojacobson: intuition: no, classloaders are not enumerable
+22:54  ojacobson: neither them nor their contents
+22:54 @cheeser: well, ...
+22:54  intuition: iirc you guys said no, because classes are dynanmically loaded?
+22:54 @cheeser: classpaths are
+22:54  guidj0s: poseidon: you could also insert each element of each array into a separate set. If in the end the sets are the same, the arrays contain the same elements.
+22:54  ojacobson: if you're in a context where you have some known source of classes you can enumerate that, but that's not always true
+22:54  cbeust: guidj0s: this will not work if there are duplicates
+22:54  ojacobson: (which is why SPI works the way it does)
+22:54  intuition: ojacobson in which cases is it not true?
+22:54  guidj0s: cbeust: good. Adjust the algorithm so that you first count the number of duplicates.
+22:55  cbeust: guidj0s: or like ojacobson said, map each object to its count
+22:55  intuition: ojacobson I would like to pass a package off to a system that can go through and say: I'm interested in storing this class, but not this one.
+22:55  ojacobson: intuition: loading classes over a network (applets, web start); loading classes from a plugin system (maven, osgi, some others)
+22:55  guidj0s: cbeust: could be. That's very java-ish, so I can't critique.
+22:55  intuition: ojacobson so by loading classes over a network you don't mean classes that are not directly contained within the jar itself
+22:55  cbeust: Java is kind of what we do here
+22:56  cbeust: it wouldn't be very different in other languages
+22:56  ojacobson: they could be in a JAR that's loaded over HTTP
+22:56  ojacobson: that's not unusual for web start
+22:56  ojacobson: they can also be loose class files loaded over HTTP (which is unusual, but supported)
+22:56 @cheeser: ojacobson: you *can* do it.  it's just not nice.
+22:56  ojacobson: *nod*
+22:56  ojacobson: Lots of non-trivial class loading scenarios don't tell the loaded code anything about where the code came from
+22:57  intuition: ok, so i'm not (unless something is happening that I don't understand) loading anything across the network
+22:57  guidj0s: cbeust: I'm not saying the solution is bad because it is java-ish. I just said it's java-ish.
+22:57  ojacobson: you can sometimes find out by reaching around in the classloader infrastructure, but the results aren't pretty and are a bit brittle
+22:57 @cheeser: guidj0s: so where's the problem with that?
+22:57  intuition: is it going to be possible for me to explore a package and pull out classes that implement a certain interface
+22:57  cbeust: I understand that and I'm saying it's a straight algorithm that will look about the same in most similar languages
+22:57  ojacobson: intuition: realistically, no
+22:57  intuition: ojacobson btw, the proxy stuff yester worked great, exactly what I was trying to do
+22:57  intuition: yesterday*
+22:58  intuition: hrm, that's too bad
+22:58  guidj0s: cheeser: No one said there's a problem. It's you people who associate "java" with "bad". I never said it was bad - I said I couldn't critique, or say how good a solution it was - because I don't know how Java deals with that.
+22:58  ojacobson: guidj0s: he's questioning your assertion that it's a "java-ish" algorithm
+22:58  ojacobson: it's how I'd do it in any language, realistically, since it's an O(n) algorithm
+22:58 @cheeser: "you people?"  what do you mean by "you people?"
+22:58  guidj0s: ojacobson: "It's a very java-ish solution, so I can't critique".
+22:58  ojacobson: It isn't.
+22:58  sproingie: why would we associate "java" with "bad"?
+22:58  ojacobson: It's just "a solution"
+22:58 @cheeser: *I* don't associate java with bad at all.
+22:59  guidj0s: cheeser: so far, "you people" = {cheeser, cbeust}
+22:59  ojacobson: if you can't critique an algorithm just because it's not the algorithm you expected, this may not be the field for you.
+22:59  guidj0s: who seem to infer that me saying it's "java-ish", there's a problem with it.
+22:59 @cheeser: guidj0s: how the hell do you have any idea whehter i do or not?
+22:59  guidj0s: cheeser: you suggested there was some sort of problem with it being "java-ish".
+22:59  guidj0s: can you not read?
+22:59 @cheeser: no, i didn't.
+22:59  guidj0s: <@cheeser> guidj0s: so where's the problem with that?
+22:59 <-- tjsnell has kicked guidj0s from ##java (can you read this?)
+22:59  ojacobson: Ah, insane troll logic
+23:00 @cheeser: ~next
+23:00  javabot: Another satisfied customer. Next!
+23:00  ojacobson: Post an unsupportable assertion, assume anyone who disagrees with your assertion has said something other than what they said.
+23:01  sproingie: but i came here for an argument!
+23:01  cbeust: No you didn't
+23:01  intuition: ojacobson, looking for some architecture advice here... Let's say that I have certain classes I would like to expose as scriptable.  Would it seem appropriate to make a abstract base class, Scriptable, that will register itself and the public api based on naming convention?
+23:01  intuition: ojacobson I'll clarify:
+23:01  ojacobson: No.
+23:01  ojacobson: SPI works fine.
+23:01  intuition: never mind :)
+23:01  ojacobson: You don't need to reinvent it.
+23:02  intuition: spi?
+23:02 @cheeser: ~spi
+23:02  javabot: cheeser, spi is the Service Provider Interface. Lets you put "I have a class that implements this interface" info in a jar file. See http://bit.ly/javaspi - but note, the class is java.util.ServiceLoader, *not* 'Service' as in the example. Use http://spi.googlecode.com/ to ensure the spi file is created correctly.
+23:02  intuition: hrm, I guess I'm confused
+23:03 @cheeser: you're not sure if you're confused?  that's so meta.
+23:03  ojacobson: If you want an enumerable source of classes, SPI is your man (for simple cases, anyways)
+23:03  intuition: lol
+23:03  sproingie: camel uses SPI.  javasound too.  trying to think of other examples off the top of my head.
+23:03  intuition: ok, so just to clairfy, I want to: public interface EntityScriptApi ... public class Entity extends Scriptable, implements EntityScriptApi ...
+23:04  intuition: Scriptable knows how to hook itself up through Jython
+23:04  ojacobson: sproingie: A little library called JDBC
+23:04  sproingie: ojacobson: yeah but no one uses that ;p
+23:04  ojacobson: Fair point
+23:04  sproingie: ojacobson: it doesn't have web scale
+23:04  intuition: I can use SPI for this instead
+23:05  sproingie: spi i think is totally what you're looking for
+23:07  mikey|: hi, i'm looking at this: http://tools.ietf.org/html/rfc4616 and it says: "%x00 ; UTF-8 encoded NUL character
+23:07  mikey|: ".  I can't for the life of me work out to add the nul char into a java string o.o
+23:07  sproingie: \0
+23:08  ojacobson: The character '\0' (== 0) represents the code point U+0000
+23:09  sproingie: java does a funky not-quite-utf8 encoding thing with nulls but you shouldnt run into it normally
+23:09  ojacobson: sproingie: that's only really relevant for the .class file format
+23:09  ojacobson: it's invisible to Java programs, usually
+23:09  sproingie: serialization too, no?
+23:09  ojacobson: Sure. Same deal, though.
+23:09  sproingie: which is another thing you wouldn't go eyeballing
+23:09  ojacobson: What *is* visible is the modified UTF-16 used for Strings and chars
+23:09  ojacobson: but only if you have code points with large numeric values to represent
+23:10  mikey|: thanks sproingie, trying that now
+23:14  acer_: Hello folks!
+23:14  acer_: Is there a way to break a void function using Jva?
+23:15 @dmlloyd: "return;"
+23:15  FauxFaux: That's an excessively helpful answer, dmlloyd, I'm ashamed to be in a channel with you.
+23:15 @cheeser: ~mock dmlloyd
+23:15 * javabot points at dmlloyd and laughs
+23:15 * dmlloyd pulls out his gatling kickban gun, spins it up, and....
+23:16  FauxFaux: I was going to go with something like, "You mean, how do you return from a void function?".
+23:16 @dmlloyd: pew pew pew pew pew pew pew pew pew pew pew pew pew pew pew pew
+23:16 @cheeser: javabot: dmlloyd++
+23:16  javabot: dmlloyd has a karma level of 237, cheeser
+23:17 @dmlloyd: I suppose we can give qwp another chance
+23:17 --- dmlloyd sets modes [##java -q *!*@gateway/tor-sasl/qwp]
+23:17  teralaser: "Break the void functions knees or arms?"
+23:19  FauxFaux: throw new FlowControlException(); etc.
+23:20 @dmlloyd: ~rlubke++
+23:20  cbeust: new ReturnException()?
+23:20 @dmlloyd: good quit message.
+23:20 @cheeser: best exit message ever
+23:20  Drizzt321: I'm looking to hash multiple pieces of data together to generate a unique ID. I was thinking of using MD5, or something similar to do the hashing, but there isn't a method that allows passing multiple Strings/Objects. I imagine I can just concat all of the data together and use that as the single argument? So long as I concat the pieces of data in the same order every time, right?
+23:20  ojacobson: Drizzt321: digest algorithms are generally specified in terms of sequences of bytes
+23:20  ojacobson: it's up to you to specify a protocol for what goes into the digest
+23:21 @dmlloyd: Drizzt321, using MessageDigest you can iterate over multiple chunks of bytes before getting your answer.
+23:21  Drizzt321: ojacobson: that's what I was starting to think of, thanks
+23:21 @dmlloyd: ~~ Drizzt321 javadoc MessageDigest
+23:21  javaPythonSnake: I figured out how to create a vertical JLabel, but my numbers are sideways now   :(
+23:21 @dmlloyd: javabot: where are you
+23:21  Drizzt321: dmlloyd: yea, I saw that. I was thinking of using the Common/Codec DigestUtils instead
+23:21 @dmlloyd: don't
+23:21  cbeust: javaPythonSnake: I think you summarized the Swing nightmare in one sentence
+23:21  javaPythonSnake: heh
+23:22  Drizzt321: no? it's not efficient? or it does Bad (tm) things?
+23:22  cbeust: And amazingly, that sentence doesn't even mention GridBagLayout
+23:22 @dmlloyd: there's just no reason for it
+23:23  Drizzt321: oh, ok
+23:23  mshaw: javaPythonSnake: enjoy making your own LabelUI for every PLAF
+23:23 @cheeser: mshaw: the only one that matters is the mac one
+23:23 @cheeser: 8^)=
+23:24  mshaw: hate GUI programming
+23:25  mshaw: current employer said i'd do a good enough job making pretty, customer facing html pages
+23:25  ShadowHntr: i'm having problems with the JRE and JDK, i'm unable to execute jar files. pastebin is as follows: http://opensolaris.pastebin.ca/1975871
+23:25  mshaw: i proved them wrong
+23:25  ShadowHntr: OS is OpenSolaris
+23:25  mshaw: graphics dude coming tomorrow
+23:27  ShadowHntr: oh boy :P
+23:27 --- kornbluth.freenode.net sets modes [##java +o pr3d4t0r]
+23:27 --- kornbluth.freenode.net sets modes [##java +q *!*@gateway/tor-sasl/qwp]
+23:32  mapreduce: cbeust: TestNG has some feature where it can generate test data.  Did that idea originate in QuickCheck or did you come up with it independently?
+23:33  tgodar: not getting Java.  I have a list of Patterns and corresp. replacement strings which I will need to iterate over.  Can I get those in the same array?  Or must I create two?   Or should I create a little class?
+23:34 @cheeser: eh?
+23:34  tgodar: as is now I was looping just on the Patterns in private Collection<Pattern> compiledPatterns = new ArrayList<Pattern>();  But Not getting how I can associate the corrsp. replacement string
+23:36  tgodar: want to do something like foo[]['pattern'] = Pattern.compile("(#\\d*)");foo[]['replace'] = 'bar';
+23:40  mapreduce: The [] means nothing there, so you might have to explain it in English.
+23:40  mapreduce: Or as a working version in some other programming language.
+23:42  tgodar: what?  all the examples i see use braces
+23:43  mapreduce: [] means nothing in Java apart from in a method or variable declaration.
+23:43  mapreduce: or an array initialiser.
+23:44  mapreduce: or a type name. :)
+23:44  tgodar: http://download.oracle.com/javase/tutorial/java/nutsandbolts/arrays.html
+23:44  tgodar: shows it as initializing an element
+23:45  mapreduce: Yes, if you put a number between.
+23:46  ojacobson: An empty pair of square braces is a syntax error unless it's part of a type
+23:47  mapreduce: ojacobson: int x[]
+23:48  mapreduce: int foo()[]{ return null; } // no, really
+23:49  tgodar: thanks
+23:49  tgodar:  I think ill port this code to something else, I can't ever seem to step into java and just make something happen, however I can take Java and rewrite it no problem to something else.
+23:49  ojacobson: mapreduce: That's still debatably part of the type, but point taken
+23:49  ojacobson: also, that method syntax needs to die in a car fire
+23:50  tgodar: i did see "float anArrayOfFloats[]; // this form is discouraged"
+23:52  ojacobson: tgodar: Independent of the clarity (or lack thereof) of your request, using arrays to store data of multiple types (in this case, Pattern and String) is not really a Done Thing in Java.
+23:52  ojacobson: Are you a PHP survivor?
+23:53  pfn: what's wrong with Map<Pattern,String>
+23:53  tgodar: ojacobson: do a fair amount of PHP.  But I started out with Fortran in the early 90s, then C++, then more into .net
+23:53  tgodar: Java is like stuff I know but in pig latin :(
+23:54  tgodar: I really just need to take sometime someday to get past the syntax
+23:54  pfn: java syntax is a simpler c# syntax
+23:54  ojacobson: It's not the syntax that's kneecapping you, necessarily
+23:54  ojacobson: The whole conceptual model where you use nested arrays as your only data structure is just plain Wrong in this language
+23:54  ojacobson: it might be right in some other languages, but this isn't one
+23:56  ojacobson: pfn's suggestion about using a map to pair patterns to replacements isn't bad
+23:56  ojacobson: alternately, a List<ReplacementPair> where ReplacementPair is a class of your own devising that does whatever you need it to will work
+23:59  tgodar: ojacobson: thank you.  That helps.  I'm a little tired right now and trying to implement this ruby code right to java
+--- Log closed Fri Oct 29 00:00:40 2010

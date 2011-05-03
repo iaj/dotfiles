@@ -1,0 +1,261 @@
+--- Log opened Sat Nov 06 00:00:46 2010
+00:12  fst3335: hello all
+00:13  fst3335: This is my first time using IRC on my Powerbook. I have used IRC on Linux before. I don't have any questions at the moment
+00:35  paras: has anyone managed to autmount CIFS/SMB shares via Directory Utility ?
+00:38 --- Brisk` is now known as Brisk
+00:38  ChrisAM: I haven't tried.
+00:38  ChrisAM: Do you just want to automount, or do you need to use directory utility?
+00:39  paras: i need Directory Utility, because i want to automount it via an LDAP entry
+00:41  paras: automounting an nfs share works fine, but i have problems with nfs
+00:41  paras: not nfs, smb... sorry
+00:43  ChrisAM: paras ... take a look at automountmaker
+01:14  proprietarysucks: is there an applescript channel, or any people in here who would know it well-ish
+01:15  proprietarysucks: I'm interested in finding out if there's a way to add icons to the finder sidebar which would normally not be drag-over-able
+01:15  proprietarysucks: such as symlinks, or autofs mounts
+01:15  Kasm279: i don't think so :\
+01:16  proprietarysucks: or even /Volumes
+01:47  Marctraider: hello
+01:47  Marctraider: Can somebody help me?
+01:48  Marctraider: I suddenly cannot connect to my windows shares anymore... Dont know what to do about it :/ i can still ping the server, but just doesnt work.
+01:48  Marctraider: nothing else changed..
+01:51  Tomis: when in doubt, restart it out
+01:52  Marctraider: seems i cant connect to any windows share on the network, i dont want to reboot tho
+01:52  Marctraider: perhaps ill restart finder
+01:54  Branes: That's not going to help.
+01:54  Branes: Tomis is right: eliminate variables, start with a clean machine, and restart.
+01:55  Marctraider: what solution is that? restart?
+01:55  Branes: Yes.
+01:55  Marctraider: Im having this The application Finder.app cant be opened -10810 error which i see is quite common. Also i am unable to unmount the shares by terminal, it just hangs :(
+01:55  Tomis: yea i was only half joking
+01:56  Tomis: wow
+01:56  Marctraider: this happened more, which indded i restarted the machine... but if it keeps happening its not nice to constantly reboot :(
+01:56  Tomis: sounds like something is seriously up
+01:56 * Branes agrees
+01:56  Branes: Marc, time for some diagnostics.
+01:56  Marctraider: its quite a new installation. i just installed the ordinary stuff
+01:57  Marctraider: well if you read this : http://reviews.cnet.com/8301-13727_7-10365239-263.html
+01:57  Branes: Boot from your OSX Install DVD, click through the language select, then launch Disk Utility from the Utilies menu. Select your internal drive, click the First Aid tab, run Repair Disk followed by Repair Permissions.
+01:57  Marctraider: it seems to be quite common, AND with external mounted drives( which i suppose to include network drives as well)
+01:57  Branes: Until you complete that basic check, it is pointless to continue diagnosing this further.
+01:57  Marctraider: Branes: i already did. it didnt find anything
+01:58  Marctraider: but it seems common with snow leopard under some circumstances, check link i gave
+01:58  Tomis: weird
+01:58  Branes: I did, and I'm aware of it. You have MacFUSE installed?
+01:59  Marctraider: yes
+01:59  Marctraider: Coincidentally I have
+01:59  Marctraider: ;p
+01:59  Marctraider: that wouldnt be a problem i hope?
+01:59  Branes: That seems to be the culprit, going from discussions with others in the same predicament.
+01:59  Tomis: try uninstalling it and see what happens
+01:59  Tomis: it is a 3rd party file system driver after all
+01:59  Marctraider: Ok, BUT I have the latest version it says i have, but there are later versions. perhaps i should try them
+02:00  Branes: The fault is probably not with the FUSE library itself, but with the two most common FUSE modules, NFS and ntfs-3g.
+02:00  Marctraider: Ehm I also have Tuxera
+02:00  Marctraider: tuxera is the commercial one
+02:00  Marctraider: Should macfuse and tuxera (or ntfs-3g) be installed together? or should only one be installed
+02:00  Branes: Only one.
+02:01  Marctraider: well macfuse doesnt support ntfs write right?
+02:01  Marctraider: or does it?
+02:01  Branes: MacFUSE does nothing.
+02:01  Branes: It is the plug-in modules that enable file systems.
+02:01  Marctraider: well... why do you say i only need one installed? I needed ntfs read/write support so thats why i have tuxera
+02:01  Marctraider: so I presumable need both?
+02:01  Branes: ntfs-3g adds NTFS read/write support, but it is an inomplete, and often buggy, reverse engineering effort.
+02:02  Branes: *incomplete
+02:02  Branes: If you want reliable NFTS support, buy a copy of Paragon NTFS. It uses Microsoft-licenced code.
+02:02  Marctraider: Branes: I dont have NTFS-3G, but tuxera, which is a little different, maybe not much i dont know
+02:02  Marctraider: branes: ok
+02:02  Branes: Frankly, I wouldn't pay a single peny for anything with 'tux' in the name :)
+02:03  Marctraider: Branes: but accessing an smbfs:// etcetera doesnt use the NTFS filesystem directly right?
+02:03  Marctraider: so i dont understand why it hangs like that
+02:03  Marctraider: oh wait i have a bootcamp partition
+02:03  Marctraider: it uses it for that ofcourse
+02:03  Branes: No, but adding FUSE adds hooks into the OpenSMB stack.
+02:04  Marctraider: So if i use paragon, i use macfuse with it?
+02:04  Marctraider: Good thing i didnt bought it yet
+02:04  Marctraider: (tuxera)
+02:05  Branes: MacFUSE is a kernel extension, a low-level addition to the OS. It then allows you to add extra modules such as ntfs-3, adding file-system suport.
+02:05  Marctraider: ok i understand
+02:05  Branes: The Paragon NTFS program is a stand-alone kernel extension, it does not need nor use FUSE.
+02:05  Marctraider: I wonder why those packages like paragon, ntfs-3g and 
+02:05  Marctraider: oh ok you answered it for me already
+02:06  Marctraider: it seems paragon is the most reliable then, if it includes both
+02:06  Branes: It doesn't include FUSE. It works by itself.
+02:06  Branes: You can still use MacFUSE and other modules alongside Paragon.
+02:06  Marctraider: oh but now i got a problem again lol
+02:06  Marctraider: branes ok
+02:06  Marctraider: Paragon doesnt seem to work with truecrypt
+02:06  Marctraider: or does it?
+02:07  Marctraider: well perhaps it does
+02:07  Branes: No, but then, MacOS doesn't work with truecrypt very well.
+02:07  Marctraider: i thought i already tried it once, but ill try again
+02:07  Marctraider: ok
+02:07  Branes: Attempting disk-level encryption on a Mac is an exercise in frustration.
+02:08  Marctraider: branes: i use a file container for my passwords and stuff, perhaps that works better?
+02:08  Branes: If you really need to keep things encrypted, either keep them on an encrypted .dmg file, or use FileVault, which encrypts the home directory. No user-specific information is stored outside the home directory, so that is a good alternative.
+02:16  Marctraider: it seems there is a beta macfuse 2.1.7
+02:17  Marctraider: im going to reboot because its impossible now to reopen finder
+02:17  Marctraider: brb
+02:29  Marctraider: Branes: I just got MacFUSE 2.1.7 to work with Truecrypt + NTFS with 64-bit kernel :)
+02:30  Marctraider: Oh wait i cant write now... sorry :p
+02:33  Marctraider: ok it works, write and read
+02:35  Branes: I knew it would. Whether it stops that -10180 error or not remains to be seen :)
+02:36  Marctraider: Branes: Perhaps, perhaps not.
+02:37  Marctraider: but I previously tried using Tuxera + Truecrypt + Kernel 64-bit it didnt work, now it does. Dont know what changed that but i thought i used the exact same versions prevously. perhaps reinstalling mac OSX is magical ;)
+02:37  Marctraider: And i assume going from 32-bit to 64-bit cant be a bad thing either
+--- Log closed Sat Nov 06 03:27:14 2010
+--- Log opened Sat Nov 06 03:27:37 2010
+03:27 --- Users 162 nicks [3 ops, 0 halfops, 1 voices, 158 normal]
+03:29 --- Channel ##mac was synced in 99 seconds
+04:46  cryptic0: my macbook pro just all of a sudden went into black screen mode and wont' recover from it.  I had to reboot
+04:48  aL3x: did that fix it?
+04:49  S_SubZero: cryptic0: ok.
+04:50  cryptic0: aL3x:  yes
+04:50  cryptic0: I tried to make it to go sleep by closing the lid, but it wouldn't sleep
+04:50  cryptic0: I had to reboot
+04:51  aL3x: was taht before or after "black screen mode"
+04:53  cryptic0: after
+04:54  cryptic0: It has happened to me a few times before that it won't wake up from sleep and the only option is to hard reboot.  But this happened for the first time.
+04:54  Branes: Sounds like CPU safety cut-out.
+04:55  cryptic0: what does that mean?
+04:56  aL3x: when the screen goes off is the computer still on; do you have a way to even test that?
+04:57  cryptic0: the pulsating light was steady on.
+04:57  aL3x: pulsating...as though it was a sleep?
+04:58  cryptic0: "pulsating-light" was steady on, not pulsating.
+04:58  aL3x: have you looked in console, to see if it mentions anythingin the logs?
+04:58  aL3x: ah, ok
+04:58  cryptic0: aL3x:  nope, I haven't yet figured out where the logs are
+04:58  Branes: cryptic0: Almost all modern processors have a built-in failsafe, if something goes wrong, such as a sudden temperature spike somewhere on the chip, it immediately cuts power within the chip itself.
+04:58  aL3x: it could be dozens of things
+04:58  cryptic0: Branes:  I see.
+04:59  cryptic0: where should I look for logs?
+04:59  aL3x: cryptic0: what kind of macbook pro? unibody or older
+04:59  cryptic0: unibody, mid 2010
+04:59  aL3x: cryptic0: applications/utilities/console
+04:59  aL3x: damn, brand new
+04:59  Branes: If the CPU safety kicks in, there isn't time to write a log.
+04:59  aL3x: cryptic0: so worse case scenario you have apple care right?
+05:00  aL3x: so the lack of a log tells us stuff too then, right Branes?
+05:00  aL3x: :)
+05:00  cryptic0: not yet, I can still buy it until July.
+05:00  aL3x: 1 year warranty included
+05:00  cryptic0: which I will
+05:00  aL3x: with no extra price
+05:00  aL3x: apple carejust extends it
+05:00  aL3x: you are covered for 1 year though
+05:00  cryptic0: yeah
+05:00  cryptic0: I will buy it a month before the warranty runs out.
+05:02  aL3x: Branes: that thing you said it might be, would that be a major defect or something that *can* happen out of nowhere, and everything still be fine?
+05:03  cryptic0: Here are some logs: http://pastebin.ca/1983401
+05:07 --- aL3x_ is now known as al3x_
+05:07 --- al3x_ is now known as al3x
+05:09  cryptic0: how can I remove the mobile me sync button from the task bar?
+05:09  al3x: hold command while dragging it off
+05:10  al3x: thats how you get ALL things off the taskbar
+05:10  al3x: btw
+05:10  cryptic0: cool
+05:10  cryptic0: I learnt something new today :D
+05:10  Colloguy: except for the third-party utilities that stick stuff up there :(
+05:11  al3x: the 3rd party apps you just quit, or disable them from starting, and 50/50 they have an option to NOT use a tasbar icon
+05:12  Colloguy: cryptic: you can also cmd-drag to rearrange the order of the icons
+05:12  cryptic0: right now, I have Dropbox, Anxiety, VPN, Wifi, Speaker, Battery, Time and Spotlight
+05:12  al3x: anxiety?
+05:12  cryptic0: anxiety is a to do list app
+05:12  cryptic0: Colloguy:  thanks for the tip.
+05:12  al3x: i am lookung at your logs btw, but i really dunno what i am looking for
+05:12  cryptic0: al3x:  thanks for doing that. I coudln't figure it out.
+05:13  cryptic0: I was looking for something like "exception"
+05:19  al3x: well, i am gonna be one of those lamos and say "i have no clue whats wrong, you should take it to the apple store" :P
+05:20  al3x: but only if it keeps happening; the first thing people do is disk permission repairs, resetting pram and smc, archive/install, repairing disk...um not necessarily in taht order
+05:23  cryptic0: yeah if this starts happening frequency, I might consider going to the apple store, but right now, I am not going to worry about it.  The machine is working great otherwise.  Plus the apple store is 2 hours away in Houston.
+05:24  Tomis: could also locate a nearby apple authorized repair center
+05:24  cryptic0: Tomis:  I wouldn't trust my machine with those clowns.
+05:25  cryptic0: I mean I woudln't trust them with my machine
+05:25  cryptic0: :p
+05:25  Tomis: me either
+05:25  al3x: if something only happens rarely, then sometimes it's just a glitch, not necessarily a problem
+05:25  Tomis: but they may be able to diagnose it for you
+05:26  cryptic0: Apple really needs to open a store in Texas A&M
+05:26  al3x: the only thing google tuned up was energy settings, but that was for leopard...so ie. didnt really find anything
+05:26  cryptic0: al3x:  what did you search for?
+05:27  al3x: cryptic0: um, its closed now, but something like "screen goes black, sleep light on steady"
+05:27  al3x: people really should just stop living in texas! ;P
+05:28  cryptic0: oh, I am getting the hell outta here as soon as I am done
+05:28  al3x: you form texas?
+05:28  al3x: from*
+05:29  cryptic0: currently in Texas for grad school
+05:29 --- Psy| is now known as Psy
+05:30  al3x: where are you from then?
+05:30  al3x: like before Texas...lol
+05:31  cryptic0: India
+05:32  al3x: what do you like better? India or texas?
+05:32  natrium1970: Why does Finder's Get Info require admin privileges to apply changes to all enclosed items -- even when I have the permissions to do manually do the operations item-by-item?
+05:33  cryptic0: Texas
+05:33  al3x: natrium1970: dunno...maybe so it forces people to think about what it is they are doing?
+05:34  al3x: I live in California, i like it alot
+05:35  natrium1970: Are you my neighbor, cryptic?
+05:36  al3x: man, software update is sneaky
+05:37  natrium1970: What did it do?
+05:37  cryptic0: natrium1970:  where you from?
+05:38  natrium1970: Houston area.
+05:38  cryptic0: college station here
+05:38  al3x: it dl-s updates inthe background...w/o telling me...my net was being slow and i didn't know why
+05:38  Tomis: yea i hate that, i always turn that off al3x 
+05:39  natrium1970: I must have dropped my MacBook Pro. There's now a chip out of the side of the plastic  part of the case. Maybe that's also why I have another dead pixel.
+05:39  al3x: iphoto must be relaly messed up...this is the second large update and it just came out like a week or 2 ago
+05:39  Tomis: yea, seams they shipped it in a borked state
+05:39  al3x: plastic? do you have the no glare, non glass, non pretty screen?
+05:40  natrium1970: It's a MacBook early 2008 model. It's the plastic that's on top of the surface that you hand rests on when you type/mouse.
+05:40  natrium1970: I don't know how to tell if it's non glare non glass non pretty.
+05:40  al3x: wow, your macbook pro instantly morphed into a macbook...that sucks
+05:41  natrium1970: MBP.
+05:41  natrium1970: I didn't type Pro the second time.
+05:41  al3x: unibodies are all metal and have the glass screen...if yours inst a unibody then no pretty glass
+05:41  natrium1970: No, early 2008 is pre-unibody.
+05:41 * al3x wants the [retty g;ass screened unibody
+05:42  al3x: taht's called the topcase btw
+05:42  al3x: you would think the actual top f the case would be called the top case, but noooo
+05:43  natrium1970: I use my standalone monitor when I'm at home a lot of the time.
+05:43  natrium1970: It's like just a little sliver out of the topcase.
+05:43  al3x: my white macbook has little slivers missing everywhere
+05:43  natrium1970: I don't actually use iPHoto or a lot of those apps.
+05:44  al3x: i don't exactly know what a macbook pro looks like, but the macbooks, the area around the kb is all plastic, and sits onteh case, and the edges start to break after awhile
+05:44  al3x: i may stop using iphoto...it doesn't work like itunes, in the sense you change your file names, it changes the folders they are in etc
+05:44  natrium1970: It sounds like mine is just started to break. 
+05:45  natrium1970: I don't like iTunes, either. I find its interface confusing. 
+05:45  al3x: what do you use for music?
+05:45  cryptic0: natrium1970:  I hate itunes
+05:45  al3x: i have to use itunes, i have an ipod touch 4
+05:45  cryptic0: al3x: I use mplayer 
+05:45  al3x: i use vlc for video
+05:46  cryptic0: vlc is nice too
+05:46  cryptic0: but I have been in love with mplayer
+05:46  al3x: i have never used mplayer
+05:46  natrium1970: mplayer won't play some of my videos.
+05:46  al3x: i like itunes for the most part, but it's getting too big for itself
+05:46  al3x: itunes=movies, music, books, etc...
+05:47  al3x: it's gotten out of hand
+05:47  cryptic0: anyway guys, nice to meet you all, I am going to bed.
+05:47  cryptic0: hopefully see you again next time.
+05:47  al3x: apple is gonna have to start making/releasing an ipod app, and it draws off info from separate apps, like a music one, a books one, etc
+05:47  al3x: cryptic0: you too...later :)
+05:47  al3x: otherwise itunes is gonna end up being finder!
+05:48  al3x: or no, iTunesOS
+05:56  webPragmatist: okay dudea
+05:56  webPragmatist: i can't uninstall a damn prefpane without it effing up
+05:56  webPragmatist: it just locks up system prefs
+05:56  webPragmatist: can i do this somehow else?
+05:57  al3x: download the trial of appzapper
+05:57  al3x: or trial of cleanapp
+05:57  Tomis: right-click it in system prefs, "remove"
+05:57  Tomis: and it locks up?
+05:58  al3x: or do what tomis said, unless that is what cauing the lock up
+05:58  Tomis: then just drag it to the trash, log out, done
+05:58  Tomis: err, rather "or"
+06:05 --- Angostura_ is now known as Angostura
+--- Log closed Sat Nov 06 06:28:22 2010
+--- Log opened Sat Nov 06 06:28:42 2010
+06:28 --- Users 159 nicks [3 ops, 0 halfops, 1 voices, 155 normal]
+06:30 --- Channel ##mac was synced in 97 seconds
+06:46  jeffmr: ok, I resized my mac partition while having a bootcamp one with the warning that I might not be able to boot the bootcamp one.  Can't boot it, anyone know how I can repair it?
+--- Log closed Sun Nov 07 20:54:15 2010

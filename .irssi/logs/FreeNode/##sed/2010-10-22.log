@@ -1,0 +1,247 @@
+--- Log opened Fri Oct 22 00:00:26 2010
+--- Log closed Fri Oct 22 01:08:11 2010
+--- Log opened Fri Oct 22 01:08:32 2010
+01:08 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+01:10 --- Channel ##sed was synced in 112 seconds
+02:16  jhaddad: how can i specify windows line endings in a sed replacement?
+02:19  jwillia3: \r$
+02:20  geirha: That'll work with some seds
+02:22  geirha: Using a literal CR is more portable. In vi and bash at least, you can type a literal CR with Ctrl+V Ctrl+M
+02:22  jhaddad: cool
+02:22  jhaddad: i'll try that
+02:22  jhaddad: thank you
+--- Log closed Fri Oct 22 05:07:23 2010
+--- Log opened Fri Oct 22 05:07:46 2010
+05:07 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+05:09 --- Channel ##sed was synced in 109 seconds
+--- Log closed Fri Oct 22 08:48:45 2010
+--- Log opened Fri Oct 22 10:55:20 2010
+10:55 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+--- Log closed Fri Oct 22 10:55:26 2010
+--- Log opened Fri Oct 22 10:55:34 2010
+10:55 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+10:57 --- Channel ##sed was synced in 95 seconds
+11:43 --- Mohan__ is now known as Mohan
+12:55  retro|cz: hello
+13:55  the_gamer: i wish to aplly a command only to lines containing only numbers. i don't know which numbers. using regex or similar would be nice. is that possible?
+13:57  waldner: sed '/^[[:digit:]][[:digit:]]*$/{do your stuff}'
+13:58  waldner: /^[0-9][0-9]*$/ may work too
+13:59  the_gamer: is it possible to replace * with + to write that only once or isn't that supported by sed?
+13:59  waldner: with gnu sed, you can use \+
+13:59  the_gamer: thanks
+13:59  waldner: np
+13:59  waldner: but other seds probably won't support that - you-ll have to use aa* or a\{1,\}
+14:01  the_gamer: sed "/^[[:digit:]][[:digit:]]*$/" -e "s/replace/with that/" #throws errors, what syntax would be right?
+14:02  the_gamer: no such file or directory for the regex...
+14:02  waldner: single quotes
+14:02  waldner: though the second one should work
+14:03  waldner: what's the exact command you're using?
+14:03  waldner: ah, maybe it's because of the -e
+14:03  waldner: so use -e "..." -e "...."
+14:03  waldner: or (if your sed supports it) sed "bla; bla; etc."
+14:04  the_gamer: sed '/^[[:digit:]][[:digit:]]*$/' 's/^/?id=/' #missing command
+14:04  the_gamer: sed -e '/^[[:digit:]][[:digit:]]*$/' -e 's/^/?id=/' #missing command
+14:04  waldner: nope, repeat -e twice
+14:04  the_gamer: just did that...
+14:04  waldner: the last one should work, let me try
+14:05  waldner: ah yes
+14:05  waldner: sed -e '/^[[:digit:]][[:digit:]]*$/s/^/?id=/'
+14:05  waldner: or even with no -e
+14:05  waldner: but then, you can just do
+14:06  waldner: sed 's/^[[:digit:]][[:digit:]]*$/?id=&/'
+14:06  the_gamer: works fine, thanks
+16:07  evelyette: hi
+16:07  evelyette: I have the following file: http://paste.pocoo.org/show/278840/
+16:08  evelyette: how can I delete all the blank characters between \start{verbatim} and \end{verbatim} ?
+16:11  gnubien: evelyette: spaces and tabs?
+16:11  evelyette: yes
+16:11  evelyette: gnubien, yes
+16:11  gnubien: \start{verbatim} and \end{verbatim} on the same line?
+16:12  evelyette: no
+16:12  evelyette: they are always on different lines
+16:12  evelyette: that's why I don't know how to do it
+16:12  gnubien: evelyette: ok, multiple instances of \start{verbatim} and \end{verbatim} in the file?
+16:12  evelyette: yes
+16:13  gnubien: evelyette: sed is greedy so it would try to use the first instance of \start{verbatim} and LAST instance of \end{verbatim}
+16:14  evelyette: I need to use them in pairs
+16:14  gnubien: glob the whole file or most of it
+16:14  evelyette: glob ?
+16:14  gnubien: netsearch glob
+16:15  evelyette: the files are quite large ...
+16:15  evelyette: let me put up an example with 2 verbatims
+16:15  evelyette: a sec
+16:15  evelyette: ah, there are already two
+16:15  evelyette: of them
+16:16  evelyette: so the example is good ...
+16:16  evelyette: http://paste.pocoo.org/show/278840/
+16:16  evelyette: this is the example
+16:16  evelyette: I want to achieve this
+16:16  evelyette: http://paste.pocoo.org/show/278846/
+16:17  gnubien: evelyette: #define identifier replacement-text  should become this? #defineidentifierreplacement-text
+16:18  gnubien: evelyette: or you want to place the entire section of \start{verbatim} and \end{verbatim} on one line of text?
+16:18  evelyette: I gave the example.
+16:18  evelyette: this is what I have. http://paste.pocoo.org/show/278840/
+16:18  evelyette: this is what I want: http://paste.pocoo.org/show/278846/
+16:19  evelyette: and no I don't want to place it in one line ...
+16:19  evelyette: just delete spaces and tabs in between \start{verbatim} and \end{verbatim}
+16:19  evelyette: in the front of every line (not in the middle of it)
+16:20  gnubien: delete all blank lines in the file?
+16:20  evelyette: no
+16:21  gnubien: evelyette: #define identifier replacement-text  should become this? #defineidentifierreplacement-text
+16:22  evelyette: I don't know what you're asking me
+16:22  gnubien: evelyette: that is deleting spaces ^^
+16:22  evelyette: ah
+16:22  evelyette: no I want to delete just the blank spaces before the line
+16:23  evelyette: this "      #define identifier replacement-text" should become this "#define identifier replacement-text"
+16:23  gnubien: evelyette: ok, delete the spaces and tabs at the beginning of the line?
+16:23  evelyette: yes
+16:23  evelyette: I'll have to go in about 5 minutes ... can you email me if you find something useful ?
+16:24  gnubien: evelyette: i dont email, just irc
+16:24  evelyette: ah ok
+16:24  evelyette: do you know how this can be done ?
+16:24  gnubien: evelyette: delete the spaces and tabs at the beginning of the line for the whole file good enough?
+16:24  evelyette: no
+16:24  gnubien: ok
+16:24  evelyette: just for the area between \start{verbatim} and \end{verbatim}
+16:25  gnubien: yea
+16:32  gnubien: evelyette: sed '/^[ ]\+\\begin{verbatim}/N;s/.*/+_+&/' filename |sed 's/^[ ]\+//;s/^+_+//'
+16:32  evelyette: it really works ... thank you :)
+16:32  evelyette: I have to go now
+16:32  evelyette: really really thank you
+16:32  evelyette: appreciate it
+16:32  evelyette: bye bye
+16:32  gnubien: evelyette sure, have fun
+16:34  crocket: Hi
+16:34  crocket: How can I remove characters after "compat32" in libdrm-compat32-2.4.20-x86_64-1.
+16:34  crocket: I want it to be libdrm-compat32
+16:35  gnubien: maybe
+16:38  crocket: Is there a way?
+16:38  gnubien: looking...
+16:42  gnubien: crocket: echo "libdrm-compat32-2.4.20-x86_64-1" |sed 's/\([a-z]\+-[a-z]\+[0-9\+][^-]\)\(.*\)/\1/'  #prints libdrm-compat32
+16:42  crocket: wow
+16:43  crocket: whatis that?
+16:44  gnubien: crocket: sed allows groups of char's in the \(.*\) syntax
+16:44  crocket: there can be one or more "-" before -compat32.
+16:45  crocket: libgphoto2-compat32-2.4.9-x86_64-1 can't be filtered by that.
+16:49  crocket: gnubien, how can you do it in this case?
+16:51  cthuluh: your package names always contain "-compat32"? if the anwser is yes, then sed 's/\(-compat32\).*$/\1/' should do the trick
+16:52  gnubien: yep
+17:00  crocket: hmm
+17:01  crocket: hmm
+17:01  crocket: It works
+17:01  gnubien: tada!
+17:01  crocket: But I still don't get it
+17:02  gnubien: crocket: its a group
+17:02  crocket: \(-compat32\) wouldn't match characters before -compat32.
+17:02  gnubien: group is whatever regex is in \(regex\)  and the \1 is print the first instance of the regex in the group
+17:05  crocket: I think it should be \(^.*-compat32\).*$
+17:06  crocket: find /var/log/packages -iname *compat32* | cut -d/ -f5 | sed 's:^.*\(-compat32\).*$:\1:'
+17:06  crocket: This command results in -compat32
+17:06  crocket: hmm
+17:07  crocket: I don't know why \(-compat32\) is the same as \(.*-compat32\)
+17:08  gnubien: sed is greedy so it takes all text from beginning of line to the regex and prints it if you use \1 in the sed
+17:13  crocket: weird
+17:13  crocket: [^0-9]  	Any character other than a number
+17:13  crocket: \(^.*-compat32\) was the same as \(-compat32\)
+17:13  gnubien: right, [^0-9] means NOT a number
+17:14  crocket: It's confusing
+17:14  gnubien: yep on the \(^.*-compat32\) was the same as \(-compat32\)
+17:14  gnubien: crocket: sed is greedy
+17:14  crocket: ^ makes exceptions, and it works weirdly in \(^.*-compat32\)
+17:15  gnubien: so dont use it, not needed
+17:16  crocket: gnubien, Can you think of an explanation about the role of ^ in \(^.*-compat32\)?
+17:16  crocket: wait a minute
+17:16  crocket: That was in []
+17:16  crocket: ^ in \(^.*-compat32\) is in ()
+17:17  cthuluh: wait, "^.*-compat32" is not the same as "-compat32" at all. let me rewrite your proposal: sed 's/-compat32.*$/-compat32/'
+17:17  cthuluh: the result will be the same, of course
+17:18  cthuluh: s/your/my
+17:18  crocket: weird
+17:19  crocket: cthuluh, Where on the internet is the explanation about this?
+17:19  crocket: Wait, it makes sense
+17:19  cthuluh: well, there's no explanation other than how sed works (in the manpages, your software distro's documentation, and the sed FAQ perhaps)
+17:20  crocket: It just matches compat32-1.0.5-x86_64-1 in libXfontcache-compat32-1.0.5-x86_64-1, and changed it to compat32.
+17:20  crocket: And it becomes libXfontcache-compat32
+17:21  crocket: I didn't know
+17:22  crocket: sed doesn't leave out unmatched letters but keeps them unless they are removed.
+17:22  crocket: This is easier than I thought.
+17:23  gnubien: crocket:  sed 's/\(-compat32\).*$/\1/'   the .*$ is not in the group so not printed
+17:23  crocket: ok
+17:23  crocket: hahaha
+17:23  cthuluh: crocket: simpler: find /var/log/packages -name '*compat32*' | sed 's:-compat32[^/]*$:-compat32:'
+17:24  crocket: hmm?
+17:25  crocket: Does [^/] mean any character that isn't / ?
+17:25  cthuluh: yes
+17:25  gnubien: no, just not /
+17:26  crocket: Why do you need [^/]?
+17:26  cthuluh: though it will print the whole path, not like what you previously wrote
+17:26  crocket: There can't be / in name.
+17:26  crocket: hmm
+17:26  crocket: It was my command.
+17:26  cthuluh: crocket: so that we only match the filename part, not the path
+17:26  crocket: find /var/log/packages -iname *compat32* | cut -d/ -f5 | sed 's/\(-compat32\).*$/\1/'
+17:27  crocket: cut -d/ -f5 removes the preceding slashes.
+17:27  crocket: let me check that.
+17:27  cthuluh: what about this?  find /var/log/packages -name '*compat32*' | sed 's:\([^/]*\)-compat32[^/]*$:\1-compat32:'
+17:28  cthuluh: (to print only the filenames, without what follows -compat32)
+17:28  crocket: -compat32[^/] can be changed to -compat32.
+17:28  crocket: It's impossible to have / after -compat32.
+17:29  cthuluh: I was just trying not to make this kind of assumption :)
+17:29  cthuluh: (though I made the assumption that your paths / file names do not contain newlines...)
+17:30  crocket: It doesn't work.
+17:31  crocket: find /var/log/packages -name '*compat32*' | sed 's:\([^/]*\)-compat32[^/]*$:\1-compat32:'
+17:31  crocket: results in something like /var/log/packages/libdrm-compat32
+17:31  crocket: as I said
+17:31  crocket: Unmatched letters don't get left out.
+17:32  crocket: That's why /var/log/packages was intact
+17:32  crocket: It wasn't matched.
+17:32  cthuluh: hmm right, and this? sed 's:.*\([^/]*-compat32\).*$:\1:'
+17:33  crocket: That results in printing -compat32
+17:34  cthuluh: and this? :)) sed 's:^.*/\(.*-compat32\).*$:\1:'
+17:34  crocket: hmm?
+17:34 --- grrrrrr is now known as barbanegra
+17:35  crocket: That works.
+17:35  crocket: 's:^.*/\([^/]*-compat32\).*$:\1:' also works
+17:36  cthuluh: yes, since no '/' can be present between the parenthesis
+17:37  cthuluh: sorry if I told you several suggests, being not sure of their correctness. I need time to get brain thinking about sed ;)
+17:38  cthuluh: hmmm, s/suggests/suggestions/
+17:40  gnubien: cthuluh: you sed it ;)
+17:43  cthuluh: 8)
+17:44  cthuluh: gnubien: "you sed it" as in "tu l'as dit"?
+17:44  gnubien: which language is "tu l'as dit"?
+17:45  cthuluh: french
+17:45  gnubien: ah, wish i spoke more than a few words of french, what does "tu l'as dit" mean?
+17:46  gnubien: you said it?
+17:46  cthuluh: literally, yes
+17:46  gnubien: cthuluh: i love puns :)
+17:46  cthuluh: it's like "indeed" or "isn't it", but rather familiar
+17:46  gnubien: yes, i recall now
+17:46  crocket: man
+17:47  crocket: /var/log/packages/compat32-tools-2.0-noarch-2alien can't be filtered
+17:47  crocket: find /var/log/packages -name '*compat32*' | sed 's:.*/\([^/]*-compat32\).*$:\1:' can't filter it.
+17:47  cthuluh: replace -compat32 with -\{0,1\}compat32
+17:48  crocket: changing -name '*compat32*' to -name '*-compat32*' works, though.
+17:48  crocket: hmm?
+17:48  cthuluh: it depends on what you want to match
+17:48  cthuluh: if you want compat-tools to be printed, then do as I said, else use -name '*compat32*'
+17:49  crocket: *-compat32*
+17:49  cthuluh: ok, forget what I said 8)
+17:49  cthuluh: enough sed for today :)
+17:50  crocket: weird
+17:51  crocket: \{1\} doesn't work while \{0,1\} works.
+17:55  crocket: I think -\{1\} should match -
+17:56  crocket: cthuluh, do you know why -\{0,1\} doesn't match compat32-tools?
+17:58  crocket: oh
+17:58  crocket: Using \{0,1\} results in printing a line "compat32" .
+18:12  crocket: Nice
+18:12  crocket: find /var/log/packages -name '*compat32*' | sed -e 's:.*/\([^/]*-\{0,1\}compat32\).*$:\1:' -e '/^compat32/ d'
+18:12  crocket: works without printing compat32-tools.
+19:02  crocket: How can I print the next line of a line that match regexp?
+19:49  waldner: sed -n '/regex/{n;p;}'
+19:49  waldner: gone
+20:07  karthee: how do i remove last 5 lines in a file using awk ?
+--- Log closed Fri Oct 22 23:11:39 2010
+--- Log opened Fri Oct 22 23:12:10 2010
+23:12 --- Users 103 nicks [0 ops, 0 halfops, 0 voices, 103 normal]
+23:13 --- Channel ##sed was synced in 111 seconds
+--- Log closed Sat Oct 23 00:00:38 2010

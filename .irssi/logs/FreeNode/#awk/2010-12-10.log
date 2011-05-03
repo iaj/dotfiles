@@ -1,0 +1,366 @@
+--- Log opened Fri Dec 10 00:00:09 2010
+00:30  kingsley: Does anyone here happen to know if awk or mawk can be faster than the "paste" command?
+00:30  waldner: I would be they're similar
+00:31  waldner: *bet
+00:31  waldner: it's easy to benchmark though
+00:39  kingsley: How would you write awk code to quickly append lines from one file to another?
+00:42  waldner: awk '{getline f2 < "file2"; print $0,f2}' file1
+00:42  waldner: (with error checking, etc.)
+00:43  pr3d4t0r: cat file1.txt file2.txt > bigfile.txt
+00:43  steve___: pr3d4t0r: that's not what they mean.
+00:44  kingsley: pr3d4t0r: I may owe you an apology.
+00:45  kingsley: pr3d4t0r: Perhaps I should have elaborated that I need to append individual lines from one file to individual lines of a second file, much like the "paste" command. 
+00:46  kingsley: pr3d4t0r: It's different from the "cat" command, which appends all lines at once from one file past the last record of another file.
+00:47  kingsley: waldner: OK, I'll benchmark mawk vs. paste.
+00:47  waldner: note that my code makes a number of assumptions
+00:48  waldner: and lacks error checking
+00:48  waldner: but for a quick benchmark it may be ok
+00:49  pr3d4t0r: kingsley: Ah.
+01:16  kingsley: waldner: You predicted that mawk and paste would have similar speeds.
+01:16  kingsley: waldner: For once, you're right again.
+01:16  waldner: possibly, yes
+01:16  kingsley: My benchmark results:
+01:16  waldner: and gawk may be somewhat slower
+01:16  kingsley: paste: 3 minutes and 46 seconds.
+01:17  kingsley: mawk: 3 minutes and 49 seconds.
+01:17  waldner: those must be very huge files
+01:18  kingsley: That's how long 30 tries took.
+01:18  waldner: ah
+01:18  waldner: yes, it's better to repeat the test a number of times
+01:18  kingsley: One file is 307 MB. The other is 200,000.
+01:19  waldner: then i suspect my code isn't doing what you wanted
+01:19  kingsley: In my case, I'd like to paste 58,000 files together into one big file.
+01:19  kingsley: However, it's taking longer than I'd like.
+01:20  waldner: that'd probably be hard for awk too
+01:20  kingsley: If anyone here happens to have any suggestions for speeding up pasting thousands of files together, feel free to let me know
+01:20  waldner: you mean each line in the final file would be made of 58000 fields one from each of the input files?
+01:20 --- mac- is now known as mac`u
+01:21  waldner: in other words, you're doing "paste file1 file2 file3.... file58000" ?
+01:24  kingsley: waldner: Your modesty is a fine quality, and I'm happy to report that your code did "paste" two files together, which is part of what I want.
+01:24  kingsley: waldner: I just need speed.
+01:25  waldner: yes, but things change quite a bit between two files and 58000
+01:28  kingsley: waldner: Each line of the output file will be made from the second fields in 58,000 files.
+01:28  waldner: so just to be clear
+01:28  waldner: if file1 is
+01:28  waldner: a b c
+01:29  waldner: d e f
+01:29  waldner: and file2 is
+01:29  waldner: q w e
+01:29  waldner: r t y
+01:29  kingsley: waldner: Your "in other words" example is close to what my code does now. 
+01:29  waldner: the output file should have line 1 be like
+01:29  waldner: b w
+01:29  waldner: and line 2
+01:29  waldner: e t
+01:29  waldner: ?
+01:29  waldner: (times 58000)
+01:30  kingsley: waldner: To be precise, for each of the 58,000 files, it extracts the second field from each line, and then pastes them to the end of a running total.
+01:31  waldner: would you be able to paste a simplified example with only, say, 3 or 4 files?
+01:32  waldner: and associated expected output?
+01:32  kingsley: waldner: For your precise example, the output of pasting file2 would be
+01:32  kingsley: a b c w
+01:32  kingsley: d e f t
+01:33  waldner: ok
+01:33  kingsley: these would be saved as a running total.
+01:33  kingsley: I treated file1 as the running total.
+01:33  waldner: so each output line should be composed of the whole line from file1, and the second field from each subsequent file?
+01:35  kingsley: waldner: Yes, I think that's a fair summary of what I'd like to do.
+01:35  waldner: and since you say "running total", perhaps those "a b c" etc. above are instead numbers
+01:35  waldner: and what you want at the end is the grand total of each line?
+01:36  kingsley: I may owe you an apology for writing "running total". The data need not be numbers. By "running total" I hoped to indicate that it was simply a combination of all previously pasted second fields.
+01:37  waldner: ah ok
+01:37  waldner: i don't think paste can do that
+01:38  kingsley: So each line of output should be ...
+01:39  kingsley: 2nd_field_from_file1,2nd_field_from_file2,2nd_field_from_file3,... up to 2nd_field_from_file58000 
+01:39  waldner: do the 58000 files all have the same number of lines?
+01:39  kingsley: At the moment, I see no way to efficiently organize the disc accesses for speed.
+01:40  waldner: ah, so it's only the 2nd field from file1 as well?
+01:40  waldner: I thought previously you said you wanted the whole line from file1
+01:40  kingsley: The files do not start out with the same number of lines. However, I convert them so that they do.
+01:41  Riviera: kingsley: I'm curious what you need that for :)
+01:41  waldner: the main problem is how to accomplish 58000 open files for a process
+01:42  kingsley: waldner: I'm OK with either all of the line from file1, or just its second field.
+01:42  waldner: in theory, this awk could do it (module to 58000 files problem)
+01:43  kingsley: Riviera: I'm consolidating data from 58000 files into one big comma separated variable (aka "csv") file that will fed as input into preexisting software that recognizes the CSV format.
+01:44  Riviera: kingsley: I meant, what this is for, not the technical part :)
+01:44  Riviera: kingsley: but if you don't want to tell, that's perfectly fine, am maybe too curious :)
+01:45  kingsley: waldner: I share your concern about 58000 open files. My code currently loops through one at a time, first standardizing its length, then pasting it to my so called "running total".
+01:45  waldner: perhaps you could use paste, which also takes care of unequal number of input lines
+01:45  kingsley: Riviera: Oh, now I understand your question.
+01:46  waldner: then postprocess the output from paste with awk, to remove unwanted fields etc.
+01:46  kingsley: Riviera: I'm cleaning up data from the big NHANES III survey.
+01:46  waldner: (still not sure whether paste will wirk with 58000 files)
+01:46  cthuluh: assuming that the data is well formatted... awk '{ array[FNR]=array[FNR] $2 " " } END { for (i=1; i<=FNR; i++){ print array[i] }}'
+01:47  Riviera: kingsley: ah, thanks :)
+01:48  waldner: cthuluh: that's cool, however I'm not sure about the amount of memory that would need
+01:48  cthuluh: indeed
+01:49  waldner: and also since input files have differing number of lines, you'd have to track the maximum FNR
+01:49  waldner: and 
+01:49  waldner: ah
+01:49  waldner: let's assume the first 100 file have 50 lines, and the 101st file has 70 lines
+01:49  kingsley: I expect the output file will be 2 or 3 GB.
+01:50  cthuluh: oh, different number of lines? :|
+01:50  waldner: now when you get to the 101st file, you'd have to create empty fields in the records 51-70
+01:50  kingsley: I do appreciate your thoughts.
+01:50  waldner: "retroactively"
+01:50  kingsley: In the interest of full disclosure....
+01:50 * kingsley needs to go soon.
+01:51  kingsley: For what it's worth, the format of each of the 58000 raw input files is 
+01:51  kingsley: sequence_number,data
+01:52  waldner: how big is "data"?
+01:52  kingsley: The 58000 files contain some or all of the possible sequence numbers.
+01:53  kingsley: The resulting output file should be "join"ed on matching sequence numbers.
+01:53  kingsley: waldner: "data" is more or less only about 5 bytes, depending on the file.
+01:53  cthuluh: but sequence are supposed to be ordered, right? :)
+01:54  waldner: ah, the matching on "sequence number" is an additional requirement that rules out paste
+01:54  waldner: (unless preprocessing, that is, but then it becomes costly)
+01:55  kingsley: cthuluh: Yes, I'm happy to report that the sequence numbers are indeed sorted in numeric order.
+01:55  kingsley: cthuluh: They're unique too.
+01:55  cthuluh: phewww :)
+01:55  waldner: ah that's why you said you can take the full line from file1, so you have the sequence number in the output
+01:55  waldner: but that would assume that file1 is also the file with most lines
+01:56  kingsley: waldner: My current approach is a shell script that loops through each of the 58000 files. First it uses the "join" command to pad missing sequence numbers with place holding commas for missing data,
+01:57  waldner: yes
+01:57  kingsley: waldner: then it uses "paste" to combine that correct number of lines to the running total.
+01:57  waldner: you may try
+01:58  kingsley: waldner: Yes, your insight into the "full line from file1, so you have the sequence number in the output" is correct.
+01:58  waldner: awk -F, '{out[$1]=out[$1] sep[$1] $2;sep[$1]=","}END{for(i=1;i in sep;i++)print i,out[$i]}'
+01:58  waldner: ^^
+01:59  waldner: if it fits in memory, it should work
+01:59  waldner: (that's a big if)
+01:59  waldner: s/i in sep/i in out/, though both should work
+02:00  kingsley: waldner: file1 need not have the most sequence numbers. I do a little preprocessing to collect all sequence numbers from the 58000 files before I start using "join" to pad missing sequence numbers with place holding commas.
+02:01  waldner: yes, the above doesn't assume that
+02:02  Riviera: how many lines do these files have again?
+02:02  Riviera: roughly?
+02:03  Riviera: rather thousands or millions?
+02:03  kingsley: Each of the 58,000 files has roughly between 1 and 53,000 lines.
+02:04  kingsley: waldner: I currently have 2GB of RAM, and another 2GB of swap.
+02:05  Riviera: i thought about processing one input (of the 58000) files at a time, appending each line's 2nd field to one output file at a time
+02:05  Riviera: one file per line
+02:05  kingsley: waldner: Although considering the data processing I have in mind, and how cheap RAM is, that may change in the future.
+02:05  Riviera: with a cat as the final operation
+02:07  Riviera: might very well be the worst case scenario about disk io, though
+02:07  Riviera: but since i am not sure about that, i thought i'd mention it :)
+02:07  kingsley: waldner, cthuluh and Riviera: I do appreciate your patience with understanding my computational complexity problem, and I am interested in your informed thoughts.
+02:08  kingsley: Unfortunately, I do need to go now.
+02:08  Riviera: good luck with this
+02:08  kingsley: If it's OK with you, perhaps would can chat later.
+02:08  cthuluh: should be OK ;)
+02:09 * cthuluh tries to understand waldner's suggestion
+02:10  waldner: cthuluh: it's just a standard concatenation, the array is indexed by the sequence number ($1)
+02:10  waldner: the sep trick is to avoid having lines like ",a,b,c"
+02:11  cthuluh: alright
+02:11  waldner: although if we print the sequence in the final output, that may well be ok
+02:11  waldner: so it could be simplified to
+02:11  Riviera: i don't know anything about disk io caching, my idea would live from the circumstance that appending operations might be cached
+02:11  waldner: awk -F, '{out[$1]=out[$1] "," $2 } END{for(i=1;i in sep;i++)print i,out[$i]}'
+02:11  Riviera: but if that is so, i think it could perform relatively well
+02:11  Riviera: and be an easy solution for that
+02:12  cthuluh: waldner: though there's no more sep array here
+02:12  cthuluh: Riviera: what about a ram based filesystem? :>
+02:12  Riviera: cthuluh: RAM might not suffice
+02:12  cthuluh: ok, ok, I'll shut up
+02:14  Riviera: no
+02:14  Riviera: you'll not
+02:14  Riviera: :P
+02:15  cthuluh: :)
+--- Log opened Fri Dec 10 02:27:36 2010
+02:27 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+02:29 --- Channel #awk was synced in 109 seconds
+--- Log closed Fri Dec 10 03:40:32 2010
+--- Log closed Fri Dec 10 03:41:08 2010
+--- Log opened Fri Dec 10 03:46:05 2010
+03:46 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+03:46 --- Server: [anthony.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+--- Log opened Fri Dec 10 03:46:32 2010
+03:46 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+03:47 --- Channel #awk was synced in 107 seconds
+03:48 --- Channel #awk was synced in 100 seconds
+--- Log closed Fri Dec 10 04:21:49 2010
+--- Log closed Fri Dec 10 04:22:15 2010
+--- Log opened Fri Dec 10 04:27:11 2010
+04:27 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+--- Log opened Fri Dec 10 04:27:41 2010
+04:27 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+04:28 --- Channel #awk was synced in 102 seconds
+04:29 --- Channel #awk was synced in 107 seconds
+04:37  pyoor: Hi all.  I was told in #bash that I might be able to find help here with a complicated awk question.  I'm looking to parse a file and do 3 things.  Remove all consecutive spaces and replace them with a single space, convert all \n's to \r's, and again remove all consecutive \r's with a single \r.  Finally, I need to do this everywhere in the file except between string1 and string2, both of which may have multiple occurences throughout the file.
+04:37  pyoor: Hi all.  I was told in #bash that I might be able to find help here with a complicated awk question.  I'm looking to parse a file and do 3 things.  Remove all consecutive spaces and replace them with a single space, convert all \n's to \r's, and again remove all consecutive \r's with a single \r.  Finally, I need to do this everywhere in the file except between string1 and string2, both of which may have multiple occurences throughout the file.
+04:38  pyoor: The line that was suggested to me to remove all double spaces was: awk -v ORS='' '/foo/,/bar/ { if ($0 !~ /bar/) $0 = $0 "  " }; 1'
+04:38  pyoor: The line that was suggested to me to remove all double spaces was: awk -v ORS='' '/foo/,/bar/ { if ($0 !~ /bar/) $0 = $0 "  " }; 1'
+04:43  yitz_: Aww. Take away that spring constraint and it's trivial with tr
+04:43  yitz_: Aww. Take away that spring constraint and it's trivial with tr
+04:44  yitz_: "between" gets complicated when they can be on the same line
+04:44  yitz_: "between" gets complicated when they can be on the same line
+04:44  pyoor: yitz_: I was using tr \\n \\r < "$1" | tr -s \\r
+04:44  pyoor: yitz_: I was using tr \\n \\r < "$1" | tr -s \\r
+04:44  pyoor: I didn't realize that there were potentially \n's in the string1...string2
+04:44  pyoor: I didn't realize that there were potentially \n's in the string1...string2
+--- Log closed Fri Dec 10 07:41:05 2010
+--- Log closed Fri Dec 10 07:41:35 2010
+--- Log opened Fri Dec 10 07:46:28 2010
+07:46 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+07:46 --- Server: [verne.freenode.net] [freenode-info] if you're at a conference and other people are having trouble connecting, please mention it to staff: http://freenode.net/faq.shtml#gettinghelp
+--- Log opened Fri Dec 10 07:47:01 2010
+07:47 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+07:47 --- Channel #awk was synced in 98 seconds
+07:48 --- Channel #awk was synced in 108 seconds
+08:05  kingsley: I'm back.
+08:05  kingsley: I'm back.
+08:08  kingsley: waldner and Riviera: While I was away, I had an opportunity to reconsider my computationally complex problem.
+08:08  kingsley: waldner and Riviera: While I was away, I had an opportunity to reconsider my computationally complex problem.
+08:08  kingsley: I also reviewed the comments made after I left.
+08:08  kingsley: I also reviewed the comments made after I left.
+08:10  kingsley: I was initially impressed with the suggestion of updating an associative array for speed.
+08:10  kingsley: I was initially impressed with the suggestion of updating an associative array for speed.
+08:11  kingsley: However, after some thought, two problems occurred to me. 
+08:11  kingsley: However, after some thought, two problems occurred to me. 
+08:12  kingsley: 1.) Even if there's no matching sequence number, a place holding comma is still required to properly align the columns of csv output.
+08:12  kingsley: 1.) Even if there's no matching sequence number, a place holding comma is still required to properly align the columns of csv output.
+08:13  kingsley: 2.) My computer may not have enough memory to construct a full csv array.
+08:13  kingsley: 2.) My computer may not have enough memory to construct a full csv array.
+08:15  kingsley: It seems to me that the greatest computational inefficiency is having to re-read the data in the various files before reaching the point where reading or writing is required.
+08:15  kingsley: It seems to me that the greatest computational inefficiency is having to re-read the data in the various files before reaching the point where reading or writing is required.
+08:16  kingsley: Perhaps re-reading could be minimized by using files and their points simultaneously.
+08:16  kingsley: Perhaps re-reading could be minimized by using files and their points simultaneously.
+08:20  pr3d4t0r: kingsley: That sounds interesting.  What was the description of the original problem?
+08:20  pr3d4t0r: kingsley: That sounds interesting.  What was the description of the original problem?
+08:20  kingsley: My thoughts are evolving, but at the moment, I'm considering collecting bunches of N of the 58,000 files, and for each bunch, and for each file within that bunch, using "join" to pad it with place holding ,s for the missing sequence numbers and data, and passing those N padded files to join.
+08:20  kingsley: My thoughts are evolving, but at the moment, I'm considering collecting bunches of N of the 58,000 files, and for each bunch, and for each file within that bunch, using "join" to pad it with place holding ,s for the missing sequence numbers and data, and passing those N padded files to join.
+08:21  kingsley: I hope join will maintain pointers to the end of each, then avoiding re-reading.
+08:21  kingsley: I hope join will maintain pointers to the end of each, then avoiding re-reading.
+08:22  kingsley: pr3d4t0r: See about 8 hours ago in #awk.
+08:22  kingsley: pr3d4t0r: See about 8 hours ago in #awk.
+08:23  kingsley: Oops! I just noticed a typo. Instead of writing "and passing those N padded files to join." I meant to write "and passing those N padded files to paste."
+08:23  kingsley: Oops! I just noticed a typo. Instead of writing "and passing those N padded files to join." I meant to write "and passing those N padded files to paste."
+08:24  kingsley: The final operation would be to paste together the 58,000/N bunches of previously pasted csv.
+08:24  kingsley: The final operation would be to paste together the 58,000/N bunches of previously pasted csv.
+08:34  pr3d4t0r: kingsley: Checking.
+08:34  pr3d4t0r: kingsley: Checking.
+08:34  pr3d4t0r: kingsley: Is this the paste thing?
+08:34  pr3d4t0r: kingsley: Is this the paste thing?
+08:35  kingsley: pr3d4t0r: Yes.
+08:35  kingsley: pr3d4t0r: Yes.
+08:35  pr3d4t0r: kingsley: OKi.
+08:35  pr3d4t0r: kingsley: OKi.
+08:47  pr3d4t0r: kingsley: OKi, I'm back.
+08:47  pr3d4t0r: kingsley: OKi, I'm back.
+09:40  pr3d4t0r: kingsley: Sorry, first day at work after a lot of chaos and I can't concentrate.
+09:40  pr3d4t0r: kingsley: Sorry, first day at work after a lot of chaos and I can't concentrate.
+09:40  pr3d4t0r: kingsley: Are you still around?
+09:40  pr3d4t0r: kingsley: Are you still around?
+09:40  pr3d4t0r: Er, can't concentrate on IRC.
+09:40  pr3d4t0r: Er, can't concentrate on IRC.
+09:41  kingsley: pr3d4t0r: Yes, I'm still here. 
+09:41  kingsley: pr3d4t0r: Yes, I'm still here. 
+09:41  pr3d4t0r: kingsley: OKi, so if I understand correctly, you have 58,000 text files.
+09:41  pr3d4t0r: kingsley: OKi, so if I understand correctly, you have 58,000 text files.
+09:41  kingsley: pr3d4t0r: Yes.
+09:41  kingsley: pr3d4t0r: Yes.
+09:42  pr3d4t0r: kingsley: You want to merge them so that you have 58,000 line 1s followed by 58,000 line 2s, followed... by 58,000 line Ns.
+09:42  pr3d4t0r: kingsley: You want to merge them so that you have 58,000 line 1s followed by 58,000 line 2s, followed... by 58,000 line Ns.
+09:42  pr3d4t0r: kingsley: Yes?
+09:42  pr3d4t0r: kingsley: Yes?
+09:42  kingsley: That's close.
+09:42  kingsley: That's close.
+09:42 09:42  pr3d4t0r: kingsley: Can you refine my description?
+ pr3d4t0r: kingsley: Can you refine my description?
+09:44  kingsley: I want to join the 58,000 files on their first field.
+09:44  kingsley: I want to join the 58,000 files on their first field.
+09:45  kingsley: Each line of output should contain data from all 58,000 files for that uniquely identifying first field.
+09:45  kingsley: Each line of output should contain data from all 58,000 files for that uniquely identifying first field.
+09:46  kingsley: Each of the 58,000 files has two fields, delimited by a comma.
+09:46  kingsley: Each of the 58,000 files has two fields, delimited by a comma.
+09:46  kingsley: The first field is the unique ID, and the second field is data corresponding to that unique ID. 
+09:46  kingsley: The first field is the unique ID, and the second field is data corresponding to that unique ID. 
+09:46  kingsley: Each of the 58,000 files has a different type of data.
+09:46  kingsley: Each of the 58,000 files has a different type of data.
+09:47  kingsley: Many files have no data for many IDs. In that case, just a place holding comma should be inserted.
+09:47  kingsley: Many files have no data for many IDs. In that case, just a place holding comma should be inserted.
+09:48  pr3d4t0r: kingsley: ID1,42\nID2,69\nID3,88\n and so on?
+09:48  pr3d4t0r: kingsley: ID1,42\nID2,69\nID3,88\n and so on?
+09:48  kingsley: The goal is to produce a comma separated variable (aka "csv") format output.
+09:48  kingsley: The goal is to produce a comma separated variable (aka "csv") format output.
+09:48  kingsley: Yes, that's the basic layout for each of the 58,000 files.
+09:48  kingsley: Yes, that's the basic layout for each of the 58,000 files.
+09:50  kingsley: The goal is to produce something like ID1,42,73,89,23\nID2,69,23,32,45\n and so on, only with about 58,000 fields per line.
+09:50  kingsley: The goal is to produce something like ID1,42,73,89,23\nID2,69,23,32,45\n and so on, only with about 58,000 fields per line.
+09:51  kingsley: Does that make sense?
+09:51  kingsley: Does that make sense?
+09:51  pr3d4t0r: kingsley: Yeah.
+09:51  pr3d4t0r: kingsley: Yeah.
+09:52  pr3d4t0r: kingsley: This sounds like a Java problem, actually.
+09:52  pr3d4t0r: kingsley: This sounds like a Java problem, actually.
+09:52  pr3d4t0r: kingsley: It's too complex for awk.  Maybe Sawzall has something for it, but it's too exotic.
+09:52  pr3d4t0r: kingsley: It's too complex for awk.  Maybe Sawzall has something for it, but it's too exotic.
+09:52  pr3d4t0r: kingsley: Python might work out well too, since it has better list and dictionary management than awk.
+09:52  pr3d4t0r: kingsley: Python might work out well too, since it has better list and dictionary management than awk.
+09:53  pr3d4t0r: kingsley: Although...
+09:53  pr3d4t0r: kingsley: Although...
+10:12  waldner: kingsley: yes, that occurred to me too later
+10:12  waldner: kingsley: yes, that occurred to me too later
+10:12  waldner: with my method, there will be missing fields in some lines
+10:12  waldner: with my method, there will be missing fields in some lines
+10:28  pr3d4t0r: kingsley: I'm thinking Python would work out well too.
+10:28  pr3d4t0r: kingsley: I'm thinking Python would work out well too.
+10:28  pr3d4t0r: kingsley: Plus, we can pack that array quite a bit if the values are numerical.
+10:28  pr3d4t0r: kingsley: Plus, we can pack that array quite a bit if the values are numerical.
+10:28  pr3d4t0r: kingsley: Better memory utilization.
+10:28  pr3d4t0r: kingsley: Better memory utilization.
+10:43  waldner: kingsley: awk -F, 'FNR==1 {nfiles++} {out[$1,nfiles]=$2; if($1>max)max=$1} END {for(i=1;i<=max;i++){line=i; for(j=1;j<=nfiles;j++){line=line "," out[i,j]}; print line}}' file1 ... file58000
+10:43  waldner: kingsley: awk -F, 'FNR==1 {nfiles++} {out[$1,nfiles]=$2; if($1>max)max=$1} END {for(i=1;i<=max;i++){line=i; for(j=1;j<=nfiles;j++){line=line "," out[i,j]}; print line}}' file1 ... file58000
+10:44  waldner: that should correctly create missing fields
+10:44  waldner: that should correctly create missing fields
+10:44  waldner: that's still the memory issue, though
+10:44  waldner: that's still the memory issue, though
+10:44  waldner: *there's
+10:44  waldner: *there's
+10:50  pr3d4t0r: waldner: gawk can handle it.
+10:50  pr3d4t0r: waldner: gawk can handle it.
+10:51  waldner: it needs to be tried out with the actual dataset, which according to kingsley is quite huge
+10:51  waldner: it needs to be tried out with the actual dataset, which according to kingsley is quite huge
+10:51  waldner: he was expecting a 2/3GB output, and his machine has 2G RAM and 2G swap
+10:51  waldner: he was expecting a 2/3GB output, and his machine has 2G RAM and 2G swap
+10:51  waldner: *might* work, if a bit tightly
+10:51  waldner: *might* work, if a bit tightly
+10:52  pr3d4t0r: waldner: I bet gawk can handle it.
+10:52  pr3d4t0r: waldner: I bet gawk can handle it.
+10:52  waldner: also depending on the actual filenames, passing 58000 arguments to awk may hit the maximum command line length limit
+10:52  waldner: also depending on the actual filenames, passing 58000 arguments to awk may hit the maximum command line length limit
+10:53  pr3d4t0r: waldner: Maybe.
+10:53  pr3d4t0r: waldner: Maybe.
+10:53  waldner: that could be worked around, though
+10:53  waldner: that could be worked around, though
+10:53  pr3d4t0r: waldner: I'd just write something like this in Python or Java or something else.
+10:53  pr3d4t0r: waldner: I'd just write something like this in Python or Java or something else.
+10:53  pr3d4t0r: waldner: The job is too big, even if the individual items aren't.
+10:53  pr3d4t0r: waldner: The job is too big, even if the individual items aren't.
+11:51  pgas: maybe several pass? first merge the files 250 by 250, then merge the resulting files? (adjustin the numbers according to the limits)?
+11:51  pgas: maybe several pass? first merge the files 250 by 250, then merge the resulting files? (adjustin the numbers according to the limits)?
+11:53  pgas: (I haven't read the whole thing..)
+11:53  pgas: (I haven't read the whole thing..)
+11:53  waldner: pgas: basically, he wants to do what "paste" would do, with 58000 fields, with varying numbers of lines each, taking only $2 from each file
+11:53  waldner: pgas: basically, he wants to do what "paste" would do, with 58000 fields, with varying numbers of lines each, taking only $2 from each file
+11:54  waldner: and create missing lines/fields in the output for files where they were not present
+11:54  waldner: and create missing lines/fields in the output for files where they were not present
+11:54  waldner: each line in each file is
+11:54  waldner: each line in each file is
+11:54  waldner: sequence_number,data
+11:54  waldner: sequence_number,data
+11:54  waldner: in the final output, lines should be joined by sequence number
+11:54  waldner: in the final output, lines should be joined by sequence number
+11:56  waldner: -5s/fields/files/
+11:56  waldner: -5s/fields/files/
+--- Log opened Fri Dec 10 13:05:29 2010
+13:05 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+13:07 --- Channel #awk was synced in 103 seconds
+16:04 --- maxim is now known as Guest61043
+16:15 --- Vorpal_ is now known as Vorpal
+18:45  Boss: I executing MySQL Query in Shell Script like this : tenants_yesterday=`mysql -h $HOST -u $USER_NAME -p$PASSWORD -N -s -e "$sql_yesterday"`  .  The shell script variable "tenant_yesterday" contain all row . I want to send this data to awk for further processing.  I doing like this : echo $tenants_yesterday | awk -F "\t" '{print "Y""\t"$1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9} . It prints the data . The problem is the data is not tab separated . It print
+18:45  Boss: s like big single line. Any help will be appreciated.
+18:48  igli: quote the variable, Boss
+18:48  igli: echo "$tenants_yesterday" | awk ..
+18:50  Boss: igli: Thanks .It works
+18:50  igli: yw
+--- Log closed Fri Dec 10 19:46:41 2010

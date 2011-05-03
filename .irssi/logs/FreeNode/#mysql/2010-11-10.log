@@ -1,0 +1,1238 @@
+--- Log opened Wed Nov 10 09:12:37 2010
+09:12 --- Users 542 nicks [0 ops, 0 halfops, 0 voices, 542 normal]
+09:12 --- Channel #mysql was synced in 3 seconds
+09:13  iaj: in order to manage a database with 130k entries... and like 5 users who simultaneously access and do queries on that database.. what system specs are needed for that/
+09:13  archivist: a 486
+09:13  archivist: thats tiny
+09:20  iaj: archivist: theres a quad core 2.8ghz intel xeon currently but it seems slow at times.. theres a php / hows that called - a platform that's accessable via wwww.. but it only does one job at a time - so if a user does a large query - others have to noticeably wait :\
+09:20  archivist: iaj fix your slow queries
+09:21  iaj: how would I do that?
+09:21  iaj: theres a company that's hosting that platform.
+09:21  iaj: and I was told to get information about how to make it faster
+09:21  iaj: I think the problem is that it handles one query at a time
+09:21  iaj: is that usual?
+09:22  archivist: change to innodb engine if you have many writes
+09:22  archivist: no
+09:23  archivist: unless you are using myisam and waiting for a table lock to be released due to a write
+09:24  archivist: iaj, I have an old P4 here with 1 gig ram and I tested 50 concurrent users
+09:25  iaj: archivist: how large is that database?
+09:25  archivist: one table has 15million rows ish
+09:25  archivist: still tiny
+09:25  iaj: archivist: no writes at all.. only queries mostly
+09:25  iaj: just a search for a certain string (in email for example) 
+09:25  archivist: you have a design fault then
+09:26  iaj: takes like 5-10 sec
+09:26  archivist: you are doing a table scan
+09:26  archivist: use fulltext index
+09:27  iaj: its mostly a select * from <table> where email = ...
+09:27  iaj: fulltext index?  how'd I do that?
+09:27  archivist: http://dev.mysql.com/doc/refman/5.1/en/fulltext-search.html
+09:28  awk: sheesh like I honstly must be the dumbest mysql user...
+09:28  awk: SELECT * FROM queue_log  WHERE DATE_SUB(CURDATE(), INTERVAL 6 MONTH) > time;
+09:28  awk:  that works, why can't I now DELETE * FROM..... ?
+09:28  iaj: oh so I need to create a ttable with MyISAM format?
+09:28  awk: ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '* FROM queue_log  WHERE DATE_SUB(CURDATE(), INTERVAL 6 MONTH) > time' at line 1
+09:28  iaj: and then can use that full-text search?
+09:28  iaj: ^ archivist  .. will that improve on speed
+09:29  iaj: but can I do %foobar.com% searches with fulltext searches?
+09:29  archivist: awk rennmove the *
+09:29  archivist: iaj like leading % cannot use an index and that forces a scan
+09:31  ckw: I'm trying to create a stored procedure and am getting a syntax error with mysql 5.1, wondering if I'm missing something obvious
+09:31  iaj: i think most of the users do a search with a +++ pattern in the end which browses through all columns of the table and tries to find the string before the +++ to be a substring
+09:31  ckw: Even this throws an error: CREATE PROCEDURE map_redirects()
+09:31  ckw: BEGIN DECLARE d INT;
+09:31  ckw: END;
+09:32  archivist: ckw delimiter?
+09:32  ckw: ???
+09:32  codeshah: hey guys I have a table called "to" in an analytics app
+09:32  codeshah: when I do 'group by to' it fails... what can I do?
+09:33  archivist: `to`
+09:33  ckw: Ah, I'll try
+09:33  codeshah: archivist, thanks
+09:33  ckw: Er, nvm
+09:34  ckw: archivist, I'm rather new to stored procedures, sorry. I never changed the query separator from ";" if that's what you were asking
+09:34  archivist: yes
+09:35  ckw: For what it's worth, the error is this:
+09:35  ckw: ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+09:37  archivist: explode
+09:37  the_wench: http://forge.mysql.com/tools/tool.php?id=243 or http://www.collection.archivist.info/explode.sql or  http://www.collection.archivist.info/explode2.sql
+09:40  sasori: question: how can i check only the engine type of a table ?
+09:40  archivist: is
+09:40  the_wench: Information Schema. For more info:   http://dev.mysql.com/doc/refman/5.1/en/information-schema.html
+09:42  sasori: i mean a shortcut command ?
+09:43  archivist: its a one liner
+09:43  ckw: archivist, Thanks, that seems to be getting closer
+09:43  ckw: Now I just need to get the full procedure finished
+09:44  sasori: i got it select table_name , engine from information_schema;  ..tnx archivist :D
+09:48  awk: what is the largest a database can run
+09:49  ckw: awk, Facebook uses mysql, and they have billions of records; really depends on your configuration, hardware, and tuning
+09:50  awk: Ok, then i must be doing something wrong, not sure how i can fix this...
+09:50  ckw: archivist, Thanks, got it semi working (now it's just figuring out what I did wrong)
+09:50  awk: I can't do anything on this mysql server
+09:51  awk: cant dump the db as so many records are being writen that it causes mysql to crash
+09:56  logan_wolf: hi all
+09:56  the_wench: oh hai logan_wolf
+09:57  logan_wolf: which join should I apply on two tables with same structure which shows the entries which are present in any one of them but not both
+09:59  archivist: a not in b
+09:59  the_wench: SELECT a.* FROM a LEFT JOIN b ON a.id = b.id WHERE b.id IS NULL;
+10:03  awk: Is there some sum which would be, eg: the size of the .MYI should be 60% of the size of .MYD ?
+10:03  archivist: no
+10:03  archivist: awk you seem to be stabbing in the dark
+10:04  Karen_m: gtowey, still up?
+10:04  Karen_m: gtowey,  Error   | 1449 | The user specified as a definer ('boot'@'') does not exist    .. this is what i get when I have a trigger created from init-file :(
+10:04  Karen_m: when the trigger executes
+10:05  Karen_m: i'll skip dropping the trigger and use a 3rd table
+10:05  Karen_m: oh definer
+10:10 --- dr0id1 is now known as dr0id
+10:13 --- brad` is now known as brad
+10:20  happynoff: Hi there. Is there a way, when using mysql in command line to not show the column names ? thanks
+10:22  Xgc: happynoff: -N might be helpful.
+10:23  Xgc: happynoff: --help will provide other hints.
+10:23  happynoff: Xgc: ok thanks
+10:23  happynoff: exactly what I needed, thanks ! :)
+10:26  ethanol: mornin' all!
+10:46  alus: which setting should I crank up if I have innodb and lots of memory?
+10:47  vhuren: if I have an innodb table and a lot of stuff get deleted will the indexes still be efficient? or do I need to perform some sort of maintenance?
+10:55  Isotopp_: alus: in /etc/sysctl.conf, assuming linux, set vm.swappiness = 0
+10:55  Isotopp_: alus: and run sysctl -p
+10:55  Isotopp_: alus: that will delay swapping of large processes as long as possible
+10:55  Isotopp_: alus: and allow you to grow the mysqld process size very large without swapping
+10:56  Isotopp_: alus: next step then is to make innodb_buffer_pool as large as possible without going into swap, ever
+10:56  Isotopp_: alus: that is like playing blackjack
+10:56  Isotopp_: alus: for example, in our 96G nehalems we run with 80G buffer pool
+10:56  Isotopp_: alus: and that is about safe
+10:57  Isotopp_: alus: also, if running 5.1 with the innodb plugin (recommended), you can make the innodb_log_file_size larger, up to say 2G total log file
+10:57  Isotopp_: alus: because in innodb plugin recovery is much faster and there is hardly any need any more to keep the redo log size limited,
+10:57  awk: guys: can you cp -R db1 to db2 while mysql is running ?
+10:57  Isotopp_: alus: also adaptive flushing manages the amount of dirty pages a lot better, so no need to small redo log here any more as well
+10:57  Isotopp_: awk: in general - no
+10:58  Isotopp_: awk: it is recommended you are running mysql on xfs on lvm, assuming linux.
+10:58  awk: I can't use mysqldump as the load of the box will go beyond 20+ and the voice quality will be shocking
+10:58  Isotopp_: awk: then you can use mylvmbackup to handle that situation in a nice way
+10:58  awk: Ok, but it's a 24 hour call centre, it never goes down
+10:58  awk: so I have no 'after hours' to work with
+10:59  Isotopp_: that is why you plan such systems with snapshot capability or redundancy in advance.
+10:59  Isotopp_: is that a raid underneath?
+10:59  Naktibalda: copying of database doesn't look like a crytical task, why do you want to do it?
+10:59  awk: check here: ylvmbackup obtains a read lock on all tables and flushes all server caches to disk...
+10:59  Isotopp_: awk, yes
+10:59  awk: this will cause a major problem as my software will cause the box to crash if it can't write to the table
+11:00 --- Northwoods is now known as Northwoods|Away
+11:00  Isotopp_: awk: mylvmbackup does a flush tables, that forces all dirty pages out
+11:00  Isotopp_: awk: then it does flush tables with read lock
+11:00  Isotopp_: awk: that is a fast flush, because the lockless flush tables flushed most dirty data out
+11:00  Isotopp_: awk: the read lock will make all processes wait, not fail
+11:00  Isotopp_: awk: then it runs lvcreate -s to create a snapshot
+11:00  awk: Isotopp_: so a table at 5gb will not be a problem?
+11:00  Isotopp_: awk: that is a sub-second operation
+11:00  Isotopp_: awk: then it unlock tables
+11:01  Isotopp_: awk: so there is a stall, a pileup of 1-2s
+11:01  Isotopp_: awk: it then mounts the snapshot and reads off the inert snapshot
+11:01  awk: Ok I understand, let me read up on this program a bit more
+11:02  Isotopp_: awk: a lvm snapshot is a copy-on-write mechanism, and will add for the first write of a cloned block 3 phy operations for each log operation
+11:02  Isotopp_: awk: so logical write -> intercept write, read old block into memory, write copy of old data to snap, resume orig write
+11:02  Isotopp_: awk: this assumes that you have sufficient i/o capacity
+11:03  Isotopp_: awk: we have about 250 operational mysql instances, about 100 in a single replication hierarchy, and we run around 6000-10000qps. for us, mylvmbackup works nicely
+11:03  Isotopp_: awk: centos 5, mysql 5.1.49 innodb plugin on xfs on lvm on raid-10 hp controller
+11:03  awk: Isotopp_: can I paste my my.cnf to pastebin and you can validate all is correct?
+11:03  Isotopp_: no
+11:03  Isotopp_: awk: i am about to vanish into a meeting right now
+11:04  awk: blah... i can be quick :D
+11:04  awk: ok talk when youb ack then :D
+11:09 --- Farkie[Away] is now known as Farkie
+11:10  Puck`: uh i can't remember what i need to google, meh .. I need to count based on the day part from a date field, so i need to extract it first, and feed this in to the SQL query.. What's the query inside query called? :q
+11:10  Puck`: i need to lookup up an example. I forgot how to do it properly
+11:10  Naktibalda: GROUP BY DATE(field)
+11:10  Naktibalda: !n Puck` date(
+11:10  the_wench: Puck` see http://dev.mysql.com/doc/refman/5.1/en/date-and-time-functions.html#function_date
+11:11  Puck`: hmm Naktibalda, thanks again
+11:11 * Puck` goes reading
+11:11  Naktibalda: !n Puck` subqueries
+11:11  the_wench: Sorry - I have no idea what function you're talking about! but try http://dev.mysql.com/subqueries see reply term
+11:11  Naktibalda: !n Puck` subquery
+11:11  the_wench: Sorry - I have no idea what function you're talking about! but try http://dev.mysql.com/subquery see reply term
+11:11  Naktibalda: whatever, I don't see a need for it in your question
+11:11  _ramo: hi
+11:11  the_wench: hello _ramo, you have a question?
+11:12  _ramo: is it possible to select just the schema from a table with a statement or from the mysql (workbench) without the whole data?
+11:13  Naktibalda: SHOW CREATE TABLE tablename
+--- Log closed Wed Nov 10 11:22:11 2010
+--- Log opened Wed Nov 10 11:22:33 2010
+11:22 --- Users 561 nicks [0 ops, 0 halfops, 0 voices, 561 normal]
+11:22  awk: Ok I don't have a LVM partition, any other way I can dump this data, without impacting the lock on the db and causing a severe impact to the load?
+11:24  _ramo: Naktibalda: should that be a solution for my issue?
+11:24  Naktibalda: what issue? :)
+11:25 --- Channel #mysql was synced in 157 seconds
+11:25  _ramo: is it possible to select just the schema from a table with a statement or from the mysql (workbench) without the whole data? :)
+11:25  Naktibalda: tias
+11:25  the_wench: Try it and see, its quicker to type it on your system and try it than wait for one of us to tell you its ok
+11:26 --- Northwoods|Away is now known as Northwoods
+11:27  _ramo: Naktibalda: if i type: SHOW CREATE TABLE matmyTable; i get the error message: Error Code 1046 No database selected
+11:28  Naktibalda: USE yourdatabase; SHOW CREATE TABLE matmyTable;
+11:28  Naktibalda: or SHOW CREATE TABLE yourdatabase.matmyTable;
+11:30  Puck`: Naktibalda: just so i understand properly, what I'm tryng to do is : ate_of_review>DATE_SUB('2010-11-06', INTERVAL 7 day) and date of review is a DATE type, so 2010-11-07 00-00-00 format. Would GROUP BY help in this case too?
+11:31  Naktibalda: format of DATE is 2010-11-07, what a surprise :)
+11:31  Puck`: erm :P
+11:32  Puck`: so what i'm trying to achieve is show the tables for particular days, like show only the ones from 2010-11-07, 2010-11-18, etc., would i need to extract the date part from date_of_review, or is there soemthing i can use that only looks at the date part?
+11:32  Naktibalda: date part of date? :)
+11:33  Puck`: well year-month-day part of date
+11:33  Puck`: ohh i don't even know how to explain
+11:33  Naktibalda: what other part does it have?
+11:33  Puck`: hour-minute-second
+11:33  Naktibalda: that's not DATE
+11:33  Puck`: that's time
+11:34  Naktibalda: no, it's a DATETIME
+11:34  Puck`: oh, right
+11:34  awk: Please guys I have no where else to turn, I need to dump a database without causing a spike on the system, is there a way I can do this ? It will take around 45 minutes to dump by that time my system is throw out the door ?
+11:34  awk: what other options are there?
+11:34  Puck`: when data is insterted i use NOW()
+11:34  Puck`: *inserted
+11:34  Naktibalda: awk: myisam or innodb?
+11:37  alus: does anyone know if http://bugs.mysql.com/bug.php?id=15815 is fixed in mysql 5.0.77-log ?
+11:37  awk: Naktibalda: MyISAM
+11:38  Naktibalda: no options, probably
+11:38  awk: ;_;
+11:40  awk: anything you can suggest?
+11:40  awk: if I was using innodb what could I do ?
+11:40  jink: alus: http://bugs.mysql.com/bug.php?id=15815#c92224
+11:41  alus: yay, dunno how I missed that.
+11:41  jink: alus: http://bugs.mysql.com/bug.php?id=15815#c101828
+11:41  jink: http://bugs.mysql.com/bug.php?id=15815#c108487
+11:42  alus: do you know if it's best to set innodb_thread_concurrency to 0 now?
+11:42  jink: I haven't a clue.  I just read the bug messages.
+11:42  Naktibalda: awk: For transactional tables such as InnoDB, --single-transaction is a much better option than --lock-tables because it does not need to lock the tables at all.
+11:43  awk: ahh, i seee..
+11:43  awk: should i try covert it ?
+11:43  Naktibalda: it will take hours, at best
+11:43 --- pento_ is now known as pento
+11:44  awk: Naktibalda: will it cause HIGH load ?
+11:44  awk: and the db to become unresponsive ?
+11:46  Naktibalda: yes
+11:46  awk: haha, thanks *bangs head on every piece of furniture in his office*
+11:47  awk: Naktibalda: why would the developer of this use MyISAM instead of InnoDB ?
+11:47  awk: Is there a reason why one would even go this route ?
+11:47  Naktibalda: because it's default engine
+11:48  awk: Naktibalda: but a developer that knows his database is going to grow to gigantic sizes and knows there will be no 'after hours' as it's 24 7, why ? Or is it just because he never thought this far ahead?
+11:52  lillis: I have a certain table layout that i want to copy and insert into my database but with a different table prefix, what way would be the best to go about this?
+11:53  Naktibalda: edit dump file :)
+11:54  yak[work]: I would dare you to find a text editor under Windows what would work with text files larger then 1GB though :P
+11:55  Naktibalda: use proper tools, like sed
+11:57  lillis: Naktibalda: that's a good tip, thanks
+11:57  lillis: and yes, i'll use sed indeed :)
+11:57  Diverdude: Im trying to execute an sql in the mysql server and i get: [pp] ERROR 1030: Got error 127 from storage engine. What does that mean?
+11:58  Naktibalda: !perror 127
+11:58  the_wench: OS error code 127:  Key has expired
+11:58  the_wench: MySQL error code 127: Record file is crashed
+11:58 --- Cobi_ is now known as Cobi
+11:58  Diverdude: ehhh that sounds quite bad?
+11:59  dub54: anyway I can select all rows that don't have a valid email address format
+11:59  archivist: !man repair
+11:59  the_wench: see http://dev.mysql.com/doc/refman/5.1/en/repair.html
+--- Log closed Wed Nov 10 12:10:11 2010
+--- Log opened Wed Nov 10 12:10:40 2010
+12:10 --- Users 572 nicks [0 ops, 0 halfops, 0 voices, 572 normal]
+12:11  lenswipe: hey guys
+12:11  lenswipe: how do i retrospectively enforce referential integrity in mysql?
+12:12 --- Channel #mysql was synced in 147 seconds
+12:14  adaptr: by adding a FK
+12:15  lenswipe: FK?
+12:15  the_wench:  http://dev.mysql.com/doc/refman/5.1/en/innodb-foreign-key-constraints.html
+12:15  lenswipe: ah right
+12:16  lenswipe: adaptr, thanks :)
+12:16  lenswipe: adaptr, by the way do you use failbox?
+12:16  lenswipe: and if s od
+12:16  lenswipe: and if so, does it lock up every couple of seconds?
+12:16  adaptr: you wot ?
+12:16  lenswipe: firefox locks up every couple of seconds
+12:16  lenswipe: im wondering if its just me
+12:17  Kasreyn: anyone using mysql++ ? setting mysqlpp::SslOption doesn't work for me. this works though: mysql -hmy.dyndns.org -uX509Tester -ppassword DB --ssl --ssl-ca=ca-cert.pem --ssl-key=client-key.pem --ssl-cert=client-cert.pem
+12:17  lenswipe: who posted that?
+12:17  lenswipe: i see no nickname
+12:17  lenswipe: ah Kasreyn
+12:18  Kasreyn: lenswipe: yes?
+12:19  lenswipe: Kasreyn, i couldnt see your nick at first
+12:19  Kasreyn: hehe. you know how you use SSL?
+12:19  lenswipe: nope
+12:19  lenswipe: not a freaking clue XD
+12:20  alus: jeez, Query_time: 783.
+12:20  adaptr: lenswipe: A. look at the topic for this channel. B. mind your language. C. get your brain together, you're spouting stream-=of-something
+12:20  alus: Rows_examined: 729935..
+12:20  lenswipe: adaptr, ???
+12:21  lenswipe: adaptr, A quote: "Humor *mandatory*" B. I didnt swear C I dont even know what you're on about
+12:21  adaptr: lenswipe: humour, yes. offtopic, no.
+12:21  adaptr: now pipe down
+12:22  lenswipe: ...okay?
+12:22  Kasreyn: ragequit
+12:23  adaptr: quittard
+12:28  awk: Ok I understand it isn't best practice to cp a DB file to a new path, however it won't cause a lock on the DB so this will be about the only solution I have using MyISAM
+12:31  awk: Ok, that causes the box to SKY rocket...
+12:40  Naktibalda: copying of file failed?
+12:43  Naktibalda: awk: INSERT SELECT in small blocks, like 10 000 records at a time
+12:49  eth: Hello. I got a problem with a pretty simple query that isn't working for some reason and I have no idea why. If anyone can give me insight as to what I'm doing wrong it would be awesome :) http://codepad.org/RUSHxPni
+12:50  awk: Naktibalda: no copied work, just pushed the load too high, so I copied to a seperate drive, then copied back.. now doing a mysqlcheck to fix tables that have not been closed properly and fix any other error during this peroid
+12:50  Naktibalda: !tell eth about 1064
+12:50  the_wench: eth a mysql syntax error is generated at the first token found that is unexpected. Look directly at or before the opening singlequote of the error message to find the mistake in your SQL.
+12:51  [raymond]: eth: read the topic
+12:51  Naktibalda: eth, character is a reserved word, so you have to quote it, like in CREATE TABLE
+12:52  eth: hah, awesome. thanks :)
+12:52  [raymond]: or, even better, read the topic
+12:52  Naktibalda: yes, it contains a lot of funny things
+12:53  eth: [raymond], haha, yeah I would never use reserved words knowingly. Will modify my table! :)
+12:53  [raymond]: eth: excellent choice.
+12:54 --- ChanServ sets modes [#mysql +o [raymond]]
+13:10 --- [raymond] sets modes [#mysql -o [raymond]]
+13:20  Lindrian: hey
+13:20  Lindrian: I am to create a search function where I will filter the necessary data out with a mysql select statement
+13:20  Lindrian: I will use LIKE, however, I want the user to have the ability to match exact word and wildcards too
+13:21  Lindrian: That I can simply do by replacing say * with %
+13:21  Lindrian: however, will 'select * from blah where a like 'b'' result in an exact match?
+13:21  archivist: dont use like for speedy searches
+13:21  Lindrian: what else can I use?
+13:22  jink: fulltext search, I guess?
+13:22  archivist: like;b%' can use an index '%leadin%' cannot
+13:22  Lindrian: okay
+13:22  Lindrian: yes its a fulltext sarch
+13:22  Lindrian: search*
+13:22  Lindrian: or atleast its not limited to single words.
+13:23  archivist: use a fulltext index and match against
+13:23  Lindrian: but you said %stuff% coudnt use an index?
+13:23  archivist: build the search string and method for fastes and best
+13:23  Lindrian: ???
+13:24  archivist: http://dev.mysql.com/doc/refman/5.1/en/fulltext-search.html
+13:24  archivist: one does some string fu on your sql for best results
+13:25  Lindrian: dude what language are you speaking?
+13:25  Lindrian: whats a "string fu"?
+13:25  ThetaPhi: same as kung fu, only with strings instead of kungs
+13:26  bnb_dev: Hello!
+13:26  archivist: Lindrian, its done in your app
+13:26  Lindrian: you mean get ALL results then filter out?
+13:27  archivist: no
+13:27  archivist: I mean you create the correct sql exact is where field='content'
+13:27  Lindrian: yes that I will do
+13:27  bnb_dev: i have tow tables products1(id,name,prices) and products2(id,name,prices), i want to sum the values of prices like this products1.price+products2.price, how i do that?
+13:27  Lindrian: I am going to search through title and message, I have added fulltext index to them
+13:28  Lindrian: are these indexes going to be used automatically now?
+13:28  Lindrian: or do I need to specify it in my query
+13:28  archivist: did you read the docs
+13:28  archivist: or the match against hint above
+13:28  bnb_dev: ?
+13:28  ceegee: hello there
+13:29  Lindrian: Full-text searching is performed using MATCH() ... AGAINST syntax.
+13:29  Lindrian: yes
+13:29  Lindrian: but there is no more info on that
+13:29  ceegee: I have some trouble with dumping a database on a mysql server running federated. I get this message: Couldn't execute 'show table status like 'hub\_requesttype'': Got an error writing communication packets (1160)
+13:29  Naktibalda: bnb_dev: why do you have 2 tables? merge them and delete 1
+13:30  bnb_dev: how to merge?
+13:30  Naktibalda: INSERT SELECT :)
+13:30  bnb_dev: :(
+13:32  archivist: where the select has a join in it :)
+13:32  archivist: and an addition?
+13:32  Naktibalda: no, just move a data
+13:32  bnb_dev: Naktibalda: thanks
+13:33  Naktibalda: well, maybe, if a total price of product is made up of 2 components
+13:34  jink: tias
+13:34  the_wench: Try it and see, its quicker to type it on your system and try it than wait for one of us to tell you its ok
+13:36  bnb_dev: Naktibalda: yes but u gave good idea, i just see this concept now http://dev.mysql.com/doc/refman/5.0/en/insert-select.html
+13:36  Naktibalda: !tell bnb_dev about normalization
+13:36  the_wench: bnb_dev http://dev.mysql.com/tech-resources/articles/intro-to-normalization.html and http://mysqldump.azundris.com/archives/20-Nermalisation.html and some here http://www.keithjbrown.co.uk/vworks/mysql/
+13:54  Lindrian: #1191 - Can't find FULLTEXT index matching the column list
+13:55  Lindrian: however, both my fields have fulltext index
+13:55  Lindrian: very weird??
+13:55  Lindrian: I am using MATCH()... AGAINST
+13:56  Lindrian: select * from table where match(field1, field2) against('text')
+13:56  Lindrian: thats my query
+13:57  VoVo64: Lindrian: add one fulltext index covering both columns in the same order as in the match()
+13:59  Lindrian: wait not following now
+13:59  Lindrian: how do I do that?
+13:59  Lindrian: I added them with phpmyadmin, one for each field?
+13:59  VoVo64: regarding pma see topic
+14:00  Lindrian: yes I know you are all whiny about that tpoic
+14:00  Lindrian: forget I said that
+14:00  VoVo64: too late. and also too late for the whiny part :)
+14:00  Lindrian: god
+14:00  Lindrian: I hate grumpy nerds
+14:00  Lindrian: geez
+14:00  Lindrian: --
+14:00 * VoVo64 goes to the bathroom whining
+14:00  VoVo64: Lindrian: you know about multi colun indexes?
+14:00  Lindrian: slit your wrists while you're at it too!
+14:00  Lindrian: No
+14:00  Lindrian: I don't.
+14:01  VoVo64: Lindrian: you can define an index that covers more than one column at once. ie ALTER TABLE ADD INDEX `foobar` (col1, col2)
+14:01  VoVo64: Lindrian: that is different from two index, one each on col1 and ocl2
+14:01  Lindrian: I see.
+14:01  Lindrian: Just did that, query goes through now
+14:01  VoVo64: Lindrian: same goes for the FULLTEXT index
+14:02  Lindrian: yes
+14:02  Lindrian: however, can MATCH() be wildcarded?
+14:02  VoVo64: you mean the column list?
+14:02  Lindrian: the against part
+14:03  VoVo64: yes, in boolean mode
+14:04  VoVo64: !m Lindrian fulltext search
+14:04  the_wench: Lindrian see http://dev.mysql.com/doc/refman/5.1/en/fulltext-search.html
+14:08  Lindrian: crappy internet is crappy
+14:08  Lindrian: so
+14:08  Lindrian: I read that article whoever i was speaking to
+14:08  Lindrian: VoVo64 i think
+14:08  Lindrian: and it doesnt relaly help?
+14:08  VoVo64: did you read the subchapter regarding boolean mode?
+14:09  VoVo64: more precise "Boolean Full-Text Searches"
+14:11  VoVo64: Lindrian: depending on your requirements you might also have a look at
+14:12  VoVo64: sphinx
+14:12  the_wench: http://www.sphinxsearch.com/ - implement full-text search for that 10+ million row table
+14:13  nicola_pav: hello. I came across the command show processlist
+14:14  nicola_pav: i read under mysql doc regarding the time
+14:14  nicola_pav: if the time value is big, it should be investigated
+14:14  nicola_pav: what is the critical point?
+14:15  nicola_pav: when do i consider a time is big for a thread to run
+14:15  nicola_pav: ?
+14:15  Lindrian: VoVo64: i only have like 10k
+14:16  salle: nicola_pav: What value are you talking about?
+14:16  nicola_pav: when i run show processlist
+14:16  nicola_pav: the "Time" column
+14:17 --- andref is now known as world
+14:17 --- world is now known as andref
+14:18  Naktibalda: nicola_pav: analyze all statements what takes 1 second or more
+14:18 --- andref is now known as world
+14:18  salle: nicola_pav: How we are supposed to know what value you are talking about and what do you really mean? :)
+14:18  salle: Naktibalda: What if he is refering to "sleep" state? :)
+14:18 --- world is now known as andref
+14:19  nicola_pav: salle: sorry, i am trying to explain as much as i can
+14:19  Naktibalda: that's just a one case :)
+14:19  Naktibalda: unless it's a sleep, 1 second is slow
+14:19  nicola_pav: if the state is sleep, there are now worries. right?
+14:22  hopeseekr: does anyone know of any articles that point out why a table like [name varchar] [value varchar] attributes is a really bad idea?
+14:22  converge: for monetary field, do you use double or int.. ?
+14:22  archivist: decimal
+14:22  the_wench: decimal decimal decimal decimal decimal DECIMAL!!!
+14:23  thumbs: converge: decimal
+--- Log closed Wed Nov 10 14:28:14 2010
+--- Log opened Wed Nov 10 14:28:38 2010
+14:28 --- Users 577 nicks [0 ops, 0 halfops, 0 voices, 577 normal]
+14:28 --- Server: [verne.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+14:29  evenflow: hey, im having mysql 5.1.51 installed on one of our linuxes, how can i verify if innodb plugin is enabled, and also, i understand innodb plugin comes out of the box in the new mysql releases, how can i enable it then?
+14:29  thumbs: evenflow: show variables like 'have_innodb';
+14:30  evenflow: thumbs, if i have it, does it mean it is enabled?
+14:31  thumbs: evenflow: available, enabled, yes
+14:31 --- Channel #mysql was synced in 166 seconds
+14:31  evenflow: thanks
+14:38  haaga: Hello. Is it normal for innodb to take very long to execute a question with LIKE?
+14:38  doonie: define normal ;P
+14:39  doonie: we do not know how much data you have, what version you run, what your query is. hard to tell ;>
+14:39  Naktibalda: haaga: yes, if you use a leading %
+14:39  thumbs: Naktibalda: hahaha
+14:39 * doonie laughs by thumbs side wondering what we're laughing at
+14:39  haaga: SELECT COUNT(Case_ID) FROM `Case` WHERE DeleteDate IS NULL AND Person LIKE '%tomato%';
+14:40  haaga: Takes 3 sec to execute
+14:40  Naktibalda: see!
+14:40  doonie: oo count
+14:40  thumbs: table scan.
+14:40  Naktibalda: leading % can't use an index
+14:41  haaga: oh. Any way to do it different?
+14:41  thumbs: sphinx
+14:41  the_wench: http://www.sphinxsearch.com/ - implement full-text search for that 10+ million row table
+14:41  thumbs: reversed index
+14:41  Naktibalda: put word tomato to another column? maybe even to another table
+14:41  thumbs: reverse index
+14:41  Naktibalda: inverted
+14:42  Naktibalda: inverted index
+14:42  the_wench: http://code.google.com/p/inverted-index/
+14:43  haaga: hum, shall check
+14:43  thumbs: thanks
+14:47  haaga: ohh, thanks btw!
+15:00 --- Guest59630 is now known as VadtecWork
+15:14  ethanol: so I have a select where I basically group by client -> order. however, an order contains multiple products. I need to calculate the weight of the order. which would basically be the sum of productweight * productamount ordered. however, the most obvious solution means adding a group by clause on product also
+15:14  ethanol: but this results in a lot more rows output. can I avoid this? or will I have to reduce the ouput afterwards in the app again?
+15:15  Naktibalda: subquery
+15:15  the_wench:  http://dev.mysql.com/doc/refman/5.1/en/subqueries.html
+15:15  thumbs: yes, use a derived table.
+15:15  ethanol: yeah that was my second thought. but just wondering if that isn't going to turn out to be very heavy
+15:17  ethanol: something about subquery being executed for every row or such
+15:17  ethanol: can't remember, been ages since I used a subquery ><
+15:17  Naktibalda: derived table
+15:17  the_wench: SELECT a.name, b.name, COALESCE(b.cnt, 0) AS cnt FROM tblname AS a LEFT JOIN (SELECT name, COUNT(*) AS cnt FROM tblname2 GROUP BY name) AS b ON a.name = b.name;
+15:19  dogmatic69: hi all. looking for some indexing tips again :) this time for made up fields eg. SELECT .. FROM ... WHERE WEEK( `ViewCount`.`created` ) > 10
+15:19  dogmatic69: should i index the created field or is it not possible to index things like that
+15:19  ethanol: Naktibalda: ah thanks for that one, excellent
+15:19  Naktibalda: impossible
+15:20  dogmatic69: Naktibalda: me?
+15:20  Naktibalda: yes, calculate a full date and use WHERE `ViewCount`.`created` > '2010-03-15' or smth
+15:21  dogmatic69: actual query is something like this http://codepad.org/V3aoEaGU
+15:21  dogmatic69: ok
+15:22  ethanol: cannot use an index on a field when you use a function on it
+15:22  ethanol: simple rule
+15:22  dogmatic69: cool
+15:22  the_wench: It's more than cool, Johnny, it's groovy, too!
+15:22  ethanol: you could store the outcome of the function a field instead (weeknr in this case for example)
+15:22  ethanol: index that and use it for searching
+15:22  dogmatic69: so i should calculate it in php and use that or is there a mysql way
+15:23  ethanol: or indeed calculate the week start and end
+15:23  ethanol: and then do where created between start and end
+15:23  archivist: Naktibalda, has already given you the way
+15:26  dogmatic69: right, but im asking if something like this would work created > CONCAT_WS('-', 'YEAR(created)', 'MONTH(created)', 'DAY(created)')
+15:26  motaka2: why is this wrong?   http://pastebin.com/S4NpVHsA
+15:27  adaptr: what's wrong
+15:27  the_wench: Don't ask us "What's wrong with this query...".  We are not SQL parsers. We do not care to look character by character looking for errors when MySQL will tell all of us WHERE the error is. Paste the FULL error issued by MySQL.
+15:27  Naktibalda: DISTINCT applies to entire row
+15:28  Naktibalda: dogmatic69: do you compare created to itself?
+15:28  Naktibalda: hmm, you generate a strange string :). no, it won't work
+15:29  MontgoDB: _raymond_: damn, I just thought of another method to produce those insert statements for a query result set... duh... CREATE TABLE... SELECT ; mysqldump
+15:30  motaka2: Naktibalda: what is the correct one ?
+15:30  Naktibalda: don't use * and use GROUP BY shls.id
+15:30  aeiou: why would mysql_fetch_object start slowing down after x seconds?
+15:31  dogmatic69: Naktibalda: well im saving view counts to a table and want to make some graphs etc... this is what it does currently http://oi51.tinypic.com/ms29gn.jpg
+15:31  Naktibalda: !man mysql_fetch_object
+15:31  the_wench: Sorry - I have no idea what function you're talking about! but try http://dev.mysql.com/mysql_fetch_object see reply term
+15:31  aeiou: is there anything mysql specific that would cause it to start slowing down after x amount of time?
+15:31  Naktibalda: aeiou: isn't a PHP question?
+15:31  aeiou: i know its a php function, but this problem sounds like a mysql one
+15:31  dogmatic69: but when there will be lots its will start getting to slow
+15:31  Naktibalda: aeiou: isn't it a PHP question?
+15:31  aeiou: Naktibalda, sure - but its just asking mysql for the data
+15:31  aeiou: mysql is the part that is slowing down
+15:32  Naktibalda: why do you blame fetch_object?
+15:32 --- frag4now is now known as Guest15335
+15:32  aeiou: I perform a query on mysql, then benchmark the mysql_fetch_object after 10 seconds or so it gets slower and slower
+15:33  aeiou: i.e fetching the results from mysql becomes slower and slower on a long-open connection
+15:34  Naktibalda: result is stored in client side, it doesn't communite to server for fetching
+15:34  Naktibalda: communicate
+15:34  Naktibalda: and it's very unusual benchmark
+15:34  aeiou: so when php makes the sql request, why does my memory usage not shoot up?
+15:34  aeiou: i.e im selecting 350,000 rows using max memory of 4mb
+15:34  [raymond]: MontgoDB: Good, if not a production system.
+15:35  Naktibalda: aeiou: because it isn't included to php memory count, integration isn't very good :)
+15:35  Naktibalda: may be different with php native driver
+15:35  aeiou: ah i see
+15:35  aeiou: humm
+15:35  aeiou: where is the data kept, RAM?
+15:36  aeiou: so php is slowing down you say?
+15:36  trefs: is this a secure way of doing things,  server mssql -> asp.net soap XML webservice -> internet - > .net application
+15:36  trefs: with a 256 bit encryption key for it
+15:36  Naktibalda: wrong channel
+15:36  adaptr: trefs: not a mysql question
+15:37  Naktibalda: 3 wrong things in you issue
+15:37  motaka2: Naktibalda: i need to join two tables. shls and users_shls . a shl might have several users_shls , but i just need the the result of the join in a way that i have all the shls distinctly while but I prefer the the ones which their users_shls.is_center_user=1
+15:37  Naktibalda: mssql, asp.net, .net, well, and soap :)
+15:37  trefs: Naktibalda such as
+15:37  adaptr: Naktibalda: don't forget "internet"
+15:38  Naktibalda: !tell motaka2 about groupwise max
+15:38  the_wench: motaka2 http://jan.kneschke.de/projects/mysql/groupwise-max/  http://dev.mysql.com/doc/refman/5.1/en/example-maximum-column-group-row.html
+15:39  Naktibalda: your order is ORDER BY is_center_user=1 DESC
+15:50  Lindrian: oi
+15:50  Lindrian: when I use match(field1, field2) against('item')
+15:50  Lindrian: will that return matches of 'item' in either field or only in both fields?
+15:51  snoyes: either
+15:51  Lindrian: weird... can
+15:51  Lindrian: t get it to work properly
+15:51  snoyes: doesn't work
+15:51  the_wench: Doesn't work is not a helpful statement. Was there an error? Unexpected results? Does it sit on the couch all day eating all your cheetos and ignoring the classifieds? Be specific!
+15:52  Lindrian: you're so wise. stop tossing that message around 24/7
+15:52  Lindrian: i was typing
+15:52  Lindrian: either way
+15:53  Lindrian: the * wildcards in match(), don't they work similar to LIKE's % ?
+15:53  thumbs: Lindrian: and stop telling snoyes what to do.
+15:54  Lindrian: stop telling me what to do
+15:54 * Lindrian has created an evil circle
+15:54 --- ChanServ sets modes [#mysql +o thumbs]
+15:54  Lindrian: it's just annoying when you guys keep tossing your fancy pants messages around all the time. its annoying. not every body is a lazy fool
+15:54  Naktibalda:  match(field1) against('item') AND  match(field2) against('item')
+15:54 @thumbs: Lindrian: see, this is where I ask you to respect a regular, snoyes
+15:55  Lindrian: I have shown no disrespect.
+15:55  Lindrian: Simply asked him not to draw premature conclusions.
+15:55  Lindrian: And you could have asked me that without giving your self OP in a attempt of scaring me
+15:55  snoyes: Lindrian: * does work similar-ish to %, but not exactly the same
+15:56 --- thumbs sets modes [#mysql -o thumbs]
+15:56  Lindrian: okay snoyes. Because I have fields with say "buy" in both message and/or title, but if i search for 'buy' or '*buy*' they dont show up
+15:56  Lindrian: I can sometimes get results where buy is nowhere at all
+15:57  snoyes: Lindrian: 'buy' is below the 4-letter minimum, and * should only come at the end.
+15:57  Lindrian: (I am using in boolean mode)
+15:57  Lindrian: ah ok, I see.
+15:57  Lindrian: 1 sec then
+15:57  Lindrian: so 'computer*' and '*computer*' will yield the same result?
+15:58  Lindrian: or will the start * cause any issues?
+15:58  motaka2: Naktibalda: is this wrong ?   SELECT shls.id AS id_shls , * , MAX(users_shls.is_center_user) FROM shls INNER JOIN users_shls ON users_shls.id_shls = shls.id AND id_shl_centers = 1 GROUP BY shls.id
+15:59  snoyes: the manual says, "The asterisk serves as the truncation (or wildcard) operator. Unlike the other operators, it should be appended to the word to be affected. Words match if they begin with the word preceding the * operator."
+16:00  Lindrian: okay snoyes. so there is no way to make say '*word*' match 'thisisawordtext' ?
+16:00  snoyes: Lindrian: right. If you need that, you use LIKE instead.
+16:00  soa2ii: If I renamed some tables for a new layout I can copy the data with INSERT INTO db2.newTable (new columns …) SELECT (old columns …) FROM db1.oldTable; or?
+16:00  Lindrian: awww
+16:01  Lindrian: I was told to use MATCH() :(
+16:01  Lindrian: time to redo things
+16:01  snoyes: soa2ii: yes, but SELECT old columns instead of SELECT (old columns)
+16:01  Lindrian: I guess I can remove the fulltext index?
+16:01  soa2ii: snoyes: great. Thanks :)
+16:01  snoyes: Lindrian: sure, or you can leave it there and use LIKE anyway.
+16:02  snoyes: but it means a full table scan in either case.
+16:02  Naktibalda: motaka2: probably it returns unexpected results :)
+16:02  Lindrian: ah ok
+16:02  Lindrian: thanks snoyes
+16:02  snoyes: motaka2: I don't think you can SELECT field, *. I think you have to SELECT *, field.
+16:03  Naktibalda: evil
+16:03  the_wench: evil is clearly defined at http://www.parseerror.com/sql/select*isevil.html
+16:08 --- masoodmortazavi_ is now known as masoodmortazavi
+16:12  D4rKr0W: lol
+16:17  b1lly: Lets say I have a table full of multiple manufacturers products... lets say a particular manufacturer sends me his db to update once a month and he makes slight changes & fixes to it, plus adds a little more.... I know that UPDATE would update the fields that are existing already, but would it also add the fields that have just been added? I'm not really sure how I would go about doing this because the manufacturers db is so big that I wouldn't be able to tell wh
+16:18  sky: b1lly:  no update would not add
+16:18  Naktibalda: REPLACE or INSERT ON DUPLICATE UPDATE
+16:19  b1lly: that would be the query Naktibalda?
+16:19  Naktibalda: !man replace
+16:19  the_wench: see http://dev.mysql.com/doc/refman/5.1/en/replace.html
+16:19  b1lly: thx
+16:19  Naktibalda: !man insert on duplicate
+16:19  the_wench: see http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html
+16:20  b1lly: perfect!
+16:20  b1lly: makes my life much easier thanks Naktibalda
+16:20  letharion: I'm trying to add a unique constraint to a table, which fails because the unique contraint isn't currently fulfilled. I'm trying to figure out a query to select all column X, column Y, which has > 1 column Y for each column X.
+16:20  sky: man o man, this working with vbulletin crap… has me thinkng how utterly wrong a a DB is for a forum
+16:20  Naktibalda: dupes
+16:20  the_wench: find them with SELECT COUNT(*) as qty,dupefield[,otherfields] FROM table GROUP BY dupefield[,otherfields] HAVING qty > 1
+16:22  letharion: the_wench: Thank you very much. I very much appreciate that :) Gonna take a few minutes to see if I understand what's going on there.
+16:29  p1l0t: how do you list the information contained in a column?
+16:29  Naktibalda: SELECT column FROM table? :)
+16:29  p1l0t: oh select! lol I forgot
+16:29  p1l0t: thank you Naktibalda
+16:30  Naktibalda: oh my ...
+16:30  thumbs: wow?
+16:31  p1l0t: Its been a while...
+16:31  thumbs: you don't say.
+16:31  Lenhix: A looong while
+16:31  Naktibalda: it's like "what's the first letter of alphabet" but worse
+16:31  Lenhix: !tell p1l0t about tutorial
+16:31  the_wench: p1l0t MySQL Tutorial:  http://dev.mysql.com/doc/refman/5.1/en/tutorial.html SQL Tutorials: http://www.sqlcourse.com  http://tut.php-quake.net/en/mysql.html and sqlzoo.net
+16:34  pigdude: I am trying to fix a corrupted hierarchical schema. it is very small, so my question is simple. using this common approach ( http://dev.mysql.com/tech-resources/articles/hierarchical-data.html ), what would the lft and rgt values be for one root record and its child?
+16:34  pigdude: is it 1-4, 2-3?
+16:34  pigdude: or something else?
+16:34  pigdude: I just need to update two rows
+16:34  chuy_max: hi, is there a tool to read the queries sent to mysql server?
+16:34  pigdude: right now they are 1-36 and 2-15 ... that is the corruption
+16:34  letharion: chuy_max: Activate logging on the server, or use the enterprise monitor tool
+16:35  pigdude: chuy_max: yes, you can log queries directly with mysql
+16:35  dogmatic69: pigdude: you using cake?
+16:35  Silowyi: so because I've had some issues transferring a large .sql file via rsync (35 GB) I split it up using 'mysqldump | split' etc... Would it be possible to import it on the other machine using 'cat parts-* | mysql'?
+16:35  pigdude: dogmatic69: nope, in this case Doctrine and its NestedSet behavior
+16:35  pigdude: dogmatic69: but hello there :^D
+16:35  dogmatic69: ah ok, cake has a recover() method for that :P
+16:35  dogmatic69: o/
+16:35  the_wench: \o
+16:35  pigdude: hehe
+16:35 --- shennyg_ is now known as shennyg
+16:36  pigdude: by my reading, 1-4, 2-3 is what I want right now
+16:36  dogmatic69: yes
+16:36  dogmatic69: you have parent_id?
+16:37  pigdude: this schema is slightly different. yep, that did it!
+16:37  pigdude: this uses lft, rgt, and level
+16:37  pigdude: cols
+16:37  dogmatic69: k
+16:37  pigdude: and root_id because this particular table may have more than one root
+16:37  dogmatic69: small things you can do manually
+16:38  pigdude: yea
+16:38  pigdude: I have to fix the bug that caused this
+16:38  dogmatic69: if it gets big you will need something like cakes method that can use the root / level cols to rebuild
+16:38  pigdude: because this will not be fun when it is 80 records
+16:38  pigdude: yea
+16:38  ethanol: derive table
+16:38  ethanol: derived table
+16:38  the_wench: SELECT a.name, b.name, COALESCE(b.cnt, 0) AS cnt FROM tblname AS a LEFT JOIN (SELECT name, COUNT(*) AS cnt FROM tblname2 GROUP BY name) AS b ON a.name = b.name;
+16:39  chuy_max: ok, thanks
+16:40  |TheWolf|: hi
+16:40  the_wench: hello |TheWolf|, you have a question?
+16:41  |TheWolf|: I have a table, with among others, two TINYINT fields used as flags (0 or 1). *always* one of the two fields has to be 1 and the other one 0. is there a way to guarantee that?
+16:41  chuy_max: letharion, pigdude I'm seeing you can use "SET profiling=1; SHOW PROFILES" to start seeing profiles, but this is per session, isn't it possible to see the profiles of all the sessions in one query?
+16:42  |TheWolf|: and reject INSERTs or UPDATEs that don't follow this rule?
+16:42  Naktibalda: |TheWolf|: triggers
+16:42  js_: how can i make sure an integer field always is incremented by one? if i have rows with 1, 2, 3 and 2 is deleted and i add a new one, i want it to get 2 and not 4 in that field. should i use triggers for this or something?
+16:42  adaptr: |TheWolf|: mysql doesn't support CHECK constraints, so you'd have to write some triggers
+16:43  |TheWolf|: hmm ok
+16:43  ThetaPhi: |TheWolf|: that sounds suspiciously like the information stored is equiv to 'a' and 'not a'. Sure you need both fields?
+16:43  adaptr: |TheWolf|: it might make more sense to use one TINYINT as a flag set and allow only 1 or 2 values in your application.
+16:44  adaptr: ThetaPhi: or just 4 options. one TINYINT is enough
+16:44  adaptr: oh, wait, you're right. yeah. silly
+16:44  adaptr: |TheWolf|: you have design fail.
+16:45  |TheWolf|: you're right in that case...
+16:46  |TheWolf|: and if I only wanted to prevent cases in which both fields are 1? in other words, allow 0/0, 0/1 and 1/0, but forbid 1/1
+16:46  |TheWolf|: then I would have to use triggers, right?
+16:47  adaptr: again, no. use ONE byte, and store two flags in it. or, alternatively put, 3 values.
+16:47  |TheWolf|: ok
+16:48  |TheWolf|: thank you!
+16:48  ThetaPhi: |TheWolf|: rephrasing adaptr, enumerate your possible states and store that. enum type exists.
+16:48  adaptr: no! I will not be rephrased!
+16:48  adaptr: aargh
+16:49  ThetaPhi: You have no choice! Muarharhar!
+16:49  EvanR-work: you have no chance to survive make your time
+16:54  adaptr: I'll sick [raymond] onto you
+16:55 * [raymond] set up EvanR-work da bomb!
+16:55  [raymond]: HAHAHAHAHAHAHAHAHAHA
+16:55  j_ayen_green: I installed mysql vanilla on ubuntu for use with localhost. When doing many writes, compared to what I experience for the same writes online or on windows+wamp, it seems about 10x slower. Is there something in particular in my.cnf I should check that would make the writes so slow?
+16:55  [raymond]: adaptr: I'm going to be *soaked* by the time I get home. :(
+16:55  adaptr: !Tell j_ayen_green about idfma
+16:56  adaptr: !tell j_ayen_green about idfma
+16:56  the_wench: j_ayen_green IDFMA - Insufficient Data For Meaningful Answer :: You have not provided nearly enough information for us to help you. Write up a clear description of your issue, provide structures and sample data in a pastebin with results and expected results.
+16:56  adaptr: [raymond]: I'm at home now, sickly
+16:56  [raymond]: adaptr: ah... it finally caught up with you eh?
+16:57  j_ayen_green: I understand what you're asking for, but on the other hand, I shouldn't have to supply photos of my house falling down in order to ask how far apart the studs should be beforehand. My writes are slow. I assume there must be an article that discusses that symptom, or a tool to test it.
+16:57  [eXception]: hi
+16:57  the_wench: hello, you have a question?
+16:58  [raymond]: !m j_ayen_green mysqlsmack
+16:58  the_wench: Sorry - I have no idea what function you're talking about! but try http://dev.mysql.com/mysqlsmack see reply term
+16:58  [raymond]: !m j_ayen_green mysqlslap
+16:58  the_wench: j_ayen_green see http://dev.mysql.com/doc/refman/5.1/en/client-utility-overview.html
+16:58  j_ayen_green: thanks [raymond]
+16:58  [eXception]: how do I "ALTER TABLE MODIFY column BIGINT" when there are FK-Constraints on this column?
+16:58  archivist: !tell j_ayen_green about tuning primer
+16:58  the_wench: j_ayen_green try https://launchpad.net/mysql-tuning-primer a shell script for basic mysql tuning suggestions.
+16:59  Naktibalda: [eXception]: drop FK first
+16:59  j_ayen_green: thanks archivist
+17:00  evenflow: visudo
+17:00  evenflow: oops
+17:00  [eXception]: <Naktibalda>: Isn't it possible without dorpping the constraint?
+17:00  Naktibalda: hmm, something like DISABLE FOREIGN KEYS
+17:00  adaptr: j_ayen_green: it was fully warranted. we don't know what idiocy you are prepetrating - you might be trying to do 1000qps on a single SATA disk. or you might be inserting from 10 threads into MyISAM.
+17:01  ethanol: Naktibalda: can my derived table reference any of the outer tables in the query?
+17:02  Naktibalda: no, join it as usual
+17:02  j_ayen_green: adaptr: understood... but what I was implying by saying based on what I saw in the other environments, is that I'm performing the same function in ubuntu, in windows+wamp, and online, same database structure, and it's only dying in ubuntu
+17:02  j_ayen_green: should have been more clear, sorry
+17:03  adaptr: j_ayen_green: then your statement of using a "vanilla" mysql in ubuntu is faulty. there's no such thing. vanilla mysql is unpackaged, ubuntu's version is not.
+17:03  adaptr: it will lie somewhere in the ubuntu default config
+17:03  j_ayen_green: i meant i made no changes to the install
+17:03  adaptr: it's still a custom package
+17:03  adaptr: the included debian.readme should detail any alterations
+17:04  [eXception]: Nakti: found
+17:04  j_ayen_green: sure, but at the end of the day, if they're doing something stupid with the config, it's what that might be I was trying to get pointed to
+17:04  [eXception]: ALTER TABLE tbl_name DISABLE KEYS
+17:04  ThetaPhi: j_ayen_green: ubuntu has mysqltuner packaged
+17:04  [eXception]: thx
+17:05  j_ayen_green: ThetaPhi, great! thanks
+17:06  jackp10: hi to everyone
+17:06  jackp10: i am trying to connect to a local mysql via shell (linux environment), but for some reason i noticed that the host is wrong
+17:06 * [raymond] growls at ThetaPhi 
+17:07  jackp10: for example, the command ymsql -u root -p, with the right password does return ERROR 1045 (28000)
+17:07  jackp10: instead of trying root@localhost, it put something else in the "host" part
+17:08  jackp10: i use to edit my local /etc/hosts file, and in the past i had an entry with the domain mentioned now, but i have removed it, and mysql still cannot connect to it
+17:08  ThetaPhi: [raymond]: I'm exempt for another few hours!
+17:08  [raymond]: LoL!
+17:09  jackp10: i had a similar problem in the past, and i have done something to the actually mysql to flush cache or something like that, but i can't remember right now
+17:09  jackp10: and if i google it, i find solution that grand permissions to mysql db..
+17:09  kiee: i had a question about mysql replication, anyone have minute to help me out?
+17:11  kiee: i have a A -> B -> C -> master-master setup, and exec_Master_log_pos is stuck on a particular location since a while
+17:11  kiee: there are no replication errors at all
+17:12  kiee: anyone seen such behaviour before?
+17:14  kitchen: anything in show full processlist?
+17:14  kiee: yup
+17:14  kitchen: related to the replication hiccup?
+17:14  kiee: the replication processes are listed there
+17:15  kiee: there are no errors in the error log
+17:15  kitchen: and there has been traffic on all masters?
+17:16  kitchen: ... write traffic
+17:16  kiee: yes
+17:16  kitchen: unique server_ids?
+17:16  kiee: yup
+17:17  kiee: this setup has been working correctly since last october
+17:17 * kitchen awaits wiser heads
+17:17  kiee: double checked server_ids too, all unique
+17:21  ethanol: Naktibalda: http://sql.pastebin.com/PMsKpmXj I'm doing something wrong.. but I can't quite wrap my head around it. Without the join on the derived table I have 7 rows. Cause this order has 7 products. With the join I end up with 49 rows.. (7*7). Just not sure how to fix it..
+17:21  nullreference: very stupid question, but I just want to confirm, are SELECT statements replicated?
+17:22  Naktibalda: ethanol: what do you want to select
+17:22  snoyes: nullreference: no
+17:22  Naktibalda: nullreference: why should they?
+17:22  nullreference: i didn't think so
+17:22  nullreference: but someone was pretty sure they were
+17:22  nullreference: the argument was to enable general query log on a non used replication server
+17:22  ethanol: Naktibalda: I want to get the weight of an order by doing a sum on the weight of all products in the order
+17:24  Naktibalda: try with GROUP BY
+17:24  Naktibalda: what are you doing makes no sense
+17:25  ethanol: it does
+17:25  ethanol: I've reduced my query step by step to figure out where it goes wrong
+17:25  ethanol: when I don't have the derived join, I have 7 lines. which I would expect cause the order has 7 products associated with it.
+17:25  Naktibalda: your outer query should select from orders only
+17:26  ethanol: I'm sorry but that statement makes no sense to me :<
+17:26  Naktibalda: oh, because I don't understand your query :)
+17:26  Naktibalda: sorry, bye
+17:26  ethanol: it's very easy
+17:27  ethanol: just don't know how to phrase it
+17:27  ThetaPhi: kiee: disks full?
+17:28  ethanol: order 1 has product A and B. of product A, 2 were ordered. of product B, 4 were ordered. I want to join a derived table that gives me the weight for 2*A, and 4*B. however, right now for product A the derived returns two rows, (A and B), and for B it also returns 2 rows (A and B)
+17:28  ethanol: so I end up with 4..
+17:28  ethanol: double the weight
+17:29  Naktibalda: forget derived table, create a simple example, with sample data and expected result
+17:29  kiee: ThetaPhi: nope, enough space on the drive
+17:29  nullreference: exit
+17:29  the_wench: Don't leave me, nullreference!
+17:29  nullreference: oops
+17:29  Naktibalda: like 5 rows of result
+17:29  kiee: ThetaPhi: tried restarting the server as well, still no go
+17:30  michae1m: select order_id, sum(items_total) from (select order_id, line_item_id, cost*amount as item_total from orders group by line_item_id) group by order_id
+17:30  michae1m: sudo sql
+17:30  michae1m: whilst being pulled by toddler
+17:30  michae1m: so excuse errors
+17:32  michae1m: s/sudo/pseudo/
+17:32  ethanol: Naktibalda: http://sql.pastebin.com/AXUxsQHJ
+17:33  Naktibalda: so it's a weight of product, not of order
+17:33  ethanol: this is example data
+17:33  ethanol: in the final query I need to group by order id
+17:33  ethanol: hence I get wrong results
+17:34  Naktibalda: pastebin expected result
+17:34  arex\: what mysql string funcion do i use to see if a field contains a certain word?
+17:34  ethanol: I can't do GROUP BY orders.id and SELECT SUM(orderlines.amount * products.weight) AS orderweight
+17:34  ethanol: that will not use correct values.
+17:34  adaptr: because...
+17:35  ethanol: isn't it obvious? :<
+17:35  Xgc: ethanol: You are making false statement.  Just show the expected result.
+17:35  Lenhix: string functions
+17:35  Xgc: ethanol: What you just said above is false.  You can absolutely GROUP BY order_id and also SUM() the expression you mentioned.
+17:36  Lenhix: !m string functinos
+17:36  the_wench: Sorry - I have no idea what function you're talking about! but try http://dev.mysql.com/functinos see reply term
+17:36  Lenhix: !m string functions
+17:36  the_wench: string see http://dev.mysql.com/doc/refman/5.1/en/functions.html
+17:36  Lenhix: arex\ ^^
+17:36  arex\: I was looking for LOCATE()
+17:36  arex\: thanks
+17:36  ethanol: hrm I take it back. http://sql.pastebin.com/d7M9xnyu
+17:36  ethanol: that worked
+17:36  ethanol: but this is only 1/3rd of my orignal query. I'll add back piece by piece and see where I went wrong on the first try ^^
+17:37  Xgc: ethanol: Of course that worked.
+17:45  ethanol: crap
+17:45  the_wench: dont swear in here please ethanol
+17:46  ethanol: the first one returns 7 rows, the second one 21 (cause there are 4 rows in tntcodes matching). http://sql.pastebin.com/Xz4jgDxk
+17:46  eydaimon: I've got a mysql server that's suddenly running very slow. I don't see anything apparant with the OS. Are there things I can do to check if mysql itself is OK?
+17:46  ethanol: so that screws things up
+17:46  ethanol: I should probably move that one into a derived table!
+17:47  Naktibalda: eydaimon: SHOW PROCESSLIST
+17:47  Naktibalda: !tell eydaimon about tuning primer
+17:47  the_wench: eydaimon try https://launchpad.net/mysql-tuning-primer a shell script for basic mysql tuning suggestions.
+17:48  Lenhix: mysqltuner
+17:48  the_wench: http://mysqltuner.pl/mysqltuner.pl
+17:48  eydaimon: thanks
+17:49  eydaimon: I was more looking to see if the mysql server was in a state of distress or some such
+17:49  Lenhix: tuning primer can give you some clues on that
+--- Log closed Wed Nov 10 19:35:40 2010
+--- Log opened Wed Nov 10 19:56:21 2010
+19:56 --- Users 600 nicks [0 ops, 0 halfops, 0 voices, 600 normal]
+19:59 --- Channel #mysql was synced in 201 seconds
+20:03  vpv4oo: Xgc: im trying to list all meetings, i have: "SELECT * FROM `meets` JOIN people AS n1 ON (meets.person_a=people.name) JOIN people AS n2 ON (meets.person_b=people.name)" is that correct?
+20:05 --- dub54_ is now known as dub54
+20:09  b1lly: SELECT review_id, product_id, review_poster, review_title, review_body, SUM(rating) FROM reviews_tbl GROUP BY product_id WHERE product_id='$product_id'
+20:10  b1lly: its giving me an error
+20:10  b1lly: and im guessin because of the SUM(rating)
+20:11  Lenhix: app code
+20:11  the_wench: don't pastebin app code, we have no way of knowing if your variables contain the values you imagine they do. Echo the query out to SQL only. Also, pastebin any resulting error message, or, if none, explain why you think you're getting different results than you should have.
+20:11  Lenhix: what's wrong
+20:11  the_wench: Don't ask us "What's wrong with this query...".  We (with the exception of flupps ) are not SQL parsers. We do not care to look character by character looking for errors when MySQL will tell all of us WHERE the error is. Paste the FULL error issued by MySQL.
+20:12  b1lly: the variable contains the value
+20:12  b1lly: i check with a print before hand
+20:12  b1lly: the error i'm getting is...hold on
+20:14  snoyes: b1lly: GROUP BY goes before WHERE.
+20:14  snoyes: that is, you have it before, it needs to be after.
+--- Log closed Wed Nov 10 20:21:56 2010
+--- Log opened Wed Nov 10 20:22:28 2010
+20:22 --- Users 602 nicks [0 ops, 0 halfops, 0 voices, 602 normal]
+20:22  Xgc: vpv4oo: No.
+20:22  Xgc: vpv4oo: Use the table aliases in the select list and ON clause.
+20:24 --- Channel #mysql was synced in 163 seconds
+20:25  netman86: Is there a quick way to do a search through a database? Something like select * from * where string = stringname
+20:25  _raymond_: netman86: mysqldump | grep
+20:26  netman86: sadly I'm stuck using this thing from a frontend. I can send it queries but I dont have CLI access
+20:26  archivist: very bad idea
+20:26  the_wench: http://www.hashmysql.org/index.php?title=Very_Bad_Idea
+20:26  netman86: hm
+20:27  netman86: well that's an interesting read.
+20:28  netman86: I wish it explained fully why it was such a bad idea- aside from clogging up the database.
+20:29  tomalak: Can anyone see a quick way to speed up this query? The three subqueries in the column selection are pushing the execution time up a bit, even though the result is only four rows. Cheers... http://codepad.org/1nKZVzMa
+20:30  tomalak: (I guess I only want to end up running them four times, but they seem to be executed on every row of general before the INNER JOIN reduces the recordset to 4..?)
+20:33  tomalak: wrapping the `general INNER JOIN (...) AS _general_latest_timestamps USING(id)` in its own subquery doesn't seem to make much difference :/
+20:34  netman86: here is the problem: A client deleted one of their clients in this application that uses this database. We need the addresses stored (somewhere) in the database from the deleted client. I've restored a backup from a few weeks back to a different database, but I dont have a clue where in the database it would be- with over 200 tables. And the company that made the software wont answer any questions without a $250/hr support contract
+20:34  thumbs: tomalak: don't use corrolated subqueries.
+20:34  thumbs: tomalak: join derived tables instead.
+20:35  seekwill: netman86: #mysql will charge you $249/hour
+20:35  archivist: netman86, grep the dump its just as quick
+20:35 * archivist charges 240....pound
+20:36  tomalak: Ah, ok, so if I replace those with JOINs I might have better luck
+20:36  tomalak: Thanks; let me try that
+20:37  netman86: archivist- Sadly, again, I don't have CLI access- only through a sql frontend.
+20:37  archivist: netman86, you have the backup, restore to another box
+20:38  netman86: I could, if I had the backup in hand- this is all being done on a remote server.
+20:38  netman86: the backup is over 2 gigs, so I'm not about to ftp it to myself
+20:38  _raymond_: why not?
+20:38  netman86: because the clients internet is slow enough that it would take a day to get to me- I need the data faster.
+20:38  marginoferror: If I have an array of accountids and I'm using prepared statements, what's the proper way to make a query that selects all accounts matching the accountids (i.e., one line per accountid, where the number of accountids is variable)?  I know how to do it without prepared statements but I think the prepared statement complicates things?
+20:38  seekwill: lol
+20:39  tomalak: what does 'corrolated subqueries' actually mean?
+20:39  archivist: bad idea
+20:39  archivist: or runs once per row
+20:39  seekwill: oh heh
+20:39  _raymond_: tomalak: that there exists a dependent relationship between the inner and outer queries.
+20:39  marginoferror: ?
+20:40  _raymond_: marginoferror: There are no arrays in SQL.
+20:40  felixjet: why i can store "15" inside tinyint(1) ? the (1) doesnt matter?
+20:40  archivist: zerofill
+20:40  the_wench: The optionally defined number after an INT data type represents the display width when used in conjunction with ZEROFILL. Please refer to: http://hashmysql.org/index.php?title=Zerofill
+20:40  _raymond_: netman86: welp I guess your client is serious about there data... not much more we can do.
+20:40  marginoferror: _raymond_: What I would do is take the php array, iterate over it to append to the query OR WHERE accountid = $value and submit that query
+20:41  marginoferror: _raymond_: But that won't work with prepared statements. Should I ask in #php?
+20:41  _raymond_: marginoferror: please... don't use databases.
+20:41 --- LinuxJedi|away is now known as LinuxJedi
+20:41  _raymond_: marginoferror: You are evil, and should be shot.
+20:41  tomalak: thanks _raymond_
+20:41  tomalak: and thanks thumbs, that's much better.
+20:41  tomalak: later guys.
+20:41  [netman]: netman86: can you access via ssh to your mysql server?
+20:41  erkules: damn no domas if you need a domas
+20:41  archivist: marginoferror, where do you get the ids from...join to...
+20:42 * seekwill shoots _raymond_ 
+20:42  marginoferror: _raymond_: Seriously, I'm trying to learn the proper way to do these things.
+20:42  marginoferror: archivist: From the SELECT results, not from the input
+20:42  archivist: marginoferror, so join
+20:43  archivist: dont do two queries where one should be used
+20:43  marginoferror: archivist: I don't understand; maybe I phrased the question incorrectly.  I am using a single query.  And the single query works with single inputs
+20:43  marginoferror: archivist: But now I want to give it multiple accountids instead of just one and match all of them
+20:43  mariuscc: can anyone help me http://pastebin.com/xj1UBSpE
+20:43  tris2k: what tool do you guys use to create conceptual models
+20:43  marginoferror: With prepared statements
+20:44  Xgc: marginoferror: What do you mean by "and match all of them"?
+20:45  marginoferror: Right now I give it a single accountid and it returns a single row
+20:45  marginoferror: And I want to give it multiple accountids and get multiple rows
+20:45  Xgc: marginoferror: SELECT ... FROM ... WHERE account_id IN (1, 2, 3, 4, 5, 6);
+20:45  Naktibalda: mariuscc: AND g.unhacked=0  remove quotes
+20:45  marginoferror: Right.  But can I do that with prepared statements without knowing the number of values ahead of time?
+20:45  Xgc: marginoferror: Not like that.  No.
+20:46  marginoferror: Okay.  So I'll calculate the number of values, create the prepared statement query dynamically in PHP and then submit that number of values.  Thanks
+20:47  Xgc: marginoferror: How did you determine the list of ids?  Often, you can just join with proper criteria.
+20:47  mariuscc: Naktibalda: removed , no change
+20:47  archivist: marginoferror, you get the id's from another select?
+20:47  marginoferror: Xgc: Unfortunately, the array of ids is being submitted by GET and can vary
+20:47  marginoferror: Xgc: Most of the time it will be all the accounts in a predefined group but I can't work on that assumption
+20:49  Naktibalda: mariuscc: do you paste the same query that was explained? I can't understand why does it choose `cat` index
+20:49  mariuscc:  Naktibalda: yes is the same query, the same thing I don't understand
+20:51  TopKatz: hello,  I want to replace a tinyint value with a string in my select,  what is the function I should look at?
+20:51  mariuscc: Naktibalda: if I remove the cat index is working well, let me add again that index
+20:51  TopKatz: like if 1 ="foo' else 'bar' or somthing like that
+20:52  Naktibalda: !n TopKatz if(
+20:52  the_wench: TopKatz see http://dev.mysql.com/doc/refman/5.1/en/control-flow-functions.html#function_if
+20:52  Naktibalda: !n TopKatz case
+20:52  the_wench: TopKatz see http://dev.mysql.com/doc/refman/5.1/en/control-flow-functions.html#operator_case
+20:53  mariuscc: Naktibalda: I got key_len 2 when I remove the cat index, what does that mean that is using only  the first 2 columns ?
+20:53  Naktibalda: yes
+20:54  Naktibalda: well, you have only 2 where conditions, 1 byte each, but it should use the 3rd column for sorting
+20:54  mariuscc: and is not showing there I suppose..
+20:54  Naktibalda: does it use filesort?
+20:55  mariuscc: without cat index no, but I need that index to
+20:55  Naktibalda: pastebin output of explain
+20:55  Naktibalda: you can use FORCE INDEX
+20:55  mariuscc: explain of which query ?
+20:56  mariuscc: the one without cat or with cat ?
+20:56  Naktibalda: without cat, of course
+20:56  Naktibalda: !man force index
+20:56  the_wench: see http://dev.mysql.com/doc/refman/5.1/en/join.html
+20:57  mariuscc: Naktibalda: http://pastebin.com/afm7ERkg
+21:00  mariuscc: Naktibalda: leave it away, I tested on the live server and is working fine with the cat index also
+21:01  mariuscc: Naktibalda: I wonder what's happening on the development enveirement
+21:03  Naktibalda: by what definition of fine? :)
+21:08  winmutt: can someone point me in the direction of how to get a sum of sums without a drived table or subqueries? trying to clean up http://pastebin.com/dciEt8QE
+21:09  gtowey: a sum of sums is just a sum.
+21:10  winmutt: look at the query
+21:11  winmutt: im trying to calculate the difference between two tables one being a one to many
+21:11  winmutt: this is from a view to calculate account balances
+21:11  gtowey: that query makes my eyes bleed
+21:11  winmutt: mine too :D
+21:12  winmutt: any suggestions?
+21:12  gtowey: make it readable, to start =P
+21:12  adaptr: chocolate-covered cashews
+21:12  winmutt: gtowey: its mysql readable :D
+21:13  winmutt: here ill clean it up some
+21:13  mgriffin: where was that sql beautifier?
+21:13  mgriffin: sql beautifier
+21:13  the_wench: http://www.sqlinform.com/
+21:13  mgriffin: ha!
+21:14  winmutt: prettier : http://pastebin.com/0bNmfLty
+21:14  mariuscc: Naktibalda: I mean that is using the right index, active_2, even if the cat index is there also.
+21:14  Naktibalda: try to ANALYZE TABLE games
+21:14  Naktibalda: !man analyze
+21:14  the_wench: see http://dev.mysql.com/doc/refman/5.1/en/analyze-table.html
+21:15  winmutt: gtowey : better?
+--- Log closed Wed Nov 10 21:16:52 2010
+--- Log opened Wed Nov 10 21:22:18 2010
+21:22 --- Users 609 nicks [0 ops, 0 halfops, 0 voices, 609 normal]
+21:22  winmutt: ok maybe the_wench will talk to me now
+21:22  winmutt: !m rew
+21:22  the_wench: rew see http://dev.mysql.com/doc/refman/5.1/en/rewriting-subqueries.html
+21:22  Jeraimee: Anyone have pointers on the best way to send a set of ints to a procedure to be used in an IN. Currently it's suggested to split the string and insert the results into a temp table then select from the temp table and use that in the IN. (failing example http://pastebin.ca/1986980)
+21:22  winmutt: gtowey: yes but like i said, this does not allow me to get a sum of sums
+21:23  winmutt: i did rewrite it as a left join
+21:23  winmutt: however wrap a sum around it and i get invalid use of group by function
+21:23  winmutt: and every other possible fix I have found involves derived tables
+21:23  winmutt: since this query is a column in a view, this does not help me much
+21:24  gtowey: winmutt: a sum of sums is just a sum
+21:24 --- Channel #mysql was synced in 159 seconds
+21:24  _raymond_: gtowey: a broken record is still broken.
+21:25  winmutt: gtowey: not when a group by is involved
+21:25  winmutt: again two tables, one is a one to many
+21:25  gtowey: you don't have a group by
+21:25  gtowey: join the tables, and do SUM(payments`.`amount` - IFNULL(`payments2invoices`.`amount`, 0))
+21:25  winmutt: yes
+21:25  adaptr: _raymond_: a broken re-a broken re-a broken re-re-r-
+21:26  gtowey: actually you do need to join on a derived table
+21:26  gtowey: but that's better than a subquery!
+21:26  _raymond_: LoL
+21:26  winmutt: of course it is
+21:27  winmutt: but i cant as this is in a view (yay mysql limitations)_
+21:27  _raymond_: gtowey: A derived table isn't a subquery?
+21:27  winmutt: it is a subquery
+21:27  winmutt: but not per row :D
+21:29  winmutt: gtowey : so back to square one. how do i get a sum of sums with two tables, one being a one to many w/group by without a derived table or subquery
+21:30  adaptr: _raymond_: a derived table isn't WEBSCALE!
+21:30  winmutt: http://pastebin.com/GNdrV07Y DNE
+21:30  winmutt: er
+21:30  winmutt: dnw
+21:32  winmutt: i guess i can do a biew instead of a derived table
+21:32  winmutt: that will work
+21:33  winmutt: i dont understand why, if you can do a view in a view , you cant do a derived table
+21:33  winmutt: silly mysql, tricks are for kids
+21:35  jimi_: How can I change the date of a timestamp, without changing the time of a timestamp? IE  move 2010-10-10 01:00:00 to 2010-10-20 01:00:00 without knowing the date  or the offset?
+21:37  gtowey: jimi_: date + INTERVAL 10 DAY
+21:38  jimi_: gtowey, but i dont know the offset, so i wouldnt know + INTERVAL 10 DAY....
+21:38  winmutt: gtowey: no other suggestions eh :(
+21:38  jimi_: gtowey, i guess i would have to do this in my programming language? pull the value back, calculate , and then update?
+21:39  winmutt: jimi: its an arbritrary offset?
+21:40  jimi_: winmutt, well, from a drop down menu, i want to display 2010-10-20 and that could be + 10 days, + 4 days - 20 days, etc
+21:40  jimi_: winmutt, thats why i want to alter the date of the date/time field, without affecting the actual time portion.
+21:41  gtowey: !n jimi_ datediff(
+21:41  the_wench: jimi_ see http://dev.mysql.com/doc/refman/5.1/en/date-and-time-functions.html#function_datediff
+21:41  Naktibalda: SET datefield = CONCAT('2010-01-20 ', TIME(datefield))
+21:43  Eaven: i'm trying to do a query where i SELECT program_performance LIKE ... but I feel LIKE doesn't do what I need. For example: in the program_performance column there is normal, high, and highest... if I so SELECT program_performance LIKE "high" it only shows records with "high" and not "high" & "highest"
+21:44  Eaven: s/so/do
+21:44  Eaven: in my book, high is like highest
+21:44  JPT: LIKE 'high%' will show both
+21:44  Eaven: ;x
+21:44  Eaven: sweet
+21:44  the_wench: --> http://sweet.nodns4.us/
+21:44  Eaven: now I just need to figure out how to translate that into rails
+21:44  Eaven: ;)
+21:45  Eaven: I could just append the % onto my string
+21:49  Eaven: JPT: thanks a bunch buddy :)
+21:49  Eaven: worked like a charm
+21:49  Eaven:   named_scope :gender_program_performance, lambda { |range| range.split('..')[0].downcase == 'men' ? {:conditions => ["SELECT mens_performance LIKE ?", range.split('..')[1] + "%"]} : {:conditions => ["SELECT program_performance LIKE ?", range.split('..')[1] + "%"]}}
+21:49  Eaven: rarar
+21:49  Eaven: get some
+21:49  Eaven: lol
+21:53  jimi_: lol @ get some
+22:04  mariuscc: group_concat(field SEPARATOR ', ') will give what if one "field" is null ?
+22:06  snoyes: null values are skipped. you get 'null' if there are no non-null values.
+22:07  mariuscc: so I will get just 1 value if one of them is null ??
+22:07  mariuscc: no separator or something?
+22:07  gdoteof: How much flexibility do I have with LOAD DATA INFILE?  I want to skip duplicate keys
+22:07  gdoteof: instead of having it barf
+22:07  gtowey: !m gdoteof load data
+22:07  the_wench: gdoteof see http://dev.mysql.com/doc/refman/5.1/en/load-data.html
+22:12  gdoteof: gtowey: thanks.  i swear i was on that page.  but i was looking for 'skip
+22:12  gdoteof: '
+22:12  gdoteof: now i got a bunch of %0D barfs
+22:13  gdoteof: at the end of my input... maybe because it was from a windows machine?
+22:13  gdoteof: the input file
+22:13  gdoteof: is there an escape character i can use to remove it?
+22:13  gdoteof: or findi t
+22:16  gdoteof: ti's a carriage return
+22:19  gtowey: gdoteof: windows uses "\r\n" for end of line terminators
+22:19  sven_oostenbrink: Is there a command, something like EXPLAIN maybe, that could return me the columns of the results of a given SELECT query?
+22:20  gtowey: !tell sven_oostenbrink about information schema
+22:20  the_wench: sven_oostenbrink information_schema is a virtual database of databases inside of MySQL 5.0. You can use it to get schema, table and column metadata. Please note: It only shows information the user has access to.  For more info:   http://dev.mysql.com/doc/refman/5.1/en/information-schema.html
+22:20  gtowey: the columns?  it's all the ones you select!
+22:21  gtowey: otherwise if you use *, then it's all of them from all tables
+22:24  sven_oostenbrink: gtowey: mmmm, that would return me columns for tables.. I know it, yeah.. but I havea SELECT query with multiple joins, etc.. and I want to know an easy way (as in, I don't have to parse the query myself) to obtain the columns
+22:25  gdoteof: sven_oostenbrink: aren't all the columns at the beginning of the query?
+22:26  sven_oostenbrink: gdoteof: they are.. I suppose I could do it with a regex, but I was just wondering if there was something in MySQL for it..
+22:26  gdoteof: sven_oostenbrink: of it's for something automated not just so you can see what's going on right now
+22:28 --- jjulian_ is now known as jjulian
+22:29  sven_oostenbrink: I write the query as a "resource" that will be stored in a database. Other people can select that query from a list.. Im not showing the query (talking about secretaries, etc here) so they can select "employees per department" or somehting.. but I want to show them what columns will be provided by the query
+22:32  mariuscc: can someone give me an idea how do I group concat null values ?
+22:38  mgriffin: mariuscc: where do you want the null to end up?
+22:39  mgriffin: sven_oostenbrink: have two views, one to return the data and one to return a key
+22:40  mariuscc: well I concat another field, so I can make the difference in php
+22:40  mgriffin: mariuscc: exactly
+22:41  mariuscc: yes, but it's pretty late and this ideas are comming slow in my mind :-)
+22:43  magglass1: I have a problem with querries being stuck in Sending data for tens of seconds; anyone know what might cause this?
+22:45  magglass1: all queries are coming via a socket, not the network
+22:45  Bummed: busy machine.. lots of data .. not hitting an index
+22:46  magglass1: does sending data mean it's still executing the query then?
+22:46  HarrisonF: sending data can mean lots of things
+22:47  HarrisonF: normally it means it is in the storage engine
+22:48  magglass1: the queries that seem to be stuck are "select something from table where regexp etc limit 1" on an innodb table with 347568 rows
+22:48  gtowey: regex are slow
+22:48  magglass1: could innodb be shuffling data around on disk?
+22:48  magglass1: it only happens every so often
+22:49  magglass1: like hours apart
+22:49  seekwill: magglass1: The "where regexp etc" is fairly important
+22:49  seekwill: Doesn't matter if it's "limit 1"
+22:49  gtowey: does that include an order by clause?
+22:50  seekwill: Includes everything!
+22:50  magglass1: the query runs quickly, but every few hours queries will pile up and a bunch of those  will be sitting until they time out
+22:50  magglass1: here is an example
+22:50  seekwill: "etc"
+22:50  magglass1: select userid from user where username regexp "^(&[\\#\\da-z]*;|[^a-z\\d])*v[e????????][n??][o????????????]m[o????????????]([u?????????]|u|?|?)[s??](&[\\#\\da-z]*;|[^a-z\\d])*(&[a-z]*;|[^a-z\\d])*$" limit 1
+22:50  gtowey: magglass1: then you have to examine what *else* is going on at that time.
+22:50  seekwill: oh
+22:51  magglass1: it seems all queries to the user table go into sending data
+22:51  magglass1: so it must be some innodb issue
+22:51  magglass1: that's the only innodb table
+22:52  seekwill: Maybe it's a bug!
+22:53  magglass1: there aren't any updates as old as the queries that are sending data
+22:53  magglass1: any suggestions on what to check?
+22:54  gdoteof: can i get an epoch stamp out of select now();
+22:54  seekwill: UNIX_TIMESTAMP()
+22:54  gdoteof: instead of 2010-11-10 16:53:22
+22:54  gdoteof: ty
+22:55  gtowey: magglass1: gather data.  get SHOW ENGINE INNODB STATUS \G output and SHOW PROCESSLIST; while things are showing the problem.
+22:56 --- LinuxJedi is now known as LinuxJedi|away
+22:56  gtowey: ideally you should be graphing server stats
+22:56  seekwill: ANd have backups!
+22:56  mgriffin: rce
+22:56  the_wench: Resume Changing Event. Often when the need to revert to backups arrises and either none are available or existing ones are borked.
+22:57  mikee: hi, I have this simple question: how can i determine the character encoding from a .sql file?
+22:57  magglass1: gtowey: /G?
+22:57  magglass1: \G*
+22:57  seekwill: magglass1: tias
+22:57  seekwill: It replaces the ;
+22:57  magglass1: gtowey: I'm graphing cpu load; what should I keep track of?
+22:58  magglass1: which mysql stats?
+22:58  mikee: i have tried several that i'm thought that, but it isnt
+22:58  gtowey: magglass1: http://code.google.com/p/mysql-cacti-templates/wiki/MySQLTemplates
+22:59  magglass1: I use zabbix
+22:59  gtowey: ew, zabbix is awful =)
+23:00  gtowey: magglass1: treat those as examples then.
+23:00  mgriffin: !wench learn cacti is Cacti useful for monitoring InnoDB and MySQL with xaprb's http://code.google.com/p/mysql-cacti-templates/wiki/MySQLTemplates and can be used with mk-heartbeat. Cacti is available in EPEL as well.
+23:00  the_wench: I have learnt cacti is Cacti useful for monitoring InnoDB and MySQL with xaprb's http://code.google.com/p/mysql-cacti-templates/wiki/MySQLTemplates and can be used with mk-heartbeat. Cacti is available in EPEL as well.
+23:01  magglass1: gtowey: I haven't had any problems with it
+23:02  magglass1: would increasing Innodb_buffer_pool_pages_total help anythinng?
+23:02  KWhat_Work: how do you INSERT a timestamp ?
+23:02  ThetaPhi: I must not install EPEL
+23:02  mgriffin: magglass1: probably not
+23:02  mikee: please help me, this is very annoying :)
+23:02  gtowey: magglass1: stop guessing. start gathering info
+23:02  ThetaPhi: EPEL is the mind-killer.
+23:03  KWhat_Work: FROM_UNIXTIME(123456789) fails
+23:03  mgriffin: ThetaPhi: you dont have to install epel-release to grab rpms from it
+23:03  ThetaPhi: EPEL is the little death that brings total obliteration.
+23:03  KWhat_Work: '2010-10-15 10:12:14' fails
+23:03  mgriffin: and epel is my friend
+23:03  djahandarie: mikee, it is at the end of each of the table declarations
+23:03  ThetaPhi: mgriffin: I support half a farm full of epel fail
+23:03  djahandarie: If it isn't there, then it will default to whatever is set on your server
+23:03  gtowey: !tell KWhat_Work about idfk
+23:03  the_wench: KWhat_Work Please paste your query, an EXPLAIN, and the relevant SHOW CREATE TABLE
+23:03  mgriffin: ThetaPhi: not epels fault probably :)
+23:04  mgriffin: idfk++
+23:04  gtowey: yeah, seriously
+23:04  ThetaPhi: mgriffin: the whole RHEL ecosystem is borked
+23:04  mgriffin: ThetaPhi: can i pm you?
+23:05  ThetaPhi: sure
+23:06  KWhat_Work: the_wench: INSERT INTO mytable (mytime) VALUES ('2010-10-15 10:12:14') does not work, INSERT INTO mytable (mytime) VALUES (FROM_UNIXTIME(123456789)) does not work, how the eff do i get a unix style epoch into a timestamp field
+23:07  magglass1: gtowey: but if I have 0 free buffers wouldn't it make sense to increase it?
+23:07  gtowey: !tell KWhat_Work about report card
+23:07  the_wench: KWhat_Work the_wench issues you this Report Card; Follows Directions - Needs Improvement!
+23:07  mgriffin: KWhat_Work: you forgot the table def
+23:07  gtowey: and the part about putting it in a pastebin
+23:07  gtowey: and explaining what "doesn't work" means
+23:08  gtowey: so pretty much 1 out of 4
+23:09  KWhat_Work: doesnt work means that i get the jan 1 1970 in the table and i highly doubt you need a CREATE TABLE `mytable` ( `epoch` timestamp ); to help you figure this one out
+23:09  magglass1: KWhat_Work: why not use a datetime field?
+23:10  KWhat_Work: magglass1: its for logging, utc is needed
+23:10  gtowey: KWhat_Work: well, you've clearly told us you're not actually giving us the real steps you're following
+23:10  gtowey: we can't help you unless you tell us the truth...
+23:11  KWhat_Work: give me 10 min lets see how fucking verbose i can be
+23:11  thumbs: KWhat_Work: don't swear in here.
+23:11  gtowey: CREATE TABLE `mytable` ( `epoch` timestamp );  doesn't have the mytime column that your insert statment has.
+23:11  gtowey: so try giving us real information
+23:11  mikee: djahandarie, i know that but it wont work, i have latin1 char there but i've tried all the latin1 sets but I still get "KÃ©rdÃ©sek" insted of "Kérdések"
+23:12  djahandarie: Truth is that importing stuff can be a bitch sometimes
+23:13  djahandarie: What are your client and connection charsets?
+23:14  alus: so I've been collecting binlogs for a long time
+23:14  alus: can I move them out of the way? they're taking up a lot of disk.
+23:14  mgriffin: alus: set expire_logs_days to something reasonable, maybe 15?
+23:14  mgriffin: then magic will happen
+23:15  mikee: i think utf8 both fresh install. default everything zend server ce windows
+23:15  mikee: and u use the command line to import the file
+23:16 * alus reads about expire_logs_days
+23:16  mikee: the file is in utf-8 char :) pff
+23:16  alus: mgriffin: is keeping binlogs since the beginning unreasonable?
+23:16  ThetaPhi: O.O
+23:16  alus: I do nightly backups with mysqldump
+--- Log closed Wed Nov 10 23:22:47 2010
+--- Log opened Wed Nov 10 23:23:17 2010
+23:23 --- Users 590 nicks [0 ops, 0 halfops, 0 voices, 590 normal]
+23:24  alus: mgriffin: innodb
+23:25 --- Channel #mysql was synced in 158 seconds
+23:26  mgriffin: alus: select t1.table_schema from information_schema.tables t1 left join information_schema.tables t2 on (t1.table_schema = t2.table_schema and t1.table_name = t2.table_name AND t2.engine = 'InnoDB') group by t1.table_schema having count(t1.table_schema) = count(t2.table_schema);
+23:26  alus: muh
+23:26  alus: what
+23:27  alus: oh, I see
+23:27  mgriffin: select distinct table_schema from information_schema.tables where engine='myisam' and table_schema not in ('information_schema','mysql');
+23:27  mikee: djahandarie, thx the help, ive changed the creat statments charset latin1 to utf8 and the --default-character-set helped me also :
+23:27  mikee: )
+23:27  mgriffin: magic utf
+23:27  the_wench: you might be able to fix it up with init-connect='SET NAMES utf8' and skip-character-set-client-handshake in my.cnf
+23:28  mgriffin: i put that factoid there hoping someone would eventually find it interesting or useful and try it
+23:28  djahandarie: I've never seen it before
+23:28  alus: mgriffin: these are taking a Long time
+23:28  djahandarie: You have failed to invoke it regularly enough
+23:28  djahandarie: excuse
+23:28  the_wench: shoot a man in the foot and you only get to laugh at him for a half hour. Talk him into using pma and it's a lifetime of humor.
+23:28  djahandarie: excuse
+23:28  the_wench: shoot a man in the foot and you only get to laugh at him for a half hour. Talk him into using pma and it's a lifetime of humor.
+23:28  mgriffin: alus: you have lots of tables and information_Schema is slow as can be
+23:29  djahandarie: Damn it the_wench
+23:29  djahandarie: excuse
+23:29  the_wench: Closed for staff training
+23:29  mgriffin: "my opposition to using fulltext is because I'm searching on a 30 character model number, so it's not a large amount of text"
+23:29  mgriffin: i did move everything to utf8_general_ci from latin1 8 months ago i guess it did aso go to myisam
+23:29  alus: mgriffin: not that many tables.. maybe 20?
+23:30  alus: mgriffin: uh. select distinct table_schema from information_schema.tables where engine='myisam' and table_schema not in ('information_schema','mysql'); #=> Empty set (1 min 16.81 sec)
+23:30  mgriffin: cool.
+23:30  ThetaPhi: alus: that's good :)
+23:30  mgriffin: ThetaPhi: be sure to set default-storage-engine=innodb
+23:30  alus: mgriffin: select t1.table_schema from information_schema.tables t1 left join information_schema.tables t2 on (t1.table_schema = t2.table_schema and t1.table_name = t2.table_name AND t2.engine = 'InnoDB') group by t1.table_schema having count(t1.table_schema) = count(t2.table_schema); #=> table_schema, my_db. 1 row in set (2 min 27.95 sec)
+23:31  mgriffin: alus: your backup strategy seems reasonable sound from here
+23:31  mgriffin: alus: do you have replication slaves?
+23:31  alus: mgriffin: no. I just cron backup the nightly snapshots off-site
+23:32  mgriffin: then there is little reason to have expire_logs_days bigger than 2 or 3 unless you think you would want to restore to data that far back from the mysqldump generated file + binary logs
+23:33  alus: mgriffin: hm.
+23:33  alus: mgriffin: on time I searched through the binlogs to find out when something changed. I guess that was dumb
+23:33  alus: s/on /one /
+23:34  alus: ok, I'll set expire_logs_days to 3
+23:40  mgriffin: http://sqlfairy.sourceforge.net/
+23:40  Lenhix: ¿
+23:41  Lenhix: What an ugly logo :S
+23:41  mgriffin: what fairies cant be a little plump?
+23:42 * erkules goes to buy a t-shirt \o/
+23:42 * mgriffin too...
+23:44  erkules: but *not* the ugly black one!
+23:48 --- jeremy_c_ is now known as jeremy_c
+23:50  anigma: sdg
+23:50  anigma: oups
+23:52  Lenhix: A royal blue t-shirt would be nice XD
+23:52 * erkules goes with the golf shirt
+23:53  erkules: Need some nice expamples for the general plugin (*not* the HandlerSocket! :)
+23:54  seekwill: dude
+23:54  seekwill: http://www.cafepress.com/sqlfairy.47879301#
+23:54  seekwill: Ok, so why does "front" show the logo, but on the guy, it's not there?
+23:54  seekwill: I call fake
+23:55  Lenhix: The guy is the fairy
+23:55  seekwill: oh
+23:55  mgriffin: erkules: they have $3 off aprons for thanksgiving
+23:56  NickAdmin: hey guys, recently I've been having some issues with tons of sleeping threads. I don't use persistent connections, and I use mysql_close() to end all connections in PHP (even though I've heard that isn't nessecary). what could be causing this to happen?
+23:56  gtowey: not closing your connections
+23:56  erkules: mikee: hehe
+23:56  mgriffin: not using mysql_close
+23:56  NickAdmin: is it required? the php doc says it isn't
+23:56  thumbs: the php docs say a lot of things.
+23:57  mgriffin: goto
+23:57  seekwill: NickAdmin: You're probably using pconnects.
+23:57  NickAdmin: I use mysql_connect() not mysql_pconnect().
+23:57  seekwill: NickAdmin: Maybe something else is?
+23:57  mgriffin: set mysql.allow_persistent=off in php.ini and restart httpd or whatever
+23:57  mgriffin: a lot of off the shelf stuff will try pconnect or fall back to connect
+23:57  mikee: erkules: funny right :) time to switch everbody everyting to unicode :)
+23:58  NickAdmin: that php ini setting is already turned off.
+23:58  seekwill: Reboot
+23:58  the_wench: rebooting is unlikely to have any effect other than possibly erasing any evidence of what's going wrong
+23:59  erkules: s/mikee/mgriffin/
+23:59  erkules: :)
+23:59  mgriffin: NickAdmin: well if you didnt have five apps using the same database it would be easy to tell who it was
+--- Log closed Thu Nov 11 00:00:39 2010

@@ -1,0 +1,1181 @@
+--- Log opened Mon Dec 06 00:00:07 2010
+--- Log closed Mon Dec 06 00:17:49 2010
+--- Log opened Mon Dec 06 00:18:13 2010
+00:18 --- Users 696 nicks [0 ops, 0 halfops, 9 voices, 687 normal]
+00:20 --- Channel #git was synced in 150 seconds
+--- Log closed Mon Dec 06 00:24:58 2010
+--- Log opened Mon Dec 06 00:35:27 2010
+00:35 --- Users 695 nicks [0 ops, 0 halfops, 9 voices, 686 normal]
+00:36 --- adamholt is now known as adamholt_away
+00:36 --- adamholt_away is now known as adamholt
+00:37 --- Channel #git was synced in 148 seconds
+--- Log closed Mon Dec 06 01:03:31 2010
+--- Log opened Mon Dec 06 01:08:56 2010
+01:08 --- Users 678 nicks [0 ops, 0 halfops, 9 voices, 669 normal]
+01:11 --- Channel #git was synced in 153 seconds
+01:27  Madsy^: I'm using msysgit. I copied my old public key into C:/Users/MyUser/.ssh. When I tried to push to remote, I get this error message: https://gist.github.com/729637
+01:27  Madsy^: Any clues?
+01:27  Madsy^: "Connection abandoned. fatal: The remote end hung up unexpectedly"
+01:27  wereHamster: Madsy^: ssh into the host and save the host key
+01:28  Madsy^: Hm, I'm not sure if I follow. I use github, and it already has my public key.
+01:28  wereHamster: Madsy^: ssh git@github.com
+01:29  Madsy^: Ahh, thanks :-)
+01:30  Madsy^: Hm. I authenticated successfull, but I still get the same error when I push.
+01:30  Madsy^: +y
+01:31  Madsy^: wereHamster: It looks like the ssh server and the git server are different hosts. Their keys differ, so the trick doesn't work.
+01:32  wereHamster: what url do you use?
+01:34  Madsy^: The same you specified. git.github.com
+01:34  wereHamster: git.github.com != github.com
+01:35  Madsy^: Sorry. This is my remote origin: git@github.com:Madsy/Computer-Graphics-Explained.git
+01:36  Madsy^: So, it's kind of weird.
+01:38  patrikf: Madsy^: you can try GIT_TRACE=1 git foo, and then you see what ssh command git invokes internally
+01:39  patrikf: then you try that command stand-alone and see if it's a ssh issue or not
+01:43  Madsy^: It calls plink.exe. That can't be right..
+01:45  patrikf: Madsy^: it can be. that's the putty tool
+01:46  patrikf: Madsy^: but if you'd rather use some ssh.exe, git uses whatever GIT_SSH in the environment says
+01:49  Madsy^: patrikf: I ran plink.exe with -v. It says "Disconnected: User aborted at host key verification"
+01:49  Madsy^: I wonder if plink.exe aborts per default without asking, when running batch mode.
+01:49  Madsy^: When the host is not known.
+01:49  Madsy^: Can that be it?
+01:51  Madsy^: Indeed. I came further when I removed -batch from the command. Now it says that "no supported authentication methods is available"
+01:52  patrikf: hmh.
+01:52  patrikf: Madsy^: check http://help.github.com/troubleshooting-ssh/
+01:52  patrikf: apparently you're not the only one with that problem
+01:53  wereHamster: if ssh works and plink not, it means plink doesn't have access to your private key
+01:54  frogonwheels: Madsy^:  have you loaded pageant  with your private key?
+01:58  Madsy^: frogonwheels: I read the github faq on this. It is indeed the problem.
+01:58  Madsy^: Invoking plink from cygwin seems to give problems with pageant
+--- Log closed Mon Dec 06 02:03:30 2010
+--- Log opened Mon Dec 06 02:08:58 2010
+02:08 --- Users 679 nicks [0 ops, 0 halfops, 9 voices, 670 normal]
+02:08 --- Server: [card.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+02:09  Madsy^: patrikf: Indeed, just a brainfart. It works now, thanks a lot for the help.
+02:09  Madsy^: frogonwheels: To you too.
+02:09  frogonwheels: :) yw
+02:11 --- Channel #git was synced in 152 seconds
+02:45 --- ChanServ sets modes [#git +v DustinGraham1]
+02:46 +DustinGraham1: Ok, I am reading the git tutorial on kernal.org which i found on git-scm but I still can't figure something out. Can I create a git repository over ftp without installing anything on the ftp, or does it require programs?
+02:47  rudi_s: DustinGraham1: You can do it, but it's not a very good idea.
+02:47  jast: technically you can, but git doesn't provide any tool for it, and git is pretty slow and inefficient over FTP anyway
+02:47  rudi_s: Create the repository locally, upload it to the FTP and everytime you want to clone/update from it, you have to fetch it from FTP again.
+02:47 +DustinGraham1: Hm. Ok thanks.
+02:47  jast: well, you *can* actually use an ftp:// URL for a remote
+02:48  rudi_s: Git works pretty well over dump HTTP, but it's not perfect. To get really fast clones/fetches you need git:// (or ssh://).
+02:48 +DustinGraham1: Nah, you answered my question.
+02:48  jast: but it's not very efficient.
+02:48  jast: smart HTTP is efficient, too :)
+02:48  rudi_s: jast: You can? Interesting, I didn't know this. Thanks.
+02:48  jast: isn't it nice that we have both dumb and smart HTTP nowadays ;)
+02:48 +DustinGraham1: Thanks guys. I look into a way to use the proper protocol. Just have a lot of space on some ftp servers so wanted to use those.
+02:48  rudi_s: ;-)
+02:51  patrikf: git repositories don't typically require lots of space
+02:53 +DustinGraham1: K
+03:34  mase_wk: is there a way to get the last commit ID for a particular file ? i'm trying to do a diff between whats in the git repo and whats on disk but with special args. I only want to know which lines have been changed
+03:36  frogonwheels: mase_wk:  you can use HEAD to get at the current contents of the file...
+03:36  mase_wk: ah good idea
+03:36  frogonwheels: mase_wk: every commit effectively contains the whole tree.
+03:37  frogonwheels: mase_wk: though it will share  tree/file blobs  with any other version of the tree/file that was the same.
+03:38  mase_wk: i could do git-cat-file on the one file i was concerned about though right ?
+03:39  frogonwheels: mase_wk: if you want to use different diff tool, why not set up a difftool?
+03:40  mase_wk: didn't think about that approach. will look at that now
+03:41  frogonwheels: mase_wk: saves having to deal with cat-file  and tracing down blobs!
+03:41  mase_wk: yeh seems much simpler
+--- Log closed Mon Dec 06 04:03:25 2010
+--- Log opened Mon Dec 06 04:08:48 2010
+04:08 --- Users 671 nicks [0 ops, 0 halfops, 9 voices, 662 normal]
+04:11 --- Channel #git was synced in 152 seconds
+04:16 --- nohk_ is now known as nohk
+04:41  puff: Anybody home?
+04:43  mase_wk: only the magic dragon
+04:44  puff: trying to get git working with this remote repo using ssh and a shared group...
+04:49  puff: Problem is, I'm a virtual server that's stuck on debian etch, so gitolite isn't available.  Is gitosis sufficient?
+04:51  puff: I tried to set it up using just git, ssh and a shared user group.  Worked for cloning, but when I tried to push:  http://git.pastebin.com/rFFLDZ4B
+04:51  SethRobertson: gitosis is painful and buggy, by all reports
+04:51  puff: Joy.
+04:52  SethRobertson: did you set the shared option on the shared server?  (and reset the permissions)?
+04:52  frogonwheels: puff: gitolite is available - it gets installed  on the local account and needs plain perl
+04:53  puff: SethRobertson: Yes.
+04:54  SethRobertson: Would you mind if I said I didn't believe you?  What setting is you shared configuration set to?
+04:55  frogonwheels: puff: just clone gitolite and install it on the account you want to use for git.. :) easy!
+04:56  frogonwheels: puff: doesn't even need root acces.
+04:58  puff: SethRobertson: Hang on a sec, assembling a pastebin.
+04:58 --- ivey is now known as ivey_off
+04:58  puff: frogonwheels: You make a convincing case... :-).
+05:00  frogonwheels: puff: are you planning on using 'puff' as your git account, or can you have a seperate one?  gitolite/gitosis are _better_ with a dedicated account..
+05:00  puff: http://git.pastebin.com/NBU88CLR
+05:01  puff: frogonwheels: I already have a dedicated account set up fo rit.
+05:01  frogonwheels: puff: (but it's not essential - you'll just need a way of gaining access to the shell seeing as both gitolite/gitosis require that you have key auth
+05:01  puff: SethRobertson: http://git.pastebin.com/NBU88CLR
+05:01  frogonwheels: puff: cool then no probs
+05:01  SethRobertson: Do you really want to debug this or are you going with gitolite?
+05:02  puff: Odd, I just checked (with $ groups) and it didn't show me as being in the git group, so I did "sudo adduser puff git" and now when I do "groups" again, stil doesn't show it.
+05:02  puff: Hm, but when I try "adduser puff git" again, this time it says I'm already a member.
+05:03  puff: SethRobertson: depends... if it's some trivial little tweak, I've already got this set up.
+05:03  SethRobertson: you have to relog in to get the new group
+05:03  puff: Bingo, that fixed it.
+05:04  puff: However, I'm thinking I should switch to gitolite anyway, since every time I ask a question here, I'm going to get "why aren't you using gitolite" :-).
+05:04  frogonwheels: puff: it's pretty easy to set up and it gives you more options for granting people full/restricted access to your repos
+05:06  puff: Got a pointer to a tutororial for doingit by hand?
+05:06  leo2007: gitlolite, no I am not using it.
+05:07  leo2007: oh, it is for access control.
+05:07  Angel-SL: leo2007: I don't think that was intended for you
+05:07  frogonwheels: puff: there are lots of docs .. just got to github sitaram gitolite page
+05:10  leo2007: ok
+05:16  jzacsh: hello, i'm looking at the GIT_SSH var in git(1) and not sure if this is overkill in order to simply change the identity file used for git purposes... i don't want to use ~/.ssh/config because it doesn't apply (i need to change which identityfile is used by a script)
+05:16  puff: Hm, so gitolite _requires_ all users have passwordless ssh key access set up?
+05:16  puff: Or just the git user?
+05:17  khaije|amalt: puff: it needn't be passwordless
+05:17  frogonwheels: puff: anybody who wants access. it's how it identifies people
+05:17  frogonwheels: puff: access to the git repos that is.. not the shell
+05:18  frogonwheels: puff: and not passwordless - you can have passwords  - easier if you have that managed though with .errm.. what's it called again?/..
+05:18  frogonwheels: a sh password keeping daemon thingumijig
+05:18  puff: I'm looking throgh the gitolite docs for an explanation of what the ssh key stuff is all about with it.
+05:18  khaije|amalt: frogonwheels: keyserver?
+05:19  puff: ssh-agent?
+05:19  khaije|amalt: lol
+05:19  frogonwheels: puff: yeah that one :)
+05:20  khaije|amalt: puff: gitolite is one of those things that appears complicated at first, but once you realize the power to complexity ratio you'll accept that it's as simple as possible
+05:20  jzacsh: with the default setup, no one can login via ssh. the only thing they can do is run git commands (as you allow them to via a config file) -- and they do so vicariously via the git user you've set up-- that user is the only one iwth any kind of access.
+05:20  jzacsh: puff: ^
+05:20  nb: we are having good luck with gitolite in fedora
+05:21  khaije|amalt: and in fact it's not partiularly complicated at all once you've started using it
+05:21  nb: and even got it set up where it will work ok even for users with shell access
+05:21  nb: (our sysadmins)
+05:21  sitaram: puff: http://sites.google.com/site/senawario/home/gitolite-tutorial  <-- someone wrote this
+05:21  frogonwheels: puff: I have a gitolite server running under cygwin :)
+05:21  jzacsh: hmm.. i thought my GIT_SSH question would be quicky -- no one else has had to change port numbers/identity fliles?
+05:22  khaije|amalt: frogonwheels: is that your preference or due to lack of other options?
+05:22  Angel-SL: frogonwheels: can't you use smart http now?
+05:22  frogonwheels: khaije|amalt: i think my teammates would shoot me even if I stuck it on colinux :)
+05:23  frogonwheels: khaije|amalt: cygwin is about as far from real windows as I'm tempted to push them. (I use linux at home by preference)
+05:23  Angel-SL: http://progit.org/2010/03/04/smart-http.html
+05:23  frogonwheels: Angel-SL: oh possibly.  it's set up though, and working quite nicely.
+05:23  khaije|amalt: :)
+05:33  jzacsh: when calling a git command does anyone know of a way to specify your ssh key? (just as you would with ssh, like `ssh -i /path/to/key ...`)
+05:35  kadoban: jzacsh: i think the usual way is to make a Host alias thing in your ssh config and using that alias
+05:36  jzacsh: kadoban: i'm trying to work around that, since i'm doing this via a script
+05:36  jzacsh: and the script is going to use its own passwordless keyfile
+05:37  kadoban: hmm, sorry then
+05:37  jzacsh: :(
+05:41  sitaram: jzacsh: well you could create a temp config file per run and pass it to ssh's -F option.  Which in turn means you need GIT_SSH or so (which I have never used but ought to work)
+05:42 * jzacsh is reading about -F
+05:42  sitaram: jzacsh: will there be race conditions?  will 2 copies of the script run together?  if not, an even better option is to use a dummy keyname in ~/.ssh/config and have your script overwrite that before it starts.  Much simpler
+05:43  jzacsh: sitaram: it seems GIT_SSH is the only way -- which i'm fine with .. i'm just figuring out now
+05:43  jzacsh: sitaram: the scirpt will be stopping if a .pid file exists for it.
+05:44  jzacsh: none the less, i'm already setting up a test to see if GIT_SSH will work (i'm guessing i just do GIT_SSH='ssh -F /path/to/tmp_conf' -- but, we'll see
+05:47  sitaram: jzacsh: if there are no races, I'd think it's much simpler to use ~/.ssh/config with a host entry that says "identityfile foo" and overwrite ~/.ssh/foo{,.pub} with your new keypair each time
+05:47  sitaram: least messy
+05:48  jzacsh: sitaram: agreed, except that it always makes me feel funny `sed`ing an actually-used ssh config file
+05:52  sitaram: jzacsh: who said you have to sed that?  You didn't get what I said then...
+05:53  sitaram: keep the config file fixed.  "host foo... identityfile foo".  In your script, when you get your new keypair (however you get it), you copy that to ~/.ssh/foo and ~/.ssh/foo.pub respectively
+05:57  jzacsh: sitaram: oh, okay. i don't think that'd apply here, the problem is that the job _might_ run under my own user name. i still want Server foo\nIdentityFile my_key to be in ~/.ssh/config -- when the cronjob runs, i don't want it to pick up on that
+05:57  jzacsh: sitaram:  so the job needs to see its own 'config' file somewhere, which is why -F seems like the only option (or create a new user for this script to run under -- but that seems like overkill to me) -- unles i'm misunderstanding you still
+05:59  sitaram: jzacsh: what "URLs" does the job use internally?  If they currently say "git@foo:repo" can you change that to "git@foo_scripted:repo"?
+05:59  sitaram: while allowing your normal use to still be "git@foo:repo" when it runs under your own username?
+06:00  jzacsh: sitaram: not sure what you mean by foo_scripted -- you're saying i can point the script to the same server ,but call it something else?
+06:00  jzacsh: sitaram: via /etc/hosts? or you mean something much more simple?
+06:01  sitaram: jzacsh: how does your script actually access the remote repos?  what URL does it use?
+06:02  jzacsh: sitaram: git@server.com:priv/repo
+06:02  sitaram: can you change that to "git@foo:priv/repo"?  Just say yes or no; I'll tell you the rest then
+06:03  jzacsh: yes, i think...
+06:04  sitaram: ok, then do it.  Then add this to ~/.ssh/config: host foo \n hostname server.com \n identityfile fookey
+06:05  jzacsh: waaahh, hostname :)
+06:05  sitaram: then in your script you take the script's own passwordless keyfile and cp it to ~/.ssh/fookey and .pub respectively
+06:05  jzacsh: sitaram: thank you :)
+06:06 * jzacsh wishes he jumped to more man pages, faster
+06:08  sitaram: jzacsh: you use gitolite right?  what install method did you choose?
+06:09  jzacsh: sitaram: root
+06:09  sitaram: ok; nvm then.  The "from-client" makes uses of this ssh config feature and you may have known all this already
+06:10  jzacsh: oh, no, definitely didn't know about that ssh_config option
+06:14 --- cytrinox_ is now known as cytrinox
+06:17 * jzacsh is getting "Cannot resolve hostname" -- HostName trick of ssh_config is not that straight forward..
+06:18  jzacsh: hmff.. i can `git blah fake_host` -- but i can't `ssh fake_host` ...
+06:18  jzacsh: strange
+06:18  Gunni: can i make my own repo, then add into the root a submodule and make that submodule put it's files in the root of my repo, and not in it's own subfolder?
+06:19  sitaram: jzacsh: should work fine... double check or paste all related stuff
+06:20  DrNick: Gunni: no. what are you trying to do?
+06:21  jzacsh: sitaram: would rather not paste the script into the channel. but good to hear it should work both ways, just wanted to see if someone would say otherwise
+06:21  Gunni: i want to clone kohana but i want to have my own origin
+06:21  Gunni: and be able to update kohana
+06:22  sitaram: jzacsh: not the script.  config snippet, plain ssh command, and outputs
+06:27  jzacsh: sitaram: the commands i'm runnng: http://dpaste.de/8yyz/ (and the .ssh/config snippet)
+06:27  Gunni: DrNick any idea how i do that?
+06:28  DrNick: Gunni: clone kohana, change the URL that origin points to
+06:28  DrNick: Gunni: or just create a new remote that points where you want
+06:28  Gunni: k, but what if i want to update kohana?
+06:28  Gunni: later part sounds good
+06:29  SethRobertson: Gunni: There is an alternate to submodules which is gitslave (also git-subtree), which may work better or worse for you, depending on your workflow.
+06:29  sitaram: jzacsh: that is weird; it should work.  In fact easy install (the from-client method) uses this trick, with the addition of "user git" to the para so in usage you don't even need the "git@" part
+06:30  sitaram: jzacsh: is this a mac?
+06:30  jzacsh: sitaram: nope, not a mac (i also assumed i could remove 'git' user from my script and leave it in config .. but, neither way works)
+06:30  SethRobertson: Only git-subtree would really help you with your use case listed above, though everyone supports symlinks
+06:31  Gunni: k, will rtfm on that, thanks
+06:32  jzacsh: sitaram: mmmm... okay, so i was runnjing `ssh git@foo_script:private/repo info` and not `ssh git@foo_script info` -- so i tried that (without the repo path) just now -- but it looks like its returning gitolite-access  info for _my_ usre -- and not the gitolite-key user
+06:32  jzacsh: Gitzilla: (idk if that makes sense ^)
+06:32  jzacsh: Gitzilla: (not you -- sorry)
+06:32  jzacsh: sitaram: ^
+06:33  sitaram: jzacsh: what does "ssh-agent -l" return?
+06:33  sitaram: jzacsh: err.. "ssh-add -l"
+06:34  jzacsh: sitaram: aahh (the key of my user, not the script-user... .. fixing :) )
+06:36  sitaram: jzacsh: https://github.com/sitaramc/gitolite/blob/pu/doc/ssh-troubleshooting.mkd and look for the word "quirk"
+06:37  jzacsh: sitaram: what ugly behavior. brilliant catch, though.
+06:37  sitaram: jzacsh: now you know what I mean when I say "no one really knows ssh; even if they think they do" ;-)
+06:38  jzacsh: sitaram: lol, I can agree with that.
+06:43  khaije|amalt: hey sitaram, a random idle question for you... would you be interested in discussing gitolite on the floss weekly show?
+06:44  sitaram: khaije|amalt: sure!  is this the one Randal hosts (or used to)?
+06:44  khaije|amalt: yaup, i personally would like to hear an episode about gitolite. if you like i'll track down the relevant info
+06:47  sitaram: khaije|amalt: oh... that would be very cool; thanks :)
+06:48  EliasAmaral: git add -e is impressive o.o
+06:50  jzacsh: EliasAmaral: aah, neat!
+06:52  EliasAmaral: specially because it opened in emacs, and I discovered that M-k kills a patch hunk, and C-c C-s split it on two (on current pointer, so I can kill one side)
+06:52  EliasAmaral: I thought it would be arcane, in the end it was totally simple
+06:58  khaije|amalt: sitaram: I just wrote up a little intro email to send to Randall, should I cc' you at the email listed for the project, sita...@gmail  ? It looks like the show has topics booked for months but it can't hurt to initiate introductions (unless you object of course)
+06:59  sitaram: khaije|amalt: Randal.  Single "l"  :-)  And I have no objections at all; feel free to cc me
+06:59  sitaram: the gmail address is fine
+06:59 * sitaram seems to remember Randal is sensitive about that "l" thing :)
+07:01  khaije|amalt: cool! right Randal, not Randahll  :)
+07:13  jzacsh: sitaram: is @wild not a legit gitolite thing? (i have  http://dpaste.de/CPYO/raw/ --- but don't recall why i put @wild in there) .. i'm not seeing anything in the gitolite docs rihgt now, so i'm thinking it was a mistake
+07:14  jzacsh: sitaram: nvm. its a group i made
+07:14  sitaram: yup
+07:14  jzacsh: i was trying to make sure i'm not missing something, before asking about the following:
+07:15  jzacsh: i have that ^ as the config (the above pastie) -- and this is the output of foo_bot running: `ssh foo_server info`:  http://dpaste.de/hk9B/raw/
+07:15  jzacsh: sitaram: ^
+07:16  jzacsh: sitaram: question is, why would foo_bot have access to private/.* or civicrm??
+07:17  sitaram: jzacsh: paste the entire config; that partial config won't help me answer the question
+07:20  jzacsh: sitaram: http://dpaste.de/xxBe/
+07:22  sitaram: jzacsh: access to private/.* is irrelevant unless it says "C".  Use "ssh ... expand" instead of "info" to get details of actual repos
+07:22  sitaram: jzacsh: civicrm is because of lines 9 and 18 in your paste
+07:23  sitaram: jzacsh: that private/.* is actually a quirk; I need to special case it but don't really have the time :(
+07:24  jzacsh: sitaram: civicrm isn't in the @dev group though, how because of line 18?
+07:24  sitaram: line 18, not 17
+07:24  sitaram: @all
+07:25 * jzacsh reads over the obvious sometimes
+07:25  sitaram: heh; we all do
+07:32  jzacsh: sitaram: okay, just found the definition of "C" in the docs again. so i only care if someone suddenly has creat rights.. if they have W rights, it doesn't mean anything ofr wild card repos?
+07:34  sitaram: right; and that is why you have the "expand" command, to dig into the actual repos created and list them
+07:35  jzacsh: sitaram: :) thanks.
+07:42  sitaram: you're welcome!
+--- Log closed Mon Dec 06 08:03:20 2010
+--- Log opened Mon Dec 06 08:08:44 2010
+08:08 --- Users 652 nicks [0 ops, 0 halfops, 9 voices, 643 normal]
+08:10  khaije|amalt: (newb attempt) i think you can reset the master~1 to HEAD, but seek confirmation for someone smarter
+08:11 --- Channel #git was synced in 150 seconds
+08:11  khaije|amalt: or rather reset HEAD to master~1
+08:12  khaije|amalt: lemme try that again... reset master^HEAD to master~1
+08:12 * khaije|amalt dies from exhaustion
+08:18  frogonwheels: docelic:  yeah it's easy - you merged the branch into master? which one changed?
+08:49  newbiz: hello
+08:49  newbiz: i'm new to git, got a little question
+08:49  newbiz: how can i cleanly ignore .gitignore :)
+08:50  newbiz: it seems a bit weird to add .gitignore to .gitignore
+08:50  newbiz: but otherwise it appears in "git status"
+08:50  DrNick: you can't ignore anything that's already part of the repository
+08:50  newbiz: my .gitignore is not in the repo
+08:51  newbiz: i just created it
+08:51  Bombe: newbiz, add it in .git/info/exclude which is where all ignored stuff should be that is not supposed to be checked in.
+08:52  newbiz: ok!
+08:56  newbiz: work perfectly, thanks :)
+10:08  eagles0513875: hey guys :)
+10:14 --- yaotti_aw is now known as yaotti
+10:17 --- yaotti is now known as yaotti_aw
+10:17 --- yaotti_aw is now known as yaotti
+10:18 --- yaotti_aw is now known as yaotti
+10:43  walt: this might be the wrong place to ask but, I am trying to use meld for a  merge. Is it possible to see the resulting merged file below the other two, similar to for example tortoisemerge?
+10:43  walt: my screen can not fit three views side by side
+10:45 * sitaram likes kdiff3 for this; 4 windows -- 3 on top, (local, base, remote), and final one on bottom
+10:56  thiago: kdiff3 is a great tool
+10:56  thiago: it's helped me in many a merge problem
+11:10  sitaram: it's the *best* of the lot, and I've tried all the free ones
+11:16  Fatal: I have a merge script that use git show :1:file > file.work, but as that lose the executable flag if it's set, I'm curious if there's another way to create a work file with the correct flags that takes :1: :2: :3: notation? (a workaround I could do is instead of using cp to copy the file back to original filename, I guess I could cat file.work > file, but feel too hackish)
+11:21  wereHamster: Fatal: ls-files -s -- <path>, extract the mode and chmod
+11:22  Fatal: wereHamster: ok
+11:29  zorzar_: hey is it possible to add a signoff message to existing commits?
+11:30  wereHamster: zorzar_: not without rewriting history
+11:30  zorzar_: wereHamster: ok
+11:30  zorzar_: wereHamster: i'll rebase anyways
+--- Log closed Mon Dec 06 11:37:49 2010
+--- Log opened Mon Dec 06 11:48:18 2010
+11:48 --- Users 692 nicks [0 ops, 0 halfops, 9 voices, 683 normal]
+11:50 --- Channel #git was synced in 150 seconds
+11:53  EliasAmaral: stas_, git close? like, git clone?
+11:53  stas_: oh, sorry, I meant 'git clone'
+11:53 --- yaotti is now known as yaotti_aw
+11:54  EliasAmaral: here it stalled when I tried to pull from a bogus https site. solution was to tweak config
+11:55  EliasAmaral: git config --global http.sslVerify false, I think
+11:56  stas_: I works with through ssh
+12:08  stas_: it's strange. I've just cloned other project without any problems
+12:09  workmad3: stas_: from the sounds of things, the problem is (I suspect) with establishing an SSH connection to that particular server via your VPN
+12:09  workmad3: which could be a huge number of different things and would require in-depth knowledge of your VPN config to solve, I expect
+12:09  stas_: all projects are on one server
+12:10  workmad3: hmm... that changes things then
+12:10  workmad3: likely it's a problem with what is serving the git repositories on the server then ;)
+--- Log closed Mon Dec 06 12:16:22 2010
+--- Log opened Mon Dec 06 12:21:51 2010
+12:21 --- Users 695 nicks [0 ops, 0 halfops, 9 voices, 686 normal]
+12:24 --- EliasAmaral is now known as dark
+12:24 --- Channel #git was synced in 153 seconds
+12:31  ExElNeT: heya. whats wrong with this command? git checkout -b tree-27419 27419 I get: fatal: reference is not a tree: 27419
+12:31  patrikf: ExElNeT: that the object named by 27419 is not a tree, commit, or tag pointing to tree or commit?
+12:32  patrikf: ExElNeT: check with "git show"
+12:34  ExElNeT: patrikf: ah ok hmm sure ...
+12:37  linduxed: i followed the guide on adding a new repo here http://scie.nti.st/2007/11/14/hosting-git-repositories-the-easy-and-secure-way
+12:37  linduxed: but when i get to the pushing of the new repo i get the following
+12:38  linduxed: ERROR:gitosis.serve.main:Repository read access denied
+12:39  sitaram: up_the_irons: please... please... could you add a link at the top of that page mentioning that gitosis has not been maintained for a while and to use gitolite?
+12:39  linduxed: it looks like the gitosis.conf file is correct so i'm kind lost on what to look for
+12:50  wereHamster: linduxed: use gitolite...
+12:52  linduxed: wereHamster: i think that my problems may be caused by bad origin specification, but i'll check out gitolite
+12:52  wereHamster: your problems are caused because you use gitosis
+12:54  linduxed: haha, is it that bad?
+12:54  wereHamster: yes!!
+12:54  linduxed: it's been working for me so far...
+12:54  wereHamster: pure luck
+12:55  sitaram: linduxed: how long have you been using it?  and why did it break now?
+12:55  linduxed: sitaram: cant figure out why it breaks now... but i've been using it for a year or more
+12:56  linduxed: brb
+13:02 --- yaotti_aw is now known as yaotti_
+13:04  jpluscplusm: hey all - quick question: how stable are the files under .git/objects/*/ ?
+13:05  Angel-SL: 'stable'?
+13:05  jpluscplusm: is an individual file immutable once created, or might it change with alterations to the actual repo data
+13:05  doener: jpluscplusm: their names are determined by their contents
+13:06  doener: jpluscplusm: i.e. the contents of a given file won't change. But the file itself might get removed when things get packed
+13:06  jpluscplusm: ah, brill
+13:07  jpluscplusm: tvm, just what I need
+13:08  Angel-SL: hey
+13:08  Angel-SL: considering sha1 is 160bit
+13:08  Angel-SL: what happens when we run out of sha1 hashes?
+13:08  engla: Angel-SL: when do we run out of sha1 hashes, do you expect?
+13:09  patrikf: Angel-SL: you win a lot of money, I presume
+13:09  Angel-SL: just a question
+13:11  patrikf: Angel-SL: if there ever is a collision within one git repo, you won't lose any data up to the point where the collision occurs
+13:11  engla: A quick rule of thumb is that around Sqrt(2^160) different hashes we can expect collisions. That'd be 10^24 sha1-hashed blobs.
+13:11  Angel-SL: hm
+13:12  jedbrown: I want to use a repo M as a submodule of two parent repos P1 and P2.  For development, I'd like to be able to use the most current version of M, simultaneously, from both P1 and P2 (this is a way to test that a change in M does not break anything important).
+--- Log closed Mon Dec 06 13:16:24 2010
+--- Log opened Mon Dec 06 13:22:00 2010
+13:22 --- Users 699 nicks [0 ops, 0 halfops, 9 voices, 690 normal]
+13:22  engla: divVerent: so as long as the average number of changed files per commit (m) is larger than average depth in trees (n) then blobs > trees > commits
+13:22  divVerent: will probably run for a long while :P
+13:22  divVerent: engla: yes, that much is clear to me :P
+13:22  divVerent: but m>n or m<n is unclear to me for large software projects
+13:22  engla: m > n easily I think
+13:23  divVerent: unless it's a Java project with a classname like org.example.bigproject.subproject.subproject.subproject.group.package.Classname
+13:24 --- Channel #git was synced in 158 seconds
+13:27  Bombe: divVerent, git fsck --full --verbose 2>&1 | grep '^Checking \(tree\|blob\|commit\)'|cut -f 2 -d " " | sort | uniq -c
+13:27 * Bombe is bored, does it show? :)
+13:30  divVerent: Bombe: waiting for clone of linux.git to succeed :P
+13:30  Bombe: :)
+13:39  cbreak_work: is it there yet? :)
+13:40 * Bombe is still waiting…
+13:43  cbreak_work: 61267 blob, 27865 commit, 45985 tree, git.git
+13:43  Bombe:  594666 blob
+13:43  Bombe:  235546 commit
+13:43  Bombe: 1048014 tree
+13:43  Bombe: That’s for linux.git.
+13:44  cbreak_work: whoa, more trees than living rooms at christmas
+13:45  cbreak_work: but still, far away from a sha1 collision
+13:47  engla: that's a lot. nearing 1 Mebitree
+13:48 * thiago tries in Qt
+13:49  thiago: hmm... I have 74 packs
+13:49  thiago: probably going to skew the results enormously
+13:50  thiago: repacking first
+13:51  cbreak_work: does it count the stuff in packs too I wonder
+13:51  engla: how did you get the object count?
+13:51  thiago: git count-object -v
+13:52  engla: I mean, split by object type
+13:52  thiago: doing what Bombe pasted: git fsck --full --verbose 2>&1 | grep '^Checking \(tree\|blob\|commit\)'|cut -f 2 -d " " | sort | uniq -c
+13:53  engla: oh sorry I ignored that
+13:53  Bombe: Thanks! :)
+13:55 * thiago sees one processor spiking
+13:55  thiago: one at 100% running git fsck, one at 24% running amarok
+14:03  thiago: still running
+14:12 --- _dels is now known as dels
+14:14  thiago: done
+14:14  thiago:  638420 blob
+14:14  thiago:  193625 commit
+14:14  thiago:  849197 tree
+14:15  cbreak_work: so, qt and linux have a tree dominance, git has a blob dominance
+14:15  thiago: git has a flatter directory structure
+14:16  thiago: each commit has a tree, so trees will always be more than commits
+14:18  thiago: Qt has 4345 trees in the current 4.7, current Linux-2.6 has 2253
+14:18  thiago: Git has 226
+14:18  thiago: bad count. This counted filenames with 'tree' in the name
+14:18  cbreak_work: probably a widely different file-to-tree ratio too
+14:19  thiago: Git = 107, Linux = 2169, Qt = 4140
+14:19 --- yaotti_ is now known as yaotti_aw
+14:19 --- yaotti_aw is now known as yaotti
+14:20  thiago: Git = 2030 files, Linux = 35192, Qt = 39361
+14:21  thiago: avg: Git = 18.97 files / dir, Linux = 16.22, Qt = 9.51
+14:51  rolfb: any reason why someone would get 'your branch is ahead of "origin/master" by 1 commit' everytime he issues `git pull` and stuff is up-to-date ?
+14:51  Fatal: you have a local commit that's not pushed to master
+14:51  wereHamster: after the pull?
+14:53  rolfb: after the pull
+14:53  wereHamster: rolfb: git log origin/master..
+14:53  rolfb: he just cloned, and pullet
+14:53  wereHamster: that's the log you are ahead
+14:53  rolfb: pulled*
+14:53  wereHamster: s/log/commit/
+14:54  rolfb: seems like his log of origin/master is not up to date
+14:54  wereHamster: how is he runing git pull?
+14:55  rolfb: `git pull`
+14:55  rolfb: the commit he is ahead is pulled from origin
+14:55  rolfb: :)
+14:55  wereHamster: maybe someone rewrote history?
+14:56  tango_: maybe he has the rebase option and he has an unpushed change
+14:56  rolfb: he cloned, then pulled
+14:56  rolfb: and it happened
+14:56  rolfb: nothing else
+14:56  Fazer2: hey, I fetched some code from my friend, but it has conflicts and right after it he made another commit without conflicts
+14:56  rolfb: :)
+14:57  Fazer2: how can I revert the fetch and make a new one?
+14:57  wereHamster: Fazer2: just fetch again
+14:57  Fazer2: wereHamster: I did it and I can't merge, because git says I'm in the middle of conflicted merge
+14:58  wereHamster: then abort the merge
+14:59  Fazer2: wereHamster: ok, thanks :)
+15:08  mansour: I have been trying to merge a branch but I can not see any difference
+15:09  mansour: I mean changes are not shown in the current branch ? I did "git branch fixes" while I am on master
+15:09  cbreak_work: that creates a new branch fixes that contains the same as master
+15:10  cbreak_work: merging that is a no op.
+--- Log closed Mon Dec 06 15:16:28 2010
+--- Log opened Mon Dec 06 15:21:50 2010
+15:21 --- Users 723 nicks [0 ops, 0 halfops, 9 voices, 714 normal]
+15:22  mansour: cbreak_work: I have a graphical GUI, but I use xmonad as the desktop, and I don't have these installed. I use "tig" instead.
+15:22  mansour: I tried running  git log --graph --decorate --all but it gives a huge output
+15:22  fr0sty: add '--oneline'
+15:22  cbreak_work: well. there are other ways
+15:23  cbreak_work: git branch --merged master
+15:23  cbreak_work: maybe
+15:24 --- Channel #git was synced in 150 seconds
+15:24  mansour: now I am confused, what am I suppose to see ?
+15:24  cbreak_work: it shows all branches that are merged into master
+15:24  mansour: using git log --graph --decorate --all gives my last commit on the top,
+15:24  cbreak_work: yes
+15:24  cbreak_work: it shows the whole history
+15:25  cbreak_work: if you see the branch you wanted to merge in there, it's already merged
+15:25  mansour: ok, I don't see the fixes branch
+15:25  SethRobertson: jedbrown: ping?
+15:25  mansour: this means it's not merged
+15:25  mansour: why ?
+15:26  fr0sty: mansour: what branch are you on now?
+15:27  mansour: fr0sty: I am not on master.
+15:28  mansour: sorry, I am on master, and not on fixes.
+15:29  fr0sty: how do you know?
+15:29  mansour: through git status
+15:33  fr0sty: mansour: paste the output of this: 'git log --oneline --graph --format="%h %d"' at gist.github.com or similar
+15:34  mansour: fr0sty: I think I have a patch for the changes somewhere, I will just apply this. If it doesn't work, I will try a cup of coffe and a smoke, then give it another try.
+15:37  fr0sty: cut and paste is too hard?
+15:39 * fr0sty wonders if anyone can recommend an android irc app...
+15:41 +myme: I'm having some issues with git-svn.. Love it if anybody would have a look: http://stackoverflow.com/questions/4367460/git-svn-fetch-fails-ls-tree-dying-because-of-missing-tree-object
+15:41  _pingu: Can I change the message of the last commit?
+15:43  jast: impatient, mr _pingu! :}
+15:48 --- ivey_off is now known as ivey
+15:48 --- jzacsh is now known as jzacsh_
+15:48 --- lirakis_ is now known as lirakis
+15:51  GarethAdams|Work: Ok, I've got to force a push to a remote repo, because the history has been rewritten
+15:51  GarethAdams|Work: Other developers will have pulled the wrong data from the repo, but they won't have made any commits on that branch
+15:51  GarethAdams|Work: if they fetch again, will everything sort itself out?
+15:53  jast: if they have a local branch based on the wrong history, they'll have to fetch and, with that branch checked out, run something like git reset --hard origin/branchname (which of course will also destroy uncommitted changes)
+15:55  Polysics: hello
+15:55  jcromartie: I'm going crazy. On every single Windows machine using cygwin and git with our github repo, I get totally random "index-pack failed" errors when trying to fetch from a remote
+15:55  Polysics: git pull is not possible because you have unmerged files, never seen this
+15:55  jcromartie: "early EOFs"
+15:55  Polysics: it's me and my colleague working on the same ssh repo
+15:55  jcromartie: at some random % each time
+15:55  jcromartie: 23% 52% 59%
+15:55  workmad3: Polysics: what do you get with 'git status'
+15:55  jcromartie: it changes from attempt to attempt
+15:57  GarethAdams|Work: jast: no, nothing based on the wrong history at all
+15:57  Polysics: workmad3: http://pastebin.com/wPTttf8K
+15:58  workmad3: Polysics: strange :/
+15:58  Polysics: basically my colleague's branch says it is 2 commits ahead
+15:58  henrikbjorn: Is there a way to export a git repository like svn export reposity-url?
+15:59  workmad3: oh!...
+15:59  workmad3: oh no...
+15:59  workmad3: I'm going crazy
+15:59  bremner: henrikbjorn: man git-archive
+15:59  jast: henrikbjorn: the 'git-archive' manpage can be found at http://git.or.cz/man/git-archive [automatic message]
+15:59  workmad3: Polysics: how about the explicit 'git pull origin master' ?
+15:59 --- slyphon_away is now known as slyphon
+16:00  henrikbjorn: bremner: so git archive repository ?
+16:00  jast: Polysics: what's the exact message pull gives you?
+16:00  jast: henrikbjorn: look at the --remote switch... and actually read about what git archive does, too :)
+16:00  jast: fair warning: archive is not enabled on all remote repositorie
+16:00  jast: s
+16:01  jast: an alternative is git clone --depth 1 <url>, then removing the .git dir
+16:03  henrikbjorn: just says protocol error nice
+16:03  jast: that suggests that it's disabled there :) but clone --depth 1 should work
+16:05  bremner: so why is archive not enabled more, just inertia?
+16:05  jast: probably
+16:06  jast: and of course it doesn't work with all protocols
+16:07  bremner: dumb http the problem?
+16:08  Polysics: workmad3: explicit pull fixed it. could you please explain a little?
+16:08  Polysics: just so i know what happened
+16:09 --- ChanServ sets modes [#git +v lostern]
+16:09 +lostern: "git config --global --add svn.noMetaData true" => "Not a SCALAR reference at /usr/lib/git-core/git-svn line 1456." What am I doing wrong?
+16:11  jcromartie: fatal: early EOFs: N% (where N is a different number pretty much every time I run git pull)
+16:12  jcromartie: 23%, 59%
+16:12  jcromartie: nondeterministic errors don't make me feel good
+16:14  ^Simon^: I have a question about branches - if I switch to a branch called "working" using git checkout -b working, and modify a file, why does it still show as modified when I switch back to another branch using git checkout master (or some other branch) ?
+16:14  ^Simon^: do modified uncommitted files simply get carried over between all branches?
+16:16  SethRobertson: Yes
+16:18  ^Simon^: So if I commit a file in one branch (working) and then switch to a different branch (master), the file that I modified gets swapped back to how it was last time I was in the master branch?
+16:19  SethRobertson: Yes
+16:19  SethRobertson: The "floating" only happens for uncommitted changes
+16:20  jast: and switching branches will be refused if the uncommitted changes can't be 'floated over' cleanly
+16:21  ^Simon^: so if I made a mistake and edited a file in the wrong branch, I could change to the correct branch before I commit it.. assuming of course that it was the same in both branches before I started editing.
+16:21  jast: yes
+16:21  jast: and if the file is different in the two branches, you can use a sequence like git stash; git checkout otherbranch; git stash pop
+16:22  ^Simon^: the more I learn about git, the more complicated it seems..
+16:22  SethRobertson: Would you prefer it was simple and just deleted your uncommitted change?
+16:22  ^Simon^: nope :)
+16:22  ^Simon^: more complicated, but also more powerful.
+16:23  jast: don't worry, you get used to these things very quickly
+16:23  ^Simon^: I'm switching over to it from subversion.
+16:23  SethRobertson: Keeping the change around until you explicitly do something seems pretty straightforward.  I'm not saying git isn't complicated sometimes, but I don't think this is one of those times
+16:23  jast: yeah, there's a host of differences, but it won't take long until you'll never want to go back ;)
+16:24  ^Simon^: and then I just have to convince everyone else to use it so we can switch the main repository over from svn to git.
+16:25  jast: yeah, that's usually the most annoying part of git ;)
+16:29  ^Simon^: if I git add a file, and then forget to commit it before swapping branches, then edit it in another branch and swap back to the original branch, will it remember that I had added it but not commited, and will it preserve the content or just act like a modified file (but not added) and carry all the changes between branches?
+16:29  ^Simon^: (hope that makes sense)
+16:30  SethRobertson: Why not try it and find out?  About 30 seconds.
+16:30  ^Simon^: if there's a faq page somewhere that covers all the intricacies of things like this, feel free to point me to it.
+16:31 * ^Simon^ goes to try...
+16:31  thiago: if it takes more time to write down the question than to test it out, then it's not in a FAQ
+16:32  SethRobertson: mkdir foo; cd foo; git init; echo A>A; git add A; git commit -m A; echo AA>>A; git add A; git checkout -b foo2; echo AAA>>A; git checkout master; git diff; git diff HEAD
+16:36  poona: If I have a particular commit, how do I directly check the code added in that commit.  Currently I do a git diff commit..previous_commit.  Is there a direct way of doing it, where the previous commit is implicit?
+16:36  ^Simon^: SethRobertson - that just confused me :p
+16:36  workmad3: ^Simon^: it's the commands to run to find out the answer to your question
+16:36  doener: poona: git show <commit>
+16:37 +lostern: "git config --global --add svn.noMetaData true" => "Not a SCALAR reference at /usr/lib/git-core/git-svn line 1456." What am I doing wrong?
+16:37 +lostern: (the error occurs when invoking git svn clone)
+16:37  SethRobertson: poona: The previous commit is always HEAD^.  `git diff HEAD^`  If there may be more than one commit, then perhaps `git reflog` might be of help `git pull; git diff HEAD@{1}`
+16:38  ^Simon^: workmad3 - I know, I just tried it.
+16:38  SethRobertson: ^Simon^: You can run each command one by one to understand what the command did.  `git status; git diff; git diff HEAD` are good commands to explore what each command does
+16:38  ^Simon^: however, the git diff and git diff HEAD are the two confusing ones.
+16:38  doener: SethRobertson: I guess by "previous commit" poona meant the parent of the other commit, not necessarily the parent of HEAD
+16:39  SethRobertson: doesner: If you have a "review repo" then my second command would work
+16:40  poona: works fine.  thanks all
+16:40  SethRobertson: ^Simon^: Yes, the index (which is the difference between the two) is a powerful and confusing concept.  I would personally suggest that aside from special cases, you normally skip using `git add` and instead use `git commit -a` which does the add implicitly.  One special case which you cannot skip `git add` is of course new files
+16:42  SethRobertson: ^Simon^: HEAD is your most recent commit on your current branch.  `git diff HEAD` shows you how your current working tree is different from your most recent commit.  `git diff` compares the working tree to the index--so it will not show changes hidden by `git add` and `git mv; git rm;` etc
+16:43  SethRobertson: If you hadn't requested the "second" `git add`, the results of `git diff HEAD` and `git diff` would have been identical.
+16:44  ^Simon^: so the index remembers what the content of the file was at the point I did the git add
+16:44 +myme: Mhm.
+16:44  jcromartie: 75% I'm getting  closer! I just need to win the game of roulette here and get a full `git fetch` to work
+16:45  jcromartie: 37% :( I lose big
+16:45 +myme: ^Simon^: 'git diff --cached' shows you the diff from last commit and the index. Aka what you're about to commit if you do no further git adds..;.
+16:46  ^Simon^: ok, I think I get it.
+16:47  ^Simon^: so a git add A would "refresh" what content would be committed to the current A/AA/AAA.
+16:47  ^Simon^: instead of committing A/AA
+16:48  ^Simon^: I think SethRobertson's suggestion of skip git add and use git commit -a will be what I end up doing ;)
+16:48 +myme: :)
+16:48 * doener usually recommends never to use "commit -a"
+16:48 +myme: ditto
+16:49  SethRobertson: Because?
+16:49 +myme: ^Simon^: The add command + the index provides many neat and powerful features.. Like git add -p, which allows you to interactively add only patches from a file, for instance.
+16:49  doener: you're giving up a lot of power, and "accidental" use of "git commit -a" means messed up commits
+16:50  doener: using "commit -a" means that you can't split up things you might have done into smaller units
+16:50  SethRobertson: I agree that the index is very powerful.  I wouldn't recommend starting users doing partial commits, though.
+16:50 * ^Simon^ appears to have started an argument regarding use of commit -a ;)
+16:51 +myme: It's way better, imho, having many smaller, unpartial commits, rather than large, bulky commits.
+16:51 +myme: s/unpartial/partial
+16:52  ^Simon^: when the commits don't get pushed to the central svn repo, I suspect it might be.
+16:52  SethRobertson: One thing I think we can all agree on is that there is more than one way and git supports many workflows
+16:52 +myme: SethRobertson: I won't argue with you on that ;)
+17:01  ^Simon^: Thanks for the info :)
+17:01 --- yaotti is now known as yaotti_aw
+17:06  patrikf: commit -a is fine as long as you know it's not the only way
+17:07  patrikf: (for me, usually -av to prevent accidental commits)
+17:08  cbreak_work: I often do a git commit -a after a git diff HEAD
+17:09  bartek: Hi there. We're brainstorming a git branching model for our team and one thought came into my mind. Say we have a "develop" branch that we branch off to create feature branches. If a feature branch takes a long time to work on, and the developer may need to update his feature branch to be an updated set from develop, what's the best way to do this?
+17:09  patrikf: merge?
+17:09  SethRobertson: Just do it.  `git rebase develop` or `git merge develop` depending on your view of ethetics
+17:10  bartek: SethRobertson: Just to be clear, I do a rebase or merge while on the feature branch, yes? git checkout feature-name, git merge develop
+17:10  SethRobertson: I'm sure I could get a good merge vs rebase war going after my `git add` vs `git commit -a` war
+17:10  bartek: just want to send the right email out ;)
+17:11  SethRobertson: Yes
+17:11  bartek: thank you.
+17:11  patrikf: SethRobertson: you have to do it more subtle
+17:11  SethRobertson: People who don't use rebase are hosers
+17:11  SethRobertson: Like that?
+17:11  patrikf: nice try ;-)
+17:13  bartek: SethRobertson: What would be the difference in a rebase over a merge?
+17:16  SethRobertson: Uh oh. Here we go.  Rebase allows a simple clean linear view of history, while merge allows a geometrically complex but temporally linear view of history.
+17:17  SethRobertson: Rebase is also much more traumatic to a repository, causing non-referenced commits.  This is not a problem as long as you use it appropriately.  Use it inappropriately and you could be in a world of hurt.
+17:17  bartek: SethRobertson: interesting. I'll have to read more up on it
+17:17  SethRobertson: It may be immediately more obvious how to revert a bad merge than a bad rebase, but both are equally easy to get out of if you know the tricks.
+17:19  SethRobertson: Basically rebase keeps local changes floating on top of everyone else's changes to present a clean view of history.  While merge lets people see a little more of the sausage making.
+17:32 --- ivey is now known as ivey_off
+17:35 --- tj- is now known as tjholowaychuk
+17:37  Tartarus: hi all, hopefully a quick/easy question.
+17:37  Tartarus: I've got a mirror of a tree I created using git clone --mirror --bare
+17:37  Tartarus: I did a GIT_DIR=. git fetch origin
+17:37  ka1ser: hey... if I have a long list of untracked files (mainly *.o and *.cmd files) that I want to get rid off when I type 'git status'... how do I do it?? something like git checkout -- *.o or something??
+17:38  Tartarus: But new clones / pulls of the mirror don't see the new commits
+17:38  Tartarus: ka1ser, .gitignore at the top of the tree
+17:38  Tartarus: add *.o \n *.cmd, etc
+17:38  Tartarus: just like .cvsignore, but global
+17:39  ka1ser: =o let me try
+17:39  ka1ser: thanks!
+17:39  SethRobertson: Tartarus: You rarely want to use --mirror, but I doubt that is the source of your problem
+17:40  Tartarus: SethRobertson, ok.  But i'm trying to setup a "mirror" of certain trees internally (to save wear and tear of cloning random upstream trees a bunch of times as our automated builds kick off)
+17:43  SethRobertson: Why did you say "GIT_DIR=." when running `git fetch`?
+17:43  SethRobertson: In any case, I just did a quick test, and in both the mirror and non-mirror case (when not using GIT_DIR), changes were seen in the repo
+17:44  SethRobertson: OK, I take that back.  Hmm.
+17:45  bartek: git archive HEAD, will obviously archive to that point, but it will  contain all commit history, local branches, etc .. Yes?
+17:45  SethRobertson: No!
+17:45  SethRobertson: It contains just the current working-directory files
+17:46  SethRobertson: Tartarus: OK, I see the problem.  Can you share your "config" file in your mirror?
+17:46  curtana: can either of git-log and git-whatchanged do something that the other cannot?
+17:46  bartek: Thought so .. what's the optimal way to backup an entire repo w/ history? Simply compress the .git folder?
+17:47  Tartarus: sec
+17:47  Tartarus: http://pastebin.com/EtmVmuq7
+17:47  fr0sty: bartek: man git-bundle ?
+17:47  jast: bartek: the 'git-bundle' manpage can be found at http://git.or.cz/man/git-bundle [automatic message]
+17:48  SethRobertson: bartek: Yes, or `git clone --bare --mirror` for even more safety
+17:48  bartek: fr0sty: SethRobertson Thanks
+17:48  bartek: I wonder what justinlilly is doing :p
+17:49  ^Simon^: Something he shouldn't be apparently.
+17:49  SethRobertson: Tartarus: Well, you have the right fetch info.  My test works cleanly, but I didn't use GIT_DIR=.  Could you try it without that and see how that works?
+17:50  SethRobertson: See if `gitk --all --date-order` in the clone shows you the "missing" commits, too
+17:51  Tartarus: http://pastebin.com/J1mikPL6
+17:52  SethRobertson: /tmp/bitbake is the clone of the clone?
+17:52  Tartarus: SethRobertson, this is a small tree.  How should I have started things off?  Just git clone --bare upstream ?
+17:52  Tartarus: and yes
+17:52  SethRobertson: Tartarus: Is upstream a bare clone or a normal checkout?
+17:52  wereHamster: are you runing pull in a bare repo?
+17:52  Tartarus: upstream is the real master for the project
+17:54  SethRobertson: So it is bare
+17:54  Tartarus: yes, i would assume so :)
+17:56  Tartarus: afk 5-10
+17:57  ka1ser: whats a 'bare' repository?
+17:58  offby1: one with no work tree
+17:58  SethRobertson: Tartarus: I just did a test and it worked fine.  Do you want me to package my test?
+17:58  ka1ser: hmm
+17:58  offby1: and whose .git/conifig includes [core] bare=true
+17:58  offby1: ka1ser: they're used on servers, not so much on developer desktops.
+17:59  ka1ser: I see
+17:59  ka1ser: thx
+17:59  ka1ser: =)
+18:01  SethRobertson: Tartarus: mkdir foo; cd foo; mkdir foo.git; cd foo.git; git init --bare; cd ..; git clone $PWD/foo.git foo; cd foo; echo A>A; git add A; git commit -m A; git push; cd ..; git clone --bare --mirror $PWD/foo.git backup.git; git clone $PWD/backup.git backup; cd foo; echo AA>>A; git commit -a -m AA; git push; cd ../backup.git; git fetch; cd ../backup; git pull; cat A
+18:01  SethRobertson: Seems to work fine.  You need to see how your process differs
+18:02  ka1ser: wow... now thats a nice 1-line there =)
+18:02  SethRobertson: It is my speciality.
+18:02  ka1ser: =o
+18:03  curtana: set -e
+18:03  SethRobertson: set +e
+18:03  curtana: nooo
+18:04  ch0p: how should I set up my master if I have people committing to the master
+18:04  SethRobertson: master==branch or something else?
+18:04  ch0p: sorry, let me be more clear
+18:04  slonopotamus: SethRobertson: yes
+18:05  ch0p: I have a repo origin/master and then I have people with other repos pushing commits to origin/master
+18:05  ch0p: here's my problem right now: [remote rejected] master -> master (branch is currently checked out)
+18:05  ch0p: here's my problem right now: [remote rejected] master -> master (branch is currently checked out)
+18:05  ch0p: woops
+18:05  ch0p: how should I have the origin/master set up so that this isn't happening
+18:05  SethRobertson: That error is when people are attempting to push to origin?
+18:05  mardum: I have been struggling with git fsck failing with a pack SHA1 checksum mismatch - is there a way to recover from this?
+18:05  ch0p: yes, I'm just not sure what state the origin repo should be in
+18:06  SethRobertson: ch0p: origin should be "bare" as we were just discussing earlier
+18:06  ka1ser: ohh
+18:06  SethRobertson: ch0p: Meaning it should not have a working directory and it should have the core.bare flag set
+18:06  ch0p: ok, that's what I was thinking
+18:06  ka1ser: thats for what bare repositories are used!
+18:06  ch0p: thanks :)
+18:06  SethRobertson: faq non-bare
+18:06  jast: Pushing to non-bare repositories is discouraged: please see https://git.wiki.kernel.org/index.php/GitFaq#non-bare [automatic message]
+18:06 * slonopotamus has his repo grown from 60gb to 115gb in 11 months. bad tendency :/
+18:07  SethRobertson: consider using git-annex instead of committing large files to git
+18:09  wereHamster: slonopotamus: are you storing pr0n in it??
+18:09  mardum: If I cannot do git gc or repack or clone, but otherwise pulling, committing, etc. work fine, do I just ignore the fsck failures?
+18:09  slonopotamus: wereHamster: worse. mmorpg
+18:09  wereHamster: slonopotamus: which one ?
+18:10  slonopotamus: wereHamster: allods online
+18:10  SethRobertson: mardum: Bad idea.  If clone works, you might want to do `git clone --mirror` and copy your .git/config and continue working from the clone
+18:10  mardum: SethRobertson: testing now...
+18:11  SethRobertson: mardum: There are various tutorials on how to fix corrupt objects, but it doesn't sound like you need to go that far
+18:11  slonopotamus: wereHamster: and that's 110g after git repack --depth=250 --window=250 -a -d
+18:12  SethRobertson: mardum: Oh, you said you cannot clone.  Well, then clone (non-mirror) from upstream again, copy your .git/config and start from there.
+18:12  slonopotamus: (don't ask me how long it took) :)
+18:13  SethRobertson: You might be able to speed `git gc --aggressive` and probably `git repack` by use of some git config values
+18:13  SethRobertson: If you have large objects.  If you just have billions of small objects, then there is no helping
+18:14  mardum: SethRobertson: I can clone, but I still get a SHA checksum mismatch when I run git fsck...
+18:15  slonopotamus: SethRobertson: gc time isn't a problem (well, until it fits between friday evening and monday morning) :) but overall size is. i already had to give up using 10k rpm hdd because this thing doesn't fit it.
+18:16  mardum: SethRobertson: I will try with the --mirror option... I did not try that yet.
+18:17  SethRobertson: Can you re-clone from upstream and not have this problem?
+18:17  SethRobertson: http://stackoverflow.com/questions/801577/how-to-recover-git-objects-damaged-by-hard-disk-failure
+18:17  slonopotamus: does git support more compact (compared to gzip) pack algos?
+18:17  wereHamster: slonopotamus: no
+18:18  wereHamster: slonopotamus: then again, git is not for storing binary data
+18:18  SethRobertson: mardum: --mirror is not going to help you here
+18:19  Tartarus: Seth, I'll just try it all again, thanks!
+18:19  jaredhoyt: any ssh experts here? trying to get agent-forwarding working but wondering if i can use one key for the initial connection, and a second for the secondary connection
+18:19  jaredhoyt: not sure if that's possible
+18:19 --- q0rban is now known as q0rban|lunch
+18:22  ohcibi: hi i'm using git svn dcommit to commit to a svn repository from time to time. however when i now try to do it, its telling me that there are no changes between current HEAD and refs/remotes/git-svn and it is resetting it to latest refs/remotes/git-svn (which is obviously different to current HEAD, since there are unstaged changes after resetting). whats wrong?
+18:22  SethRobertson: jaredhoyt: See `ssh-add` to control what keys the agent has available to it
+18:28  patrikf: ohcibi: it's wrong to expect dcommit to pick up uncommitted changes?
+18:28  Modius: If I create a new clean repository on a public hosting site; but have a preexisting one locally already that contains content,what's the best way to push my own over the top of the remote?
+18:29  ohcibi: patrikf: you got me wrong
+18:29  SethRobertson: Modius: git remote add foo URL; git push foo
+18:29  ohcibi: patrikf: svn dcommit is resetting to latest svn head (keeping local changes "untracked")
+18:29  patrikf: Modius: git remote add origin foo; git push --set-upstream origin master
+18:30  patrikf: ohcibi: oh, right.
+18:30  Modius: svn?
+18:31  ohcibi: Modius: git is able to work with svn repositories
+18:32 * shentino gags at the blasphemous name
+18:33 --- q0rban|lunch is now known as q0rban
+18:33  Modius: Permission denial.  This is on assembla - if my local username is A (on the public key) and the remote username is B, which do I need to set, A or B, in the config and the username@assembla... cases?
+18:34  patrikf: Modius: where do you set your username in your config?
+18:35  ohcibi: patrikf: there is a merge in my history (first commit after last svn dcommit), is it because of that?
+18:35  lau: in a post-receive hook script how can I get the SHA1 of the commit that launched the post-receive hook ?
+18:35  lau: the bare repo that handle the hooks (post-receive) only host 2 branches master and develop
+18:35  patrikf: Modius: and in general, user@host means logging in as user on host
+18:35  lau: when the bare receives a push I want to identify is the push concerns the master or the develop branch
+18:35  Modius: patrikf:  git config --global user.name
+18:35  lau: I would like to be v1.5 compatible
+18:36  patrikf: Modius: ouch. please consult man git-config on that one
+18:36  jast: Modius: the 'git-config' manpage can be found at http://git.or.cz/man/git-config [automatic message]
+18:36  lau: I use the git rev-parse --verify master and --verify develop to get the latest SHA1 commit for each branch
+18:36  lau: but I cannot get the SHA1 of teh commit that was pushed to the bare , any idea ?
+18:37  Modius: Aah - the problem was I needed to push as git@
+18:37  patrikf: ohcibi: no clue... just try it, I guess?
+18:38  ohcibi: patrikf: what to try?
+18:39  patrikf: ohcibi: with the merge eliminated?
+18:40  ohcibi: ah.. 8-) how to eliminate a merge?
+18:40  patrikf: I think rebase will
+18:48  sequethin: is gitosis still recommended for managing remote git repos? it looks like it hasn't been updated in a while
+18:49  bmalee: sequethin, look for gitolite.
+18:49  sequethin: bmalee: will do, thanks
+18:53  lhz: the commit common with my branch and the master has changed by master (amend), now rebasing the branch fails, can I just tell git to ignore the out-of-date root commit that the branch sits on?
+--- Log closed Mon Dec 06 18:57:59 2010
+--- Log opened Mon Dec 06 18:58:29 2010
+18:58 --- Users 742 nicks [0 ops, 0 halfops, 9 voices, 733 normal]
+18:58  lhz: thiago: can I rebase the branch back in time, and then forward maybe?
+18:59  thiago: yes
+18:59  thiago: but you should look at the --onto manpage
+19:00  ohcibi: i think i fucked up my svn repo 8-)).. stupid svn
+19:00 --- Channel #git was synced in 155 seconds
+19:00  ohcibi: one should be able to sue companies that still use svn as vcs
+19:01  ohcibi: especially if you work for one
+19:01 --- ivey_off is now known as ivey
+19:11  lhz: thiago: the branch had orphaned that halfbaked commit from master, so going backwards in time brought it along. But when going forward to latest master I could say goodbye to it by using interactive. Thanks for the help.
+19:12  hagabaka: is there a program to cache git repositories so multiple clones to the same repository don't need to retrieve the same data repeatedly? similar to what ccache does for gcc
+19:12  thiago: hagabaka: yes, it's git-clone
+19:15  hagabaka: if I clone the same repository to different locations, doesn't git fetch all the data every time?
+--- Log closed Mon Dec 06 19:20:25 2010
+--- Log opened Mon Dec 06 19:20:52 2010
+19:20 --- Users 742 nicks [0 ops, 0 halfops, 9 voices, 733 normal]
+19:20  hagabaka: yeah, but I'm asking if there's a program that does this already. like ccache, isntead of cp, git, etc etc
+19:23 --- Channel #git was synced in 151 seconds
+19:25  hagabaka: because it's not always easy to make package build scripts to use a local clone, just like it's not easy to make Makefiles use cached object files
+19:27  patrikf: hagabaka: you can actually share objects between multiple repositories, although that can get quite messy
+19:27  patrikf: hagabaka: if it's not a real dealbreaker, just go with the overhead...
+19:28  hagabaka: it is...I'm talking about a webkit fork, and just clone --depth 1 took about 10 minutes
+19:31  bremner: a hash based transparent proxy for git sounds cool.
+19:32  bremner: sortof like how I understand github works
+19:34  tango_: hagabaka: git clone --reference
+19:34  tango_: assuming the other clone is local, that is
+19:35  Blackb|rd: Can someone explain to me why git is ignoring my .gitignore? (sic... http://paste-bin.com/view/fbbfa987)
+19:35  cbreak: git clone --shared :/
+19:35  cbreak: high chance to break
+19:35  tango_: follow by git repack -a when you have time
+19:35  cbreak: Blackb|rd: by any chance, are you trying to ignore and track a file at the same time?
+19:36  Blackb|rd: cbreak: No, just one file in that subdir.
+19:36  tango_: Blackb|rd: I wonder if that is because you have smokeping/.gitignore
+19:36  Blackb|rd: tango_: nope, removed, doesn't help
+19:36  tango_: you should probably put tmail in _that_ one
+19:37  cbreak: Blackb|rd: paths are relative to the file
+19:37  Blackb|rd: tango_: also I'd rather keep just one .gitignore
+19:37  cbreak: so if your .gitignore is in the subdir, you can not repeat the subdir name if you want it to work
+19:37  tango_: so get rid of the smokeping one
+19:37  Blackb|rd: cbreak: no, I'm in the dir that contains smokeping/ (and so is .gitignore)
+19:37  cbreak: ok.
+19:37  Blackb|rd: tango_: done, as I said. Didnt help
+19:38  patrikf: Blackb|rd: works here.
+19:38  cbreak: also, usually I've seen absolute ignores rooted, so with a / as first char
+19:38  cbreak: you sure you don't have any invisible chars messing up the match? :)
+19:38  patrikf: Blackb|rd: are you tracking files in smokeping/ already, or none?
+19:38  wereHamster: trailing space ?
+19:39  cbreak: yeah, for example
+19:39  wereHamster: editor which displays trailing whitespace ftw
+19:39  Blackb|rd: patrikf: I track smokeping/config
+19:40  Blackb|rd: Ah, got it
+19:40  Blackb|rd: wereHamster: you were right, trailing spaces.
+19:40  cbreak: knew it :)
+19:40  Blackb|rd: I hate machines without a proper editor...
+19:41  cbreak: you can't just install one?
+19:42  hagabaka: puppy linux doesn't have a package for vim, or I couldn't find it
+19:43 --- adamholt is now known as adamholt_away
+19:43 --- adamholt_away is now known as adamholt
+19:44  Blackb|rd: cbreak: it's not /my/ machine, I just fix something for a friend
+19:44  cbreak: he surely appreciates a better editor :D
+19:45  Blackb|rd: cbreak: she. and I'll talk to her about just having pico as an editor installed (not even a bog standard vi!)
+19:45  cbreak: ...
+19:45  Blackb|rd: Copious learning possibilities.
+19:46  Blackb|rd: Hm.Anyeay, thanks guys!
+19:46  Blackb|rd: Anyway*
+19:47 * Blackb|rd buggers off to do more commits with colorful language in the msg
+19:53  mardum: yay for no more corrupt objects and successful gc!  thanks everyone for the help!!
+19:59  bartek: Has anyone here worked with redmine? It seems like you need to setup a hook and pull a working copy of your repo for Redmine to be able to understand it.
+20:01  leandroa: hi
+20:03  leandroa: I want to add many repos to a single remote repository, but I don't want to move my repos into a single one, is there a way to push a local repo to a remote subdirectory, or something like that?
+20:04  jast: leandroa: nope. commits always cover the entire directory structure, so the same is true for fetch/push.
+20:05  jast: the only real solution is to have one remote repository for each local one
+20:05  cbreak: or you can just use branches
+20:05  jast: or to put different things into different branches
+20:05  jast: bah, ninja'd
+20:05  leandroa: jast: ah, I see..
+20:05  cbreak: but that's more like a hack
+20:05  jast: but, frankly, that gets a bit chaotic
+20:05  tlvb: is it possible to get a git diff to ignore changes to the line termination sequence (e.g. \n vs \r\n)?
+20:05  cbreak: sure
+20:05  cbreak: git diff -w
+20:06  leandroa: cbreak, jast yes, will be annoying at some point..
+20:06  cbreak: or -b
+20:06  cbreak: or read the man page
+20:07  tlvb: cbreak: it goes in the whitespace section? I guess it makes sense
+20:07  cbreak: tlvb: scroll up a bit in the man page
+20:07  cbreak: there are more options
+20:12  tlvb: cbreak: --ignore-space-at-eol is the only one that seems obvious except -b -w
+20:12  cbreak: yeah
+20:16 --- ChanServ sets modes [#git +v lostern]
+20:17 +lostern: Is there anyone who is familiar with git-svn.perl who can give me some guidance on why line 1457 of HEAD is trying to dereference the variable 'v'? How is opts stored?
+20:18 +lostern: v seems to be a function reference for me which causes an error when it is assigned
+20:21  doxy2: hi
+20:21  doxy2: can i secure my git server/repos with username and password using the git protocol?
+20:21  dr_lepper: no
+20:21  doxy2: okay
+20:22  Khisanth: lostern: that is all the up up at 131
+20:23 +lostern: Khisanth: Sorry?
+20:23  mdunham918: ok im having a chat with my dev team about using GIT
+20:23  PerlJam: lostern: line 131
+20:23  mdunham918: and one guys is like i think we should use it on some projects but not others like some of the more simple sites
+20:24  mdunham918: i think hes wrong
+20:24  mdunham918: how could i argue it
+20:24  PerlJam: mdunham918: what would you use instead for the "simple sites"?
+20:24  mdunham918: nothing
+20:24  ProLoser|Work: hello
+20:24  mdunham918: i think it should be used for all sites
+20:24  Khisanth: lostern: line 131
+20:24  ProLoser|Work: entire files are being changed in submodules and it's bugging me cuz i don't have write access
+20:24  Khisanth: lostern: which command were you trying to run when you go the error?
+20:25  dr_lepper: mdunham918, is it a choice between using a VCS and not using?
+20:25  mdunham918: does anyone have a site or something i could go to to get good reasons on why we should use git for version control
+20:25  PerlJam: mdunham918: what's the down side of using it for those simple sites?  Why change protocol depending on the site?  Who decides which sites are "simple" and which are not?
+20:25  mdunham918: they are contact overwriting each other
+20:25  mdunham918: yes
+20:25  mdunham918: thats what i said
+20:25  mdunham918: why use it on some but not others
+20:26 +lostern: Khisanth: git svn clone. The issue only occurs when I have "git config --global --add svn.noMetaData true", it works fine with an empty gitconfig
+20:27  Khisanth: hmm for clone it would start at line 90
+20:27  mdunham918: constantly overwriting each other*
+20:28  ProLoser|Work: what do i do?
+20:28  Khisanth: the code refs are coming from %init_opts, read_git_config needs to account for those
+20:29  PerlJam: mdunham918: if you've made the mental leap to the idea that you need some sort of revision control, then it's more work to *not* use it when you're using everywhere else.
+20:29  PerlJam: mdunham918: it sounds like your coworker hasn't quite made the mental leap to decide that revision control is necessary and important in the general case.
+20:30  a|newkirk[assoc]: how do I bypass this when I know I want to overwrite whats in repos with whats current: ! [rejected]        master -> master (non-fast forward)
+20:30 --- a|newkirk[assoc] is now known as alnewkirk
+20:31  jast: alnewkirk: git push -f
+20:32  alnewkirk: trying
+20:32  alnewkirk: much thank you very (im yoda)
+20:47 +lostern: Khisanth: What is v *supposed* to be?
+20:49  Khisanth: lostern: { 'revision|r=s' => \$_revision, %fc_opts, %init_opts }
+20:51 --- ivey is now known as ivey_off
+20:52 +lostern: Khisanth: But (line 1445) $opts->['no-metadata'] returns a subroutine (line 118)
+20:53  Khisanth: $opts->['no-metadata'] would be very wrong no matter what the other line says :)
+20:53 +lostern: Isn't that what $opts->[$o] does?
+20:54 +lostern: I am printing the keys $o and no-metadata is one of them
+20:54  Khisanth: [] is not {}
+20:54  Khisanth: $opts->['no-metadata'] is $opts->[0]
+20:54 +lostern: Khisanth: sorry, curly braces
+20:55 +lostern: Khisanth: Returning to my original point: $opts->{'no-metadata'} returns a subroutine.
+20:55  Khisanth: no-metadata is 'no-metadata' => sub { $icv{noMetadata} = 1 },
+20:55  ProLoser|Work: i have a question
+20:55 +lostern: Khisanth: Which is a subroutine correct?
+20:56  ProLoser|Work: entire files are being changed in submodules and it's bugging me cuz i don't have write access, how can i get rid of this?
+20:57  Khisanth: lostern: yes
+20:57 +lostern: Khisanth: So line 1457 will fail.
+20:57  Khisanth: well yes
+20:57  Khisanth: since this is HEAD, I am assuming this is a half completed change ...
+20:58 +lostern: Khisanth: It's also happens to be in cygwin
+20:58 +lostern: It*
+20:59  Khisanth: but is it in the 1.7.3.3 tar?
+21:01 +lostern: what's the syntax to do a diff of a given file against a given tag? git diff mytag:myfile?
+21:02 +lostern: nvm git diff mytag -- myfile
+21:02 +lostern: Khisanth: Yeah, it seems to be in 1.7.3.3
+21:04 +lostern: Khisanth: ... but it seems impossible that such an apparent defect would go unnoticed.
+21:06 +lostern: Can someone try running a git svn clone with the nometadata option using v1.7.3.3?
+21:06  Khisanth: well that would be the set of people are using a version that has this code and using svn with git and has these config set
+21:06 --- s0ber_ is now known as s0ber
+21:07  alnewkirk: np
+21:07  Khisanth: lostern: any of the => sub options would trigger that
+21:08  tsdh: Hi.  How can I reset unstaged changes in only one file?  Something like reset --hard restricted to one specific file...
+21:08 +lostern: Khisanth: True.
+21:08 +lostern: Khisanth: Do you have v1.7.3.0 or later? Do you mind confirming?
+21:08  theoros: tsdh: git checkout -- FILE
+21:08 +lostern: (confirming the bug)
+21:09  tsdh: theoros: Thanks.
+21:09  theoros: tsdh: git status will tell you this
+21:09  Khisanth: I have ... 1.7.0.4
+21:09  Khisanth: lostern: but I can tell from the code :)
+21:09 +lostern: Khisanth: Okay thanks anyway
+21:09  tsdh: theoros: Oh, indeed, it does. :-)
+21:11  Khisanth: lostern: you could replace 1457 with if( ref $v eq 'CODE' ) { $v->($tmp); } else { $$v = $tmp }
+21:12  Khisanth: although --rewrite-root and --rewrite-uuid will still not do the right thing ...
+21:12 +lostern: Khisanth: Thanks for the work-around
+21:13  bartek: Has anyone here worked with gitolite? Having some user permission problems
+21:14  Khisanth: lostern: if you change the 1's on lines 121 and 122 it should work for the rewrite options too but I don't know if that will break something else or not :)
+21:18  mdunham918: what would be a good argument to get him to see why we should use revision control
+21:18  mdunham918: @PearlJam
+21:18  mdunham918: PerlJam
+21:19  PerlJam: bartek: I'm using gitolite, but I haven't had any problems with it.
+21:19  bartek: Think I found it, looks like a gitolite.rc config change
+21:19  Khisanth: mdunham918: are you looking for evil, non-evil or neutral options? :)
+21:20  mdunham918: any just looking for something to argue with hes a good debater and i think its only because he doesnt want to learn it
+21:20  mdunham918: i want to learn it because it will be good to know period especially for future dev jobs
+21:20  mdunham918: plus im sick of him always overwriting me
+21:21  mdunham918: on this last project he overwrote me like 30 times!
+21:21  mdunham918: cost me hours of extra work
+21:21  mdunham918: which he'd say yea we should use it on projects like that but not like a simple store or something
+21:21  mdunham918: which im like if were going to use it at all we should use it on all
+21:21  mdunham918: perhaps he just doesn't understand it
+21:26  ppawel: hmm, I don't understand where did this commit go - http://egit.eclipse.org/w/?p=jgit.git;a=commit;h=2eb63e2cdbd0b63dc995bb8b23f89d7156529168
+21:26  ppawel: I cloned this repo and this commit is nowhere to be found in the history...
+21:28  Khisanth: mdunham918: you can just wait for Murphy's Law to kick in :)
+21:28  Khisanth: at which point your argument would be reduced to "I told you so"
+21:29  drizzd: ppawel: a commit that is not reachable from any refs will not be part of a new clone
+21:29  Khisanth: and if you are using it for other things anyway then it has to be learned anyway
+21:30  atula: hello. new to git from svn.  I committed a few a few times... somehow, now it's showing I have more than 1 branch in the repos. in log, I see: master | origin/HEAD | origin/master   I am not sure what that means
+21:31  atula: again... it's just me on this repos... it's funny to have conflict with yourself :(
+21:31  atula: internal turmoil I suppose
+21:31  wereHamster: atula: that's normal..
+21:31  atula: wereHamster: what does the log mean?
+21:31  wereHamster: origin/master is the masetr branch from the repo you cloned from
+21:31  ppawel: drizzd, but how is it possible to create such situation?
+21:31  wereHamster: whic log?
+21:31  atula: my log file that says "a class="internal-link" href="resolveuid/d78ff522a46337382c5c2164f24ab083">"
+21:31  atula: crap...
+21:32  atula: master | origin/HEAD | origin/master
+21:32  atula: that
+21:32  wereHamster: those are branches
+21:32  atula: so there are 3 braches now, right ?
+21:32  ppawel: drizzd, hmm, ref is weird - refs/changes/76/1476/1 - do I have to get it manually? hmm
+21:33  wereHamster: atula: yes
+21:33  atula: master is my local.... origin/master is my publicrepose.git from my server and origin/HEAD ?
+21:33  atula: wereHamster: ^
+21:33  wereHamster: atula: I explainde what origin/master is earlier...
+21:33  atula: what is origin/HEAD ?
+21:34  wereHamster: a symref most likely pointing to origin/master
+21:34  atula: oh man. I think I'm really confused about this.
+21:34  drizzd: ppawel: probably
+21:34  atula: I'm reading the community git book... but I'm not close to understanding it
+21:34  wereHamster: atula: which tutorial/book did you read?
+21:34  wereHamster: atula: read it to the end
+21:34  atula: yep
+21:35  drizzd: ppawel: actually, you can specify which refs are cloned in the fetch spec
+21:35  atula: alright. lemme finish it and we'll see. thank you
+21:35  drizzd: ppawel: try git fetch origin refs/changes/76/1476/1
+21:37  ppawel: drizzd, ok perfect. then I did git checkout -b branch FETCH_HEAD and head is this commit - thanks
+21:37  ppawel: first time I encounter such repo
+21:38  offbyone: Salutations; I'm trying to figure out how to do something with git; it's something (to be honest) I don't know how to do with any other VCS either, but I'm pretty sure git supports it.
+21:39  offbyone: Basically, I made some changes on branch B, which came off of trunk.
+21:39  offbyone: I want to apply the changes to branch A as well, which is an older maintenance branch of trunk
+21:39  cbreak: just merge
+21:40  wereHamster: or rebase
+21:40  offbyone: cbreak: I tried that, but because my feature branch (B) has a lot of commits in it from trunk it made a big merge on branch A
+21:40  wereHamster: or cherry-pick
+21:40  cbreak: yeah. If you want a subset of the commits, and don't mind duplicates, you could cherry pick them
+21:40  offbyone: And rebase (according to what I read) is a bad idea because I've already pushed the commits.
+21:40  offbyone: upstream/master already has the changes in it.
+21:40  wereHamster: offbyone: are you the same as offby1 ?
+21:41  offbyone: wereHamster: Not on freenode, no
+21:41  offbyone: He and I had the same "clever" nickname idea
+21:41  offbyone: But he got it first here.
+21:41  offbyone: So, am I still looking to cherry-pick or rebase?
+21:42  offbyone: Or is there a better way?
+21:43  cbreak: if you don't want to merge both branches into one
+21:43  offbyone: I do not.
+21:43  offbyone: Okay.
+21:43  cbreak: there's not much else you can do than cherry pick
+21:43  offbyone: Thanks.
+21:43  cbreak: (rebase can do the same though)
+21:43  offbyone: Cool.
+21:44  offbyone: Is there a shorthand for "revisions tip-3 .. tip on branch x"?
+21:44  cbreak: ~3 means 3 commits before
+21:44  offbyone: And that'll pull -3, -2, -1, and 0?
+21:44  cbreak: read man git-rev-parse
+21:44  jast: the 'git-rev-parse' manpage can be found at http://git.or.cz/man/git-rev-parse [automatic message]
+21:44  cbreak: no
+21:44  offbyone: K
+21:45  offbyone: Thanks
+21:45  cbreak: pull is merge
+21:45  offbyone: Sorry
+21:45  cbreak: you just said you didn't want to merge :)
+21:45  offbyone: I'm shuffling terminology in my head. My bad.
+21:45  cbreak: I think cherry-pick nowadays supports ranges
+21:45  cbreak: so something like x~3..x
+21:45  offbyone: I meant "That refers to revisions -3..0?"
+21:45  offbyone: Ah.
+21:48 --- adamholt is now known as adamholt_away
+21:48 --- adamholt_away is now known as adamholt
+21:51  drizzd_: ppawel: it's a first for me too :-)
+--- Log closed Mon Dec 06 22:24:29 2010
+--- Log opened Mon Dec 06 22:39:59 2010
+22:39 --- Users 743 nicks [0 ops, 0 halfops, 9 voices, 734 normal]
+22:40  Eridius: you can advise users to have their core.whitespace variable set appropriately, and you can give them a pre-commit hook they can use to validate their commits in the first place
+22:40  Eridius: but actual enforcement must be done at the server
+22:40  crankharder: so two things then -- give them the pre commit and then verify that there actually is no whitespace
+22:42 --- Channel #git was synced in 149 seconds
+22:42  urbanmonk: fr0sty: ok .. thanks!
+22:43  dj_tjerk: Eridius > i've been looking for a server-side hook to enforce the absence of trailing whitespace, haven't found one so far though (i might be failing at google here :P)
+22:51  patrikf: it's not that hard to roll your own if you have some shell scripting skills
+22:53  sparda_: Hello everyone.  Sorry for the newb question, but what does "upstream" mean in the context of GIT?  Like, upstream branch, etc.
+22:53  Eridius: dj_tjerk: you may find `git diff --check` to be useful
+22:54  patrikf: sparda_: generally where you cloned your repo from
+22:58  patrikf: sparda_: also, branches can "track" "upstream" branches, which is simply a statement that branch X here corresponds to branch Y at remote Z (and git push/pull can use that information to automatically determine what you want them to do)
+--- Log closed Mon Dec 06 23:04:59 2010
+--- Log opened Mon Dec 06 23:10:25 2010
+23:10 --- Users 738 nicks [0 ops, 0 halfops, 9 voices, 729 normal]
+23:12 --- Channel #git was synced in 152 seconds
+23:18 --- ChanServ sets modes [#git +v Xxoulz]
+23:18 +Xxoulz: hi everyone
+23:18 +Xxoulz: I have a little question/problem
+23:19 +Xxoulz: I want to connect to a git
+23:19 +Xxoulz: I have the private key and the passphrase
+23:19 +Xxoulz: So i used openssl rsa -in my_private_key
+23:19 +Xxoulz: then, it ask my the passphrase
+23:20  bremner: err. shouldn't you be using ssh?
+23:20  SethRobertson: You want to use openssh, not openssl
+23:20 +Xxoulz: but the passphrase is huge (more than 10.000 char) so i can't type it, i can't past it
+23:20  patrikf: lol
+23:20  patrikf: yeah, that's why you have passphrases
+23:20 +Xxoulz: ^^
+23:20 +Xxoulz: So what can I do ?
+23:20  patrikf: so you don't have to type the whole 512-byte key
+23:20  SethRobertson: I think you have a public key, not a passphrase
+23:20 +Xxoulz: What command option I miss ?
+23:21  bremner: You could start by reading what people write
+23:21 +Xxoulz: No, I have the private key and the passphrase of the private key
+23:21 +Xxoulz: openssh not openssl ?
+23:21  bremner: yes
+23:21 +Xxoulz: ok
+23:21 --- carutsu_ is now known as caruts
+23:21 --- caruts is now known as carutsu
+23:22 +Xxoulz: I think (but I'm not sure) this private key and the passphrase associated will get me the password to use the git
+23:23  bremner: Xxoulz: is this some well known site like github?
+23:23 +Xxoulz: no no
+23:23 +Xxoulz: local git in my school
+23:24 +Xxoulz: but I'm not really sure what to do, I don't know that kind of stuff
+23:24  patrikf: lots of tutorials on ssh and git on the web
+23:24 +Xxoulz: I read the man, but they're huge and I did'nt find something in it
+23:25 +Xxoulz: yeah but nothing i found with my situation
+23:25 +Xxoulz: matching
+23:25 +Xxoulz: I have this private key, the passphrase of the private key and the git adress
+23:25 +Xxoulz: so what ?
+23:25 +Xxoulz: I'm a bit lost
+23:25  DrNick: you have the wrong type of private key
+23:26  DrNick: you want a ssh key, not an openssl key
+23:26 +Xxoulz: DrNick: ok, so I guess I have to generate this key with my privatekey/passphrase ?
+23:27  SethRobertson: man ssh-keygen
+23:28 +Xxoulz: i look at it
+23:28 +Xxoulz: it seems like asking me again the passphrase on the prompt..
+23:29 +Xxoulz: oh.. -P may help..
+23:30 +Xxoulz: yes it helps x)
+23:30  SethRobertson: You are entering a brand new passphrase.  Hint: Don't use one so long you cannot type it
+23:31 +Xxoulz: SethRobertson: I'm sorry I didn't understand your sentence
+23:31  SethRobertson: Type in a new passphrase.  Do not use a 10,000 byte passphrase.  Use something like "This is my secret passphrase"
+23:32 +Xxoulz: oh
+23:32 +Xxoulz: I don't have the choice :)
+23:32  jim: Xxoulz, not sure how to communicate with you if you can't understand whole sentences
+23:32 +Xxoulz: It's not me who choose that
+23:32  SethRobertson: I'm quite sure you do have a choice.
+23:32 +Xxoulz: So, I have my key.pub now
+23:32  SethRobertson: You are typing it in. You can type in whatever you want.
+23:32  SethRobertson: You will be very very unhappy if you use a 10,000 byte passphrase
+23:33  jim: Xxoulz, do you understand that by running ssh-keygen, you are making a NEW key where it didn't exist before?
+23:33 +Xxoulz: Yeah, but I have to connect to a git with a private key and a passphrase something give to me
+23:33  patrikf: then they got it all wrong
+23:33  jim: that seems odd
+23:33  DrNick: that's not how git (or ssh) works
+23:33  jim: you may have misunderstood
+23:33  patrikf: or asymmetric cryptography
+23:33 +Xxoulz: I think I not understand what I do..
+23:34  SethRobertson: You can change the passphrase using ssh-keygen
+23:34  SethRobertson: The private key goes in ~/.ssh/id_rsa -- it should look very similar to the private key already in there
+23:35  jim: Xxoulz, the passphrase that was given to you is probably one that's already established
+23:35 +Xxoulz: yeah, I reformulate. So I have: an git adress: git@git.mydomain.com:my_user, the private key and the passphrase
+23:36 +Xxoulz: my aim is to connect to that server :)
+23:36  SethRobertson: Stick the private key in ~/.ssh/id_rsa, use ssh-keygen to change the passphrase (and more probably learn that this is not a ssh private key), then start using git.
+23:36 +Xxoulz: ok, let's go
+23:37  jim: one piece of trivia... private keys -never- leave the machine they're on, public keys do
+23:38 +Xxoulz: SethRobertson: do I have to include the header in the id_rsa ? (-----BEGIN RSA PRIVATE KEY-----, etc)
+23:38  SethRobertson: yes
+23:38 +Xxoulz: this file actually no exist in my computer
+23:38  SethRobertson: create it
+23:38 +Xxoulz: of course
+23:38 +Xxoulz: ;)
+23:38 +Xxoulz: done
+23:38  jim: so if you were given a passphrase AND a private key, then the public key must be somewhere
+23:38 +Xxoulz: then
+23:38 +Xxoulz: jim: probably but I don't have it
+23:39  SethRobertson: jim: His upstream obviously did things in reverse because he doesn't know what he is doing
+23:39  jim: seems that way... so they keygenned for him or something
+23:39 +Xxoulz: That's pretty much that
+23:39  SethRobertson: Xxoulz: Use `ssh-keygen -p` to change the passphrase on the private key
+23:39 +Xxoulz: I'm new at those stuff
+23:40  SethRobertson: I was referring to your upstream not knowing what he was doing.  A 10,000 byte passphrase is not sane
+23:40  jim: you're new at like 3 or 4 things all at once :) so... it's going to take some time
+23:40 +Xxoulz: He asking my for the old passphrase on prompt
+23:40 +Xxoulz: Do I have to use the -P option ?
+23:40  SethRobertson: Xxoulz: The man page will explain
+23:41 +Xxoulz: jim: that's why i'm in IT school, eventually, i will learn ;)
+23:42 +Xxoulz: Your identification has been saved with the new passphrase.
+23:42 +Xxoulz: with -p -P options
+23:42 +Xxoulz: then I can connect ?
+23:43  SethRobertson: Give it a shot:  `git clone ssh://...`
+23:44 +Xxoulz: hum
+23:44 +Xxoulz: He asking me for a password..
+23:44  SethRobertson: You need to check the permissions on ~/.ssh and ~/.ssh/id_rsa
+23:45 +Xxoulz: He first ask me for that: Enter passphrase for key '/home/xxoulz/.ssh/id_rsa':
+23:45  SethRobertson: And?
+23:45 +Xxoulz: i given to it my new passphrase with success
+23:45 +Xxoulz: then it asked my a password
+23:46 --- o_o is now known as Guest21300
+23:46  SethRobertson: Sounds like the ssh key isn't set up.  You should ask your upstream.  But please also run chmod 600 ~/.ssh/id_rsa and chmod 700 ~/.ssh and chmod go-w ~/.
+23:46  SethRobertson: Try again and if it still does not work, you need to talk to the person who sent this to you
+23:47 +Xxoulz: still asking a password
+23:47 +Xxoulz: too bad
+23:48 +Xxoulz: I can't ask those persons neither
+23:48 +Xxoulz: :/
+23:48  SethRobertson: You know, all of your problems will go away if you run `rm -rf ...`  Or was that all of my problems?  I get those mixed up sometimes.
+23:48 +Xxoulz: Am I doing wrong with `git clone git@git.domain.com:my_user `
+23:49  SethRobertson: No way for us to know.
+23:49 +Xxoulz: hum..
+23:49  patrikf: Xxoulz: why? why do you get private keys and passphrases from people you cannot talk to?
+23:51 +Xxoulz: patrikf: because they ask us to find the way by ourselves
+23:52 +Xxoulz: and nobody find
+23:52  patrikf: Xxoulz: we're not waiting here to solve your homework, buddy
+23:52 +Xxoulz: it's not an homework
+23:52  patrikf: or whatever it is
+23:53  patrikf: riddle, game, ...
+23:53  patrikf: (also, do you know the meaning of "by yourself"?)
+23:53 +Xxoulz: I just asked help for understand a behavior
+23:53 +Xxoulz: it's don't forbid to have help from people
+23:53 +Xxoulz: just not form those guys
+23:54 +Xxoulz: And I just don't understand why git accept my passphrase but ask ALSO for a password... :/
+23:54 +Xxoulz: -form + from
+23:55  SethRobertson: If the ssh key is not accepted, it will fall back to password authentication
+23:55  DrNick: if you're not using a SSH agent, you will get asked for your private key's password multiple times for some git operations
+23:55  SethRobertson: This tells us that the username/hostname combination is wrong or has not been properly configured
+23:56 +Xxoulz: SethRobertson: well it seems to work because if, instead of my passphrase i give to it, when asking "Enter passphrase for key '/home/xxoulz/.ssh/id_rsa':  'foo test one two one two'
+23:57 +Xxoulz: It ask me again "Enter passphrase for key '/home/xxoulz/.ssh/id_rsa" again and again
+23:57 +Xxoulz: until correct passphrase
+23:57 +Xxoulz: So I think he accept my passphrase as correct
+23:57  SethRobertson: Yes, that allows ssh to decrypt the secret key.  It does not mean that the ssh server has accepted the key
+23:58 +Xxoulz: oh well..
+23:58 +Xxoulz: I pasted the key they given to me...
+23:58 +Xxoulz: is it there fault ?
+23:59 +Xxoulz: well..
+23:59  SethRobertson: This school sounds like a concept I can get behind.  1: Have people pay you (e.g. Profit), 2: Set up puzzles, 3: Don't teach or answer questions.
+--- Log closed Tue Dec 07 00:00:08 2010

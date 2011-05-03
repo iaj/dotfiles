@@ -1,0 +1,864 @@
+--- Log opened Fri Nov 26 00:00:49 2010
+00:02  agliodbs: I'm trying to delete all pictures older than 6 months off a USB drive.  however, when I do "find -mtime +180 -exec ls -lT {} \;', I get *all* files on the drive, regardless of how old they are
+00:02  agliodbs: what am I doing wrong?
+00:06  Riviera: agliodbs: try to add a -type f
+00:06  Riviera: agliodbs: or ! -type d
+00:06  agliodbs: ahah
+00:06  agliodbs: so without the -type, I get everything in an old directory?
+00:07  Riviera: If ls lists directories it of course does  ot care about the constraints you gave find
+00:08  Riviera: not*
+00:08  agliodbs: then why does it work with -type f, but not without it?
+00:09  Riviera: because -type f prevents ls to lidt directories because find only finds files
+00:09  Riviera: normal files
+00:10  agliodbs: Riviera: oh, I see.  ls is listing what's in the directories
+00:10  agliodbs: got it
+00:11  Riviera: yes, that's what I meant :)
+00:16  unfancy: http://pastebin.com/Tzupg9WK
+00:16  unfancy: any idea how to append this scripts output somewhere else but the very end of a file (aka. >>)?
+00:16  unfancy: i'd need to go 1 line before the last line
+00:18  unfancy: anyone?
+00:19  geirha: printf '%s\n' '$i' 'line1' 'line2' 'line3' . w | ed -s file
+00:19  geirha: !ed
+00:19  greybot: ed is a command-based file editor. See http://bash-hackers.org/wiki/doku.php?id=howto:edit-ed - http://sdf.lonestar.org/index.cgi?tutorials/ed - http://wolfram.schneider.org/bsd/7thEdManVol2/edtut/edtut.pdf
+00:20  mr_daniel: I have the very special situation that a folder is named '-5.3.3', but it should be named 'php-5.3.3'. The problem: the - character is interpreted to introduce an option, so 'mv -5.3.3 php-5.3.3' obviously fails. How can I tell mv to interpret - as part of the folder name?
+00:21  go|dfish: mr_daniel: mv ./-5.3.3 php-5.3.3
+00:21  juanmabcirc: quote it!
+00:21  geirha: quotes won't help there
+00:21  juanmabcirc: then use --
+00:22  mr_daniel: as geirha sais quotes don't help
+00:22  juanmabcirc: it's not an "and then"
+00:22  mr_daniel: prefixing the old folder name with ./ did the job, thanks go|dfish
+00:23  juanmabcirc: now think about this -5.3.3 filename and how do it got there, he!
+00:24  grummund: alias rename-spaces='shopt -s nullglob; for X in *\ *; do mv -v -- "$X" "${X// /_}"; done'
+00:24  grummund: find . -type d | while read D; do (cd "$D" && rename-spaces); done
+00:24  grummund: anything wrong with that?
+00:24  juanmabcirc: yes, i'm not an interpreter
+00:24  geirha: First one's ok, but you really shoud use a function
+00:24  geirha: second one is broken
+00:25  geirha: !faq 20 > grummund
+00:25  greybot: grummund: http://mywiki.wooledge.org/BashFAQ/020 -- How can I find and deal with file names containing newlines, spaces or both?
+00:25 * grummund struggled with a function for the first one... maybe quoting rules got me
+00:27  geirha: find . -name "* *" -exec bash -c 'base=${1##*/} dir=${1%/*}; mv "$1" "$dir/${base// /_}" _ {} \;
+00:29  grummund: will that still work if there are directories containing spaces?
+00:31  geirha: Hm. No.
+00:31  geirha: find . -depth -name "* *" -exec bash -c 'base=${1##*/} dir=${1%/*}; mv "$1" "$dir/${base// /_}"' _ {} \;
+00:31  geirha: but now it will
+00:33  grummund: hmm, what does the final _ do?
+00:34  geirha: # bash -c 'echo "0: $0, 1: $1"' _ foo
+00:34  evalbot: geirha: 0: _, 1: foo
+00:37  grummund: # bash -c 'echo "0: $0, 1: $1"' foo
+00:37  evalbot: grummund: 0: foo, 1:
+00:38  grummund: well then
+00:39  grummund: find . -depth -name "* *" -exec bash -c 'base=${0##*/} dir=${0%/*}; mv "$0" "$dir/${base// /_}"' {} \;
+00:43  geirha: find . -depth -name "*_*" -exec bash -c 'for f; do base=${f##*/} dir=${f%/*}; mv "$f" -v "$dir/${base//_/ }"; done' _ {} +
+00:44  geirha: Oops, put an -v in an odd place there
+00:44  grummund: s'okay... i didn't get that far yet... ;)
+00:45  juanmabcirc: what kind of computer usage still requires space replacements?
+00:45  juanmabcirc: that is a lot time back
+00:47  grummund: geirha: i still don't get it why you needed the trailing _, i mean i understand it pushes the arg out to $1 but why would you want to do that?
+00:47  juanmabcirc: #echo "$0"
+00:47  geirha: grummund: "$@" doesn't include "$0"
+00:48  juanmabcirc: # echo "$0?"
+00:48  evalbot: juanmabcirc: /bin/bash?
+00:48  geirha: grummund: Oh, and that last find changes underscores to spaces ^^ (renaming back and forth to test)
+00:49  geirha: # printf '%s\n' '#!/bin/bash' 'echo "$0"' > myscript; chmod +x myscript; ./myscript
+00:49  evalbot: geirha: ./myscript
+00:49  juanmabcirc: O.O
+00:50  juanmabcirc: we have a quota?
+00:50  grummund: #bash -c 'echo $0' juanmabcirc
+00:50  grummund: # bash -c 'echo $0' juanmabcirc
+00:50  evalbot: grummund: juanmabcirc
+00:54  juanmabcirc: # ./myscript
+00:54  evalbot: juanmabcirc: bash: ./myscript: No such file or directory
+00:54  grummund: geirha: ok, so why the for loop in the last example?
+00:54  grummund: what does this do that $1 does not
+00:55  geirha: -exec +  vs.  -exec ;   it runs one bash for many files instead of one bash per file
+00:56  grummund: ah... nice ;)
+00:56  grummund: ok, one last thing... :P
+00:57  grummund: should we have quotes around base=... and dir=... ?
+00:57  juanmabcirc: !quotes explained
+00:57  juanmabcirc: !quotes
+00:57  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+00:58  geirha: Doesn't hurt, but not needed. Wordsplitting and glob expansion does not occur for assignments.
+00:58  geirha: !assignment
+00:58  greybot: To assign to a variable, use varname=value . Do not include spaces around the '=', and do not write $varname on the left hand side. The value must be a word (quote funny characters), but it does not undergo word-splitting or globbing. Assign to an array with arr=( value1 value2 ) (which does undergo word-splitting and globbing), or an array element with arr[i+1]=value . See also: declare, local, and export.
+00:58  juanmabcirc: flooding!
+00:59  juanmabcirc: (1'm n0t gonna read all this)
+00:59  grummund: geirha: that's great, thanks :)
+01:19 --- Skaag_ is now known as Skaag
+01:22  pcard: does anywhere know the earlier point of logging in that PATH gets set at? I notice if I login as root, the beginning of PATH is contains /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:, else it contains /bin:/usr/bin:/usr/local/bin:
+01:22  pcard: the weird thing is, /etc/profile is only setting the sbin's at the beginning
+01:22  pcard: if the   if [ `id -u` = 0 ]; then    condition is met
+01:23  pcard: any anyone know where or what is adding the bin's and how it is adding the bin's after each sbin
+01:25  pcard: lhunath: to answer your question from earlier, in /etc/profile, it appears to prepend the sbin's to the beginning, by way of the pathmunge function, which effective just runs PATH=$1:$PATH
+01:25 --- Muzer is now known as MuzerAway
+01:26  grummund: !faq rename
+01:26  greybot: http://mywiki.wooledge.org/BashFAQ/030 -- How can I rename all my *.foo files to *.bar, or convert spaces to underscores, or convert upper-case file names to lower case?
+01:28  grummund: geirha: i updated the wiki
+01:29  pcard: anyone?
+01:35  pothibo: I have a question regarding bash and objective-C[cocoa]. I'm trying to find an environment variable within an objective-C project and I'm trying to find the best way to do it, anyone would know?
+02:37  detrate: if I have a script that accepts commands, so it's the same prefix everytime (./script <command>). Is there a way I can prefix every command with "./script " automatically within a session?
+02:40 --- scatterp- is now known as scatterp
+02:46  juanmabcirc: detrate: isn't it an interpreter?
+02:47  juanmabcirc: it is easy to just put it in a loop waiting for commands
+02:48  juanmabcirc: but i would use a short alias like my or whatever
+02:49  juanmabcirc: detrate: and as it accepts arguments, it would be then a function
+02:49  juanmabcirc: !function
+02:49  greybot: To define: funcname() { your code here; } ## To use: funcname arg1 arg2 ... ## function http://mywiki.wooledge.org/BashGuide/CompoundCommands#Functions
+02:50  grummund: detrate: while read; do echo $REPLY; done
+02:50 * juanmabcirc is eating pop-corns.
+02:51  grummund: sorry
+02:51  grummund: detrate: while read; do ./script $REPLY; done
+02:53  kel39: hi - how can I kill this process dynamically? http://pastebin.com/8yksfDXh
+02:54  kel39: like i know if i want to kill fetch i can do kill -TERM $(pgrep fetch), but i only want to kill that one process
+02:54  kel39: because i have several other lighttpd processes running
+03:00  steve___: kel39: have you read the process management wiki entry?
+03:00  steve___: !pm > kel39
+03:00  greybot: kel39: http://mywiki.wooledge.org/ProcessManagement
+03:01  kel39: cheers
+03:05  detrate: alright grummund, thank you.  juanmabcirc I already have the script to that level but I just don't want to type that prefix everytime.
+03:06  juanmabcirc: nice!
+03:11  Cykey: hi
+03:12  Cykey: Who can help me?
+03:12  steve___: !ask
+03:12  greybot: You need not ask permission to ask a question. Just ask and be patient. http://mywiki.wooledge.org/NetEtiquette
+03:14  Cykey: Hi
+03:14  juanmabcirc: better
+03:17  Cykey: Exemple of my script : 1. Login into an filehost account. 2. List all the files on your account. 3. Select the files you want to download. 4. The script downloads the file. 5. The script goes on another filehost (like mediafire) and it reuplaudes the file downloaded before
+03:17  Cykey: How can i do this?
+03:17  Cykey: Help
+03:18  juanmabcirc: all five ?
+03:18  juanmabcirc: how much do you pay ?
+03:19  Cykey: lol
+03:19  Cykey: I just want you to guide a bit
+03:19  Cykey: juanmabcirc
+03:19  juanmabcirc: better
+03:20  Cykey: ?
+03:20  detrate: grummund: it's not really working as I need it
+03:20  detrate: it's truncating the command on me
+03:21  detrate: actually I might know the reason
+03:21  juanmabcirc: it is weird how people talks to channel, then directly to users, we loose will
+03:22  juanmabcirc: Cykey: wait someone will to help you
+03:23  Cykey: Exemple of my script : 1. Login into an filehost account. 2. List all the files on your account. 3. Select the files you want to download. 4. The script downloads the file. 5. The script goes on another filehost (like mediafire) and it reuplaudes the file downloaded before <~ PLEASE GUIDE ME THE CORRECT HOW/WAY
+03:23  grummund: not with bash, is that enough guidance?
+03:24  juanmabcirc: Cykey: probably something "curl" related could manage to be possible to be near
+03:24  Cykey: Yeah
+03:25  Cykey: But that doesn't help me a lot
+03:25  Cykey: I need a script to guide me
+03:26  juanmabcirc: ok, websearch curl logins, the rest are part of it
+03:30  detrate: grummund: do you know how I could prefix this "shell" I created with the while loop?
+03:30  detrate: the closest thing was read -p
+03:30  detrate: but the it won't take my arguments
+03:31  grummund: maybe one of the $PS variables does it
+03:31  detrate: hmm
+03:32  grummund: i'm no expert... using 'read' was a throwaway suggestion
+03:32  mac-: hi
+03:32  mac-: can any one help me with that ?
+03:32  detrate: alright, thanks
+03:32  mac-: http://pastebin.com/Mb0HHr6a
+03:33  mac-: I`ve got ./bash02e: line 4: syntax error near unexpected token `;;'
+03:34  steve___: !case > mac-
+03:34  greybot: mac-: case word in pattern);; esac syntax is used to match a word against a particular pattern, and execute commands if that pattern matches. See 'case word in' in man bash | http://wiki.bash-hackers.org/syntax/ccmd/case
+03:36  juanmabcirc: # while read -p "hello:"; do printf "$REPLY"; done <<< $'1\n2\n3\n4\n'
+03:36  evalbot: juanmabcirc: 1234
+03:36  Cykey: juanmabcirc: PM?
+03:36  juanmabcirc: not if its bash
+03:37  Cykey: juanmabcirc: Please
+03:37  juanmabcirc: talk!, come on!
+03:39  Cykey: http://pastie.org/1326888
+03:39  meowz: how do you turn off the verbose for shopt -s autocd ?
+03:39  meowz: if i type /usr/src/linux, it will say 'cd /usr/src/linux'
+03:40  steve___: shopt -u
+03:41  steve___: help shopt
+03:41  steve___: meowz: ^^
+03:50  mac-: i`ve changed, but now got new error
+03:50  mac-: http://pastebin.com/EqLZB3KK
+03:50  mac-: line 16: syntax error near unexpected token `;;'
+03:51  juanmabcirc: !if
+03:51  greybot: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause # http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+03:51  mac-: ahhh
+03:51  mac-: sorry, my fault :)
+03:51  juanmabcirc: you are going to get all syntax hits!
+03:51  mac-: it is very late here ...
+03:51  mac-: :P
+03:52  mac-: I have to go to sleep :D
+03:52  juanmabcirc: he he, blame the hour
+03:52  mac-: it is 03:52 AM
+03:52  steve___: yeah... no americans around.  It's been very quiet today.
+03:53  meowz: steve___: i just want to turn off that verbose, not any other verboses
+03:53  juanmabcirc: we could speak esperanto!
+03:54  juanmabcirc: ha ha!
+03:54  meowz: i want to keep using autocd, but without the verbose, steve___
+03:55  steve___: Saluton!
+04:00  paissad: iirc, you don't recommend advanced bash scripting ... ?
+04:00  paissad: right ?
+04:00  juanmabcirc: Divenu, google ne tradukas esperanton!
+04:03  steve___: !guide
+04:03  greybot: http://mywiki.wooledge.org/BashGuide
+04:04  steve___: paissad: that's the recommended guide.
+04:05  steve___: meowz: I'm not sure you can.
+04:05  steve___: meowz: or how it's done.  I agree that's annoying.
+04:06  juanmabcirc: an unrecommended guide can be good to learn by error, but you need some knowledge to locate the troubles (the advanced is good placed in that)
+04:10  ritztech: IS there a way to Store All results in 1 temp varilble ONLY once just because i got to check on it 3 more times later for alarms / other stuff and grep certiain parts for different things
+04:10  ritztech: im pulling from an expect file
+04:12  steve___: ritztech: If it's in a function 'local' might work.
+04:12  steve___: # func() { local var=foo ; echo $var ;} ; func ; echo $var
+04:13  evalbot: steve___: foo
+04:14  steve___: # func() { var=foo ; echo $var ;} ; func ; echo $var
+04:14  evalbot: steve___: foo
+04:14  evalbot: steve___: foo
+04:14  steve___: in case you weren't picking up what I was putting down
+04:14  steve___: ;)
+04:14  steve___: ritztech: ^^
+04:15  steve___: zzz  I'm done.  Peace out my brothas 'n sistas
+04:17  ritztech: output=$(echo "$x") could that work and i can just use taht
+04:17  ritztech: sorry
+04:19  meowz: steve___: is there any reason not to use autocd ?
+04:19  parolang: I have sort of a conceptual question.  Lets say I have the 'hello' program installed, and I type foo=hello hello at the shell.  The hello program is executed and displays "Hello World!".  My only question is...why isn't the variable 'foo' set to the string "hello"?
+04:20  ritztech: im not sure how the func would work i have to $var throughout the file a couple times to get on different sections and its too hard to put multiple awks on 1
+04:20  ritztech: would that not work
+04:20  ritztech:  output=$(echo "$x")
+04:20  go|dfish: parolang: it is ..
+04:21  ritztech: or if i run output would it run it again and again Like re-login to the device as many times i echo the output
+04:21  go|dfish: output=$(echo "$x") is better written as output=$x
+04:22  go|dfish: # echo 'echo $foo' > hello; foo=world bash hello
+04:22  evalbot: go|dfish: world
+04:24  parolang: go|dfish: Well, at the prompt I type literally: $ foo=hello hello; echo $foo
+04:24  parolang: go|dfish: All I get is "Hello, world!"  $foo doesn't echo.
+04:25  parolang: go|dfish: Sorry, I'm sort of learning, so I don't know what the syntax you typed above means exactly.
+04:25  ritztech: so that will store all results in 1 variable like Multiple lines of data
+04:25  go|dfish: parolang: ah ok.
+04:27  go|dfish: parolang: I'm not sure on the proper wording for it, but, variable=value command, will only set variable temporarily
+04:27  go|dfish: when command is finished executing, variable will no longer be defined
+04:28  parolang: Okay, that makes somewhat more sense.  So I could in theory use foo elsewhere in place of the 'hello' command?
+04:29  parolang: Because it's in the same 'command'?
+04:29  ritztech: so if i run echo "$x" | grep blah blah  like 3 different times in the file will it log in everytime i do the echo "$x"
+04:31  go|dfish: parolang: i'm not sure what you mean there, if you want the above to "work", foo=hello; hello; echo $foo
+04:31  juanmabcirc: go|dfish, parolang: i think that has something to do with subenvironments, foo=bar will be seen by scripts (probably subshells)
+04:32  parolang: go|dfish: Yeah, I'm not sure either.  I guess I'll google for bash scoping.
+04:33  parolang: juanmabcirc: That's helpful.
+04:33  parolang: go|dfish, juanmabcirc: thanks
+05:15  meowz: how can i disable the verbose that shopt -s autocd enables?
+--- Log closed Fri Nov 26 09:16:33 2010
+--- Log opened Fri Nov 26 09:16:54 2010
+09:16 --- Users 511 nicks [0 ops, 0 halfops, 0 voices, 511 normal]
+09:18 --- Channel #bash was synced in 100 seconds
+09:37  ultrav1olet: how can I exclude a substring from a string, so I have "blablahello" and I want to subtract "blabla" from it and get "hello"
+09:39  pgas: !pe > ultrav1olet
+09:39  greybot: ultrav1olet: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+09:39  twb: > set -u; xs=(); echo ${xs[@]}
+09:39  twb: > set -eEu; xs=(); echo ${xs[@]}
+09:39  twb: That fails with bash: xs[@]: unbound variable -- why?
+09:40  twb: I expected xs to be bound to the empty array
+09:43  pgas: dunno, probably so that -u catches unset element in the array. you migth want to ask on the bug-bash mailing list
+09:44  twb: I thought it was more likely that I was stupid than it was a bug
+09:47  Bruce_Wayne: I have i=001 in the for loop, and I want to increment till 106.. when I increment i.. it gets '2' but I want 002... what should I do?
+09:48  twb: Bruce_Wayne: for i in {001..106}
+09:49  Bruce_Wayne: twb: right.. I forgot about that.. thanks.
+10:02  poisonbit: Bruce_Wayne,   "it gets '2' but I want 002"  then use printf
+10:02  poisonbit: # for i in {001..002}; do printf '%s => %.3d\n' "$i" "$i"; done
+10:02  evalbot: poisonbit: 1 => 001
+10:02  evalbot: poisonbit: 2 => 002
+10:03  twb: poisonbit: why . ?
+10:04  twb: # for i in {008..009}; do printf '%.3d ' $i; done
+10:04  evalbot: twb: 008 009
+10:04  twb: Hm, I expected that to fail because 008 is invalid octal
+10:08  poisonbit: # for i in {007..009}; do printf '%.3o ' $i; done
+10:08  evalbot: poisonbit: 007 010 011
+10:09  twb: $ printf %d 09 ==> bash: printf: 09: invalid octal number
+10:10  Zucca: # for i in {006..010}; do printf '%.3d ' $i; done
+10:10  evalbot: Zucca: 006 007 008 009 010
+10:10  erUSUL: !faq august
+10:10  greybot: erUSUL: No matches found at http://mywiki.wooledge.org/BashFAQ
+10:20  ari_stress: hi all
+10:20  ari_stress: how do i define variable with "" inside?
+10:21  erUSUL: with single quotes? or scaping the quotes?
+10:21  erUSUL: !quotes
+10:21  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+10:21  ari_stress: basically i want to do this: ldapsearch -h hostname -x -b "ou=base1,o=comp.com" "mail=mail@mail.com"
+10:21  ari_stress: ok let me read it
+10:22  ari_stress: btw, i echo the variable and it seems ok, it resulted in "ou=....." and "mail=....", but ldapsearch complains that i give bad filter
+10:28  ari_stress: oh man, how silly i am
+10:28  ari_stress: thanks for the reading
+10:28  ritztech: if [[ $x = *'ALARM'* ]]  how can i do if $x OR $y
+10:28  ari_stress: i just need to "$var" it
+10:30  erUSUL: !||
+10:30  greybot: foo || bar runs bar when foo fails: [[ -d $foo ]] || { echo 'ohNoes!' >&2; exit 1; }
+10:33  erUSUL: ritztech: if [[ cond1 || cond2 ]]; then ...; fi
+10:34  evelyette: hi
+10:34  evelyette: I have a command ... and I would like to enter a password twice to confirm ... and I would like to do it with a script (or command) ... I don't want to type passwords manually
+10:34  evelyette: is there any way of doing that ... I know expect
+10:34  evelyette: but is there an easier way like echo ?
+10:35  ari_stress: hi, can i truncate the ldapsearch result, say i want to grab only between lines 40-60?
+10:35  erUSUL: evelyette: use read.
+10:35  erUSUL: ari_stress: « sed -n '40,50p' » iirc
+10:36  ari_stress: thx erUSUL, let me try
+10:37  evelyette: erUSUL, I don't think read can do that
+10:38  erUSUL: evelyette: read -p "Enter pass:" -s pass1 && read -s -p "Enter pass again:"  pass2 ; if ! [[ $pass1 = $pass2 ]]; then echo "Error ... ; fi
+10:40  evelyette: that's the problem ... the can't disrupt the program I'm running and use read in between
+10:40  erUSUL: well you get the picture
+10:40  a_ok: how can I put statements in my bashrc that are not used in scripts?
+10:40  erUSUL: evelyette: sorry i missread your question
+10:44  erUSUL: a_ok: can you rephrase the question? what are you trying to do ?
+10:45  a_ok: erUSUL: I put a command: stty -ixon in my bashrc but now my basch sripts fail to take stdin with the error: stty: standard input: Invalid argument
+10:46  a_ok: So I don't want bash to execute stty when it is running a script
+10:47  lhunath: !-x > a_ok
+10:47  greybot: a_ok: Setting the -x option on bash enables a debugging mode that makes bash output the command name and arguments that it will run (after all parsing and expansion has been applied). Set it by starting a script with ''bash -x ./myscript'' or putting ''set -x'' before the code you want to debug. ''set +x'' turns this behaviour off.
+10:49  a_ok: lhunath: why would I want that?
+10:49  lhunath: to see where the stty execution comes from.
+10:49  a_ok: lhunath: like I said I put it in my bashrc
+10:49  lhunath: that shouldn't affect any scripts.
+10:50  a_ok: well it does as soon as I remove it all is well
+10:50  lhunath: hence, use set -x.  or show us your relevant bashrc code.
+10:50  a_ok: I did put it in the global bashrc perhaps that was a mistake
+10:50  lhunath: holy crap; does your script source bashrc?
+10:51  a_ok: no
+10:51  lhunath: ok
+10:51  lhunath: some nutters tend to do that.
+10:51  a_ok: lhunath: It's on a weird ass distro though. I use the same trick on other servers that have no problem at all
+10:52  lhunath: if you put set -x at the top of your .bashrc and run your script; does funky output appear?
+10:53  a_ok: lhunath: well it will have to be the /etc/bashrc as I said I put the stty in there
+10:53  lhunath: right.
+10:54  a_ok: ++ stty -ixon
+10:54  a_ok: stty: standard input: Invalid argument
+10:54  a_ok: Ill try and see if it behaves the same in .bashrc
+10:55  a_ok: wellmy .bashrc seems to source /etc/bashrc could that be the problem?
+10:57  lhunath: no
+10:57  lhunath: if you make a new script with set -x at the top, does it also do that?
+10:57  a_ok: still same effect... bloody anoying
+10:58  a_ok: you mean not setting -x in bashrc but in the sript?
+10:58  lhunath: just make a new file; with a hashbang, set -x and echo howdy world.
+10:58  lhunath: make it executable and execute.
+10:59  lhunath: err; never mind the set -x in the script, just set -x in your bashrc will do
+10:59  erUSUL: could be BASH_ENV=/etc/bashrc ?
+10:59  lhunath: oh dear
+11:00  lhunath: yes, that could be it.
+11:00  twb: lhunath: that's totally wrong, right?
+11:00  lhunath: When bash is started non-interactively, to run a shell script, for example, it looks for the variable BASH_ENV in the environment expands its value if it appears there, and uses the expanded value as the name of a file to read and execute.
+11:01  a_ok: BASH_ENV /root/.bashrc
+11:01  a_ok: lhunath: don see any stty in your sugested test
+11:02  lhunath: with BASH_ENV set?
+11:02  a_ok: lhunath: it was already set to the above
+11:02  lhunath: it should've done the same thing, then
+11:03  a_ok: well it does. it executes stty i'm sure of it but the set -x is later
+11:04  lhunath: ah ok, anyway
+11:04  a_ok: so I don't get what you are trying to prove with the test
+11:04  lhunath: a_ok: find what sets BASH_ENV and get rid of it, then find the distro dev that put it there and yell at him
+11:04  lhunath: a_ok: was trying to make sure it wasn't something your particular script did.
+11:04  a_ok: so I should empty the BASH_ENV
+11:04  lhunath: yes, BASH_ENV is evil.
+11:05  a_ok: yep that did the trick
+11:05  lhunath: esp. when used to source the "interactive shell initialization file"
+11:05  ari_stress: i dont seem to be able to properly pipe a var into sed.... search="$ldapcmd -h $host $opt "$base" "$mail""; result="$search > `sed` -n '10,25p'"
+11:05  lhunath: indeed you don't.
+11:06  lhunath: 1. do not put commands in variables.  ever.
+11:06  lhunath: 2. quoting like that doesn't work.
+11:06  lhunath: 3. > is FILE redirection.  it takes files.
+11:06  lhunath: erase everything you think you know about bash and start anew with the BashGuide linked in the topic.
+11:06  ari_stress: oh
+11:06  lhunath: but first, read this:
+11:06  lhunath: !args > ari_stress
+11:06  greybot: ari_stress: Understanding Arguments and Word Splitting: http://mywiki.wooledge.org/Arguments
+11:06  ari_stress: ok
+11:07  a_ok: lhunath: well I have not heard of BASH_ENV before today but will remember it the next time I see stuff like that happening.
+11:07  lhunath: I've never actually seen it used either
+11:09  lhunath: ari_stress: what you probably want is this: search=$(ldap -h "$host" "$base" "$mail"); result=$(sed -n '10,25p' <<< "$search")
+11:09  lhunath: ari_stress: but don't let it keep you from learning correct bash from those links :-)
+11:10  ari_stress: yes lhunath, i'm reading it. thank you for your kindness... it must be getting to your nerve looking at numerous newbie like me ^^
+11:11  lhunath: if I wasn't here to help; I wouldn't bother replying.
+11:12 --- Rada_ is now known as Rada
+11:20  a_ok: lhunath: I can't even find where it is set bloody annoying
+11:21  lhunath: try /etc/environment
+11:21  twb: a_ok: what version of Debian are you running?
+11:21  a_ok: none
+11:22  a_ok: openfiler
+11:22  a_ok: its a rpath thingy
+11:22  twb: Ah, well, that's probably the problem :P'
+11:22  a_ok: yes it is
+11:22  a_ok: Yay found it! it was in /root/.bash_profile
+11:23  twb: a_ok: you should probably check /etc/skel too
+11:23  a_ok: twb: i greped over entire /etc  nothing to be found
+11:33 --- Jonathan_R_ is now known as Jonathan_R
+11:42  rethus: i have a bash-script, and i try to check, if first parameter is "FTP" or not set.
+11:43  rethus: i have this if-loop:
+11:43  rethus: if [ $1="FTP" ]; then
+11:43  rethus: but even if i add no parameter, the if-statement is always used - instead the else-loop
+11:44  rethus: whats my fault?
+11:45  rethus: if i change "1 with $2, i got the result: $2 is not set
+11:46  twb: rethus: [ "$1" = FTP ]
+11:47  rethus: thanks, that works.
+11:50 --- zinger is now known as bzinger
+11:53  twb: The trick is understanding what you're doing.
+12:01  Bushmills: didn't like to hear that
+12:07  danboid: I've got an app here thats consuming 200% cpu - 4 threads each using ~50% - I think I need to use 'ulimit -e' but I dunno what to put after that. Does it use the same values as nice? If so, what ulimit -e value would I need to cap its 4 threads at about 20% CPU?
+12:08  bonsaikitten: I don't think you can prevent a process from taking 100% cpu if there is no competition
+12:09  bonsaikitten: and it's also platform-specific and not really a bash issue
+12:09  danboid: Yeah but 200% CPU usage can't be good - I know its not as this app keeps dieing on me
+12:10  twb: danboid: if would be better to fix the source code
+12:10  twb: Like say translating it from Java to C
+12:10  danboid: Platform is buntu x64 and man ulimit says 'see bash man page'
+12:10  twb: What is the app?
+12:11  danboid: Its webcit - the web gui for the citadel mailserver
+12:12  Bushmills: well, you can periodically SIGSTOP and SIGCONT the process
+12:13  twb: yuk
+12:13  danboid: This isn't sounding good. Looks like a switch to zimbra or something is in the offing here :/
+12:13  twb: (re citadel, not re -stop
+12:14  twb: I *hate* zimbra, but I suspect it still beats citadel
+12:14  twb: Unless you really need that calendaring shit, you're better off setting up native postfix, dovecot, slapd, postgres,...
+12:19  danboid: b**tard nightmare configuring that labyrinth of apps
+12:19  twb: zimbra is one of those "untar into /opt" clusterfscks
+12:19  twb: Oh, and it is full of java
+12:19  danboid: hence exchange still stands unrivalled - how sad in 2010 :(
+12:19  danboid: sooo expensive for a large org tho
+12:19  twb: Like I said: only if you need calendaring
+12:19  twb: I kinda suspect sunbird could do everything client-side, but since I don't use a calendar myself I don't actually know
+12:19  twb: you know, just exchanging information as vcard and iCalendar attachments
+12:32  Lufti_oO: hello ;)
+12:32  Lufti_oO: function is_connection_started { return [[ "$2" =~ .*^$1\$.* ]] }
+12:32  Lufti_oO: Bash says it needs a numberical parameter.
+12:32  Lufti_oO: What am I making wrong?
+12:32  erUSUL: Lufti_oO: drop the return
+12:37  Lufti: damn connection :/
+12:41  geirha: That's an odd regex
+12:53  richiefrich: bonsaikitten: how you been
+12:53  richiefrich:  /c
+12:53  bonsaikitten: richiefrich: confused :)
+12:53  richiefrich: bonsaikitten: why is that
+12:54  bonsaikitten: if I knew I wouldn;t be confused, eh?
+12:54  richiefrich: you a man in a womens body, if so i am confused too :P
+12:54  richiefrich: well i hope you will figure it out
+12:56  tktiddle: How do i add one to every number in a file?
+12:57  erUSUL: tktiddle: one number per line? or what/how?
+12:57  richiefrich: tktiddle: you mean a file name
+12:58  richiefrich: oh use sed
+12:58  richiefrich: sed -i 's/^/1/g' file
+12:58  richiefrich: addes 1 to the begging
+12:59  richiefrich: tktiddle: if you mean something else you need to explain further
+13:00  tktiddle: Hi I want to convert lines like 'f 0 3 1' to 'f 1 4 2'
+13:01  richiefrich: tktiddle: lines like?
+13:01  richiefrich: show me one line
+13:02  tktiddle: f 0 3 1
+13:02  richiefrich: i mean if you just wanna convert use vim it does it just the same
+13:02  richiefrich: so the line is  f 0 3 1
+13:02  richiefrich: ?
+13:03  richiefrich: sed -i 's/f 0 3 1 /f 1 4 2/g' file
+13:03  tktiddle: yep i have lots of lines that start with f then have three numbers seperated by a space
+13:03  richiefrich: sed -i 's/f 0 3 1 /f 1 4 2/g' file
+13:03  richiefrich: if thats what you mena
+13:03  richiefrich: i can only gp by what you say
+13:03  tktiddle: errrrm no is there a general rule to add one to a number using sed?
+13:04  richiefrich: tktiddle: sure there is but idk what you mean
+13:04  richiefrich: i need an example
+13:04  richiefrich: show me the full line
+13:04  richiefrich: and what you need ti to be
+13:04  richiefrich: line =  output should be =
+13:05  koala_man: # echo "f 0 3 1 ponies 41 lol 1336" | awk '{for(i=1; i<=NF; i++) if(match($i,"[0-9]+")) $i=$i+1; print;}'
+13:05  evalbot: koala_man: f 1 4 2 ponies 42 lol 1337
+13:05  richiefrich: i like the ponies
+13:06  clyphox: whats the NF mean?
+13:06  tktiddle: http://fpaste.org/Hfc1/
+13:06  tktiddle: My file is 0 indexed and i need it to be 1 indexed if you know what i mean
+13:07  koala_man: clyphox: number of fields
+13:07  richiefrich: tktiddle: so add 1 to every number
+13:07  richiefrich: ?
+13:07  tktiddle: koala_man: thanks
+13:08  clyphox: koala_man: cool sticks
+13:15  Vide: hi, can somebody explain me what this code http://pastebin.com/faBvmWV7 does?
+13:16  Vide: i can't understand the ${#array[@]} part
+13:16  Vide: and the awk part
+13:16  pgas: it's the number of elements in the array
+13:16  Vide: maybe the latter is a little offtopic
+13:16  pgas: awk does something like uniq
+13:16  Vide: pgas: yeah I udnerstood this but i can't find in the manual a reference to iy
+13:16  Vide: i mean, it always says
+13:16  pgas: to what?
+13:16  Vide: that it should be the array name
+13:17  Vide: and not an "array" keyword
+13:17  pgas: array is the name of the varible
+13:17  pgas: yeah it 's wrong
+13:17  Vide: that's the problem
+13:17  Vide: it's not the name
+13:17  Vide: but it works
+13:18  Vide: mmmh
+13:18  pgas: it probably doesn't work too well
+13:18  Vide: or maybe it doesn't.. I always use it with a single element
+13:18  Vide: (it's not my code)
+13:18  Vide: it's part of a post-commit svn hook
+13:18  Vide: probably it does work only with ONE element
+13:19  Vide: cause #array[@] expands always to 0
+13:25  Vide: pgas: just tested, it doesn't work as expected
+13:26  Vide: with the array name instead of "array" it works as expected
+13:37 --- ebraminio1 is now known as ebraminio
+13:45  bzinger: i have a list of arguments(urls) in a file that i want to supply to an command(open command on mac), I tried " cat alist | xargs open -a "google Chrome", but it doesn't seems to work, anyone know why?
+13:50  pgas: xargs doesn't read lines
+13:52  lhunath: sure it does.
+13:52  lhunath: bzinger: it works fine.
+13:53  bzinger: yeah, its working now
+13:53  lhunath: !cat > bzinger
+13:53  greybot: bzinger: cat(1) is used to concatenate multiple files together. It should NOT be used to feed file data to processes. There are far better ways to achieve this. The application might take a file as argument (eg. grep ^foo file); or you might want to use file redirection (eg. read line < file).
+13:53  lhunath: xargs open -a "Google Chrome" < alist
+13:53  bzinger: the problem was in my alist, all the url, doesn't include http://, so google chrome think its a file
+13:54  bzinger: lhunath: I thought cat just for output file contents
+13:54  lhunath: it's a useless process invocation and pipe and subshell.
+13:55  lhunath: it's what 'file redirection' is for.  hence:  command < file
+13:55  pgas: lhunath: well, I meant xargs doesn't do "one line = one argument"
+13:55  bzinger: so what's the general use case of cat ?
+13:55  lhunath: it says it right there in the friggin factoid.
+13:55  lhunath: the first sentence.
+13:56  lhunath: cat file1 file2 file3 file4
+13:56  lhunath: conCATenate file1 file2 file3 file4
+13:56  bzinger: :(
+13:57  lhunath: it's not because half the world uses cat for useless crap that it's somehow recommended to use that idiom
+13:57  bzinger: true, it all make sense now
+13:58  lhunath: one more convert; 90% of unix users to go.
+14:00  bzinger: ilhunath: so what you use for just output file content to standard output?
+14:01  bzinger: i suppose i can use cat :)
+14:03  Bushmills: cp foo /dev/tty  :)     pity that   cp foo -   doesn't do it.
+14:03  pgas: bzinger: though cat can be dangerous for that too ;)
+14:04 --- Unknown[OFF] is now known as Unknown[NF]
+14:04  bzinger: pgas: for output file content to standard output
+14:04  pgas: yes
+14:04  pgas: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=510030
+14:04  bzinger: pgas: how would that be dangerous
+14:05  pgas: see the report ^^
+14:05  pgas: (generally it tends to just mess up a bit your terminal)
+14:05  Riviera: ah cool
+14:05  Riviera: I always wanted to investigate on that 8)
+14:06  bzinger: so what is the best way to do it? more or less
+14:07  pgas: bzinger: I continue to use cat, but yeah more or less are probably safer
+14:07  pgas: we just love nitpicking here ;)
+14:08  Riviera: on the road to excellence!
+14:12  mlangenberg: I have a bash script that calls an external service to send an email. Now I would like to do some rate limiting, so the script just exits when there has already been sent an email in the last 10 minutes.
+14:13  pgas: save a timestamp in a file, compare the timestamp with the current date
+14:14  Riviera: Or just touch a file and use find to see if it finds a file younger than 10 minutes
+14:14  Riviera: or well, forgot if find supports periods smaller than a day :)
+14:15  pgas: if think at least gnu find does, but it's not posix
+14:15  Riviera: damn. :)
+14:15  pgas: though printing time in epoch is also difficult with only posix
+14:17  pgas: # awk 'BEGIN{srand();print srand()}' # cool way, almost posix, but fails on openbsd
+14:17  evalbot: pgas: 1290777439
+14:17  Bushmills: what should happen to mail attempted to get sent within 10 minutes after the last?
+14:17  mlangenberg: Bushmills: should just be ignored.
+14:18  mlangenberg: Bushmills: attempts will be logged elsewhere, but I don't need to be notified every second that a service is unable to start.
+14:18  mlangenberg: I like the touch/find idea Riviera came up with
+14:23  poisonbit: # check(){ old=$(stat --printf='%Y' /tmp/sendstamp); now=$(date +%s); ((  ( now - old ) > 2 )) || return 1; echo "Time elapsed, sending..."; }; send(){ check && touch /tmp/sendstamp ; }; for i in 1 2 3; do send ; sleep 3 ; done
+14:23  evalbot: poisonbit: bash: stat: command not found
+14:23  evalbot: poisonbit: Time elapsed, sending...
+14:23  poisonbit: ah, stat needed
+14:24  poisonbit: stat is not posix (shell), but in C lib etc
+14:25  mlangenberg: With find is it really simple: 'touch mail_sent && mail' if 'find "mail_sent" -mmin 10'.
+14:29  poisonbit: that option should be extension, i don't see it in http://www.opengroup.org/onlinepubs/009695399/utilities/find.html
+14:30  poisonbit: there is a -mtime  n
+14:30  poisonbit: and  -newer  file
+14:32  poisonbit: whay don run a persistent script that sleeps 10 minutes, and send the email, while true ?
+14:32  poisonbit: or a crontab
+14:35  mlangenberg: poisonbit: well it should be send immediately, but with a rate limit so I don't get overrun.
+14:36  poisonbit: ah :)
+14:36  mar77i: is there a standard timeout on read -n 1 ?
+14:36  mlangenberg: Seems that -mmin is an option available on my mac and my debian environment. Yeey
+14:37  pgas: mar77i: only if TMOUT is set
+14:37  poisonbit: If the TMOUT variable is set, its value is the default timeout.
+14:37  poisonbit: (from help read)
+14:38  poisonbit: mlangenberg, I use to code for my environment only too :P
+14:38  mar77i: nope. I have had the situation repeatedly that packer asking [Y/n] wasn't happy with me pressing enter in the past :(
+14:39  poisonbit: mlangenberg, why botter by HPUX if I do not have one at home  :)
+15:16  RenatoSilva: I want to grep xyz but take an ip in the next line and put into a variable, what's the cleanest way?
+15:21  lhunath: while read; do [[ $REPLY = xyz ]] && { read ip; break; }; done < file
+15:25 --- sin__tax is now known as sin_tax
+15:29  mouseclone: I'm trying really hard to get this, and some help would be really great.  I have tried searching, gretcat/greybot tried helping me on Wednesday but I might just be to stupid for this.
+15:30  mouseclone: I'm treat to get a command to out put correctly with some vars but part of the vars have to be wrapped in either "" or "" and not outer parts..
+15:31  twkm: sounds horrible.
+15:31  lhunath: stop right there
+15:31  lhunath: redefine what you want in english; not in terms of implementation.
+15:32  lhunath: putting code and variable names in other variables and then evaluating those other variable values as though they contain bash syntax is badness and should never be done.
+15:32  mouseclone: I want to dynamically build an executable command and have it work.
+15:32  lhunath: why do you think you want this?
+15:33  lhunath: logic is static.  write better logic.
+15:33  mouseclone: because I'm taking an email account, gathering the information from it, deleteing the account and recreating it with the same information that was gathered.
+15:33  lhunath: a program solves a problem.  a program doesn't generate programs that solve problems.
+15:33  lhunath: doesn't sound like you need to generate code to do that.
+15:34  lhunath: gather the information; put the information somewhere; delete the account; recreate the information from storage.
+15:35  massimo_: Hello. Old bash-2.05 allows alias like this:   alias /bin/grep="/bin/egrep"    bash-3.2 does not allow this anymore?
+15:35  mouseclone: what I'm trying to get the script to spit out is -- omaddu -n ''\''test test/kauffmantire/IA="test test" <ttest@kauffmantire.com>="test test" <qqwerqwe@kauffmantire.com>="test test" <qwerqwer@kauffmantire.com>="test test" <qwewe@kauffmantire.com>="test test" <werwer@kauffmantire.com>'\'' -p ttest --class Limited ttest'
+15:36  lhunath: what's with the weirdo quoting?
+15:36  lhunath: '' is the same thing as nothing.
+15:36  mouseclone: don't tell me tell bash..
+15:36  geirha: massimo_: Seems like a pointless alias anyway
+15:37  twkm: not pointless, but fucked up.
+15:37  lhunath: severely so.
+15:37  massimo_: geirha: Not pointless in my case.
+15:37  twkm: force ere mode where bre mode would be expected.  except by massimo_ i presume.
+15:37  lhunath: mouseclone: why do you need the script to spit out code?
+15:37  lhunath: wouldn't you rather it ran that code?
+15:38  lhunath: massimo_: aliases are only useful in interactive shells.
+15:38  lhunath: do you reference commands with full paths in your interactive shell?
+15:39  pgas: alias
+15:39  mouseclone: lhunath: the biggest reason for is that I need to have 'first last/mailnode/IA="first last" <email@domain.com>="first last" <email@domain.com>="first last" <email@domain.com>' -p pass --class limited -- this is so that it will create the account with limited access like it finds when it looks up the account.
+15:41  mouseclone: lhunath: I would rather it run the code. and it does, but trying to put '' around something in a var for it to hold until you call it.
+15:41  rkhshm: i have a file like this http://pastebin.ca/2002931
+15:41  lhunath: mouseclone: stop thinking in quotes.
+15:41  rkhshm: and i want to extract only lines with /usr/bin/ln or /usr/bin/ln -s"
+15:41  mouseclone: it doesn't matter if I stuff it all into a var, or do a omaddu -n $var1 $var2
+15:41  lhunath: mouseclone: think in arguments.
+15:41  lhunath: mouseclone: never leave PEs unquoted.
+15:42  lhunath: !args > mouseclone
+15:42  greybot: mouseclone: Understanding Arguments and Word Splitting: http://mywiki.wooledge.org/Arguments
+15:42  rkhshm: but if i use grep to extrat the lines its failing miserably.. can anyone pls assist me
+15:42  mouseclone: WTF is a PE?
+15:42  lhunath: mouseclone: that article explains all your misconceptions.
+15:42  mouseclone: ok I will go read.. don't mind learning.. I just need to learn.
+15:42  lhunath: PE = parameter expansion.  if 'foo' is a parameter, $foo expands it.
+15:42  mouseclone: will be back if I have more Qs I guess.
+15:43 * mouseclone just frustrated.
+15:43  karthee: rkhshm: grep '\/usr\/bin\/ln' filename
+15:43  lhunath: mouseclone: when you're done, come back to tell me what arguments you need to pass to your omaddu command.
+15:44  lhunath: once you know the arguments, you can start worrying about how to quote them.
+15:44  lhunath: not before.
+15:44  rkhshm: karthee: thank you sir
+15:45  rkhshm: karthee: that pulls in everyting including "ln" and "ln -s" can you pls tell me how i can get then separately. ?
+15:46  lhunath:  / doesn't need to be escaped.
+15:46  karthee: rkhshm: grep '\/usr\/bin\/ln' filename  | grep -v   '\/usr\/bin\/ln  -s'  .. ll give you only  ln  and   grep '\/usr\/bin\/ln -s' filename  will give you only  ln -s
+15:47  lhunath: holy crap
+15:47  karthee: lhunath: yes you are correct ..
+15:47  lhunath: rkhshm: what you need to do is figure out why you don't want ln -s.
+15:47  lhunath: then, you need to convert that WHY into regex.
+15:47  rkhshm: ok
+15:47  lhunath: don't do random crap like exclude arbitrary example 1
+15:48  lhunath: if the WHY is "I want lines that END with /usr/bin/ln", then you want grep '/usr/bin/ln$'
+15:49  rkhshm: karthee: it works but i thik it hangs after the last line!
+15:49  karthee: hangs ?
+15:49  rkhshm: karthee: more like a never ending search.
+15:49  lhunath: !forget why
+15:49  greybot: OK, lhunath
+15:50  rkhshm: i dont get back the prompt!
+15:50  rkhshm: after the search
+15:50  mouseclone: The code I'm working with: http://pastebin.com/QCLpJeVb  -- Where I'm getting my information: http://pastebin.com/Xkep1dpU  -- you know just in case you care to know.
+15:51  lng: hi! how do I filter files from "saved_2010-10-01.log" to "saved_2010-10-07.log"?
+15:51  lhunath: !learn why Trying to solve a problem without first understanding why it happens or what you really want will always yield you a broken result.  Explain the WHY to us (or to yourself) in detail first.
+15:51  greybot: OK, lhunath
+15:51  lhunath: lng: define "filter files"
+15:52  lng: lhunath: the rest should be filtered
+15:52  lhunath: not helping.
+15:52  lng: lhunath: I need files between these dates in filenames
+15:53  lhunath: do you mean, "select all lines from input, beginning with the one that contains saved_2010-10-01.log up to the one that contains saved_2010-10-07.log" ?
+15:53  lng: true
+15:53  lhunath: making sense is so hard.
+15:53  lhunath: use awk.
+15:53  lng: and conditionals?
+15:54  lhunath: awk '/saved_2010-10-01.log/ {a=1} /saved_2010-10-07.log/ {a=0} a { print }'
+15:54  lhunath: maybe
+15:55  geirha: awk '/saved_2010-10-01.log/,/saved_2010-10-07.log/'
+15:55  lhunath: if you don't want to exclude the latter, move the second forward one
+15:55  geirha: sed -n '/saved_2010-10-01.log/,/saved_2010-10-07.log/p'
+15:55  lhunath: or be smart like geirha :-)
+16:12  lng: lhunath: tnx
+16:12  lhunath: !for` > mouseclone
+16:12  greybot: mouseclone: Don't do this: for x in $(command) or `command`. for is used for iterating arguments, not output strings. Instead, use a while read loop: while read line; do ..; done < <(command)
+16:13  lhunath: mouseclone: put quotes around all $...
+16:13  lhunath: at the # Build omaddu step, don't build, just write the command in your script
+16:14  lhunath: omaddu -p "$pass" --class "$class" ...
+16:15  lng: lhunath: what is {a=1} and {a=0} for?
+16:15  lhunath: omaddu -p "$pass" --class "$class" ${swa:+--swa n} ${adcap:+-c admin ${madcap:+-c mboxadmin}}
+16:15  dagni: i have few programs that i need to restart, it's named /etc/init.d/program-server /etc/init.d/program-gateway, etc. i tried /etc/init.d/program-* restart but it doesn't work, is there other way ?
+16:16  lhunath: mouseclone: ^ note how I don't quote ${..:+..}, that's because inside I continue to write arguments.  and $foo's inside should be quoted.
+16:16  lhunath: that's probably one of the only cases in bash where you don't want to quote something.
+16:16  guest_143: dagni: you have to be root, "service program-server restart"
+16:16  lhunath: to make that work, you'll need to have swa='' when it's false and swa='whatevertheheckisntanemptystring' when it's true.
+16:17  dagni: guest_143: you don't get my question..
+16:17  lhunath: lng: assigns a variable.
+16:17  RenatoSilva: what's the clearest way to the the ppp ip?
+16:17  lhunath: dagni: use a loop.
+16:17  lhunath: for script in /etc/init.d/program-*; do "$script" start; done
+16:17  lhunath: RenatoSilva: there is none.
+16:18  dagni: lhunath: yeah but i though there might be a way without the loop, there is no other way than using loop ?
+16:18  lhunath: !myip
+16:18  greybot: http://mywiki.wooledge.org/IpAddress
+16:18  guest_143: dagni: "for P in $LIST; do service $P restart; done"
+16:18  lhunath: dagni: do loops give you hives?
+16:18  lng: lhunath: yes, but is it used?
+16:18  lhunath: guest_143: no!
+16:18  dagni: hehe
+16:18  dagni: ok ok
+16:18  lhunath: !varcap > guest_143
+16:18  greybot: guest_143: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+16:18  lhunath: !quotewhen > guest_143
+16:18  greybot: guest_143: "Double quote" *EVERY* argument that contains whitespace or expansions ("$foo", "$(foo)", "`foo`"). 'Single Quotes' prevent expansions from happening at all. Also quote *, [, ], ? etc. if you don't want bash to expand them into filenames.
+16:19  lhunath: guest_143: multiple elements always go in an array; never a single string of characters that you wordsplit.
+16:19  guest_143: I use upper case always, his request doesn't require program with spaces
+16:20  lhunath: so it's ok to give him crappy code?
+16:20  twkm: guest_143: sounds risky.
+16:20  guest_143: lhunath: what is crappy ?
+16:21  lhunath: wordsplitting unquoted PEs is crappy; as is pathname expanding them/.
+16:21  guest_143: he forms $LIST before the loop
+16:21  guest_143: this list contains only program names without spaces
+16:21  lhunath: and you think that if you give him this crappy code because his case doesn't REQUIRE decent code, that next time he needs to loop values, your crappy example will suit him too?
+16:22  lhunath: decent code take no more effort to write.
+16:23  dagni: guest_143: it is good to have good habits..
+16:24  lhunath: he obviously came here because he doesn't know the first thing about loops; any example he gets will model the loops he writes in the future.
+16:24  lhunath: !loops > on that note
+16:24  greybot: on that note: Loops repeatedly execute a block of code. See http://mywiki.wooledge.org/BashSheet#Loops
+16:24  lng: lhunath: please
+16:24  lhunath: lng: yes, it is used.
+16:25  lhunath: lng: a { print }
+16:25  lhunath: lng: will print if a is not 0.
+16:25  lhunath: lng: geirha's code is prettier.
+16:25  lng: lhunath: interesting
+16:25  lng: yes, thanks
+16:30  lng: how do I add interval to date?
+16:30  guest_143: lhunath: look http://codepad.org/gQqZ2gWW, that's why his case doesn't need quotes
+16:30  lhunath: guest_143: do you really think I know less bash than you?
+16:31  lhunath: guest_143: the fact that the quotes are breaking your code is because you failed to use arrays like I said you should.
+16:31  lhunath: that's a HINT of bash, telling you: FIX YOUR CODE.  And the fix is NOT to remote the quotes.
+16:31  guest_143: lhunath: you have sent me this "!quotewhen > guest_143"
+16:31  lhunath: guest_143: read your backlog.
+16:31  lhunath: 16:19:49          lhunath | guest_143: multiple elements always go in an array; never a single string of characters that you wordsplit.
+16:32  lhunath: and thank the quotes for telling you your code is broken.
+16:32  lhunath: you and dagni would never have known without them.
+16:33  guest_143: lhunath: which code is broken ?
+16:33  lhunath: the part that pretends that the single string "abc def" represents two elements.
+16:34  guest_143: lhunath: so ?
+16:34  lhunath: so, fix it.
+16:34  lhunath: to tell bash that abc def are two elements, you use this syntax:  list=(abc def)
+16:34  lng: how to get "current date - 7 days"?
+16:34  lhunath: to tell bash that abc def are one and the same element, you use this syntax: "abc def"
+16:35  guest_143: lhunath: and how do you iterate the array then ?
+16:35  lhunath: for element in "${list[@]}"
+16:35  lhunath: !arrays > guest_143
+16:35  greybot: guest_143: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+16:35  lhunath: good reference sheet.
+16:35  lhunath: lng: date stuff sucks in bash.  GNU date may help you, if you have it.
+16:36  lhunath: alternatively; depend on an external date tool.
+16:36  lng: lhunath: what is the difference?
+16:36  lhunath: between what?
+16:36  lhunath: or don't use bash.
+16:36  lng: lhunath: I can use PHP...
+16:36  lhunath: sounds good.
+16:36  lng: lhunath: between GNU date and date in Bash?
+16:36  lhunath: just don't embed php in bash.  write it all in PHP
+16:36  lhunath: bash has no date.
+16:37  lng: lhunath: yes
+16:37  lhunath: POSIX defines a date.  GNU added features to it.
+16:37  lng: lhunath: I will use bash in php
+16:37  lhunath: sounds like a bad idea.
+16:37  lng: lhunath: why?
+16:37  lng: for example
+16:37  lhunath: PHP can do more than bash can, and probably faster and better.  there is no reason why you would go back to bash after being in PHP.
+16:37  lng: sort file | uniq -u
+16:38  lng: things like that
+16:38  guest_143: lhunath: http://codepad.org/2kHOJSGf what is the difference ?
+16:38  lng: I think it will consume more resources using PHP
+16:38  lng: nm
+16:39  lhunath: guest_143: every PE you failed to quote is broken.  every PE you quoted is fine.
+16:39  lhunath: guest_143: where "broken" means two things:
+16:39  lhunath: 1.
+16:39  lhunath: !wordsplitting > guest_143
+16:39  greybot: guest_143: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+16:39  lhunath: 2.
+16:39  lhunath: every word in it that looks like a glob that matches filenames will be deleted from your data and replaced by all filenames matching it.
+16:39  lhunath: called pathname expansion.
+16:40  lhunath: lng: really.  considdering you're already firing up PHP for your date stuff, I doubt that.
+16:41  guest_143: lhunath: how to get glob, if I'm controlling it on the forming the variable stage
+16:41  lhunath: if your data contains a character such as *, ?, [ or ], it is a glob.
+16:42  guest_143: lhunath: when I'm forming the variable, I'm controling what the parts consist
+16:42  lhunath: stop pretending your variables are static, known data.  if they were, you wouldn't be putting it in variables.  whenever you expand a variable; do so safely.
+16:43  lhunath: guest_143: give me ONE REASON why the UNSAFE expansion is BETTER than the safe one.
+16:43  lng: lhunath: yup
+16:43  Riviera: guest_143: would you, in a different programming language
+16:43  Riviera: guest_143: do
+16:43  Riviera: guest_143: do_pathname_expansion(split_on_whitespace(variable))
+16:43  lhunath: guest_143: if you can't, stop friggin arguing a moot point.
+16:44  Riviera: guest_143: and call that fine, because the variable would just not contain whitespace and characters special to pathname expansion?
+16:44  guest_143: lhunath: because it's shorter
+16:44  Riviera: ah.
+16:44  Riviera: 8)
+16:44  lhunath: guest_143: you, are an idiot.
+16:44  guest_143: lhunath: no, idiot is only you
+16:45  lng: lhunath: this is easy in PHP: date('Y-m-d', strtotime('-1 week'))
+16:45  Riviera: Fucking bash violates the principle of iconicity. :/
+16:45  lhunath: because it's two bytes shorter, it's preferable.  even though INTERNALLY, you're doing TWO EXTRA OPERATIONS, both of which YOU DO NOT WANT, and both of which could BREAK YOUR CODE.
+16:46  lhunath: if you really think two bytes beats that, yes, you are an idiot.
+16:46  guest_143: lhunath: you variant does same thing but it's more "safer"
+16:46  lhunath: no, my variant does not do pathname expansion or wordsplitting when expanding.
+16:47  guest_143: lhunath: my variant expands and so ?
+16:48  lhunath: guest_143: look, pal, I'm done repeating myself.  if you still care to educate yourself, read everything I already said multiple times again until you get it or ask somebody else in the channel to humor you.
+16:48  Riviera: What a funny world it is that one has to argue with people because one worries about their code. 8)
+16:49  guest_143: lhunath: You thought I don't know that it expands
+16:49  lhunath: of course it friggin expands.  it's a parameter expansion.
+16:49  mouseclone: lhunath: I'm trying to understand what you have written.. though I don't understand your eval of ${swa:+--swa n} and what it does, though none of that is currently working as it is commented out.
+16:50  lhunath: mouseclone: don't say 'eval', I don't eval :-)
+16:50  guest_143: lhunath: the variable is prepared before the loop, so I'm controlling this forming and for expansion and for spaces
+16:50  lhunath: mouseclone: ${var:+stuff} looks at var, if var is empty, it puts nothing there.  if var is not empty it puts stuff there.
+16:51  mouseclone: oh
+16:51  lhunath: so, assuming var is swa, if swa == 1, put -swa n there.  if swa == '', put nothing there.
+16:51  mouseclone: that is easy enough.. I understand the expression now.
+16:51  mouseclone: expression proper word for that?
+16:51  guest_143: lhunath: do you want to know why I'm using upper case ?
+16:51  lhunath: mouseclone: parameter expansion
+16:51  lhunath: !pe > mouseclone
+16:51  greybot: mouseclone: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+16:51  lhunath: the url shows all of them.
+16:52  lhunath: guest_143: because your box doesn't want to listen to you unless you scream at it?
+16:52  guest_143: lhunath: extend your mind
+16:52  lhunath: guest_143: I know your variable is prepared before the loop.  that doesn't mean unsafe code is PREFERABLE to safe code.
+16:53  lhunath: guest_143: because you enjoy the thrill you get from risking overwriting other programs' environment variables?
+16:54  guest_143: lhunath: I can check any varialble for existing
+16:54  lhunath: guest_143: your only arguments for not quoting so far amount to two things:  1. in my silly example, no quotes "work".  2. no quotes is two bytes less.
+16:54  lhunath: 1. not an advantage.
+16:55  guest_143: lhunath: no, your code with arrays looks complicated and it does the same thing
+16:55  lhunath: 2. not worth anything
+16:55  lhunath: guest_143: what's complicated?  the [@] added to the expansion?
+16:55  lhunath: try learning something for a change.
+16:56  lhunath: you add syntax when you need to be able to tell bash something new
+16:57  guest_143: lhunath: you apply quotes and array to control that may be controlled on previous stage
+16:58  guest_143: lhunath: as you know arrays not very good thing, try to pass it to a function
+16:58  lhunath: arguments are strings.
+16:59  guest_143: lhunath: create an array, pass it to a function, let's it print all elements
+17:00  lhunath: # printAll() { for element; do echo "$element"; done; }; array=( "John Doe" Alice ); printAll "${array[@]}"
+17:00  evalbot: lhunath: John Doe
+17:00  evalbot: lhunath: Alice
+17:02  poisonbit: # arr=(a b 'c d'); func(){ printf '[ %s ]' "$@"; }; func "${arr[@]}"
+17:02  evalbot: poisonbit: [ a ][ b ][ c d ]
+17:02  lhunath: guest_143: how does your thought process work when you write new code that uses a list of something?  1. I need a list of something.  2. Can elements in my list ever be made to include whitespace, stars, questionmarks or square brackets?  3a. Yes.  I need to use an array.  3b. No, Woot! I can use bash-lite simple syntax, save bytes on quotes AND be home for dinner, assuming I answered 2. right.
+17:03  lhunath: guest_143: here's my thought process:  1. I need a list of something.  2. I need to use an array.
+17:04  lhunath: I'm always safe.  you're only safe if you picked 3a. or if you picked 3b and never touch your code again and were insightful enough to know in advance all the possible values of your variables (eg. you answered 2. correctly)
+17:05  poisonbit: # sanitize(){ printf '%q\n' "$@"; }; sanitize '*' ': ; ls /etc' '$(ls)'
+17:05  evalbot: poisonbit: \*
+17:05  evalbot: poisonbit: :\ \;\ ls\ /etc
+17:05  evalbot: poisonbit: \$\(ls\)
+17:05 --- zinger is now known as bzinger
+17:06  lhunath: why risk bad or malicious input?  why risk breakage when maintaining code later on?  why introduce the inconsistency?  why make bash do extra work splitting your words and searching for files matching your split words?  to save bytes typing it?
+17:07  lhunath: this isn't just your LIST crap, but also your $element when you echo elements.  your elements do not contain lists of stuff.  there is NO reason to unquote those.
+17:07  lhunath: sorry, you call it P, not element.  because P is nonsense and shorter.
+17:09  lhunath: I should probably get a blog or something and rant there and leave you #bash folk in relative piece. /me signs off
+17:09  k1k0: hi all
+17:10  k1k0: How i include other bash scripts in a script, like PHP include
+17:10  poisonbit: !.
+17:10  poisonbit: !source
+17:10  greybot: ''source <script>'' or ''. <script>'' reads and executes the commands from <script> into the current shell, only one script per invocation the rest is passed as arguments to it
+17:10  poisonbit: k1k0, like this:    . otherscript
+17:11  k1k0: poisonbit thx
+17:11  poisonbit: k1k0, or:    . otherscript  "${arguments[@]}"
+17:11  k1k0: poisonbit very nice thanks so much
+17:11  poisonbit: no problem
+17:11  mouseclone: lhunath: thanks for the help  I think that I finally got it by putting it into a function
+17:12  mouseclone: I wasn't able to use ticks so I had to escape the quotes from the email address names and just wrap that in quotes.
+17:12  k1k0: poisonbit if i put on loop for to include a directory of *.sh scripts. Is this functionaly too
+17:15  poisonbit: yup
+17:15  k1k0: like for $f in `ls *.sh`; do   . $f done
+17:15  Fatal: !ls > k1k0
+17:15  greybot: k1k0: Don't try to parse ls output. http://mywiki.wooledge.org/ParsingLs
+17:15  poisonbit: for file in *.sh; do . "$f"; done
+17:15  poisonbit: for file in *.sh; do . "$file"; done
+17:15  k1k0: poisonbit thx again
+17:15  poisonbit: or:   for file in *.sh; do sh -n "$file" && . "$file"; done
+17:15  poisonbit: sh -n check syntax
+17:15  Fatal: be warned that such a check will fail if the script has extglob syntax in it
+17:15  k1k0: poisonbit thx a l0t :D
+17:15  poisonbit: Fatal, I didn't know about that, can you put a short example ?
+17:15  rkhshm: karthee: this is what I was talking about(trying to avoid) http://pastebin.ca/2002993
+17:16  hendry: i want a random integer between 1-5. What is a good recipe? 0.$RANDOM * 5?
+17:16  rkhshm: why is the output in diffenrt lines.. ?
+17:16  k1k0: poisonbit why sh -n "$file" && . "$file"? check first and add if is cheked ?
+17:17  go|dfish: hendry: inclusive or exclusive?
+17:17  guest_143: lhunath: http://codepad.org/IsP6Pwxv look how it expands
+--- Log closed Sat Nov 27 00:05:28 2010

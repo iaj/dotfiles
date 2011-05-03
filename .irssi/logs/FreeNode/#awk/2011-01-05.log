@@ -1,0 +1,182 @@
+--- Log opened Wed Jan 05 00:00:39 2011
+00:01  cthuluh: 4# awk -F '[:["]' '{ print $2,$(NF-1) }' <<< '[15949:20261358] -A COUNT -o eth1 -p tcp -m tcp --sport 80 --dport 1025:65535 -m state --state RELATED,ESTABLISHED -m comment --comment "srv_WEB-eth1_out"' # zeus, one way to solve your problem
+00:01  shbot: cthuluh: 15949 srv_WEB-eth1_out
+00:05  steve___: zeus: ^^ awk -F'[:["]' '{print $(NF-1)".value",$2}'
+00:06  zeus: cthuluh: mmm it seems ok but it print in wrong order
+00:06  zeus: steve___: WOW !!!
+00:06  steve___: not worth even one !  cthuluh did it all.
+00:07  cthuluh: it assumes all lines end with --comment "foobar", though. if it isn't the case, then the result won't be consistent
+00:07  zeus: i've spent 2 hours without luck and cthuluh and steve___ just a bunch of seconds ... i feel very stupid !! 
+00:09  zeus: cthuluh:  you 're right again !! here is the complete iptables output http://pastebin.com/QaaH4jc3 and it give some error with first lines
+00:12  cthuluh: then you can do something like awk -F '[:["]' '/--comment/ { print $(NF-1)".value",$2; next; }; { print $2 }'
+00:12  cthuluh: if you want to print only the count for lines that don't have a comment
+00:12  cthuluh: (untested)
+00:16  zeus: cthuluh: it works ... 
+00:16  zeus: cthuluh: i do not know if i can ask one more question .... 
+00:17  cthuluh: you just did, indirectly :)
+00:17  zeus: :-)
+00:17  zeus: cthuluh: the second field is the packet count, the first the byte count. how do i have to tweak the field separator to get the byte count ?
+00:17  cthuluh: use $3
+00:18  cthuluh: the field separator is already fine
+00:19  zeus: cthuluh: mmm ... i think no ... it prints "7553346] -A COUNT -o eth1 -p tcp -m tcp --sport 993 --dport 1025"
+00:20  cthuluh: oh, right. try -F '[][:"]'
+00:20  zeus: it should only print 7553346 instead
+00:20  zeus: cthuluh: let's try ... 
+00:21  cthuluh: hmmm, no.
+00:22  zeus: cthuluh: the output for iptables-save -c | grep -e "--comment" | awk -F '[][:"]' '{print $(NF-1)".value",$2}' is ... 
+00:22  zeus: awk: fatal: Unmatched [ or [^: /[][:"]/
+00:22  cthuluh: well, try different combinations, you hould find one that works :P
+00:24  zeus: cthuluh: ok probably i've abused of your disposability
+00:24  zeus: cthuluh: i still have to thank you a million for helping me !! 
+00:25  cthuluh: you're welcome. and no, you didn't abuse of anything, since I haven't done anything since at least three hours :P
+00:26  cthuluh: I'm even not brave enough to test the crappy advices I give you
+00:26  cthuluh: []":[] would probablly work
+00:29  zeus: cthuluh: you made an error writinkg "probably" .... IT WORKS ! ($3) ... thank you again !
+00:30  cthuluh: cool
+--- Log closed Wed Jan 05 06:25:08 2011
+--- Log opened Wed Jan 05 06:25:30 2011
+06:25 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+06:27 --- Channel #awk was synced in 98 seconds
+--- Log closed Wed Jan 05 08:50:20 2011
+--- Log opened Wed Jan 05 08:50:44 2011
+08:50 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+08:52 --- Channel #awk was synced in 94 seconds
+09:22  ritztech: question ... what if in the csv file a field is empty can i somehow insert a tab or something to not mess the rest of the row 
+09:22  ritztech: awk -F , ' {print $7"   "$50"  "$14" } '
+09:22  ritztech: whats happening is if one of the fields on the row is empty it shifts all of them and im left with wacked out data thats hard to read 
+09:23  pgas: you want to align the columns?
+09:23  ritztech: oh haha
+09:23  ritztech: hola again
+09:23  ritztech: yea
+09:23  pgas: use printf to format the way you want
+09:23  ritztech: hmmm sad to say never dealt with the printf ill googlily it
+09:24  pgas: eg, printf "%10s%10s%10s",$7,$50,$14
+09:24  pgas: or "%-10s"
+09:26  SiegeX: what's the deal with needing $1=$1 if you want to change OFS?
+09:26  SiegeX: as in: awk -F, '{$1=$1}1' OFS='\t'
+09:27  pgas: it's a trick to force awk to recompute $0
+09:27  pgas: if you don't do anything awk, as an optimization, leaves $0 as it is
+09:27  ritztech: hmmm
+09:28  SiegeX: i see
+10:05 --- WinstonSmith_ is now known as WinstonSmith
+10:21 --- WinstonSmith_ is now known as WinstonSmith
+10:36  ritztech: so i have this but how do i add all my fields 
+10:36  ritztech:  awk -F , ' {for(i=1;i<=NF;i++){printf "%-20s", $i};printf "\n" } '
+10:37  ritztech: $14"    "$15"     "$16"     "$32"     "$33"    "$34
+10:37  ritztech: im not sure if i replace that somewhere in the {print ?
+10:39  pgas: hmm?
+14:21  oliver1804: how can I test if a string (i.e. 3.5,3,0, 3.A6) is a number?
+14:28  skered: 3.A6 is a number?
+14:28  oliver1804: no
+14:29  oliver1804: o.k., found it $i+0==$i
+14:31  skered: That might not work for some floating point numbers?
+14:31  oliver1804: any suggestion?
+14:32  pgas: I think it should be ok
+14:32  skered: I would find a regex and use match()
+14:32  pgas: you could match it against a regexp, depending on what you expect
+14:33  oliver1804: but I believe in "keep it simple"
+14:33  oliver1804: ;-)
+14:33  pgas: for instance if you only fear letters, you could do $1 !~ /[A-Z]/
+14:34  oliver1804: nevertheless it has to be correct and using a regexp you have to define what a number might be and that is every time a combination of dots and integers and maybe prefixes
+14:35  skered: What about... $i+0 != 0 
+14:35  oliver1804: $1 = 0 ????
+14:35  skered: You'll just have two tests.  That and $i == 0
+14:35  pgas: sure, but do you want to accept 3.6e+8?
+14:36  oliver1804: pgas: no
+14:37  skered: $i + 0 != 0 || $i == 0 { #is a number } 
+14:37  pgas: 4# echo 3.6e+8 | awk '$1+0==$1'
+14:37  shbot: pgas: 3.6e+8
+14:37  pgas: so you need a regexp ;)
+14:37  oliver1804: thx you crazy guys :-)
+14:41  skered: So awk will convert "3a" to 3?
+14:42  pgas: it depends :D
+14:43  skered: I think I've ran in to this before.. depending on the platform's atoi()
+14:43  pgas: the conversion rules are a complex, have a look at the gnu awk manual
+14:43  pgas: skered: yes, but it depends if awk want to convert it to a number or not
+14:43  skered: atof or atol etc...
+14:43  skered: Gotcha
+14:45  pgas: ie if $1 = 3a,  $1==3 is false but $1+0==3 is true but $1+0==$1 is false...
+14:45  waldner: the rough rule is "if it looks like a number, then it's a number", and that includes scientific notation too
+14:52  waldner: (though it would be interesting to know how awk itself decides that something looks like a number)
+14:59  skered: That's what I was wondering
+15:00  skered: Why they went that route.. Is scinot the only type of number in awk that has a letter in it?
+15:01  skered: Someone get A,W,or K on the line. 
+15:01  waldner: there was a thread about that on c.l.a. some time ago IIRC
+15:01  waldner: about NaN or so
+15:02  oliver1804: if($i !~ /^[0-9]+[.]?[0-9]*$/) - there is no .[0-9]+
+15:04  pgas: "3." is ok?
+15:04  oliver1804: yes
+15:04  skered: What about +/- numbers?
+15:05  oliver1804: not needed too (despite what I told before)
+15:06  oliver1804: such a "simple" problem indeed semms to be really complex
+15:06  oliver1804: s/semms/seems/
+15:07  skered: You could always try python
+15:08  oliver1804: thx but I'm just a programmer/scripter accidentally and not very often
+15:08  waldner: 4# echo '+inf' | awk '$0+0 == $0'
+15:08  shbot: waldner: no output
+15:08  waldner: hm, my gawk prints it
+15:08  pgas: well it's not really complex, it's just that we all need something a bit different :D
+15:08  waldner: 4# awk --version
+15:08  shbot: waldner: GNU Awk 3.1.5
+15:08  shbot: waldner: Copyright (C) 1989, 1991-2005 Free Software Foundation.
+15:08  shbot: waldner: etc... ( http://pastebin.com/6iqaykVL )
+15:15  waldner: http://groups.google.com/group/comp.lang.awk/browse_frm/thread/f6f3d7b32cb532d8#
+15:15  waldner: that's where it was discussed
+15:28  skered: Google should use their GMail spam filtering with Google Groups 
+15:30  pgas: or at least provide an option for activating it
+15:48  oliver1804: pgas & skered: the interesting part (and a little else) can be found here http://eugeneciurana.com/pastebin/pastebin.php?show=43709 - do you have any suggestions for simplification?
+15:52  waldner: what's the FS there?
+15:52  oliver1804: \t
+15:53  oliver1804: but that is only default and can be changed
+15:53  waldner: so why not do gsub(/\t/,",") then just concatenate $0?
+15:53  waldner: (assuming OFS is \t as well)
+15:54  waldner: if FS is \t, you can avoid the test for [[:blank:]] and just test for spaces
+15:56  waldner: also I don't think you need the other if in the else
+15:57  waldner: as at that point it can only be an empty field anyway
+15:57  oliver1804: replaced [[:blank:]] with one space - works fine
+16:00  oliver1804: deleted the "if in else" works fine too
+16:06  oliver1804: changed it to http://eugeneciurana.com/pastebin/pastebin.php?show=43710
+16:06  oliver1804: thx to waldner 
+16:06  oliver1804: very "handy"
+16:07  waldner: where do you turn tabs to commas?
+16:07  oliver1804: odbc -F ,
+16:08  waldner: what does that do?
+16:08  waldner: ah
+16:08  waldner: so you get data with commans as input
+16:08  waldner: *commas
+16:08  oliver1804: yes: http://www.spinellis.gr/sw/outwit/
+16:08  oliver1804: many thx to this man
+16:09  waldner: then you still need to do OFS="," though
+16:10  oliver1804: already done - the real script has ~260 lines
+16:11  oliver1804: I will change other parts - thx to you
+16:11  waldner: np
+16:14 --- Geronimo_ is now known as Geronimo
+16:37  nze: i have a csv file and i want to replace numbers in some fields by words, like "3;10;" -> "foo;10"
+16:38  gnubien: awk might work
+16:43  gnubien: nze: echo "1;2;3;10;11;12" |awk -F';' 'sub(/3;10/, "foo;10"){print}'  #prints: 1;2;foo;10;11;12
+16:44  pgas: $1="foo"
+16:44  pgas: awk -F\; -v OFS=\; '{$1="foo";print}'
+17:03  oliver1804: waldner: how can I put line 4-12 (http://eugeneciurana.com/pastebin/pastebin.php?show=43710) into a udf so that the for statement works with $0 and , as FS?
+17:04  oliver1804: s/udf/user defined function/
+17:05  oliver1804: and returns the modified $0?
+17:19  waldner: if you want a function-specific FS, use split() instead
+17:19  waldner: but not sure I understand what you want
+17:20  oliver1804: I want the whole $0 processed by a function I can reuse for similar problems
+17:21  waldner: $0 is a global variable, so just put the code in a function and it will work
+17:21  waldner: it will use whatever FS etc. is active when you call it
+17:24  oliver1804: waldner: o.k. my mistake was the use of return $0 at the end of the udf
+17:25  waldner: you don't need it
+17:25  waldner: or if you do, just call it with $0 = function()
+17:25  waldner: so it reassigns it back to $0, but as I said it's not needed
+--- Log closed Wed Jan 05 18:27:29 2011
+--- Log opened Wed Jan 05 18:32:39 2011
+18:32 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+18:34 --- Channel #awk was synced in 95 seconds
+18:57  SiegeX: 4# echo "123711184642,3583090366663629,0036f920012437d4" | awk -F, -v OFS=, '{$3=substr(gensub(/(.)(.)/,"\\2\\1","g",$3),3)}1'
+18:57  shbot: SiegeX: 123711184642,3583090366663629,639f021042734d
+18:57  SiegeX: 4# echo "123711184642,3583090366663629,0036f920012437d4" | awk -F, '{$3=substr(gensub(/(.)(.)/,"\\2\\1","g",$3),3)}1' OFS=,
+18:58  shbot: SiegeX: 123711184642,3583090366663629,639f021042734d
+--- Log closed Wed Jan 05 19:29:13 2011
+--- Log opened Wed Jan 05 19:29:23 2011
+19:29 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+--- Log closed Wed Jan 05 19:33:06 2011

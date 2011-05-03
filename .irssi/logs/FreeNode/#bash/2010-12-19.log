@@ -1,0 +1,408 @@
+--- Log opened Sun Dec 19 02:02:59 2010
+02:02 --- Users 514 nicks [0 ops, 0 halfops, 0 voices, 514 normal]
+02:04 --- Channel #bash was synced in 100 seconds
+--- Log closed Sun Dec 19 10:12:26 2010
+--- Log opened Sun Dec 19 14:47:17 2010
+14:47 --- Users 524 nicks [0 ops, 0 halfops, 0 voices, 524 normal]
+14:48 --- Channel #bash was synced in 100 seconds
+14:50  trone: jetole: I'm reading. But I don't understand why the while is lost.
+14:51  jetole: trone: you know it's lost and not paused?
+14:51  Bushmills: trone:   do   ^Z,  then execute  bg
+14:51  trone: jetole: when I recover the line with fg, I recover just the netcat...
+14:52  Bushmills: or   run whole command in bg, using &
+14:52  jetole: trone: if it's lost, perhaps because while is a bash builtin and I'm not certain how bash will handle it's loop clauses with jobs so perhaps run your job in a subshell: (while true; do nc -l -p 5000; done)
+14:52  jetole: trone: those paranthesis are part of the command
+14:53  trone: Bushmills: My problem is not recover the while, but understand while ^Z breake the while … and ^C don't. :)
+14:53  trone: jetole: yep, I thought a sort of subshell... now I try the ().
+14:53  Bushmills: proably also saying "job stopped" the moment you press ^Z
+14:53  jetole: trone: ^C will break the while if passed to the loop but if you press it once while netcat is running and idling then you just sent a ctrl+c to netcat and not bash
+14:54  trone: jetole: I've supposed a sort of "instance" internal to bash that run child process and built-in constructs in different manner... so ^Z saves just the process.
+14:54  jetole: bash then goes through the loop again and runs netcat again. hold down ctrl+c and the loop will exit
+14:54  trone: jetole: right. (About ^C on netcat and not on while. :)
+14:54  jetole: trone: I don't know for sure. Thats why I suggested you try it
+14:54 --- nohk_ is now known as nohk
+14:57  trone: jetole: interesting. the (while … ) things work. fg recover ALL the string. And this is ok.
+15:02 --- nohk_ is now known as nohk
+--- Log closed Sun Dec 19 15:12:43 2010
+--- Log opened Sun Dec 19 15:33:09 2010
+15:33 --- Users 514 nicks [0 ops, 0 halfops, 0 voices, 514 normal]
+15:34 --- Channel #bash was synced in 100 seconds
+--- Log closed Sun Dec 19 15:55:32 2010
+--- Log opened Sun Dec 19 16:01:18 2010
+16:01 --- Users 519 nicks [0 ops, 0 halfops, 0 voices, 519 normal]
+16:04 --- Channel #bash was synced in 217 seconds
+16:19  apineda: hi
+16:20  pgas: yo
+16:20  morzain3: hi :-P
+16:22  apineda: i want to make a simple script to adjust two alsa DAC controllers at once
+16:23  apineda: so I wrote #!/bin/bash   amixer set DAC,0 $1%   amixer set DAC,1 $1%
+16:23  apineda: the tabs are line breaks
+16:23  geirha: Looks right
+16:24  morzain3: where I work there are tons of servers and many of them run CGI/suexec, so I came up with a 1 liner for adding up the memory usage or cpu usage of each user, seems to work fine but I don't script too much so was curious if you guys had any suggestions for improvement or if there was a simpler way to do it.
+16:24  apineda: it's giving me permission denied when I try to execute it
+16:24  morzain3: lwtmpvar=;for each in `ps aux | grep -v COMMAND | awk '{print $1}' | sort | uniq`; do lwtmpvar="$lwtmpvar\n`ps aux | egrep ^$each | awk 'BEGIN{total=0};{total += $4};END{print total, $1}'`"; done; echo -e $lwtmpvar | grep -v ^$ | sort -rn | head
+16:24  morzain3: is it executable? chmod +x the file
+16:25  geirha: !ps > morzain3
+16:25  apineda: sounds obvious TT ill check
+16:25  greybot: morzain3: Don't use ps(1) in scripts -- see http://mywiki.wooledge.org/ProcessManagement instead.
+16:26  apineda: yeah that was the problem tehehe. Well now what's the proper way to make it "globally accessible"
+16:27  geirha: apineda: Put it in /usr/local/bin
+16:27  morzain3: geirha, that page seems to be about finding process ID's with ps, is there some reason to not add up the memory usage listed in the ps? is there a better way to find a users current memory usage?
+16:27  morzain3: or did I just not read far enough?
+16:27  geirha: E.g. /usr/local/bin/myscript  Then you can run it with just  myscript
+16:28  apineda: can a bash script read the up and down keys? ie. a continous process until the 'q' key is hit?
+16:28  apineda: thanks geirha
+16:28  geirha: morzain3: Well, ps can show you the memory user for all processes of a certain user. Should be better than all that grep|awk|sort stuff
+16:28  geirha: morzain3: And yes, I might have triggered that !ps factoid a little too fast.
+16:29  pgas: apineda: hmm, what?
+16:29  morzain3: the point of the script is to go onto a shared server with say 50 users and find out what user is causing problems quickly, no worries I understand :-)
+16:29  h0ho: how would i display " " in an echo statement?
+16:29  pgas: echo " "
+16:30  pgas: h0ho: or do you want the quotes in the output?
+16:30  geirha: morzain3: Well, maybe have ps only output username and mem usage, then use an associative array in awk.
+16:30  h0ho: pgas: as in echo " creating directory in "/bin/" ...done"
+16:30  morzain3: associate array in awk, a googling I shall go, thanks
+16:30  pgas: echo '" "'
+16:31  pgas: or echo  " goo \"  \ " bar"
+16:31  h0ho: pgas thanks :D
+16:31  geirha: morzain3: If you get ps to output lines with "username  0.2",  then   awk '{a[$1]+=$2} END {for (i in a) print a[i],i}'
+16:33  geirha: morzain3: You'll find good documentation for awk in /topic #awk
+16:34  morzain3: right on, just knowing that there may be a better way to do it was all I was interested in
+16:34  morzain3: I'll do the research now :-D
+16:35  geirha: morzain3: grep | awk  is always pointless btw, because awk can do anything grep can.
+16:36  morzain3: another good point, I'll work on taking that out as well
+16:36 --- emma is now known as em
+16:36  geirha: morzain3: Well, when you customize the output of ps, you'll find you can omit the header, so those greps won't be needed anymore.
+16:37  morzain3: yeah I never really read the man page for ps, I just used ps aux and ps faux without putting much thought into it, so once you mentioned getting ps to output the lines like that I decided to go through and read it
+16:37  geirha: morzain3: good idea :)
+16:54  edgy: Hi, where can I find exit codes like 127 means command not found
+16:54  morzain3: isn't that based on the program it self? they can exit with any code they want and it can mean whatever the programmer wanted it to mean, I think anyways
+16:56  twkm: edgy: ''man bash''.
+16:57  edgy: twkm: I couldn't see a list there
+16:58  twkm: i was thinking you might read it.
+16:59  geirha: edgy: See EXIT STATUS in man bash
+17:01  edgy: geirha: thanks a lot so it's just those simple number, I mean what about 124 e.g?
+17:02  geirha: edgy: 124 means it failed
+17:02  tim: hi, is there any glob rule, that matches all file names, that to not start with a specific string?
+17:03  rocktop: grep -c count only if the pattern matches in the line but what about when I have multi patterns matches in same line ?
+17:03  edgy: geirha: sorry I mean 123 e.g
+17:03  geirha: edgy: 123 means it failed
+17:03  edgy: geirha: how come? it's not listed on the man page
+17:04  erUSUL: !extglob
+17:04  greybot: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+17:04  erUSUL: tim: ^
+17:04  geirha: edgy: Everything but 0 means it failed
+17:04  geirha: edgy: bash defines some specific numbers to mean some specific errors.
+17:04  edgy: geirha: I know but I want to know why failed. I thought there would be a list for all numbers from 1-whatever for each command
+17:05  tim: erUSUL: afaict, ^ just works for single characters :(
+17:05  erUSUL: rocktop: crude aproach « tr ' ' '\n' < infile | grep -c ... »
+17:05  edgy: geirha: so saying 127 or 124 means something but not mention 122 is a little strange to me
+17:05  erUSUL: tim: i meant you to see the factoid above
+17:05  erUSUL: !extglob > tim
+17:05  greybot: tim: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+17:07  geirha: edgy: Well, have bash ever given you 124?
+17:07  rocktop: erUSUL, when I have a file with a single line look like   "blabla ..... blabla ..... blabla ..... blabla" I have grep -c "blabla" file   give  1 in result , how to get 4 in the result
+17:08  erUSUL: rocktop: just told you
+17:08  erUSUL: # echo "blabla ..... blabla ..... blabla ..... blabla" | tr ' ' '\n' | grep -c blabla
+17:08  evalbot: erUSUL: 4
+17:10  geirha: # echo "blabla ..... blabla ..... blabla ..... blabla" | awk -Fblabla '{print NF-1}'
+17:10  evalbot: geirha: 4
+17:10  rocktop: erUSUL, here I need to replace every space to the new line to have this result is there other option without replacing spaces because I will have here millions of lines
+17:11  geirha: # echo "blabla ..... blabla ..... blabla ..... blabla" | awk -Fblabla '{sum+=NF-1} END{print sum}'
+17:11  erUSUL: geirha: well you can try geirha aproach (expanding it to sum the NF for each line ) ...
+17:11  evalbot: geirha: 4
+17:14  rocktop: erUSUL,geirha:  thank you
+17:15  erUSUL: i am courios on what would be faster ... tr + grep or (g)awk
+17:16  geirha: # echo "blabla ..... blabla ..... blabla ..... blabla" | awk -Fblabla '{sum+=NF} END{print sum-NR}'
+17:16  evalbot: geirha: 4
+17:16  geirha: Slightly more efficient
+17:28  wqapol: /join ubuntu
+17:53 --- Unknown[NF] is now known as Unknown[OFF]
+17:53  apineda: I'm having trouble getting the key up, key down codes :S
+17:54  apineda: With the read out put it's giving me ^[[A and ^[[B
+17:54  apineda: but when i try to test it eg. $key = "^[[A" it doesnt succeed
+17:55  trash: apineda: What are you trying to do?
+17:57  apineda: i just wrote a script to adjust 2 amixer controls for me, it works using any characte rkey eg. w, or e, but I want the up and down keys to adjust them for me
+17:58  zplinux: hi all
+17:59  zplinux: say, I want to run a script up on boot one time to install a pc, where SHOULD I do that?
+17:59  trash: apineda: read -r
+17:59  trash: $ read -r foo
+17:59  trash: ^[[A
+17:59  trash: $ [[ $foo = ^[[A ]]; echo $?
+17:59  trash: 0
+17:59  zplinux: I am now using a line in cron, then removing it in the script
+17:59  trash: You need to press ^v  and then up to reproduce the key.
+17:59  zplinux: this way it runs in the background
+17:59  gnubien: apineda: amixer -q sset Master,0 toggle
+18:00  gnubien: apineda: toggle means turn it off if it is on, and on if it is off
+18:00 --- Unknown[OFF] is now known as Unknown[NF]
+18:01  edgy: geirha: no no it didn't return 124 for me but may be for some one else. I am sorry if my question is not clear but still I am confused. is the exit status on the man page the only status code?
+--- Log closed Sun Dec 19 18:06:09 2010
+--- Log opened Sun Dec 19 18:11:31 2010
+18:11 --- Users 528 nicks [0 ops, 0 halfops, 0 voices, 528 normal]
+18:11  edgy: geirha: in the book I read now I have this example: $ echo -e 'One quarter = \0274'
+18:11  edgy: One quarter = �
+18:12  edgy: geirha: One quarter = ¼
+18:12  edgy: geirha: but that quarter comes as that question mark when I execute it, what's wrong here please
+18:13 --- Channel #bash was synced in 102 seconds
+18:15  geirha: edgy: What character \0274 is depends on the character encoding.
+18:15  edgy: geirha: what can I make to make it work?
+18:15  geirha: You probaby have UTF-8, and \0274 is probably quarter in latin1 or something.
+18:17  geirha: edgy: echo ¼
+18:18  apineda: nice it's working. I had to read 3 characters at a time thats what the problem was. read -q -n3 so i have to hit q 3 times to quit >< but its good for now
+18:24  edgy: geirha: i have utf yes but \0xxx means the octal code of the character so there is no reason I cannot do \011 for a tab e.g
+18:24  geirha: edgy: The ascii characters are the same in all encodings, but everything above 127 differ
+18:25  geirha: 01777 in octal
+18:26  geirha: 4# printf ¼|od -An -to1
+18:26  shbot: geirha:  302 274
+18:27  geirha: err s/01777/0177/
+18:28  edgy: geirha: sorry i didn't understand, you mean echo -e '\0177' should work?
+18:29  nemo: Ok. This is more an ubuntu question, but also a bash question... ubuntu has this autocomplete they do, that I find really annoying
+18:29  nemo: in that it does it by file extension, so files without extensions or files it doesn't recognise, fail
+18:29  nemo: like, mplayer can't tab complete to play a gif
+18:30  geirha: edgy: work how?
+18:31  geirha: nemo: Yes, that ubuntu bash_completion crap is madness.
+18:31  nemo: geirha: I agree. is there a way to turn that shit off?
+18:31  edgy: geirha: by work I mean printed. I want to print the quarter by its octal code not the character directly, is this doable?
+18:31  nemo: I have some vague idea of bash completion scripts
+18:31  nemo: but not too sure where to look
+18:31  nemo: the ssh/scp stuff, now that's cool
+18:32  geirha: nemo: edit your ~/.bashrc and have it not source /etc/bash_completion
+18:32  nemo: aw
+18:32  nemo: I'd kinda like to keep scp :)
+18:32  nemo: I assume that's in there
+18:32 --- PhilipPhilip is now known as PythonBoy
+18:32  edgy: nemo, geirha: isn't it just by removing bash-completion package
+18:32  nemo: but I guess that's better than perpetual irritation
+18:32  nemo: edgy: I'd just as soon erase/comment out the file extension nonsense
+18:32  nemo: if it lets me keep scp completion
+18:33  geirha: nemo: If you can find the code that does the ssh/scp completion, you can just copy that into your .bashrc
+18:33  nemo: m'k
+18:33  SiegeX: !$*
+18:33  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+18:58  gregj: hi folks
+18:59  gregj: I'm sure this must be asked few times here a day, but I couldn't find an answer
+18:59  gregj: if I have EXE="/opt/foo/bar/myexe.exe param1 param2 param3" basename $EXE will give me the exe with params. What would be the easiest way to get rid of the params and just leave the exe's name in ?
+19:01  geirha: Uhm. Why would you have a command with arguments in a string anyway?
+19:01  gregj: yup
+19:01  gregj: basically I have a core file, gdb will give me back the exe name with arguments it was run att. But I want it without them
+19:02  gregj: and have no idea how to do it neatly in bash
+19:02 --- arpegius_ is now known as arpegius
+19:02  geirha: read -r command _ < <(gdb ...)
+19:02  geirha: !faq 1
+19:02  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+19:03  gregj: filename!
+19:03  geirha: echo "${command##*/}"
+19:04  geirha: !faq 100
+19:04  greybot: http://mywiki.wooledge.org/BashFAQ/100 -- How do I do string manipulations in bash?
+19:04  gregj: that still leaves in all the params which is what I want to get rid of
+19:04  geirha: No it doesn't. The read filters those out
+19:05  geirha: assuming, of course, the path does not contain any whitespace
+19:05  gregj: it filters out path (removes anything until the last /
+19:05  geirha: # read -r command _ < <(echo '/foo/bar/myexe bla bla'); echo "$command"
+19:05  evalbot: geirha: /foo/bar/myexe
+19:05  gregj: which out of my EXE="/opt/foo/bar/myexe.exe param1 param2 param3" leaves me with "myexe.exe param 1 param2 param3"
+19:05  geirha: # read -r command _ < <(echo '/foo/bar/myexe bla bla'); echo "${command##*/}"
+19:05  evalbot: geirha: myexe
+19:06  gregj: ok
+19:06  gregj: thx
+19:07  Jemt: Hi. I'm expeirencing an odd problem. 'read -n1' works from the command line, but not in shell scripts. I'm using Ubuntu Linux. Can someone tell me why ?
+19:08  geirha: Jemt: It works just as well in a script as in an interactive shell. There's something else that causes an issue.
+19:08  Jemt: geirha: There is nothing else in the script, except this line:   #!/bin/bash
+19:08  Jemt: I'm executing the script like this:   sh script.sh
+19:08  geirha: !sh
+19:08  greybot: sh is the POSIX or Bourne shell, not bash. Even if sh is a symlink to bash, running a script under 'sh' (either by typing 'sh myscript' or putting '#!/bin/sh' at the top) *disables* many bash features. See http://mywiki.wooledge.org/BashGuide/Practices#Choose_Your_Shell
+19:09  Jemt: Oh!
+19:09  geirha: !.sh
+19:09  greybot: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+19:09  Jemt: Glad you pointed that out to me
+19:10  jifli: is there anyway to get rid of the variables charge_now and charge_full without using cat? http://paste2.org/p/1151157
+19:10  jifli: (also, don't laugh at my wierd ifelse ladder :P )
+19:14  peterrooney: That factoid does not explain why it is retarded.  Why is it retarded?
+19:15  poisonbit: peterrooney, i guess that it means "sh is not bash, don't put .doc to an excel"
+19:16  peterrooney: poisonbit: it hardly seems that drastic - knowing I'm dealing with a shell script (as opposed to a perl script) tells me more than knowing if it's bash or csh
+19:17  geirha: jifli: I don't understand the question.
+19:17  geirha: peterrooney: Why would you want an extension at all?
+19:17  jifli: geirha: if you look in the first commented line after the first level if, I don't need the variables charge_now and charge_full to calculate percentCharge, but if I avoid using cat, I seem to have to have the variables charge_now and charge_full
+19:18  geirha: Why would it matter whether it is a python script or a bash script or a compiled C-program, as long as it does what it's intended to do?
+19:18  jifli: geirha: idk, I just wanted it to be neater :P
+19:18  edgy: x=1; echo $(($x+1)); echo $(($x+1)) // I expected to have 3! are these two increments?
+19:19  igli: echo $((++x))
+19:19  geirha: jifli: I'd do it the way you're doing it now, but you can do $(( $(</sys/.../charge_now)*100 ...
+19:19  jifli: geirha: oh ew, that's disgusting syntax :/ okay, thanks
+19:20  geirha: edgy: $((x++))
+19:20  igli: well he's printing the incremented value
+19:20  geirha: edgy: With $(($x++)) it first repalaces $x with its value, then it tries to do $((1++))
+19:20  poisonbit: edgy x="$(($x+1))" increments x (as $((x++)), but echo $(($x+1))" does not change x value
+19:20  grop: x=1; ((x++)); ((x++)); echo $x
+19:21  igli: !$(( > edgy
+19:21  greybot: edgy: $((...)) is an arithmetic substitution. After doing the arithmetic, the whole thing is replaced by the value of the expression. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+19:21  geirha: Oh, damn, I misread it.
+19:22  geirha: jifli: You should do (( var > 20 ))  instead of [[ $var -gt 20 ]]
+19:22  geirha: !tests > jifli
+19:22  greybot: jifli: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+19:22  jifli: geirha: hm yeah
+19:24  jifli: calling bc is really slow - removing that line made it 10x faster :o
+19:25  edgy: thanks all, igli that link is great
+19:25  igli: yw edgy :)
+19:26  edgy: grop: aha! nice way to do it
+19:27  geirha: jifli: Yeah, and it doesn't look like you need much precision anyway.
+19:47  jifli: btw, if anybody was wondering why my bash script from about 12 hours ago wasn't exiting after forking, it was because i used a   command1 && command2 &  construct, so I think bash was waiting for command2 to exit to evaluate the value of the whole thing, even though I didn't use the result.
+20:48  edgy: Hi, my docs says: The print $(( ... )) combination will print the answer to standard output. the (( ... )) will require you to echo $z for you to see the value. // Is this true?
+20:52  ferret: Sounds like total garbage
+20:55  edgy: ferret: this is ibm course btw ;)
+20:56  ferret: There's no command called print
+20:56  edgy: ferret: print is in ksh
+20:56  ferret: Also it is trying to explain the difference very poorly
+20:57  ferret: (( ... )) is a command, it doesn't print anything.  It potentially changes the values of some variables andsets an exit code
+20:57  ferret: $(( )) is not a command, and so instead of setting an exit code, it is replaced by the value
+20:58  ferret: As if it were a variable
+20:59  ferret: actually, the exit code bit is a bit different from that
+21:00  edgy: ferret: I am rereading what you say ...
+21:00  ferret: Basically, use (( ... )) if you want to do arithmetic and put the result in a variable OR to do boolean checking on integers; and use $(( ... )) if you are going to use an arithmetic result right away
+21:01  ferret: remembering that (( ... )) is a whole command and $(( ... )) is usually an argument to another command
+21:01  ferret: e.g. echo
+21:04  zumbi: hi! is it possible to do something like: [ -f $dir/*.[foo|bar] ] && echo File exists; I think [foo|bar] is wrong, is there an alternative?
+21:05  geirha: Not with [, but with [[ and extglob, you can.
+--- Log closed Sun Dec 19 21:08:29 2010
+--- Log opened Sun Dec 19 21:18:52 2010
+21:18 --- Users 535 nicks [0 ops, 0 halfops, 0 voices, 535 normal]
+21:19  PythonBoy: which operator to get somethin got run in the background ? &?
+21:19  geirha: !&
+21:19  greybot: If you put the control operator & at the end of a command, e.g. ''command args &'', the shell executes the command in the background in a subshell. The shell does not wait for the command to finish, and the return status is 0. Pid of the last backgrounded command is available via the special variable $!
+21:19  PythonBoy: Thanks geirha
+21:20 --- Channel #bash was synced in 103 seconds
+21:21  maxagaz: hi
+21:22  maxagaz: my boss would like me to write a security check bash script for desktop computers, to check open ports and things like that, do you some existing scripts I could begin with ?
+21:23  mindrape: maxagaz http://www.lmgtfy.com/?q=bash+script+security+check+desktop+open+ports
+21:24  maxagaz: mindrape, it's not only open ports actually
+21:24  mindrape: 6th result maxagz...
+21:25  zumbi: if I use background with my script (which uses pid, wait, $! internally) goes into a Stopped state, which could be the reason and how to avoid it?
+21:25  mindrape: it was 1 of your input criteria.  that is how you write a google search query.  Sometimes you dont want to list every input parameter.  Listing a few will allow you to quickly filter out billions of records that would not be relevant
+21:35  craiggles: hey guys, is there a quick and easy way to get the length of *.mp3
+21:39  geirha: The number of mp3 files?
+21:39  geirha: shopt -s nullglob; f=(*.mp3); echo "${#f[@]}"
+21:39  craiggles: cheers.-
+21:40  geirha: add dotglob to that shopt if you also want files starting with dot considered.
+21:40  craiggles: thanks.
+21:46  craiggles: geirha: i did that and it worked, and then tried again but without the shopt part, but now mpg123 isn't working, when i mpg123 <filename> i get file access error, and when i mpg123 <letter><tab> nothing happens except it shows all the mp3 files, any idea why?
+21:46  craiggles: sorry totally ignore that, had another terminal that i was using mpg123 with (wasn't using it at the time) but it works now.
+21:57 --- PythonBoy is now known as I_Like_this_comp
+22:00 --- I_Like_this_comp is now known as PhilipPhilip
+22:02  peleg: not sure it's the right place to ask: I am looking for a nice script to view/print diffs. Meld can compare files, but cannot (AFAIK) read a diff output and just print it nicely. Ideas?
+22:03  peleg: It's part of a script I am making that in the end prints nice DVIs/PDFs (or something) with the diff output.
+22:09  geirha: peleg: Don't know of any. Try the channel for your OS.
+22:09  peleg: geirha, thanks, I'll try.
+22:12 --- salvin_ is now known as salvin
+22:12  kmiksi: hallo
+22:13  kmiksi: someone can help me?
+22:13  kmiksi: I need to see file properties in bash
+22:14  kmiksi: I need to count number of pages of pdf file, and I dont know how to do this
+22:15  geirha: kmiksi: You need to find a utility that can output that information. Ask the channel for your OS for that.
+22:16 --- extor is now known as exTor
+22:16 --- exTor is now known as ExtOr
+22:21  DrJ: I want to make a command script ... that does: cat log <ip> | grep -v stuff | grep -v stuff
+22:22  DrJ: how would I make it so I can name that like showlog and make it work like this
+22:22  DrJ: showlog 123.123.123.123
+22:22  DrJ: so that IP feeds into the <ip>
+22:24  geirha: !guide > DrJ
+22:24  greybot: DrJ: http://mywiki.wooledge.org/BashGuide
+22:24  qubit: DrJ: write a function into your bashrc
+22:24  qubit: or put a script somewhere in $PATH
+22:24  DrJ: nah
+22:24  DrJ: I found what I want
+22:24  DrJ: arguments
+22:24  DrJ: $1
+22:24  DrJ: it looks like
+22:24  qubit: o.O
+22:25  qubit: you need a function or a script to use arguments...
+22:25  DrJ: yers
+22:25  DrJ: *yes
+22:25  DrJ: that is what I'm writing
+22:25  DrJ: a script
+22:25  k[t: meet code of a bored man: http://sprunge.us/HcNc
+22:26  DrJ: yay, I got it working
+22:26  DrJ: that was easy enough
+22:28  agentgasmask: How can I see print only the numbers in a string, in the order thy are in in the string?
+22:28  yitz_: td -dc '0-9'
+22:29  yitz_: # str="1a2b3c" ; printf "%s\n" "${str//[^[:digit:]]}"
+22:29  evalbot: yitz_: 123
+22:29  agentgasmask: what package is td in? I don't have it on ubuntu.
+22:30  qubit: i think he meant tr
+22:31  agentgasmask: oh, I'll try that.
+22:31  yitz_: Yeah, tr from coreutils. The second approach is pure bash and doesn't even need tr
+22:31  qubit: though his second method is a pure-bash implementation
+22:32  yitz_: I recommend the pure-bash approach
+22:32  agentgasmask: this is just a small script that is running on a desktop, is there a reason I shouldn't use tr?
+22:32  ferret: no
+22:33  yitz_: There's no reason to use tr, either
+22:33  agentgasmask: haha, ok, thank you very much :)
+23:13  Dribble: whats a good thing to make a script for?
+23:14  w7nz7k: is that a joke?
+23:14  yitz_: `Whatever needs to be automated
+23:17  Dribble: so like directory switching
+23:18  geirha: What's directory switching?
+23:19  kbm: #!/bin/sh
+23:19  kbm: if [ "$1" = "" ] ; then
+23:19  kbm:     clear
+23:19  kbm:     echo "test"
+23:19  kbm: if
+23:20  kbm: whats wrong with this?? im tearing my hair out!!
+23:20  mindrape: "$1"?
+23:20  kbm: arg1
+23:20  cthuluh: kbm: fi
+23:21  e36freak: heh
+23:21  kbm: when i switch to fi i get: syntax error near unexpected token `fi'
+23:21  Dribble: while [ 1 ];do echo "test";sleep 1;done
+23:21  lhunath: Dribble: that's stupid.
+23:21  mindrape: Dribble - you, sir, are and idiot.
+23:21  lhunath: kbm: show real code.
+23:22  Dribble: ok
+23:22  e36freak: kbm: and throw it up an a pastebin, dont flood the channel
+23:22  kbm: lol ok,sec
+23:22  cthuluh: mindrape: you, sir, do use tough words.
+23:23  lhunath: Dribble: don't use [ if you don't need to test a file or string.
+23:23  e36freak: kbm: also, (( $# )) is a much better way of seeing if the script has been passed an argument
+23:23  lhunath: Dribble: all you want to do is run a command that succeeds always.  such a command is 'true'.  while true; do ..
+23:23  Dribble: so then just echo "test";sleep 1;done
+23:24  lhunath: for instance
+23:24  e36freak: while true; do echo "test"; sleep1; done
+23:24  Dribble: ahh
+23:25  kbm: http://pastebin.com/3Ge97wbD
+23:26  kbm: i get ./redodb.sh: line 9: syntax error near unexpected token `fi'
+23:26  kbm: ./redodb.sh: line 9: `fi'
+23:26  geirha: while sleep 1; do echo test; done
+23:27  grop: kbm, use  if [ -z "$1" ] instead…
+23:27  lhunath: kbm: remove the cr's.
+23:28  lhunath: cat -v < redodb.sh
+23:28  lhunath: pastebin that
+23:29  grop: lhunath, why the redir?
+23:29  lhunath: dunno
+23:29  e36freak: why not?
+23:29  lhunath: feel free to not use it
+23:29  kbm: lhunath: how do i remove the cr?
+23:30  lhunath: just show the pastebin first
+23:30  kbm: cat just shows it
+23:30  lhunath: so there are cr's?
+23:30  kbm: i did
+23:30  lhunath: !cr
+23:30  greybot: Carriage Return (ASCII 13). Often written as ^M or \r. CRs are found just before newlines in text files generated by DOS/Windows apps. You can see them with "cat -e". See http://mywiki.wooledge.org/BashFAQ/052 to get rid of them.
+23:30  kbm: http://pastebin.com/3Ge97wbD
+23:30  kbm: oops
+23:30  kbm: i guess not
+23:31  grop: kbm, if [ -z "$1" ]; then
+23:32  Dribble: seq 0 .0001 1000
+23:32  Dribble: 10000
+23:34  kbm: k i did the [ -z "$1" ]
+23:34  kbm: same error
+23:34  kbm: syntax error near unexpected token `fi'
+23:34  e36freak: did you get rid of the cr's?
+23:37  grop: kbm, are the .py's chmoded?
+23:38  kbm: yes
+23:38  kbm: fuckin' a - it was the damn /n
+23:39  kbm: i mean /r
+23:39  kbm: thanks guys
+23:39  e36freak: you mean \r ? and yeah
+23:39  kbm: i was going insane!
+23:40  kbm: i cannot believe i didnt see that coming
+--- Log closed Sun Dec 19 23:44:18 2010

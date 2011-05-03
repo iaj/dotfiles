@@ -1,0 +1,1065 @@
+--- Log opened Thu Oct 28 00:00:03 2010
+--- Day changed Thu Oct 28 2010
+00:00  lhunath: !2>&1 > neekers_
+00:00  greybot: neekers_: Making sense of the copy descriptor operator: http://wiki.bash-hackers.org/scripting/copydescriptor
+00:00  lhunath: neekers_: do NOT put commands in variables.
+00:00  lhunath: !$GREP
+00:00  greybot: ''$GREP $args $file'' -- Do NOT put command names or options in variables. You don't gain ANYTHING from making 'GREP' configurable, when replacing it with something else you'll need to change the whole command line ANYWAY. Commands like that belong in a *function*. See http://mywiki.wooledge.org/BashFAQ/050
+00:00  Rad: cthuluh: i need to examine some long pipelines. ok, guys, thanks for help, maybe i'll figure it out. bye.
+00:00 --- Laynef_ is now known as Laynef
+00:01  neekers_: lhunath: that is a line from the configure script of glib2
+00:01  me2resh: Hi, using bash. how can i extract the last string after "/" from url httt://www.domain.com/projects/mena/branches/MN_27082010
+00:01  lhunath: sigh
+00:01  lhunath: !pe > me2resh
+00:01  greybot: me2resh: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+00:01  neekers_: lhunath: and thanks for the url
+00:01  ferret: echo "${url##*/}"
+00:01  ferret: it's literally mentioned in that line the bot said
+00:02  poisonbit: I don't know why... but my unix like OS is full of basename calls
+00:02  poisonbit: dirname etc
+00:03  poisonbit: the faq is unpopular still in 2010, mybe that reason
+00:03  me2resh: ferret, thanks that worked, is there a way to remove the trailing slash if the url has one in the end ?
+00:03  ferret: yes, there is a parameter expansion for that too
+00:05  alesan: hi I have a variale in my script
+00:05  lhunath: cool.
+00:05  alesan: how do I check if it only consists on blanks or empty?
+00:05  lhunath: [[ $var = *[^"blanks"]* ]]
+00:06  poisonbit: # foo='url/url/url/'; echo "${foo%%/}"
+00:06  alesan: I am parsing a file and I need to discard blank lines or lines that begin with //
+00:06  lhunath: perhaps by blanks you mean [:space:]
+00:06  evalbot: poisonbit: url/url/url
+00:06  alesan: lhunath, blanks I mean spaces, tab, ...
+00:07  neekers_: <lhunath> cool. hehehe...
+00:09  Ward|: sorry i still have no clue how to read soething between a "startstring" and a "endstring"
+00:10  alesan: if [[ $line = *[:space:]* ]] lhunath is this what I want?
+00:10  lhunath: nope.
+00:11  poisonbit: Ward|, echo $text | grep "${star}.*${$end}" | sed "s/(.*${start}|${end}.*)//"   or something like  ?
+00:12  lhunath: eww.
+00:12  poisonbit: my bad
+00:12  poisonbit: "omething like"
+00:12  Ward|: lets say the "startstring" is 'foo' and the "endstring" is 'bar'
+00:13  lhunath: where is it from and where do you want it to go?
+00:13  Ward|: if the line is foo bla bar i want " bla "
+00:13  lhunath: or what do you want to do with it?
+00:13  poisonbit: and there are spaces around the tags always ?
+00:13  Ward|: lhunath, it is not html
+00:13  Ward|: poisonbit, this is just an example
+00:14  Ward|: spaces are not allways there
+00:14  me2resh: lhunath, thanks
+00:17  poisonbit: Ward|,
+00:17  poisonbit: # start='#s'; end='#e'; string='fooo#sbaaaa#ebazzz'; string2="${string##*${start}}"; string="${string2%%${end}*}"; echo "$string"
+00:17  evalbot: poisonbit: baaaa
+00:18  poisonbit: ?
+00:19 --- galaxywatcher_ is now known as galaxywatcher
+00:19  Louis_XV: how do you deal with a bad exit status in a pipe?  e.g. I want to deal with not finding a directory in:-  find "$@" -name '*.mp3' | echo $(wc -l) 'mp3 files.'
+00:20  poisonbit: loop over $@
+00:21  Louis_XV: what?  explain please.  Me not programmer.
+00:21  nDuff: well, that code is broken in other ways
+00:21  nDuff: a missing directory is the least of your problems
+00:24  poisonbit: also there is -true in find, so you just return the total of mp3 files on whatever input
+00:25 --- caemir_ is now known as caemir
+00:25  poisonbit: if you hide STDERR
+00:27  Ward|: poisonbit, thanks i'll try it out when i get back in a few minutes
+00:28  Louis_XV: poisonbit: explain "-true in find".  I can't see what you mean from the man page.
+00:29  poisonbit: if you set -true in find, and you hidde STDERR, you don't need to worry about un-existant paths in "$@", but...
+00:29  poisonbit: UI in your place, could listen to nDuff better than to me
+00:30  poisonbit: also lot of mp3 players uses .MP3 by fat, so -iname could be better
+00:31  Louis_XV: poisonbit, please give me the example, I can't understand what you mean otherwise, sorry.
+00:32  poisonbit: Louis_XV,  which "bad exit status" do you expect in: find "$@" -name '*.mp3'   ?
+00:32  sveta: I am trying to create a script to take flags from the command line (positional parameters) but I want it to be able to use them any which way, I have no problem defining each parameter, one is a number, the other is a file, and the third one must contain an @ sign. this is what i have so far, it looks like i am going to be diggin a lot, is there any easier way to do it? http://pastebin.ca/1975092
+00:32 --- DrMax__ is now known as DrMax
+00:33  poisonbit: sveta, getopts ?
+00:33  Louis_XV: poisonbit: if there's a directory that's not accessible or non existant.
+00:34  sveta: poison, never heard of it, man'ing right now
+00:34  poisonbit: Louis_XV, then maybe something like    for dir in "$@"; do if [ -d "$dir" ]; then find BLA; else YOUR_TRAP; fi; done
+00:36  sveta: OMG poisonbit, just saved me hours of deep loops <3
+00:37  poisonbit: sven^,  do you want to quota the number of mp3 for the users? then they will ask for spotiffy and more bandwitch
+00:37  poisonbit: sorry sveta  ^^^
+00:39  sveta: XD
+00:39  poisonbit: users are like critters or gremlins... three simple rules: No water, no food after midnight, and no bright light
+00:43  julian_: i need a help... http://pastebin.com/neRPXu2X
+00:45  julian_: the "error" w3m: Can't load 1., w3m: Can't load 2., w3m: Can't load 3., etc...
+00:47  go|dfish: hmm
+00:47  go|dfish: julian_: is URL empty?
+00:47  go|dfish: you can use 'set -x' perhaps to debug it ...
+00:48  Knirch: julian_: _ is a valid part of a variable
+00:49  go|dfish: ah, nice spot
+00:49  Knirch: # foo=bar ; echo 1: $foo 2: $foo_ 3: ${foo}_
+00:49  evalbot: Knirch: 1: bar 2: 3: bar_
+00:52  julian_: Knirch, yes..
+00:52  julian_: url_1 url_2 url_3, etc...
+00:53  go|dfish: julian_: what he is telling you is that you need to replace "$URL_$i" with "${URL}_$i"
+00:53  julian_: I think it is because there is a gap and only takes w3m _1, _2, _3 and do not take all the url ...
+00:54  julian_: go|dfish, wait, ok
+00:54  Knirch: # url=http://www.site.com/foo ; a=test.html ; echo $url_$a ; echo ${url}_$a
+00:54  evalbot: Knirch: test.html
+00:54  evalbot: Knirch: http://www.site.com/foo_test.html
+00:54  Knirch: julian_: ^
+00:54  alesan: would [[ $line == "//*" ]] return true if $line contains a string that begins with "//" ???
+00:55  Knirch: # line=//hello ; [[ $line == "//*" ]] && echo TIAS
+00:55  evalbot: Knirch: no output
+00:56  Knirch: alesan: it would if you remove the quotes though
+00:56  alesan: really?
+00:56  poisonbit: # line='//hello' ; [[ $line = //* ]] && echo TIAS
+00:56  evalbot: poisonbit: TIAS
+00:56  alesan: I though one should always quote as much as possible
+00:56  poisonbit: [[ is one exception
+00:57  alesan: ok
+00:57  poisonbit: and * use to "mean" other exception
+00:57  poisonbit: unless you want literal wildcards
+00:57  alesan: how do I match a "blank" line?
+00:57  Knirch: quoted patterns don't expand, but I'm most likely using the wrong words here
+00:57  alesan: like empty or only containing spaces/tabs?
+00:58  nDuff: alesan, you could use a regex, ie. [[ $line =~ ^[[:space:]]*$ ]]
+01:01  alesan: what is the easiest way to "tokenize" the content of a variable? for example I have this: "0x00080000 u-boot.img"
+01:02  alesan: I would like to get the address and the file name in two different variables so I can use them
+01:02  alesan: between the addr and the filename I could have many spaces or tabs
+01:03  alesan: should I look into arrays?
+01:03  cthuluh: read -r address file <<< "$variable"
+01:03  cthuluh: (if you're sure you can only have two fields)
+01:03  alesan: if I have three or four I can discard them
+01:04  cthuluh: hmmm, and what about file names with spaces / tabs / newlines?
+01:06  Knirch: cthuluh: arr=($variable) works as well
+01:06  alesan: I guess people will have to escape those in the config file I'm reading
+01:06  Knirch: read -a is good for loops with input though
+01:07  alesan: Knirch, can you explain?
+01:07  Knirch: alesan: explain what?
+01:07  alesan: arr=($variable) would create an array?
+01:07  PotterT|VF: how to pass a bash variable into a sed string?  i.e. something like sed -i 's/string1/string$x/' folder$x/file.txt
+01:07  Knirch: # b="foo bar"; a=($b); echo ${a[1]}
+01:07  evalbot: Knirch: bar
+01:08  alesan: # b="foo bar"; a=($b); echo $a[1]
+01:08  evalbot: alesan: foo[1]
+01:08  nDuff: PotterT|VF, know the difference between '' and ""
+01:09  PotterT|VF: nDuff: thanks!
+01:09  PotterT|VF: that worked
+01:09  Knirch: alesan: I showd you how to use it, why did you change it?
+01:10  alesan: I wanted to see if the {} were necessary
+01:10  alesan: I wanted to learn
+01:11  nDuff: alesan, ...as a note, and while this specific instance wasn't such a case, sometimes we suggest doing things a specific way here because doing differently will fail in a non-obvious way; it's worth understanding why a suggestion is made the way it is before changing it on the basis of a quick smoke test.
+01:12  alesan: nDuff, sure
+01:12  cthuluh: 4# touch foo bar; var='ba* moo' array=($var); echo "${array[0]}" # Knirch, yes, but be careful to use set +/-f
+01:12  alesan: I just wanted to check if the array syntax had MANDATORY use of {}'s
+01:12  shbot: cthuluh: bar
+01:13  Knirch: oh neat, I suck :D
+01:14  Knirch: alesan: forget my hint, use read -a <<< "$var" instead as cthuluh said
+01:14  alesan: why?
+01:14  Knirch: errh
+01:14  alesan: I changed right now to arrays
+01:15  kruhft: alesan: yes, it's manditory
+01:15  cthuluh: alesan: set -f; array=($var); set +f...
+01:16  cthuluh: alesan: your variable may contain patterns that may be expanded by the shell as file names
+01:16  cthuluh: (this is also called globbing, to use a more common term)
+01:16  alesan: ok
+01:16  alesan: it's actually a good idea
+01:16  Knirch: cthuluh: but as you said, read and a here string should be safe, so he could very well use   read -a array <<< "$var", right?
+01:17  cthuluh: yes, read -ra..., rather
+01:17  Knirch: true
+01:37 --- JmZ is now known as JmZ_
+01:41  Ward|: how can i say foo= cat bar , please?
+01:42  cthuluh: please tell us what you want to do, without code details
+01:43  cthuluh: is bar supposed to be a file?
+01:43  Ward|: how can i say that a variable foo should be equal to the command i cannot type
+01:43  Ward|: shit that was not without code :(
+01:43  Ward|: i used variable
+01:43  Ward|: and equal :-O
+01:44  Ward|: yes bar is supposed to be a file
+01:44  Ward|: wanna put the output of cat bla in a var that's all
+01:45  cthuluh: was it so difficult?
+01:45  Ward|: its not liek i pasted a page of code...
+01:45  cthuluh: !slurp
+01:45  greybot: To read a file's contents into a variable: var=$(< file) However, this strips trailing newlines. To work around that: var=$(cat file; printf x) var=${var%x}
+01:46  Ward|: thanks cthuluh
+01:46  cthuluh: Ward|: you used foo= cat bar; this doesn't mean anything, we can only try to guess
+01:46  Ward|: duh if i allready knew the answer i wouldn't ask
+01:47  Ward|: figured it was clear
+01:47  cthuluh: then ask with words, you'll have better and faster answers
+01:47  Ward|: sorry if it was not
+01:48  Ward|: you are the first person to say that
+01:50  cthuluh: Ward|: it doesn't mean that what I said was wrong ;)
+01:50  Ward|: did i imply that?
+01:50  Ward|: i tried the second example from greybot and no \n's are there though
+01:53  cthuluh: 4# printf 'foo\n' > file; var=$(cat file; printf x); echo "[${var%x}]"
+01:53  shbot: cthuluh: [foo
+01:53  shbot: cthuluh: ]
+01:53  cthuluh: 4# printf 'foo\n' > file; IFS= read -rd '' var; echo "[$var]"
+01:53  shbot: cthuluh: no output within the time limit
+01:53  cthuluh: 4# printf 'foo\n' > file; IFS= read -rd '' var < file; echo "[$var]"
+01:54  shbot: cthuluh: [foo
+01:54  shbot: cthuluh: ]
+01:59  Ward|: thanks again
+02:16  julian_: chmod 777 -R + output of command PWD?
+02:21  retrospectacus: output of command PWD  => it's small pwd of course, and you can also use the var $PWD or . to indicate the cwd
+02:23  julian_: retrospectacus, thanks
+02:29  alesan: non devi fare benzina?
+02:29  alesan: sorry
+02:29  alesan: wrong window :(
+02:31  julian_: help me please http://pastebin.com/bemnEkvp
+02:37  juanmabc: let's see, julian, what's the failure/problem?
+02:40  julian_: I have to concatenate the URL for.
+02:40  julian_: example: http://trend.eeff.com/Read?1-62-815-1617-1008-108763_1, http://trend.eeff.com/Read?1-62-815-1617-1008-108763_2,
+02:40  julian_: http://pastebin.com/bemnEkvp
+02:40  julian_: the ERROR: w3m: Can't load 1.,   w3m: Can't load 2.
+02:41  xkpe: is it possible to duplicate a partial match with sed? echo "hello world" | sed "s/\(\.*\) /\1\1 /g"
+02:45  julian_: juanmabc, hello?
+02:48  juanmabc: julian_: use ${URL}_$i, bash is understanding URL_ as a variable
+02:49  julian_: juanmabc, w3m: Can't load 1.
+02:49  julian_: no work...
+02:49  julian_: for (( i = 1; i < 9; i++ )); do w3m -dump_source $URL$i > $FECHA/$d/$FILENAME.txt; done
+02:50  juanmabc: see, the brackets are needed { } URL_ variable is empty so $i is the result
+02:50  juanmabc: oh, ups
+02:50  juanmabc: you did change it
+02:51  julian_: juanmabc, thanks ... I just discovered that this is not the problem ..
+02:51  juanmabc: yeah
+03:12  mitnk: Hi, What does $$ mean? - echo "$$"
+03:14  yitz_: !$$
+03:14  greybot: $$ expands to the PID of the shell. In a () subshell, it expands to the process ID of the current shell, not the subshell.
+03:15 --- peshalto_ is now known as peshalto
+03:16  mitnk: Got it. Thank you, greybot!
+03:17  Jinxed--: Heey anyone have a little time to help me with socat?
+03:37 --- Ward| is now known as Ward|_
+03:41  julian_: find. -Type d-exec bash-c 'cd "$ 1" | | exit; cat *. txt> list-temp | | exit;' _ {} \; (As I can add to this some type of filter with sed or grep or something ... will not let me! or not ..: D
+03:41  julian_: | sed -e 's/ /\%20/g' | tr "\"" " " | sed -e 's/ /\n/g'| awk -F "http://" '/\.trend\.ohimg\.com/ {print "http://"$2}'| awk -F 'jpg"' '{print $1""}' | uniq
+03:41  julian_: this filter
+03:53  Jinxed--: Could someone help explain this to me: http://pastebin.com/yyArZaKa
+03:55  Jinxed--: ohhhhh
+03:56  Jinxed--: I get it... that would all you to connect your pseudo terminal to a serial device connected at a remote location
+03:56  Jinxed--: .... that's crazy
+04:00  sikilpaake: moin
+04:00  sikilpaake: how can i printf %s something without that stuff getting executed in the shell?
+04:01  sikilpaake: i want to printf %s "$a_variable", but it contains commands that i don't want executed
+04:02  yitz_: Why would it be executed?
+04:03  sikilpaake: i figured it out, nevermind
+04:03  sikilpaake: yitz_: thanks!
+04:07  palhmbs: I have a little problem I'm working out... --- http://pastebin.com/2AMVNzs8
+04:07  palhmbs:  I want to wget a certain image from a website based on a timestamp comparison
+04:07  yitz_: Try #wget
+04:07  palhmbs: ta
+04:18  tengulre: how to using sed print lines 1000 to 2000 in file a?
+04:23  yitz_: sed -n '1000,2000p; 2000q'
+04:32  c00kiemon5ter: is it good to have multuline output with "cat << EOF" or is it better to use echo ?
+04:32  yitz_: Neither is better
+04:32  c00kiemon5ter: what's the right way ?
+04:33  yitz_: Both
+04:33  c00kiemon5ter: for example for a usage function what should I use to give the user the output ?
+04:33  yitz_: Either
+04:33  c00kiemon5ter: ok :)
+04:33  c00kiemon5ter: I think I like cat more
+04:33  yitz_: Then I suggest you use cat
+04:38 --- jzacsh_ is now known as jzacsh
+04:40  tengulre: I want to print lines 1000 to 2000 in file a , then output file b and append line seq no. how to do?
+04:41  yitz_: !b2
+04:41  greybot: bashphorism 2: The questioner will keep changing the question until it drives the helpers in the channel insane.
+04:42  yitz_: And please don't ask in multiple channels
+04:43  c00kiemon5ter: cat file.a | pr -n -t | head -2000 | tail -1000 > file.b
+04:43  c00kiemon5ter: :P
+04:44  yitz_: Ewww
+04:44  c00kiemon5ter: :P :P :P
+04:44  tengulre: ;(
+04:45  tengulre: c00kiemon5ter, tks.
+04:46  yitz_: ...
+04:47  c00kiemon5ter: :P :P :P :P :P :P
+04:47  tengulre: ?
+04:47  c00kiemon5ter: sed can do it really easily
+04:47 * yitz_ throws up his hands in disgust and marches out
+04:47  c00kiemon5ter: like
+04:47  c00kiemon5ter: pr -n -t file.a | sed -n "1000,2000 p" > file.b
+04:48  c00kiemon5ter: yitz_: is that better ?
+04:48  yitz_: No
+04:49  yitz_: Why the pr?
+04:49  c00kiemon5ter: cat -n is not posix
+04:49  c00kiemon5ter: :D
+04:49  tengulre: c00kiemon5ter, that's very good.
+04:49  tengulre: tks
+04:49  yitz_: sed reads files too, you know
+04:49  tengulre: yitz_, how ?
+04:49  yitz_: sed -n "1000,2000 p" filea
+04:50  c00kiemon5ter: oh, I used pr to get the line num too
+04:50  c00kiemon5ter: I though he asked for it
+04:50  yitz_: awk 'NR >= 2000 { printf
+04:51  yitz_: awk 'NR >= 2000 { printf "%d %s\n", NF, $0 } NR == 2001 {exit}' filea
+04:52  c00kiemon5ter: awk.., I only know, awk '{print $X " " #Y}'   :/
+05:42  mitnk: Hi, When I edit a file in Vim, Which command could show me the file's encoding ?? (eg. utf8 or not)
+05:43  mitnk: Sorry sent the wrong place....... - -!
+07:11  Nikopol: hey
+07:11  Nikopol: I got some directory called "--web".  How can I rm it? I mean it's seen as an --argument  ... sucks...
+07:12  Colloguy: rmdir ./--web
+07:12  Nikopol: hoy, makes sense :)
+07:12  Nikopol: thanks
+07:26 --- nadir is now known as Guest74011
+07:26 --- Guest74011 is now known as n1adir
+--- Log closed Thu Oct 28 08:43:30 2010
+--- Log opened Thu Oct 28 08:43:53 2010
+08:43 --- Users 504 nicks [0 ops, 0 halfops, 0 voices, 504 normal]
+08:44  Znuff: Hi.
+08:44  thechitowncubs: Hey Znuff
+08:45  prince_jammys: spope: command >/dev/null 2>&1  will "hide" stdout and stderr.
+08:45 --- Channel #bash was synced in 85 seconds
+08:46  Znuff: Hi! I have a list of e-mail addresses in 2 separate files, some of these emails are both in file1 and file2. I want to sort trough the list and only retrieve the addresses that are only in the 2nd file, and not in 1st file too
+08:46  optraz: im reading bash pattern matching and i have something like this if [[ "$foo" =~ "bar|baz" ]] it is not wroking as expected
+08:46  optraz: i want to match foo is either bar or baz
+08:46  prince_jammys: !faq intersection > Znuff
+08:46  greybot: Znuff: http://mywiki.wooledge.org/BashFAQ/036 -- How can I get all lines that are: in both of two files (set intersection) or in only one of two files (set subtraction).
+08:47  prince_jammys: optraz: drop the quotes
+08:47  prince_jammys: !=~
+08:47  greybot: Binary operator, uses the expression on the right hand side as an extended regular expression and returns true if the expression on the left hand side matches the pattern. USE A VARIABLE to hold your regexes: if [[ $var =~ $r ]]; then echo Match; else echo 'No match'; fi
+08:47  prince_jammys: or do that
+08:47  optraz: prince_jammys: bar|baz?
+08:47  Znuff: Thanks
+08:47  prince_jammys: yes, or put the regex in a variable and don't quote it inside of the [[ ]]
+08:47  optraz: ok, didnt know !=~ exists.
+08:48  optraz: aha, i see
+08:48  optraz: thanks
+08:48  prince_jammys: no '!' just invokes the channel bot
+08:48  prince_jammys: *no <comma>
+08:48  optraz: lol..
+08:48  optraz: okie..
+08:48  optraz: :)
+08:48  optraz: fool me
+08:49  prince_jammys: !patterns
+08:49  greybot: Globs, Braces and Regular Expressions: http://mywiki.wooledge.org/BashGuide/Patterns
+08:49  optraz: actually i need something like this, not equal
+08:49  optraz: !=~ ;)
+08:49  pragma_: !quotes
+08:49  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+08:49  prince_jammys: [[ ! $foo =~ $re ]]
+08:49  optraz: mmmm
+08:50  prince_jammys: do you really need a regex anyway?
+08:50  optraz: no
+08:50  optraz: actually it is category, many category like db, config, data, file and so on so forth
+08:50  optraz: so it should match exactly
+08:51  prince_jammys: case $foo in db|config|data|blah)  echo Matches ;; *) echo "Doesn't match." ;; esac
+08:51  optraz: mm.. nice one
+08:51  optraz: but when i do configa
+08:51  optraz: it match :-s
+08:51  optraz: which it should not
+08:51  prince_jammys: not there it won't
+08:52  optraz: i mean in the =~
+08:52  optraz: not the case statement
+08:52  prince_jammys: right, because you were using regex, and you'd need to anchor a la ^foo$
+08:52  prince_jammys: don't use regex for this
+08:53  prince_jammys: 'foo' in most regex implementations will match 'foo' *anywhere* unless you provide anchorss
+--- Log closed Thu Oct 28 08:58:00 2010
+--- Log opened Thu Oct 28 08:58:19 2010
+08:58 --- Users 508 nicks [0 ops, 0 halfops, 0 voices, 508 normal]
+08:58  optraz: i have use too much case :)
+08:58  prince_jammys: you have many cases to look at?
+08:58  optraz: hahaha
+08:58  prince_jammys: then case is perfect
+08:58  optraz: ;)
+08:59  hatten: I run open-air, no need for a case
+08:59  prince_jammys: case $foo ding|dong) echo "It's ding dong" ;; dang) echo "It's dang" ;; *) echo "It's something else" ;; esac
+08:59 --- Channel #bash was synced in 84 seconds
+09:00  prince_jammys: clearly case is ideal in this use case
+09:00  prince_jammys: i.e. use case in this use case.
+09:34  Linex: What does execute permission on a directory mean ?
+09:36  geirha: That you can access it, e.g. with cd
+09:36  geirha: read permission allows you to read its content, e.g. with ls
+09:37  krzee: without +r but with +x you can still access a file from within (if you have +r on that file)
+09:37  geirha: But you'll have to know the filename in advance
+09:37  krzee: right
+09:37  krzee: (good to know when having users with web dirs inside their homedir)
+09:39  Linex: ok I see.
+09:42  Linex: How do I make such that when a user create a directory, the permission to be drwxrwxrw- ?
+09:43  twkm: ''man mkdir''
+--- Log closed Thu Oct 28 09:48:49 2010
+--- Log opened Thu Oct 28 09:49:11 2010
+09:49 --- Users 505 nicks [0 ops, 0 halfops, 0 voices, 505 normal]
+09:50 --- Channel #bash was synced in 84 seconds
+09:51  tengulre: hi,
+10:20  pown: sup
+10:20  Linex: -gt is greater then, what is -gn ?
+10:22  pgas: # [ 1 -gn 3 ]
+10:22  evalbot: pgas: bash: [: -gn: binary operator expected
+10:22  pgas: a typo
+10:23  pgas: -ge is greater or equal -gn doesn't exist in bash
+10:25  Linex: opps sorry
+10:27  trash: Linex: `help test'
+10:27  pown: hai pga
+10:27  Linex: its ok. reading the man. need a bit of understand. trying to understand this ->  if [ $UID -gt 99 ] && [ "`id -gn`" = "`id -un`" ]; then
+10:27  prince_jammys: good ole xmb
+10:27  pown: =:)
+10:28  pown: uic > 99 ( normal user or something) + group and normal id
+10:29  pgas: yo pown
+10:30  Linex: what does the write permission on a directory means ?
+10:30  lhunath: !tests > Linex
+10:30  greybot: Linex: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+10:30  pown: if u can do changes to the dir
+10:31  Linex: pown: ok
+10:31  pown: =)
+10:31  lhunath: creating or deleting of the files within.
+10:31  pown: yea
+10:31  Linex: and x if I can go in it, right ?
+10:31  lhunath: yes.
+10:32  shai: Hi :) I have a list of files, spread across a filesystem, which I want to get the average size of them all... how can I do that? The list of files is in a text file I have saved.
+10:32  pown: shai..
+10:32  Linex: but if the group permission is rw-, then I cannot see the file in the directiory but I can delete it ?
+10:32  pown: hm
+10:32  shai: yes?
+10:33  Linex: seems a bit odd but maybe that is the case
+10:33  pown: du -b files| awk ' { d +=$ 1} END { print d /NR}'
+10:34  Linex: so for umask, 002 is less restrictive than 022, right ?
+10:40 --- VmC is now known as CaHbKa
+10:42  Linex: but if the group permission is rw- for a directory, then I cannot what files in that directiory but I can read a file in it ? Is that right ? Its a bit odd, but I thinkthat is what it means. Can someone verify ?
+10:53  koala_man: Linex: you can know which files are in it, but you can't read files there
+11:09  shai__: loomsen: I'm not sure what that means...
+11:12 --- Natch is now known as Natch|
+11:39  Linex: I want to copy all (including subdirectories and permissions) from /var to /var2 . What command do I use ? cp -a is good enough ?
+11:41  giany: cp -Rap
+11:46  Linex: giany: thanks
+11:46  tessier: Anyone know why the text loses all of its carriage returns when I do: whois=`whois 66.102.7.0` ?
+11:46  tessier: Something to do with IFS no doubt...maybe I should just change it...
+11:47  koala_man: tessier: it doesn't
+11:47  koala_man: but when you echo $whois, they're stripped by the word splitting
+11:47  koala_man: tessier: so echo "$whois" instead
+11:47  tessier: ah
+11:47  tessier: quote it
+11:47  tessier: Right. Thanks!
+11:48 --- pragma_ is now known as Guest95293
+11:50 --- mikeplus32 is now known as mikeplus64
+11:51  Linex: giany: but that does not copy dot files and symbolic links, right ?
+12:09  Carmageddon: how do I modify this line: if [[ $host_hostname != VMW-[0-9][0-9][0-9]* ]]; then... into something like: if hostname != VMW[same] OR (RHV[same])
+12:09  Carmageddon: so, it would only go into block if hostname is not either of the options
+12:10  lhunath: use case.
+12:10  lhunath: case $hostname in VMW-..|RHV-..) ;; *) ...; esac
+12:10  lhunath: or an extglob.
+12:11  Carmageddon: lhunath but a case would force me to replicate the whole block for each case, no?
+12:17  lhunath: I suppose, yes.
+12:17 --- Weust`afk is now known as Weust`
+12:17  Carmageddon: then I dont like that solution. lhunath will this work? if [[ $host_hostname != (VMW|RHV)-[0-9][0-9][0-9].* ]]; then....
+12:18  pown: nearly
+12:19  pown: u need shopt -s extglob ;[[ $hn == @(@(a|b)-+([0-9-])) ]]
+12:19  pown: like that pown
+12:20  Carmageddon: hmm I dont follow pown, what is the purpose of that line you suggested?
+12:20  pown: hmm karma
+12:20  lhunath: Carmageddon: you are confusing globs and regular expressions.
+12:20  pown: matching
+12:20  lhunath: | is not a glob metacharacter.
+12:21  pown: i just read
+12:22  pown: karma, shopt .. ;[[ $hn == @(@(VMW|RHV)-+([0-9]).) ]]
+12:22  pown: like that
+12:22  lhunath: if you want to do "stringa" or "stringb" in a glob, you need an extglob like the one pown suggests.
+12:23  Carmageddon: hmmm, can you please explain why I need the ext/glob option for?  what it does
+12:23  lhunath: if you want to use regular expressions instead of glob patterns, you need the =~ operator.
+12:23  pown: extglob can do the [+!@](..)
+12:23  lhunath: the extglob enables extended glob features.
+12:24  lhunath: @(cat|dog) is an extended glob.  you can't do that in a normal glob unless you enable the extended glob features first.
+12:25  lhunath: alternatively; you could NOT use globs and switch to another pattern language; regular expressions.  then you could do (cat|dog)
+12:25  Carmageddon: what is glob then? I have only been using != and =~ , wouldnt this be enough for a regex to work?
+12:25  lhunath: ...
+12:25  lhunath: == and =! do glob pattern matching
+12:25  lhunath: =~ does regular expression pattern matching.
+12:25  lhunath: pick your pattern language and write your pattern.  don't confuse one with the other.
+12:26  Carmageddon: its first time I heard of glob tbh :o I was sure my != was doing a regex lol.. I wrote it and tested in regex tools :D
+12:26  lhunath: well; it's not.
+12:26  lhunath: !patterns > Carmageddon
+12:26  greybot: Carmageddon: Globs, Braces and Regular Expressions: http://mywiki.wooledge.org/BashGuide/Patterns
+12:27  lhunath: they look a bit similar.  they are very different.
+12:28  Carmageddon: well Iam experienced with regex, so will stick to that for the time being.. do I still need the extglob thing if I want regex?
+12:30  lhunath: no.  regex has nothing to do with globs.
+12:31  lhunath: pattern='(VMW|RHV)-..'; [[ $hostname =~ $pattern ]]
+12:31  lhunath: pattern='(VMW|RHV)-..'; if [[ ! $hostname =~ $pattern ]]; then ..; fi
+12:33  Carmageddon: ok great, that solves all problems then :) thanks lhunath, but what about negating? =~ is good for one section where I need it to match, but I have another section where I need to enter ONLY if NOT match..
+12:33  Carmageddon: how do I negate =~
+12:41  pzduinak: Hi
+12:41  pzduinak: I've got a simple problem
+12:42  pzduinak: I'd like to remove all dots in name from .zip files
+12:42  sn18: Carmageddon: use !, as lhunath showed
+12:42  pzduinak: I'm using this script: http://pastebin.com/JQ1iTb8y
+12:42  pzduinak: the prob is that it doesn't work
+12:44  pzduinak: and my script doesn't return any errors
+12:45  pzduinak: can someone help me?
+12:50  dagni: hi
+12:50  dagni: when i strace my encoded by SHC script, i see this:
+12:50  dagni: Process 30038 attached - interrupt to quit
+12:50  dagni: waitpid(-1,
+12:51  dagni: what happens there that it waits for something and how to figure out what it wait for when all i have is waitpid(-1, ?
+12:59  pr0mised: hi, i want create an script md5check.. http://pastebin.com/3WCQ5jwB but this don't work.. someone can help me?
+13:01  base3_: d=5; for i in {1..$d}; do echo; done
+13:01  base3_: why can't you do this, and how should you do a loop like this?
+13:01  pr0mised: someone?
+13:02  sn18: !seq
+13:02  greybot: seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+13:02  go|dfish: base3_: for ((i=1; i<=d; i++)); do ...; done
+13:02  base3_: ok thanks
+13:02  base3_: any particular explanation of why the other doesnt work
+13:02  base3_: just for curiositys sake
+13:02  go|dfish: probably because brace expansion occours before parameter expansion
+13:03  go|dfish: pr0mised: lines 6 and 7, you know that '>>' redirecting to a file, yes?
+13:05  base3_: thanks go|dfish
+13:05  pr0mised: go|dfish: in really i'm not make this.. just i want that the command md5sum index.php be storage on an variable.
+13:06  pr0mised: for the command if chek if $var1 is equal $var2
+13:09  pr0mised: for example in php we use.. $var=$_POST['value']
+13:10  pr0mised: this value will be storage on $var
+13:10  pr0mised: i want made a similar with shell script.
+13:10  sn18: !faq store > pr0mised
+13:10  greybot: pr0mised: http://mywiki.wooledge.org/BashFAQ/002 -- How can I store the return value/output of a command in a variable?
+13:11  pr0mised: yeah
+13:11  dagni: damn ;/
+13:11  pr0mised: i will read.
+13:12  dagni: my script randomly gets zombie status
+13:12  dagni: i can run it 10 times , and 11th time it gets zombie
+13:12  dagni: it seems to happen randomly
+13:12  dagni: on many servers
+13:12 --- gyaresu_ is now known as gyaresu
+13:13  dagni: now i don't know if it's fault of my script or it's fault of SHC encoder..
+13:13  dagni: anyone ? :F
+13:16  pr0mised: i don't understand ;/ please i want for example make this.. when i run the command md5sum index.php the md5 be storage on a variable and md5sum mirror.php too, in the end the if will show if index and mirror have the same md5
+13:20  asfjio: hello guys, how can i echo directory names that consist only digits? i tried echo [0-9]* but it catches results like "66_"?
+13:22  sn18: pr0mised: read the guide
+13:24  sn18: asfjio: use extended glob
+13:28  go|dfish: pr0mised: blah=$(md5sum index.php) ... would store the output of md5sum into the variable called blah
+13:30  asfjio: sn18: is this what i should use - echo *([0-9])
+13:34 --- Natch is now known as Natch|
+13:35  sn18: asfjio: *([0-9])/
+13:37  asfjio: sn18: why is the last slash?
+13:37  clever: i was using this for simple auto-complete on mplayer, complete -f -X '*.!(avi|mpg|mkv|mp3|mp4|ogm)' mplayer
+13:37  clever: but it seems to be unable to handle a simple test.foo.avi
+13:37  clever: i think its the extra .'s
+13:38  clever: asfjio: things like echo */ will force bash to only give directorys, while * would give files&dir's
+13:39  asfjio: clever: yes i just figured it out :)
+13:40  asfjio: i can't loop through them  for dir in "/path/to/"*([0-9])/; do
+13:40  asfjio: it says syntax error
+13:41  sn18: !extglob > asfjio
+13:41  greybot: asfjio: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+13:41  clever: for dir in */;do echo $dir;done
+13:41  clever: works, as an example of what you could start with
+13:42  clever: if you can echo "/path/to/"*([0-9])/, then that for loop should work, from what i know
+13:44  koala_man: clever: complete -f -X '!*.@(avi|mpg|mkv|mp3|mp4|ogm)' mplayer
+13:48  asfjio: clever: when i put it inside executable file it says syntax error, but if i run it as command it is okay.
+13:49  clever: asfjio: might be extglob then, try shopt -s extglob first to enable that thingy
+13:50  clever: koala_man: works:)
+13:51  clever: bbl
+13:55  kotique: ls -1 | (xargs -i{} basename {} | read zz; echo $zz)  -- doesn't work, why?
+13:55  koala_man: !faq pipe to read
+13:55  greybot: koala_man: No matches found at http://mywiki.wooledge.org/BashFAQ
+13:56  koala_man: blargh
+13:56  koala_man: !faq 24
+13:56  greybot: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+13:56  koala_man: kotique: ^
+13:57  kotique: it's not about visibiliy
+13:57  kotique: xargs: basename: terminated by signal 13
+13:57  kotique: does xargs buffer whole output?
+13:58  asfjio: clever: this worked shopt -s extglob;for dir in "/path/to/*([0-9])/";do echo $dir;done i should enclose the whole path with quotes. thank you for your time!
+13:58  asfjio: sn18: thank you too for the help!
+13:59  kotique: | xargs -i{} basename {} works
+13:59  kotique: | xargs -i{} fn="`basename {}`" doesn't
+13:59  kotique: escaping doesn't help
+14:00  koala_man: kotique: when read has read the first line, the second basename doesn't have anywhere to write
+14:00  kotique: how do I do defferred execution?
+14:01  koala_man: you can define a function and call it later
+14:02  kotique: well fuck me running, this did it -  | (xargs -i{} sh -c "fn=\$(basename {}); echo \$fn")
+14:02  kotique: that's a "deferred execution"
+14:03  koala_man: freaky
+14:04  koala_man: kotique: if you're interested in the proper way of doing this, it's  for f in *; do echo "${f%%/*}; done
+14:04  kotique: not quite, because files contain spaces
+14:04  koala_man: I mean, with just one %
+14:04  kotique: yeah, righto
+14:05  koala_man: this supports all kinds of filenames, unlike yours
+14:06  kotique: i have to assign to $f beforehand
+14:07  koala_man: if you don't actually get your data from files in the current dir like in your example, you can see !faq 1 for how to read input line by line
+14:07  koala_man: though perhaps you could just do sed 's,/[^/]*$,,'
+14:08  kotique: now xargs doesn't like quota sign
+14:08  kotique: oh my
+14:11  kotique: puts Dir.glob('/path/z*z').collect {|path| File.basename(path) } and problem solved! =)
+14:11  kotique: thanks
+14:25 --- sitaktif is now known as sitaktif__
+14:29 --- sitaktif_ is now known as sitaktif
+14:31 --- sitaktif__ is now known as sitaktif_
+14:43 --- studyurnm3 is now known as misnix
+14:52 --- jzacsh is now known as jzacsh_
+15:17  kotique: how do I shift BASH_ARGV ?
+15:23  nDuff: kotique, you can assign it to $@ with set, and _then_ use shift...
+15:23  nDuff: kotique, that said, what would you be doing this for? BASH_ARGV isn't for general use, and only available in debugging mode
+15:30  supkrs: hi
+15:31  supkrs: I have a general question here about Bash Shell Scripting. I can just manage with writing simple scripts
+15:32  supkrs: How do i elevate myself to write advance shell scripting ?
+15:32  dajune: supkrs: script. alot
+15:33  supkrs: dajune: ok
+15:33  supkrs: Any books which i can refer ?
+15:34  ferret: try the guides and faqs in the topic
+15:35  ferret: also read the posix man pages for the basic tools and the bash man page for advanced stuff
+15:36  supkrs: ferret: Thanks
+15:36  supkrs: posix man pages for the basic tools ?
+15:36  supkrs: are you talking about man bash ?
+15:50  ferret: !posix > SuperFlo
+15:50  greybot: SuperFlo: The POSIX standard defines what any modern unix should supply. Sticking to the commands and options in http://www.opengroup.org/onlinepubs/9699919799/utilities/contents.html will do wonders for the portability of your scripts.
+15:50  ferret: gah, he left, sorry SuperFlo
+15:53  humpty: echo bla
+15:53  humpty: echo bla
+15:54  humpty: echo bla
+15:54  Naib: ...
+15:54  humpty: echo bla
+15:54  humpty: echo bla
+15:54  Naib: STFU
+15:55  humpty: sorry, I should be on #test
+16:04 --- project2501a is now known as TheUltimateDouch
+16:06 --- TheUltimateDouch is now known as project2501a
+16:06 --- Cain` is now known as Cain
+16:08  fluxdude: j /linux
+16:08  kotique: how do i tell bash to expand * reversely?
+16:08  kotique: sort -rn
+16:08  Naib: bash4 can
+16:08  Naib: ?
+16:10  pgas: I don't think you can influence the sorting of * with something else than the locale
+16:10  geirha: files=(*) n=${#files[@]} reversed=(); for ((i=n-1;i>=0;i--)); do reversed+=("${files[i]}"); done; echo "${reversed[@]}"
+16:10  nDuff: kotique, it's ** rather than * if you've enabled the globstar shopt in bash4
+16:10  kotique: oh comeon
+16:10  nDuff: oh, _reversely_
+16:10  nDuff: I read it "recursely"
+16:10  kotique: sort -rn
+16:11  nDuff: ehh, sort seems like too much trouble
+16:11  nDuff: why invoke a subprocess when you can get it sorted in the forward order already using the locale?
+16:11  geirha: Put the files in an array, and iterate the array backwards
+16:11  nDuff: geirha++
+16:12  geirha: For the numeric sorting, use nullglob and several globs
+16:12  geirha: files=( [0-9][!0-9]* [0-9][0-9][!0-9]* )
+16:13  nDuff: ...okay, at _that_ point you're cutting into robustness, which is where I start to bow out
+16:14  geirha: I assume he's got files named 1foo 2foo 10foo etc ... since he wanted the -n switch for sort.
+16:16  nDuff: yup. But at that point I think using sort (albeit with -z) starts to be worthwhile. That, and a smack upside the head for using a non-ASCII-sortable filename convention (pad 'yer numeric prefixes, people!)
+16:23  StaRetji: Folks, is it important that bash script has to be named script.sh and not just script?
+16:23  StaRetji: I have some problems with the script so I'm truing to diagnose
+16:24  nDuff: !.sh > StaRetji
+16:24  greybot: StaRetji: Don't use extensions for your scripts. Executables shouldn't have extensions. Just like you run 'ls' instead of 'ls.elf', you should run 'myscript' or './myscript', not 'myscript.sh'. In any case, putting 'sh' extensions on *bash* scripts (which are *not* sh scripts) is retarded.
+16:24  StaRetji: thx all
+16:24  StaRetji: sorry, thx nDuff :)
+16:25  nDuff: !set-x > StaRetji (regarding diagnosis, by the way)
+16:25  greybot: StaRetji (regarding diagnosis, by the way): Setting the -x option on bash enables a debugging mode that makes bash output the command name and arguments that it will run (after all parsing and expansion has been applied). Set it by starting a script with ''bash -x ./myscript'' or putting ''set -x'' before the code you want to debug. ''set +x'' turns this behaviour off.
+16:29  dagni: hi im using SHC for encrypting my script, i ran it many times on few machines, it runs and ends good 9/10 times and randomly it becomes zombie process, i tried to strace the running pid and all i saw was "waitpid(-1"
+16:30  dagni: is this fault of my script or it's SHC to blame ?
+16:30  asteriskmonkey: im having troubles witha bash script.. im trying to background a command using the & sign and thats not working, but it works on the command line, is there a special way of doing it inside a script?
+16:31  geirha: !compiling > dagni
+16:31  greybot: dagni: http://mywiki.wooledge.org/GreyCat/CompilingBad
+16:32  geirha: asteriskmonkey: Nope, same way in a script as in an interactive shell
+16:33  asteriskmonkey: geirha, after the script runs that is supposed to bg the process i cant see anything in jobs
+16:33  asteriskmonkey: is that correct?
+16:33  twkm: yes.
+16:34  asteriskmonkey: how do i tell if it successfully backgrounded then?
+16:34  asteriskmonkey: check for instances of the script running instead?
+16:35  dagni: Why do people want to hide their shell scripts? i'll add third answer: "to try and make it as hard as possible to read the script for an attacker"
+16:36  nDuff: if you're depending on obfuscation for security, you're Doing It Wrong
+16:36  dagni: i don't depend _only_ on the obfuscation..
+16:36  dagni: but i really badly need this to be hidden
+16:36  dagni: and with this Zombie crap it's not possible ;(
+16:37  Ward|: i have this var with some special chars in it like | , now i want to use that var in awk so the special chars will need to be excaped with \ , is there any way of automagically converting a var for this purpose?
+16:37  nDuff: if you really badly need it, you're presumably dependent on it
+16:37  dagni: no i have few other things without this obfuscation would have no sense, but with these few things obfuscation makes sense..
+16:37  geirha: Ward|: You don't need to escape it
+16:37  Ward|: geirha, it doesn't seem to work not escaped :(
+16:37  geirha: Ward|: Just don't embed the var, pass it as an awk var
+16:38  Ward|: geirha, i'll try some more
+16:38  geirha: awk -v myvar="$somevar" 'BEGIN{print myvar}'
+16:38  Ward|: geirha, ah ok :) didn't know about that tanks
+16:38  dagni: http://mywiki.wooledge.org/ShellHallOfShame
+16:38  dagni: n1 ;D
+16:39  Ward|: haha
+16:39  Ward|: "The scripts herein may be copyrighted by various people or companies. I don't care. If you feel you need to protect your "rights" on utter crap, I feel rather sorry for you. "
+16:39  dagni: btw does anyone know some other obfuscator than SHC for bash ?
+16:39  dagni: rofl
+16:39  dagni: [;
+16:39  geirha: rot13
+16:40  dagni: thanks geirha
+16:40  coldboot: How do you use find to find files that have the g-w permission bit set?
+16:40  geirha: dagni: It was a joke. I don't know of any.
+16:40  geirha: !find > coldboot
+16:40  greybot: coldboot: http://mywiki.wooledge.org/UsingFind
+16:41  dagni: #!/ova/onfu
+16:41  dagni: juvyr [ -gehr ]; qb rpub unun ; qbar
+16:41  dagni: :P
+16:41  dagni: yeah, i think SHC is the one and only, tried to search for alternative yesterday, found nothing ;...
+16:42  geirha: [ -true ]? that's a new one.
+16:42  dagni: will have to fix the zombie problem somehow, thanks for tips, and, tbh: http://mywiki.wooledge.org/GreyCat/CompilingBad (99.9% agree, there are just some rare cases when you need this)
+16:43  dagni: why new one ? :)
+16:43  geirha: dagni: Use a different language. C perhaps.
+16:43  twkm: shc runs the script after decrypting it.  and that wrapper waits for the script to terminate, it seems with waitpid.
+16:43  geirha: I haven't seen that permutation of using [ to always return true
+16:43  coldboot: geirha: I can't seem to find an example of "has this permission not set" in those docs. Is it: "-perm g=-w"? Because that doesn't work, it misses files that have group write unset.
+16:44  dagni: oh well, i use that, hope it's not very very bad :p
+16:44  geirha: coldboot: Did you read the section titled "Checking file permissions"?
+16:44  dagni: twkm: so the logic tells me that the script is unable to finish and that is why it becomes zombie
+16:44  coldboot: geirha: Yes...
+16:45  geirha: coldboot: Also, what is g=-w supposed to mean?
+16:45  coldboot: geirha: Has group not writeable.
+16:46  coldboot: geirha: It doesn't state how to use symbolic permissions to find a bit that is unset, it only shows how to check for bits that are set.
+16:46  dagni: i even saw someone decrypt SHC compiled script, so it's breakable .. :p
+16:46  geirha: ! -perm -0020
+16:46 * dagni back to work :/ &
+16:46  twkm: dagni: zombies are processes that finish but fail to be reaped.
+16:47  coldboot: geirha: Ah, it takes boolean logic. Didn't know that.
+16:47  twkm: perhaps you want =g-w
+16:47  twkm: err, -perm =g-w
+16:50  Ward|: geirha, how do i call the var within awk
+16:50  Ward|: ?
+16:50  Ward|: awk keeps interpreting it a text so i must do wmething wrong
+16:51  geirha: awk -v re="$someregex" '$0 ~ re {print "This line matches the regular expression:",$0}'
+16:51  gnubien: Ward|: foo="14"; awk  -v bar="$foo" '{if($0 ~ bar) print $0}' filename
+16:51  Ward|: geirha, i want to print the var actually
+16:51  geirha: awk -v re="$someregex" 'BEGIN{print re}'
+16:52  Ward|: ok i want to print the var with a ton of other crap around it
+16:52  Ward|: lol ssorry
+16:52  Ward|: if i just print the text and the varname in it aswk says its text
+16:53  geirha: # var=bar; printf 'foo baz\n' | awk -v var="$var" '{print $1, var, $2}'
+16:53  evalbot: geirha: foo bar baz
+16:54  Ward|: but i cant have spaces
+16:54  Ward|: pff
+16:54  pgas: print $1 var $2 #then, also there is a #awk
+16:55  geirha: Ward|: If you quote properly, spaces are no problem.
+16:55  geirha: !wordsplitting > Ward|
+16:55  greybot: Ward|: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+16:55  Ward|: geirha, aha
+16:55  geirha: -v var=$var  is NOT the same as   -v var="$var"  the latter is correct.
+17:00  Ward|: geirha, i still cant get it to work
+17:00  geirha: !exact
+17:00  greybot: Please tell us EXACTLY what you typed, and EXACTLY what the error is.
+17:01  Ward|: fucking quotecrap
+17:02  Ward|: really want to throw the fucking PC to the ground
+17:02  Ward|: tiem for a break
+17:02  Ward|: all i can see now is "'''"''"'''"'''''''"""'"?"/''
+17:02  nDuff: Ward|, ...then you're doing it wrong.
+17:03  Ward|: i mean in my head....
+17:04 --- taylanub0 is now known as taylanub
+17:05  geirha: Without any idea of what you're actually doing, it's hard to help you further.
+17:05  clever: Ward|: damn, somehow that giant mess is valid!
+17:06  geirha: Yeah, even ammount of starting and ending quotes.
+17:06  geirha: s/even/same/
+17:09  poisonbit: quoting and variable expansion are like the central points of shell scripting
+17:09  poisonbit: maybe the 50% of the isues we see here are about that
+17:10  jrt05: When I get a segfault, bash tells me 'Segmentation fault (core dumped)' which is what i want, however, the core dump file never appears.  Anybody know what I am doing wrong?
+17:11  poisonbit: ulimit -c ?
+17:11  poisonbit: some OS limits core dumps size to 0
+17:11  jrt05: it's 0.  I thought that meant unlimited
+17:13  jrt05: I guess not, thanks poisonbit
+17:14  poisonbit: also be sure you've disk space... this week I've get a server with 12G of RAM... hugly for coredumps...
+17:15  poisonbit: nice for everithing else
+--- Log closed Thu Oct 28 20:58:53 2010
+--- Log opened Thu Oct 28 20:59:17 2010
+20:59 --- Users 549 nicks [0 ops, 0 halfops, 0 voices, 549 normal]
+21:00 --- Channel #bash was synced in 100 seconds
+21:03  paxl: Is tehre a way to do a grep without grep in bash using .. something ?
+21:03  paxl: like parameter expension
+21:04  go|dfish: paxl: you want to find lines in a file that match a pattern without using grep?
+21:05  rocktop: how do I read the /config.conf varaibles on the /scripts.sh ?
+21:05  paxl: yup
+21:05  paxl: save the process fork basically
+21:05 --- Natch is now known as Natch|
+21:06  go|dfish: heh
+21:06  go|dfish: !faq1
+21:06  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+21:06  skered: paxl: You're saying you already have something running that will accept strings?
+21:06  geirha: rocktop: source it. ''help source''
+21:06  go|dfish: you could use that ... and perform a [[ $line = ... ]] test on each line
+21:06  skered: and have it be slow as balls?
+21:07  go|dfish: or if you need regex, [[ $line =~ ... ]]
+21:07  paxl: I see..
+21:07  paxl: will stick with grep !
+21:07  go|dfish: or you could just use grep -_-
+21:07  paxl: thanks guys !
+21:07  skered: Unless you're writing software for the Mars Rover use grep
+21:08  paxl: nope I'm not :D
+21:08  rocktop: geirha, Thanks
+21:08  paxl: Thanks guys
+21:21  gimpy4913: I have a script which attempts to set a variable from within and SSH session, but Bash sets the variables before it gets into the SSH session.  How can I have it set them within the SSH session instead? http://pastebin.com/qPqt2ByK
+21:22  geirha: !faq ssh eats > gimpy4913
+21:22  greybot: gimpy4913: http://mywiki.wooledge.org/BashFAQ/096 -- ssh eats my word boundaries!  I can't do ssh remotehost make CFLAGS="-g -O"!
+21:22  geirha: Short answer: ssh is broken. You can't easily do that.
+21:30  nDuff: well, it can be done; printf %q is your friend.
+21:31  gimpy4913: Alright then, I'll try to figure out what that is.
+21:31  geirha: Considering the length of that, you should consider putting it in a script on the server, then execute that.
+21:32  gallon: oh man
+21:32  gallon: i saw an article on espn just for you dkk
+21:32  gallon: http://sports.espn.go.com/espn/news/story?id=5725597
+21:32  gallon: mt - wrong channel
+21:32  republican_devil: ok
+21:33  geirha: ok
+21:33  republican_devil: exec 2>file will send std error to a file?
+21:33  republican_devil: if placed in top of me script?
+21:33  geirha: Yes.
+21:33  gimpy4913: geirha: I considered that but the full backup script has a half dozen sections which look like the example I showed.  I'm trying to keep it all in one script rather than 6 scripts and a wrapper.
+21:33  republican_devil: :)
+21:34  geirha: ssh user@host bash << 'EOF'
+21:34  geirha: ...
+21:34  geirha: EOF
+21:34  gimpy4913: EOF caused me issues as well.
+21:34  greycat: Then use ZOT
+21:34  republican_devil: ssh -n
+21:35  greycat: or ALBATROSS
+21:35  greycat: that's a good one
+21:35  Ward|: what is used again inside a loop to make it start again from the top?
+21:35  geirha: gimpy4913: There's a difference between << EOF and << 'EOF'
+21:35  geirha: !<< > gimpy4913
+21:35  greybot: gimpy4913: Here documents. cat <<EOF followed by several lines of text, followed by the literal string EOF on a new line, NOT indented. The portion between the EOFs is passed to the command as standard input. If 'EOF' is 'quoted', substitutions WON'T be done; otherwise they are. See <<- for the indented variety.
+21:35  republican_devil: i still get a lot of lag and crap when I do my ssh stuff and then & done to end the loop
+21:35  Ward|: i forgot the correct term...
+21:35  republican_devil: ssh causing hangs
+21:35  republican_devil: anything reccomended when you are doing 200 ssh to 200 box in a loop
+21:36  republican_devil: to avoid hanging timeouts
+21:36  greycat: Do fewer.
+21:36  republican_devil: eps related to ending loop in & done so they all happen same time?
+21:36  greycat: launching 200 jobs in the background at once is a bad idea.
+21:36  republican_devil: oh crap
+21:36  greycat: it's "eps" a bad idea if they all hit /dev/random looking for entropy simultaneously.
+21:36  republican_devil: :)
+21:36  republican_devil: aye
+21:37  republican_devil: even on 8 cpu?
+21:37  geirha: The !pm page has an example showing how to run 5 at a time
+21:37  republican_devil: linux
+21:37  greycat: If the bottleneck is /dev/random then the number of CPUs won't matter.
+21:38  republican_devil: oh bugger
+21:38  republican_devil: it it slow as hek otherwise
+21:40 * nDuff thought he told republican_devil the same thing earlier (during a "what you're trying to do is a bad idea" rant)
+21:41  nDuff: ...seriously, some of us have been down that road before.
+21:41  greycat: It's #bash.  You have to tell everyone everything at LEAST 4 times before they believe you.
+21:42  republican_devil: earlier today?
+21:42  nDuff: ("the same thing" re: unbounded numbers of concurrent SSH connections being a bad idea in general, not /dev/random as an issue specifically)
+21:42  nDuff: no, not today
+21:42  republican_devil: ah
+21:42  republican_devil: I might have gottne busy n lost it all when turned pc off
+21:42  republican_devil: :(
+21:43  republican_devil: what if I inserted a sleep 1 in between ssh calls?
+21:43  nDuff: ...
+21:44  republican_devil: no that wouldnt work thye all sleep 1 lol
+21:44  nDuff: what you really want is to have a limited thread pool
+21:44  greycat: Might help, might not.
+21:44  nDuff: and bash isn't the right tool for that job
+21:44  republican_devil: well at work I have ssh keys to ssh into prod boxes
+21:44  republican_devil: not sure how else to collect starts without going into nagios os some uch
+21:44  republican_devil: such
+21:44  nDuff: well, what you _really_ want is to pick a message bus designed for 1:N connections, rather than using ssh at all, if you're dealing with a really big cluster
+21:45  republican_devil: or doing snmp calls ot something
+21:45  republican_devil: i dont have that kinda freedom
+21:45  republican_devil: this is big compan
+21:45  nDuff: SNMP is a better fit for the job, yes. So is Ganglia.
+21:45  caotic: how can I get a column of words transformed into a cvs list ?
+21:46  republican_devil: awk
+21:46  greycat: Or putting a web server in place on a central server and scheduling the cluster boxes to connect to it and deposit their information.
+21:46  greycat: Or any other kind of server.
+21:46  greycat: what is a "cvs list"?
+21:46  republican_devil: csv
+21:46  greycat: tr '\n' ,
+21:47  nDuff: well...
+21:47  nDuff: CSV is actually a surprisingly intricate format if you want to get all the quoting and such right
+21:47  caotic: greycat: yea that, sry
+21:47  nDuff: I usually don't use bash for anything that really needs support for getting all the details right
+21:47  greycat: If we assume his list of words is literally English words, then we don't have that problem.
+21:47  nDuff: true.
+21:52  HorkingGuts: What might I want to state in my script to leave my function instead of the .sh file itself?  i.e. checkSomething() { if [[ condition ]]; leave function; else; keep going; fi; ]] and I may call checkSomething multiple times with different arguments.  Better to just move 'checkSomething' to its own file and put in path?
+21:53  republican_devil: how do I take a file
+21:53  poisonbit: return
+21:53  republican_devil: ok 1 file has boxes I can login to
+21:53  republican_devil: 1 had total boxes but lsits app next to each box
+21:53  HorkingGuts: @poisonbit - Thanks, I will give it a shot
+21:53  poisonbit: HorkingGuts, return (equal to return 0) on failure return "$number" (i.e. return 1)
+21:53  republican_devil: how remove all the stinkers from the file with the list of crap boxes?
+21:54  republican_devil: from the good file?
+21:54  poisonbit: !faq 1
+21:54  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+21:55  greycat: poisonbit: "return" is not "equal to return 0".  If you don't specify an exit status, return uses the current $?.
+21:56  poisonbit: oops true
+21:56  poisonbit: ^^^ HorkingGuts
+21:56  greycat: Same with exit, by the way.
+21:56  poisonbit: I use to use && return, that really means return 0
+21:57  poisonbit: :)
+21:57  greycat: in that case, yes
+21:57  poisonbit: [[ check ]] && return
+21:57  greycat: I prefer the explicit return 0
+21:57  poisonbit: explicit is a good thing in code
+21:58  greycat: and lyrics
+21:58  poisonbit: I failed explaining the behavior
+22:00  poisonbit: this seems a cron, every days  I fail before dinner
+22:01 * nDuff doesn't see how "&& return" isn't a complete noop
+22:02  greycat: Because, um, there would be a line of code after that.
+22:02  exitcode1: heh... " Not everything that happens on the commandline is bash. ***Please specify if you are writing for sh!*** "  I misread that and was thinking, "yeah... most things I write are for sh**"
+22:03 * exitcode1 needs more sleep
+22:08  [k: lulz
+22:15  RenatoSilva: has anyone ever compiled bash in windows?
+22:16  nDuff: as evidenced by the variety of bash-for-Windows builds available, *someone* obviously has.
+22:16  greycat: RenatoSilva: there is this web site called Google where you can search for things that other people have done.
+22:17  exitcode1: oh, lawdy
+22:27  RenatoSilva: is there a bash dev channel?
+22:27  greycat: No.
+22:30  poisonbit: RenatoSilva, there are mailing lists and bug trackers if you're over something that google does not take
+22:30  RenatoSilva: poisonbit: ok thanks, maybe I'm stuck with that
+22:31  poisonbit: i compiled recently on Debian bash 4.1 and patches and the thing worked  :)
+22:31  poisonbit: can't say much more about
+22:31  greycat: If your issue is compiling on Windows with <insert Windows C compiler here> then yeah, #bash@freenode is probably not a very helpful place.
+22:31  RenatoSilva: poisonbit: for some reason msys's bash is ascii only and I want to understand why and compile it with encoding support
+22:32  RenatoSilva: poisonbit: I've heard you can link with gettext/inconv or something
+22:32  greycat: So you compiled it and got... what error?
+22:32  poisonbit: I could look at  ./configure --help  if I where looking for available options
+22:32  RenatoSilva: poisonbit: hmm thanks for the tip
+22:33  poisonbit: encoding most times is about terminal and environment vars, than about compile options
+22:34  greycat: I don't know about Windows, but in Unix, these things should generally be handled by the libc.
+22:34  greycat: That's where most of the LANG/LC_* variables get handled.
+22:35  RenatoSilva: poisonbit: bash.exe ignores LC_ALL
+22:35  greycat: How can you tell that?
+22:35  RenatoSilva: poisonbit: then someone from #mingw said it was because it wasn't linked with gettext/iconv
+22:35  greycat: What *exactly* are you doing and what is the result?
+22:36  greycat: I'm getting the impression he has NOT, in fact, attempted to compile it under Windows.
+22:36  greycat: Since he doesn't have any error messages or anything.  Hasn't named which compiler suite he's using.  Nothing.
+22:37  RenatoSilva: poisonbit: I did some tests, the fact is that it treats all input sent by terminal (I'm using windows terminal) as ascii-only, for the reason above accoring to them
+22:39  poisonbit: my configure has related options for both libs, in debian you just type apt-get build-dep bash (here you get build dependencies), and then you compile bash
+22:39  RenatoSilva: poisonbit: if terminal sends any non-ascii byte, it beeps and doesnt print the underlying char. For example if terminal is code page 65001 (utf8), and you type ç, it will send two bytes representing ç in utf8, however as they're not ascii bytes, bash rejects them
+22:39  poisonbit: do you have such libs installed and the build system found them ?
+22:40  Ward|: this may sound very strange but is there a way to kill something if it does not output sound anymore for let's say 0.5s ?
+22:40  greycat: I think he's expecting us to tell him "You run this magical command and it reaches into your bash.exe and tweaks bits until VOILA utf8 works"
+22:41  poisonbit: uff many years without touch a MS product, i'm sorry
+22:41  RenatoSilva: poisonbit: I'm on the way to compile it, I'm reading a wiki page now. I tried before, last failure was about two options unrecognized by gcc
+22:41  poisonbit: RenatoSilva, good luck
+22:41  RenatoSilva: poisonbit: thanks
+22:42  poisonbit: If I where using a MS product, I could look at MS scripting facilities
+22:44  poisonbit: Ward|, redirect some sound to a file... and compare that file each check.... or something like ?
+22:44  Ward|: poisonbit, let me explain
+22:44 --- republican_devil is now known as road-runner
+22:44  Guest95293: Ward|: try to use small words
+22:44  poisonbit: or "capture" the sound you produce to a file and analize that
+22:44  Ward|: poisonbit, if you run festival and let it speak something, it will then idle for like 3 seconds AFTER the sentence has been pronounced
+22:45  Guest95293: analize.
+22:45  Ward|: so i want to kill it as soon as it sotops speaking
+22:45  Ward|: because i don't feel like wiating for its stupid crapmessage for 3 seconds
+22:45  Ward|: i'm looking into disabling it but no luck so far
+22:45  poisonbit: there is not imagemagick for sounds ¿?
+22:46  Ward|: lol
+22:46  poisonbit: :)
+22:46  Ward|: i said it might soudn strange :p
+22:46 --- Guest95293 is now known as pragma_
+22:47  poisonbit: Quelcom provides assorted tools to perform simple editing operations on MP3 and WAV audio files.  These include fading, check-and-clean, informational extraction and lossless cutting and joining without reencoding.2
+22:47  poisonbit: acording to my os packages, festival can produce wav, and quelcom can edit them
+22:48  pragma_: not quite as strange as analizing, or butt-sexing, sound files
+22:48  Ward|: thats all a bit overkill
+22:48  poisonbit: arf, sorry for my english, it's self learned
+22:49  road-runner: I can help youz with ar enrish
+22:49  Ward|: it's not the audio i need to adapt
+22:50  Ward|: its just festival that needs to be killed when it stops outputting sound (to my speakers)
+22:50  poisonbit: then look at /dev/audio or at program open files
+22:50  poisonbit: lsof "$??"  should work ?
+22:51  pragma_: I'd like to point out that this has nothing whatsoever to do with bash.
+22:51  greycat: I rather doubt you would get anything useful by running lsof "$??"
+22:51  greycat: nondeterministic at best, since the value of $? would depend on what you did previously
+22:51  Ward|: pragma_, oh, asking how i can stop a program the moment is stops outputting audio != possible in bash?
+22:52  poisonbit: lsof -p "$$"
+22:52  poisonbit: maybe ?
+22:52  poisonbit: try and see
+22:52  Ward|: seemed bash related to me but nvm
+22:53  pozican: whats the preferred way of stripping blank lines from output? I just need to pipe this output to something to clean it up
+22:54  poisonbit: #!/bin/bash
+22:54  poisonbit: lsof -p "$$"  # end of openfiles listing /dev .sh
+22:54  pozican: oooo grep -vE ^$
+22:54  greycat: you don't need -E there
+22:54  pragma_: Seems more practical to me to just read festival's manpages more indepth to find any program-specific options that might customize the "wait" behaviour you're experiencing
+22:54  pragma_: Or perhaps to modify its source code, otherwise.
+22:56  poisonbit: seen in that way then is not a bash question :)
+22:57  pragma_: Maybe he's hoping for some program he can use to act as a wrapper around festival that takes a PID (festival's) and monitors the sound drivers for activity and kills $pid when $activity is 0 for a certain threshold.
+22:58  pragma_: Sounds like an kludgy way to do it.
+22:59  rocktop: any doc about all if statement cases ?
+22:59  pragma_: Certainly is a system-specific issue, in any case; not really a bash-specific thing.
+22:59  poisonbit: http://mywiki.wooledge.org/BashSheet
+23:03  rocktop: anyidea?
+23:03  poisonbit: rocktop, look at the url i passed
+23:03  poisonbit: and search for    if [command list]; then [command list]; elif [command list]; then [command list]; else [command list]; fi
+23:07  poisonbit: rocktop, maybe you refer really to all [  (test) options, that case:  help test
+23:08  lhunath: !tests
+23:08  greybot: In bash; consistently use [[ .. ]] to test strings or files and (( .. )) to test numbers or arithmetics. Do *NOT* use [ .. ] in bash, *only* in sh. See http://mywiki.wooledge.org/BashSheet#Tests
+23:09  AndroidLoverInSF: is there a script i write that will capture existing links (ln) in a directory so i can modify and re-run them?
+23:09  lhunath: I'll guess the answer is "yes".
+23:09  lhunath: though your sentence makes no real sense.
+23:10  rocktop: poisonbit, there too many case I don't know what is the deffirence between if comand ; then , if [ comand ] and if [[ command ]] and [[  ]]
+23:10  lhunath: rocktop: [ does NOT take commands.
+23:10  lhunath: neither does [[.
+23:10  lhunath: [ IS a command.  as is [[.
+23:11  rocktop: lhunath, is there deffirence between [ and [[ ?
+23:11  lhunath: when poisonbit said "[command]" he did not mean to put the command inside [ and ].
+23:11  lhunath: rocktop: [ sucks.  [[ does not.
+23:11  lhunath: ![[
+23:11  greybot: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+23:12  rocktop: lhunath, Thanks , and you too poisonbit
+23:12  lhunath: !conditionals > rocktop
+23:12  greybot: rocktop: Conditional Structures: http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+23:14  poisonbit: rocktop,  I pasted a line from wiki that had 'if  [command list]' where [command list] is formated as a convention from the wiki,  lets see as:    if true; then true; elif true; then true; else true; fi
+23:14  lunaphyte_: i'm storing an interface's mac address as a variable, by parsing the output of ifconfig $interface.  might there be another/better way?
+23:14  sharp15: math in bash.  generally a bad idea?
+23:14  lunaphyte_: maybe something that requires less parsing?
+23:15  lhunath: sharp15: math is a broad term.
+23:15  lhunath: !math > sharp15
+23:15  greybot: sharp15: Add 7 to a variable: let a+=7; ((a+=7)); a=$((a+7)); See http://mywiki.wooledge.org/ArithmeticExpression
+23:16  lhunath: lunaphyte_: umm.  arp?
+23:17  lunaphyte_: oh, really?  i'll look at the man page.
+23:18  sharp15: lhunath: i wasn't planning on doing calculus using bash.  just some basic addition. :)
+23:19  RenatoSilva: poisonbit: tried to compile but: http://pastie.org/pastes/1256529/text, see lines 75,76
+23:19  poisonbit: lunaphyte_,     awk '/eth0/{print $4}' /proc/net/arp   (or arp -an | grep eth0)
+23:20  lunaphyte_: but..  the arp table doesn't contain *my* mac address.  it contains the mac addresses of other hosts in my broadcast domain.
+23:21  poisonbit: right, forget the arp -an | grep, take the first solution
+23:21  poisonbit: RenatoSilva, I use to paste generic error messages in google
+23:22  road-runner: ok
+23:22  poisonbit: can't help more with that ms of the daemons :)
+23:22  road-runner: I have a list of bad boxes
+23:22  road-runner: I guess I could insert a check
+23:23  road-runner: if grep $x badboxes; then ..
+23:23  road-runner: to make sure non fo the bad boxes get operated on?
+23:23  road-runner: none of
+23:23  poisonbit: lunaphyte_, no, /proc/net/dev is the same, forget both, arf
+23:25  rickest: [D/quit
+23:29  poisonbit: lunaphyte_, I think available options are to parse ifconfig, ip link show, or /var/log/dmesg
+23:29  poisonbit: ethtool, etc...
+23:29  poisonbit: parse anithing, no direct cmd
+23:31  rocktop: grep in variable doesn't work e.g grep tar $fullpath
+23:31  poisonbit: echo "$var" | grep foo
+23:31  poisonbit: or [[
+23:32  poisonbit: [[ $fullpath = *foo* ]] && echo "it matchs"
+23:32  rocktop: poisonbit, thank you
+23:35  RenatoSilva: poisonbit: fixed, it is compiling now...
+23:36  julian_: alguna persona habla español?
+23:36  julian_: any person talk spanish..?
+23:36  RenatoSilva: yo hablo portunhol
+23:36  poisonbit: yo
+23:37  lunaphyte_: poisonbit: ip link show is a new one to me - thanks.
+23:37  poisonbit: lunaphyte_, it's on /bin, while ifconfig use to be in /sbin
+23:38  lunaphyte_: sure
+23:38  paxl: How can I remove duplicate in a stream that come in ?
+23:39  poisonbit: uniq ?
+23:40  rickest: uniq if they're sorted
+23:40  pgas: uniq remove consecutive duplicate lines
+23:40  pgas: !uniq
+23:40  greybot: uniq is a utility for removing or reporting repeated lines. uniq will only work effectively with sorted input (sort | uniq). awk '!s[$0]++' is an order-insensitive alternative.
+23:40  paxl: Awesom !
+23:41  paxl: thanks !
+23:43  RenatoSilva: poisonbit: built successfully, I'm using it
+23:44  poisonbit: bash on windows... is courious, i wrote you from linux on a iMac
+23:45  julian_: (wget problem)I have several directories and subdirectories in them ... These contain a list of pictures and I want wget read these listings in each directory and save the images in the same read.
+23:45  julian_: i need wget -i file  but recursive mode?
+23:45  Ward|: if i have a var in a script that is user input and will be used as a command argument, do i need to add extra security?
+23:45  ss0: greybot:  doesn't sort have a unique option?
+23:46  Ward|: i tried breaking out of it myself but everything i tried seemed to bo neutralized correctly :)
+23:46  sn18: Ward|: yes, in general
+23:47  Ward|: sn18, what should be added?
+23:48  poisonbit: Ward|,  did you tried things like  '; ls'  or  ' > file'  or  ' " $(ls) '  etc as input ?
+23:48  Ward|: poisonbit, yeah
+23:48  sn18: Ward|: depends on what the variable is supposed to contain and how it is supposed to be used
+23:49  Ward|: sn18, the integers will be checked for being integers and being in a specific range
+23:49  Ward|: sn18, that leaves a string...
+23:50  Ward|: it can be like one of the 50 defined strings
+23:50  Ward|: 50 is guessed and probably a bit more then what it will be
+23:51  Ward|: so i guess to be sure i should validate against the list of defined strings?
+23:51  RenatoSilva: poisonbit: now I need to know how to compile with encoding support
+23:51  Ward|: its nice to know that if my first validation fails still no harm could be done (from what i've tried myself)
+23:52  poisonbit: RenatoSilva, my configure has     --enable-multibyte      enable multibyte characters if OS supports them
+23:52  poisonbit: maybe that, i don't know nothing about windows really
+23:53  julian_: RenatoSilva, Oye me puedes hechar una mano con wget.
+23:53  poisonbit: RenatoSilva, in linux that option isn't needed to work with uft, iso, etc
+23:53  poisonbit: maybe in windows it is
+23:53  Ward|: RenatoSilva, maybe you could convert it with a tiny program/script you pipe to/from
+23:54  julian_: poisonbit, Pregunta, ESto esta bien... para buscar recursivamente y descargar?   find . -type d -exec bash -c 'cd "$1" || exit; wget -i lista-imagenes || exit;' _ {} \;
+23:54  poisonbit: uff
+23:54  ss0: Whats the preferred pastebin for use with this channel?
+23:54  Ward|: lol
+23:54  RenatoSilva: Ward|: doesnt work because when it gets to bash, it simply ignores the multi-bytes
+23:56  Ward|: RenatoSilva, i didn't really read much of what you said before because i was busy, could you please repeat what you are doing/what the problem is?
+23:56  Ward|: (not sure if i can help though)
+23:56  RenatoSilva: Ward|: you type ç, bash doesnt print it and makes a beep (bash.exe is ascii only)
+23:57  Ward|: RenatoSilva, right windows... cant pipe
+23:57  Ward|: lol
+23:57  Ward|: i forgot
+23:58  Ward|: RenatoSilva, i never compiled bash before but try a ./configure --help , that usually lists all possible options and whatnot
+23:58  Ward|: if that makes sense on windows even
+23:59  RenatoSilva: Ward|: I wrote an wrapping program which changes terminal encoding then calls bash, it inherits the terminal handle (it uses the same terminal), but it doesnt work, because bash just ignores non-ascii bytes, whatever encoding the win32 terminal is using
+23:59  RenatoSilva: Ward|: I'll try poisonbit's suggestion right now
+--- Log closed Fri Oct 29 00:00:17 2010

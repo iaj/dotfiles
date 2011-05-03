@@ -1,0 +1,139 @@
+--- Log opened Tue Nov 16 00:00:30 2010
+--- Log closed Tue Nov 16 00:34:56 2010
+--- Log opened Tue Nov 16 00:35:15 2010
+00:35 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+00:36 --- Channel #awk was synced in 103 seconds
+01:44  KB1JWQ: How do I ask awk to print out everything except $2?
+01:46  g0pher: { $2=""; print $0 }
+01:47  skered: Wouldn't that print an extra OFS
+01:51  skered: { $2="\b"; print }
+01:55  g0pher: skered - maybe you outthinking the question -- iirc once u do something to $x  - reparses $0 ?
+01:58  skered: Well what is awking printing when you set $2 to a null string?
+01:58  skered: awk rather
+01:58  skered: A null string. So $2 is still printed. 
+01:59  g0pher: it reparses $0 - lets do a test 
+02:00  skered: [dereks@ircbsd /usr/home/dereks]$ echo 1 2 3 | awk -v OFS="," '{ $2=""; print $0; }'
+02:00  skered: 1,,3
+02:06  cthuluh: the only problem is that $2="\b" puts a real \b char  in the output, here
+02:07  g0pher: skered - u r correct - leaves an extra FS between $1 and $3
+02:07  skered: cthuluh: Yeah, it's a ugly hack... also if OFS isn't 1 then it breaks 
+02:08  cthuluh: awk -v n="$n" '{$n = ""; sub(/[[:space:]][[:space:]]/, " ")}; 1'   doesn't leave a \b behind
+02:09  skered: So the solution is to loop over NF with and if that skips when for looping var is the field[s] you want to skip? 
+02:10  skered: cthuluh: What if your OFS isn't space?
+02:13  cthuluh: if FS != OFS then you'll have a problem, yes
+02:13  g0pher: even tried { $2=\"\"; $0=$0; print $0 } - still left 2 spaces beween $1 $3
+02:14  cthuluh: I mean, you'll still have a problem if FS != OFS with something like  '{$2 = ""; sub(FS FS, OFS); print }'
+02:18  skered: echo 1 2 3 | awk -v n="2" -v OFS="," '{$n = ""; reg=",+"; print reg; sub(reg, OFS )}; 1'
+02:18  skered: How about that?
+02:18  skered: er minus that "pring reg;" part 
+02:20  skered: awk -v n="2" '{$n = ""; reg=OFS"+"; sub(reg, OFS )}; 1'
+02:20  skered: rather
+02:21  skered: KB1JWQ is long gone.. { $2=""; print } worked for him
+02:22  KB1JWQ: Heh, sorry.
+02:22  KB1JWQ: Got distracted by shiny things. :-)
+02:22  KB1JWQ: Thanks for the help, though. :-)
+--- Log closed Tue Nov 16 02:32:51 2010
+--- Log opened Tue Nov 16 02:33:11 2010
+02:33 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+02:33  g0pher: yet: C:\!> echo.aaa     bbb        ccc | %awk% -v s="" {$2=s} | %awk% {print}
+02:33  g0pher: gives nothing ??
+02:34 --- Channel #awk was synced in 104 seconds
+02:37  g0pher: brain dead - needed echo.aaa     bbb        ccc | %awk% -v s="" {$2=s;print} | %awk% {print}
+02:48  g0pher: C:\!> echo.aaa     bbb        ccc | %awk% -v s="" -v t=" " "{$2=s; sub(\"  \",t) ; print}"
+02:48  g0pher: yields: aaa ccc
+03:44  trumpen: 4# echo {a..e} | cut -d\  -f1,3-
+03:44  shbot: trumpen: a c d e
+03:44  pr3d4t0r: g0pher: Yo'.
+03:44  pr3d4t0r: g0pher: Did you guys ever sort out the logged vs. not logged channel thing?
+03:45  pr3d4t0r: g0pher: I can share my logs AFTER there's agreement and we advertise that in the /topic.
+03:48  g0pher: pr3d4t0r - thanks - wonder if logging channel such a good idea - After sometime - i trash channel
+03:48  pr3d4t0r: g0pher: OKi.  Let me know.
+03:48  pr3d4t0r: g0pher: I do log it anyway.  It just isn't public ;)
+03:48  pr3d4t0r: g0pher: And it's not for sharing either unless all participants in a conversation agree it's OK, at least in public.
+03:49  g0pher: pr3d4t0r - in spite of my posts - there are good ideas posted here 
+03:53  g0pher: pr3d4t0r - also have logs of #awk back before doomsday - Before freenode decided to trash those on t-mobile
+03:54  pr3d4t0r: g0pher: Heh.
+04:48 --- Natch is now known as Natch|
+05:21  g0pher: pr3 - am working on a one page awk for newbies - any ideas ?
+05:28  cthuluh: Hmmm, perhaps the '!a[$0]++' thing
+05:28  cthuluh: I think it explains well how awk can be powerful and elegant
+05:28  cthuluh: yet, it"s not so easy to understand
+05:36  g0pher: cthuluh - ment more basic - many posts here are from newbies
+06:12  k[t: awk '{ tempfile = "/tmp/badauth.temp" ; if($0 ~ /.*ftpd.*: connection from .*/) { printf
+--- Log closed Tue Nov 16 06:25:37 2010
+--- Log opened Tue Nov 16 06:25:58 2010
+06:25 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+06:27 --- Channel #awk was synced in 104 seconds
+--- Log closed Tue Nov 16 06:33:45 2010
+--- Log opened Tue Nov 16 06:34:09 2010
+06:34 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+06:35 --- Channel #awk was synced in 103 seconds
+--- Log closed Tue Nov 16 08:42:24 2010
+--- Log opened Tue Nov 16 08:44:13 2010
+08:44 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+08:49 --- Channel #awk was synced in 297 seconds
+09:27  g0pher: any awk for windows CE os ?
+10:15  alek{xmb}{bottz}: tag: where is your awkpp
+10:15  alek{xmb}{bottz}: provide code.tgz
+10:30  g0pher:  any awk for windows CE os ?
+10:59  g0pher: anyone have awk for windows CE ?
+11:10  alek{xmb}{bottz}: hmm
+11:10  alek{xmb}{bottz}: not me
+11:20  g0pher: Ok ups 958 made it over Missouri - still try to make it over Kansas
+11:23  g0pher: i Have Fear - my computer will Not make it here - the Establishment Will Shoot Down the Plane over Colorado
+11:28  geirha: huh?
+11:38  g0pher: is low cost computer - is there awk for windows CE ?
+11:41  g0pher: my flight track http://www.wunderground.com/flights/track/UPS958
+11:45  g0pher: That Plane will Be Shot down over Colorado - they will Nver allow a 79 dollor computer to challnge them
+11:54  g0pher: watch the flight track here - the Establishment will Never let a low cost computer challenge them http://www.wunderground.com/flights/track/UPS958
+11:56  alek{xmb}{bottz}: they have to allow it, silly
+11:56  alek{xmb}{bottz}: this naming of a topic is suckajgy
+11:56  alek{xmb}{bottz}: i will __ not visit this site
+12:03  karthee: hi .. i have a big html page. I want to extract things starting with http:// and ending with mp3 .. How would I print only those urls ?
+12:10  g0pher: have i been banned ?
+12:11  alek{xmb}{bottz}: hope not
+12:11  alek{xmb}{bottz}: where
+12:11  alek{xmb}{bottz}: karthee
+12:11  alek{xmb}{bottz}: use urlgrep.awk second
+12:12  g0pher: tried to post solution to his question
+12:12  karthee: urlgrep.awk ?
+12:12  alek{xmb}{bottz}: hum
+12:12  alek{xmb}{bottz}: //xmb.root.pe/code/1/urlgrep.awk
+12:12  alek{xmb}{bottz}: and be happy
+12:12  alek{xmb}{bottz}: =)
+12:12  karthee: /xmb.root.pe/code/1/urlgrep.awk
+12:13  alek{xmb}{bottz}: ye
+12:13  alek{xmb}{bottz}: http://
+12:14  g0pher: none of those urls are valid
+12:14  karthee: alek{xmb}{bottz} : okay thanks .. 
+12:14  alek{xmb}{bottz}: they are u dumbfuck excerpts 404 comes
+12:15  alek{xmb}{bottz}: for nothing u use the default, which is web which is http yo
+12:15  alek{xmb}{bottz}: check my //xmb.root.pe/ page, check for how i write links
+12:15  alek{xmb}{bottz}: i write em without the proto
+12:15  g0pher: karthee - asked a valid question
+12:16  alek{xmb}{bottz}: and i answered validly
+12:16  karthee: g0pher: sorry ?
+12:16  karthee: g0pher: something wrong i did ?
+12:17  g0pher: karthee - just the responses here were Not understandable 
+12:19  alek{xmb}{bottz}: hmh
+12:19  alek{xmb}{bottz}: gopher is smart =)
+12:19  alek{xmb}{bottz}: were not unreachable = they were reachable
+12:21  g0pher: alek{xmb}{bottz}: am Not smart - just wonder why Your Nick is so incombrihensible ?
+12:31  alek{xmb}{bottz}: kuz it konsisctcsz of two parts
+12:32  alek{xmb}{bottz}: three
+--- Log closed Tue Nov 16 12:42:13 2010
+--- Log opened Tue Nov 16 12:42:45 2010
+12:42 --- Users 98 nicks [0 ops, 0 halfops, 0 voices, 98 normal]
+12:43  g0pher: alek{xmb}{bottz} why such an incomrehinsibe nick name ?
+12:44 --- Channel #awk was synced in 104 seconds
+12:56  Zet: wow, is it 1997 again?
+12:56  Zet: what's happening to my irc
+13:02  g0pher: its 1997 again - Bring it ?
+14:17 --- alek{xmb}{bottz} is now known as bouncsz
+14:18 --- bouncsz is now known as bounercsz
+14:19  bounercsz: heya
+15:13  pr3d4t0r: Hi.
+--- Log opened Tue Nov 16 15:52:49 2010
+15:52 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+15:54 --- Channel #awk was synced in 105 seconds
+--- Log closed Wed Nov 17 11:21:13 2010

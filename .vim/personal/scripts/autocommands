@@ -22,8 +22,6 @@ if has("autocmd")
         "autocmd FileType ruby,perl,tex set shiftwidth=2
         autocmd FileType applescript compiler ruby
         au FileType text,svn setlocal tw=78 fo+=t
-        "autocmd BufWinLeave *.vim,*.html,*.htm,*.etc mkview
-        "autocmd BufWinEnter *.vim,*.html,*.htm,*.etc silent loadview
         au FileType mail,text let b:delimitMate_autoclose = 0
         " Files to set default textwidth
         autocmd FileType mail,tex set textwidth=79
@@ -31,7 +29,10 @@ if has("autocmd")
         " Javascript let is a keyword
         autocmd FileType javascript syn keyword javascriptIdentifier "let"
         autocmd FileType typoscript setlocal commentstring=#%s
-
+        autocmd FileType objc set makeprg=xcodebuild\ -activetarget\ -activeconfiguration
+        autocmd FileType objc setlocal errorformat=%f:%l:\ error:\ %m,%f:%l:\ warning:\ %m
+        "autocmd FileType objc :setlocal makeprg=xcodebuild\ -configuration\ Debug
+        autocmd FileType objc set isk+=58
         "autocmd FileType xhtml,html,xml,sass,tex,plaintex,yaml silent setlocal tabstop=2 softtabstop=2 shiftwidth=2
         "au FileType html DelimitMateReload | DelimitMateSwitch
         au Filetype html setlocal foldmethod=manual
@@ -40,6 +41,9 @@ if has("autocmd")
         "au Filetype html inoremap <buffer> <C-_> <Space><BS><Esc>:call InsertCloseTag()<cr>a
         au Filetype xhtml,html imap <buffer> ,/ </<C-X><C-O>
         au Filetype xhtml,html inoremap <buffer> <C-_> </<C-X><C-O>
+        "Recognize folding settings nicely.
+        "autocmd BufWinLeave *.vim,*.html,*.htm,*.etc mkview
+        "autocmd BufWinEnter *.vim,*.html,*.htm,*.etc silent loadview
         " Remove ALL autocommands for the current group.
     augroup END
 endif
@@ -108,10 +112,18 @@ function! MyControlSpace()
     endif
 endfunction
 autocmd Filetype java inoremap <C-Space> <c-r>=MyControlSpace()<cr>
+
+augroup objc "{{{
+    au!
+    autocmd Filetype objc inoremap <C-Space> <c-r>=MyControlSpace()<cr>
+    autocmd FileType objc :nmap <buffer> <silent> K :call objc#man#ShowDoc()<cr>
+    autocmd FileType objc :setlocal makeprg=xcodebuild\ -configuration\ Debug
+    autocmd FileType objc :setlocal errorformat=%f:%l:\ error:\ %m,%f:%l:\ warning:\ %m
+    autocmd FileType objc :nmap <buffer> <silent> <leader>id :silent !xed %<cr>
+    autocmd FileType objc :nmap <buffer> <silent> <leader>bu :mak!<CR>
+augroup END "}}}
 "autocmd Filetype java set foldmethod=manual
-
 "au! Syntax java source ~/.vim/syntax/python.vim
-
 " pentadactyl stuff
 "autocmd BufDelete *pentadactyl* silent :!echo 'tell application "Firefox" to activate' | osascript
 "au! BufRead pentadactyl-* nnoremap <buffer> ,d :silent write \| :bd<CR>

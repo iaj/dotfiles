@@ -1,0 +1,104 @@
+--- Log opened Sat Dec 04 00:00:40 2010
+00:02  thesnowdog: Do preferences accept anything but integers?
+00:03  John-Galt: You mean like floats? In which case, no.
+00:08  stepnem: hm, "User-defined mapping", very useful...
+00:08  thesnowdog: Should we be allowing float args and converting them?
+00:08  stepnem: better than nothing
+00:08  stepnem: also, what about other mode bindings?
+00:08  John-Galt: Well, they can add a -desc if they want.
+00:08  thesnowdog: I think the error is better.
+00:08  John-Galt: Well, other modes aren't :vi mode, are they?
+00:09  John-Galt: thesnowdog: It wouldn't normally cause an error, it'd just treat it as a string.
+00:09  stepnem: Exactly. The more I think about it, the more it seems it all sucks.
+00:09  John-Galt: Or, I suppose it would if it were already an int pref.
+00:09  John-Galt: Heh
+00:09  stepnem: There should be some sane command to list bindings.
+00:09  John-Galt: Ok. Write a spec and I'll impliment it.
+00:10  thesnowdog: Well set! intpref=1.3 now works setting it to 1 which is not particularly desirable?
+00:10  John-Galt: I agree.
+00:11  stepnem: dunno; what about :listkeys with a -mode option?
+00:12 +CIA-8: Kris Maglione <maglione.k@gmail.com> * 615f7f0d00386fa872493805b2d6402fa4027e9c /common/content/options.js Don't allow floats for int prefs.
+00:12  stepnem: also, does it take 'passkeys into account?
+00:12  John-Galt: Fine with me. If you write the help spec, I'll do it.
+00:13  John-Galt: Nope, doesn't take passkeys into account.
+00:13  stepnem: It should display something like "(disabled for current URL)"
+00:14  John-Galt: Probably.
+00:21  thesnowdog: stepnem: Shouldn't :map in it's listing incarnation just be 'extended' to offer descriptions?
+00:21  thesnowdog: *its
+00:22  stepnem: thesnowdog: dunno, I think a separate :lk would be better
+00:22  stepnem: :map is not supposed to list the default bindings anyway
+00:22  stepnem: or is it?
+00:23  thesnowdog: No but it could.
+00:23  thesnowdog: *shrug*
+00:24  thesnowdog: Yeah, you're probably right.
+00:25  thesnowdog: stepnem: Right a spec for your 'jump to impl' feature too.
+00:25  thesnowdog: OMG *write
+--- Log closed Sat Dec 04 12:46:35 2010
+--- Log opened Sat Dec 04 12:46:40 2010
+12:46 --- Users 23 nicks [1 ops, 0 halfops, 1 voices, 21 normal]
+12:46 --- Channel #pentadactyl was synced in 3 seconds
+13:02  thesnowdog: stepnem: Yeah, makes sense now the slavish adherence to a bizarre model is waning. :)
+15:30 --- lxfancy_ is now known as lxfanc
+15:31 --- lxfanc is now known as lxfancy_
+18:38 --- josue is now known as j0su3
+19:16 +CIA-8: Štěpán Němec <stepnem@gmail.com> * a8b34fc8469f941db930773f90527d20acdbe8fc /pentadactyl/locale/en-US/tutorial.xml 
+19:16 +CIA-8: Fix the initial note markup and a typo in the tutorial.
+19:16 +CIA-8: Closes issue #166.
+21:13  stepnem: thesnowdog, John-Galt: so if we do want to get rid of 'smartcase', my two alternative suggestions would be:
+21:13  stepnem: ignorecase=always|never|smart (makes sense while perserving the option name)
+21:13  stepnem: searchcase=match|ignore|smart (values consistent with wildcase)
+21:14  John-Galt: I prefer searchcase or findcase
+21:16  John-Galt: Anyway, changing ignorecase to a string would probably break peoples' rc files, and likely wind up showing the value at startup in some cases.
+21:18  stepnem: hm, that's a point I didn't think about; so the latter option does seem preferable; probably with a deprecation period for {ignore,smart}case
+21:19  stepnem: (or rather, just saying "use searchcase now" instead of just erroring out, not really honoring their values)
+21:39  zeltak: mmm wierd woke up this morning and all my marks, quickmaks etc are gone
+21:39  zeltak: havent done anything from last night
+21:39  zeltak: any idea why? is it a known issue?
+21:39  stepnem: well, my command line history disappeared mysteriously yesterday; might be related
+21:48 --- ChanServ sets modes [#pentadactyl +o FloodServ]
+21:49  John-Galt: Yep, there was a bug in storage for a couple of revisions the other day that stopped it from reloading things properly.
+23:21 +CIA-8: Kris Maglione <maglione.k@gmail.com> * 4da2219d34c357ab286bb86f876c19b5f685b373 / (7 files in 3 dirs) Replace 'ignorecase' and 'smartcase' with 'searchcase'.
+23:22 * John-Galt is unsure of the dubious benefit of charlists over stringlists.
+23:24  stepnem: too bad, that would have been a nice simple job for me (the 'searchcase' thing) :-)
+23:24  stepnem: John-Galt: yeah, I don't know, except for the fact that you don't need commas for the former...
+23:24 +CIA-8: Kris Maglione <maglione.k@gmail.com> * defe3de289541db4328b64386614feb8ae3eeabc /common/locale/en-US/pattern.xml Fix doc bugs caused by last commit.
+23:25  John-Galt: Heh. Should have jumped on it, then.
+23:25  stepnem: well, I waited for Doug's opinion
+23:25  John-Galt: He gave it a while ago.
+23:25  stepnem: not on the particular proposals, though
+23:26  John-Galt: True, I think I misread the backlog.
+23:32  thesnowdog: I think it should be findcase.  "search" in a browser is too ambigous, "find" slightly less so.
+23:33  stepnem: but the command the option applies to is described as "search"
+23:34  thesnowdog: Command?  It's gets references as "text search" in places but it's confusing as hell if you ask me.
+23:34  stepnem: I don't find it confusing; / & ? are "search" commands, in Vim or in Dactyl
+23:34  John-Galt: thesnowdog: Yeah, but all of the other prefs are called *search
+23:35  stepnem: thesnowdog: just have a look at :h /
+23:35  thesnowdog: Yeah, I was suggesting cleaning it all up, but if I'm the only one.
+23:35  stepnem: heh
+23:35  thesnowdog: stepnem: I know, I wrote it, because I was cloning Vim.
+23:35  thesnowdog: Apparently we don't want to clone Vim anymore though, right?
+23:36  John-Galt: Well, not past the point where it stops making sense, anyway.
+23:36  thesnowdog: defsearch and searchcase?
+23:36  stepnem: well, I could live with trying to reserve "search" for the webz and using "find"" for text search; but... dunno
+23:36  John-Galt: Yeah, I agree that it's stupid.
+23:36  thesnowdog: hlsearch, incsearch...
+23:37  thesnowdog: Too early for me, just woke up. *boom*
+23:37 * thesnowdog reassembles head
+23:38  John-Galt: bugg'rit, if we want to make the distinction let's do it now. I'm not adding a 'searchcase' option only to change it in a few weeks or months.
+23:39  John-Galt: Why do we have a 'linksearch' option? Is that really the kind of thing you want to turn on and off globally?
+23:40  John-Galt: Does anyone even use it?
+23:40  stepnem: certainly not me, I had to look it up
+23:40  John-Galt: It'd be nice if we were evil enough to automatically collect statistics on such things...
+23:41 * John-Galt considers writing a plugin...
+23:42  stepnem: yeah, I think as a plugin (or just opt-in if it's simple enough) it's a nice idea
+23:43  stepnem: ...the kind of idea developers tend to talk about from time to time without ever actually doing it
+23:43  John-Galt: Mozilla certainly did it.
+23:43  stepnem: BUT the Mozilla guys... yeah
+23:50  thesnowdog: John-Galt: People who liked to use the ' search intermittently asked for it.  It was before the hint system was updated to use link text.
+23:51  thesnowdog: I suspect it's only real use is for those recent converts who've used ' regularly.
+23:52  John-Galt: Well they can use \l anyway, and if they don't like that they can :map ' /\l
+23:53  thesnowdog: John-Galt: See it is far too early for me sorry. I though you were asking about the entire feature not just the option.
+23:53  thesnowdog: Which makes no sense given the context or what you actually asked. *sigh*
+23:53  John-Galt: Seems to be broke, anyway.
+23:54  John-Galt: Hm. Nevermind, only broken in my non-test profile that's been sitting open for ages.
+--- Log closed Sun Dec 05 00:00:32 2010

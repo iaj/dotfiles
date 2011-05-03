@@ -1,0 +1,1392 @@
+--- Log opened Mon Nov 29 08:19:23 2010
+--- Log closed Mon Nov 29 08:24:24 2010
+--- Log opened Mon Nov 29 08:24:49 2010
+08:24 --- Users 473 nicks [0 ops, 0 halfops, 0 voices, 473 normal]
+08:25  squid0: but a live cd will not mount a partition as /
+08:26  squid0: its own / sits in ram/on the cd
+08:26  mAniAk-_-: so?
+08:26  lautriv_: mount it /somewhere
+08:26  dextro_: i dont know a whole lot about computers so could someone explain why i slowly lose ram? i have a (java) game server running and it uses a lot of ram every time i reboot it it seems `top` reports less and less free ram
+08:26  squid0: oh ok, I understand
+08:26  lautriv_: on the other hand, if fdisk -l is blank, you haven't loaded the neccessary drivers to do so.
+08:26 --- Channel ##linux was synced in 128 seconds
+08:26  dextro_: gets to the point where i have to reboot the machine because i dont have enough free ram to even boot it
+08:27  dextro_: machine has 4gb ram is a fresh install and has NOTHING else on it
+08:27  lautriv_: dextro_, if you use the most bloated and ugliest language, no wonder at all. java is greedy.
+08:27  dextro_: but should ending the process not free the ram?
+08:27  dextro_: even for gay java
+08:28  lautriv_: dextro_, you'rs would be the first occurence.
+08:28  dextro_: ?
+08:29  squid0: why would I need to load drivers to mount these partitions?? they're already mounted and I'm reading them fine, but fdisk -l still reads blank
+08:29  lautriv_: squid0, fdisk -l lists partitions, what will you mount if there are none ?
+08:30  mAniAk-_-: squid0: sudo/root fdisk?
+08:31  lautriv_: dextro_, resources are freed on demand but java is for lazy coders, they are not supposed to care that much.
+08:34  squid0: I really don't know
+08:34  dextro_: i just really wish i didnt have to reboot the MACHINE every couple days
+08:34  dextro_: to free enough ram to boot the gameserver
+08:34  lautriv_: squid0, type id and tell us the result
+08:34  squid0: fdisk -l /dev/sdb3 says Cannot open /dev/sdb3
+08:35  lautriv_: squid0, sdb3 is already partition of sdb
+08:35  mAniAk-_-: squid0: are you root? or are you using sudo?
+08:36  lautriv_: dextro_, you may activate an oom-killer or use cron to manually get rid of the bloat.
+08:36  squid0: I'll try root
+08:36  dwhite: dextro_, you may have a buggy version of java. have you considered upgrading to a newer version?
+08:37  dwhite: dextro_, also, #java may have some suggestions.
+08:38  lautriv_: squid0, changing system resources needs always privileges.
+08:38  squid0: http://pastebin.com/5tavThxB
+08:39  Psi-Jack: dextro_: For starters, what JDK are we talking, and what kind of specs on the system you're running it on?
+08:39  squid0: oh, it also says Partition table entries are not in disk order
+08:40  lautriv_: squid0, who on earth decided to partition this way ?
+08:40  squid0: me
+08:40  squid0: long story
+08:41  squid0: but it's been booting just fine until last night when I installed the latest linux mint onto the 36G partition
+08:41  lautriv_: squid0, make a backup and try again, you can't start on a extended partition.
+08:41  Psi-Jack: Speaking of partitioning and long stories. Here's a good one: http://thedailywtf.com/Articles/The-Certified-DBA.aspx
+08:42  squid0: oh, of course the most worrying thing is it seems that the partitions are intact from before. they were not formatted, and linux mint was not installed on any of them
+08:43  squid0: the installer never made any complaints; in fact it took some time to "copy files". but on boot, I did see an error message at the terminal that said that the disk found no package files
+08:44  lautriv_: Psi-Jack, nice link
+08:44  squid0: that is, the dvd disk
+08:44  Psi-Jack: heh yeah.
+08:45  Psi-Jack: How NOT to be a stupid fool. ;)
+08:45  mrcarrot: the previous version of linux mint is also having problem with hd. a fully working and checked hd is appearing like it would work (hd led shining) and the system hangs...
+08:45  dextro_: lautriv_ a oom-killer?
+08:45  dextro_: dwhite i just installed jre from archlinux's pacman a couple weeks ago can't be _that_ old
+08:46  mrcarrot: for me it looks like ubuntu and ubuntu based distros are just becoming more buggy for each release
+08:46  dextro_: Psi-Jack, jre, xeon quad 2.8, 4gb ram
+08:46  Psi-Jack: dextro_: Real informative. jre of WHAT version, what JVM?
+08:46  dextro_: lol sorry
+08:47  lautriv_: dextro_, there is a function called so it kills apps that tend to fulfill too much resources but usually on bad functionality.
+08:47  dextro_: [mc@anubis server5]$ java -version
+08:47  dextro_: java version "1.6.0_22"
+08:47  dextro_: Java(TM) SE Runtime Environment (build 1.6.0_22-b04)
+08:47  dextro_: Java HotSpot(TM) 64-Bit Server VM (build 17.1-b03, mixed mode)
+08:47  Psi-Jack: Okay, so Sun Java.
+08:47  squid0: lautriv_: so if I try again, and install the new linux mint to one of the (ext3) partitions, and tell the installer to install grub to a non-extended partition, that should work, right?
+08:47  bocaneri: Nets went POOF!
+08:48  squid0: where should I choose to install grub to (in the installer)?
+08:48  Psi-Jack: dextro_: Well, the problem with that system is the 4 GB. Running Java anything needs RAM like no tomorrow.
+08:48  dextro_: yeah system only uses about 500mb before i boot up the java gameserver
+08:49  Psi-Jack: dextro_: But, there's also command-line options for the jvm to limit max mem
+08:49  dextro_: -Xms
+08:49  dextro_: i have been using them
+08:49  dextro_: problem is each time it shuts down there is less ram avil
+08:49  Psi-Jack: dextro_: What's your -Xms set to?
+08:49  lautriv_: squid0, for a multiboot, use a small partition for /boot only, around 100M, then swap, then your first / after that maxe extended partitions. this way you get sdX1-3 and 5-rest.
+08:49  dextro_: for no aparent reason
+08:49  Psi-Jack: dextro_: And -Xmx?
+08:49  lautriv_: s/maxe/make
+08:49  dextro_: min ram is 1024 max is 2500
+08:50  Psi-Jack: dextro_: This system have ECC memory?
+08:50  dextro_: uh no idea
+08:50  Psi-Jack: Is it server grade equipment?
+08:50  dextro_: doubt it
+08:50  dextro_: only $100 a month
+08:50  Psi-Jack: You don't know?
+08:51  Psi-Jack: I see.. So you're paying for a server you know nothing about, eh?
+08:51  dextro_: i said i suck with computers in my first comment!
+08:51  lautriv_: Psi-Jack, Xeon i'd guess it'S ecc
+08:51  Psi-Jack: That doesn't improve things at all. ;)
+08:51  Psi-Jack: lautriv_: Likely, but can't be sure. $100/mo is good enough for low-class server hardware.
+08:52  Psi-Jack: dextro_: Distro?
+08:53  dextro_: archlinux
+08:53  Psi-Jack: For a server? Are you stupid?
+08:53  dextro_: yes :D
+08:53  Psi-Jack: Ugh.
+08:53  Psi-Jack: I'm going to simply say this then.
+08:53  [R]: lol
+08:53 * dextro_ tenses up
+08:53  Psi-Jack: Call your hosting provider, tell them the story, and tell them you suspect memory leaking issues possibly due to failing hardware.
+08:54  squid0: thanks, lautriv_ and mAniAk-_-
+08:55  dextro_: ok will do be back in a bit thanks a million for all the help so far :)
+08:57  lautriv_: is rsync tuneable to multi-port ?
+09:00  [R]: lautriv_: meaning?
+09:00  lautriv_: [R], looks like my ISP sucks at winsize so i'll try to opens-up some bundles.
+09:01  [R]: lautriv_: wtf?
+09:01  lautriv_: [R], kinda bonding but not with lines but ports.
+09:01  bocaneri: There's a command, I don't remember what it is, something like "inet list addr" to get the local IP...?
+09:02  [R]: lautriv_: english... do you speak it
+09:02  bocaneri: [R], lautriv's Englisch ist VIEL besser als mein Deutsch. Uff da!
+09:02  [R]: bocaneri: ifconfig
+09:03  SpiceMan: bocaneri: ip addr
+09:03  lautriv_: bocaneri, addr list
+09:03  Diverdude: Does anybody know if this guy: http://www.cetoncorp.com/products.php May be used in a linux machine somehow?
+09:03  [R]: this is so unfair
+09:03  [R]: people claim unbinding nouveau works for them
+09:03  [R]: why doesn't it work for me :(
+09:03  bocaneri: ifconfig ain't it...
+09:03  bocaneri: addr ain't it...
+09:03  [R]: Diverdude: i've heard there is drivers coming for it... but you can't watch anything not copy-freely
+09:04  bocaneri: .... and ip addr spews tons of crap.
+09:04 --- centosian_ is now known as centosian
+09:04  John_Morgan: what should I do if kernel have no *snd-hda-intel* with a hd audio card?
+09:04  [R]: Diverdude: i.e. if you dont already get it on QAM or over firewire... you're not gonna get it with that
+09:04  Diverdude: [R], im not really sure what you mean? Get what over QAM or firewire?
+09:05  [R]: Diverdude: the channels
+09:05  Diverdude: [R], aha...now i get channels via DVB-C
+09:05  [R]: thats a card for the US
+09:05 * [R] shakes his head
+09:06  mrcarrot: John_Morgan: two options: 1. compile a new kernel. 2. change distro
+09:06  MTecknology: I feel like Firefox 4.0 is trying to become Google Chrome......
+09:06  MTecknology: I don't like it one bit
+09:06  Diverdude: [R], what?
+09:07  [R]: Diverdude: it helps if you actaully READ
+09:08  Diverdude: [R], sorry.... i didnt want to offend you
+09:08  [R]: your inability to read isn't going to offend me
+09:08 * bocaneri googles around and runs into tons of ADVERTISEMENTS... welcome to the future, folks, where googling that used to take seconds will now be a prime time TV viewing experience...
+09:09  Diverdude: [R], im a bit new to this whole thing, so please be a bit patient
+09:09  [R]: Diverdude: you're not gonna get very far if you can't even read
+09:10  MTecknology: bocaneri: I'm getting to the point of looking for a new search engine - I love everything else they offer but as far as a search engine- they're becoming bing....
+09:10  MTecknology: Bingle
+09:12  bocaneri: It's not google doing it - it's the sites I'm visiting.
+09:12  Diverdude: [R], im not really sure what i misread. You said "if you dont already get it on QAM or over firewire... you're not gonna get it with that", with "that" being channels...so i say i get my channels over the cable...where else should i get it from? Maybe im just beeing ignorant and stupid, but hey as i said i am a bit new to this.
+09:12  [R]: Diverdude: you dont live in the US... the website CLEARLY says the card is for the US
+09:13 * Lady_Aleena sets out cookies on the table for everyone.
+09:13  stinky: bocaneri: welcome to adblock plus
+09:13  stinky: now, what is your problem?
+09:15  bocaneri: The fact that I didn't realise all that crap was there because this is a new install and I don't have all my accumulated crap on it yet.
+09:15  lautriv_: Diverdude just punch a hauppauge in your machine and install mythtv.
+09:21  zW: Hi fellow linux users.
+09:21  Psi-Jack: Diverdude: [R] does have a point. The card is very specific that it only specifies US Digital Cable.
+09:21  Psi-Jack: Hello, ungabunga.
+09:22  zW: Does someone know what currently a good linux based scalable anti-spam solution is ?
+09:22  [R]: spamassasin
+09:22  Psi-Jack: zW: Like, spamassassin, rbl, and clamav?
+09:22  zW: spamass is ok
+09:22  zW: but not for 500.000 mailboxes :-)
+09:22  Psi-Jack: Yes it is.
+09:22  zW: clamd is scalable
+09:22  zW: that is ok
+09:22  zW: But spamass is to much recourses
+09:23  zW: I was thinking about britemail
+09:23  Psi-Jack: zW: And what do you think britemail uses?
+09:23  zW: spamass ?
+09:24  zW: Isn't there a less resource using system then spamass on the market somewhere ?
+09:24  Psi-Jack: Oh, wait, Symantec, EWWWWWW! Get off my planet Symantec!
+09:24  zW: No
+09:24  zW: Symantec sucks
+09:24  zW: I need better :)
+09:24  Psi-Jack: zW: Do you want, works, or do you want fast?
+09:24  Psi-Jack: Britemail == Symantec.
+09:25  zW: brr
+09:25  zW: no britemail then
+09:25  zW: :)
+09:25  zW: Any other suggestions
+09:25  zW: What does barracuda use ?
+09:25  Psi-Jack: What part of spamassassin don't you understand?
+09:25  lautriv_: zW, i'm courious, wanna handle 500k mails and not give resources for it ?
+09:26  Psi-Jack: That's 500k mailboxes. Wether in use or not.
+09:30  zW: The thing is
+09:30  zW: I wanne make recourses for it
+09:30  zW: The question is
+09:31  zW: Can spamassassin handle it ?
+09:31  Psi-Jack: "make recourses"?
+09:31  zW: I mean, I can't setup 100 spamass servers :)
+09:32  ApplePieFromScra: over 9000!
+09:33  lxsameer: hi does any one know a tool replacing OS X bless in linux ?
+09:33  [R]: lxsameer: what is it?
+09:34  Psi-Jack: lxsameer: Umm, to make a partition bootable?
+09:34  lxsameer: [R]: http://www.unix.com/man-page/All/8/bless/
+09:34  lxsameer: Psi-Jack: yeah
+09:34  Psi-Jack: fdisk
+09:34  [R]: lol
+09:34  lxsameer: Psi-Jack: no bless do more that that
+09:34  ApplePieFromScra: how much mail do you have that you would need 100 spam assassin servers?
+09:34  Psi-Jack: lxsameer: So what? OS X is crazy too.
+09:35  Psi-Jack: ApplePieFromScra: Give it up now while you still have hair.
+09:35  Psi-Jack: Or, crust in your case.
+09:35  ApplePieFromScra: lol, i shave my head
+09:36  ApplePieFromScra: i was just going to say i bet 5-7 ecelerity servers could do as much mail processing as 100 spam assasin servers
+09:36  lxsameer: Psi-Jack: with bless you can specify a boot directory
+09:36  Psi-Jack: Uh huh. So what?
+09:36  Psi-Jack: OS X also uses EFI and GPT.
+09:37  Psi-Jack: Is there a complete replacement for bless in linux? No.
+09:37  lxsameer: Psi-Jack: i see , i want to install refit in a hfs+ parition for booting linux
+09:37  Psi-Jack: HFS+ is a filesystem format, not partition.
+09:38  lxsameer: Psi-Jack: my bad
+09:39  lxsameer: Psi-Jack: hmmmmmmmmmmm , ah my god, i hate my self, where was my brain when i bought mackbookpro
+09:40  Psi-Jack: I'd buy a Mac myself.
+09:40  Psi-Jack: But, it wouldn't be to put Linux on it.
+09:41  lxsameer: Psi-Jack: can i bless refit from OSX installation disc?
+09:41  Psi-Jack: lxsameer: #macosx
+09:42  lxsameer: Psi-Jack: hmmmmmmmmmmmmm thanks any way
+09:44  ApplePieFromScra: man, when are these hippies going to stop
+09:44  ApplePieFromScra: wifi is killing trees now, apparently
+09:46  lautriv_: ApplePieFromScra, not unlikely
+09:49  yagoo: lxsameer, best to ask #refit if there's that channel.. there's a refit boot cd actually
+09:49  lxsameer: yagoo: thanks
+09:58  crocket: I obtained a DDR3 SO-DIMM RAM, today.
+09:58  crocket: It doesn't fit in the socket perfectly such that it gets pulled when I pull it lightly.
+09:58  crocket: It can't be pulled if it fits.
+09:59  crocket: Does anybody know how to make it fit into the mainboard socket?
+09:59  reisio: crocket: I only speak English
+09:59  crocket: reisio : what the hell do you mean?
+10:00  reisio: my sentiments exactly
+10:00  crocket: reisio : I don't know what you refer to.
+10:00  reisio: crocket: I don't know what _you_ refer to
+10:00  reisio: can you rephrase?
+10:00  crocket: reisio : I don't know if you are mocking me.
+10:01  reisio: does it matter?
+10:01  crocket: yes
+10:01  crocket: reisio : You should tell me what you mean by "I only speak English".
+10:02  crocket: Or it's just a meaningless sentence passing by.
+10:02  reisio: we're past that
+10:02  reisio: can you rephrase your problem?
+10:03  crocket: reisio : My DDR3 SO-DIMM RAM doesn't fit in the RAM socket well.
+10:03  crocket: It gets pulled very easily.
+10:03  reisio: well?
+10:03  reisio: does it fall out on its own?
+10:03  crocket: reisio : No by gravitation, but a light pull would do.
+10:04  reisio: so what's the problem?
+10:04  manixor: How can I open the UI add new user, from console?
+10:04  reisio: manixor: what distro?
+10:04  mrcarrot: manixor: adduser :)
+10:04  crocket: reisio : It can't be pulled easily when it's in the socket.
+10:04  mrcarrot: manixor: as root, of course... or then sudo adduser
+10:05  meznak: crocket: it's one of three things: you have the wrong ram, you installed it incorrectly, or your motherboard sucks (ram should lock in place)
+10:05  reisio: crocket: you just said it's pulled too easy
+10:05  reisio: or the stick was mishandled and now it doesn't fit as well
+10:05  crocket: reisio : I'm saying what should be.
+10:05  reisio: either way, unless it's falling out on its own, I don't see a problem
+10:05  reisio: crocket: I should be rich and covered in women made out of blue nehi
+10:05  reisio: but I'm not
+10:05  crocket: reisio : There will be a problem later.
+10:05  reisio: crocket: yes, there will be
+10:05  reisio: there always is
+10:06 * meznak golfclaps
+10:06  reisio: but I doubt what you've described makes it any more likely
+10:06  crocket: reisio : What if BIOS doesn't recognize the RAM this way?
+10:06 * reisio kidnaps pizza delivery guy
+10:06  reisio: crocket: that would be a problem
+10:06  reisio: confucius say: there is no problem until there is
+10:06  crocket: confucius is a dead guy
+10:06  reisio: why don't you _find out_ if the computer recognizes it before you worry about it not being recognized
+10:06  reisio: crocket: _is_ he? :p
+10:07  crocket: reisio : He died thousands of years ago
+10:07  reisio: crocket: prove it
+10:07  crocket: reisio : read wikipedia article
+10:08  reisio: good for you
+10:08  crocket: reisio : He was born about the same time jesus christ was born.
+10:09  crocket: He needs to rephrase his own terms
+10:10  Rabenklaue: hi, I've just updated to 2.6.37-rc3 and got problems with my thermal info indicators - looks like there have been some changes in kernel taken place.
+10:10 * mrcarrot makes a dd/gzip image of a 320Gb hd... boooring
+10:10  Rabenklaue: What do I need to activate in order to get e.g. acpitool to show the temperature of my cpu again?
+10:11  reisio: crocket: give or take 500 years? :p
+10:11  reisio: mrcarrot: sofa king boring
+10:11  manixor: reisio: mrcarrot I'm using: Scientific Linux -- Linux version 2.6.18-128.1.1.el5 (gcc version 4.1.2 20071124 (Red Hat 4.1.2-42)), and adduser not working
+10:12  reisio: Rabenklaue: ...did your config change?
+10:12  reisio: it shouldn't have, not markedly
+10:12  reisio: manixor: the proper command is useradd
+10:12  reisio: manixor: but did you say you wanted to use a GUI?
+10:12  loomsen: manixor: you're pretty outdated
+10:13  reisio: well, scientific linux has a specific purpose
+10:13  reisio: not that it isn't unfortunate they chose Red Hat as a base, but still
+10:13  manixor: reisio: loomsen This is what I need to use. Not working useradd to. I think I need to use system-config-user
+10:13  manixor: But I don't have -X
+10:13  reisio: manixor: are you root?
+10:13  Rabenklaue: reisio: I only did make menuconfig and updated some parts in the driver section and not touched the acpi related sections.
+10:13  manixor: reisio: Yes, I'm root
+10:14  loomsen: manixor: read the manpage, useradd is the proper command
+10:14  reisio: Rabenklaue: do you have a copy of your old config?
+10:14  reisio: there may be a GUI, depending on what DE you're using, but you should be able to use useradd regardless
+10:14  reisio: and may as well, it'll be faster and more versatile
+10:15  Rabenklaue: From 2.6.36, yes I have and tried to compile it with this config, but did not change anything for me
+10:15  reisio: Rabenklaue: okay how about this: why are you updating to .37 at all?
+10:16 * bocaneri is still using .26 on his debian stable
+10:16  reisio: yeah, I'm using .26 on your debian stable as well
+10:17  loomsen: heh
+10:18  Rabenklaue: reisio: For testing reasons - as there have been some major changes regarding the remove process of BKL I wanted to check whether there are some performance improvements.
+10:18 * bocaneri succeeds  in writing a script that mounts each machine's home directory for $user on the local machines ~/net/user for *every* machine on the net
+10:18  Vutral: i got a raid1 linux software raid and it is not going to boot
+10:19  crocket: It's time to boot up the server computer
+10:19  Vutral: i need assistance in fixing grub
+10:19  bocaneri: Vutral, which grub, and what's the problem?
+10:19  Vutral: 0.92
+10:19  Vutral: i guess
+10:20  spektom: Hi
+10:20  Vutral: grub (GNU GRUB 0.97)
+10:20  spektom: is there a way to specify alias containing dots in /etc/aliases ?
+10:20  bocaneri: Vutral, OK, what's the problem?
+10:20  Rabenklaue: from my config: CONFIG_ACPI_THERMAL=y and CONFIG_THERMAL=y
+10:20  Vutral: i installed it
+10:20  Vutral: manually
+10:20  spektom: postfix says "unknown mail transport error" when sending to such an alias
+10:20  reisio: Rabenklaue: well no offense, but maybe you should master kernel management and personal system hardware requirement debugging before you work on that other stuff
+10:20  Vutral: and my the config file i found but which oviously was from (2006)
+10:20  bocaneri: I'm not going to help anybody who can't write more than two words on a line.
+10:21  reisio: Rabenklaue: AKA: use the stable kernel
+10:21  Vutral: but it still not going to boot
+10:21  Vutral: grub.conf was empty when i found the system not booten
+10:21  Vutral: and aswell menu.lst
+10:21  Vutral: i now fixed the menu.lst
+10:21  Vutral: didnt boot
+10:22  Vutral: stage1 isnt booting even i think ^^
+10:22  scp1: reisio, http://www.linux.fm/ # for you babe
+10:22  Vutral: i need a procedure to fix the grub installation without knowing how it was installed before
+10:23  reisio: thanks hun
+10:23  bocaneri: There isn't one because you have to tailor the menu.lst to your present layout.
+10:23  reisio: ooh, crypto/zlib.c is my favorite track
+10:23  Vutral: if the kernel would support kexec i did boot with it :D
+10:23  Vutral: and fix it then
+10:23  scp1: reisio, mine as well!
+10:24  reisio: I might like the dubstep remix better, though
+10:24  reisio: wow, I didn't realize espeak had such an antiquated voice :p
+10:25  Vutral: reisio, festival rules
+10:25  Vutral: you need mbrola
+10:25  Vutral: only the standard voices are bad
+10:25  Vutral: :D
+10:26  reisio: shouldn't the standard ones be... good?
+10:26  Vutral: they arent
+10:26  Vutral: check mbrola
+10:26  crocket: I can't boot my server.
+10:26  crocket: Maybe it's the wrong ram.
+10:27  reisio: heh http://www.youtube.com/watch?v=WKfrBV4WH8w
+10:27  mrcarrot: crocket: i feel pity for you :(
+10:28  crocket: mrcarrot, When somebody else put his RAM in my server, it booted fine.
+10:28  crocket: Now with my RAM, it makes a farting sound and nothing.
+10:34  Vutral: re
+10:36  reisio: I don't know, this mbrola stuff doesn't sound very modern, either
+10:36  Vutral: you need files
+10:36  Vutral: for mbrola
+10:36  Vutral: there was a artiicle in the linux magazine
+10:36  Vutral: long time ago
+10:36  Vutral: ^^
+10:36  reisio: really, files?
+10:36  reisio: I thought it would just appear
+10:36  Vutral: yes files
+10:36  Vutral: :D
+10:37  Vutral: i really need to fix the booting problem
+10:37  reisio: http://www2.research.att.com/~ttsweb/tts/demo.php checkout Audrey/UK
+10:38  Vutral: maybe you should not focus on englisch voices
+10:38  Vutral: ^^
+10:38  Vutral: lol
+10:38  Vutral: american
+10:38  Vutral: ^^
+10:38  Vutral: maybe
+10:38  Vutral: you are strange btw
+10:38  Vutral: you try to hear voices :P
+10:38  Obvious: audrey sounds awful
+10:38  Vutral: most people try to get rid of them
+10:39  Vutral: lol
+10:39  Obvious: awww hell, Charles/UK kicks ass
+10:40  Obvious: he sounds like british colonial officer
+10:40  bocaneri: Roit. That'll be quoit enoof o' that, then.
+10:40  reisio: for some reason the UK voices are slightly better
+10:41  reisio: Obvious: well compare them all
+10:41  reisio: IMO Audrey sounds the best
+10:41  Obvious: nope, even in the default text, f.e., she stresses "policIEs" and glugs on "below"
+10:42  reisio: you're comparing it to a real person? :p
+10:42  reisio: compare it to espeak :p
+10:44  Obvious: why not festival?
+10:46  Vutral: bla
+10:46  Vutral: even with mbrola
+10:46  Vutral: and the voicetools
+10:46  Vutral: and festival
+10:46  Vutral: you need to create the files yourself
+10:46  Vutral: ^^
+10:46  Vutral: you can model voices
+10:46  reisio: that's what she said
+10:46  Vutral: like you want
+10:46  Vutral: its usually easier
+10:47  Vutral: to write something which gives it a good sounding language
+10:47  Vutral: wiriting policies als policees
+10:47  Vutral: and so on
+10:48  Vutral: festival only generates voice
+10:48  Vutral: it cannot do natural language processing very well
+10:48  Vutral: but as you see its easy for a human
+10:48  Vutral: to set up the rules
+10:48  Vutral: even thought we dont write down that rule set usually
+10:48  reisio: as you can _see_
+10:48  reisio: good one :p
+10:48  Vutral: which is oviously a fault
+10:49  Vutral: lol
+10:49  Vutral: take more lsd ^^
+10:49  Vutral: it makes you hear pictures and see sounds
+10:49  Vutral: lol
+11:00 --- sanchaz is now known as sanchaz-away
+11:06  __name__: hey
+11:06  toader: hi, in the profile details of "top", what does it mean "cpu 99.9%ni"?
+11:06  __name__: I have a Huawei E620 that works when using it after boot, but once I disconnect I have to reboot to reconnect.
+11:06  __name__: Any suggestions?
+11:08  reisio: __name__: luckily I have memorized what type of device every manufacturer/model number corresponds to
+11:09  crocket: I fixed the problem
+11:09  lautriv_: reisio,  :-)
+11:09  crocket: I didn't put the RAM deep enough to lock it.
+11:09  Psi-Jack: __name__: And what is this mysterious Huawei E620?
+11:10  totesmuhgoats: reisio: what distro do you use btw?
+11:10  __name__: mobile internet modem
+11:10  SolomonKull: bleh, nmap is too slow
+11:10  toader: Hi, could anybody help me dianoses if there is a CPU bound of running my program? thanks http://imagebin.ca/img/fTgbTg.png
+11:10  reisio: totesmuhgoats: Dettu[Xx] of course! :p
+11:10  reisio: totesmuhgoats: why do you ask?
+11:11  totesmuhgoats: just curious cos i always see you in here
+11:11  totesmuhgoats: never even heard of this distro before
+11:11  reisio: totesmuhgoats: 'cause nobody uses it, not even me :p
+11:11  reisio: toader: uhoh
+11:11  reisio: python disco, very bad
+11:12  toader: reisio: why very bad?
+11:12  reisio: :p
+11:12  SolomonKull: I wish I could commit myself to using a completly Libre system.
+11:12  reisio: toader: it's actually a percentage, and why does it matter if it's high?
+11:12  Psi-Jack: __name__: In looking at Huawei's site directly, I'm not seeing the E620, at all.
+11:13 * lautriv_ renames crocket to mickey_mouse_job
+11:13 * reisio is content using merely decoding and/or transcoding non-free to free
+11:13  __name__: Psi-Jack: Maybe that's a european device?
+11:13  toader: reisio: as it not very fast for my loading data
+11:13  toader: reisio: i want to find the root reason
+11:13  Psi-Jack: __name__: I did a specific model search for E620, no listings found.
+11:13  reisio: toader: your python script?
+11:13  reisio: toader: talk to #python
+11:14  Psi-Jack: __name__: They do have an E 630, though,
+11:14  reisio: e630, good blender, that
+11:14  Termana: SolomonKull, why?
+11:15  SolomonKull: Termana: Because.
+11:15  lautriv_: Psi-Jack, i found lots of matches to E620 but it seems to be OEM for providers.
+11:15  Termana: You wish you could commit yourself to a completely libre system so that programmers can starve?
+11:15  bocaneri: When I was still working in an office, I was Windows-bound because the software required for that job was found on no other platform.
+11:15  Termana: Just asking
+11:16  Psi-Jack: lautriv_: Heh, well, that certainly doesn't do any good, then. Makes it even less likely to be well supported.
+11:16 * crocket renames lautriv to handjob
+11:16  crocket: ha
+11:16  Psi-Jack: crocket: Behave.
+11:16  crocket: sorry
+11:16  Psi-Jack: This IS a family channel.
+11:16  Termana: Psi-Jack, most of the time anyway
+11:16  Psi-Jack: Termana: No. It is.
+11:16  totesmuhgoats: reisio: oh i see, this is one of those distros that defeats the purpose of having a distro
+11:16  SolomonKull: Termana: no, so that I can enjoy freedom.  If programmers cant make money coding, they should do something else.  Libre does not mean Free, either.  Learn the definition of these terms before you run your mouth at me.
+11:17  reisio: bocaneri: I'd believe that it would've been hard/tedious to use other software, maybe
+11:17  SolomonKull: Liberty =/= Free of cost
+11:17  __name__: Psi-Jack: I doubt lspci is fooling me
+11:17  Termana: SolomonKull, run my mouth? It was mere discussion
+11:17  reisio: totesmuhgoats: maybe, never used it
+11:17  totesmuhgoats: i have a laptop that has a few issues with acpi in linux, works in windows. should i just assume it won't work in freebsd either, or is it worth a shot?
+11:17  totesmuhgoats: reisio: so what distro do you actually use?
+11:17  SolomonKull: Termana: it was seemingly hostil towards my choice of using Free Software.
+11:17  bocaneri: Reisio, no, packages like Soldworks and Solid Edge are not available for other platforms, or weren't when I was still in that field.
+11:17  SolomonKull: hostile*
+11:18  SolomonKull: Termana: what operating system do you use?
+11:18  Termana: SolomonKull, where is the business model to sell GPL software (with no extras, just the software)?
+11:18  Termana: SolomonKull, also, no not hostile, just thought provoking discussion
+11:18  Psi-Jack: totesmuhgoats: For FreeBSD try #Freebsd, not ##linux. As for ACPI issues, new kernel patches and even newer kernel releases have fixes for related laptop ACPI issues you may be having.
+11:18  Termana: SolomonKull, I have Linux, OS X and OpenBSD on separate machines
+11:19  SolomonKull: Termana: There are no software companies, there are companies that sell services with their software.
+11:19  SolomonKull: Termana: so you let programmers starve?  Why woudl you use Linux or BSD, coders are starving.
+11:19  SolomonKull: !
+11:19  reisio: bocaneri: I'm sure alternatives are, but then you'd have to convince your colleagues to tolerate them :p
+11:19  Termana: SolomonKull, no, BSD licenses allow programmers to make money
+11:19  SolomonKull: Termana: so does the GPL.
+11:19  SolomonKull: Read it before you talk about it.
+11:19  totesmuhgoats: Psi-Jack: yea, i was just asking hypothetically. ive tried the latest kernels i time and again
+11:20  Termana: SolomonKull, I've read it fine
+11:20  bocaneri: Colleagues, bosses, customers, vendors and tons of other people. Yeah, good luck with that.
+11:20  Psi-Jack: __name__: Yeah, well, unless I can look up specs for it, I find it near impossible to give any help for it. Since it's an OEM product you might contact your provider and try to work it out with them and either get a replacement, or change of product that actually works with Linux.
+11:20  bocaneri: And no, there are no alternatives for these packages even now.
+11:20  reisio: totesmuhgoats: I use one of the 3.5 non-silly distros: Debian, Slackware, Gentoo(, Arch)
+11:20  Termana: SolomonKull, you cannot make money on the software itself if it is GPL'ed.
+11:20  SolomonKull: Termana: yes you can.
+11:20  Termana: SolomonKull, I'm sorry maybe I'm not using the correct phrasing. You CAN - but you WONT
+11:20  __name__: Psi-Jack: You do not get these products without contracts here.
+11:20  SolomonKull: Termana: people do.
+11:21  Termana: SolomonKull, when they sell exceptions.
+11:21  totesmuhgoats: reisio: which one is only half non silly?
+11:22  reisio: totesmuhgoats: I suspect Arch to be non-silly
+11:22  reisio: but have less experience with it
+11:22  Termana: SolomonKull, no one is making money on selling GPL software (just the software itself) and if they are, I would be glad for you to point me at it
+11:22  reisio: it's basically non-derivative, which makes it a million times less silly than a lot of other distros
+11:23  PingFloyd: Termana: there is nothing in gpl that says you can't sell for a fee
+11:23  PingFloyd: I don't think you understand the gpl
+11:23  Termana: PingFloyd, don't throw theory at me, I already said you could
+11:24  Termana: But no one is because it isn't practical
+11:24  Termana: If I sell a GPL piece of software to 10 people, I can guarantee one of those will take the source I must provide and provide a free version
+11:25  Termana: Who will buy my version when you can get it free?
+11:25  PingFloyd: Termana: gpl is this in a nutshell--a person can distribute software under it for whatever charge they want, they can make modifications to it too, sell their modification if they want, the heart of GPL is that you can't prevent anyone else from doing the same
+11:25  crocket: Termana : You sell support, then.
+11:25  Termana: PingFloyd, I understand the GPL
+11:25  Termana: crocket, that doesn't work
+11:25  Termana: crocket, are you going to sell support with your next major game title?
+11:26  pucko_: gpl rules. preserves the right to tinker with stuff
+11:26  crocket: Termana : game
+11:26  Termana: crocket, you knew what I meant, that doesn't change anything
+11:27  PingFloyd: in other words GPL works off fairness--it eliminates the ability to monopolize
+11:27  crocket: Termana : It means I get it
+11:27  SolomonKull: GPL allows you to write software and then provide a solid service on which to build yoru company.  You dont build a company on software alone, not one single company does except maybe microsoft but they even sell hardware.
+11:27  SolomonKull: Red Hat or Novel are prime examples.
+11:28  Termana: SolomonKull, Microsoft as well as the example I provided above - game companies
+11:28  crocket: But the software has to be big enough to make support demand.
+11:28  Termana: Other types of software are sold stand-alone as well
+11:28  SolomonKull: Termana: most fo those games sell a service; eg, Servers, support forums, help lines etc.
+11:28  Termana: PingFloyd, fairness? You can't buy food with fairness.
+11:29  Termana: SolomonKull, you can't charge the same amount for that
+11:29  PingFloyd: Termana: food is a consumable item
+11:29  PingFloyd: software isn't a consumable item in any way
+11:29  SolomonKull: Termana: you can charage whatever you want.
+11:29  SolomonKull: ANYTHING.
+11:29  PingFloyd: it isn't gone after you use it
+11:29  Termana: SolomonKull, remember, the business not only has to pay it's programmers, but it also has to make a profit
+11:30  crocket: hmm
+11:30  SolomonKull: Termana: companies do it.  If you cannot do it, FIND ANOTHER JOB.
+11:30  PingFloyd: food has more in common with fireworks than it does with software
+11:30  Termana: SolomonKull, you can, but no one is silly enough to pay $160 for game "support"
+11:30  crocket: Is redhat linux subject to GPL?
+11:30  pucko_: I find it to be an easy choice, use gpl if you want to else don't.
+11:30  Termana: PingFloyd, programmers make money, money buys food
+11:30  reisio: no, but Red Hat's Linux is
+11:31  SolomonKull: Termana: You *do* realize that artwork in the game does not have to be GPL and therefore you would have a unique product.
+11:31  SolomonKull: Right?
+11:31  SolomonKull: You know that, righht?
+11:31  Termana: crocket, Red Hat contains pieces that are proprietary.
+11:31  PingFloyd: Termana: anything has as much value as what everyone puts on it
+11:31  PingFloyd: Termana: that's how those pieces of paper in your wallet  work
+11:31  ApplePieFromScra: crocket is, same as rhel but no direct support
+11:31  ApplePieFromScra: i mean, crocket, centos is
+11:32  SolomonKull: Games using the GLP model do not have to give licience to the artwork in the game.  This is how you get a unique GPL game.
+11:32  PingFloyd: the game resources can be under a completely different license
+11:32  crocket: ApplePieFromScra, I thought you told I was subject to GPL.
+11:32  SolomonKull: GPL businesses work in theory, you just cant be an idiot if you wish to succeed.
+11:32  nazgjunk: Also, try having a game that's more than a remake of existing concepts ;)
+11:33  PingFloyd: same thing with its manuals
+11:33  SolomonKull: The music, voice work, art etc.  All non-GPL parts fo the game.
+11:33 --- Abracad4br4 is now known as Abracadabra
+11:33  crocket: Hmm
+11:33  Termana: These seem like all great theories. But where is the actual people making money
+11:33  crocket: Drivers can be licensed under GPL.
+11:33  fisted: Termana: http://ht.ly/1ZZFL
+11:33  SolomonKull: GPL businesses work in theory, you just cant be an idiot if you wish to succeed.
+11:33 --- ApplePieFromScra is now known as SedZepplin
+11:34  crocket: Intel makes opensource drivers.
+11:34  SolomonKull: They do, indeed.
+11:34  Termana: crocket, Intel sells chips
+11:34  Termana: It's an addition to the software
+11:34  Termana: The software is just the side dish
+11:35  crocket: But I agree that GPL is not suitable for commercial business most of time.
+11:35  SolomonKull: THERE ARE NO SOFTWARE-ONLY COMPANIES that are successful.
+11:35 --- SedZepplin is now known as AwkingHeads
+11:35  SolomonKull: Name one.
+11:35  SolomonKull: Just one.
+11:35  Termana: SolomonKull, Microsoft
+11:35  SolomonKull: They sell hardware/
+11:35  SolomonKull: Next?
+11:35  reisio: GPL is an odd but not impossible choice for hustlers
+11:35  fisted: they didnt sell HW all the time.
+11:35  reisio: for companies providing an actual _service_, it's a perfect choice
+11:35  SolomonKull: fisted: they do now.
+11:35  fisted: SolomonKull: irrelevant since they had success before.
+11:36  SolomonKull: fisted: 20+ years ago, before they put money into IBM.
+11:36  TermanaDesire: SolomonKull: again ga
+11:36  TermanaDesire: Game companies
+11:36  fisted: SolomonKull: still irrelevant^
+11:36  AwkingHeads: none of these are as clever as pingfloyd
+11:36  SolomonKull: They provide a service - tech support, forums, help call centers, voice chat networks etc.
+11:36  bocaneri: The preponderance of MS' income, I believe, would be from software or services surrounding it.
+11:36  fisted: agree game companies might be a better example
+11:37  SolomonKull: They provide a service - tech support, forums, help call centers, voice chat networks etc.  ALL games on modern consoles come with this.
+11:37  bocaneri: EDS (formerly Unigraphics) would also fit the "software-only" bill, as would also Autodesk.
+11:37  SolomonKull: Find me a multip[layer FPS that does not have voice, a store *inside* the game etc.
+11:37  bocaneri: There are others, I'm just too tired to think them up.
+11:37  TermanaDesire: SolomonKull: illumination software creation station
+11:38  TermanaDesire: SolomonKull: mIRC
+11:38 --- AwkingHeads is now known as ApplePieFromScra
+11:38  SolomonKull: TermanaDesire: Bryan sells Illumination.
+11:38  reisio: if you include selling software in 'software' :p
+11:38  TermanaDesire: SolomonKull: that was a silly response i know who sells it
+11:38  bocaneri: The point is, SolomonKull, unless you can tell me what Unigraphics even IS, you can't make a case with me that there are no software-only companies.
+11:38  SolomonKull: Its a 2 man team, they do NOT make a living off of Illumination, or Radical Comics or any opther app they made.  Its a one app deal they dont live off of it.  Jesus.
+11:39  TermanaDesire: SolomonKull: bryan also agrees there is no business model with the gpl
+11:39  SolomonKull: bocaneri: I said they exist, but are rare and you must not be an idiot if you wish to succeed with a software-only company.
+11:40  fisted: SolomonKull: actually you said they didnt exist..
+11:40  devendra: Please check the script http://pastebin.com/iNTVhcMD and tell me why the output is not line by line. When I fire the command directly in shell, it gives line by line output but using it through script gives mess.
+11:40  SolomonKull: TermanaDesire: so?  He's not an authority on anything, he's a guy who sits in front of a camera for an hour a week.  Big deal.
+11:40  SolomonKull: fisted: no, I demanded that you name at least one company that is software only,.
+11:41  bocaneri: I've just named several, and I don't know a damn thing about the companies that make games.
+11:41  fisted: SolomonKull: lol. if you cannot see the implications of that message.. okay.
+11:41  reisio: who is talking about games...
+11:41  TermanaDesire: SolomonKull: remind me again what hardware microsoft maakea that runs windows?
+11:41  bocaneri: hey, games are software too, you know!
+11:41  TermanaDesire: Makes*
+11:42  SolomonKull: TermanaDesire: I never claimed Microsoft made hardware that ran windows.  They do, however, make the Xbox, keyboards, mice and a shitload of other gadgets.
+11:42  fisted: <     SolomonKull > THERE ARE NO SOFTWARE-ONLY COMPANIES that are successful.
+11:42  fisted: btw
+11:42  SolomonKull: "...that are successful."
+11:42  fisted: stop struggeling
+11:42  SolomonKull: Straw men fall easy, m'lady.
+11:42  bocaneri: I've named several, and I don't know a damn thing about the companies that make games, which leads me to believe you hvae no idea what the field is like.
+11:43  TermanaDesire: SolomonKull: dont be silly. Microsoft are not depending on "other gadgets" for their profit. They make money on windows and office
+11:43  SolomonKull: TermanaDesire: the real money is Xbox, these days.
+11:43  TermanaDesire: And not the support provided around those
+11:43  fisted: and on selling their souls to the devil
+11:45  __name__: Psi-Jack: I think lspci has fooled me
+11:46 * bagira just realized that his distro is substandard :(
+11:46  __name__: It's a E1550
+11:46  __name__: *lsusb
+11:47  bocaneri: Oh, bagira, don't tell me you're running ubuntu, too...
+11:47  Psi-Jack: __name__: I don't see that at all, either.
+11:47  bagira: bocaneri, no, lord no.  Slackware.
+11:47  Psi-Jack: Not even recommendations.
+11:47  bocaneri: I've actually heard people speak very highly of slack.
+11:47  bagira: bocaneri, its good for just getting stuff to work.  if you need that.
+11:48  loomsen: bocaneri: like, 10 years ago?
+11:48  __name__: Psi-Jack: that one exists
+11:48  bocaneri: Just a few days ago, in fact, by somebody who impresses me as being able to walk and chew gum at the same time.
+11:48  bagira: bocaneri, its kind of....thrown together
+11:49  Psi-Jack: __name__: Heh, all I get for that in non-English is cyrllic fonts I can't even come close to reading. ;)
+11:49  bocaneri: If you want something that's build like a tank, you either need one of the bsd's or you need debian.
+11:49  bagira: paths aren't paid very good attention to, the base packages aren't debugged, etc
+11:49  bagira: yeah i LOVED freebsd
+11:50  bagira: i just need proprietary ATI support
+11:50  bocaneri: Buh bye fbsd :(
+11:50  fedorauser162: anyone an idea why i keep getting this error when burning an iso?  http://pastebin.com/7hW9dHW7
+11:50  bagira: freebsd was a dream until i bought a graphics card worth using
+11:52  Psi-Jack: Yeah, and bubye Linux too, ATI == Bleh.
+11:52  SolomonKull: You Windows fanboys...bleh.
+11:52  SolomonKull: <oswar></oswar>
+11:52  bocaneri: I can't tell you right now which of which I have, but I have both nvidia and ati machines and they're all running very nicely. My little netbook, though, is slower than frozen molasses.
+11:53  bagira: meh?  I get --great-- ati support in linux.  it just took forever for ATI to make the driver.
+11:53  bagira: the FOSS drivers, though, will be great when my card is 30 years old.
+11:53  SolomonKull: Intel works.
+11:53  bagira: though, once again, there's issues with the installation process on slackware because of path deviances.
+11:54  bagira: driver installation^
+11:54  SolomonKull: I always ask Slackware users, why Slackware?  What redeeming quality does it have that other, more popular distros offer?
+11:54  mAniAk-_-: -use-the-force-luke=bufsize:4m <-- wat
+11:55  bagira: SolomonKull, if you really want to know, because it's hard to screw up slackware.
+11:55  bagira: i install ubuntu, i've ruined the system within the week.
+11:55  crocket: SolomonKull, Slackware users appreciate manual configuration
+11:56  bagira: ^ why it's hard to screw up
+11:56  bocaneri: mAniAk-_-, I once wrote a QLB for a friend who wanted to include mouse actions with his QuickBasic programs, and the docs I wrote included terms like "mickeys". I included such terms because the documentation I had for the mouse drivers used such terms. Cracked my friend right up. Mickey Mouse, geddit?
+11:56  mAniAk-_-: so basically slackware users are screwups
+11:57  mAniAk-_-: bocaneri: xD
+11:57  bagira: quite the contrary; we want to configure everything ourselves because developers for other distros are screwups
+11:57  bagira: maintainers* *whiskey
+12:00  bagira: mAniAk-_-, all that automagic shit for linux, it's almost always fragile.  one little hiccup and critical systems admnistration job is botched and all you have is more automagic tools to fix it with, and half the time those don't do what they're supposed to.
+12:01  bagira: otherwise we'd all be using ubuntu linux.
+12:01  bocaneri: The alternative is what happened to me just a handful of hours ago, mis-typed a single IP and found I couldn't sshfs any of my machines together. Took hours to find.
+12:01  bagira: ha
+12:02  bagira: well another reason i haven't switched is because i demand being able to add build options to my binary packages after creating them from a source build; i've been told you can do that in archlinux but not in centos or fedora
+12:21  PingFloyd: lol, "the FOSS drivers, though, will be great when my card is 30 years old."
+12:22  PingFloyd: Yeah, and Slackware is good, but it does feel like you've traveled back in time when you use it.
+12:30  reisio: PingFloyd: nothing compared to using a BSD
+12:31  PingFloyd: lol, aren't some of the BSDs still using XFree86?
+12:31  SolomonKull: PC-BSD feels modern, on the surface.
+12:32  PingFloyd: SolomonKull: until you bite into its old crusty core?
+12:33  mrcarrot: i really like openbsd... but then i am maybe a bit oldish. at least it is more stable than the new and modern linuxes
+12:34  mrcarrot: but it is not for everybody... different needs, different os
+12:34  reisio: PingFloyd: they're still using vi
+12:34  PingFloyd: It's not hard to be stable if you only care about supporting decade old hardware though
+12:34  reisio: mmm, OpenBSD is loverly
+12:36  mrcarrot: PingFloyd: that is trolling... they support very well new hardware too.
+12:36  PingFloyd: reisio: what was it we were saying yesterday about the term troll?
+12:41  mrcarrot: what i mean is that i am using both linux and openbsd, so i know that the hardware support is not as bad as you say. i bet you never tried any bsd recently. you even have to really search to find a 10+ year old equipment and all computers i have been trying openbsd on has been working well. even on a shiny new i7 computer at work
+12:47  gordboy: does openbsd still have punched cards ?
+12:48  hiptobecubic: PingFloyd, what's wrong with Slackware :D
+12:48  mAniAk-_-: for ram yes gordboy
+12:50  gordboy: i hear that timesharing on openbsd is mandatory. everyone has to take turns pedalling
+12:57  crocket: hmm
+12:57  crocket: Slackware64 13.1 USB bootimage has syslinux 3.84, and syslinux 3.84 can't boot up on my ATOM server.
+12:58  crocket: oops]
+12:59  mrcarrot: i am using plain 32-bit slackware to avoid problems :)
+13:00  PingFloyd: 32-bit is the future!
+13:04  heftig: is there software to convert an .ICM color profile to an .ICC one?
+13:04  Vutral: can google search binary strings ?
+13:05  Vutral: ^^
+13:11  ne2k: just got and installed ubuntu maverick on a new PC. installed NTP to keep clock in sync but it keeps running fast, by a couple of minutes every hour. NTP never actually locks on to a server (no * in ntpq -p). I've never had this problem before. what can I do to debug it further?
+13:22  jimbauwens: Hello, i want to setup a VPN server in a virtual machine. Does anyone know if there is already a ready availeble distro for that?
+13:23  ne2k: jimbauwens: you could look for firewall/router type distros
+13:23  Ykstort: where can i find information on how to report bugs to the kernel people? (mainline kernel causes X to crash where stable doesnt, something about MMIO aperture and then a segfault)
+13:23  ne2k: jimbauwens: routeros from mikrotik is not free but is very good
+13:24  jimbauwens: ok
+13:24  ne2k: jimbauwens: there's monowall, which is BSD rather than linux
+13:24  jimbauwens: I'll check it out
+13:24  lautriv_: Ykstort, sure it is kernel-related, what errors, what distro ?
+13:24  ne2k: jimbauwens: tbh, any small linux with openswan/openvpn packages ought to work
+13:25  Ykstort: lautriv_, i figure it's kernel related because the only thing changed was the kernel
+13:25  jimbauwens: ne2k, yes, i was thinking tinycore
+13:25  Ykstort: kernel A runs X fine but X crashes on kernel B
+13:26  Ykstort: kernel B is a release candidate so likely to be buggy
+13:26  jimbauwens: ne2k, on the website of openvpn they have a vmware image
+13:26  Ykstort: kernel A is the current stable kernel
+13:26  lautriv_: Ykstort, that is not even close, the message itself counts
+13:26  Ykstort: yeah i forget exactly what it is
+13:26  yano: you can't generate public key pairs with the openssl command, correct?
+13:27  lautriv_: Ykstort, my .37-rc3 runs fine, so what about your userland ?
+13:27  Ykstort: first there's an error from X subsystem r128 graphics driver (EE) coudlnt allocate MMIO apperture and then X segfaults
+13:27  ne2k: jimbauwens: you need to decide whether you want to run IPSec or OpenVPN or both
+13:27  Ykstort: lautriv_, the bug is in the kernel but doesnt affect your userland probably
+13:27  jimbauwens: ne2k, just openVPN would be ok
+13:28  EdwardIII: hey, how can i use 'find' to return two different kinds of files, e.g. *.html and *.php?
+13:28  Ykstort: lautriv_, it may be more complicated than that
+13:28  EdwardIII: tried using regex but i don't think it was pcre, i couldn't go this|that
+13:28  crocket: Please anybody help me deal with the error message "syslinux 3.84 3.84 cbios load error - boot error" that occurs when I boot slackware64 13.1 usb bootimage on my ATOM-cpu server.
+13:28  lautriv_: Ykstort, i see only a bad alloc, are you even sure you configured proper and ACPI is well done ?
+13:28  koala_man: EdwardIII: -name '*.php' -o -name '*.html'
+13:28  EdwardIII: ah, thanks koala_man
+13:29  Ykstort: i think so
+13:29  EdwardIII: hrm also i just accidently hit a keyboard combo and now my left hand servers pane has disappeared, any idea how to get it back?
+13:29  lautriv_: Ykstort, don't think, check it.
+13:29  PingFloyd: Ykstort: that doesn't necessarily mean its the kernel.  There's a very close relationship between the kernel, X, and video driver
+13:29  jimbauwens: ne2k, I think I will use the openVPN image.
+13:29  EdwardIII: ah wait, it got seperated out into another window. i've somehow orphaned ##linux from the rest of x-chat
+13:29  Ykstort: the kernel is the only thing that changed though
+13:29  PingFloyd: Ykstort: change one of those 3 things and the other two may need to be updated
+13:30  Ykstort: right
+13:30  PingFloyd: Ykstort: what you want to do is a bit of testing to make sure it was the kernel upgrade that triggered the problems.  Then submit a bug report
+13:30  Ykstort: my video driver is legacy :(
+13:31  Ykstort: PingFloyd, k. name a test
+13:31  PingFloyd: a bug report won't be of much use without some analysis and information
+13:31  Ykstort: well thats what i came here to learn
+13:31  PingFloyd: Ykstort: like try loading the old kernel again and see if it everything works like before
+13:31  Ykstort: i knew i couldnt just tell them some basic story
+13:31  Ykstort: ive already done that
+13:33  Ykstort: alls working fine right now
+13:33  Ykstort: on the other kernel
+13:33  Ykstort: but on the one kernel
+13:33  PingFloyd: Ykstort: ok, that's good
+13:33  Ykstort: well ill check again
+13:33  lautriv_: Ykstort, you know .37 has changed headers ?
+13:33  PingFloyd: Ykstort: now try to look for relevant information in the log
+13:33  PingFloyd: the idea is that the more pertinent information you can provide in your bug report the better
+13:33  Ykstort: yeah
+13:33  PingFloyd: if you're not sure, just make the bug report, I'm sure one of them will have some questions and ask you to check a few things
+13:34  PingFloyd: is the problem with the distro kernel image? or the vanilla kernel?
+13:34  Ykstort: i run vanilla
+13:34  PingFloyd: then you want to submit to upstream
+13:34  lautriv_: Ykstort, what toolchain ?
+13:35  PingFloyd: Ykstort: this might be helpful http://www.kernel.org/pub/linux/docs/lkml/reporting-bugs.html
+13:35  Ykstort: lautriv_, sorry i dont quite follow
+13:35  Ykstort: i used make
+13:35  Ykstort: is that what you mean?
+13:35  lautriv_: Ykstort, which version of gcc and even some userland like udev count'S on kernel-versions.
+13:36  PingFloyd: here's the key thing, which you did, "If it occurs repeatably try and
+13:36  PingFloyd: describe how to recreate it. That is worth even more than the oops itself."
+13:36  Ykstort: oh gcc of course, ive got 4.5.1-2
+13:36  discozohan: Hello! Is there a way to see configuration command that i used while installing some software ? Mysql server, for example ?
+13:36  PingFloyd: sounds like you covered that.  So that is good
+13:37 * lautriv_ facepalms
+13:37  Ykstort: i get my gcc from the good people of arch linux
+13:38  PingFloyd: arch likes to throw in experimental crap
+13:38  EdwardIII: people in here love arch with all their heart it seems
+13:38  Ykstort: that's not helpful in this situation
+13:41  Cap_J_L_Picard: arch is an experimenters distro so...
+13:43  EdwardIII: is it?
+13:44 * EdwardIII uses fedora for the rpm toolchain
+13:44  peterius: hi, my sound stopped working recently and I've tried pretty much everything and still can't fix it
+13:44  lautriv_: peterius, details ?
+13:44  peterius: anyone know what is supposed to be in /proc/asound/card0/codec97 ...?
+13:44  peterius: after many days and many hours, I got the headphone line jack sense mute button in alsamixer to make a noise, but then it stopped
+13:45  peterius: I don't even think I changed anything
+13:46  lautriv_: peterius, details ?
+13:46  Cap_J_L_Picard: peterius: soundcard? kernel version? what exactly happened?
+13:46  Cap_J_L_Picard: disto?
+13:46  EdwardIII: i've got a file containing a list of files with spaces in the name - i want to run grep on each one. i tried using xargs but i get 'argument list too long'. this doesn't handle the spaces in the filenames properly: for f in `cat /tmp/output`; do grep scgi-bin "$f"; done;
+13:46  EdwardIII: any tips?
+13:47  peterius: well I can give you all the details in the world but if you don't know what I'm talking about with the codec file you probably can't help me
+13:47  peterius: its gentoo, ac97 onboard it works fine with windows xp
+13:47  peterius: kernel is 35, but I've tried others, it was definitely working before
+13:47  peterius: alsa is 1.0.23, alsaconf doesn't work, alsactl init says "initializing using generic method"
+13:47  Obvious: EdwardIII, try setting IFS="" before
+13:47  Halabund: is there a way to display the time at the bash command propmt?
+13:47  peterius: alsamixer is all maxed out
+13:48  Halabund: so I know what time different commands were started at
+13:48  Cap_J_L_Picard: peterius: seperately installed alsa libs, or kernel install?
+13:48  peterius: separately
+13:48  peterius: I assumed at first it was an alsalib kernel conflict but no one seemed to know anything about that
+13:48  lautriv_: peterius, AC97 sits behind a chopset, did you load that modules and snd-core ?
+13:48  lautriv_: *chip
+13:48  EdwardIII: Obvious, bizarrely that produces 'argument list too long'
+13:49  EdwardIII: Obvious, what does that do?
+13:49  Obvious: EdwardIII, stops splitting lines into words
+13:49  Cap_J_L_Picard: lautriv_: wouldn't get alsa-mixer if he didn't.
+13:49  peterius: what chipset is that?  I've tried recompiling kernel numerous times with different drivers, in case it needed usb sound for some reason, the thing is, it did used to work before alsa 1.0.23 and moreover, I got that noise from the headphone jack sense
+13:49  EdwardIII: ah, Obvious - but the problem is /tmp/output contains a lot of lines -- too many to include on the command line
+13:49  Cap_J_L_Picard: peterius: depends on the motherboard.
+13:49  Obvious: Halabund,  \t     the current time in 24-hour HH:MM:SS format
+13:49  lautriv_: Cap_J_L_Picard, for the core yes but not neccessary for the chip.
+13:49  EdwardIII: Obvious, otherwise i could just grep <term> `cat /tmp/output`
+13:50  EdwardIII: Obvious, or use xargs (which gets around the spaces-in-filenames problem)
+13:50  peterius: that codec file in /proc has a bunch of 0s in it, so I wonder if that's the problem but I don't know what the file is
+13:50  Halabund: Obvious, what is the name of the env var I need to change
+13:50  Obvious: EdwardIII, IFS="" for ...
+13:51  crocket: hmm
+13:51  EdwardIII: Obvious, that produces 'too many args' error - unless that was meant for Halabund?
+13:51  Obvious: EdwardIII, err. try IFS="\n" for f in `...
+13:51 --- JonathanS is now known as JonathanD
+13:52 --- Damianz is now known as Damian
+13:52  lautriv_: peterius, paste lspci and lsusb
+13:52  EdwardIII: that has weird results, Obvious - seems that characters before and after the \n have been chomped
+13:53  Obvious: EdwardIII, also, xargs -a yourfile
+13:53  peterius: lautriv_: do you know what that codec file is?
+13:53  lautriv_: peterius, there are several, depending on your chipset.
+13:53  EdwardIII: Obvious, that produces 'argument list too long'
+13:54  EdwardIII: Obvious, that's why i stopped using xargs - i was using it before but it runs into that problem
+13:54  peterius: lautriv_: what?  so what is it?  How do I alter it?
+13:54  EdwardIII: although xargs -a is good to know, saves piping it through sed to remove the newlines in the case when the list isn't quite so long
+13:55  Obvious: EdwardIII, and --max-args=
+13:55  lautriv_: peterius, check lspci, ensure this module loads, some of them requiring an additional one b/c the codec behind ac97
+13:55  EdwardIII: Obvious, but isn't the restriction being imposed by bash rather than xargs?
+13:57  peterius: lautriv_: well Cap_J_L_Picard said I wouldn't get alsamixer if that was the issue, and like I said twice before, I got the headphone jack sense to make a noise in addition to having working sound before alsa 1.0.23 so pretty sure its just the configuration of alsa or the libs
+13:57  koala_man: EdwardIII: argument list too long? that used to be imposed by the kernel, but since 2.6.30something it's been dramatically increased
+13:58  EdwardIII: koala_man, i've got a \n seperated list of a load of files, i want to run 'grep' on each one
+13:58  lautriv_: peterius, searching errors is done from ground up and not from top down.
+13:58  EdwardIII: koala_man, if i try and loop with 'for' i get problems because some of the files have spaces in the name. if i use xargs i get 'arg. list too long'
+13:59  koala_man: wtf? how are you using xargs to get that?
+14:00  peterius: lautriv_: well even if that made sense, I've already checked that so... again, if you don't know much about that codec file, you probably can't help me
+14:02  koala_man: EdwardIII: tr '\n' '\0' < file | xargs -0 grep foo
+14:04  EdwardIII: hrm that does the trick, thanks koala_man
+14:04  EdwardIII: koala_man, what is \0?
+14:06  Diverdude: What command do i use to see processor specs?
+14:06  EdwardIII: Diverdude, cat /proc/cpuinfo
+14:07  Cap_J_L_Picard: EdwardIII: null character C escape sequence....
+14:07  Diverdude: EdwardIII, and to see available memory?
+14:08  Cap_J_L_Picard: EdwardIII: IIRC
+14:08  EdwardIII: Diverdude, free -m (for megabytes)
+14:09  EdwardIII: Cap_J_L_Picard, ah
+14:18  terabit: hey guys i have an ext4 fs and i may have run into a situation where i might be requiring more than 32000 sub-directories in a single directory. does ext4 support unlimited sub-directories by default? and how can i find out if this feature is turned on ?
+14:20 * jelly wonders what sort of a broken app might *require* such a directory structure
+14:20  lautriv_: terabit, for i in{0..35000}; do mkdir -p /test/dir$i;done
+14:21  terabit: jelly: not broken,mirroring a website.
+14:22  jelly: well, you'd typically mirror the backend storage, which would be on a similar filesystem...
+14:23  terabit: lautriv_: i'm already running the program i guess i will find out soon enough. i just thought i should ask if there was some sort of a command i don't know about that will tell me the fs parameters.
+14:23  jelly: unless you're GETting it all
+14:23  rethus: i have extract a big zip-file in the wrong folder.
+14:23  rethus: is there a way to undo tall the createt ffiles ?
+14:23  rethus: maybe with the actual day?
+14:24  terabit: jelly: just certain type of data files. and it's not my website it's a public website that maybe going down.
+14:25  jelly: "it wasn't a DDoS, said wikileaks sysadmin, it was just a bunch of people trying to download all of our site at the same time"
+14:27  lautriv_: terabit, i removed all my ext4 for stability reasons but if you are in doubt, XFS can handle that amount.
+14:27  rethus: i try find ./ -mtime 0 but didn't show the right files.
+14:27  rethus: how can i use minutes for mtime?
+14:27  rethus: instead of tdays
+14:31  PingFloyd: -mmin
+14:31  lautriv_: rethus, you can't it's always n*24h , ls -a | cut may help
+14:31  rethus: lautriv_: mtime -0 show the wrong files
+14:31  rethus: i'll show you
+14:31  rethus: the folder http://pastebin.com/8TFbYabw
+14:32  rethus: mtime-command: http://pastebin.com/mmpvh3eU
+14:33  terabit: jelly: i wasn't talking about wikileaks but since you brought it up,i was trying to mirror that too and it turns out i've been accidentally mirroring twitter too in addition to wikileaks
+14:33  rethus: all files wich are user root are newone
+14:33  rethus: but i see thee problem now
+14:34  lautriv_: rethus, it's -mtime 0 NOT mtime -0 and you may use mmin instead like PingFloyd also mentioned.
+14:34  terabit: jelly:wikileaks have a far more organized directory structure
+14:34  jelly: terabit: heh, don't read too much into my lame joke
+14:35  rethus: i have used -mtime 0
+14:35  rethus: and -mmin 0 doesn't output anything
+14:35  PingFloyd: rethus: think about what you're telling it
+14:39  rethus: but this may cause the file-creationdata is not set to the datetime where the zip is extractet.
+14:39  PingFloyd: zero days have passed, zero minutes have passed.
+14:39  PingFloyd: you've been in here longer than 59 seconds
+14:39  rethus: i know, what the parameter means. see my pastebin... the files are extractet before 5 monutes, but the created-day is set to which is set in the zipfile themself
+14:39  rethus: you know wht i mean
+14:39  PingFloyd: stat one of the files and see what it shows for modified time
+14:39  rethus: stat FAQ.txt
+14:39  rethus: Modify: 2008-11-10 11:25:44.000000000 +0100
+14:39  rethus: Change: 2010-11-29 14:22:45.000000000 +0100
+14:40  rethus: so, "find ./ -mmin 20" should give me all ffiles wich older than 20 Minutes?
+14:41  PingFloyd: between 20 and 21 minutes since last modified I think
+14:41  extor: The MAC address of my RealTEK NIC just turned to all FFF. What do? http://oi55.tinypic.com/21liye1.jpg
+14:42  rethus: PingFloyd: so, -mmin give me nothing back
+14:42  terabit: extor: i think you can use macchanger to change it if you want but it shouldn't be all fff
+14:42  PingFloyd: probably <21 and >=20 unless you specify otherwise
+14:42  Psi-Jack: extor: Yep. Means it's not working.
+14:42  extor: terabit, I'm thinking the hardware possibly fried? Cuz the whole box locked up and then when I rebooted the MAC was all FFS when it was trying to do a PXE boot as well
+14:43  Psi-Jack: extor: Lemme guess, RTL-8169?
+14:43  PingFloyd: probably just looks at the minutes field in other words
+14:43  extor: Psi-Jack, yes RTL embedded, how did you know?
+14:43  rethus: is there a way to delete all files where owner is "xy" ?
+14:43  Psi-Jack: extor: Netgear or something else?
+14:43  extor: Psi-Jack, and is there an RTL fix for this?
+14:43  extor: Psi-Jack, you recommend I drop another NIC in there?
+14:44  PingFloyd: in your find expression you can change that though
+14:44  Psi-Jack: extor: I have the problem between two very similar Netgear GigaNICs, myself, but that's only when I do bonding.
+14:44  terabit: extor: or kernel/module issue. maybe your kernel is corrupt somehow or is very outdated. what version is it?
+14:45  extor: terabit, its the centos 5.5 latest Xen kernel
+14:45  Psi-Jack: extor: Soon as I ripped out the secondary netgear, replacing it with a Trendnet, paired with the secondary Netgear, it... Seems fine.
+14:45  extor: lemme see if rebooting it does much
+14:45  Psi-Jack: But yeah, CentOS 5.5 is an older kernel..
+14:45  Psi-Jack: extor: So, you will have issues with RTL-8169.
+14:45  terabit: extor: why don't you unload /reload the driver
+14:45  Psi-Jack: extor: There IS a patched kernel module for it, though in the elrepo repository.
+14:46  extor: terabit, uhmmm cuz it had all FFFFFS before it went to the OS
+14:46  extor: why is this a kernel issue? It's all FFFF when it's trying to PXE boot also
+14:46  Psi-Jack: extor: It's a kernel module issue with that driver.
+14:46  terabit: extor: didn't realize that. then maybe it's a hardware/firmware issue
+14:46  extor: Psi....this happens before I even hit the operating system
+14:47  Psi-Jack: extor: I know.
+14:47  Psi-Jack: extor: elrepo has a patched rtl-8169 module.
+14:47  Psi-Jack: May or may not fix it, though with the 2.6.18 kernel, but you can always try.
+14:47  extor: well I cannot reach that cuz my network is down lawl
+14:47  Psi-Jack: extor: Ever heard of sneakernet?
+14:48  Fieldy: or gasp even a remotely recent kernel
+14:48  Psi-Jack: Fieldy: CentOS == older kernel.
+14:48  axle3d: am transferring large files over smb, any tool, that i can use to resume on network interruption (which keeps happening)
+14:48  Psi-Jack: Get used to it. ;)
+14:48  Fieldy: could very well have the issue resolved
+14:48  extor: Psi-Jack, no what does sneakernet do?
+14:48  Fieldy: axle3d: use rsync to transfer, mount the smb stuff with smbmount, treat it like a local directory. the rsync options -aPv will probably be best for you, but rad the man page.
+14:50  Psi-Jack: extor: Back in the day, it's where you took a floppy, put stuff on it, used your sneakers to walk to the other computer, floppy in hand, and put it into the other computer.
+14:50  Fieldy: you won't be able to transfer files over 2GB unless you use cifs however
+14:50  Awwent: Gonna explore Linux a bit in a Virtual Box. What distro should I explore? Already used Arch & Ubuntu.
+14:50  Fieldy: s/rad/read/
+14:50  Psi-Jack: Awwent: www.distrowatch.com has a list.
+14:50  magicblaze0071:  Anyone can point me with whats wrong with this regular expression : grep '((\(\d{3}\) ?)|(\d{3}-))?\d{3}-\d{4}' x.txt -- Am trying to match phone numbers.
+14:50  Awwent: Psi-Jack: Thanks.
+14:50  extor: Psi-Jack, this is at a datacenter
+14:50  axle3d: Fieldy, thanks
+14:50  Psi-Jack: extor: Okay, well, either it'll be a LOOOOOONG walk, or you'll have to get the datacenter guys to do it.
+14:51  Psi-Jack: And if this is in a datacenter, you got jipped, man.
+14:51  Psi-Jack: RTL-8169 isn't server-grade hardware.
+14:52  extor: Its a desktop mobo that I put there myself
+14:52  Psi-Jack: Then you fsck'd yourself and sent off a computer to be useless. :P
+14:59  Psi-Jack: extor: I mean, it's not even in your physical posession, how'd you even get this screenshot you made,?
+14:59  jelly: cheap remote kvm ftw?
+15:00  extor: jelly, how is it "cheap"? What looks cheap about the KVM setup?
+15:01  Psi-Jack: heh
+15:01  Psi-Jack: KVMoIP != Cheap
+15:01  Dominian: remote kvm's aren't cheap
+15:01  jelly: extor: well, it can be cheap in pricing, compared to buying decent server-level hardware with included remote mgt features, and cheap in featureset
+15:01 * extor shrugs
+15:05  Psi-Jack: Heck, you can get a DRAC for as much as you can get a KVMoIP.
+15:05  Fieldy: hehe i love when people ask for affordable $THING where $THING is something that is never affordable
+15:05  glenrock: anyone know where i can get an affordable Macbook Air
+15:05  axle3d: Fieldy, which package contains cifs mount command?
+15:05  grawity: axle3d: might be smbclient
+15:05  PingFloyd: glenrock: yeah, mug a mac nerd
+15:05  glenrock: hehe
+15:05  Fieldy: axle3d: none, you use it as a filesystem type when you mount. -t cifs
+15:05  Psi-Jack: glenrock: And you're asking here... Why?
+15:05  jelly: Psi-Jack: iLO > DRAC!!!1one
+15:05  glenrock: for comedic value
+15:05  extor: Wht exactly is a DRAC?
+15:06  axle3d: ok, thanks
+15:06  Psi-Jack: Dell Remove Access Card
+15:06  Psi-Jack: Remote*
+15:06  jelly: Dell's brand name for remote management hw bits
+15:06  grawity: Fieldy: actually, the 'smbclient' package _does_ include a "mount.cifs" helper -- this confused me :/
+15:06  extor: I love my Dell KVM switch it allows me to use any computer on the market as a server hahehe
+15:06  Psi-Jack: Kinda like their PERC and CERC
+15:07  grawity: Fieldy: (I thought the filesystem support is in the package too.)
+15:07  jelly: Pretty Embedded Raid Card?
+15:07  jelly: the other one is probably Cool.
+15:07  Fieldy: yeah i have no idea what that's all about
+15:07  Psi-Jack: What, the CERC?
+15:11  lautriv_: Psi-Jack, similar to YERK
+15:11  jelly: lautriv_: ooh, who's a YERK?
+15:12  lautriv_: jelly, the one inventing the abbreviations ;-)
+15:12  jelly: extor: HP has iLO; Sun has ALOM; IBM has... can't remember.  They all do pretty much the same thing, KVM, power, booting (think .iso images) over IP.
+15:12  extor: well my KVM is an external switch with SIP cables and the whole works. It's "l33t"
+15:12  Vutral: ey
+15:12  jelly: extor: my rule of thumb is, if you have to go over there, it's not l33t enough.
+15:12  Vutral: can someone provide a statically linked lilo for amd64 please
+15:12  PingFloyd: maybe instead of wasting that money on the KVM, you should have put it toward a decent NIC
+15:12  extor: it's l33t when combined with my remote access PDU. Together we can battle anything
+15:13 * lautriv_ remembers the time this channel had far above 1k users, now it's below 500 :-(
+15:13  extor: PingFloyd, I have a decent NIC in there...but it's not hooked up. It's a broadcom
+15:13  extor: I just asked the datacenter guy to go hook that NIC up to my switch
+15:13  extor: So I'm going to be back in business pretty soon hopefully
+15:14  jelly: having remotely manageable monkeys is a nice option
+15:14  Fieldy: hehe
+15:14  mAniAk-_-: extor: did you just use decet and broadcom in the same sentence!?
+15:14  jelly: mAniAk-_-: compared to a budget RTL chip? Sure
+15:14  extor: mAniAk-_-, broadcom is used by tyan in their server boards
+15:14  extor: Im sure others use it too such as supermicro
+15:16  lautriv_: extor, but unfortunately the most on-board broadcoms are those not supporting jumbo-frames.
+15:16  jelly: my HPs all have bcom chips with decent features (tcp offload; jumbo frames; dot1q)
+15:16  Fieldy: you could always add in a card of your choosing
+15:16  jelly: lautriv_: that might be true for supermicro boards
+15:16  extor: lautriv_, my broadcom isa Gigabit NetXtreme and I'm sure it supports jumbo frames
+15:16  extor: Fieldy, the broadcom was of my own choosing
+15:16  lautriv_: extor, once i thougth exact the same and failed.
+15:17 --- centosian_ is now known as centosian
+15:17  extor: lautriv_, BCM95751 chipset aka Broadcom netxtreme 5751
+15:19  Vutral: mhm
+15:19  Vutral: i wonder what stuff i can put in the mbr
+15:19  lautriv_: extor, lemme dig it out................
+15:19  Fieldy: yeah i can't suggest broadcom for servers either
+15:19  draeath: Anyone got some lower level ext4 experience? Do you know if the superblock backups are in the same positions as with ext2 and ext3?
+15:19  CodeNinja: is there a limit to how many logical partitions a drive can have? I have a 1.5TB drive, I split into 8, 50GB sections, 1 450, 1 100 and 2 250 partitions. sdb16 and 17 are not shown in /dev/ and when I try to mount them it says theres a bad superblock
+15:19  lautriv_: extor, no jumbo.
+15:19  jelly: 5706; 5708; 5709 -- all have 9k frame support
+15:19  lautriv_: but not 5751
+15:19  extor: jelly, and 5751 does not???
+15:19 * extor screams
+15:19  draeath: CodeNinja: http://en.wikipedia.org/wiki/Extended_boot_record  (looking now, but it would be in there assuming your not GPT/EFI)
+15:19  jelly: extor: I don't have any 5751 in servers nearby to check
+15:19  CodeNinja: draeath: GPT/EFI?
+15:19  extor: ok so what's a decent NIC then?
+15:19  extor: jelly, if you did then how would you check? Anything in Linux I can do?
+15:19  Psi-Jack: Yeah, I have a BCM 5721 in my primary NAS server.
+15:19  extor: eth0: Tigon3 [partno(BCM95751A519FLP) rev 4201 PHY(5750)] (PCI Express) 10/100/1000Base-T Ethernet 00:10:18:2b:53:e1
+15:19  Psi-Jack: It doesn't do jumbo frames unfortunately.
+15:20  lautriv_: extor, just do ifconfig ethX mtu 9000 and you get SIOCTL error.
+15:21  draeath: CodeNinja: new bios replacements that don't use a traditional MBR
+15:21  draeath: CodeNinja: Macs use it AFAIK
+15:21  CodeNinja: draeath: ah, no, not as far as I know, this is an older board, gigabyte
+15:21  CodeNinja: er
+15:21  CodeNinja: ..
+15:21 * CodeNinja facepalm
+15:21  CodeNinja: I'm thinking of the wrong system
+15:21  CodeNinja: its a usb enclosure drive, on my laptop, which is ~3 years old
+15:21  draeath: CodeNinja: got your answer...
+15:21  draeath: CodeNinja: IDE it's 63. 15 for SCSI
+15:21  jelly: extor: well, in my case all the HP Proliant models that have them onboard state those features.  If I had to check, I'd look at the broadcom specs somewhere
+15:22  CodeNinja: draeath: I assume the 63 would also apply to sata too yes?
+15:22  draeath: CodeNinja: http://linux.derkeiler.com/Mailing-Lists/Debian/2004-07/3451.html
+15:22  draeath: CodeNinja: yes
+15:22  draeath: IDE is a misnomer there. It's really ATA
+--- Log closed Mon Nov 29 15:27:31 2010
+--- Log opened Mon Nov 29 15:27:57 2010
+15:27 --- Users 493 nicks [0 ops, 0 halfops, 0 voices, 493 normal]
+15:28  axle3d: note also, via nautilus > connect to server, it works
+15:28  extor: but even over the interwabds a larger frame size helps?
+15:29  mAniAk-_-: extor: no, theyll get fragmented
+15:29  PingFloyd: but here, I'll throw a bone. "Let's take an example: New York to Los Angeles. Round Trip Time (rtt) is about 40 msec, and let's say packet loss is 0.1% (0.001). With an MTU of 1500 bytes (MSS of 1460), TCP throughput will have an upper bound of about 6.5 Mbps! And no, that is not a window size limitation, but rather one based on TCP's ability to detect and recover from congestion (loss)....
+15:29  PingFloyd: ...With 9000 byte frames, TCP throughput could reach about 40 Mbps. "
+15:29  lautriv_: PingFloyd, where everything "downstream" from a given port is known to support jumbo frames is quite clear.
+15:29  sllide: i'm connected to my pc via ssh
+15:29  Fieldy: axle3d: no idea you may wish to ask #samba
+15:29  sllide: when i run rhythmbox-client it says, cant intialize x11 window, i want my ssh command to be executed in the x11 server , how do i do this?
+15:29  extor: so this broadcom is an OK NIC then?
+15:29  PingFloyd: lautriv_: that's a given
+15:29  grawity: sllide: set DISPLAY environment variable
+15:30  CodeNinja: draeath: would a usb enclosure be classified by the kernel as a scsi disk?? I can see upto partition 15, but 16 and 17 are mia
+15:30  grawity: axle3d: do you specify the correct username? Try giving '-o user=whatever' to 'mount'
+15:30  sllide: grawity: explain..
+15:31  ManDay: !
+15:31  ManDay: you heard the man
+15:31  grawity: *sigh*
+15:31  sllide: but i dont get it D:
+15:31  grawity: export DISPLAY=:0
+15:31  sllide: thats all?
+15:31 --- zlinux_ is now known as zlinux
+15:31 --- Channel ##linux was synced in 203 seconds
+15:31  ManDay: :0 == 0:0 ?
+15:31  ManDay: grawity: reply..
+15:32  grawity: ManDay: if host is not specified, a local connection using Unix domain socket is made
+15:32  ManDay: ty :)
+15:32  grawity: ManDay: so ":0" means "connect to the zeroth X11 server running locally"
+15:32  sllide: lol
+15:32  sllide: it worked
+15:32  sllide: i typed rhythmbox-client --play and shat my pants
+15:32  grawity: ManDay: (I think the sockets themselves are located in /tmp/.X11-unix)
+15:32  CodeNinja: of course it did, because grawity is fuckin awesome like that
+15:32  ManDay: you bet he is!
+15:32 * ManDay high fives grawity
+15:33  zW: Hi. Is it true that openldap does not support empty attributes ?
+15:33  zW: sun ldap does ...
+15:34  jelly: zW: ask in #openldap
+15:34  zW: no answer :-)
+15:34  jelly: be patient.
+15:34  Psi-Jack:  Patience, sheash!
+15:34  CodeNinja: draeath: >.< my usb enclosure is specified as a scsi disk by lshw.... so those two partitions are unable to be located
+15:34  CodeNinja: thats f-in fantastic :|
+15:34  lautriv_: zW, depends on the attribute, LDAP is a database and without key..........
+15:35  zW: lautriv_: can it be changed ?
+15:35  zW: in the schema or something
+15:36  jelly: lautriv_: it's not the key, it's the value that's in question here ;-)
+15:38  extor: what exactly is etherwake?
+15:38  grawity: Probably an implementation of Wake-on-LAN
+15:38  extor: Hmm I see something called ethtool
+15:39  jelly: grawity: correct.
+15:44  extor: It's given itself a random MAC address now wtf? http://oi52.tinypic.com/fctnvp.jpg
+15:44  extor: Do I have flash chip corruption?
+15:44  extor: This is the mobo btw http://www.msi.com/index.php?func=proddesc&maincat_no=1&prod_no=1899
+15:48  extor: Sadly the CMOS chip doesnt seem to be visible
+15:48 --- TomManAway is now known as TomMan81
+15:51  gdoteof: is there anything i can do to set up a sort of 'virtual network' environment?  i want to be able to run a beta of our production server as it's qualified domain name
+15:52  gdoteof: we have been just setting it up at a subdomain like beta.oursite.com
+15:52  gdoteof: but i'd like to be able to vnc somewhere and just have a www.oursite.com that is accessible only within that vnc
+15:52  grawity: Technically, "www" is a subdomain too.
+15:52  gdoteof: grawity: yeah
+15:52  gdoteof: my point is that i want the beta version to act in every way like the real version
+15:53  extor: gdoteof, virtual switch
+15:53  grawity: You could edit /etc/hosts, for example, to point "oursite.com" and "www.oursite.com" to the test server
+15:53  grawity: It will only affect your own box, though
+15:53  Bartzy: Can I know if some file is in the kernel cache ?
+15:53  gdoteof: grawity: that's not what i want.  I want the site itself to think of itself as 'www.domain.com'
+15:53  Bartzy: or if the system just served the file from the kernel cache or from the disk ?
+15:54  grawity: gdoteof: then just configure it to do so
+15:54  grawity: gdoteof: but it won't be useful if you cannot reach it by typing that hostname
+15:54  gdoteof: 'just configure it'
+15:54  gdoteof: grawity: .. i don't think you understand my problem
+15:55  grawity: I tend to suck at that, yes
+15:55  gdoteof: like i said.  I want to have a whole virtual network that i can vnc into.  within that network I want a www.domain.com
+15:55  gdoteof: but outsideof that network www.domain.com resolves to the 'real' site
+15:55  gdoteof: pretty much, i want to emulate the production environment as much as possible
+15:56  gdoteof: doens't have to be vnc.  i wouldn't mind tunneling port 80 through some other host or whatever
+15:56  grawity: hm, so you want a network (I guess 'VPN', not 'VNC') in which "www.domain.com" resolves to the test site?
+15:56  gdoteof: yes I guess that's what I want
+15:58  grawity: I still don't understand why it has to be a whole separate network...
+15:59  grawity: But, you could set up OpenVPN and a DNS server on some spare box
+15:59  grawity: And make that DNS server resolve "www" to the test site.
+15:59  gdoteof: maybe it doesn't.  the problem is that our production environment is a hodgepodge of hacks, some of which rely on the site being the fully qualified domain that it is
+15:59  grawity: The end result is mostly the same that you would get by temporarily editing your own /etc/hosts, just in more steps
+16:00  gdoteof: ie if you stick the same environment on beta.domain.com it breaks
+16:00  gdoteof: but if you stick the environmetn on domain.com or www.domain.com it works
+16:00  gdoteof: currently our beta site is just at beta.domain.com and the things that break are expected to break
+16:00  gdoteof: does that make sense?
+16:00  gdoteof: why editing my host file isn't sufficient?
+16:01  grawity: not really :( I still think that if you 1) configured beta site to think it was "www.domain.com", and 2) configured your own computer to access beta site when you typed "www.domain.com" ...
+16:04  grawity: eh, I give up
+16:04  gdoteof: ok.  i think i need to research 'configure beta site to think it is not beta site'  thanks grawity
+16:04  lautriv_: pah, Asus M2N-SLI died with shortcircuit in idle-mode :-(
+--- Log closed Mon Nov 29 16:20:12 2010
+--- Log opened Mon Nov 29 16:20:36 2010
+16:20 --- Users 510 nicks [0 ops, 0 halfops, 0 voices, 510 normal]
+16:21 --- TomMan81 is now known as TomManAway
+16:22 --- Channel ##linux was synced in 135 seconds
+16:28 --- centosian_ is now known as centosian
+16:29  nicofs: Does anyone know how to get linux on a smartphone (Nokia E90) - or knows where to find someone who does?
+16:38  depesz: hi. my top shows a lot of cpu used by system
+16:39  depesz: not user. but ps doesn't show any process that would use a lot of cpu. how can i find what's happening?
+16:39  depesz: 6 cores are 100% used by system.
+16:43  JeffATL: I have a seiko label printer set up on a cups server which, if I send it a PDF made by ps2pdf, prints as intended but if i send the original postscript the label printer just prints the text of the postscript. how can i get it to take and render the PS directly?
+16:43 --- centosian_ is now known as centosian
+17:01  mike3: uptime
+17:03  greg3000: hi,  I'm transferring my files from one remote virtual server to another, what command should I use to clear the old remote server from private data?
+17:03  greg3000: would it just be a "rm / -rf" ?
+17:05  katoen: hmm.. that will render the machine unusable, if rm would at all allow your to perform such an action.
+17:05  katoen: why not deleting just the directory where your private data is stored
+17:05  depesz: greg3000: if the data is really private - use some toold like secure-delete or wipe.
+17:05  depesz: greg3000: if t's not really sensitive, then just mkfs the disk, and you're done.
+17:05  greg3000: katoen: sure, I'm not 100% sure about where it all would be.. I know there's some in /etc.
+17:06  greg3000: depesz: thanks for the tips, mkfs on the /dev/md1 perhaps?
+17:07  greg3000: basically I didn't want to run a command that would cause the system to fail when it was 50% done.  it's sensitive data only by protocol because it belongs to a company
+17:08  katoen: so this is a remote machine then? hmm. creating a new filesystem is an option, but it will not erase every bit on the disk. For that you could use the dd tool
+17:09  greg3000: ok, so I'll "dd if=/dev/null of=/dev/md1" (assuming md1 is the device with sensitive data)
+17:09  katoen: /dev/zero
+17:09  greg3000: thanks :)
+17:10  katoen: and, yes, that will overwrite the partition with zeros
+17:11  greg3000: now it's just getting the courage to hit the execute button, lol
+17:13  katoen: by opening another terminal and sending the running dd process a USR1 signal, you could see its progress
+17:13  greg3000: well I hit enter.. point of no return :)
+17:16 * greg3000 thanks katoen and depesz for their help today
+17:20  knittl: hi. how can i break a hardlink?
+17:21 --- centosian_ is now known as centosian
+17:22  katoen: unlink or rm will remove the link to the inode. If there are no hardlinks left, the content of the file is lost.
+17:22  knittl: katoen: i want to turn a hardlink into a copy
+17:22  katoen: you want to copy teh content of the file into another file
+17:23  knittl: i guess cp file file will not work
+17:23  katoen: cp file file2
+17:23  knittl: i do: ln orig link
+17:23  knittl: no i decide that link should be a copy
+17:23  knittl: i don't know where orig is anymore (could be anywere)
+17:23 * katoen scratches head
+17:23  knittl: cp link copy && rm link; ?
+17:24  katoen: ln will do that just, create a link to the actual inode. This means one copy of the actual data, and 2 pointers to it.
+17:24  katoen: so if you want a copy of the content, you use "cp" and give it a new name (for you can't have the same name in any given directory)
+17:24  knittl: katoen: um yes, i know that. how will that solve my problem?
+17:25  knittl: so i have to use cp link copy && rm link; ?
+17:25  katoen: there is no such concept of "original". Both names point to one inode
+17:25  armence: Hello all. I just only now extracted an archive into the wrong subdir. Is there a way to delete all files and dirs that have been created in say the last 5 minutes
+17:25  katoen: if you delete either of them, the one remaining is the "original" if that makes it easier to understand
+17:26  knittl: katoen: yes, i only remove the link to the inode
+17:26  katoen: knittl: first make a copy, so your data is secure
+17:26  katoen: knittl: then remove one of the filenames you wish to remove the hardlink for
+17:27  knittl: i think we are not talking about the same things
+17:27  knittl: i have two files, pointing to the same inode (two hardlinks)
+17:27  katoen: check
+17:27  knittl: i now want to turn one hardlink into a copy
+17:27  knittl: i want two files, pointing at two different inodes (with the same data though)
+17:27  knittl: i want to files to be independent
+17:29  knittl: * i want the two files x
+17:29  katoen: so, let's say the 2nd hardlink is called 'orig_bak', you would do 'cp orig_bak new_file && rm orig_bak'
+17:29  knittl: s/x/…/
+17:29  knittl: katoen: what i said with `cp link copy && rm link;`
+17:29  knittl: i thought there would be a command to 'break' a hardlink (and in turn create a copy of the data)
+17:29  katoen: yes, i missed that bit, apologies.
+17:29  knittl: under the same name
+17:31  katoen: to my knowledge there's no way to 'convert' a hardlink into a new file. you copy and delete. Like you suggested yourself.
+17:31  knittl: ok. thanks a lot
+17:31  PingFloyd: just cp the file, then rm the old link
+17:32  katoen: the wait is now for someone with greater knowledge to prove us wrong :-)
+17:32  knittl: haha. yeah, tell me when it happens :]
+17:33  diegoviola: i need to be able to mount a filesystem over the network, ext3, how can i do that?
+17:33  diegoviola: i need to be able to access some files from a linux server on my linux desktop
+17:34  diegoviola: like if it were on my pc
+17:34  reisio: diegoviola: how many files are we talking about?
+17:34  diegoviola: reisio: 15-20, xml files
+17:34  diegoviola: not big files
+17:34  reisio: diegoviola: would copying them to your local system suffice?
+17:35  diegoviola: that works also, thanks
+17:36  reisio: so... scp?
+17:36  knittl: scp, rsync, …
+17:36  krabador: hi people, i would to know if the newest wiimote, the wiimote plus, is working with cwiid/wiican too
+17:36  diegoviola: thx
+17:38  Chapoolin: I can't move a symlink to the Trash folder ... what's the problem?
+17:38  knittl: permissions?
+17:38  Chapoolin: knittl:: i'm root, link is root
+17:39  knittl: hm. full filesystem?
+17:40  knittl: read-only filesystem?
+17:40  knittl: what's the error message?
+17:41  Chapoolin: knittl:: hm, "rm -f " deleted it
+17:42  Chapoolin: why do some symlinks have name "blah.Desktop"?
+17:42  knittl: .Desktop files are usually 'gnome desktop icon links'
+17:43  Chapoolin: knittl:: yes, Gnome here
+17:43  knittl: those are gnome specific files, they are not symlinks
+17:43  knittl: in fact they're files
+17:43  knittl: * text files
+17:44  Chapoolin: knittl:: but a 3rd party app put it there, "Second Life" specifically.
+17:44  knittl: so? that's pretty much the same thing as a windows .lnk file on the desktop
+17:45  jelly: they used to be Gnome, now they're freedesktop.org
+17:45  Chapoolin: hm, i haven't dribbled Winders for years
+17:46  reisio: oh is freedesktop doing the openoffice.org TLD-in-name nonsense, too? :p
+17:47  PingFloyd: TLD-in-name?
+17:47  jelly: nonsense?  What's in a name?
+17:47  reisio: jelly: an enormous chuckle if they ever lose the domain
+17:48  PingFloyd: oh
+17:48  jelly: reisio: find something worthwhile to complain about, please
+17:48  reisio: jelly: k
+17:48  reisio: I can see messages from you
+17:48  reisio: it hurts
+17:48  jelly: /ignore can help
+17:48  reisio: jelly: please make it so
+17:48  jelly: no u
+17:49  reisio: you're the one complaining about my complaining
+17:49  reisio: it should really be you who ignores me
+17:49  Chapoolin: PingFloyd:: TLD-in-name?
+17:49  jelly: my irc client isn't smart enough to filter just the complaints
+17:49 * robinetd hugs jelly.
+17:49  PingFloyd: he meant using top level domain in the product name
+17:49  jelly: reisio: and you still happen to provide content from time to time!
+17:50  jelly: robinetd: thanks!
+17:50  reisio: jelly: don't spread lies!
+17:50  Chapoolin: PingFloyd:: oh.  got it  :)  thanks
+17:50  robinetd: jelly: mutually beneficial. I'm using you as a mule.
+17:50 * robinetd planted stolen goods on jelly's person.
+17:50  PingFloyd: Chapoolin: I didn't know what he meant first either
+17:50 * reisio planted stolen jellies on jelly's person
+17:51  Chapoolin: PingFloyd:: so many acronyms it's all a blur to me ... lol :D
+17:51  jelly: Chapoolin: "lol", eh? :-)
+17:51  jelly: I see what you did there
+17:52  Chapoolin: jelly:: ell oh ell ... :D
+17:54  jelly: hopefully that 2nd Life client also has a make uninstall rule to clean its files out if one ever wants to remove it
+17:56  _wired: hey guys, can someone help me out with a regex? i am trying to make a sed regex which replaces ('key_name' '??') with ('key_name' 'replaced-text-here') whereby ?? can be anything or nothing at all (i.e, just '' by itself)
+17:56  _wired: i think capturing groups have to be used, right?
+17:56  EdwardIII: hey, is there a virtualisation platform that runs on bare metal?
+17:56  EdwardIII: something that's FOSS
+17:56  _wired: EdwardIII: if you consider the free version of XenServer to be FOSS.... since the source code's floating around
+17:57  EdwardIII: heh how about the F bit?
+17:57 * EdwardIII looks it up
+17:57  jelly: _wired: can your ?? it really be anything, including, say, a ) character?
+17:57  _wired: it *is* free.
+17:58  _wired: jelly: uh, its usually AZaz09. you know, standard upper/lower case and digits
+17:58  _wired: however you type it in regex :P
+17:58  jelly: _wired: but say, _not_ an ' or an )
+17:58  _wired: but i reckon you'd search for the '
+17:58  jelly: presumably
+17:58  _wired: as the ending delimiter
+17:58  _wired: yea, correct
+17:59  jelly: so you can match for 0 or more occurences of "not single-quote" -->  [^']*
+18:00  EdwardIII: actually now we have hyper-v is there any point in running a vm host baremetal?
+18:01  _wired: when i did regex's in php, i'd do something like \(\'key_name\'\ \'.*?\') and then repeat the same thing for the replace part.. but i think its pretty dirty :P
+18:01  _wired: plus i need it done in sed, sooo...
+18:04  jelly: _wired: something like sed -r "s/(\\('key_name' ')[^')]*('\\))/\\1replaced-text-here\\2/g" (note unsightly escaping of single \ to \\)
+18:04  rethus: if i connect to my server wia ssh, i see german umlauts as broken chars. how can i check, which Charset i have set actually on cmd, and how can i easyly change it on cli ? (debian lenny)
+18:04  _wired: EdwardIII: hyper-v isnt exactly compatible with all OS'es
+18:05  Chapoolin: jelly:: "rm -rf" got rid of second-life-install dir for me
+18:05  Chapoolin: . . . gotta go.  Catch you all later. ...
+18:07  boredboy: anybody here good with grub?  have a fresh debian install, but everytime I run update-grub it sets the wrong root entry.  root(hd1,0) instead of root(hd0,0).  /boot/grub/device.map only has one entry
+18:07  _wired: jelly: sed -r? you mean -e?
+18:08  reisio: boredboy: what makes you think it's wrong
+18:08  boredboy: reisio: the system won't boot
+18:08  jelly: _wired: no.
+18:09  _wired: jelly: nvm i was using wrong sed on my mac :P using the right one on my linux box
+18:09  boredboy: reisio: if I edit the line and change it to hd0,0 it is fine
+18:09  _wired: the mac's sed was like wayyyy old
+18:09  jelly: well, this is ##linux and I assume GNU sed
+18:09  mrcarrot: boredboy: this drove me crasy with debian based distros... it is changing from the dpkg configuration database. it is like removing the purpose of having configuration files as they are overwritten by stupid settings from a database
+18:10  Giant81: jelly, why so many \'s in your sed? I know you have to escape them, but I didn't see in any in _wired's original question
+18:10  Giant81: just curious if I'm missing something
+18:10  jelly: Giant81: it was either use "" and escape backslashes, or use the usual '' but have to escape all the single quotes
+18:10  mrcarrot: boredboy: do a dpkg-reconfigure on the kernel... and the same on all the grub packages. one of those dpkg-reconfigure solved the problem for me
+18:11  boredboy: mrcarrot: cheers.  I'll see if they help
+18:15  Giant81: jelly, makes sense, I was looking at "replaces ('key_name' '??') with ('key_name' 'replaced-text-here')" not his second one about doing it in PHP, that must be where I got confused
+18:16  internetishard: Hey, I have to write a paper on "interrupts" - Can you guys give me some topics and subtopics that I should try to include, and if possible some sources that talk a lot about them?
+18:17  _wired: jelly: if i wanted to write the output back to the file, does sed have a flag for it? (cos "w" flag seems to only reflect the pattern matches).. or is doing it with: sed -r "s/(\\('key_name' ')[^')]*('\\))/\\1replaced-text-here\\2/g" lol.txt > lol.txt sufficient?
+18:18  go|dfish: _wired: -i
+18:18  go|dfish: _wired: shell redirection is set up before command execution, so blah lol.txt > lol.txt will "empty" lol.txt
+18:19 --- hacked_ is now known as hacked
+18:19  _wired: thanks go|dfish ! :D
+18:19  _wired: ooops
+18:19  _wired: i always thought > echoes the final output no matter what it is
+18:20  _wired: or do i have to prefix it with &&
+18:20  _wired: because && forces sequential running, right?
+18:20  _wired: or am i confused :P
+18:22  go|dfish: well, with: sed -r 's///' lol.txt > lol.txt, the > lol.txt part happens first, which will empty lol.txt, then the sed -r 's///' part happens, but lol.txt will already be empty
+18:26  lautriv_: expirience with linux on Thinkpad T43 ?
+18:27 * reisio headdesks
+18:29  _wired: ah, thanks go|dfish
+18:29 --- denny_ is now known as denny
+18:29  _wired: learnt smt new today
+18:29  _wired: :D
+18:29  Ratrophy: lautriv_, yeah http://www.linux-laptop.net/ibm.html
+18:38  Giant81: goldfish, yeah made that error working through my sed labs for my linux class
+18:39  Giant81: sed -r 's///' < lol.txt > lol.txt would that work?  would it do < first then > so pull in the file, then empty it and place the results in it?
+18:39  kylefox: Anyone know why I might be getting an error like this?  http://d.pr/LU9c  (the `gcc` command IS installed, I verified this)
+18:40  Val_0: is there a way to know what command requires elevated privileges and what command doesn't?
+18:42  ananke: Val_0: if it's in a directory named 'sbin', likely it requires those extra privileges
+18:42  Val_0: thank you :D
+18:42  Giant81: Val_0, run it and fine out?
+18:43  Val_0: Giant81, it's "shutdown -h", can't really do that...
+18:43  Giant81: I guess if it asks, it might also depend not just on if you can use the command but what the command does
+18:43  Giant81: hehe, yeah you need to be admin to do that I'm pretty sure
+18:44  logicwrath: Anyone ever use a quad opteron 870 tyan thunder server?  I was thinking about getting one.
+18:44  Giant81: for example, find can be run as root or not, the difference is just how many folder it can search in
+18:44  Giant81: logicwrath, build my own dual opteron tyan server at home
+18:44  Val_0: i see... I am creating some documentation on powering down servers, and one of them is a linux box... so sudo is a must in this case
+18:45  Giant81: dual 2.3Ghz quads, 16GB ECC, 4x 500gb SATA drives for storage, and 2x 250gb for OS
+18:45  logicwrath: giant: i can get quad dc 2.0 opteron 870's with 16 GB memory for < $200
+18:45  Giant81: Val_0, I suspect yes, unless you are logged into the machine as someone with elevated permissions already
+18:45  logicwrath: but im not familiar with the tyan thunder chipsets
+18:45  logicwrath: i also cant find any benchmarks
+18:46  Val_0: thanks Giant81
+18:46  Giant81: logicwrath, that I don't know, I built my whole server for about $600, paid $200 for the board alone and $75/each for the opterons
+18:46  Zenth: Hey guys
+18:46  logicwrath: giant: what board?
+18:46  Giant81: everything was ued off ebay
+18:47  Giant81: let me look
+18:47  Zenth: How do I mount /dev/sda to install grub from a liveCD?
+18:47 * mrcarrot is guessing Zenth is using ubuntu...
+18:47  Fieldy: you don't need it mounted to install grub
+18:48  Zenth: mrcarrot: not really, I use Fedora or openSUse
+18:48  mrcarrot: cd /mnt
+18:48  mrcarrot: mount -o bind /dev dev
+18:48  Zenth: Fieldy: ok, thanks, I thought I did
+18:48  mrcarrot: uh.. mistake
+18:48  mrcarrot: mkdir dev
+18:48  mrcarrot: mkdir sys
+18:48  mrcarrot: mkdir proc
+18:48  mrcarrot: mount -o bind /proc proc
+18:48  mrcarrot: do the same for all those other folders
+18:49  mrcarrot: i am tired.. you actually do not need to create those folders... just "mount /dev/sda1 /mnt" first
+18:49  mrcarrot: then chroot /mnt
+18:51  extor: 5 Reallocated_Sector_Ct   0x0033   017   017   036    Pre-fail  Always   FAILING_NOW 3436
+18:51 * extor scratches his shiny cranium
+18:52  Giant81: logicwrath, http://www.tyan.com/product_SKU_spec.aspx?ProductType=MB&pid=541&SKU=600000041  <-- pretty sure that's my board
+18:52  Giant81: though I did get the RAM for free
+18:53  Giant81: I have the one without the SAS :( but hey for $200 for a dual socket tyan, I wasn't going to compain
+18:53  karthick87: I have installed Drupal 6 using synaptic and it shows as installed in synaptic but NOT in my Ubuntu software center but it is nowhere to be found. Can anyone help?
+18:53  logicwrath: giant: http://www.tyan.com/archive/products/html/thunderk8qspro.html <- i am looking at this one
+18:56  Mkman: Hey!
+18:58  logicwrath: http://cgi.ebay.com/ws/eBayISAPI.dll?ViewItem&item=350416119937#ht_2454wt_1139 - 3 min left if anyone wants it! go go
+18:58  logicwrath: im going to pass
+18:58  karthick87: how to reinstall removed repositories?
+19:00  axle3d: i understand that hfsprogs is integrated into the latest linux kernels, but what about hfsutils? from its site it looks really outdated (last release 1998) or is there another defacto hfs utility?
+19:00  cache_surplus: can someone help me with trbshting frames in ifconfig that are two high? what is the next step....
+19:01  elb0w: Anyone know if logmein plans to support linux ever?
+19:02  mAniAk-_-: no
+19:03  elb0w: :( the pitfalls of linux
+19:03  GNU\colossus: elb0w, so build your own?
+19:04  GNU\colossus: it's trivially easy to do that, really.
+19:04  elb0w: its not about recreating something
+19:04  elb0w: its about standards
+19:04  elb0w: its like metric vs units
+19:04  scp1: elb0w, looks like... uh... openssh?
+19:04  elb0w: yeah you can make tools for both, but its a pain
+19:05  elb0w: what does ssh have to do with logmein?
+19:05  scp1: Well, I assumed you talked about what first popped up on google.
+19:05  elb0w: you know what happens when you assume right?
+19:06  elb0w: nvm teamviewr looks like it does it all
+19:06  Rickardo1: How do I set the compressionlevel with tar?
+19:06  elb0w: and for the low cost of $719
+19:06  elb0w: horray
+19:09  kido: hi
+19:10  krabador: hi people, i would to know if the newest wiimote, the wiimote plus, is working with cwiid/wiican too
+--- Log closed Mon Nov 29 21:30:22 2010

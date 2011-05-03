@@ -1,0 +1,241 @@
+--- Log opened Thu Dec 23 00:00:55 2010
+00:07  mjf: Good evening. Is it possible to join all lines into the hold buffer and after last line is processed to copy the hold buffer to the pattern buffer and print the result?
+00:09  mjf: I do not know how to "join lines into the hold buffer".
+00:10  mjf: The rest is just ${g;OPERATION;p} (I guess).
+00:12  mjf: My initial idea was :sed -n '1h;1!H;${g;s/foo.*bar/baz/g;p}'
+00:12  mjf: but it is wrong.
+00:13  mjf: When I input for instance "foo\nbar foo\nbar" I get only one "baz" as output (that caused the /foo.*bar/ of course).
+00:14  geirha: It does not remove the newlines
+00:14  mjf: geirha: I know, I want them in the output.
+00:14  mjf: Newlines should be preserved.\
+00:15  geirha: Then why are you surprised?
+00:16  mjf: The problem is with the "replace from 'foo' to 'bar' inclusive with 'baz'. I can not simply use substitution for that, I guess.
+00:16  geirha: Oh, actually it's surprising that you get even one baz, since none of the lines match.
+00:17  geirha: sed '/foo/,/bar/c\
+00:17  geirha: baz'
+00:17  mjf: What I need is exactly: "between every closest 'foo' and 'bar' (inclusively) do some sed operation"
+00:18  geirha: Well, the above replaces the first line containing foo until the first line containing bar with baz.
+00:18  mjf: yes
+00:19  mjf: I got some problems to explain what I mean in english...
+00:19  geirha: If you need something more advanced than that, you end up with the same problems you get trying to parse html and xml with sed.
+00:20  mjf: Ok, simply, I would like to perform some sort of operation between start and stop pattern but in multiline manner.
+00:21  mjf: In fact, both variants - start and stop excluded from operation and start and stop included
+00:22  geirha: That's too complicated for me. I'm bailing out.
+00:22  mjf: geirha: Thank you for your ideas. (At least you helped me to formulate the problem).
+00:23  mjf: geirha: It's complicated, therefor I ask here whilst I simply can not get it myself. :(
+00:24  mjf: geirha: You bet I tried several approaches, but all were wrong (or I was not able to code my ideas at all).
+00:24  geirha: Should be fairly easy in perl and python. Doable in bash and awk, but sed I don't know.
+00:27  geirha: I'm sure it's possible though, given certain constraints.
+00:27  mjf: The final script would be:  msed 'from' 'to' 'operation'
+00:28  mjf: Examples - msed 'foo' 'bar' 'p' # print everything between foo's and bar's
+00:29  mjf: or - msed 'foo' 'bar' 's/x/y/g;p' # replace every x by y between foo's and bar's and print then pieces out
+00:30  mjf: ideally the script would have some -v switch to work the opposite way (performing oper. on everywhere not between...)
+00:30  mjf: and one more -i switch meaning "inclusive"
+00:31  mjf: That's my idea I would like to fullfill.
+00:32  mjf: So, in fact, it's 4 scripts alltogether.
+00:32  mjf: (perhaps not, I hardly can guess it, I may expect the scripts would be very close to each other)
+00:33  mjf: And, there is NO howto on google found concerning this sort of problems in sed.
+00:33  mjf: ;)
+00:34  geirha: Well, it's like parsing html, so it will be very hard.
+00:39  mjf: I think some trick must be used (like to split by newlines to 3 parts for exclusive and 5 parts for inclusive variants by \n's and then operate on proper parts only for each case described above).
+00:39  mjf: Or something alike.
+00:40  mjf: That way it can't be so painful, I think. The problem is that the idea is vague yet and I got no muscles to hack it myself, I think.
+00:41  mjf: Btw, the idea is not mine. Somebody already suggested it to me last time I asked for that here. Accidentally I lost the log. :(
+00:42  mjf: It's quite challenging, perhaps somebody would like to help me with it here (where else, right?)
+00:51  waldner: I think you want "join lines if line 1 ends in a certain string, and line 2 begins with a certain string"
+00:52  waldner: ah no, maybe not
+00:53  mjf: waldner: if only
+00:53  waldner: what you want is nongreedy quantifiers, which sed does not have
+00:53  mjf: waldner: therefor I want to workarround using some splitting...
+00:55  mjf: waldner: in general - split + operate on certain pieces only + print result
+00:56  mjf: waldner: (print result = print the result of operation on the certain pieces obtained by the splitting)
+00:56  mjf: waldner: oh, sorry, no print (part of "operation" - that's crutial)
+00:57  mjf: waldner: msed 'foo' 'bar' 's/x/y/;p' # (part of "operation")
+00:59  mjf: In fact, practically I need the exclusive variants only for my purposes (msed 'foo' 'bar' 'operation' and the variant with -v)
+01:00  waldner: I suggest you may want to look into perl
+01:02  mjf: waldner: I do not want to hear that. :)
+01:04  mjf: waldner: Really, if sed is capable of it, why not use exactly it. Perl may or may not be installed in the system but sed almost certainly is installed on every unix system.
+01:06  mjf: waldner: Therefor sed is better choice (for me). Perl is extremely powerful and it will be quite easy to write it in it, I agree. But, what if I want to use some script using the msed script as it's dependency anywhere?
+01:08  mjf: The msed script would help me with many common tasks I need almost everyday.
+--- Log closed Thu Dec 23 01:30:08 2010
+--- Log opened Thu Dec 23 01:30:33 2010
+01:30 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+01:32 --- Channel ##sed was synced in 121 seconds
+01:53  linuxmonger: I'm trying to figure out how to list all lines between word1 and word2, I think sed can do this but it eludes me, anyone have any ideas? Basically I want to list everything between cop and cup from /usr/share/dict/words. Thanks!
+02:25  linuxmonger: cat /usr/share/dict/words | sed -e '1,/cop/d'  -e 'cup,/$d' doesn't work, still trying.
+02:26  linuxmonger: The first part is correct, it deletes from the first line through the word cop, but I can't seem to get the delete from the second word to the last line.
+02:35  linuxmonger: Got it! cat /usr/share/dict/words | sed -e '1,/cop/d' -e '/cup/,$d'
+02:46  grop: useless use of cat
+02:47  grop: sed -e '1,/cop/d' -e '/cup/,$d' /usr/share/dict/words # will do the job too. no need to use cat
+03:58 --- grrrrrr is now known as barbanegra
+--- Log closed Thu Dec 23 05:28:25 2010
+--- Log opened Thu Dec 23 05:34:15 2010
+05:34 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+05:36 --- Channel ##sed was synced in 120 seconds
+--- Log closed Thu Dec 23 09:30:08 2010
+--- Log opened Thu Dec 23 09:30:38 2010
+09:30 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+09:32 --- Channel ##sed was synced in 124 seconds
+09:38  ritztech: didnt know sed had its own room lol
+09:38  m4n: well, most of the folks here are there on bash as well
+09:39  ritztech: lol
+09:40  ritztech: # sed '/body=\[/,/\]/s/\[.*\]/[]/' <<< "body=[REMOVE1] KEep1 body=[REMOVE2] Keep 2 body=[REMOVE3] KEep3 body=[REMOVE4] Keep 4 "
+09:41  ritztech: trying to remove everything from body=[blahblahlasdf]  But keep all the others that show Keep
+09:41  ritztech: even remove body=[]
+09:53  m4n: sed 's/body=\[[^]]*] //g'
+09:56  ritztech: holy crank thats nice :)
+09:56  ritztech: soo litte too
+09:56  ritztech: haha
+09:56  ritztech: dam sed is definetly confusing for newb
+09:57  m4n: yes it is, but if you get the fundamentals right with little knowledge on regex should get you done.
+10:13  ritztech: ill have to really research regex cause i hear it alot
+10:15  hansel: regex = regular expression = patterns
+10:15  m4n: sed by default uses BRE
+--- Log closed Thu Dec 23 12:29:36 2010
+--- Log opened Thu Dec 23 12:29:58 2010
+12:29 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+12:31 --- Channel ##sed was synced in 121 seconds
+13:18  Richlv: i'm sure this is a pretty silly question... but i just can't figure it out. why does it give me previous line in one case and next line in the other ? http://pastebin.ca/2027140
+13:20  waldner: the first one matches the msgid_plural line, the second matches the msgid line
+13:20  Richlv: yes, but when matching msgid it gives me msgid and line preceding it, when matching plural line, it gives me plural and the next line after it
+13:21  waldner: yes
+13:21  waldner: see what you have in the pattern:
+13:21  waldner: ..
+13:21  waldner: #
+13:21  waldner: #, php-format
+13:21  waldner: #
+13:22  Richlv: the msgid case is sort of expect (according to my limited understanding), but why do i get next instead of the previous line with plural ?
+13:22  waldner: wait
+13:22  Richlv: expected
+13:22  waldner: you always have two lines in the buffer
+13:22  waldner: in particular, at some point you have this:
+13:22  waldner: #, php-format
+13:22  waldner: msgid "Delete selected value mapping? It is used for %d item!"
+13:23  Richlv: ok, that should match the msgid pattern
+13:23  waldner: so your /.*msgid \"D/ matches that
+13:23  Richlv: which is then printed
+13:23  waldner: and both lines are printed
+13:23  waldner: in the next cycle, you then have this in the buffer:
+13:23  waldner: msgid_plural "Delete selected value mapping? It is used for %d items!"
+13:23  waldner: msgstr[0] ""
+13:24  Richlv: so that does not match anymore
+13:24  waldner: and the /.*msgid_plural etc. pattern matches that, and those two lines are printed
+13:24  Richlv: hmm, but those are two separate invocations
+13:24  waldner: when you run your first sed, the first pair of lines is matched
+13:24  waldner: when you run your second sed, the second pair of lines is matched
+13:24  waldner: that's it
+--- Log closed Thu Dec 23 13:28:58 2010
+--- Log opened Thu Dec 23 13:34:28 2010
+13:34 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+13:34  Richlv: i rarely stray from one line sed operations, and it's always a puzzle for me ;)
+13:35  waldner: yes, probably for something more complex than simple things, it's probably easier to use other tools
+13:35  Richlv: i still have to expand this to work with more lines, but at least i have the general idea of the buffer space much more clearn in my head
+13:35  waldner: to work with more lines, it's quite more complex
+13:35  waldner: but fortunately, there's an example in the sed faq
+13:36 --- Channel ##sed was synced in 122 seconds
+13:36  waldner: http://sed.sourceforge.net/sedfaq4.html#s4.23.2
+13:36  waldner: the one with :more and :enough labels
+13:37  waldner: that deletes lines, but you can change it to do anything you want
+13:37  waldner: the important point is how it builds a sliding window buffer of n lines
+13:38  waldner: the text explains how to change it to match the desired number of lines
+13:40  Richlv: oh, wonderful, maybe next time i'll manage to get a simpe case working on my own now
+16:43 --- maxim is now known as Guest72713
+16:54  flasomm: Hello guys, I have a question about a regexp
+16:55  gnubien: flasomm: ok, explain
+16:56  flasomm: I try to find the regexp for the following string : 1DA748BA-4CAF-E521-87C8-EDB6D2F0BC39|CD4CAE90-DED9-5F44-F616-1CD3C3CC805A|A0DD390E-59EB-0BE7-2856-1CD3C3CCDD36
+16:56  gnubien: whole string or just some part of it?
+16:56  flasomm: I want to get strings beetween "|" any sugegstion ?
+16:58  waldner: s/|/\n/g maybe?
+16:58  gnubien: flasomm: awk ok?
+16:58  flasomm: well it's for my sql query
+16:58  flasomm: awk should do it
+16:58  flasomm: i'll translate it
+17:19  geirha: What should the resulting sql query look like?
+17:55 --- grrrrrr is now known as barbanegra
+--- Log closed Thu Dec 23 19:45:30 2010
+--- Log opened Thu Dec 23 20:01:00 2010
+20:01 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+20:02  grop: 4# sed 's/^\([^|]*\).*|\/\([^/]*\).*/\1|\2/' <<< "mtn.com|/C=ZA/ST=Gauteng/L=Johannesburg/O=Mobile Telephone Networks/OU=MTN/CN=b2b.mtn.co.za|/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign International Server CA - Class 3/OU=www.verisign.com/CPS Incorp.by Ref. LIABILITY LTD.(c)97 VeriSign||"
+20:02  shbot: grop: mtn.com|O=VeriSign Trust Network
+20:02 --- Channel ##sed was synced in 116 seconds
+20:17  galaxywatcher: grop: thx
+--- Log closed Thu Dec 23 20:26:18 2010
+--- Log opened Thu Dec 23 20:31:41 2010
+20:31 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+20:33 --- Channel ##sed was synced in 120 seconds
+20:37  galaxywatcher: grop: I know how to do [^/] e.g. but how would I do the same for a multi-character string? Like [^"O="] e.g.?
+20:40  waldner: in sed you can't do that
+20:43  galaxywatcher: waldner: ok..
+20:57  araujo: any way to replace a whole new line that contains a specific word with a whole new one?, I am trying to find a command for it, but can't find one
+20:59  geirha: sed '/foo/c\
+20:59  geirha: replacement line'
+21:00  geirha: If you want to edit a file, use ed instead. The syntax is similar, but not quite.
+21:01  geirha: You can also use the substitution command.  sed 's/.*foo.*/replacement line/'
+21:03  araujo: Thanks geirha !, that made it
+21:04 * araujo not familiar with this case before
+--- Log closed Thu Dec 23 21:27:36 2010
+--- Log opened Thu Dec 23 21:33:08 2010
+21:33 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+21:34 --- Channel ##sed was synced in 113 seconds
+21:36  Kramericus: echo -e "well hi fred" | sed -e s/hi/hello/
+21:36  Kramericus: ^^ is very simple, the output is "well hello fred"
+21:37  Kramericus: So if I just add an ANSI escape sequence to the substitution, maybe I could change the word "hello" to be colored red...
+21:37  Kramericus: echo -e "well hi fred" | sed -e s/hi/\e[1\;37\;41\;hello/
+21:37  Kramericus: Hmm... no, the output is now "well e[1;37;41;hello fred"
+21:38  Kramericus: It's as if my escape character (\e) is being ignored..?
+21:47  galaxywatcher: grop: The string I initially gave you as input is not representative of all the data in this data set. Here is a better example: www.abrasnet.com.br|/C=BR/ST=Sao Paulo/L=Sao Paulo/O=Locaweb Servicos de Internet S.A/OU=Locaweb Servicos de Internet S.A/CN=*.websiteseguro.com|/C=ZA/ST=Western Cape/L=Cape Town/O=Thawte Consulting cc/OU=Certification Services Division/CN=Thawte Premium Server
+21:47  galaxywatcher: CA/emailAddress=premium-server@thawte.com|200.234.200.227|hm1712.locaweb.com.br.
+21:48  galaxywatcher: The output I want is: www,abrasnet.com.br|O=Locaweb Servicos de Internet S.A|200.234.200.227|hm1712.locaweb.com.br.
+21:49  galaxywatcher: I have this:  sed 's/\(^[^|]*|\)\/[^|]*\(O=[^/]*\/[^|]\|\)\(.*\)/\1|\2/'
+21:50  galaxywatcher: It gets tricky with multiple delimiters. (for me)
+22:01  geirha: Why is the data so oddly formatted in the first place?
+22:02  waldner: Kramericus: to insert a \, you have to use \\
+22:02  Kramericus: waldner: Thanks, but that has the same output..
+22:02  waldner: oh
+22:02  waldner: of course, you're not quoting anything
+22:03  waldner: then you need \\\\
+22:03  Kramericus: That makes it "well \e[1;37;41;hello fred"
+22:03  Kramericus: :)
+22:03  waldner: then you need to give it to something that understands \e
+22:04  Kramericus: Not sure what you mean.
+22:04  waldner: just having sed output that does not make the output colored, as you have seen
+22:04  waldner: to the terminal, \e is just \ followed by e, it's not special
+22:05  Kramericus: echo -e \\e[1\;37\;41mhello
+22:06  Kramericus: That will echo a red "hello"
+22:06  Kramericus: It seems like the terminal understands...
+22:06  galaxywatcher: geirha: This was a dump from an SQLite database. I didn't have a hand in the initial data format.
+22:06  waldner: nope, it's echo -e that understands it
+22:07  waldner: and turns it into a real escape character
+22:07  waldner: to do the same with sed, you need to output \x7f, not \e
+22:09  waldner: er, \x1b
+22:11  waldner: echo "well hi fred" | sed -e 's/hi/\x1b[1;37;41mhello/'
+22:11  Kramericus: I see.
+22:12  Kramericus: Thank you. :)
+22:12  waldner: np
+22:12  geirha: color=$(tput bold; tput setaf 7; tput setab 1); sed -e "s/hi/${color}hello/"
+22:12  waldner: and of course whar geirha says is much better
+22:12  waldner: *what
+22:12  Kramericus: Why?
+22:13  geirha: Kramericus: See http://www.bash-hackers.org/wiki/doku.php/scripting/terminalcodes
+22:13  waldner: because you don't have to hardcode escape sequences, and it's easier to write and modify
+22:14  Kramericus: Ah, it's an abstraction layer. So my final script will support more terminal types, too. Thank you both.
+22:48  Kramericus: x='s/hi/hello/'; echo "well hi fred" | sed -e $x;
+22:48  Kramericus: output is "well hello fred"
+22:48  Kramericus: But let's say I want to enclose the substitution command in literal quotes, so that it can later include special characters...
+22:48  Kramericus: x="'s/hi/hello/'"; echo "well hi fred" | sed -e $x;
+22:49  Kramericus: Now I get this error:sed: -e expression #1, char 1: unknown command: `''
+22:49  waldner: nope, you need eval for that
+22:49  waldner: and good luck, btw
+22:49  Kramericus: Do you imply that this will be difficult?
+22:50  waldner: if my hunch of what you want to do is right, yes
+22:52  Kramericus: x="'s/hi/hello/'"; echo "well hi fred" | eval sed -e $x;
+22:52  Kramericus: Output is "well hello fred"
+22:52  Kramericus: Looks good!
+22:52  waldner: yes, until you start processing arbitrary stuff
+22:54  Kramericus: Merry Christmas, Waldner!
+22:54  waldner: thanks, and to you
+--- Log closed Thu Dec 23 23:15:36 2010
+--- Log opened Thu Dec 23 23:31:04 2010
+23:31 --- Users 99 nicks [0 ops, 0 halfops, 0 voices, 99 normal]
+23:32 --- Channel ##sed was synced in 113 seconds
+--- Log closed Thu Dec 23 23:57:24 2010

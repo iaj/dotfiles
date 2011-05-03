@@ -1,0 +1,707 @@
+--- Log opened Fri Dec 24 00:02:48 2010
+00:02 --- Users 545 nicks [0 ops, 0 halfops, 0 voices, 545 normal]
+00:03  TheBonsai: TSTP can be ignored or handled, so there might be different cases
+00:03  TheBonsai: stty -a lists it as "susp" by the way
+00:03  TheBonsai: it's just like ^C a signal trigger
+00:04 --- Channel #bash was synced in 97 seconds
+00:29  zouhair: Hi, I have a dates in this format "2010-12-23"  how can I use date to change it to "december 23 2010"?
+00:30  e36freak: man date, theres a whole bunch of format options
+00:32  e36freak: date +"%B %d %Y"
+00:37  poisonbit: # date +"%B %d %Y" -d 2010-12-23
+00:37  evalbot: poisonbit: December 23 2010
+00:38  zouhair: thanks guys
+00:40  poisonbit: note that date will output month name, based on user locale (i.e. 'diciembre' for 'es_ES.UTF-8')
+00:41  zouhair: yep
+00:44  yeah: unctions
+00:47  yeah: oops, sorry. my real question is: i'm writing a couple of scripts to glue together development and production web servers for developers to use, and they are getting kind of sizeable. 2 scripts, 200ish lines each. i have a bunch of functions, some of which are duplicates between both scripts so i was thinking of making a function library file and sourcing it from the actual scripts...but i haven't done this before in bash, and i wonder if the
+00:49  grop: !source > yeah
+00:49  greybot: yeah: ''source <script>'' or ''. <script>'' reads and executes the commands from <script> into the current shell, only one script per invocation the rest is passed as arguments to it
+00:50  yeah: grop, thanks i know how i would literally include a file like that with source, i'm just curious from a design standpoint how i should organize files/libraries etc.
+00:51  nDuff: yeah, function libraries should typically go in a share directory if you're installing to the filesystem (ie. /usr/share/yourprogram/somelibrary.bash), whereas your executables should be in a bin directory and have no extension (/usr/bin/yourprogram)
+00:51  nDuff: yeah, ...is that responsive to your question?
+00:51 * nDuff defers to the FHS standard docs for more definitive discussion on the subject.
+00:52  yeah: right now i just have a git repository with the scripts in it and developers install it and add the directory to $PATH...i suppose i should actually make a software package for our distro
+00:52  yeah: s/install/clone
+00:52  hansel: yeah yeah
+00:52  grop: ^^
+00:53  nDuff: (whereas helper executables, unlike libraries, belong in a libexec directory...)
+00:53  yeah: ok, thanks - time to learn how to build my first .deb :)
+00:53  grop: nDuff, aren't executables have to be in /usr/local/bin not /usr/bin ?
+--- Log closed Fri Dec 24 00:57:37 2010
+--- Log opened Fri Dec 24 01:02:58 2010
+01:02 --- Users 536 nicks [0 ops, 0 halfops, 0 voices, 536 normal]
+01:04  nDuff: !pe > grop
+01:04  greybot: grop: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+01:04  nDuff: to give a better answer, though, it'd be helpful if you described what you were trying to use cut to accomplish.
+01:04  grop: # s=foo n=${#s}; while ((n!=0)); do res+=$(cut -c $n <<< "$s"); ((n--)); done; echo "$res" # to do that without cut
+01:04  evalbot: grop: oof
+01:04 --- Channel #bash was synced in 112 seconds
+01:04  grop: nDuff, yes, with param expansion, but I don't know how to do it…
+01:07  geirha: ${var:offset:length}
+01:08  geirha: res+=${s:--n:1}
+01:08  geirha: res+=${s:(--n):1}
+01:09  grop: geirha, nice, thanks :)
+01:42 * poisonbit stoles that string_reverse () {
+01:44  geirha: rev() { local n=$((${#1}/2)); if ((!n)); then printf %s "$1"; return; fi; rev "${1:n}"; rev "${1::n}"; }
+01:52  hal: how can I list just the directories residing in a directory, but not show the current directory dot?
+01:53  geirha: printf '%s\n' */
+01:53  geirha: shopt -s dotglob; printf '%s\n' */   # if you want directories starting with . as well
+01:53  hal: geirha: no I don't, geirha :)
+01:53  hal: that's great
+01:54  hal: really I'd like not to show the trailing forward slash also geirha
+01:54  hal: (being given an inch but taking a mile) :)
+01:54  geirha: dirs=(*/); printf '%s\n' "${dirs[@]%/}"
+01:55  hal: geirha: oh I see
+01:55  hal: that's great - thank you very much :)
+01:55  hal: where would I find out more about the variables %s etc?
+01:56  geirha: The Guide and FAQ, and of course man bash
+01:57  geirha: !arrays > dirs=(*/)
+01:57  greybot: dirs=(*/): An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+01:57  geirha: printf '%s\n': ''help printf''
+01:57  geirha: !pe > "${dirs[@]%/}"
+01:57  greybot: "${dirs[@]%/}": Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+01:59  hal: thanks for your help geirha
+02:08  avis: i have a running process and was wondering if there was a key combination that would bring be back and leave that process running until it ends  in a bash gnome shell
+02:09  avis: ifi simply append an & after the command would it still run if i close out that terminal  ?
+02:12  grop: avis, no. You can use screen
+02:17  geirha: avis: If you start it in the background and exit the shell, it will keep running, but you will no longer be able to control it.
+02:18  geirha: The terminal may go on a killing spree and kill your background job if you close it, which is why you should exit the shell instead of closing the terminal.
+02:20  geirha: screen(1), as grop suggests, or something similar is more useful though, as you can reattach to interact with it.
+02:30 * skraito bored
+02:30  UnholyTerror: board
+02:32 --- cuba33ci_ is now known as cuba33ci
+02:32 --- Azer_ is now known as Azer
+--- Log closed Fri Dec 24 02:58:07 2010
+--- Log opened Fri Dec 24 03:03:27 2010
+03:03 --- Users 518 nicks [0 ops, 0 halfops, 0 voices, 518 normal]
+03:04  grop: # foo() { echo -e "first arg: $1\nsecond arg: $2"; }; foo bar baz
+03:04  evalbot: grop: first arg: bar
+03:04  evalbot: grop: second arg: baz
+03:04  jef91: Very cool
+03:04  jef91: Thank you very much
+03:04 --- Channel #bash was synced in 92 seconds
+03:05  e36freak: jef91: also $# and $@
+03:06  jef91: in this
+03:06  jef91: if [ $1 == "debug" ]
+03:06  jef91: do I need "" around text?
+03:07  e36freak: # foo() { echo "$@, $#"; }; foo bar baz
+03:07  evalbot: e36freak: bar baz, 2
+03:07  e36freak: # foo() { echo "$@, $#"; }; foo bar
+03:07  evalbot: e36freak: bar, 1
+03:07  cthuluh: jef91: no, but you need them around "$1"
+03:07  cthuluh: !quotes > jef91
+03:07  greybot: jef91: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+03:07  e36freak: ![[ > jef91
+03:07  greybot: jef91: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+03:07  cthuluh: jef91: don't use == with [
+03:07  e36freak: was getting to that next, haha
+03:08  jef91: Why does this work then? if [ $? == 1 ]
+03:08  jef91: I've been using the above and that works fine
+03:08  e36freak: jef91: it works, just not good syntax
+03:09  e36freak: jef91: also theres no need to do that, just use "if command; then"
+03:09  cthuluh: jef91: it works only in bash, and by chance (since $? can only be one word)
+03:09  jef91: What is better syntax for that then?
+03:10  cthuluh: [[ $1 = 'test' ]]
+03:10  e36freak: # echo 'foo' > file; grep -q 'bar' file; if (( $? == 1 )); then echo 'not found'; fi # no need to do this
+03:10  cthuluh: or [ "$1" = 'test' ]
+03:10  evalbot: e36freak: not found
+03:10  e36freak: # echo 'foo' > file; if ! grep -q 'bar' file; then echo 'not found'; fi # this will work
+03:10  cthuluh: !faq difference > jef91
+03:10  evalbot: e36freak: not found
+03:10  greybot: jef91: http://mywiki.wooledge.org/BashFAQ/031 -- What is the difference between test, [ and [[ ?
+03:11  e36freak: # echo 'foo' > file; if ! grep -q 'bar' file || echo 'not found' # or this
+03:11  e36freak: ahh
+03:11  evalbot: e36freak: Missing terminating quote, bracket or keyword
+03:11  e36freak: # echo 'foo' > file; grep -q 'bar' file || echo 'not found' # or this
+03:11  evalbot: e36freak: not found
+03:11  cthuluh: are you ok, e36freak ? :)
+03:12  e36freak: cthuluh: not been sleeping well
+03:12  cthuluh: do you know that you can play with evalbot in #evalbot?
+03:12  e36freak: was demonstrating better was to do if [ $? == 1 ]
+03:12  e36freak: s/was/ways
+03:13  cthuluh: oh right, sorry for my stupid remark, then
+03:14  e36freak: no worries :)
+03:14  e36freak: i have a terminal to do that in too
+03:14  grop: # echo; ! (($?)) && { echo done; } || { echo failed; }
+03:14  evalbot: grop:
+03:14  evalbot: grop: done
+04:23 --- Unknown[NF] is now known as Unknown[OFF]
+04:38 --- Zenopus_ is now known as Zenopus
+04:38 --- wanze is now known as kba
+04:57  xtract: evening
+04:57  xtract: I'm trying to do an if statement of a number and variable, but I am getting an error
+04:57  xtract: can someone help
+04:57  e36freak: !exact
+04:57  greybot: Please tell us EXACTLY what you typed, and EXACTLY what the error is.
+04:58  xtract: for file in /home/user/code/shell/exe/*;
+04:58  xtract: do
+04:58  xtract: entropy=`ent -b $file | grep Entropy | cut -d" " -f 3`
+04:58  xtract:         if [ $entropy > 0.937679 ]
+04:58  xtract:         then
+04:59  e36freak: bash cant handle floating point
+04:59  e36freak: also
+04:59  e36freak: !((
+04:59  greybot: ((...)) is an arithmetic command, which returns an exit status of 0 if the expression is nonzero, or 1 if the expression is zero. Also used as a synonoym for "let", if side effects (assignments) are needed. See <http://mywiki.wooledge.org/ArithmeticExpression>.
+04:59  xtract: doh!
+04:59  e36freak: !float
+04:59  greybot: for floating point numbers see !faq 22
+04:59  e36freak: !faq 22
+04:59  xtract: ok
+04:59  greybot: http://mywiki.wooledge.org/BashFAQ/022 -- How can I calculate with floating point numbers instead of just integers?
+04:59  e36freak: read ^
+04:59  xtract: thanks
+04:59  e36freak: ayep
+05:00 --- prince_j1mmys is now known as prince_jammys
+05:02  e36freak: ![[ > xtract
+05:02  greybot: xtract: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+05:02  xtract: ok, I got it
+05:02  xtract: thanks again for the help
+05:03  e36freak: yep
+05:27  malfy_: how do i get a process to run in the background, and run another command straight after that
+05:27  malfy_: ?
+05:28  malfy_: im looking for something like 'something &; something_else'
+05:28  malfy_: but bash doesnt like that syntax
+05:28  e36freak: !&;
+05:28  greybot: &; is always wrong. If you want to run things in the background in a compact one-liner just use & between commands, and omit the ; entirely. See http://mywiki.wooledge.org/BashPitfalls
+05:28  malfy_: ahhh
+05:28  malfy_: thanks a lot
+05:28  e36freak: np
+05:37  matt8686: How to delete all files in directory except ones with .ttf extension? I tried this: rm !(*.ttf)   ..but looks like it does not work for some reason. Any suggestions?
+05:37  yitz_: You gotta first do: shopt -s extglob
+05:37  yitz_: !extglob
+05:37  greybot: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+05:44  matt8686: I did "rm $(ls * | grep -v \.*ttf)"
+05:46  yitz_: !ls > matt8686
+05:46  greybot: matt8686: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+05:47  yitz_: That fails hard when, for example, a filename has a space
+05:54  richardbronosky: is it possible to have a case match not end with ;;
+05:54  e36freak: ...why?
+05:54  tharkun: !array
+05:54  greybot: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+05:54  richardbronosky: that way it will continue to the next entry which is *)
+05:55  e36freak: you can have them call the same function...
+05:56  richardbronosky: how do you break out of a function?
+05:56  yitz_: return
+05:57  richardbronosky: thanks, I'm doing to too many language swaps.
+05:57  e36freak: and you can have it return an exit code as well, ofc
+05:57  tharkun: !arithmetic
+05:57  greybot: http://mywiki.wooledge.org/ArithmeticExpression
+05:59  hansel: !ncurses
+05:59  hansel: awww
+05:59  th0rax: is there a way i can return the exit status of a program running inside a for loop?
+05:59  richardbronosky: $?
+05:59  Dribble: !&&
+05:59  greybot: cmd1 && cmd2 ## cmd1 is executed, and then if its exit status was 0 (true), cmd2 is executed. See http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+06:00  richardbronosky: !$?
+06:00  greybot: The special parameter ? (you use $? to expand it) contains the exit status of the previous command, an integer from 0 to 255 inclusive. In general, an exit status of 0 implies success (or "true") and non-zero implies failure ("false").
+06:00  e36freak: and finally
+06:00  e36freak: !||
+06:00  greybot: foo || bar runs bar when foo fails: [[ -d $foo ]] || { echo 'ohNoes!' >&2; exit 1; }
+06:02  e36freak: th0rax: command || { echo 'skipping... command failed'; continue; } # is good for error handling in a loop
+06:05  hotwings: could alphapos generation be simplified in this? maybe with a loop of some sort?  http://pastebin.com/tJiwCGur
+06:06 --- KB1JWQ_ is now known as KB1JWQ
+06:06  e36freak: !`
+06:06  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+06:09 * e36freak is thinking
+06:16  hotwings: maybe theres a way to do 'for hmm in [a-z]' ?
+06:16  e36freak: yes, but im thinking about case sensitiveness
+06:17  e36freak: and that would be for i in {a..z}
+06:19  e36freak: wait, you just want the index of the first file matching that letter in the directory?
+06:19  e36freak: grep | awk is usually bad form, you should only need one out of grep, sed, and awk
+06:24  e36freak: for i in {a..z}; do grep -i " $i" "$temp" | head -1 | awk whatever; done
+06:24  e36freak: grep -i ignores case
+06:24  e36freak: you can figure out the rest
+06:25 * seekwill has used grep | awk :(
+06:25 * skraito say hi all
+06:26  seekwill: hi all
+06:26  skraito: heyseek will
+06:26  skraito: oh my
+06:26  skraito: ure here
+06:26  hansel: sed++
+06:27  th0rax: lol, thanks guys, I was way over thinking that crap
+06:28  e36freak: hotwings: http://pastebin.com/B9uscta3
+06:28  e36freak: hotwings: something like that
+06:28  e36freak: hotwings: http://pastebin.com/mZ0z2c37 missed the -i
+06:29  e36freak: and you can do that whole line with sed
+06:29  e36freak: or sed | head
+06:29  e36freak: although im not sure how to make sed case-insensitive, if you can
+06:30  e36freak: maybe you could do it with PE
+06:31  e36freak: sed -n '/ [${i^^}${i}]/s/ .*//p'
+06:31  e36freak: sed -n '/ [${i^^}${i}]/s/ .*//p' | head -1
+06:31  e36freak: might work
+06:36  skraito: e36freak
+06:36  skraito: lol what time is it now there ?
+06:36  e36freak: 12:30
+06:40  skraito: ic
+06:41  e36freak: aww i know im dumb because that sed line needs double quotes
+06:47  hotwings: thanks e36freak, ill give your suggestions a try (was away having dinner)
+06:48  e36freak: hotwings: no worries, lemme paste up the final "solution" though id have to probably play with it before it was perfect
+06:49  e36freak: also, why is $tmpfile a variable?
+06:50  e36freak: http://pastebin.com/KHaPNY1p there
+--- Log closed Fri Dec 24 06:56:54 2010
+--- Log opened Fri Dec 24 07:02:35 2010
+07:02 --- Users 511 nicks [0 ops, 0 halfops, 0 voices, 511 normal]
+07:03 --- Channel #bash was synced in 80 seconds
+07:08  Dribble: !eval
+07:08  greybot: 'eval' is a common misspelling of 'evil'. If eval is the answer, surely you are asking the wrong question. See http://mywiki.wooledge.org/BashFAQ/048
+07:08  Dribble: !evil
+07:08  greybot: A common misspelling of 'eval', q.v.
+07:08  Dribble: ok
+07:09  Dribble: !shopt
+07:09  greybot: help shopt <ENTER> http://www.bash-hackers.org/wiki/doku.php?id=internals:shell_options -- nullglob and extglob are most common. dotglob and nocase{match,glob} can be handy too
+07:09  Dribble: !{}
+07:09  greybot: Command grouping. Like (), but doesn't spawn a subshell. See http://mywiki.wooledge.org/BashGuide/CompoundCommands#Command_grouping
+07:09  Dribble: !()
+07:09  Dribble: !echo
+07:09  marvin: Dribble:
+07:09  e36freak: !subshell
+07:09  greybot: http://mywiki.wooledge.org/SubShell
+07:10  Dribble: yeah
+07:11  Dribble: !'
+07:11  greybot: Single quotes (') cause everything between them to be taken literally by bash. If you want to embed a ' inside a '...', write it as the four characters, '\'': echo 'It'\''s a blast!'
+07:11 --- yitz__ is now known as yitz_
+07:11  e36freak: having fun?
+07:12  Dribble: lol yeah I like what its description better then my manual
+07:12  e36freak:  /msg the bot if you just wanna query it
+07:13  Dribble: what do i put after /msg
+07:13  Dribble: !/msg
+07:13  greybot: You don't really want to msg us. These aren't the droids you're looking for. You can go about your business, or talk in the channel like everyone else. Move along, move along...
+07:13  e36freak:  /msg greybot whatever
+07:14  e36freak: that refers to people :)
+07:19  hotwings: e36freak - $tmpfile is a variable so i can change it easily just editing it at the beginning of the script, rather then go through the script and replace all occurances
+07:20  e36freak: then thats not the correct syntax
+07:21  e36freak: !>
+07:21  greybot: Use > to write redirect STDOUT to a file: ls > myFileList. See !redir
+07:21  e36freak: note _file_
+07:21  hotwings: also, the alphapos array stores the positions in the filelist array where each letter first occurs so that in the menu system you can press a thru z and it will jump to the corresponding position in the filelist array
+07:21  e36freak: ahh, nice
+07:21  e36freak: that makes sense then :)
+07:22  e36freak: and you dont need to write to file then, you can just read from the array
+07:22  hotwings: say i have 2000 entries and want to get to the m's.. instead of scrolling thru hundreds of entries i just hit m and it goes straight there
+07:23  hotwings: iirc i tried that first but it took longer to loop through the array rather then just grep a temporary file
+07:24  e36freak: hotwings: http://pastebin.com/zpGGcV1K
+07:24  e36freak: correct syntax to store that and read it as a variable
+07:25  e36freak: although, lemme try something
+07:27  e36freak: i dont know if you can do that without actually writing it to a file
+07:27  e36freak: echo'ing a newline explicitly doesnt work
+07:27  lhunath: very odd.
+07:28  lhunath: what's the purpose of the temp parameter?
+07:28  e36freak: lhunath: thats what i was wondering
+07:28  lhunath: just populate alphapos in the for.
+07:28  lhunath: the first one, that is.
+07:28  e36freak: lhunath: only for the first occurance of each line starting with each letter
+07:29  lhunath: then don't overwrite existing keys.
+07:29  ns5: What is the best practive of refering to an variable in bash script?  $var or "$var" or $(var)?
+07:30  lhunath: "$var".
+07:30  lhunath: $(var) has nothing to do with variables.
+07:31  e36freak: !$() > ns5
+07:31  greybot: ns5: Command Substitution: "$(foo bar)" causes the command 'foo' to be executed with the argument 'bar' and "$(..)" will be replaced by the *output*. See http://mywiki.wooledge.org/BashFAQ/002 and http://mywiki.wooledge.org/CommandSubstitution
+07:31  lhunath: you may mean ${var}.  which is identical to $var
+07:32  ns5: so "$var" is different from $var and ${var}?
+07:32  e36freak: actually it should be "${var}"
+07:32  e36freak: !" > ns5
+07:32  greybot: ns5: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+07:32  e36freak: !pe > ns5
+07:32  greybot: ns5: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+07:32  lhunath: !args > ns5
+07:32  greybot: ns5: Understanding Arguments and Word Splitting: http://mywiki.wooledge.org/Arguments
+07:33  lhunath: that explains the point of quotes around expansions fairly well.
+07:33  ns5: I just want to find the best way of using a variable to minimize potential errors, like space in the name of file names
+07:33  e36freak: "$foo", but read those pages
+07:34  e36freak: huge amount of good information in them
+07:34  e36freak: also, inferred from "space in the name of file names,"
+07:34  e36freak: !ls
+07:34  greybot: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+07:35  lhunath: ns5: yeah, I think I already answered that question with the first thing I said.  the rest is just useful background information.
+07:36  ns5: lhunath, e36freak: wow a lot of documents to read, anyway it looks like a good idea to stick with "$var", thank you
+07:36  lhunath: !wordsplitting > ns5
+07:36  greybot: ns5: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+07:36  lhunath: that's shorter.
+07:37  e36freak: ahh, thats a good one
+07:37 * e36freak will remember that
+07:37  lhunath: unquoted expansions are not only subject to wordsplitting but also to pathname expansion.
+07:39  hotwings: e36freak - is it possible to add 0-9 to that as well or would that conflict since numbers are array elements and not an associative array label (or whatever) ?
+07:39  e36freak: hmm
+07:39  e36freak: i dont know enough to answer that, perhaps lhunath can
+07:40  e36freak: or he may have a better overall solution to what youre trying to do
+07:40  lhunath: what *is* he trying to do?
+07:40  iibewegung: anyone know how to grep for a backslash? ... i tried grep \\ and it doesn't work
+07:40  lhunath: and, the array indices can be any string.  digits 0-9 are also strings.
+07:41  pgas: grep -F \\
+07:41  pgas: grep '\\'
+07:41  e36freak: well yeah
+07:41  e36freak: hotwings: explain exactly what youre trying to do
+07:41  iibewegung: thanks, pgas
+07:42  lhunath: iibewegung: if you type \\ in bash code, bash turns it into \.  grep needs \ escaped.
+07:42  lhunath: (bash does too, hence bash turning it into \)
+07:42  lhunath: if you single quote it in bash, bash doesn't interprete the backslash-escaping so it leaves '\\' as \\ when passing it to grep.
+07:43  iibewegung: i see.. typing \ four times \\\\ worked also.
+07:43  yitz_: # echo h\e\\l\ o
+07:43  evalbot: yitz_: he\l o
+07:43  lhunath: indeed. \\\\ is \\ + \\, interpreted by bash into \ + \, then grep gets \\, which is an escaped \.
+07:43  hotwings: lhunath - i have a file list stored in an array.  i create a second array (associative, using a-z), which stores the position in the file list array the first occurance of each letter occurs.  for example if the filelist[50]="myfile", then alphapos[m]=50..  its so i can easily move directly to a-z positions in large filelists
+07:44  hotwings: i hope that makes (enough) sense
+07:45  lhunath: hotwings: so you iterate alphapos instead of filelist when you press a key.
+07:45  hotwings: if filelist[1234]="first_occurance_starting_with_f", then alphapos[f]=1234
+07:45  lhunath: might as well iterate filelist and do away with the noise of generating an alphapos
+07:45  lhunath: iterating arrays is fast.
+07:46  lhunath: what do you want to do after you've found the index of the first file that starts with a given letter?
+07:49  hotwings: i generate an output list to stdout starting from that index
+07:50  hotwings: however, iirc i starting using the second array because looping through an array with thousands of elements each time was not fast at all
+07:51  hotwings: so generating a second array with the positions gave me instant access to the location in the main file list
+07:52  hotwings: of course the closer to a the faster, but the closer to z the slower it gets
+07:52  hotwings: when looping through rather then using the alphapos list
+08:04  PRAEDO: anyone awake
+08:05  PRAEDO: ?
+08:05  e36freak: whats up
+08:05  PRAEDO: i have 2 quick questions
+08:05  e36freak: just ask
+08:05  PRAEDO: first, i'd like to know if it's possible to append lines to a file with a single command
+08:05  e36freak: !>>
+08:05  greybot: Use >> to append to a file and prevent the original contents from being erased. See !redir
+08:05  PRAEDO: like echo "new line" >> file.txt
+08:05  PRAEDO: does to the end
+08:05  e36freak: thats the one
+08:05  PRAEDO: sorry, i didn't explain correctly
+08:06  PRAEDO: i meant append to the beginning instead of the ned
+08:06  PRAEDO: end
+08:06  e36freak: no
+08:06  PRAEDO: not possible?¿
+08:06  e36freak: nope, not without using multiple commands. most programming languages cant do that either
+08:09  e36freak: second question?
+08:10  PRAEDO: second question is:
+08:10  PRAEDO: is it possible to hide the output of ffmpeg encoding?
+08:10  krzie: !prepend
+08:10  greybot: To prepend a string to a file, use cat with the stdin flag: cat - origfile <<< "string" > newfile && mv newfile origfile
+08:10  e36freak: in particular, or just to hide the output of the command?
+08:10  PRAEDO: frame=   35 fps= 22 q=-1.0 size=     112kB time=1.34 bitrate= 685.8kbits/s
+08:10  e36freak: s/the/a
+08:10  PRAEDO: i run a command and i get this spam on the command line
+08:11  PRAEDO: i want to leave it in the background with &
+08:11  e36freak: command >/dev/null
+08:11  e36freak: that will keep STDERR
+08:11  e36freak: command >/dev/null 2>&1 will hide everything
+08:11  PRAEDO: but 2>&1>/dev/null at the end of the command doens't seem to work
+08:11  e36freak: as will
+08:11  PRAEDO: spam of numbers continue to appear
+08:11  e36freak: you have it in the wrong order
+08:12  e36freak: !2>&1
+08:12  greybot: Making sense of the copy descriptor operator: http://wiki.bash-hackers.org/scripting/copydescriptor
+08:12  e36freak: &>/dev/null will also do that
+08:13  PRAEDO: then what does 2>&1>/dev/null do?
+08:13  PRAEDO: i always used that before
+08:14  e36freak: that page explains it
+08:15  PRAEDO: okie
+08:15  PRAEDO: thanks
+08:44  hotwings: how do you nest $() inside other $()'s ?
+08:44  e36freak: by nesting them
+08:44  yitz_: # var=$(echo $(echo hi)) ; echo $var
+08:44  evalbot: yitz_: hi
+08:45  hotwings: i got:
+08:45  e36freak: foo=$(sed s/bar/baz/ <<<$(sed s/foo/bar <<<"foo")); echo $foo
+08:45  e36freak: # foo=$(sed s/bar/baz/ <<<$(sed s/foo/bar <<<"foo")); echo $foo
+08:45  hotwings: fileserver:~$ $(echo one $(echo two))
+08:45  hotwings: -bash: one: command not found
+08:45  evalbot: e36freak: sed: -e expression #1, char 9: unterminated `s' command
+08:45  e36freak: bah
+08:45  e36freak: # foo=$(sed s/bar/baz/ <<<$(sed s/foo/bar/ <<<"foo")); echo $foo
+08:45  evalbot: e36freak: baz
+08:45  e36freak: rookie mistake
+08:46  e36freak: hotwings: the real code?
+08:49  e36freak: hotwings: that is trying to run the result of that nesting as a command, you need to have bash treat it is a string, i.e. assigning it to a variable or redirecting it
+08:49  e36freak: # echo $(echo one $(echo two))
+08:49  evalbot: e36freak: one two
+08:50  e36freak: # sed s/two/three/ <<<$(echo one $(echo two))
+08:50  evalbot: e36freak: one three
+08:55  Seta: Hey! When i have a software that requests links like: http://aaa.aa/a can i configure my server to forward those requests to http://bbb.bb/b ?
+08:56  e36freak: not a bash question
+08:56  Seta: Sry...
+08:56  e36freak: go to your distro's channel or #apache if thats what youre using
+08:56 --- pyoor_ is now known as pyooe
+08:56 --- pyooe is now known as pyoor
+08:57  Seta: my distro channels are overfill, i and i dont think apache has todo something with that... (java software requests that link)
+08:57  Seta: but ok...thx anyway
+09:02  rany27: Inside a function is there a way to access the (n-1) passed parameter without storing them all in an array? like $@-1 ( that is wrong of course )
+09:03  e36freak: erm
+09:03  e36freak: $1, $2, $3
+09:03  rany27: e36freak: Amount of parameters isn't known
+09:04  e36freak: $# tells you that
+09:04  rany27: e36freak: Ok and then?
+09:04  e36freak: can you explain exactly what youre trying to do?
+09:04  e36freak: theres probably a better way to do it
+09:05  rany27: e36freak: If I'll use #$ I'll have to store all the parameters in an array which is not what i want to unless there is no other option. I want to access the n-1 parameter without using an array.
+09:06  e36freak: ...can you explain what you want to do, not how you want to do it? and whats wrong with an array?
+09:07  complete: Happy Xmas from Germany
+09:08  complete: Whats a good way to find the 10 largest files inside a directory including subdirectories?
+09:08  e36freak: ooh, thats a good one
+09:08  hotwings: e36freak - one last question for the night..  is there a way to alter this to only check the filename and not the full path?  for b in $(find "$WORKDIR" -type f |egrep ' |[A-Z]'); do
+09:08  e36freak: !basename > hotwings
+09:08  greybot: hotwings: basename(1) can strip the directory and extension from a path. (a/b/c.d -> c.d or c). Or you can use a parameter expansion: "${path##*/}" or "${path%.*}"
+09:08  hotwings: i only care if the files have ' ' or A-Z.. paths dont matter
+09:09  e36freak: oh, youre parsing find?
+09:09  hotwings: yeah
+09:09  rany27: complete: find / -type f 2>/dev/null | xargs du 2>/dev/null | sort -n | tail -n 10 | cut -f 2 | xargs -n 1 du -h
+09:09  rany27: e36freak: Its a part of a big script im writing and the solution is already known using an array but i am curious if i can avoid this.
+09:10  e36freak: mein gott
+09:10  complete: rany27: wow, thanks. will try that
+09:10  e36freak: !extglob > hotwings
+09:10  greybot: hotwings: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+09:10  tzervo: hi all. I have a bunch of files with their names starting with dates. I want to remove the dates. I do this: for f in *; do echo "${f//[:digit:]*/}"; done
+09:11  complete: rany27: why all the 2>/dev/null ?
+09:11  tzervo: the result is not the one I want. where do I look at/read for the error?
+09:11  rany27: complete: avoid stderr. redirections
+09:12  complete: rany27: yeah i know. but what info will find and du put out on stderr?
+09:14  rany27: complete: I don't really know, just making the stdout cleaner. You are not supposed to have any problems but still try to remove them and run.
+09:14  e36freak: hotwings: man find, theres a ton of stuff in there, including -regex
+09:15  rany27: complete: You can also use ''du . -mak|sort -n|tail -10'' to list 10 largest file inside a directory.
+09:16  complete: rany27: oh, that looks even nicer
+09:16  hotwings: i tried using -regex but couldnt get it to work
+09:17  hotwings: cant figure this out at all :\
+09:17  e36freak: hotwings: also, why ' |[A-Z]' and not [ A-Z] ?
+09:18  hotwings: no reason i guess.  just in the habit of using | when i want or i guess
+09:18  pgas: tzervo: bash mostly uses globs not regexp
+09:19  e36freak: hotwings: -regex '.*[A-Z ].*'
+09:19  tzervo: pgas: hm, ok, thanks a lot. let me man on that
+09:19  pgas: !glob
+09:19  greybot: "Glob", the common name for pattern matching, filename expansion, "wildcards", etc. http://mywiki.wooledge.org/glob
+09:19  tzervo: pgas: thanks :)
+09:19  e36freak: !extglob > pgas
+09:19  greybot: pgas: "Extended globs" (shopt -s extglob) allow you to say things like "all files that do not end in .jpg". See http://mywiki.wooledge.org/glob
+09:19  e36freak: erm, tzervo ^
+09:20  tzervo: ok, I'll read these, thank you both!!
+09:21  pgas: ! -name '*[!A-Z ]*'
+09:22  e36freak: hotwings: if its searching the whole path, you can use -regex '.*/.*[ A-Z].*'
+09:22  pgas: hmm maybe not
+09:22  hotwings: e36freak - the problem with that is how do you regex from the last / then to only check against the filename?
+09:22  e36freak: or
+09:22  hotwings: or throw out ".*/" and then check for [A-Z ]
+09:23  e36freak: hotwings: if its searching the whole path, you can use -regex '.*/[^/]*[ A-Z].*'
+09:23  pgas: ah well -name '*[A-Z ]*'
+09:23 * e36freak likes regexp >.>
+09:23  pgas: though [A-Z] might not be what you want depending on your locale
+09:23  e36freak: aye, i forget the other one
+09:24  e36freak: [:upper:] ?
+09:24  hotwings: gah, -name... totally forgot about that.  i think im getting too tired to be doing this right now
+09:24  hotwings: i really appreciate all the help tonight btw. thanks
+09:24  e36freak: -regexp '.*/[^/]+[ [:upper:]].*'
+09:24  e36freak: aHA
+09:25  tzervo: pgas: hey, I got it. it needed [[:digit:]] instead of [:digit:] :)
+09:25  tzervo: works now, thanks. fun fact: I read the snippet regarding pattern matching, I just did not get it correctly :)
+09:27  pgas: tzervo: ok, your expansion doesn't seem to fit very well your description though
+09:28  pgas: it will remove the first digit and everything afterward
+09:28  tzervo: pgas: say I had 2010_somethingelse.pdf, this worked: for f in *; do echo "${f//[[:digit:]]/}"; done
+09:28  tzervo: probably I did not explaint it well..
+09:29  e36freak: that would give you _somethingelse.pdf, correct?
+09:29  tzervo: yup. then a second pass to remove the _
+09:29  tzervo: I am sure there is a more efficient way
+09:29  e36freak: ${f//_[[:digit:]]/}
+09:29  e36freak: erm
+09:29  e36freak: ${f//[[:digit:]]_/}
+09:30  e36freak: that means its time for sleep
+09:30  tzervo: e36freak: workb but: I have many more underscores (instead of spaces) in my names :P
+09:30  tzervo: anyway, I am sure there is a more efficient way but I am happy with what I have for now. thanks for the help
+09:32  tzervo: oh shoot. I also had other numbers in the filenames. its good I made a backup. time to read some more :P
+09:34  pgas: ${f#*_}
+09:35  tzervo: thanks
+09:35  tzervo: was just reading that :)
+09:42  lhunath: hotwings:
+09:42  lhunath: # time { arr=( {0..5000} ); for i in "${arr[@]}"; do :; done; }
+09:42  evalbot: lhunath:
+09:42  evalbot: lhunath: real	0m1.759s
+09:42  evalbot: lhunath: etc... ( http://pastebin.com/dqHHbyPP )
+09:43  lhunath: hotwings: if evalbot can iterate 5000 elements in 1.7 seconds, your box should have no issue whatsoever.
+09:43  lhunath: don't give me the "iterating thousands of elements is slow" crap.  it just isn't true.
+09:44  lhunath: hotwings: for line in "${lines[@]}"; do [[ $line = $char* ]] && found=1; (( found )) && echo "$line"; done
+09:44  lhunath: that is ALL.
+09:45  lhunath: the time is like less than 0.1s on my box.
+09:46  lhunath: now doing stupid sed stuff for thousands of elements, that's another matter entirely.
+09:48  hotwings: that doesnt change the fact it was as i described earlier.  maybe the issue was the method i was using.  iirc something like:  for((x=0; x<"${filelist[@]}"; x++)); do if grep -i "a" <<<"${filelist[$x]}"; then break; fi      something like that
+09:48  hotwings: a little hard to remember now, it was quite some time ago
+09:48  hotwings: ill give your example a try here in a minute
+09:49  lhunath: hotwings: do not grep!
+09:49  lhunath: as I said, forking processes for thousands of elements is obviously stupid.
+09:49  lhunath: and you don't need grep at all.
+09:49  lhunath: [[ $line = $char* ]]
+09:50  Bersam: hi everybody :D! how can i get a tree on bash? for some directory i need to list everything include them.
+09:50  lhunath: !find > Bersam
+09:50  greybot: Bersam: http://mywiki.wooledge.org/UsingFind
+09:51  Bersam: lhunath: tnx
+09:55  lhunath: hotwings: either way; the for loop I gave you is all you need, and it is fast.  keep your code short and simple.
+09:56  lhunath: using a C-style for loop when you don't need the index is just noisy.
+09:56  hotwings: i need the index though
+09:56  lhunath: oh right; in your implementation you store it in a second array
+09:56  lhunath: anyway, don't do that
+09:57  hotwings: i was just looking at your example trying to figure out how to get an index out of it but i dont see how
+09:57  lhunath: you don't need an index!
+09:57  lhunath: screw indexes
+09:57  lhunath: all you care about is lines.
+09:59  lhunath: hotwings: run this:
+09:59  lhunath: lines=({a..z}{0..5000}) char=q; for line in "${lines[@]}"; do [[ $line = $char* ]] && found=1; (( found )) && echo "$line"; done | less
+09:59  hotwings: i need the index so the menu system knows where in the filelist it is, and to coincide with possible toggles for each item in the filelist
+10:00  lhunath: or heck, even just this:  lines=({a..z}{0..5000}) char=q; printf '%s\n' "${lines[@]}" | less +/^"$char"
+10:01  lhunath: no, you don't need the index.
+10:01  lhunath: index is meaningless.
+10:01  lhunath: you might as well keep a counter.
+10:01  lhunath: but I doubt even that is useful.
+10:02  lhunath: then again, all of this makes no sense in what you told me you want to do.  so explain what you really want to better.
+10:07 --- studyurnm3 is now known as misnix
+10:13  hotwings: i have a filelist (thousands of files) stored in an array.  the menu system lets you press a-z to automatically jump to the first element starting with that letter, redrawing the filelist in the menu system starting from that position.  if files[3000]="first element starting with f", then the menu system redraws the files with "first element starting with f" at the top.  you can scroll
+10:15  hotwings: forwards/backwards through the menu's list. there are toggles for each file as well, for example to mark as to be included in an archive
+10:16  hotwings: the index tells the menu system where to start the file list it shows the user, where to look in toggle arrays, etc
+10:17 --- lonelyibex is now known as fungo
+10:18  hotwings: for each element in the filelist array, you have a corresponding element in a 'archive' array, 'online' array, etc
+10:20  hotwings: it was originally suggested i use arrays for all this stuff, hence why im using arrays for all this stuff
+10:22  hotwings: when i go to process everything, it just for((x=0; x<"$files[@]}"; x++)); do ...checking everything with ${whatever_array[$x]}, and do the necessary action if set
+10:22  hotwings: hope thats enough detail
+10:27 --- shai_ is now known as shai
+10:32  lhunath: and what about the last line of code I gave you is inadequate?
+10:32  lhunath: the printf | less
+10:33  lhunath: all it takes is a character and an array of lines, then lets you browser through the lines.
+10:38  lhunath: you could even make dialog(1) do all the work for you.
+10:38  lhunath: menuitems=() lines=({a..z}{0..100}); for line in "${lines[@]}"; do menuitems+=("${line:0:1}" "${line}"); done; dialog --menu "Lines" 0 0 0 "${menuitems[@]}"
+10:39  lhunath: though there you may get into trouble over command line length
+10:46 * skraito back 
+10:46  hotwings: thanks for the help lhunath, will look into more in the morning.  i better hit the bed before i make mistakes ill have to waste time fixing in the morning
+10:46 * skraito say hi all
+--- Log closed Fri Dec 24 10:57:59 2010
+--- Log opened Fri Dec 24 11:03:24 2010
+11:03 --- Users 515 nicks [0 ops, 0 halfops, 0 voices, 515 normal]
+11:04 --- Channel #bash was synced in 81 seconds
+11:24  nimred: what is "if [ $? -ne 0 ]" for ?
+11:25  go|dfish: it checks it he last command exited 'successfully'
+11:25  go|dfish: if the ..
+11:26  go|dfish: $? holds the exit code of the previous command, 0 means it exited 'successfully'
+11:27  trash: nimred: It's almost always used in the wrong way.
+11:27  trash: !if > nimred
+11:27  greybot: nimred: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause # http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+11:29  nimred: my question is not what should it be ? but does it do, even if it is the bad way...
+11:30  trash: You were answered by greybot and the URLs given.
+11:31  nimred: trash: can you tell me does it do ?
+11:31  trash: 11:25 <go|dfish> it checks it he last command exited 'successfully'
+11:31  trash: 11:25 <go|dfish> if the ..
+11:31  trash: 11:26 <go|dfish> $? holds the exit code of the previous command, 0 means it exited 'successfully'
+11:31  trash: 11:27 <greybot> nimred: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause #
+11:31  trash:                 http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+11:32  trash: Wow, that was hard.
+11:33  nimred: cool you always are so helpful here :)
+11:33  nimred: "the right way to answer question" is missing
+11:33  nimred: need to be written
+11:34  pgas: # false; if [ $? -ne 0 ];then echo there was an error;fi
+11:34  evalbot: pgas: there was an error
+11:35  pgas: #  if ! false;then echo there was an error;fi
+11:35  nimred: ok bye
+11:35  evalbot: pgas: there was an error
+11:35  trash: *shrug*
+11:54 --- Unknown[OFF] is now known as Unknown[NF]
+11:56  untseac: hey, is there a way to know which line a bash script is executing at a moment? like by using jstack in java.
+11:57  selckin: !+x
+11:58  lhunath: there are parameters such as BASH_LINENO
+11:58  lhunath: !-x
+11:58  greybot: Setting the -x option on bash enables a debugging mode that makes bash output the command name and arguments that it will run (after all parsing and expansion has been applied). Set it by starting a script with ''bash -x ./myscript'' or putting ''set -x'' before the code you want to debug. ''set +x'' turns this behaviour off.
+11:58  lhunath: selckin: +x turns it off :-P
+11:59  untseac: yes but that requires me to activate -x before executing the script
+11:59  untseac: i want to know while the process is executing
+12:00  untseac: because i dont want to stop the script =p
+12:01  pgas: untseac: you cannot
+12:02  untseac: pgas, thought so.. thanks.
+12:02  lhunath: maybe if you have really bad and naughty code you can get it to execute arbitrary code!
+12:02  selckin: maybe you can attach with strace or similar
+12:08  varadero: when i do ps aux | grep processname , i want to have first line wich has explanations of fields , any way to exculude it with grep ?
+12:08  trash: !pm > varadero
+12:08  greybot: varadero: http://mywiki.wooledge.org/ProcessManagement
+12:09  varadero: ps aux was an example , this may have anything include cat text file
+12:09  varadero: exculde something or some line
+12:09  trash: Any other example might have another solution.
+12:10  pgas: varadero: awk, sed
+12:10  pgas: awk 'NR==1||/processname/'
+12:11  pgas: with ps, the answer can be: ps -p $(pgrep processname)
+12:12  varadero: i want to have smothing like >>  ps aux | head -n 1  ; ps aux | grep getty
+12:12  varadero: or
+12:12  pgas: hmm, though that probably work only with one process
+12:12  varadero: cat file.txt | head -n 1  ; ps aux | grep getty
+12:12  pgas: varadero: yeah, I already gave you a solutoin
+12:13  varadero: whatever
+12:13  varadero: thnx
+12:14  pgas: whatever?
+12:14  pgas: ...
+12:14  trash: varadero: How hard is it to write "thanks" properly?
+12:14  varadero: i couldnt understand , but thnx for help i ll read a little more
+12:14  varadero: that was waht i mean sorry
+12:14  pgas: awk 'NR==1||/processname/'
+12:14  pgas: does what you want
+12:14  Bushmills: trash: depends on keyboard layout :P
+12:15  varadero: pgas oh :) thnx again this was what i asked indeed sorry
+12:15  pgas: in theory you should be able to do  | { head -n 1; grep processname; }  in practice many head eat all stdin
+12:15  varadero: pgas works like charm thnx
+12:23  geirha: Another way is sed -n '1p;/foo/p'
+12:58 --- Weust`afk is now known as Weust`
+13:18 --- [1]The-Bat is now known as The-Bat
+13:23  TheBonsai: hmmmmm anyterm *mumble*
+13:24  trash: anyterm?
+13:25  TheBonsai: http://anyterm.org
+13:25  TheBonsai: interesting thing. bash-hackers.net (not org) is free to use at my root server. i could tinker something
+13:26  trash: So a SSH client in a java applet?
+13:26  TheBonsai: no
+13:26  TheBonsai: it's not a java applet
+13:26  TheBonsai: which makes it interesting
+13:26  TheBonsai: also not a ssh client
+13:26  TheBonsai: it's a terminal emulator
+13:27  TheBonsai: http://anyterm.org/howitworks.html
+13:27  TheBonsai: you get a pseudo terminal device, the rest is a matter of how you configure/drive it
+13:33  bcj: Can anyone see the problem with the following:   g () { gedit $* & ; }
+13:33  bcj: ?
+13:34  selckin: ;
+13:34  trash: g() { gedit "$@" & }
+13:34  bcj: Does the ampersand implicitly end the command then?
+13:34  dark: !seq
+13:34  greybot: seq(1) is a highly nonstandard external command used to count to 10 in silly Linux howtos. Use one of these instead: for x in {1..10} (bash3.x) or for ((x=1; x<=10; x++)) (bash 2.04+) or i=1; while [ $i -le 10 ]; do ...; i=$(($i+1)); done (ksh/POSIX)
+13:35  bcj: Cheers
+13:35  TheBonsai: bcj: it serves the same purpose for the } keyword
+13:36  bcj: I'm not sure "$@" is correct though.
+13:36  bcj: Wouldn't that expand all variables into one string?
+13:37  TheBonsai: no
+13:37  TheBonsai: !$@
+13:37  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+13:37  bcj: Aha
+13:37  bcj: Great
+13:37  TheBonsai: just remember this: You almost always want "$@".
+13:38  bcj: Yes, that's a very useful expansion.
+13:38  bcj: E.g. for my\  file\  name.txt
+13:38  bcj: Thanks
+14:27  g[r]eek: Hello friends. I have several hundred XML files whose elements follow a certain schema / template. I'd like to rename one of these elements from <foobar>xyz</foobar> to <candy>xyz</candy> - for all of the XML files. Suggestions for automating these please. Thanks.
+14:31  hendry: g[r]eek: xmlstarlet can help you there
+14:32  g[r]eek: Thanks hendry will check it out. If anyone know of a convenient bash / linux command to achieve this please let me know.
+14:32  trash: !xml
+14:32  greybot: You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+14:32  trash: For the iteration, use find.
+14:32  trash: find . -type f -name '*.xml' -exec mycommand {} \;
+14:32  hendry: g[r]eek: http://xmlstar.sourceforge.net/doc/xmlstarlet.txt search for ename elements
+14:33  hendry: g[r]eek: http://xmlstar.sourceforge.net/doc/xmlstarlet.txt search for Rename elements
+14:34  g[r]eek: Thanks trash.
+14:36  g[r]eek: Woah. XMLStarlet is great.
+14:37  g[r]eek: Thank you for helping solve my problem. Warm regards over the festive season.
+14:49  cehteh: hi
+14:50  cehteh: any hint about an elegant method to iterate backwards through an (possibly sparse) array?
+14:51  cehteh: going just for arithmetic countdown otherwise .. cant think about something better now
+14:51  selckin: why would that be bad
+14:53  cehteh: because if its sparse, it makes some empty iterations .. for i in ${array[@]}; ... but in reverse would look more elegant
+--- Log closed Fri Dec 24 14:57:45 2010
+--- Log opened Fri Dec 24 15:03:13 2010
+15:03 --- Users 533 nicks [0 ops, 0 halfops, 0 voices, 533 normal]
+15:03  erUSUL: matt8686: "man ls" surely has the answer. iirc they are the number of links there is to that inode in the fs
+15:04 --- Channel #bash was synced in 85 seconds
+15:11  Geralt: ,bash-completion
+15:12  Geralt: !bash-completion
+15:29  geirha: Geralt: I don't think anyone's bothered writing anything about bash completion. The man-page is your best resource.
+15:32  Lenhix: !faq comments
+15:32  greybot: Lenhix: No matches found at http://mywiki.wooledge.org/BashFAQ
+15:32  Lenhix: uhm
+15:32  Lenhix: Are there multiline comments in bash?
+15:32  geirha: No, # only these
+15:33  Lenhix: ok, thx
+15:34  Lenhix: And an easy way to wait for the user to press a key? Like "pause" in Windows
+15:34  grop: Or use a heredoc redirected to /dev/null… :p
+15:34  Lenhix: read?
+15:34  geirha: !faq pause > Lenhix
+15:34  greybot: Lenhix: http://mywiki.wooledge.org/BashFAQ/065 -- Is there a "PAUSE" command in bash like there is in MSDOS batch scripts?  To prompt the user to press any key to continue?
+15:35  Lenhix: thx

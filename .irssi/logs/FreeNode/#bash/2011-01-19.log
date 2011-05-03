@@ -1,0 +1,1653 @@
+--- Log opened Wed Jan 19 00:00:10 2011
+--- Log closed Wed Jan 19 00:03:04 2011
+--- Log opened Wed Jan 19 00:08:26 2011
+00:08 --- Users 556 nicks [0 ops, 0 halfops, 0 voices, 556 normal]
+00:09 --- Channel #bash was synced in 91 seconds
+00:15 --- GrowLinux is now known as Julian_Shorter_B
+--- Log closed Wed Jan 19 00:21:25 2011
+--- Log opened Wed Jan 19 00:21:48 2011
+00:21 --- Users 553 nicks [0 ops, 0 halfops, 0 voices, 553 normal]
+00:23 --- Channel #bash was synced in 93 seconds
+--- Log closed Wed Jan 19 00:32:48 2011
+--- Log opened Wed Jan 19 00:38:14 2011
+00:38 --- Users 545 nicks [0 ops, 0 halfops, 0 voices, 545 normal]
+00:39 --- Channel #bash was synced in 91 seconds
+00:46  Ganymede: I'm a bit confused about this syntax: FILES=( /etc/hosts /etc/hostname ); ls -lh $FILES; When I run this on the command line, as expected, it shows the ls -lh output for both files. If I put this in a file test.sh and do bash test.sh, it only shows the first file...why is this?
+00:47  prince_jammys: i wouldn't expect it to show both files.
+00:48  prince_jammys: "$foo" is equivalent to "${foo[0]}" when foo is an array.
+00:48 --- sh[4]rm4 is now known as sh4rm4
+00:48  Ganymede: Maybe I should step back and explain what I'm trying to accomplish.
+00:48  prince_jammys: echo "${files[@]}"  to expand all elements. And use more quotes in general.
+00:49  Ganymede: Okay, you probably answered my question.
+00:49  prince_jammys: !faq 5
+00:49  Ganymede: I wasn't sure if the quotes would force it to become one argument.
+00:49  greybot: http://mywiki.wooledge.org/BashFAQ/005 -- How can I use array variables?
+00:49  prince_jammys: no, quoting "${foo[@]}" protects each element.
+00:50  prince_jammys: unquoting expands them all, but they are wordsplit.
+00:50  prince_jammys: (and globbed)
+00:50  sh4rm4: secret='A $' cmd -p\'$secret\'
+00:50  sh4rm4: ^ works
+00:50  sh4rm4: it doesnt work inside a bash script though
+00:51  sh4rm4: the only difference is secret is defined on the line above
+00:51  prince_jammys: see one of the most recent faqs
+00:52  prince_jammys: !faq echo > sh4rm4
+00:52  greybot: sh4rm4: http://mywiki.wooledge.org/BashFAQ/104 -- Why doesn't foo=bar echo "$foo" print bar?
+00:52  prince_jammys: also, quote the arg properly
+00:52  sh4rm4: how would that be ?
+00:53  prince_jammys: if secret is supposed to be two things, use an array. I don't know why there are literall apostrophes there either
+00:53  sh4rm4: to save the " " and treat the $ as non-bash-thing
+00:54  prince_jammys: cmd -p"$secret" should do
+00:54  prince_jammys: the literal dollar in secret will have no effect.
+00:54  prince_jammys: !quotes
+00:54  greybot: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+00:54  Ganymede: prince_jammys, Thanks for the advice, it looks like I got it to work now.
+00:54  prince_jammys: cool
+01:03  kwtm: Got a question about variables and string manipulation in general; hoping to make my script NON-bash-specific.  Is this still the right channel to ask, or is there some #shell_programming_in_general channel?
+01:03  e36freak: what is the question?
+01:04  e36freak: PE is POSIX
+01:04  ferret: some of them are...
+01:05  e36freak: well, yeah
+01:05  kwtm: e36freak: I have a multi-line string (ie. contains newlines) from the output of some shell command.  How can I store it in a variable ($MyVar or whatever) and preserve newlines?  All the newlines turn into spaces when I do it, so the multiple lines turn into one big paragraph.
+01:06  prince_jammys: they're there. you just aren't viewing them properly
+01:06  prince_jammys: echo "$your_thing"
+01:08  kwtm: prince_jammys: Hmm.  I've tried.  I'll pastebin my script; maybe I'm doing something wrong.  Not only does it come out in 1 big paragraph when I do echo $my_var, but I pipe it to file and do a diff on it and it comes out mangled (which is the problem I'm trying to solve).
+01:08  kwtm: pastebin coming up
+01:08  prince_jammys: echo "$my_var"
+01:09  prince_jammys: or printf '%s\n' "$my_var"
+01:09  e36freak: sh# var=$'foo\nbar\nbaz'; echo $var; echo "$var"
+01:09  shbot: e36freak: $foo
+01:09  shbot: e36freak: bar
+01:09  shbot: e36freak: etc... ( http://pastebin.com/94hEuPej )
+01:09  e36freak: bah sh
+01:10  e36freak: # var=$'foo\nbar\nbaz'; echo $var; echo "$var"
+01:10  evalbot: e36freak: foo bar baz
+01:10  evalbot: e36freak: foo
+01:10  evalbot: e36freak: etc... ( http://pastebin.com/wRP52ep5 )
+01:10  prince_jammys: echo $my_var unquoted will split $my_var into words (newlines will be gone), expand any globs, and then run echo with those args, so newlines are gone
+01:10  e36freak: !wordsplitting
+01:10  greybot: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+01:10  e36freak: !pf 2
+01:10  greybot: http://mywiki.wooledge.org/BashPitfalls#pf2 -- Don't do this! -- cp $file $target
+01:11  kwtm: e36freak: Ahh!  I see.  Okay, let me try quoting.  What you say makes sense...
+01:11  prince_jammys: yeah, good idea e36freak
+01:11  prince_jammys: i initially hit on that by pure accident, the "s were decoration.
+01:13  e36freak: hahaha
+01:13  e36freak: don't blame me -_-
+01:13  e36freak: all i know how to do is spam the bot
+01:13  prince_jammys: i won't blame you, but it's your fault.
+01:13  kwtm: prince_jammys, e36freak: Thank you VERY much!  I know it must seem a trivial mistake, but it's been bugging me for almost a year.
+01:13  e36freak: heh
+01:13  prince_jammys: (that's a line from the great flick Drunken Tai Chi)
+01:14  e36freak: will have to check it out
+01:15  prince_jammys: one of the crazier ones of yesteryear
+01:15  kwtm: Btw, a general question: previously I posted some scripts of mine and got a (rightly deserved) dressing down about various things I did wrong or bad habits ... things like Use More Quotes (which was abbreviated UMQ --apparently it's used commonly enough to have its own abbreviation) and Don't Put Local Variables In ALLCAPS.
+01:15  prince_jammys: the latter is a lesser evil, the former is critical
+01:15  e36freak: both are corret, yes
+01:15  kwtm: Is there a collection of these Bash Programming Best Practices I can read on the web, to improve my bash programming beyond just knowing how to write scripts that give the output I need?
+01:15  prince_jammys: !pf
+01:16  greybot: prince_jammys: No matches found at http://mywiki.wooledge.org/BashPitfalls
+01:16  prince_jammys: that URL
+01:16  prince_jammys: greybot: no, that's what i wanted.
+01:16  kwtm: prince_jammys: Got it, reading now.  Thanks.
+01:17  kwtm: Holy cow, some of these are exactly what I've been doing wrong for the past $NOTVERYLARGENUM years.
+01:18  kwtm: Wish I knew this half a decade ago when I was setting up all my bash scripts. :P  Anyway, looks like I have my work cut out for me.
+01:26  seekwill: Hi. Is it  "./run > output.log 2>&1" or  "./run 2>&1 > output.log". I think it's the first one, since stdout is before stderr...
+01:27  prince_jammys: !faq 2>&1
+01:27  greybot: http://mywiki.wooledge.org/BashFAQ/055 -- Tell me all about 2>&1 -- what's the difference between 2>&1 >foo and >foo 2>&1, and when do I use which?
+01:27  seekwill: ah thx
+01:30  seekwill: prince_jammys: Just as I thought. Thanks!
+01:57  manizzle: man godamn, even xilinx does horribly in bash
+01:58  e36freak: hmm?
+--- Log opened Wed Jan 19 02:03:52 2011
+02:03 --- Users 543 nicks [0 ops, 0 halfops, 0 voices, 543 normal]
+02:03  manizzle: welll the use of
+02:03  manizzle: /bin/ls
+02:03  manizzle: was sad
+02:04  e36freak: right, but he probably doesn't get the full path with that
+02:04  e36freak: you do
+02:04  e36freak: so fix it
+02:05 --- Channel #bash was synced in 90 seconds
+02:06  DogBoy: having trouble with a filename like this: idjc.[2010-09-29][09-51-39].01.flac
+02:06  twkm: use more quotes.
+02:07  DogBoy: trying to do flac -d $filename from script but it's barfing
+02:10  e36freak: twkm already told you the solution
+02:10  e36freak: !pf 2
+02:10  greybot: http://mywiki.wooledge.org/BashPitfalls#pf2 -- Don't do this! -- cp $file $target
+02:10  e36freak: read ^
+02:12  e36freak: manizzle: on a related not, using "i" as a variable for filenames is dumb
+02:13  manizzle: e36freak, i was just ttrying to make a hack/quick fix to make it work.
+02:13  e36freak: yeah, just a comment
+02:13  e36freak: meaningful variable names ftw
+02:14  e36freak: there's probably something in there like ``cp "$xil_script_loc/$i" "foo"'' or something, you just need to make it ``cp "$i" "foo"''
+02:16  dogmeat: folks, i need to run a program, 'foo', for max 30 minutes. if it exits before that time, then script execution should continue. if 30 minutes has elapsed, then kill it. is there a way to do this? before i had foo & sleep $time; kill $!, but if it ran less than 30 mintues, this would cause script execution to pause
+02:16  Rav3nSw0rd: having difficulties with a bash script. <code start> for i in c++/*.cpp; do mv c++/$i java/$i; done <code end> what's the best way to strip the c++ out of the dir name short of running script within the c++ directory?
+02:17  e36freak: !faq timeout
+02:17  greybot: http://mywiki.wooledge.org/BashFAQ/068 -- How do I run a command, and have it abort (timeout) after N seconds?
+02:17  e36freak: dogmeat: there is a $SECONDS builtin
+02:18  e36freak: !pe > Rav3nSw0rd
+02:18  greybot: Rav3nSw0rd: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+02:18  e36freak: !faq string > Rav3nSw0rd
+02:18  greybot: Rav3nSw0rd: http://mywiki.wooledge.org/BashFAQ/007 -- Is there a function to return the length of a string?
+02:18  e36freak: bah
+02:18  e36freak: !faq 100 > Rav3nSw0rd
+02:18  greybot: Rav3nSw0rd: http://mywiki.wooledge.org/BashFAQ/100 -- How do I do string manipulations in bash?
+02:19  e36freak: !pm > dogmeat
+02:19  greybot: dogmeat: http://mywiki.wooledge.org/ProcessManagement
+02:20  alperkanat: hey there.. i want to search for patterns like "640:480" in bash variables.. how can i do that using bash? any ideas? i've tried grep w/o any chance
+02:21  kojiro: alperkanat: in variables? case
+02:21  alperkanat: yes
+02:21  kojiro: alperkanat: use case.
+02:21  e36freak: # foo="abc640:480def"; [[ $foo = *640:480* ]] && echo "match"
+02:22  evalbot: e36freak: match
+02:22  e36freak: # foo="abc640:470def"; [[ $foo = *640:480* ]] && echo "match"
+02:22  evalbot: e36freak: no output
+02:22  alperkanat: no i want to do pattern searching
+02:22  alperkanat: 640:480 can vary
+02:22  alperkanat: so i thought something like
+02:22  e36freak: well, bash supports bre
+02:22  nDuff: ...now, if what you _really_ mean is that you want to search for [0-9]+:[0-9]+, then BASH_REMATCH. And be more specific when asking your questions. :)
+02:22  alperkanat: \d{3}:\d{3}
+02:22  DogBoy: turns out it wasn't a quoting issue, I had renamed the file that the cue sheet referred to
+02:22  nDuff: alperkanat, \d is PCRE
+02:22  alperkanat: but i can't use this with grep
+02:22  DogBoy: in a subtle way
+02:23  nDuff: alperkanat, use extended REs
+02:23  alperkanat: [0-9]{3} ?
+02:23  nDuff: or [[:digit:]]{3} if you wanted a true equivalent to \d
+02:23  kojiro: # var="123:4567"; case $var in +([[:digit:]]):+([[:digit:]]))) echo found;; esac
+02:24  evalbot: kojiro: bash: syntax error near unexpected token `)'
+02:24  kojiro: # var="123:4567"; case $var in +([[:digit:]]):+([[:digit:]])) echo found;; esac
+02:24  evalbot: kojiro: found
+02:24  kojiro: ^^ case and extglob
+02:24  e36freak: # foo="abc640:480def"; re='.*[[:digit:]]\{3\}:[[:digit:]]\{3\}.*'; [[ $foo =~ $re ]] && echo "match"
+02:24  evalbot: e36freak: no output
+02:24  e36freak: bah
+02:24  e36freak: # foo="abc640:480def"; re='.*[[:digit:]]{3}:[[:digit:]]{3}.*'; [[ $foo =~ $re ]] && echo "match"
+02:24  evalbot: e36freak: match
+02:24  e36freak: # foo="abc640:48def"; re='.*[[:digit:]]{3}:[[:digit:]]{3}.*'; [[ $foo =~ $re ]] && echo "match"
+02:24  evalbot: e36freak: no output
+02:25  alperkanat: ok thanks that gave me the idea
+02:25  nDuff:  # foo="abc640:480def"; re='.*[[:digit:]]{3}:[[:digit:]]{3}.*'; [[ $foo =~ $re ]] && printf '%s:' "${BASH_REMATCH[@]}"
+02:25  kojiro: alperkanat: don't use grep.
+02:25  alperkanat: ok
+02:25  nDuff: # foo="abc640:480def"; re='.*[[:digit:]]{3}:[[:digit:]]{3}.*'; [[ $foo =~ $re ]] && printf '%s:' "${BASH_REMATCH[@]}"
+02:25  evalbot: nDuff: abc640:480def:
+02:25  e36freak: always store the regex in a variable
+02:25  kojiro: alperkanat: don't launch an external executable to find something in the running shell
+02:25  alperkanat: ok
+02:25  kojiro: also, save your future self some pain and use readable code.
+02:25  kojiro: !regex
+02:25  greybot: Some people, when confronted with a problem, think ``I know, I'll use regular expressions.'' Now they have two problems. -- jwz
+02:28  nDuff: # foo="abc640:480def"; re='[[:digit:]]{3}:[[:digit:]]{3}'; [[ $foo =~ $re ]] && printf '%s:' "${BASH_REMATCH[@]}"
+02:28  evalbot: nDuff: 640:480:
+02:43  nDuff: alperkanat, ...you could also do it with PE; since you know it's 3 numeric digits on either side of the colon, a regex is overkill and a glob adequate.
+02:52  humpty: e36freak: why "always store the regex in a variable"?
+02:52  e36freak: !re
+02:52  greybot: Regular Expressions. These come in several flavors (BRE, ERE, PCRE, and more). See http://mywiki.wooledge.org/RegularExpression and http://www.grymoire.com/Unix/Regular.html and http://www.regular-expressions.info/
+02:52  alperkanat: nDuff: PE?
+02:53  e36freak: !pe
+02:53  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+02:53  e36freak: !pf 34 > humpty
+02:53  greybot: humpty: http://mywiki.wooledge.org/BashPitfalls#pf34 -- Don't do this! -- if [[ $foo =~ 'some RE' ]]
+02:54  e36freak: that's the one
+02:54  needlez: anyone in here able to help with a bash script?? i just need to change one part of it
+02:54  nDuff: !questions > needlez
+02:54  greybot: needlez: Ask questions. Don't just paste 200 lines of code on a web page and say "HERE MY KODE <URL> WHATZ RONG". Describe the problem, clearly and concisely. If necessary, give the SMALLEST sample code that demonstrates the problem.
+02:55  needlez: im going to post my bash command, the issue is i want it to shutdown or suspend after totem but it wont always
+02:56  needlez: heres my bash script right now http://paste.ubuntu.com/555613/
+02:56  e36freak: !pm > needlez
+02:56  greybot: needlez: http://mywiki.wooledge.org/ProcessManagement
+02:56  needlez: thats what i have right now, what i want is to change the sudo pm-suspend into something to shutdown the computer
+02:56  e36freak: needlez: that's not a bash question. and don't use killal
+02:57  e36freak: killall**
+02:57  needlez: e36freak: totem requires you to killall or it wont kick in sleep mode
+02:57  needlez: im in ubuntu 10.10
+02:57  e36freak: totem & pid=$!; sleep 7200; kill "$pid"; whatever
+02:57  humpty: e36freak: might be some self eating snake: as I'd use a variable, I might want to quote it, when I would not quote the proper regex :)
+02:57  e36freak: no, it doesn't need killall
+02:58  e36freak: or use pkill
+02:58  e36freak: if you have it
+02:58  e36freak: !killall
+02:58  greybot: killall is dangerous and unportable. On some systems it tries to kill every process. Use pkill instead.
+02:58  e36freak: humpty: wat
+02:59  needlez: still my only thing is what command should i use instead of pm-suspend to shutdown or put into sleep mode?? i have tried pm-suspend but prompts for password, which is useless if im asleep this bash script is to autoclose totem and then shutdown the computer
+02:59  e36freak: that's not a bash question.
+02:59  e36freak: but you would need to either change group permissions or do something with sudo
+03:00  e36freak: ask #ubuntu about that
+03:00  needlez: kk thanks im ubuntu right now bout that
+03:00  davek: e36freak: shutdown -h now  will shutdown the computer
+03:00  e36freak: davek: i am aware
+03:00  needlez: thats what i was gonna do first but they said ask bash
+03:01  davek: e36freak: sorry, meant to aim that at needlez
+03:01  e36freak: needlez: because the #ubuntu people are dumb. you probably need to be in the "power" group or something if you're not, or need to set up passwordless sudo for that command
+03:01  e36freak: neither of which have anything to do with bash
+03:02  needlez: e36freak: thank you
+03:03  e36freak: needlez: and please just change killall to pkill, won't hurt
+03:03  e36freak: ...as he leaves
+03:04  pyoor: some data center, somewhere in america... just died.
+03:06  e36freak: hmm?
+03:10  toresbe: Is it possible to get the disk usage from a host of different directories, presented as a single output?
+03:11  Leddy: man du
+03:12  toresbe: Sorry, I didn't state my question well enough: I have different directories as different arguments in an array of arguments. How can I get this list of directories to be summed up as a single item?
+03:12  toresbe: Oh, wait. I could just pass du -c into tail -n1, I suppose.
+03:13  e36freak: there you go
+03:14  toresbe: Seems kludgy but hey
+03:14  e36freak: unix philosophy is "do one thing and do it well"
+03:15  nDuff: toresbe, ...I'd also suggest using the -s argument to decrease the amount of spurious output tail needs to discard
+03:16  toresbe: my philosophy is "provide output that doesn't need text munging to fulfill a pretty common use case".
+03:16  toresbe: nDuff: I suppose. Thanks.
+03:27  jrcoco: When I fork a shell using `command &`, how can I tell in a bash script if it has completed? Specifically I want it to block until completion.
+03:27  e36freak: !wait
+03:27  nDuff: jrcoco, wait
+03:27  e36freak: !faq wait
+03:27  greybot: e36freak: No matches found at http://mywiki.wooledge.org/BashFAQ
+03:27  e36freak: bah
+03:27  jrcoco: Will that work if I have several commands forked? As in, fork six, and wait until all are finished?
+03:27  e36freak: command & pid=$!; other command; wait $pid
+03:28  e36freak: there's a faq on it
+03:28  e36freak: hold on
+03:28  jrcoco: Ah, thanks.
+03:28  jrcoco: You guys are great.
+03:28  nDuff: jrcoco, you can just run "help wait" at your command line
+03:29  e36freak: hmm
+03:29  e36freak: !pm > jrcoco (probably in there)
+03:29  greybot: jrcoco (probably in there): http://mywiki.wooledge.org/ProcessManagement
+03:30  e36freak: yeah
+03:30  jrcoco: e36freak: I didn't get your pm for some reason.
+03:30  e36freak: first "advanced question"
+03:30 * jrcoco has never liked mIRC.
+03:30  e36freak: pm was the bot command...
+03:31  e36freak: !pm
+03:31  greybot: http://mywiki.wooledge.org/ProcessManagement
+03:31  e36freak: read that
+03:31  jrcoco: Oh, that makes sense.
+03:56  johntramp: hi.  Is there a way to wait until a file is modified?
+03:58  steve___: johntramp: You mean do something when a file has been modified?
+--- Log closed Wed Jan 19 04:02:50 2011
+--- Log opened Wed Jan 19 04:03:10 2011
+04:03 --- Users 529 nicks [0 ops, 0 halfops, 0 voices, 529 normal]
+04:03  johntramp: inotifywait -e modify *     excellent,  thank you
+04:04 --- Channel #bash was synced in 88 seconds
+04:07  twkm: beware that inotify does not delay notification until the program that is modifying the file "finishes".
+04:14  johntramp: twkm: ah ok, i dont think that will be a problem here but that is good to know
+04:18  igi: johntramp, inotifywait with close and modify toghter
+04:22  daowai: i am in
+04:30  Julian|Work: Hello all
+04:30  daowai: hi
+04:30  Julian|Work: In a shell script, I'm calling "md5sum <filename>" -- it outputs something like: "e07910a06a086c83ba41827aa00b26ed  test.txt"
+04:31  Julian|Work: I want to just grab the actual md5sum.  I don't md5sum itself has an option to skip outputting the filename, so I'm trying to use sed, or grep... but both of those seem to want a filename as input, rather than direct input.
+04:31  twkm: faq #1.
+04:31  Julian|Work: I read through the manpages of all three, can't... okay.  thanks.
+04:32  Julian|Work: http://mywiki.wooledge.org/BashFAQ/001 ?
+04:33  nDuff: yup
+04:33  Julian|Work: I'm sorry, I'm either in the wrong place or I don't see how that applies
+04:33  nDuff: it tells you how to read fields out of a stream
+04:33  Julian|Work: ah, I can read the data stream...
+04:34  fission6: is there a quick bash tool to run a small directory/file web server over the current directory
+04:34  nDuff: fission6, not "a quick bash tool", no.
+04:34  molunters: python have a module
+04:34  nDuff: there are plenty of tiny web servers
+04:34  fission6: any recs
+04:34 * nDuff personally is fond of lighttpd -- minimal configuration fits in two lines
+04:35  nDuff: but anyhow, it's NABQ
+04:35  nDuff: !nabq
+04:35  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+04:35  fission6: ok
+04:36  Julian|Work: read -n 32 maybe do useful, since I can count on the md5sum being 32 chars.
+04:36  nDuff: ewww
+04:36  nDuff: read sum _
+04:36  nDuff: and there you are
+04:36  nDuff: no mucking around with character counts, and if you switch to sha1sum later it still works
+04:37  cicada: 能打中文不
+04:37  igi: no.....
+04:37  tmr: fission6, python -m SimpleHTTPServer 8080
+04:37  fission6: interesting
+04:37  fission6: thanks
+04:38  Julian|Work: alright, this is a little more than what I've done with bash before... I'll keep digging for now.  Thanks.
+04:38  cicada: whoami
+04:38  cicada: w
+04:38  cicada: who
+04:38  fission6: nice thanks
+04:38  fission6: alias webserver = 'python -m SimpleHTTPServer 8080'
+04:40  cicada: 'python -m SimpleHTTPServer 8080'
+04:41  Julian|Work: alright, and if I want to access that $sum variable outside of the 'while read ... done' -- I'll just need to assign a var.
+04:41  igi: !pe > Julian|Work
+04:41  greybot: Julian|Work: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+04:41  Julian|Work: seems it's gone if I thrown an "&& command2 $sum" afterwards.
+04:42  lansecdd: echo good
+04:44  tmr: !faq disappear > Julian|Work
+04:44  greybot: Julian|Work: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+04:44  igi: # echo aaaa > test; var=`md5sum test`; echo ${var%% *}
+04:44  evalbot: igi: bash: md5sum: command not found
+04:45  cicada: pwd
+04:49  Julian|Work: got it figured out-- thanks all.
+04:49  Julian|Work: So now you'll all hate me... nano doesn't have a post save-hook (that I can find), so I'm implementing my own quick-and-dirty version:
+04:49  Julian|Work: http://pastebin.com/LXTxy5Sm
+04:50  Julian|Work: probably could be done "better" -- but it certainly works for now.
+04:56 --- david is now known as Guest66661
+04:58  Rav3nSw0rd: I have a directory full of numeric files... eg for i in 1..10; do touch $i; done ... I'm trying to sort it, so at first I expected ls to be fine, but it sorts by first digit... so then I tried piping it to sort ... ls | sort -n .. and that gives even more messed up results for some reason... explanation & solution please?
+04:59  twkm: lexicographic sorting is not sensitive to numeric value.
+05:00  Rav3nSw0rd: yes, I found that out XD
+05:00  twkm: my suggestion is to rename the files so they sort as you like, e.g., 01, 02, ...
+05:01  twkm: if all you want to do is "look" at the results, your ls | sort -n should have been fine, with the names you say you have.
+05:02  twkm: but any use of ls to form a list you'll use for processing is doomed to failure, unless you told the truth (the names are only numeric -- which i doubt).
+05:08  el_seano: hey folks.  I've been messing around with my PS1, and it's behaving funky now.  After i enclosed it all with \[ \] to enable wrapping, it'll let me wrap, but if I try to delete a word at a time, it takes out my prompt to.
+05:08  el_seano: doesn't affect anything else, just kind of annoying to lose my prompt over and over.
+05:08  twkm: then you did the wrapping wrongly.
+05:09  el_seano: I made the \[ my first couple of characters in the string and my \] the last two
+05:09  el_seano: is there a different way?
+05:09  twkm: depends what is between them.
+05:10  twkm: what you said is only appropriate if nothing there moves the cursor -- e.g., only color or xtitle changes are done.
+05:10  el_seano: it looks like this: \[[${debian_chroot:+($debian_chroot)}\u@\h \e[36m\W\e[0m]\$ \]
+05:10  twkm: (which would be a dumbfuck prompt)
+05:11  twkm:        \[     begin  a sequence of non-printing characters
+05:11  Rav3nSw0rd: but yea, turned out the issue with ls | sort -n was completely within the binary sort I have on this system... scped it to another system, tested there, and worked fine :D . Thanks twkm for the help, and all I was doing is looking at the results XD it's a directory of numeric files corresponding to euler project problems, lol.
+05:12  twkm: doesn't [${debian_chroot:+(otherdebianhorseshit}\u@\h look like it would be "printing"?
+05:12  el_seano: gotcha
+05:12  el_seano: I misunderstood what it was supposed to do then.
+05:12  tmr: !faq fancy > el_seano
+05:12  greybot: el_seano: http://mywiki.wooledge.org/BashFAQ/053 -- I have a fancy prompt with colors, and now bash doesn't seem to know how wide my terminal is.  Lines wrap around incorrectly.
+05:12  twkm: \[\e...]\]\W\[\e...]\]\$
+05:13  twkm: Rav3nSw0rd: your sort doesn't sort?  that sucks.
+05:13  el_seano: thanks twkm
+05:13  twkm: cool.
+05:15  igi: Rav3nSw0rd, maybe you need to set LC_ALL=C
+05:15  igi: As follow the manpage
+05:15  Rav3nSw0rd: wait wait, what?
+05:16  igi: Rav3nSw0rd, the locale specified affects sort order.
+05:17  Rav3nSw0rd: how do i change locale?
+05:17  twkm: numeric sorting seldom fails due to locale.
+05:17  igi: Rav3nSw0rd, export LC_ALL=C
+05:17  Rav3nSw0rd: alright, I'll give that a test
+05:18  Rav3nSw0rd: nope :/
+05:20  Rav3nSw0rd: actually, upon further testing... it's only that directory... well, the files in it at least... would it matter if the files were not empty? I would assume not but it seems so...
+05:21  twkm: only if you aren't using just ls (no options), which would complicate the sorting.
+05:21  Rav3nSw0rd: using plain ls, so I'm really confused XD
+05:22  Rav3nSw0rd: ls -la
+05:22  Rav3nSw0rd: oops
+05:22  e36freak: -_-
+05:22  igi: alias ls?
+05:22  e36freak: !wayttd
+05:22  greybot: What Are You Trying To Do?
+05:22  twkm: heh, ls -G?  /me shudders
+05:23  Rav3nSw0rd: sorry, typed in wrong window, sec, checking alias...
+05:23  twkm: \ls | sort -n
+05:23  Rav3nSw0rd: oh... there's an "alias ls=ls --color=always" in my .bash_profile ...
+05:24  Rav3nSw0rd: would that affect things?
+05:24  e36freak: that's irrelevant
+05:24  e36freak: well
+05:24  twkm: yes, it sucks cock.
+05:24  e36freak: use --color=auto
+05:24  twkm: why always?
+05:24  e36freak: then it will detect when it's being piped
+05:24  twkm: then he'll just hate ls|less not being colorful?
+05:25  e36freak: heh
+05:25  Rav3nSw0rd: eh, I'll deal XD
+05:25  Rav3nSw0rd: working is better than not working even if it means no colors :P
+05:25  Rav3nSw0rd: wow
+05:25  Rav3nSw0rd: issue resolved!
+05:25  twkm: \ls | sort -n
+05:25  Rav3nSw0rd: thanks XD
+05:26  twkm: of course \ls|sort ...|less won't be colorful, but at least it will be in order.
+05:49  kokoko1: hi guys
+05:49  e36freak: hello
+05:49  kokoko1: how remove dot '.' from 2nd field in the ...
+05:49  kokoko1: 119.156.221.24          GJR.Gondal_GTR_ZTE.01_DSLAM
+05:50  kokoko1: GJR.Gondal_GTR_ZTE.01_DSLAM <-- want to remove dots from this field and there are many in the file.
+05:50  e36freak: with all bash? use read and seperate into two variables
+05:50  e36freak: otherwise, i would use sed
+05:50  kokoko1: e36freak, anything not necessarily bash :)
+05:50  kokoko1: i just want to get rid of these dots :)
+05:51  e36freak: umm
+05:51  e36freak: sec
+05:52  igi: awk   was fine
+05:52  e36freak: yeah, awk is probably easier
+05:53  kokoko1: How? :)
+05:53  e36freak: don't know awk that well
+05:53  e36freak: bash would be:
+05:54  e36freak: read -r a b <<<"119.156.221.24          GJR.Gondal_GTR_ZTE.01_DSLAM
+05:54  e36freak: ahh
+05:54  e36freak: # read -r a b <<<"119.156.221.24          GJR.Gondal_GTR_ZTE.01_DSLAM"; printf "%s\t%s" "$a" "${b//./}"
+05:54  evalbot: e36freak: 119.156.221.24	GJRGondal_GTR_ZTE01_DSLAM
+05:55  e36freak: loop to do the whole file
+05:56  kokoko1: hmm e36freak thanks :)
+05:56  igi: awk '{gsub(/\./,"",$2);print}'
+05:57  e36freak: # while read -r a b; printf "%s\t%s" "$a" "${b//./}"; done <<<$'123.456.789.012        ABC.Def_Ghi.01_foo\n098.765.432.123        ZYX.Wvu_tsr.02_bar'
+05:57  evalbot: e36freak: bash: syntax error near unexpected token `done'
+05:57  e36freak: bah
+05:57  e36freak: # while read -r a b; do printf "%s\t%s" "$a" "${b//./}"; done <<<$'123.456.789.012        ABC.Def_Ghi.01_foo\n098.765.432.123        ZYX.Wvu_tsr.02_bar'
+05:57  evalbot: e36freak: 123.456.789.012	ABCDef_Ghi01_foo098.765.432.123	ZYXWvu_tsr02_bar
+05:57  e36freak: # while read -r a b; do printf "%s\t%s\n" "$a" "${b//./}"; done <<<$'123.456.789.012        ABC.Def_Ghi.01_foo\n098.765.432.123        ZYX.Wvu_tsr.02_bar'
+05:57  evalbot: e36freak: 123.456.789.012	ABCDef_Ghi01_foo
+05:57  evalbot: e36freak: 098.765.432.123	ZYXWvu_tsr02_bar
+05:58  e36freak: in your case, while read -r a b; do printf "%s\t%s\n" "$a" "${b//./}"; done < file
+05:58  e36freak: in your case, while read -r a b; do printf "%s\t%s\n" "$a" "${b//./}"; done < file > newfile
+05:58  igi: # awk 'BEGIN{print "test"}'
+05:58  evalbot: igi: test
+05:59  igi: # echo ' 119.156.221.24          GJR.Gondal_GTR_ZTE.01_DSLAM' | awk '{gsub(/\./,"",$2);print}'
+05:59  evalbot: igi: 119.156.221.24 GJRGondal_GTR_ZTE01_DSLAM
+06:00  elik: What would be the most simple method to do a 2 way diff on a list of files, only on consecutive files (same file in history, diff with previous version)
+06:02  e36freak: uh
+06:02  e36freak: depends
+06:02  e36freak: diff -y <(cat file1 file2 file3) <(cat oldfile1 oldfile2 oldfile3)
+06:02  e36freak: or do you wanna loop through and do a diff at a time?
+06:03  elik: e36freak: loop through a diff at a time
+06:03  e36freak: then i need more info, like how the list is set up and directory structure, etc
+06:04  elik: -y does sound interesting
+06:04  elik: here is some background
+06:04  e36freak: i like it for a visual comparison
+06:04  e36freak: gives side-by-side
+06:05  elik: basically, files names are the time for the files
+06:05  elik: I want to diff two consecutive files, then next two
+06:06  e36freak: ...in what format? like a couple examples?
+06:06  elik: 2011.01.18-13.52.52-523585088
+06:06  elik: 2011.01.18-13.52.59-460778754
+06:06  e36freak: and you would want to run that against...
+06:07  elik: and more
+06:07  elik: 1st against 2nd, 2nd against 3rd
+06:07  elik: etc
+06:07  elik: so with a -y ls | tail +2, that would be... interesting
+06:07  elik: but I don't know the -y format
+06:07  e36freak: do not use ls
+06:07  e36freak: i got this
+06:08  elik: why not ls?
+06:08  e36freak: give me a sec to play with it
+06:08  e36freak: !ls
+06:08  greybot: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+06:08  elik: sure sure
+06:08  elik: this website is magic :)
+06:10  e36freak: all in one directory?
+06:10  elik: yup
+06:10  elik: nothing too complex
+06:10  e36freak: i'm just trying to think, because they need to be sorted
+06:10  grndslm: heya d00dz... i'm curious how easy you think it would be to create a script to auto-download music from a list, in a file, of a thousand sounds in "Artist - Track Title" format. . . . .
+06:11  grndslm: specifically, what would be the easiest way to seek the songs in a text-only manner...
+06:11  elik: e36freak: yeah, that<s why I thought ls could help, but I see it can become problematic
+06:11  e36freak: nah, you would use an array
+06:11  e36freak: try something for me
+06:11  elik: sure
+06:11  kokoko1: igi, thanks for the awk version i am now using this ....
+06:12  kokoko1: while read f;do echo $f | awk '{gsub(/\./,"",$2);print}';done < zte.txt
+06:12  e36freak: do # files=(*); printf "%s\n" "${files[@]}"
+06:12  e36freak: see if they're in order
+06:12  e36freak: kokoko1: no need to loop with awk
+06:12  igi: kokoko1, no need to loop.....
+06:13  igi: awk 'xxxxxxxxx' filename
+06:13  kokoko1: hmm
+06:13  e36freak: awk '{gsub(/\./,"",$2);print}' zte.txt
+06:13  igi: yup
+06:13  elik: e36freak: they are
+06:13  e36freak: ohh, then this one is easy
+06:14  kokoko1: yeah its easy :)
+06:14  kokoko1: thanks guys very much appreciated
+06:15  elik: e36freak: globbing takes care of it?
+06:15  e36freak: files=(*); for ((i=1; i<=${#files[@]}; i++)); do diff "${files[i
+06:15  e36freak: ahh
+06:15  e36freak: files=(*); for ((i=1; i<=${#files[@]}; i++)); do diff "${files[i-1]}" "${files[i]}"; done
+06:15  igi: grndslm, need some text examples
+06:15  e36freak: putting a read command at the end would let you hit enter before each one
+06:15  e36freak: files=(*); for ((i=1; i<=${#files[@]}; i++)); do diff "${files[i-1]}" "${files[i]}"; read -p "next?"; done
+06:17  grndslm: igi: like this??  http://pastebin.com/E8MtKm1y
+06:18  elik: e36freak: yup, that work perfectly
+06:18  elik: e36freak: thank you very much
+06:18  grndslm: my idea is to read in each line and then pull it from btjunkie.org somehow... but i'm an uber-n00ber
+06:18  e36freak: mimm
+06:18  e36freak: mhmm*
+06:19  elik: e36freak: I'm tracking video card register changes with another little script, dumping video card registers
+06:19  elik: This really helps tracking what changes when
+06:19  e36freak: gotcha
+06:19  e36freak: you could dump it all to a file
+06:20  e36freak: files=(*); for ((i=1; i<=${#files[@]}; i++)); do diff "${files[i-1]}" "${files[i]}" >> changefile; done
+06:21  elik: e36freak: yeah, having your example will help me tailor the output to get something readable. I'll put some suger on it :)
+06:21  grndslm: what an awesome name... gnomon!
+06:21  igi: grndslm, what you need to do is  make a url to search on web, like this http://btjunkie.org/search?q=Raconteurs+-+Blue+Veins
+06:22  e36freak: yeah, and then format your names accordingly
+06:22  e36freak: and use wget
+06:22  e36freak: i do something similar for ebay
+06:22  grndslm: igi:  something like that still requires a click, tho.. it's gotta be text only
+06:22  grndslm: i'd like to use wget, but i don't know what to use to search to get a direct link in order to wget it!
+06:22  e36freak: grndslm: gotta parse the html and grab it
+06:23  grndslm: hmm...
+06:23  e36freak: something like perl would be a better-suited language
+06:23  nDuff: !html
+06:23  greybot: You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+06:23  grndslm: woah
+06:24  grndslm: i think i just need a better search platform, honestly
+06:24  igi: grndslm, just wget it and the look into the html
+06:24  grndslm: ah... that makes more sense
+06:24  igi: grndslm, emm, i agree that you need a better search
+06:24  e36freak: honestly it can be done with bash if the URL has a specific div id or something
+06:24  e36freak: but probably shouldn't be
+06:40  gnychis: does anyone have any suggestions for monitoring if any files with a certain extension in a directory have been modified?
+06:40  tEtra: inotify
+06:40  nDuff: gnychis, incron / inotifywait, and filter the results
+06:42  gnychis: hmmmm inotify is linux based, i'm on osx
+06:42  tEtra: sorry :)
+06:42  nDuff: OS X has its own approach through launchd
+06:42  nDuff: you'll need to RTFM
+06:42  igi: gnychis, if you want to check the file differ or not with previous version?
+06:42  e36freak: !nabq
+06:42  greybot: Not A Bash Question. Ask the channel that supports your software, hardware, or OS.
+06:43  igi: maybe he use bash in OSX
+06:43  gnychis: i do use bash in osx
+06:44  e36freak: k, still OS specific
+06:44  gnychis: i was expecting a bash-based solution
+06:44  gnychis: but mkay, i can look up launchd
+06:44  e36freak: i mean, i guess you could constantly loop find or something dumb, but there's generally a much better way to do it
+06:45  nDuff: change notification is not POSIX standardized, so there's no single global approach
+06:45  nDuff: maybe in a decade
+06:47  Sharetel: Hi, can someone please tell how do I get the name of the documents printed from Cups logs via script/command?
+06:48  tEtra: cat cups.log?
+06:48  e36freak: not sure what you're asking
+06:49  igi: i don't known what in cups.log, could you offer some log?
+06:53  meh_feh: hello, all
+06:53  meh_feh: # echo do i have voice?
+06:53  evalbot: meh_feh: do i have voice?
+06:53  igi: hello, meh_feh
+06:54  meh_feh: evalbot: talking about you, yes, you definitely have it
+06:54  meh_feh: igi: thanks.
+06:54  gnychis: is there a command in which you pass a filename and it returns the base filename without the extension?
+06:54  meh_feh: evalbot: let's meet in PM session...
+06:55  e36freak: gnychis: basename? but parameter expansion would be the better way to go
+06:55  igi: basename is what you want
+06:55  e36freak: # file='/foo/bar/baz.txt'; echo "${file%.*}"
+06:55  evalbot: e36freak: /foo/bar/baz
+06:55  meh_feh: igi: basename is separate program
+06:55  e36freak: or
+06:55  meh_feh: igi: expansion is bash ability
+06:55  e36freak: # file='/foo/bar/baz.txt'; echo "${file##*/}"
+06:55  evalbot: e36freak: baz.txt
+06:56  e36freak: basename is horrendously slow compared to PE
+06:56  igi: meh_feh, i known it
+06:57  e36freak: # TIMEFORMAT="real: %E"; time for ((i=0; i<1000; i++)); do file='/foo/bar/baz.txt'; echo "${file##*/}" >/dev/null; done
+06:57  evalbot: e36freak: real: 1.396
+06:57  e36freak: # TIMEFORMAT="real: %E"; time for ((i=0; i<1000; i++)); do file='/foo/bar/baz.txt'; echo "$(basename "$file")" >/dev/null; done
+06:58  evalbot: e36freak: no output within the time limit
+06:58  e36freak: silly timeout
+06:59  e36freak: 0.182 vs 2.249 here
+07:05  abhinav_singh: hi
+07:09  meh_feh: # a=.///./././.Desktop//././; while [[ $a == ./* || $a == */ || $a == *//* || $a == */./* || $a == */../* || $a == ../* || $a == */. || $a == /* ]]; do a=${a##./}; a=${a%%/}; a=${a//\/\//\/}; a=${a//\/.\//\/}; a=${a//\/..\//\/}; a=${a##../}; a=${a%%/.}; a=${a##/}; done; echo "$a"
+07:09  evalbot: meh_feh: .Desktop
+07:09  meh_feh: how would you do it with basename and dirname stuff?
+07:09  e36freak: WHAT
+07:10  meh_feh: e36freak: i'm now raping evalbot a little
+07:10  nDuff: !wayttd
+07:10  greybot: What Are You Trying To Do?
+07:10  e36freak: that's... why would you...
+07:10  meh_feh: e36freak: making wrapper for mount in Windows
+07:10 --- BiCHiTo is now known as Bichito
+07:10  yitz_: Use readlink
+07:10  e36freak: my brain just exploded
+07:10 --- someone is now known as Guest13211
+07:10  meh_feh: nDuff: don't panic. i'm here to talk with evalbot, not with people
+07:11  nDuff: meh_feh, you can do that by PM
+07:11  e36freak:  #evalbot
+07:11  nDuff: meh_feh, or in #evalbot
+07:11  e36freak: or pm
+07:11 --- Bichito is now known as BiCHiTo
+07:11 --- BiCHiTo is now known as Bichito
+07:11  meh_feh: nDuff: e36freak: just don't panic.
+07:11  e36freak: !faq 100 > meh_feh
+07:11  greybot: meh_feh: http://mywiki.wooledge.org/BashFAQ/100 -- How do I do string manipulations in bash?
+07:12  meh_feh: and "how would you do it with basename and dirname stuff?" was a joke. i know how to work in bash, but i can't debug expansions in Windows (without of bash interpreter)
+07:14  e36freak: even to do what you just did, you made it wayyy more difficult than it had to be
+07:15  meh_feh: e36freak: you aren't able to rewrite it shorter or smarter
+07:15  e36freak: sec
+07:30  igi: # a='.///./././.Desktop//././'; b=${a//.\//}; echo ${b//\//};
+07:30  evalbot: igi: .Desktop
+07:58  Sharetel: tEtra: What I essentially need is to get the logs in an orderly manner like Username, Number of prints. I have the command for this but additionally I also need to know the documentname alongside. So not getting which parameter to pass
+08:37  roland-: hello, anyone knows any sed? :P
+08:37  roland-: very simple thing
+08:37  nDuff: !ask > roland-
+08:37  greybot: roland-: If you have a question, please just ask it. Don't look for topic experts. Don't ask to ask. Don't PM! Don't ask if people are awake, or in the mood to help. Just ask the question straight out, and be patient waiting for an answer. http://wooledge.org/mywiki/NetEtiquette
+08:37  roland-: I have an output, like this: xxx wwww, 64877373 , how do I sed to get the output before the "," only ?
+08:38  nDuff: roland-, you don't need sed for that
+08:38  nDuff: val='xxx wwww, 64877373'; printf '%s\n' "${val%,*}"
+08:38  nDuff: erm
+08:38  nDuff: # val='xxx wwww, 64877373'; printf '%s\n' "${val%,*}"
+08:38  evalbot: nDuff: xxx wwww
+08:38  nDuff: and there you are.
+08:40  roland-: nDuff the value varies, on size and type, could be numbers/letters, the idea is to select the output before the ,
+08:40  nDuff: # IFS=, read col1 col2 rest <<<'xxx wwww, 64877373 ,'; echo "col1: ${col1}; col2: ${col2}; col3: ${col3}"
+08:40  evalbot: nDuff: col1: xxx wwww; col2:  64877373 ; col3:
+08:40  nDuff: roland-, yes, the answer I gave you does that.
+08:40  igi: # echo 'xxxx wwwww, 62234234' | sed 's/,.*//'
+08:40  evalbot: igi: xxxx wwwww
+08:40  nDuff: roland-, or, BOTH answers I gave you, rather.
+08:41  nDuff: (so does igi's, but it unnecessarily uses sed)
+08:42  igi: emm, if you are deal with a variable , ${var%.*} is fine . And sed is suitable for a file
+08:43  roland-: igi your solution doesn't work
+08:43  roland-:  echo gw-linux, internal 0.1.1 Feb 19 2010 | sed 's/,*//'
+08:43  roland-: gw-linux, internal 0.1.1 Feb 19 2010
+08:43  roland-: it should display gw-linux only
+08:43  igi: #  echo gw-linux, internal 0.1.1 Feb 19 2010 | sed 's/,.*//'
+08:43  evalbot: igi: gw-linux
+08:44  igi: you lose the dot
+08:46  pgas: why do you ask for "sed" since you don't even know the basic? this is trivial task for cut or awk
+08:47  nDuff: roland-, huh? "lose the dot"?
+08:48  nDuff: # val='gw-linux, internal 0.1.1 Feb 19 2010'; printf '%s\n' "${val%,*}"
+08:48  pgas: "lost the dot"
+08:48  evalbot: nDuff: gw-linux
+08:48  pgas: s/,*// vs s/,.*//
+08:48  nDuff: ahh, right.
+08:49  Sharetel: Hi, the following is a single log line for Cups.HP_P2055dn 141 Michael 1 1 - 192.168.1.85 Microsoft Word - Internal Tasks Template_.docx
+08:50  roland-: igi works thank you
+08:50  Sharetel: I only need that the document name Microsoft Work Internal Tasks Template_.docx is shown. Can someone please tell me how?
+08:51  pgas: this single line is in a variable?
+08:51  igi: in a log
+08:51  pgas: or do you process a whole file and want the names on each line?
+08:52  pgas: cut -d ' ' -f8- logfile
+08:52  Sharetel: its from the page_log in /var/logs/cups. I need to process whole page_log file so that the document name is also printer alongside the username
+08:52  roland-: hey, when I type ssh -V i got some sord of output that i cannot echo to any file, any idea why?
+08:53  pgas: it's probably printed on stderr: >file 2>&1
+08:54  roland-: ssh -V >sshverson 2>&1 ?
+08:54  roland-: doesn't work:/
+08:54  igi: Sharetel, you want the username and document name ? right?  In your example is : Michael and Microsoft Work Internal Tasks Template_.docx
+08:54  pgas: works here
+08:55  Sharetel: cut - d ' ' -f8- gives ipaddress and document name but username is missing
+08:55  Sharetel: I was trying it with this awk '{print $3}' page_log | sort | uniq -c | awk '{print $2,$1}' | column -t
+08:55  pgas: Sharetel: well username was a new request
+08:55  Sharetel: but this merely gives username and number of prints
+08:55  Sharetel: pgas: Sorry about that
+08:56  Sharetel: I need username, numberofprints and documentname
+08:56  pgas: cut -d ' ' -f3,9- logfile
+08:56  igi: oh, another request...
+08:56  pgas: oh well, you get the idea
+08:56  roland-: one more thing and I am done, I am trying to define a variable as a system command like: $sshv would be "cat sshversion" can I do that?
+08:57  pgas: don't, use a function instead
+08:57  roland-: huh
+08:57  pgas: sshv () { cat sshversion; }
+08:58  pgas: # foo () { echo hello; };foo
+08:58  evalbot: pgas: hello
+09:00  roland-: pgas good idea but U have to echo later with this and it does not work
+09:01  pgas: what?
+09:03  pgas: if you just want to print the version it works
+09:03  pgas: if you need to pass the output to a command you can do : command "$(foo)"
+09:04  pgas: if you want a dynamic variable that is updated automagically, you can't have that in bash (well unless you write some C code)
+09:06  roland-: fixed some of it I have this: echo '#define SSH_VERSION     "$SSHV"' > version.h
+09:07  roland-: won't print the defined sshv my buess is because of the " or '
+09:09  pgas: because of the '
+09:10  roland-: yes, fixed it
+09:10  roland-: I am done thank you
+09:12  Sharetel: pgas: Is there a way the output can be redirected to the Openoffice calc spreadsheetfile so that it automatically updates the data?
+09:13  igi: Sharetel, i don't think bash
+09:14  lhunath: Sharetel: redirecting output to a file is done with '>'
+09:14  lhunath: the openoffice crap you can sort out yourself or in the appropriate channel
+09:15  igi: perl have a module for excel , that maybe  what  you want
+09:15  Sharetel: lhunath : Yes, I first manually tried to copy, paste the output from the terminal but the spreadsheet looked weird as all data wasn't in order
+09:15  Sharetel: same thing with > redirection to a simple text file
+09:16  igi: Sharetel, i guest calc can import cvs type
+09:16  Sharetel: the display doesnt look orderly
+09:16  pgas: well, if you used sort as in your example above, it changes the order
+09:17  lhunath: output correct data, then.
+09:17  lhunath: whereby "correct" means "in the format that calc understands"
+09:29 --- buntfalke is now known as Guest57421
+09:29 --- Martinp24 is now known as Guest59048
+09:32  lyhana8: hi, I running a script as sudo and got this error:
+09:32  lyhana8: mv: inter-device move failed: `/tmp/out' to `/etc/hosts'; unable to remove target: Permission denied
+09:33  lyhana8: I work locally and here is the command trigerring the error:
+09:33  lyhana8:  `echo "127.0.0.1 ${PN} ${PN}.homelinux.com"|cat - /etc/hosts > /tmp/out && mv -f /tmp/out /etc/hosts` && printf "OK" || printf "Fail"
+09:39  geirha: What's with the `` ?
+09:39  geirha: And does the user actually have write access to /etc ?
+09:41  mar77i: lyhana8: you're running with sudo?
+09:42  mar77i: and yes, screw the backticks (``), and use braces {} around that part
+09:42  geirha: You don't even need braces
+09:42  mar77i: well...
+09:43  mar77i: # false && echo ok || echo fail
+09:43  mar77i: 4# false && echo ok || echo fail
+09:43  shbot: mar77i: fail
+09:43  evalbot: mar77i: fail
+09:43  mar77i: oh
+09:43 --- xok is now known as Guest91165
+09:43  mar77i: right
+09:46  mar77i: dyndns wants to sell me a domain name there...
+09:48  lyhana8: mar77i: still got the error without the ``
+09:49  pgas: # true && false || echo fail
+09:49  evalbot: pgas: fail
+09:49  lyhana8: mar77i: sorry, I wasn't using sudo, that was why >.<
+10:02  Guest91165: I have two files...
+10:02  Guest91165: one of them is a huge one...
+10:03  Guest91165: the other files contains records which should be excluded from first file...
+10:04  Guest91165: I stored the file contents to a variable and then tried with egrep -v $EXCLUDES huge_file
+10:04  Guest91165: but that doesn't seem to work and ate a lot of resources...
+10:05  lyhana8: Guest91165: did you ask on #awk channel?
+10:05  Guest91165: lyhana8: thanks, I will try ...
+10:08  vkues: Guest91165: grep -Fvf excludes huge_fule
+10:08  vkues: s/fule/file/
+10:09  vkues: Guest91165: maybe also -x, depending on what you want
+10:11  lyhana8: vkues: -f = work with a file, -F = file's line are pattern, -v = don't select lines in huge_file matching the one in ./excludes
+10:11  lyhana8: am I right? vkues
+10:12  vkues: lyhana8: -F for treating the patterns literally, not as regular expressions
+10:12  lyhana8: ok
+10:14  kerozene: cool
+10:16  lyhana8: thanks vkues, keep it for future use :D
+10:17  nicky__: how to use the find command to find the files that end with .cpp and .h in a single instance.
+10:17  pgas: find . -name \*.cpp -o -name \*.h
+10:18  pgas: !find
+10:18  greybot: http://mywiki.wooledge.org/UsingFind
+10:21  Sharetel: Hey guys, thanks very much indeed for your help
+10:35  Sharetel: Well, as suggested I tried to redirect the file to a simple text.csv file to be imported in Calc. However, only the data separated by a "," ( comma) is shown in an order, rest all is in one field.
+10:36  geirha: and?
+10:38  Sharetel: so how can I get cut -d ' ' -f3,9- /var/log/cups/page_log this to give me an output which seprates with a comma instead of an hyphen?
+10:39  nicky__: pgas: thanks
+10:51  igi: Sharetel, cut --output-delimiter=
+11:10  elkng: #n=0; echo "111" | while read a;do ((n++)); done; echo $n
+11:10  elkng: # n=0; echo "111" | while read a;do ((n++)); done; echo $n
+11:10  evalbot: elkng: 0
+11:11  elkng: why "n" doesnt incremented?
+11:11  geirha: !faq disappear
+11:11  greybot: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+11:14  geirha: Sharetel: while read -r -a fields; do (IFS=,; echo "${fields[2]},${fields[*]:8}"); done < infile > outfile
+11:15  geirha: That assumes none of the fields contain , already though.
+11:25  generictheold: you help me with make stuff ??
+11:25  The-Compiler: !make
+11:25  greybot: make is not bash. It has its own syntax that looks a bit like bash, but it isn't. Ask in ##workingset or ##c and read http://www.gnu.org/software/make/manual/ or the help documents of your version of make
+11:26  generictheold: hmm .. shure ?? inside a rule it looks like bash .. to me
+11:26  generictheold: for i in $(x); do ..
+11:28  generictheold: ive got thisone .. http://dpaste.org/EMoL/ but it runs only once ..
+11:29  generictheold: maybe a script that runs it ..
+11:29  geirha: There is no shell syntax there
+11:30  generictheold: i know .. but any better ideas for renaming ??
+11:30  generictheold: or correctly deleting suffix ..
+11:30  geirha: for f in ./*.flv; do mv "$f" "${f%.flv}"; done
+11:31  geirha: !pe
+11:31  greybot: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+11:31  generictheold: tanx ..
+11:31  generictheold: onliner ..
+11:36 --- Guest59048 is now known as Martinp23
+11:39  fraff: hi all, I have file=/tmp/filename_0.1.c and I'd like to extract 0.1 with something like num=${file//!([0-9\.])/} (with extglob) but it does not work, what am I missing ?
+11:42  Anvil: what about num="${file%.c}" ; num="${num##*_}" ?
+11:45  fraff: sounds nice, but it may not always be a .c file
+11:46  prince_jammys: replace c with *
+11:46  Kartagis: when setting a variable in cli, do I need var or $var?
+11:46  prince_jammys: your extglob probably matches the entire pattern
+11:46  prince_jammys: var='Hello'; echo "$var"
+11:46  Kartagis: thanks prince_jammys
+11:46  prince_jammys: s/pattern/string/
+11:48  fraff: well, !([0-9\.]) should match everything but 0.1. right ?
+11:50  fraff: I could also do num=$(echo $file | grep -o "[0-9\.]\+") but I'd like to do it only with bash builtins
+11:50  geirha: No need for extglob there, you could just use [!0-9.]
+11:50  fraff: geirha: got it, thank you
+11:51  geirha: # f=/tmp/blah123/filename_0.1.c; echo "${f//[!0-9.]}"
+11:51  Anvil: . is not special in [], btw.
+11:51  evalbot: geirha: 1230.1.
+11:51  geirha: I'd go with Anvil's suggestion though
+11:59  aziz: i'm trying to list all files sorted by date: find . -type f -print0 | xargs -0 ls -lrt
+11:59  aziz: this doesn't work because xargs calls ls for each argument
+11:59  aziz: how would you do this?
+12:03  fraff: I think xargs accept an argument that treat n arguments at once
+12:03  aziz: you mean -nX ?
+12:03  aziz: how can i tell it to pass all arguments at once?
+12:04  fraff: maybe ... it's in the man
+12:04  aziz: yea, I checked the man a few times...
+12:05 --- bLuCiFeR is now known as blu
+12:05  talespin_kit: can find be asked to look in to multiple directories for searching
+12:05  Anvil: find . -type f -print0 | xargs -0 ls -lrt <- this is not 1 ls per file here.
+12:06  aziz: Anvil: yes, I think you're right
+12:06  aziz: i just tried it with -n1
+12:06  aziz: and it was very slow... so it executed ls several times :)
+12:07  Anvil: xargs -0 ls -lrt doesnt fork a single ls either, btw. It depends of the length and number of parameters iirc.
+12:07  generictheold: for f in ./*.flv; do mv "$f" "${f%.flv}"; done  doesnt work ..
+12:07  generictheold: wait ..
+12:08  geirha: With GNU sort and find,   while IFS=/ read -r -d '' mtime file; do echo "$file"; done < <(find . -type f -printf '%T@/%p\0' | sort -zn)
+12:09  generictheold: cant stat .. `?
+12:09  geirha: talespin_kit: yes
+12:10  geirha: generictheold: What's the filename?
+12:10  aziz: Anvil: afaics ls sorts the files directory-wise. that's why i was confused and thought xargs ran ls once per arg.
+12:10  generictheold: *.flv
+12:10  generictheold: to *
+12:10  geirha: generictheold: That means there's no files matching *.flv in the current directory
+12:10  geirha: !nullglob
+12:10  greybot: nullglob: a shell option (shopt) which causes unmatched globs to expand to nothing, rather than themselves. Example: shopt -s nullglob; files=(*); echo "There are ${#files[*]} files."
+12:10  generictheold: other way round  doesnt too ..
+12:11  generictheold: but there is a file ..
+12:11  geirha: Well, the glob doesn't match it, so it doesn't end in .flv
+12:14  fraff: any way to use float instead of integer without using bc ?
+12:14  geirha: awk, python, perl ...
+12:14  geirha: !faq float
+12:14  greybot: http://mywiki.wooledge.org/BashFAQ/022 -- How can I calculate with floating point numbers instead of just integers?
+12:15  fraff: ok, thank you
+12:22  generictheold: files=(*.flv); echo "here are ${#files[*]} files" gives me 1
+12:23  geirha: generictheold: Run shopt -s nullglob  then run that again.
+12:23  Anvil: of course, if you dont have nullglob enabled, your files has the string '*.flv'
+12:24  generictheold: no change ..
+12:24  generictheold: hmm in a new shell ..
+12:24  geirha: # files=(*.flv); echo "here are ${#files[@]} files"
+12:24  evalbot: geirha: here are 1 files
+12:24  geirha: # shopt -s nullglob; files=(*.flv); echo "here are ${#files[@]} files"
+12:24  evalbot: geirha: here are 0 files
+12:25  Anvil: generictheold : echo dot-f-l-v-terminated files : *.flv ; echo all-f-l-v files : *.flv*
+12:26  geirha: If it still says 1 file after you've enabled nullglob, then there really is a file ending with .flv.
+12:26  generictheold: i'm thinking of echo $files .. rather
+12:26  generictheold:  echo "{$files} ??
+12:26  generictheold:  echo "{$files}"
+12:26  geirha: printf '%q\n' "${files[@]}"
+12:27  geirha: !arrays
+12:27  greybot: An array maps numbers to strings. Bash 4 also has associative arrays (maps strings to strings). See http://mywiki.wooledge.org/BashSheet#Arrays
+12:28  geirha: Do you see any .flv files if you run this?  printf '%q\n' *
+12:29  generictheold: yes ..
+12:29  geirha: What's the exact line for that flv file?
+12:29  Anvil: what was my command line returning, btw ?
+12:30  paseante: what does this notation mean?
+12:30  paseante: 		DOMAIN=${i%%"/"*}
+12:30  paseante: 		PORT=${i##*"/"}
+12:31  Josay: !expansion
+12:31  generictheold: got files=(*.flv); printf '%q\n' "${files}"
+12:31  geirha: !pe > paseante
+12:31  greybot: paseante: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+12:31  generictheold: gives me vid.flv
+12:31  Josay: one day, i'll be able to remember the greybot shortcuts
+12:31  generictheold: got files=(*.flv); printf '%q\n' "${files%.flv}"
+12:31  generictheold: gives me suprise suprise .. vid
+12:31  geirha: generictheold: Ok, then the for-loop I gave you earlier will rename that vid.flv to vid
+12:31  sn18: generictheold: printf '%q\n' "${files[@]}"
+12:32  generictheold: jup will do that .. but i have work to do now :(
+12:32  generictheold: cya
+12:32  generictheold: sometime
+12:32  geirha: I think we wen't through a couple of !b#'s there.
+12:45  Sharetel: geirha: I tried the script you gave but it just appears to do something without any errors whatsoever...no output at all
+12:45  Sharetel: am an absolute newbie at this all
+12:46  superlinux: hi. how can i lower the caps of all characters in a file? which  command?
+12:48  geirha: Sharetel: Well, all output goes to the outfile
+12:48  Sharetel: superlinux : tr '[A-Z]' '[a-z]' I think.
+12:48  superlinux: let me check
+12:48  Sharetel: geirha: I will pastebin , please let me know if I screwed up or did right.
+12:49  geirha: tr '[:upper:]' '[:lower:]'
+12:49  iaj: Guys Im having trouble... I set up .ssh/config to have a host with a LocalCommand and PermitLocalCommand set, the LocalCommand goes to this script: http://paste.pocoo.org/show/323177   - however when I login to the ssh machine, the script gets executed twice... :( What can I do about that?
+12:50  superlinux: ok cool ( <= i have just typed it by mistake on my shell when it worked, hehe!)
+12:52  Sharetel: http://pastebin.com/CxiUzGyc
+12:53  Mohan:  cat file | awk '{print tolower($_)}'
+12:54  unop: !uuoc
+12:54  greybot: Useless Use of Cat (cat foo | grep bar). See http://partmaps.org/era/unix/award.html
+12:55  Mohan:  awk '{print tolower($_)}' file_to_change
+12:56 --- talespin_kit is now known as nicky___
+12:56 --- nicky___ is now known as talespin_kit
+12:56  elkng: # a=( "111 222" );echo ${a[0]}
+12:57  evalbot: elkng: 111 222
+12:57  elkng: a=( $(echo "111 222") );echo ${a[0]}
+12:57  the_dark_warrio: when using wget, is it possible to get the name of the file being downloaded?
+12:57  unop: don't you supply that to wget?
+12:58  elkng: how can I get string "111 222" from echo in variable a[0] ?
+12:58  the_dark_warrio: unop: but sometimes the URL isn't the file name itself
+12:58  the_dark_warrio: unop: it must be resolved. For instance, a link from sourceforge has a lot of junk in it
+12:59  lhunath: elkng: echo "${a[0]}"
+12:59  lhunath: elkng: NEVER leave your expansions ($var, $(command)) UNQUOTED.
+13:01  geirha: Sharetel: And the resulting  dailycupsreport files doesn't contain what you want?
+13:01  geirha: s/files/file/
+13:02  rumpe1: the_dark_warrio, can you give an example?
+13:03  the_dark_warrio: http://downloads.sourceforge.net/project/libpng/libpng15/1.5.0/libpng-1.5.0.tar.xz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Flibpng%2Ffiles%2Flibpng15%2F&ts=1295438575&use_mirror=ufpr
+13:03  the_dark_warrio: this is the direct link extracted from a sourceforge project
+13:03  lhunath: ask #wget
+13:03  elkng: a=( $(echo -e "111\n222\n333") );echo ${a[1]}  <-- "echo" generates 3 strings and they are contains in variable a (a[0],a[1],a[2]), but if there is a string with spaces in it "a=( $(echo -e "111 aa\n222\n333") );echo ${a[1]}" its dont worked appropriately
+13:03  lhunath: or read the manual.
+13:03  elkng: # a=( $(echo -e "111 aa\n222\n333") );echo ${a[1]}
+13:03  evalbot: elkng: aa
+13:03  elkng: # a=( $(echo -e "111\n222\n333") );echo ${a[1]}
+13:03  evalbot: elkng: 222
+13:03  lhunath: elkng: I said do NOT leave expansions unquoted.
+13:04  lhunath: elkng: if you want help, at least LISTEN.
+13:04  Sharetel: geirha: Did you check my pastebin link? Is the script correct? Becasue aaparently, it does something but no response
+13:04  the_dark_warrio: lhunath: didn't know about that channel =P. Thanks
+13:04 --- Bichito is now known as BiCHiTo
+13:04  elkng: lhunath: with quotes all strings in one variable a[0]
+13:05  lhunath: elkng: good.
+13:05  geirha: Sharetel: Yes, and what does the output file contain?
+13:05  elkng: lhunath: no
+13:05  lhunath: elkng: $() inside () is stupid.
+13:05  elkng: I want them to be in a[0],a[1],a[2]
+13:05  lhunath: elkng: if you want to read LINES into array ELEMENTS, you need read -a or mapfile.
+13:06  Sharetel: geirha: nothing happens when I run the script
+13:06  lhunath: IFS=$'\n' read -r -d '' myarray <<< $'line 1\n line2\nline 3'
+13:06  geirha: Sharetel: Ok, so the file is empty?
+13:06  lhunath: and stop using echo -e too.  it sucks too.
+13:06 --- grosboul1t is now known as grosboulet
+13:06  lhunath: use $'' instead.
+13:06  geirha: Sharetel: The ''> dailycupsreport'' makes all output from the loop go to the file dailycupsreport...
+13:07  Sharetel: geirha: No, the file isn't generated
+13:07  geirha: Sharetel: Yes it is
+13:07  geirha: Sharetel: Oh wait, I missed that you put a newline after done
+13:07  Sharetel: geirha: which location would it be at?
+13:07  geirha: Sharetel: The redirections must be after done, on the same line.
+13:08  geirha: done <infile >outfile
+13:08  Sharetel: geriha: ok, let me modify it and also, please tell me do I need to specify the path where this dailycupsreport file should be generated?
+13:09  geirha: Sharetel: Yes, if you don't want it to end up in the current directory
+13:10  Sharetel: gierha: got the file, it contains the details. However, I want this to go in the Openoffice Calc spreadsheet so that it is presented in an orderly manner
+13:11  Sharetel: I checked http://plan-b-for-openoffice.org/calc/topic/save-spreadsheet-as-comma-separated-values-file#screencast this link for CVS
+13:11  Sharetel: but I do not get the "export" option as shown in the screencast
+13:12  geirha: Now I'm confused. I thought you wanted to generate a CVS file you could import in calc.
+13:12  Sharetel: yes exactly, I need that
+13:13  Sharetel: geirha: Let me import it, I will update you in a moment
+13:15  Sharetel: Its amazing, I launch Calc, go to File > Open > filepath and the contents are opened in Writer!!!
+13:17  geirha: Give it a csv extension and ooo is more likely to treat it as a csv file
+13:17  geirha: Or specify what file format it is in the open file dialog.
+13:18  Sharetel: did that, now atleast it's opening in Calc but same prob. All data in field A to 17
+13:20  geirha: Well, what do you want? I have no idea how the input data looks, and what you want as output data. I could only guess based on your earlier code.
+13:20  geirha: And, of course, if the data already contains , it will mess things up.
+13:21  Sharetel: geriha: 3 cheers 2 you!!!, hats off to you!
+13:22  Sharetel: only a few entries are bit jumbled up, but rest all looks quite fine
+13:22  Sharetel: although the document type/name exceeds some field
+13:23  elkng: lhunath:
+13:23  lhunath: elkng:
+13:29  elkng: lhunath: your code didnt worked for me, thanks
+13:29  lhunath: !doesntwork
+13:29  greybot: Saying something "doesn't work" helps nobody. Explain what you *want* to do, what you are *doing* and how it is *failing*. Being abstract or vague doesn't help. Copy/paste the commands that fail and the errors they produce.
+13:32  resmo: hi
+13:34  resmo: I am working on a shell script and had a missbehaviour which I do not understand why this happend, if you look at https://github.com/resmo/git-ftp/commit/414a86060a76928e4e275356ad1690a9790118f7
+13:35  pgas: ugh, anything more readable than a diff?
+13:35  resmo: you see the revert commit. it seems that it makes a difference if you use a LOGIN_OPTIONS="`get_login_options`" which returns "--user $REMOTE_USER:$REMOTE_PASSWD"
+13:36  resmo: and this is used as option in curl
+13:36  lhunath: ew.
+13:36  pgas: !faq complex > resmo
+13:36  greybot: resmo: http://mywiki.wooledge.org/BashFAQ/050 -- I'm trying to put a command in a variable, but the complex cases always fail!
+13:37  elkng: lhunath: http://pastebin.com/gpz3MGyp
+13:37  lhunath: elkng: I told you to quote your expansions.
+13:37  resmo: pgas, but it is not a command it is an option right?
+13:37  lhunath: elkng: $() is not quoted in your code.
+13:38  pgas: resmo: but it's the same problem
+13:38  lhunath: elkng: the code I gave you works perfectly.  you probably just didn't use it right.
+13:38  lhunath: "didn't help" is as fucking useless as "didn't work".  tell me WHY the code I gave you "didn't work"
+13:38  resmo: pgas, a nice hint, thx
+13:39  lhunath: # IFS=$'\n' read -r -d '' myarray <<< $'line 1\n line2\nline 3'; for element in "${myarray[@]}"; do printf 'element: <%s>\n' "$element"; done
+13:39  evalbot: lhunath: element: <line 1
+13:39  evalbot: lhunath:  line2
+13:39  evalbot: lhunath: line 3>
+13:40  lhunath: nuts, forgot -a
+13:40  lhunath: # IFS=$'\n' read -r -d '' -a myarray <<< $'line 1\n line2\nline 3'; for element in "${myarray[@]}"; do printf 'element: <%s>\n' "$element"; done
+13:40  evalbot: lhunath: element: <line 1>
+13:40  evalbot: lhunath: element: < line2>
+13:40  evalbot: lhunath: element: <line 3>
+13:40  lhunath: elkng: there, is that what you want?
+13:41  elkng: lhunath: I'l try it
+13:41  lhunath: elkng: leaving something unquoted is never a fix.  don't even try it.
+13:45  tuxnani: i have to replace text pattern in xml file, http://codepad.org/OOFCxJNa , whats the right approach?
+13:46  geirha: !xml
+13:46  greybot: You can't realistically parse tag-based markup languages like HTML and XML using Bash or utilities such as grep, sed or cut. If you just want to dump/render HTML, see (links|links2|lynx|w3m) -dump, html2text, vilistextum. For parsing out pieces of data, see tidy+(xmlstarlet|xmlgawk|xpath|xml2), or learn xslt. Ask #xml and #html for more help. See http://www.codinghorror.com/blog/archives/001311.html
+13:49  tuxnani: geirha, thanks
+13:58  dodongo: How would I grep only the first three characters of each line of a text file for a set three-character string?
+13:59  generictheold: ok now here comes the best .. it does what we wish .. ONCE !!
+13:59  Josay: dodongo: grep '^abc' file ?
+13:59  unop: dodongo,  grep -o '^abc' file  # perhaps?
+13:59  dodongo: Thanks, I'll try that now
+13:59  dodongo: those
+14:01  generictheold: http://dpaste.org/mjJ8/
+14:01  generictheold: stops after one file ..
+14:01  lhunath: dodongo: "grep" is a tool that selects lines, not characters.
+14:01  generictheold: WHY  :'(
+14:02  fraff: generictheold: fil=(*.flv) is an array
+14:02  lhunath: generictheold: 1. you left your expansion unquoted.
+14:02  fraff: then, use for i in ${file[*]} ...
+14:02  generictheold: so another for loop to go through the array ?
+14:02  lhunath: no, that would be even worse
+14:02  dodongo: lhunath: ok thanks
+14:02  lhunath: generictheold: you loop an array like this: for file in "${files[@]}"
+14:03  lhunath: fraff's is unquoted (badness) and uses
+14:03  lhunath: [*] instead of [@]
+14:03  lhunath: !$@
+14:03  greybot: The difference between $@ and $*: Unquoted, none at all: both equal $1 $2 .... With double quotes, "$@" is "$1" "$2" ..., while "$*" is expanded as the single argument "$1c$2c..." (where c is the first character of IFS). You almost always want "$@". The same goes for arrays: "${myarray[@]}"
+14:04  fraff: lhunath: you're right, my bad
+14:04  generictheold: in this case for fil in ${fil[*]} ??
+14:04  lhunath: NO!
+14:04  lhunath: bad help is infectious.
+14:05  lhunath: generictheold: if you see an unquoted expansion it is ALWAYS WRONG.
+14:05  lhunath: if you see an array expanded with * instead of @, it is *probably* wrong.  * is only useful in a very rare few cases.
+14:06  generictheold: ok .. but shouldn go for i in $ fil go through the array ?
+14:06  lhunath: eg. when you *intend* to merge all your nicely separated array elements into a single string.  eg. for displaying to a user.
+14:06  generictheold: ok .. but shouldn't  for i in $ fil go through the array ?
+14:06  lhunath: generictheold: how about you try reading what I told you?
+14:06  hever: Hej I'm going to check if a argument is submitted with a ending slash but this doesn't work: "if [[ "$0" != */ ]]; then" what am I missing ?
+14:07  lhunath: generictheold: no.  $fil is the same as ${fil[0]}, it expands only the first element of the array (the first STRING, seeing as $foo is a STRING expansion, not an ARRAY expansion)
+14:07  lhunath: generictheold: either way, QUOTES!
+14:07  randy2009:  tar -czf /tmp/tmp/test.tar.gz --remove-files /tmp/tmp/test?.log  is going to create 1 tar.gz with all the test?.logs in it. How can i create 1 tar for each test?.log????
+14:08  lhunath: hever: the first argument is $1, not $0
+14:08  hever: hmm
+14:08  lhunath: $0 expands to the name of the process.
+14:08  hever: yes
+14:08  randy2009:  tar -czf /tmp/tmp/test?.tar.gz --remove-files /tmp/tmp/test?.log doesn't work
+14:08 --- bmoqimi1 is now known as bmoqimi
+14:08  hever: lhunath, thanks!
+14:09  lhunath: randy2009: use a loop.
+14:09  lhunath: randy2009: each tar command creates a tar archive.  if you want multiple archives, run multiple tar commands.
+14:09  lhunath: !loops > randy2009
+14:09  greybot: randy2009: Loops repeatedly execute a block of code. See http://mywiki.wooledge.org/BashSheet#Loops
+14:10  randy2009: thnx
+14:11  dodongo: I have a text file which lists tv show names, one on each line.  I want to grep the file for the one line that contains "Lights Out" by grepping for the first three characters ("Lig"), but it the problem is that it also finds the line with "Friday Night Lights".  I want to just search the first three characters of each line for "Lig" so it will only return what I want.  How could I do that?
+14:12  lhunath: anchor the regular expression with ^
+14:13  lhunath: unop's suggestion was right on the money.
+14:14  dodongo: I couldn't quite figure it out, I'll try again
+14:15  tuxnani: hi there, i have this command sed -e 's/"~~</secondary>"/"</secondary>"/g' 35563_2418278_mp.xml , but it doesnt run properly, what all characters must have escape character \ before them?
+14:19  lhunath: dodongo: grep '^Log' mytextfile
+14:19  randy2009: how do i do this:
+14:19  randy2009: for i in "1" and "2";do {20lines of code}$i ;done
+14:19  dodongo: Cool I think I got it
+14:20  lhunath: tuxnani: the ones that have a meaning do.
+14:20  lhunath: tuxnani: how do you expect SED to know that you want the / AFTER your "secondary>" to be the end of the pattern, instead of the slash BEFORE it?
+14:21  vkues: randy2009: without "and"
+14:21  lhunath: randy2009: make sense?
+14:21  randy2009: yes
+14:21  tuxnani: lhunath, so do ~ also need \?
+14:21  lhunath: no
+14:21  randy2009: i'll try
+14:22  randy2009: also with quotes?
+14:22  lhunath: there are no special characters inside 1 and 2 that NEED quotes.
+14:22  randy2009: or "1 2" or "1" "2"
+14:22  randy2009: ok
+14:22  lhunath: those are two entirely different things.
+14:22  tuxnani: sed -e 's/"~~<\/secondary>"/"<\/secondary>"/g' 35563_2418278_mp.xml  this one didnt work
+14:22  randy2009: i thought to tell bash that it are difrent values
+14:22  lhunath: randy2009: the first is ONE string of THREE characters, the second is TWO strings of ONE character.  which one do you want?
+14:23  lhunath: !doesntwork > tuxnani
+14:23  greybot: tuxnani: Saying something "doesn't work" helps nobody. Explain what you *want* to do, what you are *doing* and how it is *failing*. Being abstract or vague doesn't help. Copy/paste the commands that fail and the errors they produce.
+14:24  randy2009: i try to understand
+14:24  randy2009: ah
+14:24  randy2009: ok
+14:24  randy2009: i'll need "1" "2"
+14:25  tuxnani: i have this xml file qith certain tag , with value(s). but the creation of page at server made wrong entry of ~~ proceeding every value, now i have to replace the single values with null character and place a coma in case of more than one value within the tag
+14:26  generictheold: http://dpaste.org/RsBF/ gives me two names ..
+14:26  generictheold: but the rest wont work ..
+14:27  randy2009: thnx :) i search another script, if i put it in a var i can do it like this: jetty="jetty1 jetty2" for i in $jetty do {20 lines of code}$1 ;done
+14:28  lhunath: generictheold: you do NOT want *.
+14:29  generictheold: true ..
+14:29  lhunath: good freaking god.  why do I even bother.  I'm talking to a blank wall.
+14:29  generictheold: so how do pick em ..
+14:29  lhunath: generictheold: go read EVERYTHING I said, AGAIN.  And AGAIN until you GET IT.  I've explained it all in great detail.  I'm not gonna repeat myself.
+14:30  lhunath: you just didn't listen.
+14:34  fraff: lhunath: in this case (printf "${fil[*]}"), "printf" makes it fail, not "*"
+14:36 --- bmoqimi is now known as narcislinux
+14:37 --- narcislinux is now known as Guest64049
+14:41 --- Guest64049 is now known as bmoqimi
+14:42  superlinux: hi again.  please fix this code for me: last_saved_count=`cat count.txt`; for i in  {$last_saved_count..1} ;  All I want is pass the last_saved_count to the for loop. it's not working with me.
+14:42  koala_man: !for
+14:42  greybot: The ''for var in ..'' statement iterates over arguments. for ((i=0; i < n; i++)) iterates over a numeric range. To iterate over filenames, use ''for file in [glob]''. Do *NOT* do ''for foo in `cat,ls,find,...`'': Here, for will iterate over resulting WORDS, NOT the "filenames", or "lines" that the command outputs.
+14:42  koala_man: try the one for a numeric range
+14:43  lhunath: fraff: define fail
+14:43  superlinux: ok good
+14:43  superlinux: now i get u
+14:43  lhunath: fraff: I was referring to his for loop.
+14:45  fraff: lhunath: yes I know, but this printf fail because he is trying "printf $value" instead of "printf $format $value"
+14:45  superlinux: is this correct ? for ((i=$last_saved_count; i < 1; i--))  ;
+14:45 --- DustyDin1o is now known as DustyDingo
+14:46  lhunath: fraff: true.
+14:46  superlinux: i mean syntactically
+14:46  lhunath: superlinux: sure.
+14:46  lhunath: superlinux: also, foo=$(<file)  is better than  foo=`cat file`
+14:46  superlinux: so this DOES pass the $last to i? isn't
+14:47  superlinux: ok, cos that would be mutlithreaded?
+14:47  lhunath: superlinux: logically it makes little sense.
+14:47  lhunath: superlinux: no, because you wouldn't be forking of cats.
+14:47  superlinux: then why?
+14:47  superlinux: ah!!!
+14:48  lhunath: superlinux: the for logic is kind of odd, I suspect you mean i > 1
+14:48  superlinux: you mean running cat too much?
+14:48  lhunath: or i > 0, even
+14:48  lhunath: superlinux: linux users use cats far more often than they ought to.
+14:48  kerozene: hey, is there a better way to be doing this? (find . -maxdepth 2 -name 'filename' | while read -r x; do y="${x#\.\/}"; y="${y//\//-}"; cp "$x" "bak/$y"; done)
+14:48  generictheold: ok fil=(*.flv); for fil in ${fil[*]}; do mv "${fil}" "${fil%.flv}"; done works .. finally ..
+14:48  superlinux: the less thant was a typo
+14:48  lhunath: generictheold: WRONG.
+14:48  generictheold: but works !!
+14:48  lhunath: generictheold: no.
+14:49  generictheold: try out ..
+14:49  lhunath: generictheold: only in your crappy tests.
+14:49  lhunath: generictheold: it is still a BUG.
+14:49  lhunath: generictheold: how come you ignored ALL my advice?
+14:49  lhunath: do you think you know better than me?
+14:49  generictheold: the quotes ??
+14:49  lhunath: I told you to QUOTE all your expansions.
+14:49  lhunath: I told you any expansion that isn't QUOTED is WRONG.
+14:50  lhunath: I told you NOT TO USE *.  Since that merges all your elements into one.
+14:50  lhunath: I told you to use @ instead.
+14:50  lhunath: now, you're taking your array elements, merging them all together into a single string, separated by some arbitrary character, likely a space.  then you're asking bash to take that string and wordsplit it back into separate parts using spaces as delimitors.
+14:51  generictheold: ok lets rewrite .. i wasnt so lucky with the quotes at first cause i had files like {fil} .. then
+14:51  lhunath: when you ALREADY HAD IT in separate parts.
+14:51  lhunath: the only thing you've done is BREAK all the filenames that contain SPACES or other glob metacharacter.
+14:51  lhunath: s
+14:51  lhunath: if something doesn't work, REMOVING quotes is NEVER the solution.
+14:51  lhunath: if it looks like if fixes it, you're WRONG.  they just made things worse.
+14:52  lhunath: because now you've got BUGGY code that you don't even KNOW is bugged.
+14:53  lhunath: files=(*.flv); for file in "${files[@]}"; do mv "$file" "${file%.flv}"; done
+14:53  generictheold: that's what i tried right now ..
+14:53  generictheold: it works ..
+14:54  lhunath: also; it's a really freaking bad idea to re-use the variable name of your array as your for iteration variable name.
+14:54  acs: Xargs can run a function either ?
+14:54  acs: xargs seems to run only excutables...
+14:54  lhunath: acs: xargs is not bash.  it doesn't run bash code.
+14:54  kerozene: anyone see my question at :48?
+14:54  lhunath: don't use xargs anyway, it sucks.
+14:54  lhunath: !xargs
+14:54  greybot: xargs(1) is dangerous (broken) when processing filenames that are not NUL-terminated. If you're working with filenames, use find's -exec {} + instead (yes, it does multiple-filenames-per-invocation, too).
+14:54  acs: lhunath: hm, yes
+14:54  lhunath: acs: use a for loop or find or while instead.
+14:55  lhunath: kerozene: I'd use find's -exec instead, probably
+14:55  lhunath: kerozene: but it looks fine at first sight
+14:55  generictheold: but it doesn't work otherwise ..
+14:55  lhunath: generictheold: what doesn't work?
+14:55  kerozene: really, wow :)
+14:55  acs: lhunath: find can run bash scripts using --exec ?
+14:56  lhunath: kerozene: you want all files named "filename" in 1st level subdirectories?
+14:56  generictheold: for i in ${files[@]}
+14:56  lhunath: acs: find can run programs with --exec
+14:56  lhunath: generictheold: freaking.  hell.  is your quote key broken?
+14:56  generictheold: no ..
+14:57  kerozene: lhunath: yes that's right
+14:57  lhunath: generictheold: if you don't start reading all the information I toss at you, you're gonna make me ba you.
+14:57  lhunath: ban, even.
+14:57  kerozene: and copy a them to bak/ named by their parent dir
+14:57  generictheold: for i in "${files[@]}" is what i ment
+14:57  lhunath: generictheold: thank you
+14:57  lhunath: generictheold: you say it doesn't work?  how does it not work?
+14:57  lhunath: !doesntwork
+14:57  greybot: Saying something "doesn't work" helps nobody. Explain what you *want* to do, what you are *doing* and how it is *failing*. Being abstract or vague doesn't help. Copy/paste the commands that fail and the errors they produce.
+14:57  lhunath: kerozene: for file in */filename; do ..; done
+14:58  kerozene: much better
+14:58  generictheold: it stops after one file .. more correctly
+14:58  lhunath: kerozene: for file in */filename; do mv "$file" "bak/${file/\//-}"; done
+14:59  lhunath: generictheold: show the code you're using.
+14:59  lhunath: generictheold: I suspect you're using "$files" instead of "$i" inside the loop.
+--- Log closed Wed Jan 19 14:59:34 2011
+--- Log opened Wed Jan 19 15:02:26 2011
+15:02 --- Users 572 nicks [0 ops, 0 halfops, 0 voices, 572 normal]
+15:02  lhunath: not 'i'.  not 'j'.  those are meaningless and cause confusion when used all over the freaking place.
+15:03  lhunath: personally; I use the one-letter prefix of my array variable name when I'm iterating its indexes.
+15:03  lhunath: for f in "${!files[@]}"
+15:03  lhunath: and the non-plural form of the array name when iterating its values.
+15:03 --- Channel #bash was synced in 101 seconds
+15:05  lhunath: when you're digging through code that's 3 loops deep wondering what the fuck this i and k variable contain, where a and b came from and why x doesn't contain what you expect it to, you may begin to understand my point.
+15:06 --- keystr0k_ is now known as keystr0k
+15:07  generictheold: http://dpaste.org/GTHt/ but still iterating trough file .. doesnt work
+15:07  kerozene: lhunath: the difference with my 'find' version is that it works on the relative path, not just the filename, so I get the parent dir of each file to use as a filename prefix ( "${path/\//-}" )
+15:08  fraff: generictheold: same mistake, for files in $files .... won't work
+--- Log closed Wed Jan 19 15:09:12 2011
+--- Log opened Wed Jan 19 15:48:22 2011
+15:48 --- Users 577 nicks [0 ops, 0 halfops, 0 voices, 577 normal]
+15:49 --- Channel #bash was synced in 87 seconds
+15:52  ExpDate: hei,, I have question about sorting,
+15:52  ExpDate: what would be the best way to sort files in priority order, meants it would be sorted based on the date/time, if the date/time same, then it would based on thename
+15:52  acs: what's the difference between the POSIX and POSIX.2 algorithm implemented by bash ?
+15:53  erUSUL: acs: what algorithm ?
+15:55  acs: bash's algo
+15:55  acs: erUSUL: the algorithm bash implementes
+15:55  acs: implements
+15:56  sneezewort: Is there a way to script multiple http gets in parallel and see how long it takes for them to complete?
+15:56  erUSUL: acs: the question makes no sense... bash implements i am sure a lot of algorithms. do you mean the sh language standar as defined by posix?
+15:56  acs: erUSUL: the question _MAKES_ sense
+15:57  erUSUL: acs: well then i am to dumb to understand you. wait here for someone who does.
+15:57  acs: er : I refer myself to the bash' standard
+15:58  vkues: hehe
+15:58  vkues: MAKES!!
+15:58  vkues: So, posix defines algorithms, eh?
+15:59  acs: vkues: no, you implement whatever algo you prefer, but to submit to the standard; what is new to posix.2 in bash ?
+16:00  pgas: !bashism
+16:00  greybot: http://mywiki.wooledge.org/Bashism for a (partial!) list of bash-specific features, and how to emulate them in other shells
+16:00  vkues: and suddenly "makes" become lowercase, if not, wrong. :)
+16:00  lhunath: avinashhm: http://pastie.org/1477364
+16:01  pgas: acs: I guess you want the difference between bash and the shell language defined in Posix?
+16:02  pgas: see also http://www.gnu.org/software/bash/manual/bashref.html#Bash-POSIX-Mode
+16:02  gionnico: hi
+16:02  gionnico: how can you read a file line by line?
+16:03  lhunath: !faq 1
+16:03  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+16:03  gionnico: can you read stdin line by line?
+16:03  pgas: sure
+16:03  acs: pgas: bash was not posix compliant ?
+16:03  acs: pgas: thanks.
+16:04  pgas: bash can mostly run posix scripts. there's some little difference listed in the last link I gave you
+16:04  pgas: but bash also defines a lot of extensions to posix
+16:06  jk4: hi, I'm trying to understand this thingy: ${!var[@]}
+16:06  jk4: I don't understand it
+16:07  jk4: I know it "Expand the value of the parameter named by the value of the parameter var.", but I don't understand.
+16:08  lhunath: no, it doesn't.
+16:08  lhunath: that's ${!var}
+16:08  jk4: oooh, OK
+16:08  lhunath: it expands the value of " the parameter named by: the value of the parameter 'var' "
+16:08  lhunath: the value of the parameter 'var' could be "quux"
+16:09  lhunath: then it expands the vale of the parameter named "quux"
+16:09  lhunath: so it's the same as $quux
+16:09  lhunath: either way; pretend you don't know, this is evil black magic anyway
+16:10  lhunath: "${!var[@]}" expands to all the indexes of the array "var"
+16:11  jk4: OK, thankyou very much, I understand now :)
+16:11  lhunath: jk4: what lead you astray?  was it a wrong wiki page?
+16:11  jk4: I was so focussed thinking that I didn't respong
+16:12  jk4: I needed a way to find out what index corresponded to a value in an associative array, and someone here gave me a piece of cod  to do it.
+16:13  gionnico: is it nice to assign variables using VAR=$(dostuff) ?
+16:13  jk4: I wanted to find out how it worked so I looked on bashsheet
+16:13  kojiro: gionnico: um, "nice"?
+16:13  jk4: but I was lokking in the wrong section
+16:13  cthuluh: !varcaps > gionnico
+16:13  greybot: gionnico: By convention, we capitalize environment variables (PAGER, EDITOR, SHELL, ...) and internal shell variables (BASH_VERSION, RANDOM, ...). All other variable names should contain at least one lowercase letter. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+16:14  lhunath: gionnico: what are you looking for exactly?  a nice fluffy feeling in your stomach?
+16:14  gionnico: well it seem quite weird to me
+16:14  gionnico: can I just assign a stdout line to a variable?
+16:14  taylanub: not line, whole data
+16:14  lhunath: $() is syntax that expands the output of a command in-place.
+16:14  jk4: unless you use head -1
+16:14  taylanub: (except that null bytes will be erased)
+16:15  lhunath: so foo=$(echo bar)   <- 'echo bar' outputs 'bar', so the command becomes:  foo=bar
+16:15  taylanub: jk4: head is evil, use sed :P
+16:15  cthuluh: !faq 1 > gionnico , again
+16:15  greybot: gionnico , again: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+16:15  gionnico: so if you have a variable variable (so you can't hardcode it ..) you have to use $()
+16:15  lhunath: what?
+16:16  lhunath: variable variables are evil, yet completely unrelated to $()
+16:16  jk4: taylanub: but why is head evil? it does it's job.
+16:16  kojiro: who needs variable variables when you have associative arrays?
+16:16  lhunath: jk4: read does it too.
+16:17  lhunath: read firstLine < <(commandThatOutputsLotsOfLines)
+16:17  gionnico: kojiro: in C you just assign var=function();
+16:17  taylanub: jk4: http://harmful.cat-v.org just philosophy :P
+16:17  gionnico: in bash you can't just assign output of a "function" and you have to use the trick of $()
+16:17  taylanub: it's not a 'trick'
+16:18  jk4: taylanub: haha yeah but that guy is umm..
+16:18  lhunath: gionnico: you're confusing return values and streams.
+16:18  lhunath: and the fact that C syntax isn't the same as bash syntax should hardly come as surprizing.
+16:18  pgas: gionnico: yeah, the shell, does a lot of things differently.
+16:18  gionnico: ok function(char * var_ptr); seems more linear to me dunno ..
+16:19  lhunath: moot.
+16:19  jk4: taylanub: I think he is a bash hater
+16:19  jk4: OK, well my question is answered so byebye and many thankyous.
+16:20  gionnico: so if i have a file containing 1 line .. i store that string with string=$(cat file)
+16:20  pgas: gionnico: sure, but then it's a lot easier to do: cp foo bar to copy a file than '#include  ...  main () ...'
+16:21  randy2009: can i use regular expresions in a date command? I have file's with diffrent timestamps
+16:21  gionnico: pgas: i'm just not used to ..
+16:22  pgas: gionnico: that or the bash shortcut s=$(<file) or even read s <file
+16:22  gionnico: how can you increase a string variable containing a number?
+16:22  pgas: randy2009: no
+16:22  randy2009: to bad
+16:22  gionnico: read s <file seems better ..
+16:22  lhunath: (( var++ ))
+16:23  pgas: randy2009: but then date doesn't read files either afaik so I'm not sure what your question is
+16:23  jk4: OK, I have another question, which is better: if [[ "${var}" = "${pie}" ]] or if [[ "${var}" == "${pie}" ]]
+16:23  gionnico: lhunath: it's like 0001 0002 i'd like to preserve syntax
+16:23  gionnico: possible?
+16:23  jk4: = or ==
+16:24  pgas: jk4: it doesn't matter
+16:24  gionnico: in php there's also === xD
+16:24  jk4: ok, awesome
+16:24  kojiro: well that's one hell of a selling point.
+16:24 --- Cain` is now known as Cain
+16:24  jk4: I think I'll use ==
+16:25  pgas: jk4: it matters a bit if you use [  as posix only defines = not ==
+16:25  lhunath: gionnico: no.  numeric data should never be stored as formatted.
+16:25  lhunath: that's ludicrous.  same thing for dates.
+16:25  lhunath: you format it when you want to show it.
+16:25  jk4: oh, OK, thanks
+16:25  kojiro: jk4: of course, if $var and $pie are numeric, then you should use a different syntax altogether
+16:26  kojiro: fail
+16:26  gionnico: lhunath: so i have a variable containing 1 2 3 .. how can i convert to 0001 0002 0003 ?
+16:26  gionnico: ^^^
+16:26  taylanub: printf
+16:26  taylanub: does one variable contain e.g. "1 2 3"?
+16:27  gionnico: taylanub: no it either contains 1 2 or 3. it's a counter
+16:27  taylanub: # printf %04d\\n 1
+16:27  evalbot: taylanub: 0001
+16:27  taylanub: read ''help printf''
+16:28  gionnico: taylanub: cool thanks :)
+16:28  taylanub: !faq leading
+16:28  greybot: http://mywiki.wooledge.org/BashFAQ/018 -- How can I use numbers with leading zeros in a loop, e.g. 01, 02?
+16:29  taylanub: that should be a good read too
+16:29  winkey: is this the proper way to test exit codes? is there a constant for success? if (($? == 0))
+16:30  randy2009: pgas, i want to move several files, files named like test2011_01_19 foo2011-01-19 and bar20110119, i hope i could catch them with *date +%Y?%m?%d
+16:30  erUSUL: winkey: if program ; then ... ; fi
+16:30  greycat: winkey: that would work, although most of us would just use "if".
+16:30  randy2009: somethink like that
+16:30  greycat: (or && or || if it's a really short thing)
+16:31  gionnico: is it nice to concatenate some text using echo $var1$var2$var3 ?
+16:31  greycat: randy2009: date +foo generates strings.  It doesn't match filenames.
+16:31  winkey: greycat "if" ?
+16:31  greycat: winkey: as erUSUL said.
+16:31  randy2009: i can put %Y and %m in diffrent vars
+16:31  greycat: gionnico: use more quotes.
+16:31  winkey: greycat ohh i get it
+16:31  randy2009: i know, but can do test$date
+16:31  gionnico: ok
+16:32  erUSUL: !ifgrep > winkey this applies
+16:32  greybot: winkey this applies: if grep -q word "$file"; then blah blah; fi DO NOT use [[ or [ or ` or $() or any other crap. "if" expects a command. "grep" is a command. "[" is too. You don't need both, just the grep works because grep returns true (0) if a match is found, but not otherwise.
+16:32  randy2009: date=`date +%Y
+16:33  winkey: greybot thanks
+16:33  greycat: randy2009: yes, you could do something like   mv *"$year"*"$month"*"$day" /target
+16:33  pgas: randy2009: date(1) doesn't catch anything, but you can extract the date without date(1), depending on what you want to do with it you might then use date(1) to reformat it
+16:36  pgas: oh now I get it :D
+16:36  pgas: well  I guess mv *$(date +'%Y*%m*%d)* would work
+16:37  pgas: with an extglob if you need something more precise than *
+16:38 --- Bichito is now known as BiCHiTo
+16:39  gionnico: read s < serial.txt; while read -r line; do (( s++ )); done; echo $s
+16:39  gionnico: why doesn't $s change ?
+16:39  gionnico: (( s++ )) works and if i echo each line it's increased ...
+16:39  greycat: because there were no lines of input?
+16:40  gionnico: greycat: no there were i skipped somethibng
+16:40  greycat: you haven't even shown where the input comes from
+16:40  gionnico: cat url_list | while ..
+16:40  greycat: !faq disappear > gionnico
+16:40  greybot: gionnico: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+16:40  greycat: Ta da!
+16:41  gionnico: so it's something like local variable to the loop like in C inside {}
+16:41  greycat: No, it's something like "you used a pipe which means you used a subshell"
+16:41  greycat: If you had not used a fucking PIPE you would not have had a problem.
+16:41  greycat: !uuoc
+16:41  greybot: Useless Use of Cat (cat foo | grep bar). See http://partmaps.org/era/unix/award.html
+16:42  kojiro: naughty!
+16:42  randy2009: back
+16:42  gionnico: greybot: it's not cat really it comes from stdin
+16:42  greycat: Lie to me some more.  Go on.
+16:42  kojiro: gionnico: greybot is a bot
+16:42  lhunath: another cat saved
+16:42  gionnico: it's more like dostuff | while ...
+16:42  lhunath: still a pipe ..
+16:43  lhunath: you know this symbol? --> | <--
+16:43  gionnico: greycat: heh sorry i didn't mean it
+16:43  randy2009: mv *$(date +'%Y*%m*%d)*
+16:43  randy2009: how can i test this?
+16:43  kojiro: gionnico: you're explaining something that doesn't affect your problem in a way that doesn't help you find a solution, but does annoy greycat...
+16:43  greycat: Start by adding the missing '
+16:43  lhunath: randy2009: quotes
+16:43  lhunath: randy2009: quoted glob characters mean nothing.
+16:43  randy2009: i don't understand
+16:43  greycat: lhunath: it's quoted so that it comes back as a literal * from the date command, and then it's UNQUOTED in the $() so that the * gets expanded.
+16:43  kojiro: lhunath: I only see one quote mark there...
+16:44  randy2009: whta's a glob character?
+16:44  greycat: randy2009: add the missing ' character
+16:44  greycat: randy2009: *
+16:44  greycat: !glob
+16:44  greybot: "Glob", the common name for pattern matching, filename expansion, "wildcards", etc. http://mywiki.wooledge.org/glob
+16:44  randy2009: ok
+16:44  randy2009: ok
+16:44  randy2009: :)
+16:44  lhunath: yeah; I missed the unfortunate side-effect there.
+16:44  winkey: gionnico while read a ; do foo $a ; done < <( bar | baz )
+16:44  gionnico: hey the | while is suggested in FAQ1
+16:44  lhunath: s/un//
+16:44  gionnico: that's there i took it
+16:44  greycat: gionnico: with a caveat?
+16:44  kojiro: !faq 1
+16:44  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+16:44  randy2009: mv *$(date +'%Y'*'%m'*'%d')*   ??:)
+16:44  kojiro: randy2009: better. Tias.
+16:45 * kojiro is really confused about the intent, there, though
+16:45  greycat: FAQ 1 says, "Using a pipe to send find's output into a while loop places the loop in a SubShell and may therefore cause problems later on if the commands inside the body of the loop attempt to set variables which need to be used outside the loop; in that case, see FAQ 24, or use ProcessSubstitution like: "
+16:45  greycat: So gionnico FUCKING CAN'T READ.
+16:45  schweizer: hi
+16:45  gionnico: ... a noob faq should contain something dangerous
+16:45  greycat: *plonk*
+16:46  kojiro: gionnico: it does!
+16:46  gionnico: i looked the thousand of solution and that looked the simplest to me
+16:46  gionnico: good looking
+16:46  schweizer: is it possible just with bash tools to filter from a wordlist all strings that are 3,4, or 5 chars long and output them?
+16:46  greycat: schweizer: is it one word per line?
+16:46  kojiro: gionnico: see, the need for a solution to be simple is exactly what makes them dangerous
+16:46  schweizer: yes
+16:46  taylanub: schweizer: what do you mean with "just with bash tools" ?
+16:46  greycat: schweizer: grep '^.\{3,5\}$'
+16:46  schweizer: but some words are longer and some shorter
+16:47  schweizer: taylanub: i mean without writing a python script or something like that
+16:47  randy2009: beautifull :) : ls *$(date -d '1 day ago' +'%Y'*'%m'*'%d')*
+16:47  randy2009: thnx guys
+16:47  schweizer: thx greycat
+16:47  greycat: randy2009: +'%Y*%m*%d'
+16:47  lhunath: might as well move the outer *'s inside too.
+16:48  greycat: randy2009: note that I added ONE quote character to the END of the string because it was MISSING.
+16:48  greycat: lhunath: No.  Those must be outside.
+16:48  greycat: or... well, I see what you mean.
+16:48  greycat: I still would prefer to see the separation between the ones that are being fed to date and the ones that are not.  But it's stylistic.
+16:49  taylanub: schweizer: grep, sed, awk, etc. are not "bash" tools. in fact awk is a whole scripting language itself.
+16:49  greycat: taylanub: he meant standard unix tools, clearly.
+16:49  taylanub: just correcting...
+16:49  randy2009: it isn't missing
+16:49  greycat: OH MY FUCKING GOD
+16:49  greycat: 10:43  randy2009> mv *$(date +'%Y*%m*%d)*
+16:49  schweizer: ok you're right
+16:49  greycat: THERE WAS A MISSING ' THERE.  JESUS FUCKING CHRIST.
+16:50  randy2009: yeah, but the latest not
+16:50  randy2009: 16:47
+16:50  schweizer: another question: is it possible, with the same set of tools, to a) remove all words that contain ' and b) shuffle the list?
+16:50  randy2009: i noted
+16:50  greycat: schweizer: man grep, and ask greybot about faq random
+16:51  schweizer: greybot: tell me about "faq random" please
+16:51  gionnico: wget URL -O /dev/stdout | awk { dostuff } | while read -r line; do ............... so i need wget -O tempfile; while read -r line do awk { dostuff } tempfile
+16:51  taylanub: schweizer: /msg greybot random
+16:51  greycat: /msg greybot faq random
+16:51  gionnico: right? i absolutely need a tempfile to avoid the pipeline subshell issue dont i?
+16:51  lhunath: no
+16:51  lhunath: well; techinically
+16:51  lhunath: while ... done < <(command)
+16:51  schweizer: thx guys
+16:51  erUSUL: !<( > gionnico
+16:51  greybot: gionnico: Process Substitution -- <(cmd) and >(cmd) -- see http://mywiki.wooledge.org/ProcessSubstitution , or http://mywiki.wooledge.org/BashFAQ/024 for a common use
+16:52  lhunath: there the temp file is handled implicitly by bash
+16:52  greycat: gionnico is a lost cause.  He does not read.
+16:52  lhunath: and it's a fifo; barely any disk io
+16:52  taylanub: i don't know the exact case but one can e.g.  foo | ( while foo; do bar=baz; done; echo $bar )
+16:53  gionnico: greycat: i can't learn all at one time. i'm learning by writing i think it's better. and you're helping me more than a manual )
+16:53  gionnico: :)
+16:53  taylanub: note that he's a person though
+16:53  greycat: We have a FAQ specifically for this question.  He was pointed to it.  There is a pointer to it in FAQ 1 as well, underneath the example he claims to have followed.  With an explanation.
+16:53  kojiro: schweizer: for w in "${words[@]}"; do case $w in ???|????|?????) printf '%s\n' "$w";; esac; done
+16:54  kojiro: that's a pure-bash solution, if you really needi t.
+16:54  greycat: You skipped the part where you mapfile the word list into the array.
+16:54  winkey: kojiro nifty
+16:54  kojiro: greycat: yep, I tk shrtcts
+16:55  kojiro: greycat: does "a wordlist" necessarily imply that the words are in a file, though?
+16:55  greycat: Because I asked him
+16:55  erUSUL: that's left as an exercise for the reader ;P
+16:56 * kojiro leaves off
+16:56  greycat: 10:46  greycat> schweizer: is it one word per line?
+16:56  greycat: 10:46  schweizer> yes
+16:56  greycat: 10:46  greycat> schweizer: grep '^.\{3,5\}$'
+16:56  kojiro: ok ok
+16:56  kojiro: IFS=$'\n'; words=( $(<wordlistfilethingie) ); ...
+16:57  greycat: set -f if you're going to use that
+16:57  kojiro: right, good call
+16:57  winkey: wount it be better to skip the array and use while read... in that case?
+16:57  lhunath: IFS=$'\n' read -r -d '' -a words < wordlist
+16:57  kojiro: winkey: possibly
+16:57  lhunath: no need to fix IFS and +f afterwards.
+16:58  winkey: allthough i bet if it is a very large file grep would be way faster
+16:58  gionnico: done < <() is really nice
+16:58  gionnico: it works and i didn't need tmpfile great!
+16:58  kojiro: winkey: probably.
+16:58  winkey: mmap
+16:59  crocket: Guys help me
+16:59  kojiro: crocket: with?
+16:59  crocket: cd /tmp/SBo/package-adobeair/opt/Adobe\ AIR/ works on bash, but it doensn't work in a script.
+16:59  crocket: ./adobeair.SlackBuild: line 27: cd: /tmp/SBo/package-adobeair/opt/Adobe\ AIR/: No such file or directory
+17:00  crocket: adobeair.SlackBuild starts with #!/bin/sh
+17:00  pgas: "sh -x yourscript" and see what's really executed
+17:00  crocket: ok
+17:00  crocket: + cd '/tmp/SBo/package-adobeair/opt/Adobe\ AIR/'
+17:01  crocket: adobeair.SlackBuild: line 27: cd: /tmp/SBo/package-adobeair/opt/Adobe\ AIR/: No such file or directory
+17:01  pgas: crocket: see the \ inside the quote, it's a literal \ that's your problem
+17:01  crocket: pgas : But they are double quotes in my script.
+17:01  crocket: And cd is in a subshell.
+17:02  crocket: like ( cd "$PKG/opt/Adobe\ AIR/" )
+17:02  pgas: it doesn't matter, set -x shows you what is really executed
+17:02  crocket: hmm
+17:02  pgas: and what cd sees is that you have a litera \ inside
+17:02  tehbaut: if I'm using DD and I need to skip the first 20GB of an image, with a byte size of 512, what should my skip and seek values be?
+17:02  taylanub: crocket: inside double quotes, backslash is literal except when before $ or \ etc.
+17:03  crocket: Oh I get it
+17:04  crocket: man
+17:04  crocket: i can't get it to accept space
+17:05  taylanub: "foo bar" or 'foo bar' or foo\ bar
+17:05  michelem: hello folks
+17:06  lhunath: crocket: either quote or escape, don't do both.
+17:06  crocket: lhunath, ok
+17:06  michelem: I'd like to execute a command such as "  ( foo 2>&1 & ; wait ; bar)&  "  –– what is a valid syntax for it?
+17:06  lhunath: foo & wait; bar
+17:06  taylanub: !&;
+17:06  greybot: &; is always wrong. If you want to run things in the background in a compact one-liner just use & between commands, and omit the ; entirely. See http://mywiki.wooledge.org/BashPitfalls
+17:06  michelem: thx
+17:07  crocket: I think a subshell manipulates the syntax.
+17:07  michelem: that's what "separated by" meant in the man then :) thx
+17:07  crocket: Is a subshell unique to bash?
+17:07  crocket: POSIX specification doeesn't tell about subshell
+17:07  michelem: no, POSIX covers that
+17:07  greycat: definitely not a bashism.
+17:08  michelem: crocket: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_09_04
+17:08  crocket: man
+17:08  crocket: michaelr, you own me.
+17:09  michelem: that's right, I pnw you
+17:09  greycat: So you pwn him so hard that everyone whose nick begins with "mich" also pwns him, even total strangers.
+17:10  michelem: ^mich[^ ]* pwns crocket
+17:10  gionnico: how can i reverse an input file? i have a file containing for each line url3 url2 url1 i'd like to reverse so that it show url1 url2 url3
+17:11 --- hagebake is now known as hagabaka
+17:11  michelem: gionnico: awk is best for that, but it's not trivial
+17:11 --- Orphis_ is now known as Orphis
+17:11  michelem: nor efficient :) stack each line on an array and at END print the array reversed
+17:11  tehbaut: if I'm using DD and I need to skip the first 20GB of an image, with a byte size of 512, what should my skip and seek values be? Do I convert 20GB to bytes, then divide by 512?
+17:12  rumpe1: gionnico, tac is the inverse output of cat
+17:12  greycat: tehbaut: or convert it to kB and multiply by 2.
+17:12  gionnico: rumpe1: yee :)
+17:12  greycat: rumpe1: tac/rev do two different kinds of "reversing"
+17:12  michelem: rumpe1: what is tac provided by?
+17:12  erUSUL: michelem: how is « awk '{ print $3,$2,$1 }' file > newfile » not trivial ?
+17:13  michelem: erUSUL: he wants to invert lines, not fields in a line
+17:13  greycat: tac is GNU-only, or at least it's not on OpenBSD
+17:13  acs: I never understood why the options from set -o are not grouped together with the options from shopt
+17:14  michelem: having it in C is probably the best compromise, tho it's still fairly inefficient
+17:14  Lenhix: Hello. Just for curiosity: what's the difference in behaviour between these two http://pastie.org/1477605 ?
+17:15  michelem: Lenhix: none, for what I can tell
+17:16 --- BiCHiTo is now known as Bichito
+17:16  tehbaut: greycat, makes sense
+17:17  acs: Lenhix: no diff
+17:17  tehbaut: I presume I can't just use kB designations and such for block value?
+17:17  Lenhix: Other than the {} and the ]; i don't see big differences. Is some syntax preferred over the other? (I like the 2nd, shorter)
+17:17  greycat: maybe if your dd has such an extension
+17:22  tehbaut: ok, so I used google to convert 20GB to bytes, divided by 512 and came up with 40960000... that sound about right?
+17:22  greycat: dear gods.
+17:22  igli: hehe
+17:22  greycat: Seriously?  Google?
+17:23  greycat: a kilobyte is 1024 (2^10) bytes.  A megabyte is 1024 of those.  A gigabyte is 1024 of those.
+17:23  greycat: So a gigabyte is 1024*1024*1024 or 2^30 bytes.
+17:23  greycat: Use bc.
+17:23  geirha: No, kilobyte is 1000 bytes. kibibyte is 1024 bytes
+17:23  greycat: Lies.
+17:23  igli: yuck
+17:24  greycat: I refuse to knuckle under to the lies of the storage device marketing industry, and the spineless jellyfish who adopted idiotic baby-talk words to appease them.
+17:24  e36freak: 1000 is not a base 2 number
+17:24  Damnshock: greycat: is not only about the industry, is about international units
+17:24  toresbe: what Damnshock said
+17:25  Damnshock: kilo = 10^3
+17:25  greycat: Rationalizations.
+17:25  toresbe: No, maths.
+17:25  greycat: kilo = 2^10 in computer science and 10^3 in other disciplines.
+17:25  e36freak: right, and 2^10 is 1024
+17:25  greycat: It's not mathematics.  It's labeling.
+17:25  toresbe: No, it's clinging onto a bad habit.
+17:26  tehbaut: yeah, I don't trust my brain :P
+17:26  geirha: kilo is sometimes 2^10 and sometimes 10^3 in computer science.
+17:26  geirha: speeds generally use base 10
+17:26  e36freak: it _should_ always be 2^10
+17:27  geirha: No, it should always be 10^3 ... then we could finaly have some sanity.
+17:27  toresbe: there's no point in redefining the meaning of the word "kilo" just because other people have gotten it wrong previously.
+17:27  e36freak: alright, you redesign a computer to be base 10
+17:27  toresbe: That's got nothing to do with it.
+17:27  e36freak: http://xkcd.com/394/
+17:27  e36freak: it has everything to do with it
+17:27  geirha: The first computer was base 10
+17:27  dualbus: yes, "kilo" means "one thousand"
+17:28  dualbus: there are other prefixes for base 2
+17:28  dualbus: http://en.wikipedia.org/wiki/Kibi-#IEC_standard_prefixes
+17:28  Damnshock: greycat: nope
+17:28  toresbe: geirha: That depends on your definition of the "first computer", but the ENIAC certainly was
+17:28  Damnshock: 10^3 = kilo in international units system
+17:28  greycat: "nope" what?
+17:28  greycat: kilobyte means 1024 bytes.  It has been that way for longer than many of you have LIVED.
+17:28  greycat: I will not chanve.
+17:28  greycat: change*
+17:29  Damnshock: I'm not defending this use rather than accepting the fact that is something done wrong from a loooong time
+17:29  geirha: toresbe: I'm thinking about Babbage's, even though he didn't complete it
+17:29  michaelr: i pwn everyone
+17:29  toresbe: You don't want to get into the definition argument with me ;)
+17:29  toresbe: geirha: I've spent too much time in the history basement at NTNU for that!
+17:30  toresbe: greycat: If you want to get the value of the number 1000 wrong because you think the number 1024 isn't "catchy" enough, that's up to you, but you're still wrong.
+17:30  greycat: No, I'm adhering to the original standard.  That does not make me "wrong".  It makes me antique, perhaps.
+17:30  toresbe: What standard, pray tell, says that kilo = 2^10?
+17:31  Damnshock: toresbe: international units system
+17:31  greycat: The de facto standard used throughout the computing industry prior to approximately 1992.
+17:31  toresbe: I spent this morning hacking PDP-11 machine code in octal, but I still know how SI works.
+17:31  The-Compiler: I think in OS X and Ubuntu (starting at 11.04) all values will use a base of 10
+17:32  e36freak: which is dumb
+17:32  geirha: When a megabyte was 1000*1024 bytes? :)
+17:32  toresbe: yeah, just use MiB and GiB when that makes sense.
+17:33  geirha: The-Compiler: Not all, but mainly Ubuntu is going strict about KiB meaning 1024 bytes and kB meaning 1000 bytes
+17:33  greycat: Anyway, a 20 GB file contains this many blocks:
+17:33  greycat: imadev:~$ bc
+17:33  greycat: 20*2^30/512
+17:33  greycat: 41943040
+17:34  greycat: And if certain people choose to misspell GB with a lowercase i inside it, it won't be the most egregious spelling error I've seen on IRC.
+17:34  geirha: They've been hacking gtk code in order to do it :)
+17:36  gionnico: how can i break from a nested loop? i have while do; for do; if (($var1 == $var2)) GOTO END_OF_THIS_WHILE_LOOP
+17:37  e36freak: oh god goto?
+17:37  geirha: gionnico: help break
+17:37  e36freak: you're looking for "break"
+17:37  hever: whow I didn't saw goto for years ;)
+17:37  e36freak: it's all over the linux kernel, but only with good reason
+17:37  gionnico: hever: i'm studiyng assembler right now
+17:37  gionnico: :)
+17:38  hever: ;) ok
+17:38  gionnico: so if do break; will not only "end" the for loop but also go to last line of while ?
+17:38  igli: you don't need to use $var in (( gionnico, so if ((var1==var2)) # works
+17:38  hever: gionnico, you're excused ;)
+17:38  geirha: gionnico: Also, better to do ((var1 == var2))
+17:38  joel_falcou: hi, working with bash, how can I do something like in a folder tree rm all files with a given extension ?
+17:39  geirha: damn, too late.
+17:39  pgas: gionnico: no break without arguments only break from one loop
+17:39  greycat: joel_falcou: rm *.myext
+17:39  geirha: joel_falcou: rm *.jpg
+17:39  pgas: !find > joel_falcou
+17:39  greybot: joel_falcou: http://mywiki.wooledge.org/UsingFind
+17:39  joel_falcou: sorry i meant recursively in the whole tree
+17:39  geirha: Oh, recursion
+17:39  joel_falcou: oh find ofc then -exec ?
+17:39  greycat: In that case, find, as you were told already.
+17:39  joel_falcou: i always forgot exec
+17:39  joel_falcou: thanks for the realitty check
+17:40  e36freak: find . -type f -iname "*.jpg" -exec rm {} +
+17:40  igli: find . -type f -name '*.jpg' -exec rm -f {} + # afair
+17:40  igli: oh well
+17:40  geirha: joel_falcou: There's shopt -s globstar; rm ./**/*.jpg  if you have bash4, though you may exceed the max arg length with that.
+17:40  gionnico: pgas: ok i'll use a tmp variable that the while loop checks. while do; for do; if (()) broken=1; break; doneif; donefor; if(broken=1) break; doneif; while_dostuff; donewhile
+17:40  joel_falcou: geirha: thx
+17:40  greycat: some versions of find also have a -delete action, but it's nonstandard
+17:41  igli: if ((broken)) gionnico, not one (
+17:41  gionnico: igli: it's *very* generic syntax ..
+17:41  greycat: !bool
+17:41  greybot: Bash doesn't have boolean variables, but you can shanghai integers for this purpose, just like in C. ok=1; while ...; foo && ok=0; ...; done; if ((! ok)); then whatever; fi
+17:41  gionnico: only pseudo code is it ok?
+17:41  igli: you can break 2 # as well
+17:42  igli: *shrug* :)
+17:42  gionnico: igli: and break 2 will not *end* while loop, just make while test next one?
+17:42  e36freak: break 2 will end it
+17:42  igli: you're thinking of continue
+17:42  geirha: ''help break''
+17:42  e36freak: continue goes to next iteration
+17:42  e36freak: ''help continue''
+17:43  gionnico: e36freak: i want break for loop and continue while ..
+17:43  gionnico: possible to do inside the if that's inside for ?
+17:44  pgas: no
+17:44  gionnico: or i need a support variable?
+17:45  pgas: you need some logic of your own
+17:45  joel_falcou: thanks everbody for the help. ciqo
+17:45  geirha: gionnico: help continue
+17:45  pgas: oh yeah....you just want continue sorry
+17:45  mactimes: Could someone take a look at this small script and tell me the correct way if doing this comparison?  http://pastie.org/1477723
+17:46  geirha: !ifgrep > mactimes
+17:46  greybot: mactimes: if grep -q word "$file"; then blah blah; fi DO NOT use [[ or [ or ` or $() or any other crap. "if" expects a command. "grep" is a command. "[" is too. You don't need both, just the grep works because grep returns true (0) if a match is found, but not otherwise.
+17:46  gionnico: pgas: i made one script that works but use a $broken support variable
+17:46  e36freak: gionnico: just one break should do that
+17:47  gionnico: http://pastebin.com/RwpNv7K8
+17:47  mactimes: greybot, Thank you.  I'll try to fix that.
+17:47  geirha: On second thought.
+17:47  geirha: !guide > mactimes
+17:47  greybot: mactimes: http://mywiki.wooledge.org/BashGuide
+17:47  gionnico: can i incorporate that continue inside the if (line 4) ?
+17:47  mactimes: Argh!
+17:47  mactimes: geirha, Thank you.
+17:48  e36freak: for ((i=0; i<10; i++)); do for ((j=0; j<10; j++)); do printf "%s " "$i" "$j"; ((j == 5)) && break; done; done
+17:48  e36freak: # for ((i=0; i<10; i++)); do for ((j=0; j<10; j++)); do printf "%s " "$i" "$j"; ((j == 5)) && break; done; done
+17:48  evalbot: e36freak: 0 0 0 1 0 2 0 3 0 4 0 5 1 0 1 1 1 2 1 3 1 4 1 5 2 0 2 1 2 2 2 3 2 4 2 5 3 0 3 1 3 2 3 3 3 4 3 5 4 0 4 1 4 2 4 3 4 4 4 5
+17:48  evalbot: e36freak: 5 0 5 1 5 2 5 3 5 4 5 5 6 0 6 1 6 2 6 3 6 4 6 5 7 0 7 1 7 2 7 3 7 4 7 5 8 0 8 1 8 2 8 3 8 4 8 5 9 0 9 1 9 2 9 3 9 4 9 5
+17:48  geirha: gionnico: if (( n == line )); then continue 2; fi
+17:48  e36freak: see, it'll go up to the next one
+17:49  e36freak: # for ((i=0; i<5; i++)); do for ((j=0; j<5; j++)); do printf "%s%s" "$i" "$j"; ((j == 2)) && break; done; done
+17:49  evalbot: e36freak: 000102101112202122303132404142
+17:49  e36freak: bah, format fail
+--- Log closed Thu Jan 20 08:34:25 2011

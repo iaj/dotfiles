@@ -1,0 +1,574 @@
+--- Log opened Mon Nov 29 08:19:23 2010
+--- Log closed Mon Nov 29 08:24:24 2010
+--- Log opened Mon Nov 29 08:24:50 2010
+08:24 --- Users 633 nicks [0 ops, 0 halfops, 6 voices, 627 normal]
+08:26 --- Channel #git was synced in 133 seconds
+08:38 --- DrNick2 is now known as DrNick
+08:43 --- nohk_ is now known as nohk
+09:33 --- dl9pf_ is now known as dl9pf
+09:42 --- xrn is now known as zemacsh
+09:45  tasslehoff: Can I make git output the date of a certain commit in a custom format? I need to make a YYMMDDHHMMSS-version number for some fpga code :)
+09:47  sitaram: tasslehoff: you could use "--date=iso" and massage the output I guess.  Or even --date=raw
+09:57  simplexio^work: could some one point me to some howto/tutorial which would help me "cleaning" git repo which is made from svn repo, what i eant to do is remove useless commits, and make patch file from latest situation vs initial commit
+09:58  luke--: hi there
+09:58  luke--: I have a question
+09:59  tasslehoff: sitaram: thx. I need to emulate subwcrev.. Find the mentioned version number, and a status saying if I have local modifications/commits. I guess maybe a python-script parsing the output from "git status" and "git log -1".
+09:59  luke--: how can you remove a branch from github when you've already removed it in your local repo?
+10:00  wereHamster: push --delete origin branch
+10:00 --- ChanServ sets modes [#git +v acs]
+10:00 +acs: hi
+10:01 +acs: I did `git fetch`, then `git merge origin/master`, and I got this error:
+10:01 +acs: Automatic merge failed; fix conflicts and then commit the result.
+10:01 +acs: why did I get this err ? And how can I update the local repository ?
+10:02  wereHamster: you did get that error because there are conflicts which git can't resolve on its own
+10:02 +acs: I saw, but I did run git reset --hard, and the error still persist
+10:02  luke--: wereHamster: thanks!
+10:03  wereHamster: acs: did upstream rewrite history?
+10:07 +acs: wereHamster: ha?
+10:07 +acs: wereHamster: what does that mean ?
+10:09  wereHamster: acs: do you have any local changes?
+10:09  wereHamster: (which you want to keep)?
+10:14 --- thiago is now known as Guest71226
+10:20 --- Unknown[NF] is now known as Unknown[OFF]
+10:22  gzy: hi, my origins head points to tmp, i now pushed a master branch and would like to point origins head to it, how?
+10:22 +acs: wereHamster: I had, but I did run git reset --hard
+10:23 +acs: wereHamster: now, I do not have any more
+10:23  wereHamster: acs: I mean, do you have any local commits which you want to keep
+10:23 +acs: wereHamster: no, I have no local commit that interests me
+10:24  wereHamster: then use reset --hard oriign/mastre
+10:24 +acs: wereHamster: hm. I did not know that option. let me see
+10:25 +acs: wereHamster: great. thanks :)
+10:26  tasslehoff: any commands I can use to check 1. do I have local changes to version controlled files, 2. am I ahead of upstream. I can parse the output from git status, but that seems a bit frail.
+10:28  wereHamster: git diff --exit-code --quiet
+10:29  wereHamster: and for 2, you can use log, rev-list, cherry.. and parse those
+10:30  Arafangion: Why would cherry help?
+10:31  tasslehoff: wereHamster: excellent. thanks
+10:31  wereHamster: it starts lines with +/- depending on which side has the commit
+10:31  wereHamster: so you can count the number of +'s and -'s and see how far ahead/behind you are
+10:31  wereHamster: but rev-list is probably better here
+10:32 --- aep_ is now known as aep
+10:42  tasslehoff: why is rev-list better? cherry seems like exactly what I need
+10:44  wereHamster: cherry is not plumbing
+10:46  tasslehoff: if porcelain works for me, I want to stay away from plumbing :)
+10:47  wereHamster: depends for what purpose you need the commands
+10:47  riffraff: I believe I may have found a bug in git: doing a diff between two commits consistently sends the git process to 100% cpu and it stays like that for more than fifteen minutes
+10:47  wereHamster: if you are writing a script you should use plumbing
+10:47  riffraff: dong --name-only works fine
+10:47  riffraff: s/dong/doing/
+10:47  wereHamster: riffraff: ist hat a private repo? Or can you share it?
+10:48  doener: riffraff: did you try with --patience?
+10:48  riffraff: doener: no never heard of it I'm sorry
+10:48  doener: riffraff: there were reports before that for certain files, the default diff algorithm takes ages, while patience diff finishes quickly
+10:48  riffraff: wereHamster, private i was hoping there is a way I can help a diagnosis
+10:49  riffraff: ok trying it now
+10:49  wereHamster: run it in gdb and look what it's doing
+10:49  riffraff: confirmed, patience takes one moment
+10:50  tasslehoff: wereHamster: for speed/efficiency, or because porcelain-output may change (or for another reason)?
+10:50  wereHamster: output may change
+10:51  Arafangion: Certain options can finetune what git's diff is doing. For example, how eagerly it should look for changes that have come from other files, how many levels it should look, etc.
+10:51  riffraff: so the bug is known: shall I try to further investigate it or is it useless?
+10:51  Arafangion: riffraff: It'd be a useful comp-sci project.
+10:54  riffraff: I take that as "you are hitting an algorithmic edge case and is not a code bug"
+10:55  Arafangion: riffraff: All diff algorithms are heuristics, indeed.
+11:01  Xeross: Is there a way to get git-format-patch to only generate patches for 1 branch, and not for the merges from other branches that happen inbetween ?
+11:02  Xeross: as I have about 5 commits from a different branch that I don't need patches for
+11:02  tasslehoff: 'git diff --exit-code --quiet' doesn't give a diff for added files. is there a way to make it care about those as well?
+11:04 --- deepakk is now known as dkannan
+11:13  jaalto: I'm getting "Connection refused" from "git clone git://repo.or.cz/anything-config.git". would someone briefly check this command. It it works, that may be my local problem, or configuration problem in repo.or.cz
+11:14  Fatal: jaalto: works here<tm>
+11:15  jaalto: Fatal: Thanks. Hm, I'll have to contact repo.or.cz
+11:16  Fatal: jaalto: I'd sooner expect some local issue :) tried git clone -vv git://repo.or.cz/anything-config.git ?
+11:27  Cocytuz: moving files in git: doing "git add ." when there are several hundred moved and slightly modified files makes git not detect the renames. WHen adding fewer files at a time, git detects renames. Why?
+11:29  Cocytuz: And: is git rename info stored in the repository in any way? Or is it just rm/add with the detection logic in the logg/diff tools?
+11:33  Rhonda: No, rename info isn't stored. git tracks content, not files
+11:35  Cocytuz: Rhonda: ok, thanks. Do you know why the git behaves differently in the "git add ." and "git add somefile.c somefile_renamed.c" scenarios?
+11:36  Rhonda: git add . only adds tracked files.
+11:37  divVerent: 11:33:46         Rhonda | No, rename info isn't stored. git tracks content, not files
+11:37  divVerent: it "sort of" is, if the commit contains JUST a rename without change
+11:37  divVerent: due to the blob hashes, such a commit would perfectly record rename info)
+11:37  Rhonda: divVerent: Well, no. Then the treeish only contains the new filename. It doesn't contain information about the old filename.
+11:38  divVerent: Rhonda: sure, I was just saying, with SUCH a commit the info can be trivially reconstructed from the commit and its parent
+11:38  divVerent: git doesn't store any diffs, just states of the repo at each commit
+11:38  Rhonda: Everything else is comparison of blobs. If there is no difference it's easy, but it is still the same algorithm of "detecting" renames.
+11:39  divVerent: I was mainly saying that if one wants git to be able to reliably show renames, one should make sure renames occur in a commit with no other changes
+11:39  engla: yes. but in the case of perfect renames you can detect renames and moves by diffing the tree objects themselves
+11:39  divVerent: the problem is that doing this would violate a possible "all commits ought to compile" policy
+11:40  engla: divVerent: If one wants git to reliably show renames, use the -M option to diff and log :-)
+11:40  divVerent: e.g. in Java where the source files contain their own path :P
+11:40  Rhonda: rename a file and copy it to another new name. Now which one is the rename and which one the new copy, even in "perfect renames"? :)
+11:40  divVerent: Rhonda: I don't think it makes sense in that situation to distinguish :P
+11:41  engla: divVerent: Java is a conspiracy to violate DRY in 100 ways
+11:41  Rhonda: Cocytuz: Anyway, did my response on git add . help you? :)
+11:41  divVerent: DRY?
+11:41  divVerent: oh, googled it
+11:41  Cocytuz: Rhonda: Very much. Me stupid, herp derp. :/ Thanks :)
+11:41  divVerent: it's funny that google finds it for "dry", even tho0ugh it is an english word :P
+11:41 * Rhonda doesn't find the acronym dry expansion.
+11:42  Rhonda: Cocytuz: No, it's not that obvious, actually. No need to feel stupid.
+11:42  divVerent: engla: guess why I don't like Java :P
+11:42  engla: DRY = Don't repeat yourself. You shouldn't repeat yourself.
+11:42  divVerent: but well... even in C, renaming a source file often has implications in other files
+11:42  engla: ^^
+11:42  Rhonda: TLAs are an EBD because of LNS.
+11:42  divVerent: like makefiles, #include statements
+11:43  crab: "herp derp"?
+11:43  divVerent: but, these typically are OTHER files, so the commits can usually be cratfed in a way that they only do perfect renames or changes of other files
+11:43  divVerent: evil case is if foo.c includes foo.h, and you want to rename both
+11:43  Rhonda: bump the soname!
+11:43  divVerent: probably the best way is to first rename foo.h to bar.h, and change all references (including the one in foo.c)
+11:43  engla: divVerent: it's not worth it to try to craft those commits. Just do the minimal changes necessary for move and commit it.
+11:43  divVerent: and only then rename foo.c to bar.c, and change all references
+11:44  divVerent: engla: unless I want git to be able to track the rename properly :P
+11:44  engla: divVerent: git does detect renames just fine, use -M and you will also get a nice diff showing the minimal changes that were done
+11:44  engla: divVerent: what do you mean with properly here?
+11:44  divVerent: engla: so it detects them at all
+11:44  engla: divVerent: git doesn't track any rename properly if you're that way.
+11:44  divVerent: had quite some failures in the past
+11:44  divVerent: engla: it does if they are perfect renames
+11:44  divVerent: then it even is reliable
+11:45  divVerent: but sure, it depends on whether you even need it
+11:45  engla: You are referring to merges etc?
+11:45  divVerent: no
+11:45  divVerent: more like git-blame across rename
+11:45  divVerent: of course, in MOST cases, a rename is either just a blatant directory rename (typically without changes in the files)
+11:46  divVerent: or it is a rename combined with huge refactoring
+11:46  divVerent: the latter, git-blame has no chance at anyway
+11:46  divVerent: the former is handled well
+11:47  divVerent: what annoys me more sometimes is false positives in rename handling, especially for binary files
+11:47  divVerent: like, if a new texture is added that just happens to be somewhat similar to a totally unrelated one
+11:47  divVerent: like, if a new texture is added that just happens to be somewhat similar to a totally unrelated one
+11:47  divVerent: git shows this as a copy in the diffstat
+11:47  divVerent: (I hate hitting UpArrow when I press Enter... eeepc keyboard)
+11:48  engla: hm true, that's just noise
+11:48  eagles0513875|2: hey guys :)
+11:48  divVerent: of course, it just annoys me a bit when viewing the diffstat
+11:48  eagles0513875|2: getting ready to setup my own git repository :)
+11:48  divVerent: it makes no sense to git-blame a bitmap file :P
+11:48  eagles0513875|2: looking forwrad to using it for a number of projects
+11:49  banisterfiend: anyone here find the git tui confusing?
+11:49  engla: eagles0513875|2: good. welcome to git.
+11:49  banisterfiend: it doesnt seem so intuitive
+11:49  divVerent: git tui? you mean the regular command line?
+11:49  eagles0513875|2: engla: its not restricted to any particular programming language right
+11:49  banisterfiend: yeah
+11:49  banisterfiend: i mean cli sorry
+11:49  divVerent: eagles0513875|2: not really
+11:50  divVerent: git may have trouble with langauges like Whitespace :P
+11:50  divVerent: as in, no useful diffs
+11:50  eagles0513875|2: lol
+11:50  divVerent: but it works fine with about anything in the real world
+11:50  engla: eagles0513875|2: git can track any collection of files.
+11:50  eagles0513875|2: divVerent: i have a php project i want to put in a repo as well as a java project
+11:50  eagles0513875|2: ok engla
+11:50  divVerent: if you need whitespace support, you can still write your own diff handler ;)
+11:50  eagles0513875|2: divVerent: i dont need white space support
+11:50  divVerent: was just joking
+11:51  divVerent: git works with about any programming language where the sources look somewhat like text
+11:51  divVerent: it also works with other stuff, just not as well
+11:51  eagles0513875|2: ok
+11:51  engla: banisterfiend: maybe it's not intuitive.. but there are general principles and option syntax that carry over from command to command
+11:52  divVerent: basically, I think "if the diff of a change is human readable, git is the right tool"
+11:52  banisterfiend: engla: well i find sometimes options in one command have a different meaning to options in another command, and sometimes the same option is expressed differently, like -n1 versus -1
+11:52  banisterfiend: engla: and i remember one command (cant recall its name right now) used a different option than -m for specifying a message\\
+11:53  engla: banisterfiend: ah that's bad. Things that we longtime git users don't think about. Which command uses -n1 ?
+11:53  banisterfiend: engla: holdon
+11:54  strk: I'm experimenting with git-svn and don't understand _when_ dcommit will create a commit for each git commit and when it would instead create only one for merge
+11:54  engla: no wonder it ends up a bit confusing... git is conservative to preserve old options working, while adding new features and flags all the time
+11:54  strk: both happened and didnt' understand why (multicommit before, single comit after)
+11:55  banisterfiend: engla: git tag
+11:55  banisterfiend: engla: git tag -1    doesn't work, you have to use git tag -n1
+11:55  engla: strk: git merges don't transfer well to svn
+11:55  strk: uhm
+11:56  engla: banisterfiend: It has a different meaning than in git log though
+11:56  tasslehoff: is there a way I can specify my own dateformat in rev-list?
+11:56  banisterfiend: engla: but -n1 means the same as -1 in git log
+11:56  strk: engla: how could it be that I got all commit and logs the first time ?
+11:57  engla: banisterfiend: no? -<n> in git log is the number of commits to list.  git tag -n<n> is the number of lines of the tag message to show, this is what I read from the man page.
+11:58  strk: gah, git svn fetch made things even more complex:
+11:58  strk: # Your branch and 'github/master' have diverged,
+11:58  strk: # and have 1 and 1 different commit(s) each, respectively.
+11:58  strk: diff doesn't show any
+11:58  engla: strk: I don't know git-svn so well, but it can be that the first parent of the merge is treated as the branch, while changes from the second parent are just squashed in
+11:58  banisterfiend: engla: they seem to give exactly the same output
+11:59  banisterfiend: engla: try it, git log -n2 versus git log -2     appear exactly the same, same for -n3 and -3 too, etc
+12:00  banisterfiend: man git-log (that's for me btw)
+12:00  jast: the 'git-log' manpage can be found at http://git.or.cz/man/git-log [automatic message]
+12:00  engla: banisterfiend: ok, but -n in git tag is a different thing.
+12:01  banisterfiend: oh ok
+12:01  banisterfiend: well im as lost as an octopus in a garage
+12:02  engla: then do an octupus merge and come back into one flow
+12:02  strk: alright, no more merges for svn compat
+12:06  banisterfiend: is flyspray dangerous for humans?
+12:06  banisterfiend: i just squirted a fuck load of it in this little room
+12:06  banisterfiend: to kill a huge fly
+12:06  banisterfiend: do i have to open the windows now? (and risk letting more flies in :/)
+12:07  engla: I avoid eating pesticides so I'd avoid breathing it as well
+12:09  strk: why do I get a "diverged" status after git svn dcommit ?
+12:09  strk: maybe I shouldn't have a remote when I have an svn-remote ?
+12:13  engla: strk: you get a new commit back with some git-svn annotations in the commit log I think.
+12:14 --- ChanServ sets modes [#git +v broonie_]
+12:14  engla: strk: also, merges are flattened when dcommitting, right
+12:14  strk: https://github.com/strk/geos/commits/master
+12:14 --- broonie_ is now known as broonie
+12:14  strk: 5fb9 (second) is the same of 9e7f (4th)
+12:15  strk: only the latter has the svn id annotation
+12:15  crab: oh gh0d, git-svn
+12:15  strk: eh
+12:15  strk: help !
+12:15  strk: :>
+12:16  strk: maybe I should dcommit <my_dev_branch>
+12:17  engla: you can't transfer the merges as merges anyway
+12:17  engla: git-svn will limit you
+12:19  tasslehoff: is http://pastebin.com/cwiGTnXr using plumbish enough commands that I can be called robust?
+12:19 --- dwmw2_gone is now known as dwmw2
+12:28  sgronblo: git-svn rulz
+12:28  sgronblo: without it you'd have to use plain svn
+12:40  sitaram: hi all; any svn access control experts here?
+12:40  sitaram: if so, question: in this example: http://pastebin.com/pSEQkSn9 on this page: http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.serverconfig.pathbasedauthz , can someone tell me what would happen if you interchanged the 2 paragraphs?
+12:41  sitaram: (in this example, I'm wondering if it's specificity that wins, or last match.  Both interpretations are possible
+12:41  sitaram: (I'm writing an article on gitolite's acl language versus svn... just in case someone wonders whay I'm asking)
+12:49  ToreadorVampire: Hey all - a follow-on from a question last week about hiding/suppressing branches/tags from the output of git branch (which I now know is not possible) - does anyone know how the tab-autocomplete suggestions for git are created (using Debian Squeeze if it matters)?  Is it possible to change some config in order to omit remote branches and omit tags from that autocomplete list?  It occurs to me that that's mostly where I want to suppr
+12:49  ToreadorVampire: ess things
+12:49  selckin: should be doable
+12:49  ToreadorVampire: If I want to know the name of a remote branch then I'll use git branch -r or something like that.  My main peeve is when I want to check out a local branch but I forgot what I named it.  I type git checkout <tab> and I'm faced with a gigantic list of tags and remote branches that I don't care about
+12:50  ToreadorVampire: If I could suppress those from the autocomplete that would be great
+12:51  ToreadorVampire: In fact, just suppressing tags from that would go a long way - there aren't THAT many remote branches, most are tags
+12:52  bremner: ToreadorVampire: probably you could help by specifying which shell you use...
+12:52  ToreadorVampire: Oh, bash
+12:53 * ToreadorVampire is skimming over http://repo.or.cz/w/git.git/blob/2ca880fe54660869bc93a2302efced9ab64511d9:/contrib/completion/git-completion.bash atm
+12:54  ToreadorVampire: Seems I have a copy of that helpfully placed in /etc/bash/bash_completion.d/git ... now to figure out how to suppress tags from it
+13:11  ketin: Ok, git noob here... having a small issue. Set up a git repo, did the init, add and commit, that worked fine.
+13:12  ketin: I'm trying to access it through a git:// address, what would that be? I can't seem to find it.
+13:13  ketin: I did already try the name of the folder the source is in. I was never asked to assign a repo name so I'm not sure how to hit it remotely.
+13:13  ToreadorVampire: Usually I access my remote repos via ssh
+13:15  ketin: I plan to eventually. Trying to set it up with an IDE that supports git:// for the time being.
+13:15  ToreadorVampire: In which case you want: git clone "ssh://hostname.for.the.repos/path/on/that/host/to/the/repos"
+13:15  ToreadorVampire: Oh
+13:15  ToreadorVampire: I don't really know/use the git:// protocol - when I figured out I could use ssh I stopped looking for other solutions :)
+13:18  ketin: Yeah, I have to figure this one out for the windows people I work with before we move to git.
+13:18  zomg: ketin: is the repo on your local machine?
+13:18  wereHamster: ketin: git:// is unauthenticated/anonymous protocol
+13:18  wereHamster: you can push through it, but it's not secured
+13:18  wereHamster: so it's disabled by default
+13:18  ketin: It's on a server on the network.
+13:18  ketin: wereHamster: Yeah, I ran git-daemon manually.
+13:18  wereHamster: you can push through ssh (yes, it works on windows) or http
+13:19  zomg: You don't even need git-daemon if you can use ssh though :)
+13:19  zomg: (or samba since you mentioned windows)
+13:19  ketin: Well I looked at the IDE and it doesn't really supprt ssh keys for git so...
+13:20  ToreadorVampire: Not sure if you even need IDE support with git
+13:20  zomg: Yeah
+13:20  ToreadorVampire: When you install git for Windows you get a sort-of-bash commandline that you can use for git-related stuff
+13:20  ketin: Yeah, the developers will want single command gui interfaces though.
+13:20  zomg: git works best from cli imo but it does require a bit getting used to first
+13:20  ketin: Atleast for commit and push.
+13:21  zomg: Not real devs if they don't like cli
+13:21  zomg: :P
+13:21  ketin: Tell me about it.
+13:21  ToreadorVampire: Not too knowledgeable on that because I don't use Windows myself, I just know that you get the bash thing because I work with a Windows guy who uses my git repository (badly)
+13:21  ToreadorVampire: :D
+13:21  zomg: push doesn't even need a gui.. I mean you just say git push and bam
+13:22  ketin: Yeah, they're going to want it built in to their GUI's though... fucking .NET and django guys.
+13:22  zomg: Hey now let's not group Django with .NET
+13:22  ketin: The php guys won't give a flip if it's cli.
+13:22  zomg: ;)
+13:22  zomg: You can just tell them to figure it out themselves for their IDE
+13:22  ketin: zomg: Well the Django guy is also .NET.
+13:23  Cromulent: PHP guys would want someone to do it for them
+13:23  zomg: Cromulent: hey now, I'm a PHP guy
+13:23  zomg: :D
+13:23  Cromulent: my commiserations :p
+13:24  ketin: Well if I can get this working I can get them off of... source safe
+13:24  zomg: Nah it's ok since we actually do it properly ;)
+13:24 * ketin shudders
+13:24  zomg: VSS... :x
+13:24 * ToreadorVampire is a .NET guy, although uses MonoDevelop/Debian for all development - and generally deploys to Debian servers running mono
+13:24  zomg: I hear even MS never used it on any of their projects...
+13:25  zomg: ketin: guess they're using Visual Studio or something?
+13:25  ketin: Yeah.
+13:25  zomg: http://stackoverflow.com/questions/507343/using-git-with-visual-studio
+13:25  zomg: Did you see that?
+13:26  ketin: Hmm.
+13:29  ketin: So ssh would just be ssh://hostname/var/www/localhost/htdocs/blah/, correct?
+13:35  paulweb515: ketin: I see a lot of ssh://username@hostname/dir/to/repo
+13:43  AlexC_: morning
+13:44  Rockj: Anyone could assist me in helping me sharing a repo?  I've made a directory under public_html and done git init --bare and git update-server-info and enabled the post hook script, but it doesnt let me clone the repo. it's empty :O
+13:44  AlexC_: we have all of our Git repos in /srv/gitosis/repositories and I'd like to use the Git daemon to serve some repositories for when clients would like access to the code, but read only. How can I setup for example, git.their-domain.com and have Git Daemon only possible to serve their repo?
+13:45  Rockj: (I'am pushing my code from home to publicweb.   git remote add publicweb username@hostnanme:fullpath_to_gitdir_under_public_html ,   git push publicweb master )
+14:04  FauxFaux: Rockj: So you're cloning an inited repository, and it's empty?  Shocker.
+14:05  Rockj: FauxFaux: I've been tricking myself somehow
+14:05  Rockj: after the clone it says it is "empty"
+14:06  Rockj: so I thought it didn't fetch any files...
+14:06  Rockj: *hides*
+14:06  FauxFaux: I still don't understand, but you sound happy, so all is good. ¬_¬
+14:07  Rockj: if I remember correctly, git fetch tells me some stats after I've pulled some files, right?
+14:08  Rockj: it doesn't do on the initial git clone, but it just says "Initialized empty Git repository in /tmp/ticketdroid/.git/" - I thought it didn't get anything then. (of course I never double checked with a ls :p)
+14:08  Rockj: anyway, time to get some breakfast and wake up *sighs*
+14:09  FauxFaux: Ah yes, clone just shows the init message if there's not much to do.
+15:05  hendry: i have a shared repo /srv/git/foo and I want to sync it up with a remote/srv/git/foo, how do I do that in one step? do I really need a working tree?
+15:11  wereHamster: hendry: are both bare?
+15:13  hendry: wereHamster: yah
+15:13  wereHamster: cd /srv/git/foo && git fetch remote/srv/git/foo --all
+15:16  hendry: wereHamster: hmm, fatal: fetch --all does not take a repository argument
+15:17  doener: well, --all means "fetch from all remotes"
+15:19  hendry: seemed to fetch something, but git log doesn't say the right things. gr
+15:19  wereHamster: ah, I thought it meant fetch all refs
+15:19  wereHamster: like, push --all
+15:19  doener: hendry: git fetch remote/srv/git/foo refs/*:refs/*
+15:19  hendry: doener: thanks! that worked
+15:19  hendry: jeepers, git is a tad cryptic
+15:19  doener: hendry: also: git remote add --mirror origin remote/srv/git/foo
+15:19  doener: hendry: and from then on just "git fetch origin"
+15:19  doener: hendry: just be careful not to push, as the mirroring gets setup in both directions
+15:19  hendry: in my case, we're just migrating servers from one to another, and i need to ensure i'm in sync when dns changes over somehow
+15:21 --- _dels is now known as dels
+--- Log closed Mon Nov 29 15:27:31 2010
+--- Log opened Mon Nov 29 15:27:58 2010
+15:27 --- Users 670 nicks [0 ops, 0 halfops, 8 voices, 662 normal]
+15:28  drecute: how do i resolve a conflict after git push -f
+15:28  wereHamster: what conflict? There is none if you use push -f
+15:29  bremner: there is for the poor sod that pulls.
+15:29  drecute: i got a conflict on the server end of the repository
+15:29  drecute: so auto merge failed
+15:29  bremner: err, faq non-bare?
+15:29  jast: err: Pushing to non-bare repositories is discouraged: please see https://git.wiki.kernel.org/index.php/GitFaq#non-bare [automatic message]
+15:29  bremner: drecute: you know about this^
+15:29  drecute: no
+15:29  drecute: let me read up
+15:31 --- ChanServ sets modes [#git +v lostern]
+15:31 +lostern: I want to use git-svn instead of svn on a large repository which I have checked out in svn. Is there a way to git-svn clone the version I have checked out instead of over the network and then change the git-svn repo to point to the network remote?
+15:31 --- Channel #git was synced in 204 seconds
+15:32  wereHamster: lostern: no. what you can do is setup a svn mirror and clone that
+15:32  yoh: rudi_s: /hg git/ thanks for your suggestion -- I have gone through README again and still do not see how I could have local git clone of remote hg repository (i.e. without local .hg)... or have I missed something?
+15:32  drecute: so a possible solution is to git reset --hard on the server repository right?
+15:32 +lostern: wereHamster: Thanks
+15:33  bremner: drecute: depends on your definition of "solution".
+15:33  drecute: i just need an answer damn it
+15:34  bremner: well, do you care about throwing away changes? do you plan on doing this every time you push? Shouldn't you really set up a bare repo to push to?
+15:35  bremner: oh, wait, those are questions, not answers.
+15:37  drecute: sometimes i just wonder what kind of support u guys provide
+15:38  bmalee: The voluntary kind? :p
+15:38  bremner: money cheerfully refunded.
+15:38  wereHamster: the best you can get.. if you are able to articulate your problem..
+15:38  sgronblo: rofl
+15:39  sgronblo: usually when you whine about how somebody who does not get paid to help you is not helping you, you are just likely to be seen as ridiculous
+15:41  EvanR-work: sgronblo: what do you think free software means anyway
+15:41  wereHamster: the level of support is directly proportional to the amount of information we get about the problem. The more we know the better our answers
+15:41  bremner: whining?
+15:41  EvanR-work: people are supposed to help you with any problem and do stuff for you at no cost
+15:41  EvanR-work: package deal
+15:41  bremner: drecute: care to try again? the laughter will stop pretty soon.
+15:41  sgronblo: you didnt think that sounded like whining?
+15:41  bremner: I did, I meant to answer "what is Free Software about"
+15:42  parasti: EvanR-work: well, nobody is really "supposed to", those who do are simply keeping with the spirit
+15:44  EvanR-work: im not serious
+15:44  EvanR-work: in case you missed that
+15:45  sgronblo: EvanR-work: you forgot to include a smiley to clearly indicate that you were being ironic
+15:45  EvanR-work: thats sort of like a laugh track in a sitcom, watering it down
+15:48  sgronblo: well I hope you didn't take it seriously :) :) :)
+15:48  parasti: I am ashamed in a corner, FYI
+15:52 --- g0bl1n_ is now known as g0bl1n
+16:06  strk: git-am: previous rebase directory ... still exists but mbox given
+16:06  strk: what does it mean ?
+16:09  _nil: i can use a git filter-branch to nuke a directory correct?
+16:10  _nil: another developer used an capitalized directory name
+16:10  bremner: why not just move it?
+16:10  _nil: so he did git commit Server/blah instead of server/blah
+16:11  _nil: bremner: because it created the directory on the server
+16:11  _nil: i can see Server/blah on github
+16:11  _nil: and the proper server/blah
+16:12  bremner: my point is that filter-branch is probably un-neccesary. Just fix it and push again
+16:13  bremner: filter-branch is the tactical nuke of git. Effective, but with some side effects.
+16:14  _nil: bremner: ok i did that already so i guess i'll just leave it
+--- Log closed Mon Nov 29 16:20:12 2010
+--- Log opened Mon Nov 29 16:20:37 2010
+16:20 --- Users 675 nicks [0 ops, 0 halfops, 9 voices, 666 normal]
+16:22  _nil: bremner: thx
+16:22 --- Channel #git was synced in 140 seconds
+16:23  bremner: _nil: welcome.
+16:35  spuz: hello, if git diff is telling me an entire file has changed but visually, the files look exactly the same, is there a way I can get git to tell me what the actual differences it has found are?
+16:35  spuz: this might happen if for example the line endings have changed (though that's not the case for me right now)
+16:36  engla: it might be that line ending conversion settings have changed
+16:37  engla: after all git diff shows the percieved changes, changes that would be if you did commit -- with some line ending settings I understand that the worktree file will be different from the stored file
+16:37  engla: spuz: ^
+16:43  spuz: ok here's a related question, is it possible to open a file that is either in git's index or in HEAD in an external editor?
+16:47  drecute: i cant seem to be able to get any file at http://utsl.gen.nz/git/post-update
+16:47  _rane: git show HEAD:path/to/file | $EDITOR
+16:47  _rane: or something
+16:47  _rane: if that's what you meant
+16:48  drecute: _rane: u talking to me?
+16:49  SpookyET: Hello. Has anyone got a good zsh completion for git? The one bundled with zsh blows.
+16:49  _rane: drecute: no
+16:49  parasti: spuz: what _rane said and "git show :path" to show a file at index
+16:50  spuz: parasti: thanks
+16:51  ft: SpookyET: Maybe you should start reporting bugs to the zsh developers so they know where the problems are.
+16:52  blackxored: is there an easy way to push only several commits to origin without rebasing???
+16:53  blackxored: specifically I want to omit the latest commit from being pushed
+16:54  parasti: then push HEAD~1 with the full syntax
+16:54 --- o_o is now known as Guest57261
+16:54 --- slyphon_away is now known as slyphon
+16:55 --- Guest57261 is now known as robotarmy_
+16:55  blackxored: fatal: remote part of refspec is not a valid name in HEAD~1
+16:55  blackxored: i could use HEAD^
+16:55  blackxored: as well right?
+16:55  parasti: yes, but it won't change the fact that it is not full syntax :P
+16:55  blackxored: heheheheh
+16:55  parasti: full syntax is git push +<src>:<dst>
+16:56  parasti: sorry, actually git push origin +<src>:<dst>
+16:56  blackxored: so assume it's github how would you do it
+16:56  blackxored: git push origin +HEAD~1:master
+16:56  parasti: I would use something like git push origin HEAD~1:refs/heads/mybranch
+16:56  blackxored: ???
+16:56  parasti: or maybe just that works, I can never remember
+16:57  blackxored: i'll tell you in a min
+16:57  parasti: the + might hurt actually, might be better to leave that out
+16:58  blackxored: yep, that worked, god I love git, thanks parasti ;)
+16:59  blackxored: for reference just
+16:59  blackxored: git push origin <commitref>:<remote branch> :P
+16:59  drecute: i have the conflict info here http://fpaste.org/Oxdm/
+16:59  drecute: how do i go about this pls
+17:01  bluenovember: drecute, git mergetool
+17:01  engla: drecute: if you have a merge conflict, first check that you are mergin what you think you are.. unexpected conflicts come from that. else.. you edit the files to resolve the merge manually.
+17:07  drecute: engla: so if i'm sure about what i'm merging, i can run git mergetool right?
+17:07  engla: drecute: you should first find out which branches you are merging.
+17:08  engla: drecute: git mergetool will help you edit the files to resolve the conflicts.
+17:08  engla: drecute: ah now I see "I'm sure" and not I'm not sure.. sorry! yes go ahead
+17:11 +acs: I am on master branch, I wrote code, and I do not want to commit it on master. I want to commit it on a branch BBB. How can I do it ?
+17:11  parasti: git checkout BBB
+17:11  parasti: (possibly with git checkout -m BBB, as it might refuse otherwise)
+17:12 +acs: let me see...
+17:13 +acs: parasti: it worked without -m...
+17:13 +acs: thanks
+17:13  skyl: can I use .gitignore or sth else to ignore symlinks?
+17:14  yrlnry: Git should treat symlinks the same as any other file.
+17:14  bartek: Hi. What's the proper git command to archive my repo into a tar while preserving history? git archive seems to mainly be for simply exporting the code, not history -- right?
+17:14  yrlnry: If you put the name of the symlink into .gitignore, git should ignore it.
+17:14  yrlnry: bartek:  if the tar gile includes the .git directory, that is your history right there.
+17:14 --- tj- is now known as tjholowaychuk
+17:15  bartek: touche
+17:15  yrlnry: bartek:  if you copy that .git directory anywhere, incuding out of a tar file, git will be able to reconstruct the history and check out the old revisions.
+17:15  drecute: how did it know
+17:15  drecute: how does git find the right file
+17:16  bartek: magic
+17:16  drecute: even when the files are not in the same directory and they dont have the same names
+17:16  bartek: linus ssh's into your box
+17:16  bartek: stupid question i know :p
+17:16  yrlnry: drecute:  the file names are recorded in the respository.
+17:16  yrlnry: In the tree objects.
+17:17  yrlnry: bartek:  try for example: mkdir /tmp/copy; cp -r .git /tmp/copy/.git; cd /tmp/copy; git blah blah
+17:17  drecute: wow
+17:18  bartek: yrlnry: hmm, what about the files above the .git repo? Don't I need those as well?
+17:18  yrlnry: bartek:  No, that's just the working directory.  Git can recover them from the repository if the working directory is clean/
+17:18  bartek: Ah, makes sense .. thanks for clarifying
+17:18  yrlnry: bartek:  try it, and after you cd /tmp/copy,   do "git reset --hard".
+17:19  bartek: So when I tar, I should just tar my .git directory, not the base working directory
+17:19  yrlnry: Either one is fine.
+17:19  bartek: ok
+17:19  yrlnry: If you have changes in the working directory that are not committed to the repository, they will not be in the .git subdirectory.
+17:19  bartek: Right
+17:19  bartek: That's very good to know
+17:19  yrlnry: Although any changes you added with git-add *will* be in there.
+17:20  yrlnry: I suggest you try it a bit.  It's all very predictable.
+17:21  skyl: one may explicitly add a file that is in .gitignore, yes?
+17:21  crab: yes.
+17:22  yrlnry: Hi, Crab!
+17:22  crab: hi yrlnry. i liked your git reset piece very much.
+17:24  drecute: is it really compulsory to do git-pull before git-push?
+17:24  _rane: no
+17:24  yrlnry: drecute: No.
+17:24  drecute: but i do have issues everytime i run git push without git-push -f
+17:24  yrlnry: drecute:  the potential problem is that if the remote head has moved forward, your push will fail if you don't somehow adjust your repository to match before trying the push.
+17:25  drecute: git always want to be to git pull first
+17:25  crab: drecute: is someone else pushing to the same remote repository? if so, you're overwriting their changes every time you push -f
+17:25  drecute: yrlnry: so doing git-pull is valid then
+17:26  yrlnry: "valid"?
+17:26  drecute: yrlnry: so doing git-pull before git-push is valid then
+17:26  drecute: crab: yes
+17:26  yrlnry: I don't know what "valid" means in this context, sorry.
+17:26  drecute: yrlnry: i mean it is right to do so
+17:27  crab: drecute: it's one of the ways in which you can deal with the situation.
+17:27  drecute: crab: how do i?
+17:27  drecute: because i don't want to have issues again anytime i want to do git-push
+17:28  yrlnry: Personally, I never use pull; I always use fetch, followed either by git merge --ff-only (if that will work) or git-rebase (if it won't).
+17:28  yrlnry: But theere is no "right" way; you need to come to an agreement with your collaborators about the best way to handle the situation,.
+17:28  drecute: yrlnry: we are always trying to
+17:29  drecute: but we always come to a deadlock
+17:29  crab: why deadlock?
+17:29  PerlJam: drecute: probably because you are always overwriting each other's changes with push -f  :)
+17:30  crab: drecute: have a look at the diagrams and push/pull explanation on http://toroid.org/ams/git-central-repo-howto
+17:30  drecute: PerlJam: but git-pull always fails anytime i run it from my end
+17:30  jast: yrlnry: you might as well always use pull --rebase, that amounts to the same thing :)
+17:30  drecute: PerlJam: sometimes it is intentional
+17:30  crab: why does it fail?
+17:30  yrlnry: Maybe the other guy is push-f-ing also.
+17:30  PerlJam: drecute: "git push -f" should be an extraordinary thing to type, not every day usage
+17:31  _rane: depends
+17:31  jast: push -f is another expression for "please throw away all upstream that I don't already have locally"
+17:31  jast: *changes
+17:33  _rane: if I work alone and have accidentally pushed a typoed commit message, I might push -f amended message just because I'm pedantic
+17:33  yrlnry: crab:  thanks, I am glad you liked it.  What did you like about it?
+17:33  yrlnry: crab:  I thought it was rather thin, myself.
+17:34  PerlJam: _rane: sure, under those very specific circumstances.
+17:34  drecute: thanks crab
+17:34  drecute: that is a good resourc
+17:35  crab: yrlnry: what i liked most is that i can now point people to the three rules.
+17:35  yrlnry: Aha!
+17:36  yrlnry: crab, drecute : I saw this recently and thought it seemed very helpful: http://marklodato.github.com/visual-git-guide/index-en.html
+17:43 * PerlJam looks at yrlnry's text on git-reset 
+17:48 --- Xeross is now known as Xeross|AFK
+17:50  yoh: rudi_s: /hg git/ ha -- grepping through the logs of this chatroom -- found out about plans for git-remote-hg  -- I guess that is what I need ;)
+17:51  mdpatrick: I really should log all of the channels I'm in and do exactly what you just suggested, yoh.
+17:51  mdpatrick: That's kind of genius.
+17:52  mdpatrick: Ooh... Nice. I've been logging all along. There's got to be some gold in there.
+17:53  jast: there are public logfiles of this channel; see topic
+17:54  rudi_s: yoh: ;-) That would be interesting. At the moment I use a local hg repository and it works fine.
+17:56 --- WebDragon|laptop is now known as WebDragon
+17:57 --- Unknown[OFF] is now known as Unknown[NF]
+18:01  drecute: once there's a conflict and i run mergetool, what does it to?
+18:01  drecute: how does it resolve the conflict
+18:02  drecute: does it copy one change to another based on some logic?
+18:02  SethRobertson: A human (you) tells it what to do
+18:02  bluenovember: It should bring up your merge resolution tool of choice, then you select which of the versions to keep
+18:03  bluenovember: quite likely you will have to do more than just chose between changes for a given conflict
+18:03  SethRobertson: Personally, I usually just go and edit the files directly
+18:11  drecute: SethRobertson: what of in a case where you are collaborating with someone
+18:11  drecute: so both of u have different versions of these conflicting files
+18:12 --- WebDragon|laptop is now known as WebDragon
+18:13  yoh: is there anyone using git_remote_helpers python module?  could you give me a hand on how to give it a try? (in particular Sverre's git-remote-hg.py)
+18:13  yoh: I just wonder how to make git aware of hg...
+18:17  crab: yrlnry: i guess he beat me to it.
+18:20  yrlnry: crab:  I think the world has room for more than one of those./
+18:24  parasti: xmms2 list
+18:24  parasti: oops
+18:31  engla: SethRobertson: one person does the merge, and one person then resolves the merge in that place and pushes the result.. done.
+18:31  engla: drecute: ^
+18:31  engla: SethRobertson: oops wrong person
+18:33  drecute: engla: then both can pull the result to local wd
+18:33  drecute: ?
+18:33  engla: drecute: why could they not? :-)
+18:35  drecute: tnx engla
+18:38  Tobias|: Hmm
+18:38  Tobias|: I made some changes to a file, then reverted them
+18:38  Tobias|: But git seems to be shouting about fast-forwards when I push to that repository still?
+18:41  yrlnry: if you used "git-revert", that does not revert to the old commit, but rather writes a new commit in which the changes are undone.
+18:42  Tobias|: How annoying
+18:42  Tobias|: Any way to actually revert?
+18:42  yrlnry: Absolutely.  You can use git reset --hard <<commit>>
+18:42  fr0sty: Tobias|: what did you do? (what git commands)
+18:42  parasti: if you used git revert, then you should NOT be getting fast-forward errors
+18:42  yrlnry: where <<commit>> is the old commit that has only those changes that you actually want to have in the history.
+18:42  jast: note that reset --hard will truncate all history after that commit
+18:44  Tobias|: edited a file, git committed that file
+18:44  Tobias|: git reverted
+18:44  Tobias|: Then tried to push to it
+18:44  gebi: Tobias|: gitk --all is usually a good tool to get a high-level overview about your repo and your upstreams
+18:44  jast: a "git revert" doesn't cause fast-forward problems. perhaps someone else pushed stuff before you did?
+18:44  gebi: including a git fetch before to sync lastest upstream changes to your local repo
+18:45  fr0sty: Tobias|: git remote update; git status
+18:45  fr0sty: what does it say about the upstream (if anything)?
+18:48 --- nohk_ is now known as nohk
+18:49  Tobias|: I just used `git pull` and it worked
+18:49  Tobias|: How bizzare :(
+18:49  jast: not unexpected, that
+18:56 --- Xeross|AFK is now known as Xeross
+--- Log closed Mon Nov 29 21:30:22 2010

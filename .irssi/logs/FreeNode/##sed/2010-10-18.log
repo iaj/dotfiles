@@ -1,0 +1,94 @@
+--- Log opened Mon Oct 18 01:28:54 2010
+01:28 --- Users 90 nicks [0 ops, 0 halfops, 0 voices, 90 normal]
+01:28  virus_found: Hello. How do I move a line, that contains "cr", down (so it becomes a line number n+1), and the line below it - up (n-1). Simply put, exchange them.
+01:30  virus_found: line line crrrr line line      becomes      line line line crrrr line
+01:30 --- Channel ##sed was synced in 91 seconds
+01:32  geirha: There's probably a better way to do this, but: sed -n '/cr/{h;n;p;x;p;t}; /cr/!p'
+01:34  Parabola: i dont have a question, i just have to say, its amazing how complex this app is, so much so that theres a channel devoted to it
+01:34  virus_found: It worked, thanks aa lot.
+01:35  virus_found: geirha: quite a mighty command here...
+01:36  geirha: Once you run ''man sed'' and see what all those one-letter commands does, you'll probably see what it does.
+01:36  Parabola: did you reference anything when you wrote that?
+01:36  Parabola: or was that from memory
+01:37  geirha: memory. There aren't that many commands to remember.
+01:37  Parabola: fair enough, i've been reading about regex and sed for a good chunk of today :)
+01:37  Parabola: my brain hurts a bit
+01:39  geirha: But looking at the man-page now, I see the 't' should've been a 'b'
+01:40  virus_found: geirha: it works even without t
+01:40  virus_found: and b
+01:40  geirha: Ah, right
+01:42  virus_found: I just wonder, what that part does in the end    /cr/!p         man doesn't even contain "!"s
+01:43  geirha: It negates
+01:43  geirha: /cr/p  if line mathces /cr/, print it.  /cr/!p  if the line does NOT match /cr/, print it
+01:44  virus_found: I see. I thought about negating another thing in the first time.
+01:44  virus_found: Thanks a lot.
+01:45  geirha: sed -n '/cr/{x;n;p;x;p;b};p'
+01:45  geirha: There, now the b makes a difference.
+01:46  geirha: Maybe h and g make more sense. sed -n '/cr/{h;n;p;g;p;b};p'
+01:47  virus_found: It's too difficult for my mind. What's the prefered command of those three?
+01:48  geirha: I dunno, I'm not that good with sed :P. I'd go for the latter, though they should all do the same.
+01:49  virus_found: Ok.
+01:51  geirha: if line matches /cr/, (h) copy it to hold space, (n) read next line to pattern space, (p) print pattern space, (g) copy hold space back to pattern space, (p) print pattern space, (b) skip the rest; do the next line of input
+01:55  virus_found: Thanks for clarification. I'm playing with all those command letters in a test printf input. The best way to learn and memorize :)
+--- Log closed Mon Oct 18 04:24:22 2010
+--- Log opened Mon Oct 18 04:24:45 2010
+04:24 --- Users 91 nicks [0 ops, 0 halfops, 0 voices, 91 normal]
+04:26 --- Channel ##sed was synced in 105 seconds
+05:06 --- grrrrrr is now known as barbanegra
+07:43  kaushal: hi
+07:44  kaushal: I have the first line ^@^@^@^@^@^@Processing ContactImport at 01-10-2010 02-50-27 in around 200 files
+07:45  kaushal: is there a way to delete ^@ in all the 200 files ?
+07:50  jwillia3: ^@ is NUL bytes, so no.
+07:50  jwillia3: maybe tr can do it for you
+07:52  kaushal: jwillia3: any example ?
+07:53  jwillia3: tr -d\0
+07:54  kaushal: ok
+07:55  kaushal: jwillia3: so tr -d\0 file ?
+07:55  jwillia3: kaushal, no, have you /tried/ looking at man tr or google?
+08:00  kaushal: jwillia3: I tried
+08:01  kaushal: cat file | tr -d\0 > newfile
+08:02  jwillia3: tr -d \0 <src >dst
+08:05  kaushal: jwillia3: it did not worked
+08:05  kaushal: still i have the same characted ^@ in the newfile
+08:05  jwillia3: kaushal, use cat to find out if ^@ is really two characters or NUL
+08:06  kaushal: not sure i understand that
+08:08  jwillia3: try sed 's/\^@//g'
+08:08  kaushal: ok
+08:12  kaushal: i did sed 's/\^@//g' file > newfile
+08:12  kaushal: it still has the same characters ^@
+08:13  jwillia3: kaushal, http://dpaste.org
+08:14  jwillia3: kaushal, http://dpaste.com
+08:15  kaushal: jwillia3: do you want me to pastebin the content of the file ?
+08:15  jwillia3: yes, kaushal
+08:15  kaushal: ok
+--- Log closed Mon Oct 18 08:26:24 2010
+--- Log opened Mon Oct 18 08:26:46 2010
+08:26 --- Users 89 nicks [0 ops, 0 halfops, 0 voices, 89 normal]
+08:28 --- Channel ##sed was synced in 105 seconds
+08:33  kaushal: jwillia3: i did sed s/\^@//g file > newfile
+08:34  kaushal: and i did less newfile it still has ^@
+08:34  kaushal: weird
+08:34 * jwillia3 shrugs
+08:37  phil_in_london: http://pastebin.com/0jL20zMx   I'm trying to extract just the Subject out of that file, can anyone lend a hand?
+08:38  jwillia3: phil_in_london, sed -n 's/^Subject: //p'
+12:18  Guest99466: http://pastebin.org/287095
+12:18  Guest99466: i need to cut out the content out of this file
+12:18  Guest99466: a html file
+12:18  Guest99466: how do I realize this with sed?
+12:19  Guest99466: I thought about something like "search for pattern (e.g. <body>) strip out everything above pattern, search for next pattern (e.g. </body>) and strip the following line after that pattern til end of the file
+12:57 --- e-DIO-t_ is now known as e-DIO-t
+--- Log closed Mon Oct 18 15:43:00 2010
+--- Log opened Mon Oct 18 15:48:21 2010
+15:48 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+15:49 --- Channel ##sed was synced in 103 seconds
+--- Log closed Mon Oct 18 19:10:02 2010
+--- Log opened Mon Oct 18 19:10:23 2010
+19:10 --- Users 100 nicks [0 ops, 0 halfops, 0 voices, 100 normal]
+19:11  metalx2000: Hello, I know that  --   sed "/string/d" file.txt   --  will delete any line from file.txt that contains "string", how can I get it to delete only the fist line it find with that string instead of all of them?
+19:11 --- Channel ##sed was synced in 103 seconds
+19:51  benny99: hi, is there a filter option for sed, so I do not replace certain words, but print only certain words ?
+20:26  hemanth: which the best way to quote and comma each line of a file?
+20:26  hemanth: that is each line must be quoted and at the each end of line a comma must be added
+20:33  jwillia3: s/.*/"&",/
+20:38  hemanth: thanks :)
+--- Log closed Tue Oct 19 00:00:59 2010

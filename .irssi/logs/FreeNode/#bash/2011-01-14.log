@@ -1,0 +1,885 @@
+--- Log opened Fri Jan 14 08:48:30 2011
+--- Log closed Fri Jan 14 08:48:30 2011
+--- Log opened Fri Jan 14 08:53:50 2011
+08:53 --- Users 544 nicks [0 ops, 0 halfops, 0 voices, 544 normal]
+08:54  rkhshm: dualbus: its like this.. the problem was found to be in glob(). and bash has its own glob() that are being called so.. fixing the glob() in bash is what needs to be done
+08:54  e36freak: penguinsrule: i hate combining grep and sed, but that's probably how i'd do this one
+08:55 --- Channel #bash was synced in 94 seconds
+08:55  penguinsrule: eeek really i didnt know if awk gsub could but i was trying to google some examples
+08:57  zzz: Hi, i' m trying to read a file line by line and wait for the user to press enter after every line, or this is the root problem. My solution is here: http://pastebin.com/7kv83Dfa, but obviously it doesn' t work, because both read reads from the file :- ). How can i solve this problem? What' s the best way?
+08:57  e36freak: i'm trying to think of how to do it, that's nasty though
+08:58  e36freak: penguinsrule: that's a question for greycat :P
+08:59  e36freak: zzz: (bot is down) By convention, we capitalize environment variables (PAGER, EDITOR, SHELL, ...) and internal shell variables (BASH_VERSION, RANDOM, ...). All other variable names should contain at least one lowercase letter. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+08:59  dualbus: zzz, use a different file descriptor with the outer read
+08:59  e36freak: zzz: try a different descriptor
+08:59  e36freak: heh
+09:01  e36freak: while read -r <&99 line; do echo "$line"; read -s; done 99<file
+09:01  zzz: e36freak: it' s a good practice.
+09:02  dualbus: e36freak, is read's -u portable?
+09:02  e36freak: dualbus: no idea, i just picked an option
+09:02  e36freak: dualbus: ahh
+09:02  e36freak: did not know about that one
+09:03  zzz: e36freak: thanks, it works fine.
+09:03  e36freak: dualbus: looks like -r is the only option specified by posix
+09:03  e36freak: zzz: that number can be anything higher than 2
+09:04  e36freak: well, up to 255 iirc
+09:04  e36freak: think it's a single byte
+09:04  mrtnt: I have an old slackware box, which does not have either curl or wget. Are there any similar tools for those two?
+09:05  e36freak: mrtnt: not really a bash question, try a slackware channel, but those are the only two i use
+09:05  dualbus: e36freak, oh, thanks, I will use your idiom instead of -u then
+09:05  e36freak: mrtnt: something like w3m -dump maybe
+09:06  e36freak: or -dump_source
+09:06  dualbus: or /dev/tcp/domain.here
+09:06  e36freak: ahh, there you go
+09:07  dualbus: mrtnt, here's the source http://thesmithfam.org/blog/2006/05/23/bash-socket-programming-with-devtcp-2/
+09:09  zzz: e36freak: ok, thanks.
+09:11  e36freak: i'd like to see a script that has all 256 file descriptors going O.o
+--- Log closed Fri Jan 14 09:16:01 2011
+--- Log opened Fri Jan 14 09:26:23 2011
+09:26 --- Users 548 nicks [0 ops, 0 halfops, 0 voices, 548 normal]
+09:27  pgas: and maybe ARGV
+09:27 --- Channel #bash was synced in 90 seconds
+09:28  SiegeX: hmm so like if(!a[FILENAME]++){print "new file"}
+09:28  drake1: Check www.gangsterfreak.com/fopen.c . I just wrote the shell interface description
+09:30  pgas: SiegeX: hmm, I was more thinking about using a prev variable, but your trick probably works too ...not a bad idea
+09:30  sente: if anything the domain the should be gangstafreak not gangster
+09:31  penguinsrule: is the /n supposed be be new lines every time .....
+09:31  penguinsrule: or \n
+09:31  pgas: no
+09:31  e36freak: penguinsrule: in what context? it doesn't have to be
+09:32  penguinsrule: list=$(printf "%s\n" los5005 los5021 los5899 los7396)
+09:32  e36freak: yes, after every argument
+09:32  penguinsrule: a new line after each one
+09:33  pgas: who has !umq ready and just waits to press enter? :D
+09:33  e36freak: http://bash-hackers.org/wiki/doku.php/commands/builtin/printf
+09:33  pgas: or maybe !faq 1
+09:33  e36freak: heh
+09:33  dualbus: why's the bot down?
+09:33  e36freak: dualbus: no idea
+09:33  dualbus: who provides it?
+09:33  pgas: followed by !array
+09:33  e36freak: 19:24 -!- greybot [rfc1413@wooledge.org] has quit [Ping timeout: 240 seconds]
+09:34  e36freak: greycat, i would think
+09:34  e36freak: http://wooledge.org/~greybot/
+09:34  dualbus: greycat's offline
+09:34  SiegeX: heh,  awk '!a[FILENAME]++' file1 file2 ... fileN is the new   head -qn1 file1 file2 ... fileN
+09:34  pgas: greybot tends to be confused by netsplit, it's also hosted at greycat's house so it probably doesn't have a 99.99% availabiliy
+09:35  e36freak: meh. i could host it on a linode server...
+09:35  SiegeX: maybe it's time for greycat to "break out emacs and modify that perl script"
+09:35 * SiegeX just saw Social Network
+09:35  e36freak: thought greycat is a vi user >.>
+09:36  e36freak: cool people use vi(m)
+09:36  twb: Real men use TECO
+09:36  pgas: greybot searches the faq so you need to also at least mirror the faq
+09:36  SiegeX: ed is pretty hard core, thats one lang that ive seen come in handy that I know next to jack shit about
+09:36  Tango_und_Cash: im trying to create a new variable by trimming a already known one with this :
+09:36  Tango_und_Cash: blub=$("$blub2" |rec|cut -c 1)
+09:36  e36freak: sente: i use ex over ed
+09:37  SiegeX: pgas has thrown me an ed script or two my way I believe
+09:37  Tango_und_Cash: but there is a mistake , and i cant find it
+09:37  pgas: SiegeX: teco is in another league entirely compared to ed ;)
+09:37  SiegeX: are we talking the same league as APL?
+09:37  e36freak: Tango_und_Cash: blub=$(rev <<<"$blub2" | cut -c 1) ?
+09:37  pgas: Tango_und_Cash: is "$blub2" a command?
+09:38  penguinsrule: this might be better to see on what imt trying to get at SiegeX sorry to bug again   im taking out from $list    if matches of 2 items are in  $links    then delete the line
+09:38  penguinsrule: http://pastebin.com/nk8XGBKM
+09:38  geirha: Tango_und_Cash: What does the rec command do?
+09:38  e36freak: geirha: i assumed he meant rev
+09:38  SiegeX: penguinsrule: change my "$mainlinks" to "$links"
+09:38  Tango_und_Cash: $blub2 is a already known variable
+09:39  twb: pgas: I packaged it for debian
+09:39  SiegeX: $mainlist rather
+09:39  pgas: SiegeX: check http://en.wikipedia.org/wiki/Text_Editor_and_Corrector, it's amazing how the old emacs in teco is close to the modern one
+09:39  e36freak: # var="foo"; "$var" # Tango_und_Cash, you need a command
+09:39  evalbot: e36freak: no output within the time limit
+09:39  Tango_und_Cash: geirha, it turns the variable arround  it maks 12345 to 54321
+09:40  e36freak: that would be "rev"
+09:40  SiegeX: pgas: will do
+09:40  twb: Tango_und_Cash: rev(1)?
+09:40  SiegeX: pgas: have you seen this shit? Game of life in APL ==> http://www.youtube.com/watch?v=a9xAKttWgP4
+09:40  twb: SiegeX: there's A*
+09:40  geirha: Tango_und_Cash: And so you want blub to contain 5
+09:41  pgas: twb: cool. http://sdf.org/?tutorials/survival-teco is not too bad to get started a bit
+09:41  twb: Hmm, not A*?  The ASCIIified APL
+09:41  twb: pgas: sdf has teco installed on its sh servers?
+09:41  penguinsrule: syntax error near unexpected token `('   trying to find it
+09:41  Tango_und_Cash: geirha,  no i want to create ne variable by cuting a existing variable
+09:42  e36freak: Tango_und_Cash: he meant based on blub2 being 12345
+09:42  geirha: blub=${blub2:(-1)}
+09:43  e36freak: umq! :P
+09:43  penguinsrule: im doing that and i get the syntax error
+09:43  penguinsrule: awk -F'-' 'FNR==NR{downZ[$0]++}FNR!=NR && downZ[$2]+downZ[$4]<2{print}' <(echo "$list") <(echo "$links")
+09:43  geirha: 4# blub2=12345 blub=${blub2:(-1)}; echo "$blub"
+09:43  shbot: geirha: 5
+09:44  geirha: e36freak: What, me? no need for quotes there.
+09:44  Tango_und_Cash: blub2 is not constant
+09:44  pgas: twb: hmm on the server with alpha it seems yes, no the intel ones, but you can probably ask for it
+09:44  e36freak: 4# blub2=abcd blub=${blub2:(-1)}; echo "$blub"
+09:44  shbot: e36freak: d
+09:44  Tango_und_Cash: sometimes it has 4 chars oder 10 chars or 4chars and 1 digit or maybe 3 digits
+09:45  twb: pgas: I lost interest when they wanted money
+09:45  twb: It's easier for me to just abuse customer machines
+09:45  e36freak: Tango_und_Cash: Parameter Expansion is the expansion of a parameter: "$foo", "$1". You can use it to perform string operations: "${file%.mp3}", "${0##*/}". Remember to *always* quote them. See http://mywiki.wooledge.org/BashSheet#Parameter_Operations
+09:45  e36freak: 4# blub2="a1b2c3d4e5f" blub=${blub2:(-1)}; echo "$blub"
+09:45  shbot: e36freak: f
+09:47  pgas: twb: eh, I should be able to "validate" your account there for free. I don't remember what you can do with it but surely ping finger etc
+09:47  e36freak: geirha: what if the last character is a space? :P
+09:48  twb: pgas: I'm "twb" there, apparently
+09:48  twb: every few years I go back and create an account, then remember I can't do much without validation
+09:48  Tango_und_Cash: geirha, e36freak  ah thats it thx a lot
+09:49  geirha: e36freak: Then blub will be a space ...
+09:50  e36freak: 4# blub2="abc "; blub=${blub2:(-1)}; echo "$blub"
+09:50  shbot: e36freak: no output
+09:50  e36freak: 4# blub2="abc "; blub=${blub2:(-1)}; printf "<%s>" "$blub"
+09:50  shbot: e36freak: < >
+09:50  e36freak: ahh, nevermind :)
+09:53  penguinsrule: shiz im still getting this error........... command substitution: line 194: syntax error near unexpected token `('
+09:53  penguinsrule: awk -F'-' 'FNR==NR{list[$0]++}FNR!=NR && list[$2]+list[$4]<2{print}' <(echo "$list") <(echo "$links")
+09:54  pgas: you need bash for <()
+09:56  penguinsrule: im running it in my bash script....
+09:56  pgas: how do you run your bash script?
+09:56  pgas: what's the first line of your bash script?
+09:56  penguinsrule: haha just about to give u that
+09:58  penguinsrule: crap nm ;)
+09:58  penguinsrule: #!/bin/sh
+09:58  penguinsrule: just changed it lol
+09:58  penguinsrule: now it worked
+09:58  e36freak: -_-
+10:21 --- venmx_ is now known as venmx
+10:30 --- venmx_ is now known as venmx
+10:32  ShurV: Hi!
+10:32  Boosh1: Hi!
+10:33  ShurV: can't find info how to use getopts so that diffrent options will accept the same argument
+10:33  pgas: ?
+10:33  ShurV: so that in  ab:arg  - arg should be not only for b optrion bu tfor both
+10:34  ShurV: for example script will do something with URL specified as argument
+10:34  pgas: hmm, you only tell getopts which option need an arguement
+10:35  ShurV: the options may be  -p forr play or -d for download
+10:35  pgas: your command need to accept -a or -b plus a url?
+10:35  ShurV: yes
+10:35  ShurV: both -p and -d shouldl accept the same URL argument
+10:36  pgas: so the url is not actually and arguement to your option. like in: grep -e foo file
+10:36  pgas: foo is an arguemnt of -e, but file is just something else
+10:36  ShurV: not exactly
+10:37  ShurV: I want to do: $ script -p url
+10:37  prince_jammys: getopts parses two kind of options: ones that set something on or off, or ones that take an option argument. any other logic you have to write yourself.
+10:37  ShurV: or script -d url
+10:38  prince_jammys: so have 'url' be a normal (non option argument) and -d or -p are flags (with maybe -d set to default).
+10:38  pgas: ShurV: ok, I sounds to me that you only want to var -p and -d with getopts, and then use the last argument as a url
+10:38  pgas: ShurV: ok, It sounds to me that you only want to parse -p and -d with getopts, and then use the last argument as a url
+10:38  ShurV: oknowton1, yes, that is what I suspected I have to do
+10:38  prince_jammys: sounds like that to me too
+10:39  pgas: !faq easily
+10:39  prince_jammys: if script only does a -p or a -d and nothing else, you can just have it -download by default and check for -p.
+10:39  ShurV: I just thought there is an easier way ;)
+10:39  pgas: http://mywiki.wooledge.org/BashFAQ/035
+10:40  ShurV: actually I want a third option
+10:40  pgas: ShurV: well, it's not exactly difficult. thoug I'd probably don't use getopts
+10:40  prince_jammys: i use getopts even when there's no reason to  :)
+10:45  ShurV: thanks for the link
+10:53  eject_ck: I want to download file via ftp command and check download result, what variable contain ftp program exit result ?
+10:54  prince_jammys: $?
+10:54  prince_jammys: !if
+10:55  eject_ck: prince_jammys: let me see
+10:55  prince_jammys: or: if somecommand; then ... ; else ... ; fi
+10:56  prince_jammys: 'if' checks the exit status of a command. if it's 0 (success), it goes into the 'then' block. So unless you need to know a special failure status, you don't need to look at $? directly.
+10:57  prince_jammys: (or unless you need to save $? for use later in your script, as it will get overwritten)
+11:03  dualbus: !bot
+11:24  mamooth: Hi there
+11:28  pgas: yo
+11:31 --- Lpine_ is now known as Lpine
+11:39  amaurea: Hi! I have a question about piping: Let's say that I get a set of lines as input, and want to pass them through a program which outputs a value for each line, and append that value to each original line. The program has a high startup cost, but can process lines quickly once it has started. Is there a good way of doing this in bash?
+11:40  twkm: rewrite it so that it outputs the line too.
+11:40  amaurea: Yes, I can do that, and it is not a bad solution.
+11:41  dualbus: amaurea, what do you mean by doing it in bash?
+11:42  amaurea: Let me try to write a mock example
+11:44  tempo: hello how can I crypt a passwd to use with useradd command
+11:45  poisonbit: !nabq
+11:45  lhunath: !crypt
+11:45  dualbus: bot's not available
+11:45  lhunath: tempo: generally; you don't.
+11:46  amaurea: dualbus: http://pastie.org/1459484
+11:46  poisonbit: tempo, see man userradd "The encrypted password, as returned by crypt(3)."
+11:46  poisonbit: so man 3 crypt
+11:47  tempo: for example in need to to useradd  -p passwd user1 and the man say the password need to be crypt
+11:47  tempo: I don't have a man crypt
+11:47  twkm: get a crypt program.
+11:48  pgas: openssl might be able to do it too
+11:48  dualbus: amaurea, from where are you receiving the lines, from a file?
+11:48  amaurea: dualbus: from standard input
+11:48  tempo: do you the name of one of this program
+11:49  amaurea: dualbus: they are generated slowly by yet another program
+11:50  amaurea: dualbus: I could, of course, wait for all the input to finish, put it in a file, and then pass that file through the program I want the extra output from, and then use the "paste" program. That would work, but I would rather do this on the fly as the input arrives. It is not very important, though
+11:51  tempo: just for tell you I have found one mkpasswd
+11:51  dualbus: amaurea, why don't you just pipe it like... another_program | prog
+11:51  pgas: amaurea: well the answer would depend on what prog is able to do
+11:51  tempo: I can  use it like this useradd $1 -m -p $(mkpasswd "$138") -U
+11:51  tempo: thanks
+11:51  pgas: amaurea: you can pass it the content of different files in one go?
+11:52  amaurea: pgas: prog reads from standard input and writes to standard output
+11:52  amaurea: pgas: it can read as many lines as there are
+11:52  amaurea: pgas: and each line gives one corresponding line of output
+11:53  amaurea: for example: if the input is "x y z", the output might be "a". And I would want the final line to be "x y z a"
+11:54  amaurea: In a way, what I want to do is to take an input stream, split it into two, pass one of them through prog, and then merge them together again. Conceptually, it isn't very hard. But I think you might need several threads to avoid locking when you try bidirectional communication between two programs (bash and prog) through pipes
+11:55  amaurea: dualbus: To answer your questino, if I did that, I would end up with just "a", not "x y z a"
+11:55  pgas: amaurea: but how would you know where to split?
+11:56  amaurea: pgas: The split here would be to simply make a copy. I.e. I want to filter the stream through a command, but also keep the original stream, and then paste the two together afterwards.
+11:56  pgas: it's easy to cat all the files into prog, but then you have no way to know when one files starts and when another  stops
+11:57  amaurea: Hmm.. I think we are misunderstanding each other here. There aren't any files involved
+11:57  pgas: then you don't know what "< $lines " means
+11:58  amaurea: pgas: Or I do know what it means, but made a mistake in my example
+11:58  pgas: which doesn't really help me to understand ;)
+11:58  amaurea: $(echo $line | prog), then
+11:59  pgas: prog < file | paste -d ' ' - file
+12:00  pgas: hmm or you want this for stdin?
+12:00  amaurea: Yes
+12:00  lhunath: amaurea: if you don't want to put the output of a program in-line in your code, do NOT USE `` or $().
+12:01  lhunath: their purpose is not to "run things"  their purpose is to expand output of things.
+12:01  amaurea: I could wait until I have all of stdin, then put it in a file, and do that, though.
+12:01  lhunath: additionally, learn to quote.
+12:01  lhunath: !quotewhen
+12:01  amaurea: lhunath: Ok. What should I have done?
+12:02  lhunath: I don't know about your issue; not paying attention enough.  just pointing out your obvious syntax failures.
+12:03  pgas: hmm, you might need a fifo or 2
+12:03  pgas: or a coproc if you have bash4
+12:03  amaurea: pgas: Yes, I thought the answer might be something like that
+12:03  amaurea: I'm afraid of deadlocks, though
+12:04  pgas: deadlocks?
+12:04  cads: hey, I've got two questions. the first is how can I quickly make a command shortcut (like 'acs _' instead of 'apt-cache search _')?
+12:05  amaurea: Yes, let us say that program A writes some text to the input of program B, and then tries to read the answer back from program B. If there is any caching involved, then the read might lock, and if B is still waiting for more input from A because of caching, then, you get a deadlock
+12:05  pgas: amaurea: it should work ok with a coproc
+12:05  cads: and the second is how can I interact with web apis from the command line
+12:05  twkm: how quickly.  sheesh.
+12:05  amaurea: But anyway, I have an idea of where to start now, at least
+12:06  cads: twkm, you talking to me?
+12:06  amaurea: but I want to get to the bottom of lhunath's complaint. You said something about my use of $(). How was it wrong, and what is the right way to get that effect?
+12:08  pgas: cads: alias acs='apt-cache search'
+12:08  amaurea: lhunath: I thought the whole point of $() was to evaluate an expression, usually by running some program, and then capture its standard output. If that is wrong, then I'd like to find out why
+12:09  banoz: hi there
+12:09  banoz: I have a Makefile
+12:09  amaurea: lhunath: about the lack of "", that was because this was just a pseudocode example to illustrate what I wanted to do
+12:10  banoz: is it possible to execute a bash script from a Makefile?
+12:10 --- banoz is now known as avnof
+12:10 --- avnof is now known as avanof
+12:11  cads: pgas, I'd just append that to my ~/.bashrc ?
+12:18  pgas: cads: that would work
+12:28  dualbus: amaurea, does your program output one line for each line of input?
+12:29  dualbus: in other words, is input equal in length to output?
+12:30  dualbus: you could try this
+12:30  dualbus: while read -r <&3 foo && read -r <&4 bar; do echo "${foo} ${bar}"; done 3<test.txt 4<<<"$(sed 's/a/b/g' test.txt)"
+12:30  dualbus: just change test.txt and sed... to the appropiate names
+12:31  dualbus: otherwise you will have to call your program for each line, spawn a process...
+12:35  pgas: dualbus: yeah but he wants to read from stdin not from test.txt
+12:42  oneforall: line 179: unexpected EOF while looking for matching `''  this here is it saying it can't find the match for "  or the `  ?
+12:42  pgas: '
+12:42  oneforall: I used find in my script and I only have  2 ``
+12:42  oneforall: and the " all have a match O.o
+12:43  pgas: ' not `
+12:43  oneforall: used search there also and took my time
+12:46  oneforall: ahweirdI copy pasted from the output and it was using `. But I just did a search again with ' and it only has 2 in the # comments That's and won't
+12:48  oneforall: hmm even the log I did of the build it looks like a `
+12:48  pgas: ' not ` ....
+12:48  oneforall: but no mater a search int he script and they all have a mat except the 's and 't of cource
+12:48  pgas: oh sorry
+12:49  oneforall: matter*
+12:49  pgas: well. paste it somewhere
+12:49  oneforall: http://pastebin.com/v8mcTJY9
+12:50  pgas: or better, try to comment out lines until you find the problem
+12:51  oneforall: hmm 179 has # Some software won't compile without this symlink:
+12:51  oneforall: and 230 is the usual last line :)
+12:52  avanof: hi there
+12:53 --- tho_ is now known as tho
+12:54  toader_: Hi, I have 10G CSV file data.csv, and I want to delete the firstline, the header. How could I do? thanks!
+12:54  twkm: edit it.
+12:54  toader_: twkm: i see, but it is two big
+12:54  toader_: twkm: if i ope with gedit, i think it is impossible
+12:55  twkm: don't use gedit.  perhaps you want sed.
+12:55  toader_: twkm: how to do with sed
+12:56  twkm: the command to delete a specific line is not hard to find in the documentation.
+12:59 --- Cain` is now known as Cain
+13:07  dualbus: toader_, bash only solution: lineno=0; while read -r line; do ((lineno++)) && echo "$line"; done <input.txt >output.txt
+13:07  oneforall: if removing that comment line does it and its been there for a very long time . I would say "why is it even looking at it when its a comment line" O.o
+13:08  erUSUL: sed will use a tmp file... given that it is a 10 GiB file maybe not the best tool for the job ? what about ed? can it hadle 10 GiB files ?
+13:11  pgas: 12G with a while read loop is not really a solution
+13:12  ferret: sed would be quicker
+13:13  pgas: erUSUL: ed uses a temp file too
+13:13  ferret: if you want a solution that does not use a temp file or load it into memory you would have to write a script to do it in a scripting language that supports in-place binary writing, e.g. perl/python
+13:14  pgas: but you need a lot of memory
+13:14  pgas: oh sorry I should have read the whole thing
+13:14  twkm: not really.  a line is being removed, not added.
+13:14  oneforall: na that just makes it line 132 now :)
+13:14  ferret: then make two line-reading loops, a first one that reads until it gets to the line, and a second one that reads and writes lines n characters earlier, where n is the length of the offending line
+13:15  twkm: (even adding just needs room for the new line(s))
+13:15  erUSUL: pgas: tyvm
+13:15  pgas: erUSUL: but in a different way
+13:16  pgas: I used the editor of mc with big files in the past (emacs doesn't like very big files)
+13:44  oneforall: hmm I think it was from some missing }
+14:05  adac: This is my command: "/usr/share/backuppc/bin/BackupPC_zcat XferLOG.bad.z | grep prematurely " how can I tell grep to show more Like 3 lines before the string and tree lines after
+14:06  tmr: man grep
+14:06  Fatal: with -A and -B or -C
+14:06  Fatal: unsure what's posix and what's not of those arguments though
+14:06  oneforall: yup thats what it was. too bad it never reported them :(
+14:06  adac: ahh ok i see :)
+14:06  oneforall: :)
+14:10  geirha: Fatal: None of them are POSIX, all GNU I think.
+14:10  Fatal: ah :/
+14:11  Fatal: geirha: ouch, yeah you're right
+14:46  chee: hallo. i miss bash. tell me this:
+14:46  chee: /h/c/d<TAB>==>/home/chee/doc
+14:46  chee: ^ can I get this kind of completion with bash?
+14:47  ferret: yes, but you would have to write it yourself
+14:48  ferret: along with ''complete'' / ''compgen''
+14:50  cthuluh: chee: why not simply use zsh?
+14:51  chee: cthuluh: ok!
+14:51  cafaro: I have a file "~/foo", that contains "~/bar", when I do "cat ~/foo", the "~" from "~/bar" isn't expanded, how can I make it expand?
+14:51  geirha: chee: /h*/c*/d<tab>
+14:51  cthuluh: cafaro: cat ~/"foo"
+14:52  geirha: Bash will not alter cat's output in any way
+14:52  chee: thanks
+14:53  cthuluh: oh
+14:53  cthuluh: I missed a part
+14:59  gminuses: is it possible to execute some command after several simultaneous connection to ssh servers are all finished. I though about using "wait", but that only works if these ssh clients terminate themselves. I'd like to execute commands when all of them have connected to ssh servers, simultaneously.
+15:00  falconindy: gminuses: a program like cssh can do simultaneous commands to multple ssh sessions
+15:01  gminuses: falconindy: thanks. I'll check it out.
+15:03  ferret: you could also use screen or dtach on the remote systems then exit the ssh sessions
+15:05  cafaro: cthuluh: that still yields the same result
+15:06 --- homie is now known as Guest56717
+15:07 --- Guest56717 is now known as homie`
+15:08 --- homie` is now known as homie
+15:10  gminuses: cssh might not be what I want. I ssh -D to these ssh servers, which doesn't seem to be supported by cssh
+15:14  gminuses: I ssh -D to several ssh severs simultaneously, and I'd like to execute some commands after all of them are connected. is there some way to achieve that?
+15:14  Synthead: how can I use parameter expansions to take the trailing slashes off a path only if they exist?  for example, "/foo/////" and "/foo" would both be "/foo"
+15:15  cthuluh: Synthead: either use a loop or extended glob
+15:16  koala_man: *(/) is extglob for any number of /
+15:16  Synthead: cthuluh: interesting!
+15:17  Synthead: cthuluh: that works great, thanks!!
+15:17  falconindy: whoa. extended glob in a PE. never even thought to use that
+15:19  geirha: ${var%%+(/)}
+15:19  Synthead: yeah, that's what I thought
+15:19  Synthead: mind = blown
+15:22  pgas: ${var%${var##*[!/]}}
+15:23 --- Cain` is now known as Cain
+15:28  geirha: Ooh, pgas went POSIX on our hiney
+15:29  cafaro: So, I'm trying to expand output from cat, which doesn't happen by default. Is there a way to achieve this?
+15:29  geirha: If you don't mind turning evil, sure.
+15:30  cafaro: ok, never mind then ;)
+15:39  geirha: Bot's back
+15:57  Synthead: how would I use regex to print "a" ten times?
+15:58  pgas: regexp don't print, they match
+16:00  Synthead: I mean, say I wanted to print 1000 "=" characters on the screen and I don't want to use a loop.  can't I use { } or something?
+16:00  geirha: # printf %.s= {1..10}
+16:00  evalbot: geirha: ==========
+16:01  geirha: !hr
+16:01  greybot: http://bash-hackers.org/wiki/doku.php/snipplets/print_horizontal_line
+16:01  Synthead: ooh, interesting
+16:04  microm: I'm reading a file with a while read loop, but the file has line continuations in it, and the output "merges" lines (as show in http://paste.pocoo.org/show/320540/). How do I not merge the lines?
+16:05  taylanub: microm: 'help read'
+16:08  geirha: while read -r; do echo "prefix: $REPLY"; done <<'EOF'
+16:09  pgas: #  f () { [ $(($1-1)) -ge 0 ] && f $(($1-1)) "$2=" || printf %s $2; }; f 100
+16:09  evalbot: pgas: ====================================================================================================
+16:13  taylanub: nice recursion
+16:21  microm: taylanub: thanks.
+16:47  rejoin: hello
+16:47  pgas: hi
+16:51  rejoin: how can i write a script that increments numbers in pair
+16:51  rejoin: for example a 10 digit number
+16:51  rejoin: 000000000
+16:52  rejoin: increment the first two digits to 20, the second two to 10, third two to 30 and the and the last four digits to 9999
+16:54  pgas: hmmm. not sure I get it maybe you want for imbricated loop?
+16:55  rejoin: i have not experience in programing :(
+16:55  rejoin: no*
+16:56 --- feydrm_ is now known as feydrm
+16:57  rejoin: pgas, if the number is 0000000000, it starts incrementig 0100000000 until 200000000000 then the second two digits start incrementing 0101000000 until 0110000000
+16:57 --- rejoin is now known as ReJoiN
+16:58  e36freak: bunch of for loops?
+16:58  pgas: something like that?: for ((i=1;i<=20;i++));do for ((j=1;j<=10));do printf "%02d%02d",$i,$j;done;done
+16:58  e36freak: four of them would work, perhaps not the most elegant solution
+16:59  pgas: # for ((i=1;i<=20;i++));do for ((j=1;j<=10));do printf "%02d%02d",$i,$j;done;done
+16:59  evalbot: pgas: bash: syntax error: arithmetic expression required
+16:59  evalbot: pgas: bash: syntax error: `((j=1;j<=10))'
+16:59  e36freak: pgas: j++
+16:59  pgas: # for ((i=1;i<=20;i++));do for ((j=1;j<=10;j++));do printf "%02d%02d",$i,$j;done;done
+16:59  evalbot: pgas: 0000,1,10000,1,20000,1,30000,1,40000,1,50000,1,60000,1,70000,1,80000,1,90000,1,100000,2,10000,2,20000,2,30000,2,40000,2,
+16:59  evalbot: pgas: 50000,2,60000,2,70000,2,80000,2,90000,2,100000,3,10000,3,20000,3,30000,3,40000,3,50000,3,60000,3,70000,3,80000,3,90000,3
+16:59  evalbot: pgas: etc... ( http://pastebin.com/KbRK1Xe9 )
+16:59  pgas: argh
+16:59  pgas: # for ((i=1;i<=20;i++));do for ((j=1;j<=10;j++));do printf "%02d%02d\n" $i $j;done;done
+16:59  evalbot: pgas: 0101
+16:59  evalbot: pgas: 0102
+16:59  evalbot: pgas: etc... ( http://pastebin.com/r830vrPq )
+17:00  e36freak: !bot
+17:00  greybot: I know I am, but what are you?
+17:00  e36freak: oh, nice
+17:01  ReJoiN: pgas, is that the script?
+17:01  e36freak: pgas: the problem is getting it to increment from left to right, though i guess you could switch i and j
+17:06  e36freak: got it
+17:06  ReJoiN: nice
+17:07  e36freak: so you want the highest to be 2010309999, right?
+17:07 --- WinstonSmith_ is now known as WinstonSmith
+17:07  ReJoiN: yes
+17:09  ReJoiN: e36freak,  i really like programming, but the teachers at school don't teach us
+17:09  e36freak: for l in {0..9999}; do for k in {0..30}; do for j in {0..10}; do for i in {0..20}; do printf "%02d%02d%02d%04d\n" "$i" "$j" "$k" "$l"; done; done; done; done
+17:09  e36freak: try that, should increment backwards
+17:10  e36freak: will take a while though, that's a lot of numbers
+17:10  ReJoiN: e36freak, thank you i appreciate it :)
+17:11  taylanub: is there a best way to translate bash style brace expansions to sh ?
+17:13  taylanub: is there any other way than comlex nested for loops, and brute force?
+17:16  e36freak: for which?
+17:17  lhunath: taylanub: run an external program that gives you what you want.
+17:17  lhunath: like seq or expr or awk or perl, or hey, bash.
+17:18  lhunath: then, parse the output into your sh code, or better yet, throw sh away and migrate to this external program entirely.
+17:20  e36freak: he seems to think that everything needs to be done in sh -_-
+17:20  taylanub: well i would migrate to another tool if sticking to sh wasn't the point :P
+17:20  lhunath: when is sticking to sh ever the point?
+17:21  taylanub: admiteddly it's not for anything serious
+17:21  lhunath: one might say the point would be to be portable between certain systems
+17:21  taylanub: well that's what i meant
+17:21  lhunath: but that can be addressed in different ways
+17:21  lhunath: maybe you should learn some C.
+17:22  e36freak: i prefer to put #!/bin/bash at the top and if they want to use it, they can install bash or fix it
+17:22  taylanub: my current project (if you could call it that) is really suitable to the shell
+17:23  taylanub: (alternative to makepkg for creating arch/pacman/alpm packages)
+17:23  lhunath: shrug.  the pain when trying to write half-decent or half-readable code you are feeling right now will only get worse.
+17:23  e36freak: taylanub: which would be much more efficient if you just used bash features
+17:23  lhunath: wtf.  this is for linux.  use friggin bash.
+17:23  e36freak: seriously
+17:23  lhunath: why cares about sh when you're on linux.
+17:23  e36freak: arch doesn't even really have sh, it's just a bash symlink
+17:24  taylanub: that's just to keep dumb scripts from breaking -_-
+17:24  e36freak: lrwxrwxrwx 1 root root 4 Nov 29 02:36 /bin/sh -> bash
+17:24  lhunath: dumb scripts SHOULD break.  the world would be a much better place.
+17:25  taylanub: link it to dash (one _should_ be able to) and see how long you last (maybe it's better by now)
+17:25  e36freak: i hear that
+17:25  taylanub: i just mean scripts that use bash features implicitly
+17:25  e36freak: taylanub: or just use bash, because it comes on the bare minimum arch and therefore every arch box has it?
+17:25  taylanub: you can use pacman on other systems you know...
+17:26  e36freak: awesome. they can install bash
+17:26  lhunath: they will have bash too.  and if not, yes, they can install it
+17:26  e36freak: in fact, i'm doing the exact opposite and full-bash-ifying the init scripts
+17:26  e36freak: because everyone has bash, they already use bash
+17:26  e36freak: might as well take advantage of bash features
+17:27  taylanub: obviously, if using bash, use it right
+17:27  lhunath: e36freak: are you submitting that upstream?
+17:27  e36freak: lhunath: yes
+17:27  lhunath: e36freak: what stream?
+17:27  e36freak: bug tracker
+17:27  lhunath: well, what distro :-)
+17:27  e36freak: a lot of it is implementing feature reqs at the same time
+17:27  e36freak: arch
+17:28  lhunath: when you've sanitized most of it; I may bother giving arch another try.
+17:28  e36freak: hahaha
+17:28  e36freak: what are you using now?
+17:29  falconindy: e36freak: you realize that someone beat you to it
+17:29  lhunath: OS X, provided by work.
+17:29  e36freak: falconindy: yes, but haven't implemented a lot of feature reqs
+17:29  e36freak: and it's not standard
+17:29  falconindy: just as long as you're working from the head of the master branch
+17:35 --- feydrm_ is now known as feydrm
+17:48 --- Gallo is now known as Gallomimia
+17:51  zoidberg`: afternoon folks, I need help with a regex pattern, i didntknow where to turn :)
+17:52  trash: #regex?
+17:52  zoidberg`: didnt even think of that, good call
+17:52  trash: Also:
+17:52  trash: !regex
+17:52  greybot: Some people, when confronted with a problem, think ``I know, I'll use regular expressions.'' Now they have two problems. -- jwz
+17:52  e36freak: they have their uses :)
+17:53  trash: Hardly in my world.
+17:53  zoidberg`: well i'm mass retagging mp3s and rebuilding directory structure based on id3 tags i've fixed
+17:53  zoidberg`: so :)
+17:54  trash: easytag for the win.
+17:54  zoidberg`: i'm using mp3tag
+17:54  trash: Your bad.
+17:54  zoidberg`: good program lots of builtin functions, but theres somthing out of the ordinary i wnat to do
+17:54  e36freak: trash: lulz
+17:59  guest20938: i'm trying to use "find" to recursively search my filesystem for duplicate directory names.  i've catted the list of unique names to compare against into a file, but i dont understand how i should use it with find.
+18:00  guest20938: i tried:  for each in `cat ./unique_names`; do find / -type d $each; done
+18:00  e36freak: !uuoc
+18:00  greybot: Useless Use of Cat (cat foo | grep bar). See http://partmaps.org/era/unix/award.html
+18:00  steve___: guest20938: you could just wrote the output of find to a file and use uniq -d on the two files.
+18:00  trash: Use fdupes.
+18:03  iso: findfile="$(find $incoming -mtime +5 -type f -print0)"
+18:03  iso: for file in "$findfile"; do
+18:03  iso: echo "$(stat $file -c %y)"
+18:03  iso: done
+18:03  iso: any ideas how to handle spaces in filenames here ?
+18:03  go|dfish: iso: use find's -printf
+18:03  go|dfish: well "find's"
+18:03  iso: ok
+18:04  Gaspy: Question: Is there anyway to the output of the last command that was run and pipe it into another command without having to rerun last command again.
+18:04  xenoterracide: I'm looking for a command that lists permissions, given a file, recursively, but instead of down the tree, it goes back up to the parent to / . I've used this command before, but I can't for the life of me figure out what it is
+18:05  e36freak: iso: or use print0 with a while read loop, which is what i would do
+18:06  e36freak: iso: or better ye, find's exec
+18:06  iso: find: paths must precede expression
+18:06  e36freak: find "$incoming" -type f -mtime +5 -exec stat -c %y {} \;
+18:06  iso: only way to do it ?
+18:07  iso: findfile="$(find $incoming -mtime +5 -type f -print0 | while read -d $'\0' file)"
+18:07  erUSUL: -printf "%y\n"
+18:07  iso: command substitution: line 4: syntax error near unexpected token `)'
+18:07  e36freak: while IFS= read -rd '' file; do stat -c %y "$file"; done < <(find "$incoming" -type f -mtime +5 -print0)
+18:07  e36freak: erUSUL: ahh good point
+18:08 --- taylanub is now known as taylan
+18:08  steve___: Gaspy: can you show an example of what you're trying to do.
+18:09  nDuff: Gaspy, no; the prior command's output isn't saved anywhere, so you can't pipe it into an arbitrary process without regenerating it.
+18:09  e36freak: i think he want's to get something that was printed to stdout again, and no
+18:09  e36freak: wants**
+18:09  erUSUL: e36freak: well the formatting char is not %y as in stat but you get the idea ...
+18:10 --- taylan is now known as taylanub
+18:10  guest20938: i'd ideally like to pass find each line in my list to search for, but yeah, in my example cat wasn't the right way to go.  cat passes find each word in my file, not each line
+18:10  Gaspy: I just ran "find . -type d -d 5". I want to have the result of "find . -type d -d 5 | grep pos" without having the rerun the "find . -type d -d 5" again.
+18:10  e36freak: erUSUL: ofc
+18:12  e36freak: %t
+18:12  Gaspy: nDuff, e36freak, steve___ : Thanks for the help. I'll remember to save it in a file next time.
+18:12  e36freak: Gaspy: use find more efficiently
+18:12  e36freak: !find > Gaspy
+18:12  greybot: Gaspy: http://mywiki.wooledge.org/UsingFind
+18:12  steve___: Gaspy: or you can use 'tee' if you want to see it on stdout and redirect it to a file
+18:13 * nDuff nods -- there's generally no reason to grep through find's output as opposed to telling find to do a more specific search in the first place
+18:13  e36freak: iso: find "$incoming" -type f -mtime +5 -printf "%f %a" # this what you want? or something similar?
+18:15  Gaspy: greybot, steve___, nDuff , e36freak : Thanks for the tips. This does speed things up.
+18:16  iso: yeah working on the printf thing atm :=
+18:17  iso: but need the ctime in another loop
+18:17  iso: so cant use it with find :P
+18:17  erUSUL: find ... -printf "%p %t\n"
+18:17  e36freak: then use a while read loop
+18:17  e36freak: tada!
+18:19  iso: the script should basicly find all files *.mkv in a specific path and then run encoder for mp4 and change mtime back to mkv file
+18:19  nDuff: iso, then you don't need to print the mtime, you just need to use touch --reference
+18:19  iso: read out mtime and use touch on new files
+18:20  nDuff: iso, you don't NEED to -- GNU touch can just reset to whatever-time-this-other-file-has
+18:20  iso: well one step after another :)
+18:20  nDuff: iso, so reading the time out and handling it in your script is unnecessary
+18:20  iso: why ?
+18:20  iso: i have to wait 30mins until encode is done then mv file and then touch it :)
+18:20  steve___: iso: he just said
+18:21  Gaspy: Are there any commands / daemons that get notified when a file is create in a directory or do you have to poll?
+18:22  nDuff: Gaspy, incron
+18:22  steve___: inotifywait or incron
+18:22  nDuff: (presuming Linux)
+18:22  iso: will be great system when its working ^^
+18:22  iso: the php part is working already :P
+18:23  cherwin: I see that people struggle when using while loops to iterate over a list. Commands that get executed in the list, that require the user to interact with stdin won't work. That's why people need to use for loops. My question is: What is the difference between a while loop vs. a for loop?
+18:24  cherwin: s/why/when/
+18:24  e36freak: !faq 1
+18:24  greybot: http://mywiki.wooledge.org/BashFAQ/001 -- How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+18:24  vkues: !faq disappear > cherwin
+18:24  greybot: cherwin: http://mywiki.wooledge.org/BashFAQ/024 -- I set variables in a loop. Why do they suddenly disappear after the loop terminates? Or, why can't I pipe data to read?
+18:24  vkues: Oh, no.
+18:24  vkues: Not that FAQ.
+18:25  e36freak: !wordsplitting
+18:25  greybot: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+18:25  e36freak: !faq ffmpeg
+18:25  greybot: http://mywiki.wooledge.org/BashFAQ/089 -- I'm reading a file line by line and running ssh or ffmpeg, but everything after the first line is ignored!
+18:25  e36freak: that the one?
+18:25  vkues: Yes, thank one, thank; cherwin, consider reading that.
+18:25  e36freak: cherwin: read that and faq 1
+18:26 --- feydrm_ is now known as feydrm
+18:27  Gaspy: nDuff & steve___ : Thanks lead me to launchd. On a Mac, right now.
+18:29  taylanub: 'find . -depth -type d -empty -delete'  is effectively the same as  'find . -depth -type d -exec rmdir {} +'  right?
+18:29  cherwin: e36freak: Thanks.
+18:29  nDuff: *shudder*
+18:29 * nDuff has had bad experiences with launchd
+18:29  e36freak: heh
+18:30  armetiz: Hi there
+18:30  armetiz: I just want to know how I can check if a folder doesn't exist
+18:30  armetiz: if [ -d $FOLDER ]
+18:30  armetiz: return true if the folder exist
+18:30  armetiz: but, I just want to create the folder if it deson't exist..
+18:31  armetiz: do you have a clue ?
+18:31  cthuluh: mkdir -p "$folder"
+18:31  cthuluh: !varcaps > armetiz
+18:31  greybot: armetiz: By convention, we capitalize environment variables (PAGER, EDITOR, SHELL, ...) and internal shell variables (BASH_VERSION, RANDOM, ...). All other variable names should contain at least one lowercase letter. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+18:31  cthuluh: !quotes > armetiz
+18:31  greybot: armetiz: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+18:31  vkues: cthuluh: ![[
+18:31  cthuluh: :)
+18:31  cthuluh: ![[ > armetiz
+18:31  greybot: armetiz: [[ is a bash keyword similar to (but more powerful than) the [ command. See <http://mywiki.wooledge.org/BashFAQ/031> and <http://mywiki.wooledge.org/BashGuide/TestsAndConditionals>. Unless you're writing for POSIX sh, we recommend [[.
+18:32  cthuluh: armetiz: do you have enough to read? :)
+18:32  armetiz: thanks cthuluh
+18:32  armetiz: I have many things to read :p
+18:33  armetiz: thanks dudes ;)
+18:34  Gaspy: greybot: What do you think about http://tldp.org/LDP/Bash-Beginners-Guide/Bash-Beginners-Guide.pdf?
+18:34  al_nz1: what does -e do?
+18:34  skered: resourcing .inputrc would be same as init a new bash session?
+18:34  erUSUL: !crap | Gaspy
+18:34  erUSUL: !crap > Gaspy
+18:34  greybot: Gaspy: The overwhelming majority of bash scripts, code, tutorials, and guides on the Internet are crap. Sturgeon was an optimist.
+18:35  Gaspy: Oh man. I am not well read enough. Had to look up that Sturgeon thing.
+18:35  nDuff: !abs > Gaspy (re: the "Advanced" guide from the same source)
+18:35  greybot: Gaspy (re: the "Advanced" guide from the same source): The infamous "Advanced" Bash Scripting Guide should be avoided unless you know how to filter out the junk. It will teach you to write bugs, not scripts. In that light, the BashGuide was written: http://mywiki.wooledge.org/BashGuide
+18:36  cthuluh: though this is not the ABS. maybe isn't Bash-Beginners so bad?
+18:36  cthuluh: ABS: Absolute BullShit 8)
+18:37 * nDuff shrugs; we have a guide we know is good -- reviewing others doesn't seem a good use of time.
+18:38  Gaspy: greybot: You're right the wooledge.org guide does have a lot more explanation on writing general bash scripts. Not just ones that work on one computer.
+18:38  iso: IFS=$(echo -en "\n\b") <-- that worked also find without printf ^^
+18:38  taylanub: !bot > Gaspy
+18:38  greybot: Gaspy: I know I am, but what are you?
+18:39  vkues: if [ -f $FILENAME ]; then
+18:39  vkues: echo "Size is $(ls -lh $FILENAME | awk '{ print $5 }')"
+18:39  cthuluh: iso: IFS=$'\n\b'
+18:39  vkues: cthuluh: that's from that beginner's guide
+18:39  Gaspy: greybot: A beginner.
+18:39  iso: ^^
+18:39  erUSUL: !ls > vkues
+18:39  greybot: vkues: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+18:39  cthuluh: vkues: right, i'm reading it too. crap.
+18:39  vkues: cthuluh: it may not be fatal, but at least issues where you'd trigger varcaps, ls, quotes
+18:39  taylanub: !bot > Gaspy ...
+18:39  greybot: Gaspy ...: I know I am, but what are you?
+18:40  iso: thx for the tip cthuluh
+18:40  vkues: s/issues/features &/
+18:40  erUSUL: vkues: use "du" to get filesize
+18:40  vkues: erUSUL: thanks for that pointer---but that was code from that .pdf (bash-beginners-guide) that cthuluh considered being less harmful than the ABS
+18:41  tmr: !greybot > Gaspy
+18:41  greybot: Gaspy: I'm written in perl using POE::Component::IRC, and my source is at http://wooledge.org/~greg/greybot/
+18:41  erUSUL: vkues: oops sorry
+18:41  cthuluh: vkues: *maybe*? ;)
+18:41  vkues: erUSUL: i pasted that code as bad example, because it features varcaps, parsing ls, lacking quotes, things that cthuluh earlier questioned, hence functioning well as a summary for that document for him :)
+18:42  Gaspy: There's no way greybot is just a bot without any human interaction.
+18:42  vkues: cthuluh: well, it breaks my heart to blame shell books for parsing ls, because that's done in literally every book :)
+18:42  taylanub: Gaspy: well we give him commands
+18:42  cthuluh: Gaspy: /msg greybot ls
+18:43  Gaspy: So he's a FAQ bot.
+18:43  vkues: Whatever that is :)
+18:45  Gaspy: UGH... This is my first time reading pearl. Looks like LISP and Visual Basic had a babye.
+18:45  cthuluh: haha
+18:45  nDuff: heh.
+18:45  nDuff: Gaspy, take that back -- LISP's syntax is beautiful!
+18:45  cthuluh: I believe it was a gang-bang
+18:46  vkues: nDuff: how that, it's equally fucked as perl's, only in the very opposite direction :)
+18:47  Gaspy: nDuff: Hey if my wife is beautiful and I'm ugly we may still have an ugly child.
+18:47  nDuff: vkues, I'll buy that. (That said, that's not true of *every* LISP -- Clojure, for instance, adds a fair bit of sugar -- ie. parser macros for data structures other than lists)
+18:48  vkues: nDuff: ah, well, I lazily normally mean common lisp when i say lisp :)
+19:07  Synthead: how can I match any character while using parameter expansions, kinda like "." in sed?
+19:08  go|dfish: Synthead: ?
+19:08  Synthead: I'm working with percent-escaped characters (from URLs), and I want to replace %-anything-anything with "_"
+19:08  go|dfish: (the question mark)
+19:08  Synthead: haha
+19:08  Synthead: ohhhhhh, that did it, I just had to escape the % in the PE :)
+19:08  Synthead: thanks!@
+19:14  al_nz1: in my script which does some rsync I would like to then send a email with a few simple lines like 140.0Mg of data transferred or something along those lines, currently I am emailing the rsync log file which is a massive list of every file synced
+19:15  al_nz1: what would the command be to get a summary rather than such a verbose list for the rsync?
+19:15  trash: rsync can do the format you want, just parse that.
+19:17  skered: al_nz1: Don't use -v?
+19:18  skered: I use --stats
+19:42  geirha: Also, there's #rsync
+19:47  al_nz1: I want to set the contents of a file to a variable
+19:47  al_nz1: "LOG=cat /mnt/backup.log" doesnt work
+19:48  al_nz1: skered: ok - -stats
+19:48  e36freak: -_-
+19:48  e36freak: log=$(</mnt/backup.log)
+19:48  e36freak: !$(<
+19:48  greybot: The command substitution $(cat file) can be replaced by the equivalent but faster $(< file).
+19:49  al_nz1: thanks
+19:49  e36freak: !varcap
+19:49  greybot: By convention, we capitalize environment variables (PAGER, EDITOR, ..) and internal shell variables (SHELL, BASH_VERSION, ..). All other variable names should be lower case. Remember that variable names are case-sensitive; this convention avoids accidentally overriding environmental and internal variables.
+19:52  al_nz1: the website I saw it on actually had log='cat /mnt/backup.log' but that didnt work either
+19:53  cthuluh: al_nz1: it should
+19:53  nDuff: al_nz1, I'm wondering if you mistook backticks for regular quotes
+19:53  cthuluh: huh, no
+19:53  tmr: It would with right quotes.
+19:53  cthuluh: yeah
+19:53  taylanub: it probably did execute the contents of the variable as a command, later on, but code in variables is generally considered bad practice
+19:53  al_nz1: ok, im new and was just copying something I saw
+19:53  taylanub: oh, backticks...
+19:54  joeytwiddle: ` instead of '
+19:54  al_nz1: skered: so to capture stats I need rsync <OPTIONS> -stats > outputtofile.log
+19:54  tmr: !` > Though
+19:54  greybot: Though: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+19:59  e36freak: one of the reasons that back ticks are annoying
+19:59  e36freak: though with any good fixed width font they're easy to distinguish
+20:00  joeytwiddle: backticks are POSIX! mumble grumble
+20:00  tmr: So is $().
+20:00  e36freak: except posix also considers them depreciated...
+20:00  joeytwiddle: oh, that's news to me
+20:00  taylanub: Solaris /bin/sh can't handle $()
+20:01  taylanub: in case it matters to anyone
+20:01  tmr: If you're stuck with bourne shell.. Whell few meters of rope aint that much.
+20:01  joeytwiddle: ahh damn that solaris sh
+20:01  tmr: Solaris has POSIX sh too somewhere.
+20:02  e36freak: tmr: lul
+20:03 --- [netman]_ is now known as [netman]
+20:07  tmr: /usr/xpg4/bin/sh maybe.
+20:07  geirha: aye, that's posix sh
+20:22  hengha: I got a variable and tried to used it in a pattern to locate files with that : for files in /home/$variable*.gz;do echo $files;done. but for loop only print the literal string of /home/whate*.gz and never returned the list of files, how can I do that in for without using find ?
+20:22  hengha: for files in /home/*.gz;do echo $files;done works fine
+20:24  trash: hengha: What do you have in $variable?
+20:24  e36freak: !wordsplitting
+20:24  greybot: echo $foo; rm $foo -- If you leave $foo unquoted, bash will *remove* all whitespace (newlines, spaces, tabs) while expanding it, take each *word* as a separate argument. `echo` prints these words separated by one space and `rm` deletes each word. So ALWAYS *quote* your parameter expansions: echo "$foo"
+20:24  prince_jammys: quote all expansions: "/home/$foo"*.gz
+20:35  hengha: trash: thanks, variable='2011-01-13';
+20:36  e36freak: hengha: also, shopt -s nullglob
+20:36  e36freak: !nullglob
+20:36  greybot: nullglob: a shell option (shopt) which causes unmatched globs to expand to nothing, rather than themselves. Example: shopt -s nullglob; files=(*); echo "There are ${#files[*]} files."
+20:37  e36freak: # for f in *.pdf; do echo "$f"; done
+20:37  evalbot: e36freak: *.pdf
+20:37  e36freak: # shopt -s nullglob; for f in *.pdf; do echo "$f"; done
+20:37  evalbot: e36freak: no output
+20:37  hengha: k, trying...
+20:37  e36freak: otherwise if it doesn't find a match, it will treat the glob as literal
+20:39  hengha: ha, shopt -s nullglob is the one, thanks a lot, man
+20:39  e36freak: hengha: if being used in a script, make sure to put it at the beginning of the script
+20:40  e36freak: like, right under the shebang
+20:42  Ganymede: I'm kind of confused about something...I have a file /opt/flexnetserver/lmgrd that totally exists. I can md5sum it, it's a ELF 64-bit LSB executable, x86-64, version 1 (SYSV), it's executable and a regular file. When I try to run it with /opt/flexnetserver/lmgrd -c /opt/flexnetserver/maya2011.lic, bash says: -bash: /opt/flexnetserver/lmgrd: No such file or directory. But I swear it exists. sh says "not found". I've never seen anything like this. W
+20:42  Ganymede: hat could it be?
+20:42  hengha: e36freak: thanks, always got her bang on it
+20:58 --- ricky_ is now known as ricky
+21:25  f00bar80: i'm asking how to extract one from a 1.5G .tar.gz  file
+21:25  cthuluh: with tar, perhaps?
+21:25  zoidberg`: hey hey
+21:26  zoidberg`: i've got a big 5x grepped ls for a huge directory. i've got the data i want to move
+21:26  nDuff: f00bar80, unfortunately, you can't seek around inside the gzip stream -- you'll need to read all the way up to wherever the file you want to extract is. Hope it's close to the front, eh?
+21:26  zoidberg`: whats the proper way to extend that grepped 'ls'
+21:26  cthuluh: !ls > zoidberg`
+21:26  greybot: zoidberg`: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+21:26  nDuff: !ls > zoidberg-
+21:26  greybot: zoidberg-: ls shows you a representation of files. They are NOT file names (for simple names, they mostly happen to be equivalent). Do NOT try to parse it. http://mywiki.wooledge.org/ParsingLs
+21:26  zoidberg`: :(
+21:26  jaminja: f00bar80: gzip might be useful :) mc will let you browse a .tar.gz subject to diskspace....
+21:26  zoidberg`: that bot ruins all my fun!
+21:26  cthuluh: zoidberg`: your tentacles don't allo you to say these kind of horrible things in my presence
+21:27  zoidberg`: you humans
+21:27  mattymo: how can I trap a kill signal with a bash script?
+21:27  zoidberg`: always looking down on us zoidbergs
+21:27  The-Compiler: using trap. :p
+21:27  yitz_: !trap
+21:27  greybot: If you want processes to communicate, the easiest way (besides a pipe) is to use signals. See: help trap <Enter>, man kill and man bash /SPECIAL PARAMETERS | http://mywiki.wooledge.org/ProcessManagement
+21:27  nDuff: mattymo, you can't trap a kill signal with ANYTHING
+21:27  nDuff: mattymo, the operating system doesn't allow kill to be trapped; that's why it's, err, kill.
+21:28  nDuff: mattymo, ...and also why people who use kill -9 without a damned good reason should be shot.
+21:28  mattymo: I'm looking to write a bash wrapper script around gpk-update-viewer to trap the logout/shutdown signal
+21:28  e36freak: wooop woop woop woop woop
+21:28  yitz_: !kill
+21:28  greybot: Unsafe Use of Kill: kill -9 sends SIGKILL to a process which is the exact same thing as normal kill (SIGTERM), except that it prevents the process from cleaning up after itself. You do NOT want to use it. See http://partmaps.org/era/unix/award.html#uuk9letter
+21:28  mattymo: yeah I want to trap the SIGTERM
+21:28  e36freak: help trap
+21:28  f00bar80: :(
+21:28  e36freak: man kill
+21:28  zoidberg`: cthuluh: so woudl you mind helping me turn my ls command into a find? :)
+21:29  e36freak: !find > zoidberg` ( why always the fighting? )
+21:29  greybot: zoidberg` ( why always the fighting? ): http://mywiki.wooledge.org/UsingFind
+21:29  zoidberg`: haha
+21:29  consumerism: i'm using the "manual loop" approach for parsing options for a bash script, from here http://mywiki.wooledge.org/BashFAQ/035 but i'd like to be able to parse -mca instead of -m -c -a. how could i do this?
+21:30  zoidberg`: its my turn with the box maby
+21:30  zoidberg`: maybe*
+21:30  e36freak: the farnsworth paradox :)
+21:31  zoidberg`: :D
+21:31  kdub: what's the difference between using a semicolon and a double ampersand when you want serially executed commands?
+21:31  zoidberg`: good memory mate
+21:31  e36freak: !&&
+21:31  greybot: cmd1 && cmd2 ## cmd1 is executed, and then if its exit status was 0 (true), cmd2 is executed. See http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+21:31  e36freak: zoidberg`: i'm a matt groening fanatic. the scary thing is that i can also do that with the simpsons
+21:31  kdub: oh, thanks e36freak
+21:31  joeytwiddle: !getopt
+21:31  greybot: The external command getopt(1) is never safe to use, unless you *know* it is GNU getopt, you call it in a GNU-specific way, *and* you ensure that GETOPT_COMPATIBLE is not in the environment. Use getopts (shell builtin) instead, or simply loop over the positional parameters.
+21:31  e36freak: !faq easily > joeytwiddle
+21:31  greybot: joeytwiddle: http://mywiki.wooledge.org/BashFAQ/035 -- How can I handle command-line arguments (options) to my script easily?
+21:31  zoidberg`: e36freak: nice man :) which season did bart cut the head off of the statue
+21:32  e36freak: that's the telltale head iirc... gotta remember the season
+21:32  e36freak: ahh, first
+21:32  e36freak: not a big fan of the first season
+21:32  e36freak: 3-10 are the best
+21:32  zoidberg`: really?
+21:32  zoidberg`: agreed
+21:33  f00bar80: jaminja, what's mc ?
+21:33  joeytwiddle: consumerism: seems getopts can do what you need
+21:33  zoidberg`: im a much bigger fan of futurama at this point
+21:33  joeytwiddle: might be Midnight Commander
+21:34  jaminja: f00bar80: midnightcommander - nice :). think it's http://midnight-commander.org will let you browse tar.gz's and rpms and god knows what else. wouldn't be without it...
+21:35  e36freak: mc is pretty nice
+21:35  jaminja: f00bar80: if your on debian or redhat it's packaged already I'd imagine...
+21:35  e36freak: if not, getting it should be fairly trivial
+21:35  e36freak: package managers <3 (especially pacman!)
+21:35  zoidberg`: ick
+21:36  zoidberg`: arch
+21:36  f00bar80: jaminja, what i has more than using gzip -l ?
+21:36  f00bar80: jameskk, it*
+21:36  f00bar80: jameskk, sorry
+21:36  tracphil: Anyone know how I can replace a variable in a sed script?
+21:36  zoidberg`: ? use replace with sed
+21:36  jaminja: f00bar80: you referred to a .tar.gz which is a compressed tar. tar tzf would do.. but mc will let you "browse" the .tar.gz easily. Just a thought anyway
+21:36  taylanub: tracphil: the question doesn't make sense
+21:36  tracphil: sed -i -e's/Host_Alias      APPADMIN_HOST.*/Host_Alias      APPADMIN_HOST=$HOSTNAME_SHORT/' install.sh.bak
+21:36  zoidberg`: !sed > tracphil
+21:36  greybot: tracphil: sed is a Stream Editor, used to filter output. It's NOT primarily useful for editing files (use ed or perl instead). Ask sed questions in ##sed.
+21:37  e36freak: tracphil: come join us in ##sed
+21:37  tracphil: YES!!! I didn't realize there was a sed
+21:37  tracphil: thanks
+21:37  zoidberg`: lol
+21:37  taylanub: if only it would be a bit more active...
+21:37  zoidberg`: and had a better sense of humor..
+21:37  pgas: though as sed has no variables, it's probably a shell question
+21:38  zoidberg`: taylanub:  i asked a while back in there if someone could write me a sed one-liner to turn the bible into harry potter
+21:38  taylanub: zoidberg`: define one-liner.  you can do it without using a newline...
+21:38  jaminja: is on topic - using environment vars inside sed from bash: use double-quotes ie sed "s/blah/$VAR/" vs single-quotes.
+21:38  e36freak: _really_ long line
+21:39  taylanub: then you _must_ sanitize the variable contents
+21:39  zoidberg`: hehe
+21:39  e36freak: jaminja: is fine, but you have to be careful with delimiters
+21:39  tracphil: lol
+21:39  e36freak: i like to put a parameter expansion in to escape whatever i'm using as a delimiter just to be safe
+21:39  tracphil: thanks will give it a  try
+21:39  taylanub: give awk some love by the way, it's a nice scripting language (you heard that)
+21:39  jaminja: general pointer e36freak - you're correct of course :) but I had that question a lot wrt single/double quotes
+21:40  e36freak: "s/blah/${var////\/}/"
+21:40  e36freak: so many slashes!
+21:40  pgas: f00bar80: tar -zxf blah.tgz fileyouwant
+21:41  e36freak: same as "s:blah:${var///\|
+21:41  e36freak: ahh
+21:41  e36freak: same as "s:blah:${var//:/\:}:"
+21:41  f00bar80: pgas, it's a tar.gz , as well it's inside another .tar file
+21:41  zoidberg`: uh oh my drunk neighbor is driving again
+21:41  zoidberg`: she just stumbled to her car
+21:42  pgas: f00bar80: it's in a tar.gz inside a tar?
+21:42  jaminja: f00bar80: gunzip it then run file on whatever you get - will see whether it's a tar or compressed data
+21:44  hwilde: how to get just the time numbers out of ping results?
+21:45  taylanub: 'man ping' maybe
+21:45  hwilde: 64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.018 ms
+21:45  taylanub: parsing it would be funky
+21:45  zoidberg`: wow yeah 'find' is nto cutting it
+21:45  hwilde: I made two awks but it doesn't seem to work
+21:45  zoidberg`: e36freak: ls | grep -v - | grep -v _ | grep -v Thumbs.db | grep -v '^\['   <-- can i get this done in 'find'
+21:46  taylanub: my eyes
+21:46  crimeboy: ;]
+21:46  jaminja: hwilde: ping -q -c5 google.com | tail -n1 maybe? :)
+21:46  hwilde: ping 127.0.0.1 | awk '{print $7}'      this returns just the time=0.017 column
+21:46  zoidberg`: taylanub:  i'm sure theres a single grep expression i could use, i just suck
+21:47  hwilde: but I want just the number 0.017
+21:47  zoidberg`: hwilde:  then use sed and just grab the value
+21:47  taylanub: zoidberg`: i could care less about the multiple greps, but you should never parse ls output
+21:47  zoidberg`: taylanub:  yes so i heard
+21:47  jaminja: hwilde: use | cut -d= -f4?
+21:47  zoidberg`: taylanub: im looking at the find article in the faq
+21:48  taylanub: zoidberg`: 'man find' ...
+21:48  zoidberg`: taylanub:  i'm not seeing how to reproduct this
+21:48  zoidberg`: produce
+21:48  hwilde: jaminja, that is really close but it says "ms" at the end
+21:48  hwilde: sed example?
+21:48  hwilde: I like sed because it has unbuffered option
+21:49  jaminja: hwilde: then | tr -d 'ms^' I guess :) so ping whatever | cut -d= -f4 | tr -d 'ms^' lots of other ways
+21:49  taylanub: find . -maxdepth 1 ! \( -name '*-*' -o -name '*_*' -o -name '*Thumbs.db*' -o -name '\[*' \)
+21:49  taylanub: not very clean either... maybe loop through ./*
+21:50  hwilde: zoidberg`, how would you do this with sed?
+21:50  zoidberg`: hwilde:  with d
+21:50  zoidberg`: you'd have to look it up, im retarded, but it would be like sed 'd/time=/ <<- $blah
+21:51  zoidberg`: but cut would work too me thinks
+21:51  taylanub: hwilde: awk '{ t=$7; sub(/time=/,"",t); print t }'
+21:51  hwilde: cut doesn't have unbuffered
+21:51  pgas: awk -F'time=| ms' 'NF>2{print $2}'
+21:51  hwilde: ooo pgas +1
+21:52  taylanub: oh mine doesn't say ms at the end
+21:52  zoidberg`: taylanub:  lol nice find string there
+21:52  taylanub: no wait it does, so what's the problem?..
+21:52  taylanub: the ms is separated by space, is yours not?
+21:52  hwilde: I just want the number :)
+21:52  hwilde: I think pgas implementation is most efficient
+21:53  pgas: not sure about that, maybe using -F'[= ]' and the correct number is even better
+21:54  taylanub: milisecond differences there, wouldn't our bottleneck be ping here? :P
+--- Log closed Fri Jan 14 23:44:11 2011
+--- Log opened Fri Jan 14 23:55:03 2011
+23:55 --- Users 576 nicks [0 ops, 0 halfops, 0 voices, 576 normal]
+23:55  nDuff: there, that latter one is what I was looking for.
+23:55  Jimmy|RSTE: thanks
+23:55  Jimmy|RSTE: reading now
+23:56 --- Channel #bash was synced in 86 seconds
+--- Log closed Sat Jan 15 00:00:40 2011

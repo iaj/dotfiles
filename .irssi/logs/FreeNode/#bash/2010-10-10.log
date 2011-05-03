@@ -1,0 +1,356 @@
+--- Log opened Sun Oct 10 00:00:14 2010
+--- Day changed Sun Oct 10 2010
+00:00  GVT: geirha, you are excluding "1" file?
+00:00  geirha: Yes
+00:01  geirha: Think of !(...) as  « *, except ... »  e.g. !(foo*)  will match the same as * except the ones also matching foo*
+00:02  GVT: geirha, I'd need something like for data in "${prefix}_${subsystem}_"!(afdeling|instelling|entiteit|etc)-data.sql
+00:02  GVT: geirha, is there a way to go from the array onderhoudstabellen=(afdeling instelling entiteit) to smth like that?
+00:05  dropdrive: How should I reuse code between bash scripts?  E.g. I always write this function everywhere:  die () { echo "$@"; exit 1 }
+00:06  erUSUL: dropdrive: make a bash_lib then source it in your scripts
+00:06  loomsen: dropdrive: write it to a script and source it in all other scripts
+00:06  geirha: GVT: Hm. Not that I can think of. You either use the one with !(afdeling|instelling|...)  or  do a test in the loop.
+00:07  dropdrive: erUSUL: I see, just "source fooo" in bar.sh?
+00:07  erUSUL: dropdrive: yes
+00:07  dropdrive: erUSUL, loomsen: Okay, Thanks.
+00:13  lennart__: how can I match a string that can contain any value from 0-6000?
+00:14  geirha: if ((var >= 0 && <= 6000)); then
+00:14  geirha: if ((var >= 0 && var <= 6000)); then
+00:14  geirha: Well, that will fail if var doesn't contain a valid number.
+00:15  geirha: !faq valid
+00:15  greybot: http://mywiki.wooledge.org/BashFAQ/054 -- How can I tell whether a variable contains a valid number?
+00:17  lennart__: That one really fails: ((: 3926 >= 0 && <= 6000: syntax error: operand expected (error token is "<= 6000")
+00:18  erUSUL: #4 ((: 3926 >= 0 && 3926 <= 6000)) && echo yay
+00:19  erUSUL: 4# (( 3926 >= 0 && 3926 <= 6000 )) && echo yay
+00:19  shbot: erUSUL: yay
+00:19  geirha: GVT: table=${data#"${prefix}_${subsystem}_"} table=${table%-data.sql}; if isIn "$table" "${onderhaustabellen[@]}"; then continue; fi; mysql -u... ; done
+00:19  geirha: !faq 46 > GVT, where isIn is the function shown here
+00:19  greybot: GVT, where isIn is the function shown here: http://mywiki.wooledge.org/BashFAQ/046 -- I want to check to see whether a word is in a list (or an element is a member of a set).
+00:20  lennart__: sorry minor error from my side works great now
+00:20  geirha: lennart__: Yeah, sorry, missed the var in the second test
+00:21  lennart__: geirha: I didn't pay enough attention, so it was not your fault
+00:23 --- yuki_no_satoshi is now known as yuki_satoshi
+00:23  rany27: exit
+00:31  petteyg: Is there a way to have bash count the number of dots in a string like "1.2.7" (other than passing to grep -c)?
+00:33  cthuluh: petteyg: grep -c wouldn't give you a correct result anyway
+00:34  geirha: # var='1.2.7' dots=${var//[!.]}; echo "${#dots} dots"
+00:34  evalbot: geirha: 2 dots
+00:34  cthuluh: grumpf
+00:35  cthuluh: he's too fast :)
+00:36  geirha: # var='1.2.7'; IFS=. read -r -a fields <<< "$var"; n=${#fields[@]}; echo "$n fields, $((n-1)) dots"
+00:36  evalbot: geirha: 3 fields, 2 dots
+00:37  erUSUL: # IFS=. read -a a <<< "1.2.7" ; echo "$(( ${#a[@]} -1))"
+00:37  evalbot: erUSUL: 2
+00:37  petteyg: evalbot: ty :)
+00:37  petteyg: geirha: meant to type you, not the bot :)
+00:50 --- peshalto_ is now known as peshalto
+00:52 --- lynucs is now known as jham
+00:56  brontoeee: how would one prepare endless loop with an option to be killed?
+01:02  Tramp: brontoeee: not sure, what you mean. So I'm guessing. You could check for the existence of a file on each iteration and break the loop if it exists
+01:03  brontoeee: Tramp, single loop can go for hours, i need inbetween kill
+01:04  Tramp: yes. endless loops tend to take a long time, even with lots of processing power
+01:06  Tramp: maybe "help trap" and "help kill" help - but I still don't get your problem. If you want to kill something, kill it. (well, in the context of processes, anyways)
+01:06  brontoeee: i meant some sort of keyboard break or kill myloop command
+01:06  brontoeee: or something
+01:07  Tramp: Ctrl-C, like anything else
+01:07 --- muzer is now known as MuzerAway
+01:08  Adman65: is there anyway to get the PID for the most recent started process? I want to run a command and store the PID for later
+01:09  erUSUL: Adman65: $?
+01:09  loomsen: $!
+01:09  smerz: $? is exit status no? :)
+01:10 * erUSUL needs sleep ;)
+01:12  cthuluh: Adman65: this will only work for a command that you run in the background, right?
+01:13  cthuluh: it won't work if that's a process that "daemonizes" itself
+01:13  Adman65: it doesn't daemonize itself
+01:22  Smirnov: anyone know how i can automate the prompts by dpkg-reconfigure ?
+01:24  cthuluh: Smirnov: dpkg-reconfigure debconf (and that's rather a question for your OS channel, if you need to know more)
+01:25  lennart__: how can i use ' as delimiter in cut command?
+01:25  cthuluh: "'"
+01:25  lennart__: thanx
+01:25  krzee: possibly also \'
+01:26  lennart__: the first suggestion did the trick
+01:27  cthuluh: !quotes > lennart__
+01:27  greybot: lennart__: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+--- Log closed Sun Oct 10 01:34:20 2010
+--- Log opened Sun Oct 10 01:34:43 2010
+01:34 --- Users 513 nicks [0 ops, 0 halfops, 0 voices, 513 normal]
+01:35 --- Channel #bash was synced in 65 seconds
+01:38 --- mmnicola1 is now known as mmnicolas
+01:43  Adman65: how can I start a process and send it to the background and redirect it's output to a file? cmd& > out.txt doesn't seem to be working. Is that the proper syntax?
+01:45  cthuluh: command > file &
+01:45  cthuluh: !redirections > Adman65
+01:45  Edong23: lol
+01:45  Edong23: you redirected that
+01:45  Edong23: lol
+01:45  cthuluh: !redirection > Adman65 , :P
+01:45  greybot: Adman65 , :P: Redirections: http://bash-hackers.org/wiki/doku.php/syntax/redirection http://mywiki.wooledge.org/BashGuide/InputAndOutput#Redirection http://bash-hackers.org/wiki/doku.php/howto/redirection_tutorial
+01:45  Adman65: ty
+01:45  cthuluh: oh and...
+01:46  cthuluh: !guide > Adman65
+01:46  greybot: Adman65: http://mywiki.wooledge.org/BashGuide
+01:46  cthuluh: now you have enough to read fo tonight :)
+01:46  Adman65: Ha!
+01:46  Adman65: yes
+01:47  Adman65: specjour > .specjour/manager.log & ; echo $! > .specjour/manager.pid ; true -- apparently that & ; is illegal
+01:47  cthuluh: it is
+01:47  cthuluh: !pf &;
+01:47  greybot: http://mywiki.wooledge.org/BashPitfalls#pf21 -- Don't do this! -- for i in {1..10}; do ./something &; done
+01:48  Adman65: hmm
+01:48  Edong23: so just remove the ;
+01:49  cthuluh: just let him read ;)
+01:49  Edong23: sorry
+01:49  Edong23: that was interesting to me
+01:50  Edong23: i wasn't giving the answer.. it was more... of a wow
+01:50  Adman65: wow at what?
+01:50  cthuluh: Edong23: np
+01:50  Edong23: im not a bash expert by any means, i only recently started actually writing or attempting scripts
+01:50  Edong23: more of a wow, like   wow, i didn't know that
+01:50  Edong23: not wow   look at those boobs
+01:50  Edong23: but   small wow
+01:51  cthuluh: huhu
+01:54  Adman65: how can I cat a file and use that output to the argument of a function?
+01:54  Adman65: err argument of a command
+01:55  cthuluh: some command "$(cat file)"
+01:55  cthuluh: but that's rather pointless
+01:55  cthuluh: go read the guide, work examples hard, understand them
+01:55  Edong23: ^ good idea
+01:55 * Edong23   starts
+01:55  Adman65: how is that example pointless?
+01:55  cthuluh: (some might argue that "$(< file)" is more efficient
+01:56  cthuluh: no
+01:56  cthuluh: but
+01:56  cthuluh: !wayttd
+01:56  greybot: What Are You Trying To Do?
+01:56  Adman65: cat some pid file, then kill that pid
+01:57  cthuluh: then it's ok
+01:57  cthuluh: kill "$(< file)"
+02:00  Edong23: I've done that, but i used the ` way
+02:00  cthuluh: !`
+02:00  greybot: The backquote (`) is used in the old-style command substitution, e.g. foo=`command`. This syntax is deprecated in favor of foo=$(command). Backslash handling inside $() is less surprising, and $() is easier to nest. See http://mywiki.wooledge.org/BashFAQ/082
+02:00  Edong23: interesting
+02:00  Edong23: no need for those for me anymore though, im going to read this whole thing
+02:03  soreau: Is there a way to detect if you're running on 64 or 32 bit in bash? For a build script..
+02:04  cthuluh: try something hackish with uname, perhaps...
+02:05  soreau: Well the reason I mention it's for a build script is because I want to make a correct assumption
+02:05  soreau: or add as a flag option
+02:05  soreau: but since I haven't seen any other build system flag for 64/32 bit, I was wondering
+02:05  Edong23: ...
+02:05  soreau: I do not have any 64bit system
+02:06  Edong23: let met log into a 64 bit system
+02:06  Edong23: i might be able to see some way
+02:06  cthuluh: you'd better ask ##workingset for that
+02:06  cthuluh: or #autotools
+02:06  ferret: soreau: compiling a C program would be one way
+02:06  ferret: on linux you can detect the ''lm'' cpuflag in /proc/cpuinfo
+02:07  ferret: that will tell you if the processor is 64-bit capable, but nothing about the kernel or the ld or the library support
+02:07  soreau: ferret: Yea, I have seen configure scripts compile a small C prog for tests
+02:08  ferret: uname -m is supposed to tell you the kernel
+02:08  Edong23: ^^
+02:08  Edong23: i just did that
+02:08  soreau: ferret: How would I figure out if it's 32/64 from a small C program?
+02:08  Edong23: $ uname -m
+02:08  Edong23: x86_64
+02:08  Edong23: uname -m
+02:08  Edong23: i686
+02:08  dropdrive: Is it generally recommended to write scripts with errexit and nounset?
+02:08  ferret: uname -m can be all sorts of things on other unix
+02:09  soreau: Compiling a small C program is so much cooler too ;)
+02:09  Edong23: lol
+02:09  Edong23: ok
+02:09  ferret: and it also doesn't really tell you anything, you can have a 64-bit kernel with entirely 32-bit userland
+02:09  soreau: indeed
+02:09  soreau: but doesn't uname target the kernel specifically?
+02:10  cthuluh: !-e > dropdrive
+02:10  cthuluh: !set-e > dropdrive
+02:10  greybot: dropdrive: "set -e" attempts to tell bash to abort the script if any command returns non-zero. But it fails. Badly. Subtly. Insidiously. Don't use it. Please. Just don't.
+02:11  cthuluh: but set -u is useful, yes
+02:11  soreau: ferret: But I would be interested in how to use a small C prog to determine weather it's setup for 64 or 32 bit
+02:12  ferret: I don't remember off the top of my head
+02:13  ferret: Probably just measuring the size of a void pointer is enough
+02:13  cthuluh: and it's not a bash question :°
+02:13  cthuluh: hmmm
+02:13  ferret: just look in pretty much any configure script for any C program :P
+02:13  cthuluh: indeed
+02:13  soreau: ferret: Thanks
+02:14  dropdrive: cthuluh: -u is nounset?
+02:14  dropdrive: cthuluh: Thanks for the tip on -e.
+02:14  dropdrive: cthuluh: What's the best way to do the negation of "if my_cmd"?  Right now I'm just using the "else" caluse.
+02:16  cthuluh: if ! command
+02:16  cthuluh: !if
+02:16  greybot: if <COMMANDS>; then <COMMANDS>; fi # http://bash-hackers.org/wiki/doku.php/syntax/ccmd/if_clause # http://mywiki.wooledge.org/BashGuide/TestsAndConditionals
+02:17  dropdrive: crikey you know it all!  thanks!
+02:17  BlackX: hi all
+02:20  Edong23: lol
+02:20  Edong23: !porn
+02:20  greybot: for ((i=1; i<100; i++)); do wget http://pornsite/image-$(printf %03d $i).jpg; sleep 10; done
+02:20  Edong23: that is useful
+02:20  cthuluh: jesus...
+02:24  BlackX: hi all, nedd some help with a script
+02:24  BlackX: hi all, need some help with a script
+02:24  Edong23: ^ looks like it works
+02:25  BlackX: some one?
+02:25  Edong23: ask
+02:27  BlackX:     x=0
+02:27  BlackX:       p1=13,37
+02:27  BlackX:       cob1=1,57;
+02:27  BlackX:       area1=6,28;
+02:27  BlackX:       fu1=0,27;
+02:27  BlackX:             function suma(){
+02:27  BlackX:               let t=$p1+$cob1+$area1+$fu1
+02:27  BlackX:                                 }
+02:27  BlackX:             function iva(){
+02:27  BlackX:              let i=$t*18/100+$t
+02:27  BlackX:                                 }
+02:27  BlackX: i have this
+02:27  BlackX: but its not working
+02:28  BlackX:  if kg=1
+02:28  BlackX:             then echo El precio es de:"$totalp"
+02:28  BlackX:             else kg<=0 echo "Dejate de jugar y introduce los kilos $:kg"
+02:28  BlackX:          fi
+02:28  BlackX:           exit 0
+02:29  BlackX: Edong23,  ???
+02:29  cthuluh: !pastebin > BlackX ...
+02:29  greybot: BlackX ...: Paste the *relevant* code: http://pastie.org/ - http://pastebin.ca/ - http://sprunge.us/ - http://pastebin.bash-hackers.org/
+02:30  cthuluh: BlackX: bash doesn't do floating point arithmetics
+02:30  cthuluh: and you don't say how it is failing...
+02:30  cthuluh: !faq float
+02:31  greybot: http://mywiki.wooledge.org/BashFAQ/022 -- How can I calculate with floating point numbers instead of just integers?
+02:33  BlackX: 10x
+02:34  techy: http://pastebin.com/s62VNEDV - script , on line 26 i keep getting an error: line 26: syntax error near unexpected token `then', is it my expression? even if i put in my first expression on line 7 which works, it still gives me same error
+02:36  cthuluh: techy: you need a space between 'if' and '['
+02:36  cthuluh: !ls > techy
+02:36  greybot: techy: Don't try to parse ls output. http://mywiki.wooledge.org/ParsingLs
+02:36  cthuluh: !quotes > techy
+02:36  greybot: techy: "USE MORE QUOTES!" They are vital. Also, learn the difference between ' and " and `. See <http://mywiki.wooledge.org/Quotes> and <http://wiki.bash-hackers.org/syntax/words>.
+02:36  techy: thanks!
+02:36  cthuluh: and check cd's return value
+02:37  BlackX: ye ok but how can i declare a variable with floating point number?
+02:37  cthuluh: a=1.0
+02:37  cthuluh: that's not what will give you floating point arithmetic in bash, though...
+02:43  techy: cthuluh i checked out globs. i indeed need to store the files within that directory, so if i do for i in *; is there a way i can pull each file out of that expression ?
+02:44  cthuluh: files=( /dir/* )
+02:44  cthuluh: (or may I have misunderstood)
+02:44  techy: no you didn't, thanks !
+02:48  techy: no you didn't, thanks !
+02:48  techy: oops
+02:53  Guest94927: yosh
+03:22  RudyValencia: How do I check if a specific process is running in a bash script?
+03:24  cthuluh: use kill -0 "$pid"
+03:24  cthuluh: or pkill, if you have it
+03:25  RudyValencia: What I'm checking is whether something else has started, by name
+03:25  RudyValencia: like, "if 'deluged' is not running, start it"
+03:26  cthuluh: !pm > RudyValencia
+03:26  RudyValencia: I'm making a Bash script to start the Deluge torrent daemon and its Web UI on my server
+03:26  greybot: RudyValencia: http://mywiki.wooledge.org/ProcessManagement
+03:26  RudyValencia: ah pgrep
+03:28  ferret: RudyValencia: can't you just start it?  Assuming it is listening on a specific local tcp port, it'll quit right away if it's already running
+--- Log closed Sun Oct 10 03:34:52 2010
+--- Log opened Sun Oct 10 03:35:11 2010
+03:35 --- Users 510 nicks [0 ops, 0 halfops, 0 voices, 510 normal]
+03:36 --- JmZ is now known as JmZ_
+03:36 --- Channel #bash was synced in 65 seconds
+04:07 --- peshalto_ is now known as peshalto
+04:11 --- yuki_no_satoshi is now known as yuki_satoshi
+04:14  hmw: softlink ../* folder issue:  /folder/with/link/ -> /some/folder, /folder/with/link/script.sh { ls .. } lists /some and not /folder/with (also applies to php scripts) - what would I need to check out, in order to access /folder/with/* when using ".." ?
+04:16  doublehp: so, i was saying...
+04:16  doublehp: i am filtering a log; i want the line preceeding a given pattern
+04:17  doublehp: the pattern is "syslog-ng starting"; for all of you, the line before is "syslog-ng stopping"; but for me, when i freese, it's not the case: i want the last recorded line before the freese
+04:18  hmw: ...now that I tried to reproduce my issue with a shell script, ls .. does list the wanted folder, but I remember having "lost" files, when moving to .. or something, while being in a soft-linked folder or similar...
+04:21  hmw: doublehp: perhaps this helps: http://www.unix.com/unix-dummies-questions-answers/116387-grep-8-lines-before-after-pattern.html
+04:23  doublehp: hmw: that's the heavy way :) the one i wanted to avoid :)
+04:23  hmw: -A
+04:26  hmw: i am too stupid to find an answer for my issue in google - perhaps the language - i suppose it is due to the targeted folder's .. entry pointing to its real parent - can I make the .. link work like some sort of "backwards" - related to the calling script's location?
+04:26  doublehp: << Eterm -e sudo bash -c "export DISPLAY=:0.0; rox /tmp ; echo -e '\nDone (sleeping 10s)'; sleep 3" >> used to work, a few months ago. Now, Rox closes after 10s ... any idea ?
+04:28  hmw: if it really *suddenly* stopped working, it might be a good idea to ask that in a channel or forum related to your OS...
+04:28  hmw: what is rox anyways?
+04:29  doublehp: soirry, 5th crash in 2h; any one answered me ?
+04:30  hmw: if it really *suddenly* stopped working, it might be a good idea to ask that in a channel or forum related to your OS...
+04:30  hmw: what is rox anyways?
+04:30  hmw: (no other activity in the channel)
+04:30  doublehp: a filer; i don't have any special date; i rarely use this script; it was working in june; not in october
+04:31  hmw: i solved my problem, but it made my PHP script uglier... :(
+04:32  hmw: and mv'ing a file to .. and then not finding it anymore is a hard thing
+04:42  doublehp: 2 bugs prevent me studying 5 bugs ... bugs circularly producing bugs, and preventing me fixing them ...
+04:45  hmw: doublehp: i feel reminded on fork bombs somehow *G*
+04:45  doublehp: hmw: i remember why i want to avoid the URL you gave me: the log file is 1G big; so if i could avoid parsing it twice ...
+04:45  hmw: you dont need to, use the -B option
+04:46  doublehp: hmw: no, known kernel hangs; my kernel has 4 bugs => freeses and KP, plus other bugs in "soft land" ...
+04:46  SeanBannister: Hey all, I'm writting some text to a file in my bash script but the problem is it's getting interpreted, for example the text includes $test but it doesn't write $test to the file because it thinks it's a variable. I'm currently using the following :
+04:46  SeanBannister: cat > file.sh << EOF
+04:46  SeanBannister: $example1
+04:46  SeanBannister: $example2
+04:46  SeanBannister: EOF
+04:47  hmw: prepend the $ with a \
+04:47  krzee: i love here docs
+04:48  hmw: SeanBannister: ^
+04:48  SeanBannister: hmw: Yeah I was doing that but there's 50 odd lines I'm writting and it gets messy
+04:49  SeanBannister: I can write one line ok with: echo '$example' > file
+04:49  SeanBannister: can I do anything similar with cat?
+04:49  doublehp: hmw: yes, -B is what i need.
+04:49  hmw: SeanBannister: no idea :(
+04:50  doublehp: how do i ask sed to ... accept sevral patterns, and, reject some other ? ie, i want paterns A and B, but reject lines containing C
+04:50  SeanBannister: Yeah, it's odd because I've been playing around and it doesn't seem to be possible
+04:58  doublehp: thanks, good night.
+05:03  k-: goodjob k-x
+05:16 --- boaz_ is now known as boaz
+05:27  h4x0r`: hey
+--- Log closed Sun Oct 10 05:34:20 2010
+--- Log opened Sun Oct 10 05:34:43 2010
+05:34 --- Users 508 nicks [0 ops, 0 halfops, 0 voices, 508 normal]
+05:35 --- Channel #bash was synced in 65 seconds
+06:43 --- tecra is now known as xxtecraxx
+--- Log closed Sun Oct 10 07:33:51 2010
+--- Log opened Sun Oct 10 07:34:16 2010
+07:34 --- Users 507 nicks [0 ops, 0 halfops, 0 voices, 507 normal]
+07:34 --- Server: [bartol.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+07:35 --- Channel #bash was synced in 64 seconds
+08:19  momentum: how can in by default, have all files I create be chmod 700 ?
+08:19  momentum: is there a way to default this?
+08:19  momentum: actually, make that 600
+08:44  lhunath: change your umask.
+08:50  hemanth: lhunath, i was about to type that but <momentum> in not here
+08:50 * hemanth sticky sticky bits :)
+08:58  tsolox: how do make a script that accepts an input via piping. Like, echo 'apple'|myscript.sh
+09:01  yitz_: Read from STDIN
+09:03  kingsley: tsolox: while read aline ; do echo $aline ; done
+09:04  kingsley: tsolox: cat > /tmp/output
+09:05  kingsley: tsolox: Either line can be put in a script to read from standard input.
+09:06  tsolox: thanks..it's working now. It's for ooffice..so that i can view attachments from mutt emails.
+09:07 --- streuner__ is now known as streuner
+09:11  tsolox: ohh..it's not working..mutt is piping the actual .ppt data ...
+09:13  tsolox: i thought it was piping the filepath..but it's piping the contents instead..
+09:24  lhunath: so put it in a file
+09:26  _abc_: Why does somehting like this: sed -e 's/regexp/\n/g' -e '/^$/d not remove the blank lines?
+09:26  _abc_: Doesn't d operate on the extra lines generated by s ?
+09:27  _abc_: Do I need to use g to copy it back?
+--- Log closed Sun Oct 10 09:33:24 2010
+--- Log opened Sun Oct 10 09:33:51 2010
+09:33 --- Users 507 nicks [0 ops, 0 halfops, 0 voices, 507 normal]
+09:34 --- Channel #bash was synced in 72 seconds
+09:36  tsolox: ok..tee > the_file does it!!
+09:37  tsolox: haha.. it's a good policy to always try what the shell can offer, before doing it in c
+09:39  tsolox: not quite there yet...
+09:39  pgas: cat > file
+09:40  pgas: LinuxKer: makes no sense to me
+09:40  LinuxKer: pgas: Can anyone point me to a bash script to Delete Subdirectory but not sub-subdirectory ? That means make all subsub directory a subdirectory in Linux ?
+09:40  pgas: oh wait let me read the question above
+09:40  LinuxKer: English proble,
+09:40  LinuxKer: m
+09:42  pgas: what if Folder3 has the same name of an existing folder in Folder1?
+09:42  JavaNub: evalbot: arr=(r t f m); echo test'!'
+09:42  loomsen: # echo foo
+09:42  evalbot: loomsen: foo
+09:42  LinuxKer: pgas: It doesn't have
+09:43  JavaNub: # arr=(r t f m); echo test'!'
+09:43  evalbot: JavaNub: test!
+09:43  JavaNub: neato
+09:43  LinuxKer: pgas: I have hundres of files sorted using alphatically order which an a folder name "a" where files and folder that start with a go, i want to delete all those a, b,c,d folders
+09:43  tsolox: kingsley: thanks..your 'cat > /tmp/output' works well with viewing attachments in mutt!!!
+09:44  tsolox: pgas: thanks too
+09:45  pgas: LinuxKer: ok, the most straithforward is probably something like: mkdir tmp;mv Folder1/*/* tmp/;rm -rf Folder1/*/;mv tmp/* Folder1/;rm -rf tmp
+09:45  LinuxKer: pgas: i will try
+09:48  LinuxKer: pgas: Great It works
+09:48  LinuxKer: pgas: thanks
+09:51 --- JmZ_ is now known as JmZ
+09:58  pif: hi, in case .. esac I don't get the diff between ;& and ;;&
+10:00  LinuxKer: pgas: If you are free, Any script to categorize folders with similar name into one directory. For example: There are 4 directories named LinuxFedora, LinuxUbuntu, WindowsXP and Windows7. The script should be able to create two folder named Linux and Windows where the respective directories are moved.
+--- Log closed Mon Oct 11 07:24:35 2010

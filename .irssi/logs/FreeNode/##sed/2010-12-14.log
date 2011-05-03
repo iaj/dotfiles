@@ -1,0 +1,103 @@
+--- Log opened Tue Dec 14 11:47:24 2010
+--- Log closed Tue Dec 14 11:47:24 2010
+--- Log opened Tue Dec 14 11:52:48 2010
+11:52 --- Users 97 nicks [0 ops, 0 halfops, 0 voices, 97 normal]
+11:54 --- Channel ##sed was synced in 116 seconds
+--- Log closed Tue Dec 14 12:41:36 2010
+--- Log opened Tue Dec 14 12:52:02 2010
+12:52 --- Users 96 nicks [0 ops, 0 halfops, 0 voices, 96 normal]
+12:53 --- Channel ##sed was synced in 119 seconds
+--- Log closed Tue Dec 14 15:03:14 2010
+--- Log opened Tue Dec 14 15:13:39 2010
+15:13 --- Users 95 nicks [0 ops, 0 halfops, 0 voices, 95 normal]
+15:15 --- Channel ##sed was synced in 118 seconds
+15:43  ldfsilva|2: folks, is there anyway for sed to interprete \n ?
+15:43  ldfsilva|2: i just would like to change , <comma> by return
+15:49  ldfsilva|2: 4#echo "a,b"|sed 's/,/\r\n/g'
+16:11  tvm: hi, sed -n '/<message/,/<\/message>/p' prints contents between the <message> tags, how would i specify that i want output the the content only if there is certain value between the tags?
+16:20  csabo: tvm im pretty crappy with sed, but when theres only specific things i want to print, i use /foo/!d
+16:20  csabo: not sure if that helps in your situation
+16:21  tvm: this is multiline string
+16:21  tvm: beggining with <message> and ending with </message>
+16:21  tvm: i only want to print it
+16:21  tvm: if there is certain value between the tags
+16:21  csabo: you want it
+16:21  csabo: hmm
+16:22  csabo: so your tags are not on the same line
+16:22  tvm: nope.
+16:23  csabo: # print section of file between two regular expressions (inclusive)
+16:23  csabo:  sed -n '/Iowa/,/Montana/p'             # case sensitive
+16:23  tvm: yes, that's what i already have.
+16:23  csabo: oh :(
+16:23  tvm: but i want to print it only if there is another string between the tags
+16:24  csabo: jeez
+16:24  csabo: what if you ran sed twice
+16:25  csabo: run it once, meet the condition of if that string exists. if so, pipe to another file, then run that file through sed
+16:25  tvm: hmm, that wouldn't help. because it matches multiple times.
+16:25  csabo: oh my
+16:26  csabo: which occurance of that string do you want to match against
+16:26  csabo: and is it a set number each time
+16:28  tvm: this is a script, which greps 1000+ logfiles for an error and outputs -C100 context for each match, but as the entries vary in length the -C100 output will display the entry that i want but also other entries.
+16:28  tvm: and i need sed to display ONLY the entry that i want.
+17:03  Riviera: Instead of asking for help with punctual issues, it might make more sense to draw the whole picture and ask for ink.
+17:03  Riviera: Err.
+17:03  Riviera: :)
+17:21  csabo: lol Riviera your buffer was scrolled up wasnt it
+17:24  Riviera: no no :)
+17:24  Riviera: Just decided in the middle of the sentence that it's not worth it .. :)
+17:25  csabo: yeah, thats why i just started ignoring him
+17:26  csabo: Riviera can sed be run against say 2 files at once? eg: "sed '/blah/!d/ $var $var2'" ?
+17:33  Riviera: The question is ambiguous and the broken syntax does not clarify anything; if the input stream should consist of both input files concatenated, then yes, it can.
+17:45  mmckinst: csabo: you can do that with awk http://backreference.org/2010/09/11/smart-ranges-in-awk/
+17:46  mmckinst: if tha helps
+17:47  mmckinst: actually I think I misread your question so that won't help :(
+17:50 --- kizoku_ is now known as kizoku
+17:53  cthuluh: I understand it as "can I run sed on more than one file?"
+17:53  cthuluh: => sed 'commands' file1 file2 ...
+18:04  ldfsilva|2: folks, changin values in a : separated line such as in /etc/shadow file, how could it be for the second field ( password hash )
+18:13  cthuluh: umask 077; sed '/badguy/ s/:[^:]*/:!/' /etc/shadow > /tmp/shadow.tmp && less "$_"
+18:13  cthuluh: though that's not a really beatiful way to edit such an important file
+18:13  cthuluh: beautiful*
+18:20  ldfsilva|2: 4# echo "root:ASdadew3434x:14957::28:14:::"|sed 's/\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)/\1XXX:\3\4\5\6\7\8\9/'
+18:20  shbot: ldfsilva|2: root:ASdadew3434x:14957::28:14:::
+18:22  ldfsilva|2: wrong one, this one is ok:
+18:22  ldfsilva|2: echo "root:ASdadew3434x:14957::28:14:::"|sed 's/\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)\(.*:\)/\1XXXX\3\4\5\6\7\8/'
+18:22  ldfsilva|2: not beautiful as well =\
+18:23  cthuluh: hem
+18:23  cthuluh: I rather meant that sed wasn't the best tool
+18:24  cthuluh: your software distro should come with appropriate tools
+18:24  ldfsilva|2: should it work \(.*:\){8} ?
+18:24  cthuluh: probably not
+18:24  cthuluh: \{8\} would
+18:25  cthuluh: but...
+18:25  cthuluh: what are you trying to do? :P
+18:27  ldfsilva|2: just to replace a specific field
+18:27  cthuluh: which one?
+18:27  ldfsilva|2: could use cut, awk, just checking how to work with sed
+18:27  Riviera: "just checking"
+18:27  Riviera: That's like saying
+18:27  cthuluh: ldfsilva|2: are you trying to disable an account?
+18:28  ldfsilva|2: the second one, the most important part is that we can not build a regex with the : content
+18:28  Riviera: "i don't respect your help, because it is not important to me"
+18:29  ldfsilva|2: Riviera, I did not get your point
+18:30  cthuluh: ldfsilva|2: I didn't get yours
+18:31  ldfsilva|2: =\  i'm tryint to work with : separated fields where I can not take the regex among then in consideration... the : should be the important part then we will be able to replace the 1st value, 2nd value . so on
+18:32  cthuluh: are you just trying to use sed in order to use sed or do you have an _actual_ job to be done?
+18:34  cthuluh: /etc/shadow is an important file, don't mess with it unless you're forced to do so
+18:37  ldfsilva|2: cthuluh trying to change hash value for specific users in shadow file that's why not using system tools
+18:38  cthuluh: I don't understand why it could be a reason
+18:50  jente: hi, the sedfaq helped me out a lot already, but I still have trouble using a shell variable in my sed-expression. I am not sure if it is possible ... I have a string of numbers, separated by spaces and formed into blocks, which in return are comma separated. I put an example here: http://dpaste.com/286602/ What I would like to achive is using the number stored in $TAG to determin the field to extract. Possible?
+--- Log closed Tue Dec 14 21:42:32 2010
+--- Log opened Tue Dec 14 21:42:56 2010
+21:42 --- Users 94 nicks [0 ops, 0 halfops, 0 voices, 94 normal]
+21:42 --- Server: [lindbohm.freenode.net] [freenode-info] channel trolls and no channel staff around to help? please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+21:44 --- Channel ##sed was synced in 116 seconds
+--- Log closed Tue Dec 14 22:21:34 2010
+--- Log opened Tue Dec 14 22:36:58 2010
+22:36 --- Users 93 nicks [0 ops, 0 halfops, 0 voices, 93 normal]
+22:38 --- Channel ##sed was synced in 111 seconds
+--- Log closed Tue Dec 14 23:02:17 2010
+--- Log opened Tue Dec 14 23:07:42 2010
+23:07 --- Users 92 nicks [0 ops, 0 halfops, 0 voices, 92 normal]
+23:09 --- Channel ##sed was synced in 117 seconds
+--- Log closed Wed Dec 15 00:00:31 2010

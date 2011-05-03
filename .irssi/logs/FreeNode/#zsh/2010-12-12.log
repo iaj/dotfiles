@@ -1,0 +1,155 @@
+--- Log opened Sun Dec 12 00:00:40 2010
+00:16  whitedragon: Hey folks. Is there a way to dump all defined variables in a script?
+00:30  peth: whitedragon: not sure what you mean but "env" or "set" without arguments will do what you want, if my guess is right
+00:30  peth: try both to see what they do
+00:47  whitedragon: peth: set without any arguments seems to be just what i need. Thanks.
+01:00 --- mren is now known as mren|off
+01:14  whitedragon: Hey again folks. Is there a way to set the COMPLETE_ALIASES-option per command/alias? Because i have some aliases that should get the completion of the actual command they refer to but i have other aliases as well.
+02:15 --- peth_ is now known as peth
+03:20  _wiz_: has someone written support for 7z(1) command line completion?
+08:18  SatoshiHayazaki: Hey guys, I wonder if you can help me...I'm trying to play some files with subtitles on mplayer. The layout is like "File 1.avi", "File 1.srt.srt", "File 2.avi", "File 2.srt.srt"
+08:18  SatoshiHayazaki: Is there a way to use them in the same loop
+08:19  SatoshiHayazaki: so I can do something like for i in *; do mplayer "$i".avi -sub "$i".srt.srt; done
+08:37  teratorn: you want to loop over *.avi and then split the extension off
+08:41  teratorn: for name in *.avi; do
+08:41  teratorn:     [[ $name =~ (.*)\.avi ]]
+08:41  teratorn:     basename=$match[1]
+08:41  teratorn:     echo mplayer $name $basename.srt.srt
+08:41  teratorn: done
+08:41  teratorn: SatoshiHayazaki: ping.
+08:42  SatoshiHayazaki: teratorn, wow, thanks
+08:42  SatoshiHayazaki: I actually did it with for i in *avi(:r); do mplayer "$i".avi -sub "$i".srt.srt;done
+08:43  SatoshiHayazaki: but yours is a somewhat neater way
+10:00 --- insomnia1alt is now known as insomniaSalt
+10:23  Bzek_: Hello. How to create something like that: alias 's us2'='ssh -l root 8.8.8.8' 
+10:23  Bzek_: It doesn't work.
+10:39  thrig: make a 's' script or function that does something with the 'us2' argument
+14:21  tdn: How do I make a while loop that runs until user says stop? I am thinking a read in the while cond. And if read gets and 'y' then it continues, otherwhise it stops.
+14:21  tdn: I am thinking this must be a pretty common thing to do, however, I have not been able to find any example on Google. Hope you can help.
+14:29  ft: zsh's `read' builtin has an option for y/n questions.
+14:29  ft: see "man zshbuiltins"
+14:29  Mikachu: and -t for just checking if there is input to read at all
+14:29  Mikachu: iirc
+14:30  tdn: ok
+14:38  tdn: Erhm. How do I increment an integer by one?
+14:38  tdn: cnt=0; $cnt=$cnt+1 does not work.
+14:38  Mikachu: (( cnt++ ))
+14:38  Mikachu: also, never put a $ on the lhs
+14:38  tdn: lhs?
+14:39  Mikachu: left hand side
+14:39  Mikachu: it will expand to 0=0+1
+14:39  tdn: Mikachu, yeah, I noticed that.
+14:39  Mikachu: but even cnt=0+1 will just assign the string 0+1
+14:39  Mikachu: (( )) introduces an arithmetic context (or something)
+14:39  tdn: ok.
+14:39  tdn: Makes sense.
+14:39  tdn: However, I thought parenthesis were for subshells.
+14:40  Mikachu: that's one pair ;)
+14:40  Mikachu: ( (( cnt++ )) ) would increment the var in a subshell (which would not actually have any useful effect)
+14:40  tdn: Ok.
+14:41  tdn: foo=$(read); echo $foo; does not work as I expecte.
+14:41  tdn: How do I assign foo to what is entered in read?
+14:41  Mikachu: read foo
+14:41  tdn: Oh.
+14:41  tdn: Of course. Thanks.
+14:42  Mikachu: read -t0 foo will wait 0 seconds if there is no input to read
+14:43  Mikachu: and then return false
+14:43  Mikachu: so if you do while read -t1 -q; do something; done
+14:43  Mikachu: err
+14:43  Mikachu: so if you do while ! read -t1 -q; do something; done
+14:43  Mikachu: it will exit when you press the y key
+14:43  Mikachu: or 0
+14:44  tdn: Ok.
+14:51  tdn: How can I eject dvd drive from zsh?
+14:52  rudi_s: tdn: eject
+14:52  tdn: Of course. Thanks!
+14:52  rudi_s: np
+14:57  Mikachu: eject -t usually closes the tray
+15:20 --- mren|off is now known as mren
+15:59 --- netron_ is now known as netron
+17:22 --- dive is now known as Guest76165
+17:24 --- Guest76165 is now known as dive
+17:48  CyberDomovoy: hi
+17:49  Mikachu: hello
+17:51  CyberDomovoy: i'm a zsh noob, coming from bash, and need some help, of course :) i set ECHO_Q="$QUIET || echo", later i do $ECHO_Q "some string". When doing this in bash, it works, zsh tells me "command not found: false || echo", how do i put a command and its arguments in a variable?
+17:52  ft: /topic -> wikifaq
+17:54  CyberDomovoy: ok, i was thinking it has something to do with splitting, thx
+17:56  ft: at this point, Mikachu usually advises people to use an array instead. which is a good idea. :)
+17:56  Mikachu: i was thinking it is hopefully in the faq entry
+17:56  ft: Mikachu: nope, xyou didn't add it yet. :)
+17:56  Mikachu: heh
+18:02  CyberDomovoy: QUIET=false; ECHO_Q="$QUIET || echo"; ${=ECHO_Q} "some text";  This doesn't output anything... what am i missing?
+18:04  Mikachu: it sends || as an argument to false
+18:04  Mikachu: you can't have syntax in a variable
+18:04  CyberDomovoy: hmmm
+18:04  Mikachu: you'd need to use eval
+18:04  ft: not in other shells either, though.
+18:05  CyberDomovoy: eval... don't like that
+18:05  ft: you shouldn't like it. :)
+18:05  CyberDomovoy: any other way to do what i want?
+18:06  ft: xecho() { [[ -n $QUIET ]] && return; echo "$@"; }
+18:06  ft: or something else along those lines.
+18:07  CyberDomovoy: yes, thought about that, guess i'll do it
+18:21  kamcio2603: Hello
+18:21  kamcio2603: why im getting this : complete:13: command not found: compdef
+18:21  Mikachu: when you do what
+18:21  kamcio2603: when i login in my account
+18:22  kamcio2603: im trying to put my zsh config for all users in server
+18:22  Mikachu: then you are probably doing something wrong
+18:22  kamcio2603: i know,but what im doing wrong?
+18:23  kamcio2603: where i need to put my zshrc config for all users in server?
+18:23  kamcio2603: (global config for everyone)
+19:12  reggie: .win 8
+--- Log closed Sun Dec 12 19:36:44 2010
+--- Log opened Sun Dec 12 19:52:09 2010
+19:52 --- Users 156 nicks [0 ops, 0 halfops, 0 voices, 156 normal]
+19:53 --- Channel #zsh was synced in 87 seconds
+--- Log closed Sun Dec 12 20:18:37 2010
+--- Log opened Sun Dec 12 20:23:57 2010
+20:23 --- Users 155 nicks [0 ops, 0 halfops, 0 voices, 155 normal]
+20:25 --- Channel #zsh was synced in 90 seconds
+20:26  markand: hello
+20:28  markand: could someone explain me this difference between zsh and a basic (freeBSD) sh ? http://pastebin.com/2KaB66ea
+20:30  markand: above the prompt I have cmds="rm ls" like the sh one
+20:31  peth: that's the problem. you assigned one element, so for x in elements iterates over one element.
+20:31  peth: zsh doesn't split by itself
+20:31  markand: hmm okay
+20:32  peth: either you tell it to explicitly, or you assign multiple elements as in cmds=(rm ls)
+20:32  markand: but cmds=() is not standard
+20:33  markand: I would like something that works with any shell
+20:33  markand: particularly unix sh
+20:33  Mikachu: that is very masochistic
+20:33  markand: yes :)
+20:34  Mikachu: zsh isn't posix compatible
+20:34  Mikachu: you can check if you're in zsh and do emulate -L sh or so in the beginning of the script, and it should get you partway there
+20:34  markand: how could I split it by spaces ?
+20:34  markand: Mikachu, thanks this workaround could works
+20:45  aep: any idea how to sort  f_1.png ... f_123.png  correctly? *(N) doesnt seem to help
+20:46  aep: in a glob that is
+20:46  Mikachu: *(n)
+20:46  aep: neither
+20:46  aep: doesnt even work with just  1.png to 123.png
+20:48  aep: sort -n works fine. hmpf
+20:48 * aep does ls * | sort -n
+20:51  Mikachu: it works perfectly fine
+20:51  Mikachu: you are aware of course that ls sorts arguments?
+21:10  aep: aaah...
+21:10  Mikachu: at least gnu ls has -U for no sorting
+21:11  aep: yeah, all good. thanks
+21:11 * aep aliases ls to ls -U
+21:13  thrig: `ls *` is probably a useless use of ls, or of *, depending
+21:13  aep: now thats a good point..
+21:14  aep: and i just realized i actually _want_ it sorting. using ls * as a testcase for globbing was just wrong
+21:14 --- mqt is now known as Guest70759
+--- Log closed Sun Dec 12 21:18:54 2010
+--- Log opened Sun Dec 12 21:24:17 2010
+21:24 --- Users 156 nicks [0 ops, 0 halfops, 0 voices, 156 normal]
+21:25 --- Channel #zsh was synced in 83 seconds
+--- Log closed Sun Dec 12 23:19:05 2010
+--- Log opened Sun Dec 12 23:24:27 2010
+23:24 --- Users 158 nicks [0 ops, 0 halfops, 0 voices, 158 normal]
+23:24 --- Server: [niven.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+23:25 --- Channel #zsh was synced in 84 seconds
+23:33 --- mren is now known as mren|off
+23:42 --- peth_ is now known as peth
+--- Log closed Mon Dec 13 00:45:14 2010

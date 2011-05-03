@@ -1,0 +1,178 @@
+--- Log opened Sun Nov 14 19:50:10 2010
+--- Log closed Sun Nov 14 19:50:10 2010
+--- Log opened Sun Nov 14 19:55:31 2010
+19:55 --- Users 557 nicks [0 ops, 0 halfops, 0 voices, 557 normal]
+19:55 --- Server: [niven.freenode.net] [freenode-info] channel flooding and no channel staff around to help? Please check with freenode support: http://freenode.net/faq.shtml#gettinghelp
+19:56 --- Channel #bash was synced in 82 seconds
+--- Log closed Sun Nov 14 20:32:42 2010
+--- Log opened Sun Nov 14 20:38:12 2010
+20:38 --- Users 560 nicks [0 ops, 0 halfops, 0 voices, 560 normal]
+20:39 --- Channel #bash was synced in 84 seconds
+20:42 --- taylanub is now known as TaylanUB
+20:43  _zip: is there a way to store stdout and stderr of a program called in a $() into variables? stdout would be naturally stored in the '$foo', if the statement would be: foo=$(something), but where would you store stderr, or capture it or w/e?
+20:43 --- TaylanUB is now known as gineurb
+20:44 --- gineurb is now known as taylanub
+20:44  erUSUL: _zip: var=$(command 2>&1 )  ??
+20:44  erUSUL: !redirection
+20:44  greybot: Redirections: http://bash-hackers.org/wiki/doku.php/syntax/redirection http://mywiki.wooledge.org/BashGuide/InputAndOutput#Redirection http://bash-hackers.org/wiki/doku.php/howto/redirection_tutorial
+20:45  _zip: ahkay, thanks
+20:50  _zip: erUSUL: I'm not sure if I understood how to access stderr in your example, care to give an example?
+20:50  erUSUL: _zip: you want them in separate vars ?
+20:50  _zip: yes
+20:53  erUSUL: _zip: really dunno if it can be done running the command only once ...
+20:54  _zip: nuts :(
+20:54  erUSUL: using a temp file?
+20:55  erUSUL: ugly but may be the only way ...
+20:57  _zip: :|
+--- Log closed Sun Nov 14 21:10:17 2010
+--- Log opened Sun Nov 14 21:11:02 2010
+21:11 --- Users 564 nicks [0 ops, 0 halfops, 0 voices, 564 normal]
+21:12 --- Channel #bash was synced in 101 seconds
+21:20  poisonbit: _zip, you may use an array instead of a variable (arr[0] for stdout and arr[1] for stderr) and subshells+redirections
+21:21  poisonbit: r[1]="$( { r[0]="$(ls shit)" ; } 2>&1 )"; printf 'stdout: %s\nstderr: %s\n' "${r[0]}" "${r[1]}"
+21:21  poisonbit: # r[1]="$( { r[0]="$(ls shit)" ; } 2>&1 )"; printf 'stdout: %s\nstderr: %s\n' "${r[0]}" "${r[1]}"
+21:21  evalbot: poisonbit: stdout:
+21:21  evalbot: poisonbit: stderr: ls: cannot access shit: No such file or directory
+21:21  poisonbit: # touch shit; r[1]="$( { r[0]="$(ls shit)" ; } 2>&1 )"; printf 'stdout: %s\nstderr: %s\n' "${r[0]}" "${r[1]}"
+21:21  evalbot: poisonbit: stdout:
+21:21  evalbot: poisonbit: stderr:
+21:21  poisonbit: mmm does not work
+21:22  twkm: good.
+--- Log closed Sun Nov 14 22:09:27 2010
+--- Log opened Sun Nov 14 22:09:54 2010
+22:09 --- Users 567 nicks [0 ops, 0 halfops, 0 voices, 567 normal]
+22:11 --- Channel #bash was synced in 80 seconds
+22:19  solstice: hi .when you run /bin/sh (symlik to bash) SHELL is /bin/bash. is it a bug ?
+22:20  solstice: why is it not /bin/sh ?
+22:20  twkm: because the shell is bash in posix-ish mode.
+22:20  twkm: also, running a shell doesn't necessarily change SHELL.
+22:21  poisonbit: inigo@crono:~$ /bin/ksh
+22:21  poisonbit: $ echo $SHELL
+22:21  poisonbit: /bin/bash
+22:21  TheBonsai: SHELL  The full pathname to the shell is kept in this environment variable.  If it is not set when the shell starts, bash assigns to it the full pathname of the current user’s login shell.
+22:21  twkm: indeed.  so, work out why bash is your SHELL, rather than the random shell you happened to invoke most recently.
+22:21  solstice: poisonbit: ? really ?
+22:22  poisonbit: really here
+22:22  solstice: man login also tell about $SHELL
+22:22  twkm: certainly man bash won't.
+22:25 --- kaeser is now known as enigmata
+22:26 --- enigmata is now known as caetanus
+22:26 --- caetanus is now known as kaeser
+22:39  xnox: I have seen a person commit a change in a simple makefile. He replaced "mv" commands to "-mv" commands. What is the difference?
+22:42  twkm: ''man make''
+22:43  cthuluh: or probably rather: ''info make''
+22:43  twkm: ewww.
+22:44  cthuluh: he has an ubuntu cloak ;)
+22:44  cthuluh: so I guess he's not using openbsd' make
+22:44  twkm: ((ewww**2))
+22:51 --- Muzer is now known as MuzerAway
+22:53  anon33__: is there a way to use an argument from the previous command? for instance, i did mkdir <path/to/dir> and then after mv <file> <previously/created/dir>
+22:55  twkm: yes.
+22:55  cthuluh: mv <file> !$
+22:56  twkm: ewww, we hates histsub.
+22:56  anon33__: twkm: what would the alternative then be? also - how would i also reference the <file> in the previously instate mv command?
+22:57  cthuluh: there's an other way
+22:59  twkm: there is a special parameter that would be useful, but frankly i'd just use a variable.
+22:59  anon33__: twkm: i'm looking to do this on the fly - not using a script
+22:59  twkm: a'la, dir=path/to/dir ; mkdir "$dir" && mv "$file" "$dir"
+22:59  twkm: then i guess you want that special parameter.
+23:00  anon33__: $!?
+23:00  cthuluh: not exactly this one 8)
+23:14  hacosta_: where can i read about the difference between @ and * in arrays
+23:14  hacosta_: echo ${a[@]} and printf ${a[@]}
+23:14  hacosta_: give different results
+23:15  twkm: ''man bash''.
+23:16  twkm: the difference bewteen echo and printf is different than the difference between using * and @ as the array subscript.
+23:16  hacosta_: well, yeah but * works fine, i know i can read about it in man bash, but i was thinking of something a bit more specific
+23:16  hacosta_: like a section
+23:16  hacosta_: or a webpage
+23:17  twkm: it is quite specific in the manual.
+23:18  hacosta_: manual section.
+23:19  hacosta_: something like: read the section 3 of the manpage
+23:19  hacosta_: or whatever.
+23:20  twkm: so you want me to find it, so you can find it more easily, because instances of * are far too common?
+23:21  hacosta_: i don't want you to find it, i just tought someone might know a good resource of the top of their head, it's fine if you don't. thanks
+23:23  gniourf_gniourf: hacosta_, http://www.gnu.org/software/bash/manual/bashref.html#Special-Parameters
+23:23  hacosta_: thanks
+23:26  twkm: frankly i suggest you read *every* section in which you find a *, but meh.
+23:28  hacosta_: i might, i just needed to solve something real fast. thanks (-:
+23:28  twkm: *shrug*
+23:29  geirha: hacosta_: The solution is probably adding quotes.
+23:30  gniourf_gniourf: use "$@" (with the quotes)
+23:30  geirha: ${a[@]} is very different from "${a[@]}"
+23:31  gniourf_gniourf: oh he wanted @ and * in array subscripts
+23:31  geirha: Well, same rules apply
+23:32  wideyes: anyone have a moment to help this noob get some keypresses into a bash shell script?
+23:32  geirha: Sure, open an editor and press the keys
+23:32  twkm: ''help read''
+23:33  twkm: (probably a mistake -- i tend to hate such things)
+23:33  wideyes: ;)
+23:33  wideyes: will read catch an 'enter' keypress?
+23:34  wideyes: and can I feed read the output of a variable?
+23:34  twkm: uh.
+23:34  twkm: variables don't produce output.
+23:35  gniourf_gniourf: do you mean the content of a variable?
+23:35  wideyes: yes
+23:35  gniourf_gniourf: # variable="a nice variable"; read <<< "$variable"; echo $REPLY
+23:35  evalbot: gniourf_gniourf: a nice variable
+23:35  gniourf_gniourf: it seems you can
+23:36  twkm: variables you cannot get the data out of are moderately useless, though perhaps not entirely so.
+23:36  wideyes: nice. My concern, though, is getting an enter keypress at the end of the string
+23:37  wideyes: so this script will be entering data into another script that expects user input followed by 'enter' keypresses
+23:38  gniourf_gniourf: have you tried to use read already?
+23:38  wideyes: I have, but I could have had my syntax wrong
+23:38  wideyes: (not very experienced, as you can see)
+23:38  gniourf_gniourf: you know, something like read -p "Please enter your name: "
+23:38  geirha: The BashGuide might make things clearer
+23:39 --- lynucs is now known as jham
+23:39  wideyes: ok
+23:39  wideyes: google wasn't very helpful, but it was hard to phrase what I needed
+23:40  wideyes: what I'm trying to do is to get the script I'm writing to take command line arguments and feed them to another script at certain times, followed by keypresses
+23:40  geirha: followed by newlines you mean
+23:40  wideyes: so I'm not asking for user input, rather inputting data to another script that asks for user input
+23:41  wideyes: sorry, yes, you're right, or whatever the bash shell scripting equivalent of pressing the 'enter' key would be
+23:41  geirha: printf '%s\n' "$var"
+23:41  geirha: That'll output the content of var followed by a newline.
+23:41  Riviera: But of course you want to wait until the other script asks for the user input?
+23:41  wideyes: right
+23:41  wart___: hi folks.  i'd like some pointers on how to accoplish this task.  i know that some combination of bash-completion might work.  i have a simple .c program (addrlookup) that takes as input a name and delivers as output a list of email addresses scraped from my notmuch database.  i'd like to make this somehow live, such that I can type PeTabTab and it'll return all the Pe* results like ls PeTabTab
+23:41  wideyes: yes, so the other script asks for input. Then I feed the content of a variable to it, followed by a simulated 'enter'
+23:42  wideyes: will that printf command fit that bill?
+23:43  geirha: wart___: bash's tab-completion is handled by readline. Have your C-program use readline.
+23:43  Rav3nSw0rd: trying to do euler problem 1 through bash, here is my attempt, I can't figure out what's wrong:: http://pastebin.com/2mdG7mfQ
+23:44  geirha: wart___: Hm. No I read that wrong. You'll want to look at Programmable Completion in bash's man-page.
+23:44  geirha: expr?!
+23:44  geirha: Stop reading the guides at tldp
+23:44  wart___: geirha: right, but the problem is that Programmable Completion assumes thtat the arguments are static, but here the arguments are dynamic
+23:44  taylanub: !expr
+23:45  greybot: 'expr' is a program used in ancient shell code to do math. In Posix shells like bash, use $(( expression )). In bash and ksh93, you can also use '(( expression ))' or 'let expression' if you don't need to use the result in an expansion.
+23:45  wart___: geirha: unless i misread the man page
+23:46  geirha: wart___: You'll need to use a function that generates the possible arguments.
+23:47  gniourf_gniourf: Rav3nSw0rd, line 2, no space !!! it should be sum=0
+23:47  geirha: Rav3nSw0rd: Replace $(expr) with $(( )), and [ .. ] with (( .. )). Also, remember that some numbers may be divisible by both 3 AND 5.
+23:49  geirha: Rav3nSw0rd: Nevermind that last part. I remembered that task wrongly.
+23:52  Rav3nSw0rd: thanks gniourf_gniourf and geirha
+23:52  gniourf_gniourf: Rav3nSw0rd, can we see you solution now?
+23:53  Rav3nSw0rd: actually just got back to computer, saw solutions, said thanks to be polite, then am currently implementing the changes XD gimme a sec :P
+23:53  gniourf_gniourf: ok
+23:54  gniourf_gniourf: Rav3nSw0rd, you actually don't need the variables imod3 and imod5
+23:54  gniourf_gniourf: and computing imod5 will down things if i is already a multiple of 3
+23:55  Rav3nSw0rd: yea, I was having issues with it and thought that would make it simpler to debug
+23:55  Rav3nSw0rd: but that's why it's an elif and not a separate if
+23:55  gniourf_gniourf: you're only using them once, so debugging is not an issue
+23:55  gniourf_gniourf: you're right to use an elif and not a separate if ;)
+23:56  geirha: if (( !(i%3) )); then echo "$i is divisible by 3"; fi
+23:56  gniourf_gniourf: and sum=$(($sum + $i)) can be written ((sum+=i))
+23:56  Rav3nSw0rd: ? what's the ! for?
+23:56  Rav3nSw0rd: new to bash if you can't tell :P
+23:57  geirha: Rav3nSw0rd: It negates the truth value of (i%3)
+23:57  Rav3nSw0rd: oh, since i%3 would return 0, so not 0 is true? and ! (!0) is false?
+23:58  geirha: Yes, 0 is false, any other integer is true
+23:58  geirha: (Just like in C)
+23:59  Rav3nSw0rd: http://pastebin.com/NvyXxBWn
+23:59  gniourf_gniourf: if (( !(i%3*i%5) )); then echo "$i is divisible by 3 or 5"; fi
+23:59  Rav3nSw0rd: getting ./euler problem 1: line 9: ((: 0 -eq 0 : syntax error in expression (error token
+23:59  Rav3nSw0rd:  is "0 ")
+23:59  gniourf_gniourf: wow
+23:59  Rav3nSw0rd: line 7 as well
+--- Log closed Mon Nov 15 00:00:05 2010
