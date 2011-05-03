@@ -128,6 +128,8 @@ shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
 autoloadable() {
     ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
 }
+function cdf() { cd *$1*/ } # stolen from @topfunky
+
 # Returns whether its argument should be considered "true"
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
 booleancheck() {
@@ -199,7 +201,6 @@ typeset -T LS_COLORS          ls_colors
 # First off, allow commands after sudo to still be alias expanded.
 # An alias ending in a space allows the next word on the command line to
 # be alias expanded as well.
-#alias :q='echo "This is not Vim!" >&2'
 alias sudo="sudo "
 alias l='ls -CF'
 alias c=clear
@@ -208,6 +209,14 @@ alias s="sudo "
 alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
+alias gx="gitx"
+alias gxa="gitx --all"
+alias :q="echo YOU FAIL"
+alias sr= "screen -r"
+alias pygrep="grep --include='*.py' $*"
+alias rbgrep="grep --include='*.rb' $*"
+gd() { git diff $* | view -; }
+gdc() { gd --cached $*; }
 
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
@@ -267,7 +276,7 @@ alias vi=vim
 alias v=vim
 source $HOME/.zsh/gitaliases
 source $HOME/.zsh/functions/git.zsh
-source $HOME/.zsh/vi-mode.zsh
+#source $HOME/.zsh/vi-mode.zsh
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
@@ -659,7 +668,7 @@ zstyle ':completion:*' special-dirs ..
 # Call vcs_info as precmd before every prompt.
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
-source /Users/iaj/.zsh/functions/vcs_hooks.zsh
+source $HOME/.zsh/functions/vcs_hooks.zsh
 
 # Display the VCS information in the right prompt.
 if [[ $ZSH_VERSION == (4.3.<9->|4.<4->*|<5->*) ]]; then
@@ -879,7 +888,7 @@ prompt-setup() {
         #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}in %b${green}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # Prompt with history set
         #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
-        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}%1v-(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
         #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # basic prompt
         #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"

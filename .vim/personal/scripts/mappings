@@ -4,7 +4,7 @@ noremap <D-i> :%s/^/> /<CR>:nohl<CR>gg
 "fold tags
 nnoremap <silent> <F2> :TlistToggle<CR>
 nnoremap <silent> <F3> :NERDTreeToggle<CR>
-noremap <silent> <leader>n :NERDTreeToggle<cr>
+"noremap <silent> <leader>n :NERDTreeToggle<cr>
 
 "make document a textobject - well not really working with registers so not
 "a really good choice
@@ -114,7 +114,7 @@ map <silent> <leader>Q :e ftp://www.clientproduction.com/<CR>
 
 " highlights the current typed word (all occasions)
 imap <F2> <esc>:let @/=expand("<cword>") \| set hls<cr>a
-nmap ,, <C-^>
+nnoremap <leader><leader> <c-^>
 "nmap ,, :LustyJugglePrevious<CR>
 "map <silent> ,. :LustyJuggler<CR>
 nnoremap \v <C-w><C-v><C-l>:e $MYVIMRC<cr>
@@ -491,7 +491,54 @@ command! W :w
 "nnoremap <silent> sr     :FufRenewCache<CR>
 nnoremap <silent> \F :FufEditDataFile<CR>
 
+let g:CommandTCursorStartMap='<leader>f'
+map <leader>f :CommandTFlush<cr>\|:CommandT<cr>
+map <leader>gf :CommandTFlush<cr>\|:CommandT %%<cr>
+
 nnoremap <silent> \V :Vimrex<CR>
 "removes superfluous blank lines..
 map \L :g/^\s*\n\s*$/d<CR>
 map ; :
+" Map ,e and ,v to open files in the same directory as the current file
+cnoremap %% <C-R>=expand('%:h').'/'<cr>
+map <leader>e :edit %%
+map <leader>v :view %%
+function! RenameFile()
+    let old_name = expand('%')
+    let new_name = input('New file name: ', expand('%'))
+    if new_name != '' && new_name != old_name
+        exec ':saveas ' . new_name
+        exec ':silent !rm ' . old_name
+        redraw!
+    endif
+endfunction
+map <leader>n :call RenameFile()<cr>
+
+command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
+"imap <c-l> <space>=><space>
+
+function! OpenChangedFiles()
+  only " Close all windows, unless they're modified
+  let status = system('git status -s | grep "^ \?\(M\|A\)" | cut -d " " -f 3')
+  let filenames = split(status, "\n")
+  exec "edit " . filenames[0]
+  for filename in filenames[1:]
+    exec "sp " . filename
+  endfor
+endfunction
+command! OpenChangedFiles :call OpenChangedFiles()
+
+" In these functions, we don't use the count argument, but the map referencing
+" v:count seems to make it work. I don't know why.
+function! ScrollOtherWindowDown(count)
+  normal! 
+  normal! 
+  normal! 
+endfunction
+function! ScrollOtherWindowUp(count)
+  normal! 
+  normal! 
+  normal! 
+endfunction
+nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
+nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>

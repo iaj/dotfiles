@@ -378,7 +378,8 @@ else
     " for now we use that fricken sjl everywhere possible
     "let g:molokai_original = 1
     "colorscheme sjl
-    colorscheme lucius
+    set cursorline
+    colorscheme sjl
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
