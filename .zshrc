@@ -801,8 +801,11 @@ prompt_char() {
 #### Prompt setup functions
 if [[ -n $SSH_CONNECTION ]]; then
     export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
+    COLOR="${magenta}"
+
 else
     export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
+    COLOR="${boldgreen}"
 fi
 prompt-setup() {
     #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
@@ -815,7 +818,7 @@ prompt-setup() {
         #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # basic prompt
         #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
-        PROMPT="${boldgreen}${SHORTHOST}${default}:%b${default}%1~"
+        PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
         PROMPT+='${vcs_info_msg_0_}'
         PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
     else
