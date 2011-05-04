@@ -350,9 +350,9 @@ if has('gui_running')
     "colorscheme twilight2
 
     "Molokai Settings
-    let g:molokai_original = 1
-    colorscheme sjl
-    "colorscheme lucius
+    "let g:molokai_original = 1
+    "colorscheme sjl
+    colorscheme lucius
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
