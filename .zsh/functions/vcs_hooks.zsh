@@ -6,8 +6,6 @@ function minutes_since_last_commit {
     echo $minutes_since_last_commit
 }
 function scm_time_since_commit() {
-#local -A pc
-#pc=(${(kv)wunjo_prompt_colors})
 local MINUTES_SINCE_LAST_COMMIT=`minutes_since_last_commit`
 if [ "$MINUTES_SINCE_LAST_COMMIT" -gt 30 ]; then
     COLOR="${red}"
@@ -16,7 +14,6 @@ elif [ "$MINUTES_SINCE_LAST_COMMIT" -gt 10 ]; then
 else
     COLOR="${green}"
 fi
-local SINCE_LAST_COMMIT="${green}$(minutes_since_last_commit)m${default}"
+local SINCE_LAST_COMMIT="${COLOR}$(minutes_since_last_commit)m${default}"
 echo $SINCE_LAST_COMMIT
-print -P $SINCE_LAST_COMMIT
 }

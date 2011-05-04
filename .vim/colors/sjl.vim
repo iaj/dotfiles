@@ -87,6 +87,7 @@ hi PmenuSel        guifg=#000000 guibg=#AAF412
 hi PmenuSbar                     guibg=#131414
 hi PmenuThumb      guifg=#777777
 " }}}
+"
 
 hi PreCondit       guifg=#A6E22E               gui=bold
 hi PreProc         guifg=#A6E22E
@@ -206,11 +207,25 @@ if &t_Co > 255
    hi MoreMsg         ctermfg=229
    hi Operator        ctermfg=161
 
+   " Popup Menu
+   " ----------
+   " normal item in popup
+   hi Pmenu            guifg=#e0e0e0           guibg=#303840           gui=none
+   hi Pmenu            ctermfg=253             ctermbg=233             cterm=none
+   " selected item in popup
+   hi PmenuSel         guifg=#cae682           guibg=#505860           gui=none
+   hi PmenuSel         ctermfg=186             ctermbg=237             cterm=none
+   " scrollbar in popup
+   hi PMenuSbar                                guibg=#505860           gui=none
+   hi PMenuSbar                                ctermbg=59              cterm=none
+   " thumb of the scrollbar in the popup
+   hi PMenuThumb                               guibg=#808890           gui=none
+   hi PMenuThumb                               ctermbg=102             cterm=none
    " complete menu
-   hi Pmenu           ctermfg=81  ctermbg=16
-   hi PmenuSel                    ctermbg=244
-   hi PmenuSbar                   ctermbg=232
-   hi PmenuThumb      ctermfg=81
+   "hi Pmenu           ctermfg=81  ctermbg=16
+   "hi PmenuSel                    ctermbg=244
+   "hi PmenuSbar                   ctermbg=232
+   "hi PmenuThumb      ctermfg=81
 
    hi PreCondit       ctermfg=118               cterm=bold
    hi PreProc         ctermfg=118
