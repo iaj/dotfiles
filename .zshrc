@@ -21,8 +21,7 @@
 # These settings are only for interactive shells. Return if not interactive.
 # This stops us from ever accidentally executing, rather than sourcing, .zshrc
 [[ -o nointeractive ]] && return
-export PAGER=less
-export EDITOR=vim
+
 export LIBXCB_ALLOW_SLOPPY_LOCK=true
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
@@ -43,6 +42,14 @@ if [ -d ~/bin ]; then
     PATH=~/bin:$PATH
     MANPATH=~/man:$MANPATH
     INFOPATH=~/info:$INFOPATH
+fi
+
+export PAGER=less
+if [[ $OSTYPE == darwin* ]]; then
+    export EDITOR='mvim'
+    export GIT_EDITOR='mvim -f --remote-silent'
+else
+    export EDITOR="vim"
 fi
 
 ### Colors
