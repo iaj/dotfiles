@@ -126,7 +126,7 @@ shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
 # Checks if a file can be autoloaded by trying to load it in a subshell.
 # If we find it, return 0, else 1
 autoloadable() {
-    ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
+    #( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
 }
 function cdf() { cd *$1*/ } # stolen from @topfunky
 
@@ -679,7 +679,6 @@ if [[ $ZSH_VERSION == (4.3.<9->|4.<4->*|<5->*) ]]; then
 else
     RPROMPT='${vcs_info_msg_0_:- }'
 fi
-
 
 #### Allow interactive editing of command line in $EDITOR
 if autoloadable edit-command-line; then
