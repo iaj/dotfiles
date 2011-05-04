@@ -46,9 +46,6 @@ fi
 
 export PAGER=less
 if [[ $OSTYPE == darwin* ]]; then
-    export EDITOR='mvim'
-    export GIT_EDITOR='mvim -f --remote-silent'
-else
     export EDITOR="vim"
 fi
 
