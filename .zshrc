@@ -213,6 +213,7 @@ alias gx="gitx"
 alias gxa="gitx --all"
 alias :q="echo YOU FAIL"
 alias sr= "screen -r"
+alias sx= "screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
 gd() { git diff $* | view -; }

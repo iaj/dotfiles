@@ -1,1 +1,0 @@
-/Applications/PeepOpen.app/Contents/Resources/Support/vim-peepopen/plugin/peepopen.vim

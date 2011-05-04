@@ -84,6 +84,8 @@ set backspace=indent,eol,start
 
 set showmatch                   " Briefly jump to a paren once it's balanced
 set matchtime=2                 " (for only .2 seconds).
+set matchtime=123
+
 
 " Searching and Patterns
 set ignorecase                  " Default to using case insensitive searches,
@@ -375,10 +377,10 @@ if has('gui_running')
     "hi search ctermbg=223 ctermfg=238
 else
     "colorscheme molokai
-    " for now we use that fricken sjl everywhere possible
-    "let g:molokai_original = 1
-    "colorscheme sjl
+    "for now we use that fricken sjl everywhere possible
+    let g:molokai_original = 1
     set cursorline
+    "colorscheme lucius
     colorscheme sjl
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
@@ -484,7 +486,18 @@ if has('statusline') && has('gui_running')
         let &titlestring=expand("%:p:h")
         let &titlestring=$PWD
     endif
+else
+    " GRB: Put useful info in status line
+    " green
+     hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
+     " magenta
+     hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
+     " cyan
+     hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
+     "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
+     set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
 endif
+
 """ Remapping the <TAB> key to something useful
 function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
@@ -497,7 +510,7 @@ function! MyTabComplete()
             return "\<C-N>"
         endif
     endif
-    
+
     let b:complType=0
     "let line = getline('.')                         " curline
     "let substr = strpart(line, -1, col('.')+1)      " from start to cursor
