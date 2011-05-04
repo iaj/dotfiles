@@ -792,16 +792,18 @@ hg_prompt_info() {
     patches: <patches|join( → )|pre_applied(%{$fg[yellow]%})|post_applied(%{$reset_color%})|pre_unapplied(%{$fg_bold[black]%})|post_unapplied(%{$reset_color%})>>" 2>/dev/null
 }
 prompt_char() {
-    #git branch >/dev/null 2>/dev/null && echo '±' && return
+    #git branch >/dev/null 3>/dev/null && echo '±' && return
     #hg root >/dev/null 2>/dev/null && echo '☿' && return
     #echo '○'
     echo '$'
 }
 
 #### Prompt setup functions
-# Global color variable
-#PROMPT_COLOR_NUM=$(((${#${HOST#*.}}+11)%12)) #PROMPT_COLOR_NUM=10
-export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
+if [[ -n $SSH_CONNECTION ]]; then
+    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
+else
+    export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
+fi
 prompt-setup() {
     #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
     if booleancheck "$shellopts[titlebar]" ; then
