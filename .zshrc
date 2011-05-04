@@ -800,9 +800,9 @@ prompt_char() {
 
 #### Prompt setup functions
 if [[ -n $SSH_CONNECTION ]]; then
-    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
-else
     export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
+else
+    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
 fi
 prompt-setup() {
     #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
