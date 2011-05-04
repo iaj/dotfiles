@@ -14,7 +14,6 @@ elif [ "$MINUTES_SINCE_LAST_COMMIT" -gt 10 ]; then
 else
     COLOR="${green}"
 fi
-local SINCE_LAST_COMMIT="${green}$(minutes_since_last_commit)m${default}"
+local SINCE_LAST_COMMIT="${COLOR}$(minutes_since_last_commit)m${default}"
 echo $SINCE_LAST_COMMIT
-print -P $SINCE_LAST_COMMIT
 }

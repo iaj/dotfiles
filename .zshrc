@@ -49,12 +49,13 @@ fi
 # Use colorized output, necessary for prompts and completions.
 autoload -U colors && colors
 # Some shortcuts for colors.
-local red="%{${fg[red]}%}"
+local red="%{${fg[red]}%}" #FF6B60
 local blue="%{${fg[blue]}%}"
-local boldblue="%b%{${fg[blue]}%}"
+local boldblue="%B%{${fg[blue]}%}"
 local green="%{${fg[green]}%}"
+local boldgreen="%B%{${fg[green]}%}" #CEFFAB
 local magenta="%{${fg[magenta]}%}"
-local yellow="%{${fg[yellow]}%}"
+local yellow="%{${fg[yellow]}%}" #FFFFB6
 local boldyellow="%B%{${fg[yellow]}%}"
 local default="%{${fg[default]}%}"
 local white="%B%{${fg[white]}%}"
@@ -125,16 +126,12 @@ shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
 #### Helper Functions
 # Checks if a file can be autoloaded by trying to load it in a subshell.
 # If we find it, return 0, else 1
-autoloadable() {
-    ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null
-}
+autoloadable() { ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null }
 function cdf() { cd *$1*/ } # stolen from @topfunky
 
 # Returns whether its argument should be considered "true"
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
-booleancheck() {
-    [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]]
-}
+booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
@@ -209,6 +206,7 @@ alias s="sudo "
 alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
+# only on mac osx tho
 alias gx="gitx"
 alias gxa="gitx --all"
 alias :q="echo YOU FAIL"
@@ -253,16 +251,12 @@ if [[ $OSTYPE == darwin* ]]; then
         $EDITOR -w ${1}
         plutil -convert binary1 ${1}
     }
+    function pn() { open "peepopen://$1?editor=MacVim" }
 else
     alias ls='ls --color=auto -B'
 fi
 
-#PeepOpen
-function pn() {
-    open "peepopen://$1?editor=MacVim"
-}
 alias pnc='pn `pwd`'
-
 alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 alias grep='grep --color=auto'
 alias pu='pushd'
@@ -276,8 +270,9 @@ alias cd/='cd /'
 alias vi=vim
 alias v=vim
 source $HOME/.zsh/gitaliases
-source $HOME/.zsh/functions/git.zsh
+#source $HOME/.zsh/functions/git.zsh
 #source $HOME/.zsh/vi-mode.zsh
+source $HOME/.zsh/functions/vcs_hooks.zsh
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
@@ -376,10 +371,7 @@ if zmodload -i zsh/terminfo; then
 fi
 zmodload zsh/stat
 
-
-search-backwords() {
-    zle history-incremental-search-backward $BUFFER
-}
+search-backwords() { zle history-incremental-search-backward $BUFFER }
 zle -N search-backwords
 
 bindkey -M vicmd "^R" search-backwords
@@ -467,72 +459,6 @@ zle -N edit-command-line
 # Tab completes, never expands
 # so expansion can be handled
 # by a completer.
-
-### Set window title
-# Given a command as a single word and an optional directory, this generates
-# a titlebar string like "hostname> dir || cmd" and assigns that to an element
-# in PSVAR for use by the prompt, and to the exported variable TITLE for use by
-# other applications.  If the directory is omitted, it will default to the
-# current working directory.  It then takes the first word of that command
-# (splitting on whitespace), excluding variable assignments, the word sudo, and
-# command flags, and assigns that to an element in PSVAR for use as a screen
-# name and icon title, as well as to the exported variable ICON.  Finally, it
-# actually writes those strings as the screen name and title bar text.
-set-title-by-cmd() {
-    # Rather than setting the screen name and titlebar to "fg..." when fg is
-    # executed, we determine what the user is trying to foreground and change the
-    # screen name and titlebar to that, before actually calling fg.  So, we take
-    # our current job texts and directories and use them, in a subshell from a
-    # process substitution, to set the title properly.
-    if [[ "${1[(w)1]}" == (fg|%*)(\;|) ]]; then
-        # The first word of the command either was 'fg' or began with '%'
-        if [[ "${1[(wi)%*(\;|)]}" -eq 0 ]]; then
-            local arg="%+"              # No arg began with %, default to %+
-        else
-            local arg=${1[(wr)%*(\;|)]} # Found a % arg, use it
-        fi
-        # Make local copies of our jobtexts and jobdirs vars, for use in a subshell
-        local -A jt jd
-        jt=(${(kv)jobtexts}) jd=(${(kv)jobdirs})
-        # Run the jobs command with the chosen % arg.  If it can't find a matching
-        # job, we discard the error message and continue setting the title as
-        # though we hadn't found a command that should change the foreground app.
-        # If it finds a matching job, we redirect the output into a process
-        # substitution that handles getting the job number and calling
-        # set-title-by-cmd-impl with the job description and job CWD.  We use a
-        # process substitution so that the text processing can be done in a
-        # subshell, leaving the 'jobs' command run in the current shell.  This
-        # should work fine with older versions of zsh.
-        jobs $arg 2>/dev/null > >( read num rest
-        set-title-by-cmd-impl \
-            "${(e):-\$jt$num}" "${(e):-\$jd$num}"
-        ) || set-title-by-cmd-impl "$1" "$2"
-    else
-        # Not foregrounding an app, just continue with setting title
-        set-title-by-cmd-impl "$1" "$2"
-    fi
-}
-# This function actually does the work for set-title-by-command, described
-# above.
-set-title-by-cmd-impl() {
-    set "$1" "${2:-$PWD}"                      # Replace $2 with $PWD if blank
-    psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")} # The new title
-    if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
-        psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
-    else
-        psvar[2]=$1                              # The whole line if only one word
-    fi                                         # or a variable assignment, etc
-
-    if booleancheck "$shellopts[screen_names]" ; then
-        set-screen-title "$psvar[2]"           # set the command as the screen title
-    fi
-    if booleancheck "$shellopts[titlebar]" ; then
-        set-icon-title   "$psvar[2]"
-        set-window-title "$psvar[1]"
-    fi
-    export TITLE=$psvar[1]
-    export ICON=$psvar[2]
-}
 
 if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Is set to a non empty value to reset the window name in the next
@@ -625,7 +551,6 @@ if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
         # Just reset the name, so no screen reset necessary for the moment.
         window_reset=
     }
-
     # Sets the window title. Works with screen, xterm and rxvt. (V) escapes
     # all non-printable characters. Thanks to Mikachu in #zsh on Freenode
     # (2010-08-07 17:09 CEST).
@@ -644,6 +569,7 @@ if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Add the preexec() and precmd() hooks.
     add-zsh-hook preexec window_preexec
     add-zsh-hook precmd window_precmd
+    #add-zsh-hook precmd set-title-by-cmd
 else
     # Fallback if another TERM is used, necessary to run screen (see below in
     # "RUN COMMANDS").
@@ -652,6 +578,8 @@ fi
 ### vcs_INFO - SCM in Prompt
 # Allow substitutions and expansions in the prompt, necessary for vcs_info.
 setopt promptsubst
+autoload -U promptinit
+
 # Load vcs_info to display information about version control repositories.
 autoload -Uz vcs_info
 # Only look for git and mercurial repositories; the only I use.
@@ -660,8 +588,8 @@ zstyle ':vcs_info:*' enable git hg svn
 # Set style of vcs_info display. The current branch (green) and VCS (blue)
 # is displayed. If there is an special action going on (merge, rebase)
 # it's also displayed (red).
-zstyle ':vcs_info:*' formats "($green%b%u%c$default:$blue%s$default)"
-zstyle ':vcs_info:*' actionformats "($green%b%u%c$default/$red%a$default:$blue%s$default)"
+zstyle ':vcs_info:*' formats "($red%s%m$default|$white%b%u%c$default)"
+zstyle ':vcs_info:*' actionformats "($red%b%u%c$default/$red%a$default:$blue%s$default)"
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' unstagedstr '?'
 zstyle ':vcs_info:*' stagedstr   '!'
@@ -669,18 +597,12 @@ zstyle ':completion:*' special-dirs ..
 # Call vcs_info as precmd before every prompt.
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
-source $HOME/.zsh/functions/vcs_hooks.zsh
 
-# Display the VCS information in the right prompt.
-if [[ $ZSH_VERSION == (4.3.<9->|4.<4->*|<5->*) ]]; then
-    RPROMPT='${vcs_info_msg_0_}'
-    # There is a bug in Zsh below 4.3.9 which displays a wrong symbol when
-    # ${vcs_info_msg_0_} is empty. Provide a workaround for those versions,
-    # thanks to Frank Terbeck <ft@bewatermyfriend.org> for it.
-else
-    RPROMPT='${vcs_info_msg_0_:- }'
-fi
-
+zstyle ':vcs_info:*' formats "($red%m$default|$white%b%u%c$default)"
+zstyle ':vcs_info:git*+set-message:*' hooks git-committime
+function +vi-git-committime() {
+hook_com[misc]=`scm_time_since_commit`
+}
 
 #### Allow interactive editing of command line in $EDITOR
 if autoloadable edit-command-line; then
@@ -693,7 +615,6 @@ fi
 #### Some minicom options:
 # linewrap use-status-line capture-file=/dev/null color=off
 export MINICOM='-w -z  -C /dev/null -c off'
-
 
 if [[ -f $HOME/.vim/plugin/manpageviewPlugin.vim ]]; then
     man() {
@@ -715,7 +636,7 @@ fi
 #### Less and ls options
 # make less more friendly for non-text input files, see lesspipe(1)
 # If we have it, we'll use it.
-which lesspipe &>/dev/null && eval "$(lesspipe)"
+#which lesspipe &>/dev/null && eval "$(lesspipe)"
 
 # customize the colors used by ls, if we have the right tools
 # Also changes colors for completion, if initialized first
@@ -874,8 +795,7 @@ prompt_char() {
     #git branch >/dev/null 2>/dev/null && echo '±' && return
     #hg root >/dev/null 2>/dev/null && echo '☿' && return
     #echo '○'
-    echo '>'
-    #echo '⤴'
+    echo '$'
 }
 
 #### Prompt setup functions
@@ -889,16 +809,24 @@ prompt-setup() {
         #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}in %b${green}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # Prompt with history set
         #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
-        PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
+        #PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
         #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
         # basic prompt
         #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
+        PROMPT="${boldgreen}${SHORTHOST}${default}:%b${default}%1~"
+        PROMPT+='${vcs_info_msg_0_}'
+        PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
     else
         # <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
         PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
     fi
 }
 prompt-setup
+# Display the VCS information in the right prompt.
+# NOT anymore - Display the history information instead ;DD 
+#RPROMPT='${vcs_info_msg_0_}'
+RPROMPT="${default}(${white}%!%b)"
+
 
 # Prompt for spelling corrections.
 # %R is word to change, %r is suggestion, and Y and N are colored green and red.
