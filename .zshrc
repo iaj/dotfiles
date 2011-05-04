@@ -135,8 +135,8 @@ booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
-if [ -d $HOME/Documents/work ]; then 
-    w() { cd $HOME/Documents/work }
+if [ -d $HOME/Documents/jobs/marcgalal ]; then 
+    w() { cd $HOME/jobs/marcgalal }
 fi
 if [ -d $HOME/Documents/work ]; then 
     ba() {
