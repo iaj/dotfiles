@@ -73,7 +73,7 @@ let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
 set nocompatible
 set nocursorcolumn
 set magic
-set cursorline
+"set cursorline
 " Files that should be ignored by default - in completition as well as in Command-T
 set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.git,.o,.svn,.toc,.obj,.bmp,.jp*g,.png
 
@@ -382,7 +382,7 @@ else
     "colorscheme molokai
     "for now we use that fricken sjl everywhere possible
     let g:molokai_original = 1
-    set cursorline
+    "set cursorline
     "colorscheme lucius
     colorscheme sjl
 
