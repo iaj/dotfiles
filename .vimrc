@@ -11,6 +11,7 @@
 
 """ Settings
 filetype off
+
 " apply all the plugins to our current vim sessions - thanks pathogen ツ
 "dont load csapprox if no gui support - silences an annoying warning
 if !has("gui")
@@ -349,10 +350,12 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
+    let fg_bg = 1
+    let fg_bg = 2
     "Molokai Settings
     let g:molokai_original = 1
-    colorscheme sjl
-    "colorscheme lucius
+    "colorscheme sjl
+    colorscheme lucius
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
@@ -382,6 +385,7 @@ else
     set cursorline
     "colorscheme lucius
     colorscheme sjl
+
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
@@ -408,8 +412,13 @@ if has('statusline') && has('gui_running')
     "on some colorschemes (kw: reversing) its necessary to s/fg/bg
     fun! UpdateStatuslineColorCodes() "{{{
         " themes differ here - replace bg with fg or the other way around ;)
-        let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
-        let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+        if (g:fg_bg == 1)
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+        else
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
+        endif
     endfunction "}}}
     function! SetMyStatusLine()
         " TODO fix that stuff

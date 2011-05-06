@@ -226,6 +226,7 @@ alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
 gd() { git diff $* | view -; }
 gdc() { gd --cached $*; }
+bash() { command bash E }
 
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
@@ -711,8 +712,10 @@ if autoloadable compinit; then
 
     # Match lowercase letters to uppercase letters and dashes to underscores (not
     # vice-versa), and allow ".t<TAB>" to list all files containing the text ".t"
-    zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
-
+    #zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
+    #07:57:16   Patplu: iaj: you need to tweak matcher-list zstyle
+    #07:57:28   Patplu: something like : 
+    zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z} l:|=*' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
     # Try to use verbose listings when we have more information
     zstyle ':completion:*' verbose true
 
