@@ -44,13 +44,6 @@ if [ -d ~/bin ]; then
     INFOPATH=~/info:$INFOPATH
 fi
 
-export PAGER=less
-if [[ $OSTYPE == darwin* ]]; then
-    export EDITOR="mvim -f --remote-wait-silent"
-else
-    export EDITOR="vim"
-fi
-
 ### Colors
 # Use colorized output, necessary for prompts and completions.
 autoload -U colors && colors
@@ -224,9 +217,6 @@ alias sr= "screen -r"
 alias sx= "screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
-gd() { git diff $* | view -; }
-gdc() { gd --cached $*; }
-bash() { command bash E }
 
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
@@ -265,6 +255,7 @@ if [[ $OSTYPE == darwin* ]]; then
     function pn() { open "peepopen://$1?editor=MacVim" }
 else
     alias ls='ls --color=auto -B'
+    alias g='vim'
 fi
 
 alias pnc='pn `pwd`'
@@ -354,6 +345,12 @@ setopt AUTO_CD             2>/dev/null
 #setopt NoAutoMenu
 
 #### Environment variables
+export PAGER=less
+if [[ $OSTYPE == darwin* ]]; then
+    export EDITOR="mvim -f --remote-wait-silent"
+else
+    export EDITOR="vim"
+fi
 export SHELL=$(whence -p zsh)             # Let apps know the full path to zsh
 export DIRSTACKSIZE=10                    # Max number of dirs on the dir stack
 if booleancheck "$shellopts[utf8]" ; then
@@ -467,6 +464,7 @@ zle -N edit-command-line
 # so expansion can be handled
 # by a completer.
 
+#### Setting the window title
 if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Is set to a non empty value to reset the window name in the next
     # precmd() call.
@@ -657,6 +655,19 @@ which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
 #will give ksh-like behaviour for that key,
 #except that it will handle multi-line buffers properly.
 
+# Prompt to <<insert>> <<normal>> Modes on the right
+#function zle-line-init zle-keymap-select {
+#RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
+#RPS2=$RPS1
+#zle reset-prompt
+#}
+#zle -N zle-line-init
+#zle -N zle-keymap-select
+
+### Functions
+gd() { git diff $* | view -; }
+gdc() { gd --cached $*; }
+bash() { command bash E }
 collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
 
 mkcd() {
@@ -678,16 +689,6 @@ mkmaildir() {
     subdir=${1}
     mkdir -p ${root}/${subdir}/{cur,new,tmp}
 }
-
-# Prompt to <<insert>> <<normal>> Modes on the right
-#function zle-line-init zle-keymap-select {
-#RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-#RPS2=$RPS1
-#zle reset-prompt
-#}
-#zle -N zle-line-init
-#zle -N zle-keymap-select
-
 ### Completion
 if autoloadable compinit; then
     autoload -U compinit; compinit # Set up the required completion functions
