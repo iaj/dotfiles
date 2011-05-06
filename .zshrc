@@ -21,8 +21,7 @@
 # These settings are only for interactive shells. Return if not interactive.
 # This stops us from ever accidentally executing, rather than sourcing, .zshrc
 [[ -o nointeractive ]] && return
-export PAGER=less
-export EDITOR=vim
+
 export LIBXCB_ALLOW_SLOPPY_LOCK=true
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
@@ -45,7 +44,14 @@ if [ -d ~/bin ]; then
     INFOPATH=~/info:$INFOPATH
 fi
 
-### Coloring
+export PAGER=less
+if [[ $OSTYPE == darwin* ]]; then
+    export EDITOR="mvim -f --remote-wait-silent"
+else
+    export EDITOR="vim"
+fi
+
+### Colors
 # Use colorized output, necessary for prompts and completions.
 autoload -U colors && colors
 # Some shortcuts for colors.
@@ -71,11 +77,11 @@ printf '\e[91m%s\e[0m' "$line";
 #printf ${red} "$line";
 print -n $'\0';
 done &)
+
 ### SETUP
 # These settings are only for interactive shells. Return if not interactive.
 # This stops us from ever accidentally executing, rather than sourcing, .zshrc
 [[ -o nointeractive ]] && return
-
 # Disable flow control, since it really just annoys me.
 #stty -ixon &>/dev/null
 
@@ -127,16 +133,18 @@ shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
 # Checks if a file can be autoloaded by trying to load it in a subshell.
 # If we find it, return 0, else 1
 autoloadable() { ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null }
-function cdf() { cd *$1*/ } # stolen from @topfunky
+cdf() { cd *$1*/ } # stolen from @topfunky
 
 # Returns whether its argument should be considered "true"
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
 booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
+
+# Access often used paths quickly
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
-if [ -d $HOME/Documents/work ]; then 
-    w() { cd $HOME/Documents/work }
+if [ -d $HOME/Documents/jobs/marcgalal ]; then 
+    w() { cd $HOME/jobs/marcgalal }
 fi
 if [ -d $HOME/Documents/work ]; then 
     ba() {
@@ -154,14 +162,12 @@ if [ -d $HOME/Dropbox ]; then
 fi
 leo() { elinks "http://dict.leo.org/?search=$1"; }
 dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
+# using a perlre lookahead 'trick' to prevent grep from
+# greping it's own process
+# grep with --enable-pcre needed!
 psg() {
-    # using a perlre lookahead 'trick' to prevent grep from
-    # greping it's own process
-    # grep with --enable-pcre needed!
     ps ax | grep -i -P "$1"'(?!\(\?\!)'
 }
-#logs() { cd $HOME/.irssi/logs/FreeNode }
-#logsb() { cd $HOME/.irssi/logs/bitlbee/ }
 
 # Replaces the current window title in Gnu Screen with its positional parameters
 set-screen-title() { echo -n "\ek$*\e\\" }
@@ -169,7 +175,6 @@ set-screen-title() { echo -n "\ek$*\e\\" }
 set-window-title() { echo -n "\e]2;"${${(pj: :)*}[1,254]}"\a" }
 # Replaces the current terminal icon text with its positional parameters.
 set-icon-title() { echo -n "\e]1;"${${(pj: :)*}[1,254]}"\a" }
-
 
 #### Capability checks
 # Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
@@ -194,6 +199,11 @@ typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
 typeset -T CLASSPATH          classpath
 typeset -T LS_COLORS          ls_colors
 
+source $HOME/.zsh/gitaliases
+#source $HOME/.zsh/functions/git.zsh
+#source $HOME/.zsh/vi-mode.zsh
+source $HOME/.zsh/functions/vcs_hooks.zsh
+
 ### Aliases
 # First off, allow commands after sudo to still be alias expanded.
 # An alias ending in a space allows the next word on the command line to
@@ -216,6 +226,7 @@ alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
 gd() { git diff $* | view -; }
 gdc() { gd --cached $*; }
+bash() { command bash E }
 
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
@@ -269,10 +280,6 @@ alias cd/='cd /'
 #alias pl='pdflatex'
 alias vi=vim
 alias v=vim
-source $HOME/.zsh/gitaliases
-#source $HOME/.zsh/functions/git.zsh
-#source $HOME/.zsh/vi-mode.zsh
-source $HOME/.zsh/functions/vcs_hooks.zsh
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
@@ -598,7 +605,7 @@ zstyle ':completion:*' special-dirs ..
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
 
-zstyle ':vcs_info:*' formats "($red%m$default|$white%b%u%c$default)"
+zstyle ':vcs_info:git:*' formats "($red%m$default|$white%b%u%c$default)"
 zstyle ':vcs_info:git*+set-message:*' hooks git-committime
 function +vi-git-committime() {
 hook_com[misc]=`scm_time_since_commit`
@@ -705,8 +712,10 @@ if autoloadable compinit; then
 
     # Match lowercase letters to uppercase letters and dashes to underscores (not
     # vice-versa), and allow ".t<TAB>" to list all files containing the text ".t"
-    zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
-
+    #zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
+    #07:57:16   Patplu: iaj: you need to tweak matcher-list zstyle
+    #07:57:28   Patplu: something like : 
+    zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z} l:|=*' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
     # Try to use verbose listings when we have more information
     zstyle ':completion:*' verbose true
 
@@ -783,7 +792,6 @@ zle -N Resume
 bindkey "^Z" Resume
 typeset +x PS1     # Don't export PS1 - Other shells just mangle it.
 
-
 hg_prompt_info() {
     hg prompt --angle-brackets "\
         < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
@@ -810,14 +818,6 @@ fi
 prompt-setup() {
     #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
     if booleancheck "$shellopts[titlebar]" ; then
-        # <blue bright=1><truncate side=right len=20 string="..">
-        #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}in %b${green}%35<..<%~%<<$(prompt_char)  ${default}%b"
-        # Prompt with history set
-        #PROMPT="${magenta}%n${default} at ${yellow}%M ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
-        #PROMPT="${magenta}%n${default} at ${yellow}${SHORTHOST} ${default}(${white}%!%b${default}) in %b${green}%35<..<%~%<<$(prompt_char) ${default}%b"
-        #PROMPT="${magenta}%n${default}(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
-        # basic prompt
-        #PROMPT="%n(${white}%!%b${default})${white}::%b${magenta}%35<..<%~%<<$(prompt_char)  ${default}%b"
         PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
         PROMPT+='${vcs_info_msg_0_}'
         PROMPT+=" ${yellow}$(prompt_char) ${default}%b"

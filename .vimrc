@@ -11,7 +11,12 @@
 
 """ Settings
 filetype off
+
 " apply all the plugins to our current vim sessions - thanks pathogen ツ
+"dont load csapprox if no gui support - silences an annoying warning
+if !has("gui")
+    let g:CSApprox_loaded = 1
+endif
 call pathogen#runtime_append_all_bundles()
 call pathogen#helptags()
 filetype plugin indent on
@@ -51,19 +56,15 @@ if has('syntax')
         call matchadd('Todo', '\(TODO\|FIXME\|CHANGED\|XXX\)')
     endif
 endif
-"dont load csapprox if no gui support - silences an annoying warning
-"if !has("gui")
-    "let g:CSApprox_loaded = 1
-"endif
 
 """ Sourcing ~/.vimrc and own scripts
-"source $HOME/.vim/personal/scripts/error_handling
 source $HOME/.vim/personal/scripts/remappings
 source $HOME/.vim/personal/scripts/mappings
 source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
 source $HOME/.vim/personal/scripts/galal
 source $HOME/.vim/personal/scripts/objctagjump
+"source $HOME/.vim/personal/scripts/error_handling
 
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
@@ -72,7 +73,7 @@ let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
 set nocompatible
 set nocursorcolumn
 set magic
-"set cursorline
+set cursorline
 " Files that should be ignored by default - in completition as well as in Command-T
 set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.git,.o,.svn,.toc,.obj,.bmp,.jp*g,.png
 
@@ -198,7 +199,6 @@ set ffs=unix,dos,mac            " Try recognizing dos, unix, and mac line ending
 if ! len(glob("~/.backup/"))
     echomsg "Backup directory ~/.backup doesn't exist!"
 endif
-
 set history=10000
 set writebackup                 " Make a backup of the original file when writing
 set backup                      " and don't delete it after a succesful write.
@@ -224,7 +224,7 @@ filetype plugin indent on       " also allow for filetype-specific plugins,
 syntax on                       " and turn on per-filetype syntax highlighting.
 set grepprg=grep\ -nH\ $*
 """ Plugin Settings
-" Eclim settings
+"""" Eclim settings
 " 'open' on OSX will open the url in the default browser without issue
 let g:EclimBrowser='open'
 " Determines what action to take when a only a single result is found.
@@ -237,18 +237,18 @@ let g:EclimJavaSearchSingleResult='edit'
 " Let <CR> search for the single class/method directly
 let g:EclimJavaSearchMapping = 1
 
-" Gundo - Graphical UNDO - pretty awesome imo
+"""" Gundo - Graphical UNDO - pretty awesome imo
 let g:gundo_width = 60
 "let g:gundo_preview_height = 40
 "let g:gundo_right = 1
 
-" Gist settings - broken ... :-(
+"""" Gist settings - broken ... :-(
 let g:github_user = 'iaj'
 let g:github_token = 'tyberion@gmail.com'
 let g:gist_clip_command = 'pbcopy'
 let g:gist_detect_filetype = 1
 
-" Supertab settings
+"""" Supertab settings
 " supertab + eclim == java win
 " however it was pretty annoying so I wrote my own tabby
 let g:SuperTabDefaultCompletionType = "context"
@@ -263,25 +263,25 @@ let g:SuperTabContextDiscoverDiscovery =
             \ ["&completefunc:<c-x><c-u>", "&omnifunc:<c-x><c-o>"]
 " dunno what the heck this one is doing actually
 let g:SuperTabLongestEnhanced = 1
-
-"Taglist Settings (eg. show tags only for the current file)
+"let g:SuperTabLongestHighlight = 1
+"""" Taglist Settings (eg. show tags only for the current file)
 let g:Tlist_Show_One_File = 1
 "let Tlist_Max_Tag_Length = 200
 let Tlist_WinWidth=50
 let Tlist_GainFocus_On_ToggleOpen = 1
 let g:Tlist_Ctags_Cmd = "~/bin/ctags" "user defined ctags command
 let tlist_objc_settings = 'objc;i:interface;c:class;m:method;p:property'
-"let g:SuperTabLongestHighlight = 1
 let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
-
-" XPTemplate Settings
+"""" XPTemplate Settings
 let g:xptemplate_brace_complete = 0
 let g:is_posix=1                " I don't use systems where /bin/sh isn't POSIX.
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 
-"sparkup settings
+"""" Sparkup Settings
 let g:sparkupExecuteMapping = '<D-e>'
+
+"""" NERDCommenter Settings
 " disable warnings from NERDCommenter:
 let g:NERDShutUp = 1
 let NERDTreeIgnore = ['\.pyc$', '\.pyo$']
@@ -289,23 +289,24 @@ let NERDChristmasTree=1
 let NERDTreeWinSize=50
 let NERDTreeChDirMode=2
 
+"""" delimitMate Settings
 let g:loaded_delimitMate = 0
 let g:delimitMate_expand_space = 1
 let g:delimitMate_expand_cr = 1
 let g:delimitMate_smart_quotes = 0
 let delimitMate_excluded_ft = "mail html"
-
 let g:yankring_history_dir = '~/.vim/'
 let g:tex_flavor='latex'
 
-"let g:CommandTCancelMap = ['<C-c>']
+"""" Command-T Settings
 let g:CommandTMaxHeight = 20
 let g:CommandTMaxFiles=3000
 let g:CommandTScanDotDirectories=1
+"let g:CommandTCancelMap = ['<C-c>']
 "let g:CommandTAlwaysShowDotFiles=1
 "let g:CommandTMatchWindowAtTop=1
 
-" netrw settings
+"""" Netrw Settings
 let g:netrw_altv          = 1
 let g:netrw_fastbrowse    = 2
 let g:netrw_keepdir       = 0
@@ -314,7 +315,7 @@ let g:netrw_retmap        = 1
 let g:netrw_silent        = 1
 let g:netrw_special_syntax= 1
 
-""" FuzzyFinder Settings
+"""" FuzzyFinder Settings
 " Fix for the foldopen=search setting
 let g:returning_from_fuzzy = 0
 let g:fuf_modesDisable = [ 'mrucmd' ]
@@ -349,10 +350,12 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
+    let fg_bg = 1
+    let fg_bg = 2
     "Molokai Settings
     let g:molokai_original = 1
-    colorscheme sjl
-    "colorscheme lucius
+    "colorscheme sjl
+    colorscheme lucius
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
@@ -382,6 +385,7 @@ else
     set cursorline
     "colorscheme lucius
     colorscheme sjl
+
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
@@ -408,8 +412,13 @@ if has('statusline') && has('gui_running')
     "on some colorschemes (kw: reversing) its necessary to s/fg/bg
     fun! UpdateStatuslineColorCodes() "{{{
         " themes differ here - replace bg with fg or the other way around ;)
-        let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
-        let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
+        if (g:fg_bg == 1)
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+        else
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
+        endif
     endfunction "}}}
     function! SetMyStatusLine()
         " TODO fix that stuff
