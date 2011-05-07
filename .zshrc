@@ -67,228 +67,11 @@ local white="%B%{${fg[white]}%}"
 # it doesn't work, the E alias can be used as workaround.
 exec 2>>(while read -r -k -u 0 line; do
 printf '\e[91m%s\e[0m' "$line";
-#printf ${red} "$line";
 print -n $'\0';
 done &)
-
-### SETUP
-# These settings are only for interactive shells. Return if not interactive.
-# This stops us from ever accidentally executing, rather than sourcing, .zshrc
-[[ -o nointeractive ]] && return
-# Disable flow control, since it really just annoys me.
-#stty -ixon &>/dev/null
-
-#### Functions for VCS-INFO
-# Load the git-completion functions
-if [ -d ~/git/zsh/Completion ]; then
-    fpath=(~/git/zsh/Completion/*/*(/) $fpath)
-fi
-# Load the VCS Infobar
-if [ -d ~/git/zsh/Functions/VCS_Info/ ]; then
-    fpath=(~/git/zsh/Functions/VCS_Info/ ~/git/zsh/Functions/VCS_Info/Backends $fpath)
-fi
-
-# Set correct fpath to allow loading my functions (including completion
-# functions). in this case: my own functions
-#if [[ -d ~/git/zsh/Functions ]]; then
-    #fpath=(~/.zsh/functions $fpath)
-    #autoload ${fpath[1]}/^_*(^/:t)
-#fi
-
-# Originally from Jonathan Penn, with modifications by Gary Bernhardt
-whodoneit() {
-    (set -e &&
-        for x in $(git grep -I --name-only $1); do
-            git blame -f -- $x | grep $1;
-        done)
-}
-
-# Autoload add-zsh-hook to add/remove zsh hook functions easily.
-autoload -Uz add-zsh-hook
-
-#### Optional Behaviors
-# Setting any of these options will modify the behavior of a new shell to
-# better suit your needs.  These values given specify the default for each
-# option when the shell starts.  At the moment, changing shellopts[utf8] during
-# an execution does nothing whatsoever, as it only sets up some aliases and
-# variables when the shell starts.  However, all of the other options can be
-# changed while the shell is running to change its behavior from that point
-# forward.
-typeset -A shellopts
-shellopts[utf8]=1         # Set up a few programs for UTF-8 mode
-shellopts[titlebar]=1     # Whether the titlebar can be dynamically changed
-shellopts[screen_names]=1 # Dynamically change window names in GNU screen
-shellopts[preexec]=1      # Run preexec to update screen title and titlebar
-shellopts[precmd]=1       # Run precmd to show job count and retval in RPROMPT
-shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
-
-#### Helper Functions
-# Checks if a file can be autoloaded by trying to load it in a subshell.
-# If we find it, return 0, else 1
-autoloadable() { ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null }
-cdf() { cd *$1*/ } # stolen from @topfunky
-
-# Returns whether its argument should be considered "true"
-# Succeeds with "1", "y", "yes", "t", and "true", case insensitive
-booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
-
-# Access often used paths quickly
-if [ -d $HOME/Downloads ]; then
-    dl() { cd $HOME/Downloads }
-fi
-if [ -d $HOME/Documents/jobs/marcgalal ]; then 
-    w() { cd $HOME/jobs/marcgalal }
-fi
-if [ -d $HOME/Documents/work ]; then 
-    ba() {
-        if [[ $1 -eq 1 ]]; then
-            cd $HOME/Documents/workspace/Animal
-        elif [[ $1 -eq 2 ]]; then
-            cd $HOME/Documents/workspace/AnimalScript2
-        else
-            cd $HOME/ba/tex
-        fi
-    }
-fi
-if [ -d $HOME/Dropbox ]; then 
-    db() { cd $HOME/Dropbox/ }
-fi
-leo() { elinks "http://dict.leo.org/?search=$1"; }
-dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
-# using a perlre lookahead 'trick' to prevent grep from
-# greping it's own process
-# grep with --enable-pcre needed!
-psg() {
-    ps ax | grep -i -P "$1"'(?!\(\?\!)'
-}
-
-# Replaces the current window title in Gnu Screen with its positional parameters
-set-screen-title() { echo -n "\ek$*\e\\" }
-# Replaces the current terminal titlebar with its positional parameters.
-set-window-title() { echo -n "\e]2;"${${(pj: :)*}[1,254]}"\a" }
-# Replaces the current terminal icon text with its positional parameters.
-set-icon-title() { echo -n "\e]1;"${${(pj: :)*}[1,254]}"\a" }
-
-#### Capability checks
-# Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
-# TODO So can quite a few other terminal emulators...  If I'm missing a
-# terminal emulator that you know can set the titlebar, please let me know.
-[[ -n "$STY" || "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]] || shellopts[titlebar]=0
-
-# [[ -n "$STY˝ ]] || "export TERM=xerm-256color"
-
-# TODO Should probably check terminal emulator really is using unicode...
-# [[ TEST IF UNICODE WORKS ]] || shellopts[utf8]=0
-
-# Dynamically change a screen name to the last command used when in Gnu Screen
-[[ "$TERM" == (screen*) ]] || shellopts[screen_names]=0
-
-### Colon-separated Arrays
-# Tie colon separated arrays to zsh-arrays, like (MAN)PATH and (man)path
-typeset -T INFOPATH           infopath
-typeset -T LD_LIBRARY_PATH    ld_library_path
-typeset -T LD_LIBRARY_PATH_32 ld_library_path_32
-typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
-typeset -T CLASSPATH          classpath
-typeset -T LS_COLORS          ls_colors
-
-source $HOME/.zsh/gitaliases
-#source $HOME/.zsh/functions/git.zsh
-#source $HOME/.zsh/vi-mode.zsh
-source $HOME/.zsh/functions/vcs_hooks.zsh
-
-### Aliases
-# First off, allow commands after sudo to still be alias expanded.
-# An alias ending in a space allows the next word on the command line to
-# be alias expanded as well.
-alias sudo="sudo "
-alias l='ls -CF'
-alias c=clear
-alias d=cd
-alias s="sudo "
-alias lN='l -lt | head'
-alias la='ls -A'
-alias ll='ls -l'
-# only on mac osx tho
-alias gx="gitx"
-alias gxa="gitx --all"
-alias :q="echo YOU FAIL"
-alias sr= "screen -r"
-alias sx= "screen -x"
-alias pygrep="grep --include='*.py' $*"
-alias rbgrep="grep --include='*.rb' $*"
-
-# If the window naming feature is used (see above) then use ".zsh" (leading
-# dot) as title name after running clear so it's clear to me that the window
-# is empty. I open so much windows that I don't know in which I have something
-# important. This helps me to remember which windows are empty (I run clear
-# after I finished my work in a window).
-if [[ -n $window_reset ]]; then
-    alias clear='clear; window_reset=yes; window_precmd reset'
-fi
-
-# on mac the gnutls are wicked...
-# hidden in the clouds!
-if [[ $OSTYPE == darwin* ]]; then
-    alias df='gdf'
-    alias sort='gsort'
-    #alias find='gfind'
-    alias du='gdu'
-    alias ls='gls --color=auto -B'
-    alias dircolors='gdircolors'
-    alias g='mvim --remote-silent'
-    alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
-    alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
-    alias -s pdf='/Applications/Skim.app'
-    alias m='/Applications/VLC.app'
-
-    #### Man and Info options
-    # Make vim the manpage viewer or info viewer
-    # Requires manpageview.vim from
-    # http://vim.sourceforge.net/scripts/script.php?script_id=489
-    manx() { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
-    pledit() {
-        plutil -convert xml1 ${1}
-        $EDITOR -w ${1}
-        plutil -convert binary1 ${1}
-    }
-    function pn() { open "peepopen://$1?editor=MacVim" }
-else
-    alias ls='ls --color=auto -B'
-    alias g='vim'
-fi
-
-alias pnc='pn `pwd`'
-alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-alias grep='grep --color=auto'
-alias pu='pushd'
-alias po='popd'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias cd..='cd ..'
-alias cd/='cd /'
-
-#alias pl='pdflatex'
-alias vi=vim
-alias v=vim
-alias -g L='|less'
-alias -g T='|tail'
-alias -g H='|head'
-alias -g C='|pbcopy'
-alias -g E='2>&1'
-alias -g N='>/dev/null'
-alias -g L='E | less'
-alias -g G='| grep'
-alias -g D='E | colordiff L'
-alias -g S='| sort'
-#alias -g V='|vim -'
-#alias -g B='&>/dev/null &'
-#alias -g D='&>/dev/null &|'
-booleancheck "$shellopts[utf8]" && alias screen="screen -U"
-#alias m='mplayer -fs'
-alias history='history -EfdD'
-alias h='history'
-alias gh='h 1 | grep'
+# Customize the colors used by ls, if we have the right tools
+# Also changes colors for completion, if initialized first
+which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
 
 ### Options
 #### Shell Options
@@ -344,6 +127,10 @@ setopt Correct             2>/dev/null
 setopt AUTO_CD             2>/dev/null
 #setopt NoAutoMenu
 
+# Returns whether its argument should be considered "true"
+# Succeeds with "1", "y", "yes", "t", and "true", case insensitive
+booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
+
 #### Environment variables
 export PAGER=less
 if [[ $OSTYPE == darwin* ]]; then
@@ -362,6 +149,231 @@ export SAVEHIST=500000                      # Lines of history to write out
 export HISTFILE="$HOME/.zsh/.zsh_history"   # File to which history will be saved
 export HOST=${HOST:-$HOSTNAME}              # Ensure that $HOST contains hostname
 
+### Setup
+# These settings are only for interactive shells. Return if not interactive.
+# This stops us from ever accidentally executing, rather than sourcing, .zshrc
+[[ -o nointeractive ]] && return
+
+#### $fpath for enjoying most recent completion+rest
+# Make sure every entry in $fpath is unique.
+typeset -U fpath
+# Load the git-completion functions
+if [ -d ~/git/zsh/Completion ]; then
+    fpath=(~/git/zsh/Completion/*/*(/) $fpath)
+fi
+# Load the VCS Infobar
+if [ -d ~/git/zsh/Functions/VCS_Info/ ]; then
+    fpath=(~/git/zsh/Functions/VCS_Info/ ~/git/zsh/Functions/VCS_Info/Backends $fpath)
+fi
+# Set correct fpath to allow loading my functions (including completion
+# functions).
+#fpath=(~/.zsh/functions $fpath)
+# Autoload my functions (except completion functions and hidden files). Thanks
+# to caphuso from the Zsh example files for this idea.
+#if [[ -d ~/.zsh/functions ]]; then
+    #autoload -Uz ${fpath[1]}/^_*(^/:t)
+#fi
+# Autoload add-zsh-hook to add/remove zsh hook functions easily.
+autoload -Uz add-zsh-hook
+
+#### Optional Behaviors
+# Setting any of these options will modify the behavior of a new shell to
+# better suit your needs.  These values given specify the default for each
+# option when the shell starts.  At the moment, changing shellopts[utf8] during
+# an execution does nothing whatsoever, as it only sets up some aliases and
+# variables when the shell starts.  However, all of the other options can be
+# changed while the shell is running to change its behavior from that point
+# forward.
+typeset -A shellopts
+shellopts[utf8]=1         # Set up a few programs for UTF-8 mode
+shellopts[titlebar]=1     # Whether the titlebar can be dynamically changed
+shellopts[screen_names]=1 # Dynamically change window names in GNU screen
+shellopts[preexec]=1      # Run preexec to update screen title and titlebar
+shellopts[precmd]=1       # Run precmd to show job count and retval in RPROMPT
+shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
+
+#### Helper Functions
+# Checks if a file can be autoloaded by trying to load it in a subshell.
+# If we find it, return 0, else 1
+autoloadable() { ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null }
+cdf() { cd *$1*/ } # stolen from @topfunky
+
+# Access often used paths quickly
+if [ -d $HOME/dev/qs ]; then
+    qs=~/dev/qs/Quicksilver/Quicksilver; : ~qs
+fi
+if [ -d $HOME/Downloads ]; then
+    dl() { cd $HOME/Downloads }
+fi
+if [ -d $HOME/Documents/jobs/marcgalal ]; then 
+    w() { cd $HOME/jobs/marcgalal }
+fi
+if [ -d $HOME/Documents/work ]; then 
+    ba() {
+        if [[ $1 -eq 1 ]]; then
+            cd $HOME/Documents/workspace/Animal
+        elif [[ $1 -eq 2 ]]; then
+            cd $HOME/Documents/workspace/AnimalScript2
+        else
+            cd $HOME/ba/tex
+        fi
+    }
+fi
+if [ -d $HOME/Dropbox ]; then 
+    db() { cd $HOME/Dropbox/ }
+fi
+leo() { elinks "http://dict.leo.org/?search=$1"; }
+dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
+# using a perlre lookahead 'trick' to prevent grep from
+# greping it's own process
+# grep with --enable-pcre needed!
+psg() { ps ax | grep -i -P "$1"'(?!\(\?\!)' }
+
+# Replaces the current window title in Gnu Screen with its positional parameters
+set-screen-title() { echo -n "\ek$*\e\\" }
+# Replaces the current terminal titlebar with its positional parameters.
+set-window-title() { echo -n "\e]2;"${${(pj: :)*}[1,254]}"\a" }
+# Replaces the current terminal icon text with its positional parameters.
+set-icon-title() { echo -n "\e]1;"${${(pj: :)*}[1,254]}"\a" }
+
+#### Capability checks
+# Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
+# TODO So can quite a few other terminal emulators...  If I'm missing a
+# terminal emulator that you know can set the titlebar, please let me know.
+[[ -n "$STY" || "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]] || shellopts[titlebar]=0
+
+# [[ -n "$STY˝ ]] || "export TERM=xerm-256color"
+
+# TODO Should probably check terminal emulator really is using unicode...
+# [[ TEST IF UNICODE WORKS ]] || shellopts[utf8]=0
+
+# Dynamically change a screen name to the last command used when in Gnu Screen
+[[ "$TERM" == (screen*) ]] || shellopts[screen_names]=0
+
+### Colon-separated Arrays
+# Tie colon separated arrays to zsh-arrays, like (MAN)PATH and (man)path
+typeset -T INFOPATH           infopath
+typeset -T LD_LIBRARY_PATH    ld_library_path
+typeset -T LD_LIBRARY_PATH_32 ld_library_path_32
+typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
+typeset -T CLASSPATH          classpath
+typeset -T LS_COLORS          ls_colors
+. $HOME/.zsh/functions/vcs_hooks.zsh
+#. $HOME/.zsh/functions/git.zsh
+#. $HOME/.zsh/vi-mode.zsh
+
+### Aliases
+# First off, allow commands after sudo to still be alias expanded.
+# An alias ending in a space allows the next word on the command line to
+# be alias expanded as well.
+alias sudo="sudo "
+alias l='ls -CF'
+alias c=clear
+alias d=cd
+alias s="sudo "
+alias lN='l -lt | head'
+alias la='ls -A'
+alias ll='ls -l'
+# only on mac osx tho
+alias gxa="gitx --all"
+alias :q="echo YOU FAIL"
+alias sr= "screen -r"
+alias sx= "screen -x"
+alias pygrep="grep --include='*.py' $*"
+alias rbgrep="grep --include='*.rb' $*"
+
+# If the window naming feature is used (see above) then use ".zsh" (leading
+# dot) as title name after running clear so it's clear to me that the window
+# is empty. I open so much windows that I don't know in which I have something
+# important. This helps me to remember which windows are empty (I run clear
+# after I finished my work in a window).
+if [[ -n $window_reset ]]; then
+    alias clear='clear; window_reset=yes; window_precmd reset'
+fi
+
+# on mac the gnutls are wicked...
+# hidden in the clouds!
+if [[ $OSTYPE == darwin* ]]; then
+    alias df='gdf'
+    alias sort='gsort'
+    #alias find='gfind'
+    alias du='gdu'
+    alias ls='gls --color=auto -B'
+    alias dircolors='gdircolors'
+    alias v='mvim --remote-silent'
+    alias m='mvim --remote-silent'
+    alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
+    alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
+    alias -s pdf='/Applications/Skim.app'
+    alias mp='/Applications/VLC.app'
+
+    #### Man and Info options
+    # Make vim the manpage viewer or info viewer
+    # Requires manpageview.vim from
+    # http://vim.sourceforge.net/scripts/script.php?script_id=489
+    manx() { mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate' }
+    pledit() {
+        plutil -convert xml1 ${1}
+        $EDITOR -w ${1}
+        plutil -convert binary1 ${1}
+    }
+    function pn() { open "peepopen://$1?editor=MacVim" }
+else
+    alias ls='ls --color=auto -B'
+    alias v='vim'
+    alias m='vim'
+fi
+alias pnc='pn `pwd`'
+alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+alias grep='grep --color=auto'
+alias pu='pushd'
+alias po='popd'
+alias g='git'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias cd..='cd ..'
+alias cd/='cd /'
+
+#alias pl='pdflatex'
+alias vi=vim
+alias -g L='|less'
+alias -g T='|tail'
+alias -g H='|head'
+alias -g C='|pbcopy'
+alias -g E='2>&1'
+alias -g N='>/dev/null'
+alias -g L='E | less'
+alias -g G='| grep'
+alias -g D='E | colordiff L'
+alias -g S='| sort'
+alias -g B='&>/dev/null &'
+alias -g D='&>/dev/null &|'
+booleancheck "$shellopts[utf8]" && alias screen="screen -U"
+#alias m='mplayer -fs'
+alias history='history -EfdD'
+alias h='history'
+alias gh='h 1 | grep'
+#### Git Aliases
+#alias glol="git log --pretty=oneline"
+#alias gf="git fetch"
+#alias gl="git log"
+#alias gs="git status"
+#alias gi="git init"
+#alias gb="git branch"
+#alias ga="git add"
+#alias gc="git commit"
+#alias gca='git commit --amend'
+#alias gco="git checkout"
+#alias gd="git diff"
+if [[ $OSTYPE == darwin* ]]; then
+    alias gxa="gitx -all"
+    alias gx="gitx"
+fi
+gdi() { git diff $* | view -; }
+gdc() { gd --cached $*; }
+alias gka="gitk --all &"
+alias gitkl="gitk \$(git branch | sed 's/*//' | sed 's@\<@heads/@' )"
+
 ### Keybindings
 bindkey -v                                         # Use vi keybindings
 TRAPINT() { zle && print -s -r -- $BUFFER; return $1 }
@@ -374,7 +386,6 @@ if zmodload -i zsh/terminfo; then
         bindkey "${terminfo[kdch1]}" delete-char       # Delete
 fi
 zmodload zsh/stat
-
 search-backwords() { zle history-incremental-search-backward $BUFFER }
 zle -N search-backwords
 
@@ -464,6 +475,22 @@ zle -N edit-command-line
 # so expansion can be handled
 # by a completer.
 
+# Edit the command line using your usual editor.
+# Binding this to 'v' in the vi command mode map,
+#autoload edit-command-line
+#zle -N edit-command-line
+#bindkey -M vicmd v edit-command-line
+#will give ksh-like behaviour for that key,
+#except that it will handle multi-line buffers properly.
+
+# Prompt to <<insert>> <<normal>> Modes on the right
+#function zle-line-init zle-keymap-select {
+#RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
+#RPS2=$RPS1
+#zle reset-prompt
+#}
+#zle -N zle-line-init
+#zle -N zle-keymap-select
 #### Setting the window title
 if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Is set to a non empty value to reset the window name in the next
@@ -616,11 +643,7 @@ if autoloadable edit-command-line; then
     bindkey "\ee" edit-command-line
 fi
 
-### Misc
-#### Some minicom options:
-# linewrap use-status-line capture-file=/dev/null color=off
-export MINICOM='-w -z  -C /dev/null -c off'
-
+### Functions
 if [[ -f $HOME/.vim/plugin/manpageviewPlugin.vim ]]; then
     man() {
         [[ $# -eq 0 ]] && return 1
@@ -637,36 +660,13 @@ if [[ -f $HOME/.vim/plugin/manpageviewPlugin.vim ]]; then
         vim -R -c "Man $1.pl" -c "silent! only"
     }
 fi
-
-#### Less and ls options
-# make less more friendly for non-text input files, see lesspipe(1)
-# If we have it, we'll use it.
-#which lesspipe &>/dev/null && eval "$(lesspipe)"
-
-# customize the colors used by ls, if we have the right tools
-# Also changes colors for completion, if initialized first
-which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
-
-# Edit the command line using your usual editor.
-# Binding this to 'v' in the vi command mode map,
-#autoload edit-command-line
-#zle -N edit-command-line
-#bindkey -M vicmd v edit-command-line
-#will give ksh-like behaviour for that key,
-#except that it will handle multi-line buffers properly.
-
-# Prompt to <<insert>> <<normal>> Modes on the right
-#function zle-line-init zle-keymap-select {
-#RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-#RPS2=$RPS1
-#zle reset-prompt
-#}
-#zle -N zle-line-init
-#zle -N zle-keymap-select
-
-### Functions
-gd() { git diff $* | view -; }
-gdc() { gd --cached $*; }
+# Originally from Jonathan Penn, with modifications by Gary Bernhardt
+whodoneit() {
+    (set -e &&
+        for x in $(git grep -I --name-only $1); do
+            git blame -f -- $x | grep $1;
+        done)
+}
 bash() { command bash E }
 collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
 
@@ -689,9 +689,33 @@ mkmaildir() {
     subdir=${1}
     mkdir -p ${root}/${subdir}/{cur,new,tmp}
 }
+# Display all branches (except stash) in gitk but only 200 commits as this is
+# much faster. Also put in the background and disown. Thanks to sitaram in
+# #git on Freenode (2009-04-20 15:51).
+gitk() {
+    command gitk \
+        --max-count=200 \
+        $(git rev-parse --symbolic-full-name --remotes --branches) \
+        $@ &
+    disown %command
+}
+# Same for tig (except the disown part as it's no GUI program).
+tig() {
+    command tig \
+        --max-count=200 \
+        $(git rev-parse --symbolic-full-name --remotes --branches) \
+        $@
+}
 ### Completion
 if autoloadable compinit; then
-    autoload -U compinit; compinit # Set up the required completion functions
+    # Load the complist module which provides additions to completion lists
+    # (coloring, scrollable).
+    zmodload zsh/complist
+    # Use new completion system, store dumpfile in ~/.zsh/cache to prevent
+    # cluttering of ~/. $fpath must be set before calling this. Thanks to Adlai in
+    # #zsh on Freenode (2009-08-07 21:05 CEST) for reminding me of the $fpath
+    # problem.
+    autoload -U compinit; compinit -d ~/.zsh/cache/zcompdump # Set up the required completion functions
 
     # Order in which completion mechanisms will be tried:
     # 1. Try completing the results of an old list
@@ -736,10 +760,17 @@ if autoloadable compinit; then
     # followed by files that do, followed last by files that are known to be binary
     # types that should probably not be edited.
     zstyle ':completion:*:*:(vi|vim):*:*' \
-        file-patterns '*~(*.o|*~|*.old|*.bak|*.pro|*.zwc|*.swp):regular-files' \
+        file-patterns '*~(*.o|*~|*.old|*.bak|*.pro|*.zwc|*.swp|*.pdf|*.class|*.aux):regular-files' \
         '(*~|*.bak|*.old):backup-files' \
         '(*.o|*.pro|*.zwc|*.swp):hidden-files'
 
+    # Provide a fallback completer which always completes files. Useful when Zsh's
+    # completion is too "smart". Thanks to Frank Terbeck <ft@bewatermyfriend.org>
+    # (http://www.zsh.org/mla/users/2009/msg01038.html).
+    zle -C complete-files complete-word _generic
+    zstyle ':completion:complete-files:*' completer _files
+    bindkey '^F' complete-files
+    
     # Use colors in tab completion listings
     zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
@@ -753,7 +784,7 @@ if autoloadable compinit; then
 
     # Use caching for commands that would like a cache.
     zstyle ':completion:*' use-cache on
-    zstyle ':completion:*' cache-path ${ZDOTDIR}/.zcache
+    zstyle ':completion:*' cache-path ~/.zsh/.zcache
 
     # Page long completion lists, using this prompt.
     zstyle ':completion:*' list-prompt %S%L -- More --%s
@@ -764,10 +795,6 @@ if autoloadable compinit; then
     # Autocomplete to ./configure in the most cases
     zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
 fi
-
-autoload -U loadGitAliases
-loadGitAliases
-
 
 ### Prompt
 #### Function to hide prompts on the line - Will be replaced eventually
@@ -817,13 +844,11 @@ else
     COLOR="${boldgreen}"
 fi
 prompt-setup() {
-    #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
     if booleancheck "$shellopts[titlebar]" ; then
         PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
         PROMPT+='${vcs_info_msg_0_}'
         PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
     else
-        # <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
         PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
     fi
 }
