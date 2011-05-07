@@ -275,7 +275,6 @@ alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
 # only on mac osx tho
-alias gxa="gitx --all"
 alias :q="echo YOU FAIL"
 alias sr= "screen -r"
 alias sx= "screen -x"
@@ -379,7 +378,8 @@ alias gd="git diff --patience"
 alias gf="git fetch"
 alias gl="git log"
 alias gs="git status"
-alias gp="git push"
+alias gp="git pull"
+alias gpsh="git push"
 alias gi="git init"
 alias gb="git branch"
 alias ga="git add"
@@ -388,6 +388,8 @@ alias gc="git commit"
 alias gcm="git commit -m"
 alias gca='git commit --amend'
 alias gco="git checkout"
+alias gCc='cat .git/config'
+alias gCv='v .git/config'
 alias gd="git diff"
 alias gra="git ra"
 alias gru="git remote update"
@@ -397,9 +399,29 @@ alias gb="git branch"
 alias gbv="git branch -av"
 alias gka="gitk --all &"
 alias gitkl="gitk \$(git branch | sed 's/*//' | sed 's@\<@heads/@' )"
-alias egitconfig='v .git/config'
+if [[ $OSTYPE == darwin* ]]; then
+    alias gx="gitx"
+    alias gxa="gitx -all"
+fi
+
+alias grc="git rebase --continue"
+alias gra="git rebase --abort"
+alias gri="git rebase -i"
+alias gcp="git cherry-pick"
 gdi() { git diff $* | view -; }
 gdc() { gd --cached $*; }
+# git svn
+alias gsfr="git svn fetch && git-svn rebase"
+gitSvnDcommit(){
+  echo 'updating (git svn rebase)'  && \
+    git svn rebase && \
+    echo '(git stash)'  && \
+    git stash && \
+    echo comitting ..  && \
+    git svn dcommit && \
+    echo '(gsh apply)' && \
+    git stash apply
+}
 
 ### Keybindings
 bindkey -v                                         # Use vi keybindings
