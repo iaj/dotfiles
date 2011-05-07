@@ -354,6 +354,9 @@ alias history='history -EfdD'
 alias h='history'
 alias gh='h 1 | grep'
 #### Git Aliases
+if [[ $OSTYPE == darwin* ]]; then
+    alias gitx="open -b nl.frim.GitX"
+fi
 #alias glol="git log --pretty=oneline"
 #alias gf="git fetch"
 #alias gl="git log"
@@ -365,10 +368,6 @@ alias gh='h 1 | grep'
 #alias gca='git commit --amend'
 #alias gco="git checkout"
 #alias gd="git diff"
-if [[ $OSTYPE == darwin* ]]; then
-    alias gxa="gitx -all"
-    alias gx="gitx"
-fi
 gdi() { git diff $* | view -; }
 gdc() { gd --cached $*; }
 alias gka="gitk --all &"
@@ -666,222 +665,222 @@ whodoneit() {
         for x in $(git grep -I --name-only $1); do
             git blame -f -- $x | grep $1;
         done)
-}
-bash() { command bash E }
-collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
+    }
+    bash() { command bash E }
+    collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
 
-mkcd() {
-    [[ -z $1 ]] && printf "usage: mkcd NEW-DIRECTORY" && return 1
-    [[ -d $1 ]] && printf "mkcd: Directory %s already exists; cd-ing" $1
-    command mkdir -p -- $1
-    builtin cd -- $1
-}
+    mkcd() {
+        [[ -z $1 ]] && printf "usage: mkcd NEW-DIRECTORY" && return 1
+        [[ -d $1 ]] && printf "mkcd: Directory %s already exists; cd-ing" $1
+        command mkdir -p -- $1
+        builtin cd -- $1
+    }
 
-MAILDIR_ROOT=~/mail
-mkmaildir() {
-    ### Uses $MAILDIR_ROOT
-    local root subdir
-    root=${MAILDIR_ROOT:-${HOME}/Mail}
-    if [[ -z ${1} ]] ; then
-        print "Usage\n $0 <dirname>"
-        return 1
+    MAILDIR_ROOT=~/mail
+    mkmaildir() {
+        ### Uses $MAILDIR_ROOT
+        local root subdir
+        root=${MAILDIR_ROOT:-${HOME}/Mail}
+        if [[ -z ${1} ]] ; then
+            print "Usage\n $0 <dirname>"
+            return 1
+        fi
+        subdir=${1}
+        mkdir -p ${root}/${subdir}/{cur,new,tmp}
+    }
+    # Display all branches (except stash) in gitk but only 200 commits as this is
+    # much faster. Also put in the background and disown. Thanks to sitaram in
+    # #git on Freenode (2009-04-20 15:51).
+    gitk() {
+        command gitk \
+            --max-count=200 \
+            $(git rev-parse --symbolic-full-name --remotes --branches) \
+            $@ &
+        disown %command
+    }
+    # Same for tig (except the disown part as it's no GUI program).
+    tig() {
+        command tig \
+            --max-count=200 \
+            $(git rev-parse --symbolic-full-name --remotes --branches) \
+            $@
+    }
+    ### Completion
+    if autoloadable compinit; then
+        # Load the complist module which provides additions to completion lists
+        # (coloring, scrollable).
+        zmodload zsh/complist
+        # Use new completion system, store dumpfile in ~/.zsh/cache to prevent
+        # cluttering of ~/. $fpath must be set before calling this. Thanks to Adlai in
+        # #zsh on Freenode (2009-08-07 21:05 CEST) for reminding me of the $fpath
+        # problem.
+        autoload -U compinit; compinit -d ~/.zsh/cache/zcompdump # Set up the required completion functions
+
+        # Order in which completion mechanisms will be tried:
+        # 1. Try completing the results of an old list
+        #    ( for use with history completion on ctrl-space )
+        # 2. Try to complete using context-sensitive completion
+        # 3. Try interpretting the typed text as a pattern and matching it against the
+        #    possible completions in context
+        # 4. Try completing the word just up to the cursor, ignoring anything past it.
+        # 5. Try combining the effects of completion and correction.
+        zstyle ':completion:*' completer _oldlist _complete _match \
+            _expand _prefix _approximate
+
+        # Don't complete backup files as executables
+        zstyle ':completion:*:*:(*pdf*|acroread|rm):*' file-sort time
+        zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*\~'
+
+        # If I don't have ``executable'', don't complete to the _executable completer
+        zstyle ':completion:*:functions' ignored-patterns '_*'
+
+        # Match lowercase letters to uppercase letters and dashes to underscores (not
+        # vice-versa), and allow ".t<TAB>" to list all files containing the text ".t"
+        #zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
+        #07:57:16   Patplu: iaj: you need to tweak matcher-list zstyle
+        #07:57:28   Patplu: something like : 
+        zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z} l:|=*' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+        # Try to use verbose listings when we have more information
+        zstyle ':completion:*' verbose true
+
+        # Allows /u/l/b<TAB> to menu complete as though you typed /u*/l*/b*<TAB>
+        zstyle ':completion:*:paths' expand suffix
+
+        # Menu complete on ambiguous paths
+        zstyle ':completion:*:paths' list-suffixes true
+
+        # Have '/home//<TAB>' list '/home/*', rather than '/home/*/*'
+        zstyle ':completion:*:paths' squeeze-slashes false
+
+        # Enter "menu selection" if there are at least 2 choices while completing
+        zstyle ':completion:*' menu select=2
+
+        # vi or vim will match first files that don't end in a backup extension,
+        # followed by files that do, followed last by files that are known to be binary
+        # types that should probably not be edited.
+        zstyle ':completion:*:*:(vi|vim):*:*' \
+            file-patterns '*~(*.o|*~|*.old|*.bak|*.pro|*.zwc|*.swp|*.pdf|*.class|*.aux):regular-files' \
+            '(*~|*.bak|*.old):backup-files' \
+            '(*.o|*.pro|*.zwc|*.swp):hidden-files'
+
+        # Provide a fallback completer which always completes files. Useful when Zsh's
+        # completion is too "smart". Thanks to Frank Terbeck <ft@bewatermyfriend.org>
+        # (http://www.zsh.org/mla/users/2009/msg01038.html).
+        zle -C complete-files complete-word _generic
+        zstyle ':completion:complete-files:*' completer _files
+        bindkey '^F' complete-files
+
+        # Use colors in tab completion listings
+        zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+        # Add a space after an expansion, so that 'ls $TERM' expands to 'ls xterm '
+        zstyle ':completion:*:expand:*' add-space true
+
+        # Tweaks to kill: list processes using the given command and show them in a menu
+        zstyle ':completion:*:*:kill:*' command 'ps -u$USER -o pid,%cpu,tty,cputime,cmd'
+        zstyle ':completion:*:*:kill:*' menu yes select
+        zstyle ':completion:*:*:kill:*' force-list always
+
+        # Use caching for commands that would like a cache.
+        zstyle ':completion:*' use-cache on
+        zstyle ':completion:*' cache-path ~/.zsh/.zcache
+
+        # Page long completion lists, using this prompt.
+        zstyle ':completion:*' list-prompt %S%L -- More --%s
+
+        # Show a warning when no completions were found
+        zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
+
+        # Autocomplete to ./configure in the most cases
+        zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
     fi
-    subdir=${1}
-    mkdir -p ${root}/${subdir}/{cur,new,tmp}
-}
-# Display all branches (except stash) in gitk but only 200 commits as this is
-# much faster. Also put in the background and disown. Thanks to sitaram in
-# #git on Freenode (2009-04-20 15:51).
-gitk() {
-    command gitk \
-        --max-count=200 \
-        $(git rev-parse --symbolic-full-name --remotes --branches) \
-        $@ &
-    disown %command
-}
-# Same for tig (except the disown part as it's no GUI program).
-tig() {
-    command tig \
-        --max-count=200 \
-        $(git rev-parse --symbolic-full-name --remotes --branches) \
-        $@
-}
-### Completion
-if autoloadable compinit; then
-    # Load the complist module which provides additions to completion lists
-    # (coloring, scrollable).
-    zmodload zsh/complist
-    # Use new completion system, store dumpfile in ~/.zsh/cache to prevent
-    # cluttering of ~/. $fpath must be set before calling this. Thanks to Adlai in
-    # #zsh on Freenode (2009-08-07 21:05 CEST) for reminding me of the $fpath
-    # problem.
-    autoload -U compinit; compinit -d ~/.zsh/cache/zcompdump # Set up the required completion functions
 
-    # Order in which completion mechanisms will be tried:
-    # 1. Try completing the results of an old list
-    #    ( for use with history completion on ctrl-space )
-    # 2. Try to complete using context-sensitive completion
-    # 3. Try interpretting the typed text as a pattern and matching it against the
-    #    possible completions in context
-    # 4. Try completing the word just up to the cursor, ignoring anything past it.
-    # 5. Try combining the effects of completion and correction.
-    zstyle ':completion:*' completer _oldlist _complete _match \
-        _expand _prefix _approximate
+    ### Prompt
+    #### Function to hide prompts on the line - Will be replaced eventually
+    TogglePrompt() {
+        if [[ -n "$PS1" && -n "$RPS1" ]]; then
+            OLDRPS1=$RPS1; OLDPS1=$PS1
+            unset RPS1 PS1
+        else
+            RPS1=$OLDRPS1; PS1=$OLDPS1
+        fi
+        zle reset-prompt
+    }
+    zle -N TogglePrompt
+    bindkey "^X^X" TogglePrompt
 
-    # Don't complete backup files as executables
-    zstyle ':completion:*:*:(*pdf*|acroread|rm):*' file-sort time
-    zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*\~'
+    #### Function to allow Ctrl-z to toggle between suspend and resume
+    Resume() {
+        zle push-input
+        BUFFER="fg"
+        zle accept-line
+    }
+    zle -N Resume
+    bindkey "^Z" Resume
+    typeset +x PS1     # Don't export PS1 - Other shells just mangle it.
 
-    # If I don't have ``executable'', don't complete to the _executable completer
-    zstyle ':completion:*:functions' ignored-patterns '_*'
+    hg_prompt_info() {
+        hg prompt --angle-brackets "\
+            < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
+            < at %{$fg[yellow]%}<tags|%{$reset_color%}, %{$fg[yellow]%}>%{$reset_color%}>\
+            %{$fg[green]%}<status|modified|unknown><update>%{$reset_color%}<
+        patches: <patches|join( → )|pre_applied(%{$fg[yellow]%})|post_applied(%{$reset_color%})|pre_unapplied(%{$fg_bold[black]%})|post_unapplied(%{$reset_color%})>>" 2>/dev/null
+    }
+    prompt_char() {
+        #git branch >/dev/null 3>/dev/null && echo '±' && return
+        #hg root >/dev/null 2>/dev/null && echo '☿' && return
+        #echo '○'
+        echo '$'
+    }
 
-    # Match lowercase letters to uppercase letters and dashes to underscores (not
-    # vice-versa), and allow ".t<TAB>" to list all files containing the text ".t"
-    #zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
-    #07:57:16   Patplu: iaj: you need to tweak matcher-list zstyle
-    #07:57:28   Patplu: something like : 
-    zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z} l:|=*' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-    # Try to use verbose listings when we have more information
-    zstyle ':completion:*' verbose true
+    #### Prompt setup functions
+    if [[ -n $SSH_CONNECTION ]]; then
+        export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
+        COLOR="${magenta}"
 
-    # Allows /u/l/b<TAB> to menu complete as though you typed /u*/l*/b*<TAB>
-    zstyle ':completion:*:paths' expand suffix
-
-    # Menu complete on ambiguous paths
-    zstyle ':completion:*:paths' list-suffixes true
-
-    # Have '/home//<TAB>' list '/home/*', rather than '/home/*/*'
-    zstyle ':completion:*:paths' squeeze-slashes false
-
-    # Enter "menu selection" if there are at least 2 choices while completing
-    zstyle ':completion:*' menu select=2
-
-    # vi or vim will match first files that don't end in a backup extension,
-    # followed by files that do, followed last by files that are known to be binary
-    # types that should probably not be edited.
-    zstyle ':completion:*:*:(vi|vim):*:*' \
-        file-patterns '*~(*.o|*~|*.old|*.bak|*.pro|*.zwc|*.swp|*.pdf|*.class|*.aux):regular-files' \
-        '(*~|*.bak|*.old):backup-files' \
-        '(*.o|*.pro|*.zwc|*.swp):hidden-files'
-
-    # Provide a fallback completer which always completes files. Useful when Zsh's
-    # completion is too "smart". Thanks to Frank Terbeck <ft@bewatermyfriend.org>
-    # (http://www.zsh.org/mla/users/2009/msg01038.html).
-    zle -C complete-files complete-word _generic
-    zstyle ':completion:complete-files:*' completer _files
-    bindkey '^F' complete-files
-    
-    # Use colors in tab completion listings
-    zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-
-    # Add a space after an expansion, so that 'ls $TERM' expands to 'ls xterm '
-    zstyle ':completion:*:expand:*' add-space true
-
-    # Tweaks to kill: list processes using the given command and show them in a menu
-    zstyle ':completion:*:*:kill:*' command 'ps -u$USER -o pid,%cpu,tty,cputime,cmd'
-    zstyle ':completion:*:*:kill:*' menu yes select
-    zstyle ':completion:*:*:kill:*' force-list always
-
-    # Use caching for commands that would like a cache.
-    zstyle ':completion:*' use-cache on
-    zstyle ':completion:*' cache-path ~/.zsh/.zcache
-
-    # Page long completion lists, using this prompt.
-    zstyle ':completion:*' list-prompt %S%L -- More --%s
-
-    # Show a warning when no completions were found
-    zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
-
-    # Autocomplete to ./configure in the most cases
-    zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
-fi
-
-### Prompt
-#### Function to hide prompts on the line - Will be replaced eventually
-TogglePrompt() {
-if [[ -n "$PS1" && -n "$RPS1" ]]; then
-    OLDRPS1=$RPS1; OLDPS1=$PS1
-    unset RPS1 PS1
-else
-    RPS1=$OLDRPS1; PS1=$OLDPS1
-fi
-zle reset-prompt
-}
-zle -N TogglePrompt
-bindkey "^X^X" TogglePrompt
-
-#### Function to allow Ctrl-z to toggle between suspend and resume
-Resume() {
-    zle push-input
-    BUFFER="fg"
-    zle accept-line
-}
-zle -N Resume
-bindkey "^Z" Resume
-typeset +x PS1     # Don't export PS1 - Other shells just mangle it.
-
-hg_prompt_info() {
-    hg prompt --angle-brackets "\
-        < on %{$fg[magenta]%}<branch>%{$reset_color%}>\
-        < at %{$fg[yellow]%}<tags|%{$reset_color%}, %{$fg[yellow]%}>%{$reset_color%}>\
-        %{$fg[green]%}<status|modified|unknown><update>%{$reset_color%}<
-    patches: <patches|join( → )|pre_applied(%{$fg[yellow]%})|post_applied(%{$reset_color%})|pre_unapplied(%{$fg_bold[black]%})|post_unapplied(%{$reset_color%})>>" 2>/dev/null
-}
-prompt_char() {
-    #git branch >/dev/null 3>/dev/null && echo '±' && return
-    #hg root >/dev/null 2>/dev/null && echo '☿' && return
-    #echo '○'
-    echo '$'
-}
-
-#### Prompt setup functions
-if [[ -n $SSH_CONNECTION ]]; then
-    export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
-    COLOR="${magenta}"
-
-else
-    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
-    COLOR="${boldgreen}"
-fi
-prompt-setup() {
-    if booleancheck "$shellopts[titlebar]" ; then
-        PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
-        PROMPT+='${vcs_info_msg_0_}'
-        PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
     else
-        PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
+        export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
+        COLOR="${boldgreen}"
     fi
-}
-prompt-setup
-# Display the VCS information in the right prompt.
-# NOT anymore - Display the history information instead ;DD 
-#RPROMPT='${vcs_info_msg_0_}'
-RPROMPT="${default}(${white}%!%b)"
+    prompt-setup() {
+        if booleancheck "$shellopts[titlebar]" ; then
+            PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
+            PROMPT+='${vcs_info_msg_0_}'
+            PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
+        else
+            PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
+        fi
+    }
+    prompt-setup
+    # Display the VCS information in the right prompt.
+    # NOT anymore - Display the history information instead ;DD 
+    #RPROMPT='${vcs_info_msg_0_}'
+    RPROMPT="${default}(${white}%!%b)"
 
 
-# Prompt for spelling corrections.
-# %R is word to change, %r is suggestion, and Y and N are colored green and red.
-SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]o/[E]dit/[A]bort) '
+    # Prompt for spelling corrections.
+    # %R is word to change, %r is suggestion, and Y and N are colored green and red.
+    SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]o/[E]dit/[A]bort) '
 
-### Attaching to a possibly running screen session
-# If not already in screen reattach to a running session or create a new one.
-# This also starts screen one a remote server when connecting through ssh.
-if [[ $TERM != dumb && -z $STY ]]; then
-    # Get running detached sessions.
-    session=$(screen -list | grep 'Detached' | awk '{ print $1; exit }')
-    # As we exec later we have to set the title here.
-    #window_preexec "screen"
-    # Create a new session if none is running.
-    if [[ -z $session ]]; then
-        # exec screen
-        # Reattach to a running session.
-    else
-        exec screen -r $session
+    ### Attaching to a possibly running screen session
+    # If not already in screen reattach to a running session or create a new one.
+    # This also starts screen one a remote server when connecting through ssh.
+    if [[ $TERM != dumb && -z $STY ]]; then
+        # Get running detached sessions.
+        session=$(screen -list | grep 'Detached' | awk '{ print $1; exit }')
+        # As we exec later we have to set the title here.
+        #window_preexec "screen"
+        # Create a new session if none is running.
+        if [[ -z $session ]]; then
+            # exec screen
+            # Reattach to a running session.
+        else
+            exec screen -r $session
+        fi
     fi
-fi
 
-if [ -d $HOME/perl5/lib/perl5 ]; then
-    eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
-fi
-## vim:fdm=expr
-## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
+    if [ -d $HOME/perl5/lib/perl5 ]; then
+        eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
+    fi
+    ## vim:fdm=expr
+    ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
