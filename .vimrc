@@ -73,7 +73,7 @@ let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
 set nocompatible
 set nocursorcolumn
 set magic
-"set cursorline
+set cursorline
 " Files that should be ignored by default - in completition as well as in Command-T
 set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.git,.o,.svn,.toc,.obj,.bmp,.jp*g,.png
 
@@ -211,7 +211,7 @@ set backupext=~                 " Backup for "file" is "file~"
 """" Command Line
 set wildmenu                    " Menu completion in command mode on <Tab>
 "set wildmode=longest,list      " <Tab> cycles between all matching choices.
-set wildmode=list:longest,full  " <Tab> cycles between all matching choices.
+set wildmode=list:longest,full
 set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 "set timeoutlen=100
 
@@ -329,6 +329,9 @@ let g:space_loaded = 1
 "let g:fuf_dir_exclude = '\v\-Tmp\-|\.svn/$|\.git/$|((^|[/\\])\.{1,2}[/\\]$)'
 "let g:fuf_mrucmd_maxItem = 2000
 
+"""" easymotion
+" for now we won't bug our keys !! <leader> is ',' as well...
+let g:EasyMotion_do_mapping = 0
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
     "colorscheme zenburn                  "tha best fricken fucken theme on earth
@@ -350,16 +353,18 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
-    let fg_bg = 1
-    let fg_bg = 2
+    let g:molokai_original = 1 " lighter background in gVim
+    let g:solarized_termcolors = 256 " use degraded colors in terminal
+    let g:zenburn_high_Contrast = 1 " darker colors
+
     "Molokai Settings
-    let g:molokai_original = 1
     "colorscheme sjl
-    colorscheme lucius
+    "colorscheme lucius
+    "colorscheme neverland
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
-    "colorscheme neverland2
+    colorscheme neverland2
     "colorscheme twilight256
     "colorscheme mustang
     "hi Visual guibg=#999999
@@ -394,6 +399,11 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
+    if g:colors_name=='neverland' && g:colors_name=='molokai' || g:colors_name=='sjl'
+        let fg_bg = 2
+    else
+        let fg_bg = 1
+    endif
     " Function used to display syntax group.
     function! SyntaxItem()
         return synIDattr(synID(line("."),col("."),1),"name")

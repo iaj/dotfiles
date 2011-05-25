@@ -54,6 +54,7 @@ local boldblue="%B%{${fg[blue]}%}"
 local green="%{${fg[green]}%}"
 local boldgreen="%B%{${fg[green]}%}" #CEFFAB
 local magenta="%{${fg[magenta]}%}"
+local boldmagenta="%B%{${fg[magenta]}%}" #CEFFAB
 local yellow="%{${fg[yellow]}%}" #FFFFB6
 local boldyellow="%B%{${fg[yellow]}%}"
 local default="%{${fg[default]}%}"
@@ -206,7 +207,7 @@ if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
 if [ -d $HOME/Documents/jobs/marcgalal ]; then 
-    w() { cd $HOME/jobs/marcgalal }
+    w() { cd $HOME/Documents/jobs/marcgalal }
 fi
 if [ -d $HOME/Documents/work ]; then 
     ba() {
@@ -259,6 +260,7 @@ typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
 typeset -T CLASSPATH          classpath
 typeset -T LS_COLORS          ls_colors
 . $HOME/.zsh/functions/vcs_hooks.zsh
+. $HOME/.zsh/customized.zsh
 #. $HOME/.zsh/functions/git.zsh
 #. $HOME/.zsh/vi-mode.zsh
 
@@ -299,8 +301,7 @@ if [[ $OSTYPE == darwin* ]]; then
     alias du='gdu'
     alias ls='gls --color=auto -B'
     alias dircolors='gdircolors'
-    alias v='mvim --remote-silent'
-    alias m='mvim --remote-silent'
+    alias g='mvim --remote-silent'
     alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
     alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
     alias -s pdf='/Applications/Skim.app'
@@ -319,15 +320,13 @@ if [[ $OSTYPE == darwin* ]]; then
     function pn() { open "peepopen://$1?editor=MacVim" }
 else
     alias ls='ls --color=auto -B'
-    alias v='vim'
-    alias m='vim'
+    alias g='vim'
 fi
 alias pnc='pn `pwd`'
 alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 alias grep='grep --color=auto'
 alias pu='pushd'
 alias po='popd'
-alias g='git'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias cd..='cd ..'
@@ -405,7 +404,7 @@ if [[ $OSTYPE == darwin* ]]; then
 fi
 
 alias grc="git rebase --continue"
-#alias gra="git rebase --abort"
+alias grab="git rebase --abort"
 alias gri="git rebase -i"
 alias gcp="git cherry-pick"
 gdi() { git diff $* | view -; }
@@ -425,6 +424,14 @@ gitSvnDcommit(){
 
 ### Keybindings
 bindkey -v                                         # Use vi keybindings
+# Helper function for using zkbd definitions with less clutter
+function zbindkey() {
+  [[ "$1" = "-s" ]] && {
+    s=-s
+    shift
+  }
+  [[ -n ${key[$1]} ]] && builtin bindkey $s "${key[$1]}" "$2"
+}
 TRAPINT() { zle && print -s -r -- $BUFFER; return $1 }
 if zmodload -i zsh/terminfo; then
     [ -n "${terminfo[khome]}" ] &&
@@ -436,7 +443,6 @@ if zmodload -i zsh/terminfo; then
 fi
 zmodload zsh/stat
 search-backwords() { zle history-incremental-search-backward $BUFFER }
-zle -N search-backwords
 
 bindkey -M vicmd "^R" search-backwords
 bindkey "^Y" yank
@@ -450,8 +456,13 @@ yank-pb() {
     zle copy-region-as-kill $BUFFER
     echo $BUFFER | pbcopy
 }
+# Declare these as custom widget functions
+#zle -N reset-prompt
+zle -N search-backwords
 zle -N paste-xclip
 zle -N yank-pb
+#zle -N shortpath
+#zle -N fullpath
 
 #bindkey -M viins "^R\*" yank-pb
 bindkey -M viins '^A' beginning-of-line
@@ -738,6 +749,14 @@ mkmaildir() {
     subdir=${1}
     mkdir -p ${root}/${subdir}/{cur,new,tmp}
 }
+function fullpath() {
+PS1="$PS1:s/\%~/%d/:s/40</400</"
+zle reset-prompt
+}
+function shortpath() {
+PS1="$PS1:s/\%d/%~/:s/400</40</"
+zle reset-prompt
+}
 ### Completion
 if autoloadable compinit; then
     # Load the complist module which provides additions to completion lists
@@ -784,6 +803,8 @@ if autoloadable compinit; then
 
     # Have '/home//<TAB>' list '/home/*', rather than '/home/*/*'
     zstyle ':completion:*:paths' squeeze-slashes false
+
+    zstyle ':completion:*' hosts ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*}
 
     # Enter "menu selection" if there are at least 2 choices while completing
     zstyle ':completion:*' menu select=2
@@ -868,18 +889,22 @@ prompt_char() {
 
 #### Prompt setup functions
 if [[ -n $SSH_CONNECTION ]]; then
-    export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
     COLOR="${magenta}"
-
+    export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
 else
-    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
     COLOR="${boldgreen}"
+    export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
 fi
+# TODO: full prompt showing in PROMPT :D
 prompt-setup() {
     if booleancheck "$shellopts[titlebar]" ; then
-        PROMPT="${COLOR}${SHORTHOST}${default}:%b${default}%1~"
+        PROMPT="${COLOR}${SHORTHOST}${default}:"
+        # Trunchate after 30 Chars.. Use the ~ instead of $HOME
+        PROMPT+="${blue}%30<..<%~%<<${default}%b"
         PROMPT+='${vcs_info_msg_0_}'
-        PROMPT+=" ${yellow}$(prompt_char) ${default}%b"
+        PROMPT+=" ${magenta}$(prompt_char) ${default}%b"
+        #PS1=$'%{'"$CC"$'%}%20>..>%1~%>>>%{\e[0m%}'
+        #PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
     else
         PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
     fi
