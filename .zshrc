@@ -804,7 +804,9 @@ if autoloadable compinit; then
     # Have '/home//<TAB>' list '/home/*', rather than '/home/*/*'
     zstyle ':completion:*:paths' squeeze-slashes false
 
-    zstyle ':completion:*' hosts ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*}
+    if [[ -e $HOME/.ssh/known_hosts ]]; then
+        zstyle ':completion:*' hosts ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*}
+    fi
 
     # Enter "menu selection" if there are at least 2 choices while completing
     zstyle ':completion:*' menu select=2
