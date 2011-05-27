@@ -903,7 +903,7 @@ prompt-setup() {
         PROMPT="${COLOR}${SHORTHOST}${default}:"
         # Trunchate after 30 Chars.. Use the ~ instead of $HOME
         PROMPT+="${blue}%30<..<%~%<<${default}%b"
-        PROMPT+='${vcs_info_msg_0_}%b'
+        PROMPT+='${vcs_info_msg_0_}'
         PROMPT+=" ${magenta}$(prompt_char) ${default}%b"
         #PS1=$'%{'"$CC"$'%}%20>..>%1~%>>>%{\e[0m%}'
         #PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
