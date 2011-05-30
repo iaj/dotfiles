@@ -16,7 +16,7 @@ filetype off
 "dont load csapprox if no gui support - silences an annoying warning
 set t_Co=256
 if !has("gui")
-    let g:CSApprox_verbose_level = 1
+    let g:CSApprox_verbose_level = 0
 endif
 call pathogen#runtime_append_all_bundles()
 call pathogen#helptags()
