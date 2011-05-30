@@ -14,6 +14,7 @@ filetype off
 
 " apply all the plugins to our current vim sessions - thanks pathogen ツ
 "dont load csapprox if no gui support - silences an annoying warning
+set t_Co=256
 if !has("gui")
     let g:CSApprox_loaded = 1
 endif
@@ -21,7 +22,6 @@ call pathogen#runtime_append_all_bundles()
 call pathogen#helptags()
 filetype plugin indent on
 
-set t_Co=256
 syntax enable
 "set cpoptions+=$                       " not directly change a word-mark a $
 "set lazyredraw                          " Avoid redrawing the screen mid-command.
