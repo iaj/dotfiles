@@ -332,6 +332,7 @@ let g:space_loaded = 1
 """" easymotion
 " for now we won't bug our keys !! <leader> is ',' as well...
 let g:EasyMotion_do_mapping = 0
+
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
     "colorscheme zenburn                  "tha best fricken fucken theme on earth
