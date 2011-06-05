@@ -359,13 +359,13 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    "colorscheme sjl
+    colorscheme sjl
     "colorscheme lucius
-    "colorscheme neverland
+    "colorscheme neverland2
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
-    colorscheme neverland2
+    "colorscheme neverland
     "colorscheme twilight256
     "colorscheme mustang
     "hi Visual guibg=#999999
