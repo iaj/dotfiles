@@ -24,7 +24,7 @@ filetype plugin indent on
 
 syntax enable
 "set cpoptions+=$                       " not directly change a word-mark a $
-"set lazyredraw                          " Avoid redrawing the screen mid-command.
+"set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
@@ -110,7 +110,7 @@ set complete=.,w,b,t
 
 " Folding
 set foldmethod=syntax           " By default, use syntax to determine folds
-set foldlevelstart=99            " All folds open by default
+set foldlevelstart=99           " All folds open by default
 set foldopen=block,insert,jump,mark,percent,quickfix,search,tag,undo
 
 " Text Formatting
@@ -335,7 +335,7 @@ let g:EasyMotion_do_mapping = 0
 
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
-    "colorscheme zenburn                  "tha best fricken fucken theme on earth
+    "colorscheme zenburn
     "colorscheme xoria256
     "colorscheme darktango
     "set columns=153
@@ -345,7 +345,7 @@ if has('gui_running')
     "colorscheme slate
     set fuoptions=maxvert,maxhorz
     "colorscheme clouds_jay "IMPROVED!
-    "colorscheme vitamins "IMPROVED!
+    colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
 
     " this one is actually decent too!!(herald)
@@ -359,7 +359,7 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    colorscheme sjl
+    "colorscheme sjl
     "colorscheme lucius
     "colorscheme neverland2
     "colorscheme clouds_jay
@@ -376,6 +376,9 @@ if has('gui_running')
     "set background=light
     "colorscheme solarized
 
+    set guicursor=n-c:block-Cursor-blinkon0
+    set guicursor+=v:block-vCursor-blinkon0
+    set guicursor+=i-ci:ver20-iCursor
 
     highlight SpellBad term=underline gui=undercurl guisp=Orange
     " a little tweaking to get that zenburn better for my lazy eyes ;)
@@ -400,7 +403,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' && g:colors_name=='molokai' || g:colors_name=='sjl'
+    if g:colors_name=='neverland' || g:colors_name=='molokai' || g:colors_name=='sjl' || g:colors_name=='lucius' || g:colors_name=='vitamins'
         let fg_bg = 2
     else
         let fg_bg = 1
@@ -592,6 +595,7 @@ function! MyShiftTabComplete()
 endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+
 """ Miscellaneous - to check out
 " Netrw explorer
 if has("eval")
