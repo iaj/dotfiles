@@ -37,6 +37,7 @@ set guifont=Monaco:h12.00
 set title
 set isfname-=\=
 "set macmeta
+"set iskeyword+=äöüÄÖÜ
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -345,8 +346,6 @@ if has('gui_running')
     "colorscheme slate
     set fuoptions=maxvert,maxhorz
     "colorscheme clouds_jay "IMPROVED!
-    colorscheme vitamins "IMPROVED!
-    "colorscheme herald_modded
 
     " this one is actually decent too!!(herald)
     "colorscheme herald
@@ -359,7 +358,9 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    "colorscheme sjl
+    colorscheme sjl
+    "colorscheme vitamins "IMPROVED!
+    "colorscheme herald_modded
     "colorscheme lucius
     "colorscheme neverland2
     "colorscheme clouds_jay
@@ -403,7 +404,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' || g:colors_name=='molokai' || g:colors_name=='sjl' || g:colors_name=='lucius' || g:colors_name=='vitamins'
+    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins'
         let fg_bg = 2
     else
         let fg_bg = 1

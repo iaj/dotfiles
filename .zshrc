@@ -488,6 +488,8 @@ bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
 bindkey " "       magic-space                    # Space expands history subst's
 bindkey "^@"	  _history-complete-older        # C-Space to complete from hist
 bindkey "^]."	  insert-last-word
+# TODO: check this one out...
+bindkey "^],"	  copy-earlier-word
 bindkey 'jk'	  vi-cmd-mode
 bindkey '^T' _most_recent_file
 # No Delays please, we want flashy SPEEDZ
