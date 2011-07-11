@@ -88,7 +88,6 @@ set showmatch                   " Briefly jump to a paren once it's balanced
 set matchtime=2                 " (for only .2 seconds).
 set matchtime=123
 
-
 " Searching and Patterns
 set ignorecase                  " Default to using case insensitive searches,
 set smartcase                   " unless uppercase letters are used in the regex.
@@ -274,10 +273,14 @@ let g:Tlist_Ctags_Cmd = "~/bin/ctags" "user defined ctags command
 let tlist_objc_settings = 'objc;i:interface;c:class;m:method;p:property'
 let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
+let Tlist_Use_Right_Window = 1
+
 """" XPTemplate Settings
 let g:xptemplate_brace_complete = 0
-let g:is_posix=1                " I don't use systems where /bin/sh isn't POSIX.
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
+"let g:xptemplate_key = '<Tab>'
+let g:xptemplate_nav_next = '<C-j>'
+let g:xptemplate_nav_prev = '<C-k>'
 
 """" Sparkup Settings
 let g:sparkupExecuteMapping = '<D-e>'
