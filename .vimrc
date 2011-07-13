@@ -361,11 +361,11 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    colorscheme sjl
+    " colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
     "colorscheme lucius
-    "colorscheme neverland2
+    colorscheme neverland2
     "colorscheme clouds_jay
     "colorscheme molokai2
     "colorscheme molokai_jay
@@ -380,9 +380,9 @@ if has('gui_running')
     "set background=light
     "colorscheme solarized
 
-    set guicursor=n-c:block-Cursor-blinkon0
-    set guicursor+=v:block-vCursor-blinkon0
-    set guicursor+=i-ci:ver20-iCursor
+    " set guicursor=n-c:block-Cursor-blinkon0
+    " set guicursor+=v:block-vCursor-blinkon0
+    " set guicursor+=i-ci:ver20-iCursor
 
     highlight SpellBad term=underline gui=undercurl guisp=Orange
     " a little tweaking to get that zenburn better for my lazy eyes ;)
