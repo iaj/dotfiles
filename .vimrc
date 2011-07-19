@@ -67,6 +67,11 @@ source $HOME/.vim/personal/scripts/galal
 source $HOME/.vim/personal/scripts/objctagjump
 "source $HOME/.vim/personal/scripts/error_handling
 
+" Add xptemplate global personal directory value
+if has("unix")
+  set runtimepath+=~/.vim/xpt-personal
+endif
+
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
             \ . ' || %{&ft=~"^man"?"man":&ro?"view":"vim"} %f %m'
