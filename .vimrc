@@ -279,8 +279,8 @@ let Tlist_Use_Right_Window = 1
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 "let g:xptemplate_key = '<Tab>'
-let g:xptemplate_nav_next = '<C-j>'
-let g:xptemplate_nav_prev = '<C-k>'
+" let g:xptemplate_nav_next = '<C-j>'
+" let g:xptemplate_nav_prev = '<C-k>'
 
 """" Sparkup Settings
 let g:sparkupExecuteMapping = '<D-e>'
@@ -357,22 +357,24 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
-    let g:molokai_original = 1 " lighter background in gVim
+    " let g:molokai_original = 1 " lighter background in gVim
     let g:solarized_termcolors = 256 " use degraded colors in terminal
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    " colorscheme sjl
+    colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
-    "colorscheme lucius
+    " colorscheme lucius
+    " colorscheme muse
+    " colorscheme ir_black
 
 " +--------------+
 " |    neverland!|
 " +--------------+
-    colorscheme neverland2
-    hi VisualNOS guibg=#444444
-    hi Visual guibg=#424242
+    " colorscheme neverland2
+    " hi VisualNOS guibg=#444444
+    " hi Visual guibg=#424242
 
     
     "colorscheme clouds_jay
@@ -416,7 +418,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins'
+    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black'
         let fg_bg = 2
     else
         let fg_bg = 1
@@ -606,8 +608,8 @@ function! MyShiftTabComplete()
         return "\<C-P>"
     endif
 endfunction
-inoremap <tab> <c-r>=MyTabComplete()<cr>
-inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+" inoremap <tab> <c-r>=MyTabComplete()<cr>
+" inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
 
 """ Miscellaneous - to check out
 " Netrw explorer
