@@ -12,4 +12,3 @@ XPTemplate priority=personal
 
 XPT yoursnippet " tips here
 bla bla
-

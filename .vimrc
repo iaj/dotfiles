@@ -412,8 +412,8 @@ else
     "for now we use that fricken sjl everywhere possible
     let g:molokai_original = 1
     "set cursorline
-    "colorscheme lucius
-    colorscheme sjl
+    colorscheme lucius
+    " colorscheme sjl
 
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme

@@ -7,8 +7,8 @@
 XPTemplate priority=personal
 
 
-XPTvar $author       Derek Wyatt
-XPTvar $email        derek@derekwyatt.org
+XPTvar $author       Jörg Schmalfuß
+XPTvar $email        tyberion@googlemail.com
 
 " if () ** {
 " else ** {

@@ -203,6 +203,9 @@ cdf() { cd *$1*/ } # stolen from @topfunky
 if [ -d $HOME/dev/qs ]; then
     qs=~/dev/qs/Quicksilver/Quicksilver; : ~qs
 fi
+if [ -d $HOME/hg/dactyl ]; then
+    dactyl=~/hg/dactyl; : ~dactyl
+fi
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
@@ -398,6 +401,7 @@ alias gb="git branch"
 alias gbv="git branch -av"
 alias gka="gitk --all &"
 alias gitkl="gitk \$(git branch | sed 's/*//' | sed 's@\<@heads/@' )"
+alias hp="hg pull -u"
 if [[ $OSTYPE == darwin* ]]; then
     alias gx="gitx"
     alias gxa="gitx -all"

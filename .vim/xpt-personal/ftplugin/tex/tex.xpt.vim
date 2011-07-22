@@ -2,16 +2,6 @@ XPTemplate priority=personal
 XPTinclude
     \ _common/personal
 
-XPT main
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{graphicx}
-\usepackage[ngerman]{babel}
-`cursor^
-
 XPT tt wrap=text hint=\\texttt{...}
 \texttt{`text^}`cursor^
 
@@ -55,3 +45,37 @@ XPT description hint=\\begin{description}...\\end{description}
 
 XPT i hint=\\item
 \item `cursor^
+
+XPT main
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage[ngerman]{babel}
+`cursor^
+
+XPT dinb hint=letter
+\documentclass[a4paper, 12pt]{dinbrief}
+\usepackage[utf8x]{inputenc}
+\usepackage{ngerman}
+\signature{Jörg Schmalfuß}
+\address{Jörg Schmalfuß\\ 
+         Grafenstraße 33\\
+         64283 Darmstadt}
+\backaddress{J.Schmalfuß, Grafenstr. 33, 64283 Darmstadt}
+
+\begin{document}
+
+\subject{`sub?^}
+\begin{letter}{
+    `an...^
+}
+\opening{`anrede^}
+
+`cursor^
+
+\closing{mit freundlichen Grüßen,}
+\end{letter}
+\end{document}

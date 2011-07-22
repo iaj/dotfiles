@@ -1,0 +1,1 @@
+/Users/iaj/hg/vimperator-labs/vimperator/contrib/vim/ftdetect/vimperator.vim
