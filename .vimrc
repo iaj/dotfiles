@@ -340,9 +340,23 @@ let g:space_loaded = 1
 
 """" easymotion
 " for now we won't bug our keys !! <leader> is ',' as well...
-" let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_leader_key = '\'
+" nnoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
+" onoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
+" vnoremap <silent> <Leader>f :<C-U>call EasyMotionF(1, 0)<CR>
+" 
+" nnoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
+" onoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
+" vnoremap <silent> <Leader>F :<C-U>call EasyMotionF(1, 1)<CR>
+" 
+" onoremap <silent> <Leader>t      :call EasyMotionT(0, 0)<CR>
+" onoremap <silent> <Leader>T      :call EasyMotionT(0, 1)<CR>
 
+"""" Syntastic
+let g:syntastic_enable_signs=1
+let g:syntastic_disabled_filetypes = ['html']
+let g:syntastic_stl_format = '[%E{Error 1/%e: line %fe}%B{, }%W{Warning 1/%w: line %fw}]'
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
     "colorscheme zenburn
@@ -367,12 +381,13 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
 
     "Molokai Settings
-    colorscheme sjl
+    " colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
-    " colorscheme lucius
+    colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
+    " colorscheme solarized
 
 " +--------------+
 " |    neverland!|
@@ -423,7 +438,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black'
+    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='solarized'
         let fg_bg = 2
     else
         let fg_bg = 1

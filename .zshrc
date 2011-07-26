@@ -401,6 +401,8 @@ alias gb="git branch"
 alias gbv="git branch -av"
 alias gka="gitk --all &"
 alias gitkl="gitk \$(git branch | sed 's/*//' | sed 's@\<@heads/@' )"
+alias gsu="git submodule update --init"
+alias gsa="git submodule add"
 alias hp="hg pull -u"
 if [[ $OSTYPE == darwin* ]]; then
     alias gx="gitx"
