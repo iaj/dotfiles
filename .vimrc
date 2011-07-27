@@ -379,13 +379,14 @@ if has('gui_running')
     " let g:molokai_original = 1 " lighter background in gVim
     let g:solarized_termcolors = 256 " use degraded colors in terminal
     let g:zenburn_high_Contrast = 1 " darker colors
+    set background=dark
 
     "Molokai Settings
     " colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
-    colorscheme lucius
-    " colorscheme muse
+    " colorscheme lucius
+    colorscheme muse
     " colorscheme ir_black
     " colorscheme solarized
 
@@ -406,10 +407,6 @@ if has('gui_running')
     "hi Visual guibg=#999999
     "let g:obviousModeInsertHi = "guibg=Black guifg=White"
     "hi Visual term=reverse cterm=reverse guifg=#ce5c00 guibg=#fcaf3e
-
-    "a whity ;)
-    "set background=light
-    "colorscheme solarized
 
     " set guicursor=n-c:block-Cursor-blinkon0
     " set guicursor+=v:block-vCursor-blinkon0
@@ -438,7 +435,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='solarized'
+    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black'
         let fg_bg = 2
     else
         let fg_bg = 1
@@ -506,8 +503,15 @@ if has('statusline') && has('gui_running')
             "set statusline+=\ (%9*%{(&ft==\"\"?&"":&ft)}%*)                    " Encoding.
             set statusline+=\%2*%{(&fenc==\"\"?&enc:&fenc)}%*)                  " Encoding.
             set statusline+=%(\ [%4*%H%R%M%*]%)                                 " Flags.
+
             "set statusline+=\ %{exists('actual_curbuf')&&bufnr('%%')==actual_curbuf?CountMatches(1):''}
             set statusline+=%=                                                  " Left-right alignment.
+
+            " syntastic error in statusline
+            set statusline+=%#warningmsg#
+            set statusline+=%{SyntasticStatuslineFlag()}
+            set statusline+=%*
+
             set statusline+=%(%3*%{SyntaxItem()}%*%)                            " Highlighting group.
             set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
             set statusline+=\ %P                                                        " % through file.
