@@ -355,7 +355,7 @@ let g:EasyMotion_leader_key = '\'
 
 """" Syntastic
 let g:syntastic_enable_signs=1
-let g:syntastic_disabled_filetypes = ['html']
+" let g:syntastic_disabled_filetypes = ['html']
 let g:syntastic_stl_format = '[%E{Error 1/%e: line %fe}%B{, }%W{Warning 1/%w: line %fw}]'
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
@@ -376,17 +376,17 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
-    " let g:molokai_original = 1 " lighter background in gVim
+    let g:molokai_original = 1 " lighter background in gVim
     let g:solarized_termcolors = 256 " use degraded colors in terminal
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
 
     "Molokai Settings
-    " colorscheme sjl
+    colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
     " colorscheme lucius
-    colorscheme muse
+    " colorscheme muse
     " colorscheme ir_black
     " colorscheme solarized
 
@@ -420,12 +420,20 @@ if has('gui_running')
     "hi incsearch ctermbg=216 ctermfg=242
     "hi search ctermbg=223 ctermfg=238
 else
-    "colorscheme molokai
+    " colorscheme molokai
     "for now we use that fricken sjl everywhere possible
-    let g:molokai_original = 1
+    " let g:molokai_original = 1
     "set cursorline
-    colorscheme lucius
+    " colorscheme lucius
     " colorscheme sjl
+    " colorscheme ir_black
+    let g:molokai_original = 1 " lighter background in gVim
+    let g:solarized_termcolors = 256 " use degraded colors in terminal
+    let g:zenburn_high_Contrast = 1 " darker colors
+    set background=dark
+
+    "Molokai Settings
+    colorscheme sjl
 
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme

@@ -694,10 +694,12 @@ zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' unstagedstr '?'
 zstyle ':vcs_info:*' stagedstr   '!'
 zstyle ':completion:*' special-dirs ..
+
 # Call vcs_info as precmd before every prompt.
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
 
+# for git repos, show the past time in minutes since last commit
 zstyle ':vcs_info:git:*' formats "($red%m$default|$white%b%u%c$default)"
 zstyle ':vcs_info:git*+set-message:*' hooks git-committime
 function +vi-git-committime() {
@@ -912,7 +914,7 @@ prompt-setup() {
         # Trunchate after 30 Chars.. Use the ~ instead of $HOME
         PROMPT+="${blue}%30<..<%~%<<${default}%b"
         PROMPT+='${vcs_info_msg_0_}'
-        PROMPT+=" ${magenta}$(prompt_char) ${default}%b"
+        PROMPT+="${default}%b ${magenta}$(prompt_char) ${default}%b"
         #PS1=$'%{'"$CC"$'%}%20>..>%1~%>>>%{\e[0m%}'
         #PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
     else
