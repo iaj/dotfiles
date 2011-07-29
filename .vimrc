@@ -382,13 +382,14 @@ if has('gui_running')
     set background=dark
 
     "Molokai Settings
-    colorscheme sjl
+    " colorscheme sjl
     "colorscheme vitamins "IMPROVED!
     "colorscheme herald_modded
     " colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
     " colorscheme solarized
+    " colorscheme grb3
 
 " +--------------+
 " |    neverland!|
@@ -396,6 +397,7 @@ if has('gui_running')
     " colorscheme neverland2
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
+    colorscheme neverland
 
     
     "colorscheme clouds_jay
@@ -432,8 +434,9 @@ else
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
 
-    "Molokai Settings
+    " Molokai Settings
     colorscheme sjl
+    " colo grb3
 
     "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
@@ -443,7 +446,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='neverland' || g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black'
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb'
         let fg_bg = 2
     else
         let fg_bg = 1
@@ -520,9 +523,9 @@ if has('statusline') && has('gui_running')
             set statusline+=%{SyntasticStatuslineFlag()}
             set statusline+=%*
 
-            set statusline+=%(%3*%{SyntaxItem()}%*%)                            " Highlighting group.
+            set statusline+=\ %(%3*%{SyntaxItem()}%*%)                          " Highlighting group.
             set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
-            set statusline+=\ %P                                                        " % through file.
+            set statusline+=\ %P                                                " % through file.
             set statusline+=\ %4*%{fugitive#statusline()}%*
 
             "" This trick is so I can better control the colors of the non-current
