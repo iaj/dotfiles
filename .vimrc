@@ -345,18 +345,23 @@ let g:EasyMotion_leader_key = '\'
 " nnoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
 " onoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
 " vnoremap <silent> <Leader>f :<C-U>call EasyMotionF(1, 0)<CR>
-" 
 " nnoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
 " onoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
 " vnoremap <silent> <Leader>F :<C-U>call EasyMotionF(1, 1)<CR>
-" 
 " onoremap <silent> <Leader>t      :call EasyMotionT(0, 0)<CR>
 " onoremap <silent> <Leader>T      :call EasyMotionT(0, 1)<CR>
 
-"""" Syntastic
-let g:syntastic_enable_signs=1
-" let g:syntastic_disabled_filetypes = ['html']
-let g:syntastic_stl_format = '[%E{Error 1/%e: line %fe}%B{, }%W{Warning 1/%w: line %fw}]'
+" set this if you prefer activating the checkers manually
+call syntastic#Setup()
+" let g:syntastic['auto_setup'] = 0 
+" let g:syntastic.file_types['new_type'] = Examples see plugin/syntastic.vim
+let g:syntastic.file_types['xml'] = 'disabled'
+
+" overwrite error format
+" let g:syntastic.file_types['js'].cmd.efm = "overwrite error fromat here"
+" for html tidy set ignore regex
+" let g:syntastic.file_types.html.ignore_regex = 'lacks "alt" attribute\|proprietary attribute'
+
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
     "colorscheme zenburn
@@ -383,8 +388,8 @@ if has('gui_running')
 
     "Molokai Settings
     " colorscheme sjl
-    "colorscheme vitamins "IMPROVED!
-    "colorscheme herald_modded
+    " colorscheme vitamins "IMPROVED!
+    " colorscheme herald_modded
     " colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
@@ -399,16 +404,16 @@ if has('gui_running')
     " hi Visual guibg=#424242
     colorscheme neverland
 
-    
-    "colorscheme clouds_jay
-    "colorscheme molokai2
-    "colorscheme molokai_jay
-    "colorscheme neverland
-    "colorscheme twilight256
-    "colorscheme mustang
-    "hi Visual guibg=#999999
-    "let g:obviousModeInsertHi = "guibg=Black guifg=White"
-    "hi Visual term=reverse cterm=reverse guifg=#ce5c00 guibg=#fcaf3e
+
+    " colorscheme clouds_jay
+    " colorscheme molokai2
+    " colorscheme molokai_jay
+    " colorscheme neverland
+    " colorscheme twilight256
+    " colorscheme mustang
+    " hi Visual guibg=#999999
+    " let g:obviousModeInsertHi = "guibg=Black guifg=White"
+    " hi Visual term=reverse cterm=reverse guifg=#ce5c00 guibg=#fcaf3e
 
     " set guicursor=n-c:block-Cursor-blinkon0
     " set guicursor+=v:block-vCursor-blinkon0
@@ -416,16 +421,16 @@ if has('gui_running')
 
     highlight SpellBad term=underline gui=undercurl guisp=Orange
     " a little tweaking to get that zenburn better for my lazy eyes ;)
-    "Zenburn Settings
-    "let g:zenburn_high_Contrast = 1
-    "colorscheme zenburn
-    "hi incsearch ctermbg=216 ctermfg=242
-    "hi search ctermbg=223 ctermfg=238
+    " Zenburn Settings
+    " let g:zenburn_high_Contrast = 1
+    " colorscheme zenburn
+    " hi incsearch ctermbg=216 ctermfg=242
+    " hi search ctermbg=223 ctermfg=238
 else
     " colorscheme molokai
-    "for now we use that fricken sjl everywhere possible
+    " for now we use that fricken sjl everywhere possible
     " let g:molokai_original = 1
-    "set cursorline
+    " set cursorline
     " colorscheme lucius
     " colorscheme sjl
     " colorscheme ir_black
@@ -437,8 +442,6 @@ else
     " Molokai Settings
     colorscheme sjl
     " colo grb3
-
-    "colorscheme desert
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
 endif
@@ -519,9 +522,9 @@ if has('statusline') && has('gui_running')
             set statusline+=%=                                                  " Left-right alignment.
 
             " syntastic error in statusline
-            set statusline+=%#warningmsg#
-            set statusline+=%{SyntasticStatuslineFlag()}
-            set statusline+=%*
+            " set statusline+=%#warningmsg#
+            " set statusline+=%{SyntasticStatuslineFlag()}
+            " set statusline+=%*
 
             set statusline+=\ %(%3*%{SyntaxItem()}%*%)                          " Highlighting group.
             set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
