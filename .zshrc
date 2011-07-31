@@ -43,6 +43,12 @@ if [ -d ~/bin ]; then
     MANPATH=~/man:$MANPATH
     INFOPATH=~/info:$INFOPATH
 fi
+# Pathselector...
+if [ -f ~/bin/path-selector.sh ]
+    C()   { cd       $(path-selector.sh "$@"); }
+    E()   { $EDITOR  $(path-selector.sh "$@"); }
+    MDC() { mdc      $(path-selector.sh "$@"); }
+fi
 
 ### Colors
 # Use colorized output, necessary for prompts and completions.

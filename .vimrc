@@ -10,19 +10,30 @@
 " Vim, I'd rather just plain ol' vi emulation reminding me to upgrade.
 
 """ Settings
-filetype off
 
-" apply all the plugins to our current vim sessions - thanks pathogen ツ
 "dont load csapprox if no gui support - silences an annoying warning
 set t_Co=256
 if !has("gui")
     let g:CSApprox_verbose_level = 0
 endif
-call pathogen#runtime_append_all_bundles()
-call pathogen#helptags()
-filetype plugin indent on
+" call pathogen#runtime_append_all_bundles()
+" call pathogen#helptags()
+set nocompatible
+filetype indent plugin on | syn on
+set hidden
 
-syntax enable
+" let's copy paste some lines from documentation
+fun SetupVAM()
+    let addons_base = expand('$HOME') . '/vim-addons'
+    exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
+
+    if !isdirectory(addons_base)
+        exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
+    endif
+
+    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'syntastic2'], {'auto_install' : 2})
+endf
+call SetupVAM()
 "set cpoptions+=$                       " not directly change a word-mark a $
 "set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
@@ -69,14 +80,13 @@ source $HOME/.vim/personal/scripts/objctagjump
 
 " Add xptemplate global personal directory value
 if has("unix")
-  set runtimepath+=~/.vim/xpt-personal
+    set runtimepath+=~/.vim/xpt-personal
 endif
 
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
             \ . ' || %{&ft=~"^man"?"man":&ro?"view":"vim"} %f %m'
 
-set nocompatible
 set nocursorcolumn
 set magic
 set cursorline
@@ -352,10 +362,10 @@ let g:EasyMotion_leader_key = '\'
 " onoremap <silent> <Leader>T      :call EasyMotionT(0, 1)<CR>
 
 " set this if you prefer activating the checkers manually
-call syntastic#Setup()
+" call syntastic#Setup()
 " let g:syntastic['auto_setup'] = 0 
 " let g:syntastic.file_types['new_type'] = Examples see plugin/syntastic.vim
-let g:syntastic.file_types['xml'] = 'disabled'
+" let g:syntastic.file_types['xml'] = 'disabled'
 
 " overwrite error format
 " let g:syntastic.file_types['js'].cmd.efm = "overwrite error fromat here"
@@ -390,19 +400,19 @@ if has('gui_running')
     " colorscheme sjl
     " colorscheme vitamins "IMPROVED!
     " colorscheme herald_modded
-    " colorscheme lucius
+    colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
     " colorscheme solarized
     " colorscheme grb3
 
-" +--------------+
-" |    neverland!|
-" +--------------+
+    " +--------------+
+    " |    neverland!|
+    " +--------------+
     " colorscheme neverland2
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
-    colorscheme neverland
+    " colorscheme neverland
 
 
     " colorscheme clouds_jay
@@ -565,13 +575,13 @@ if has('statusline') && has('gui_running')
 else
     " GRB: Put useful info in status line
     " green
-     hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
-     " magenta
-     hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
-     " cyan
-     hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
-     "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
-     set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
+    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
+    " magenta
+    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
+    " cyan
+    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
+    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
+    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
 endif
 
 """ Remapping the <TAB> key to something useful
@@ -616,10 +626,10 @@ function! MyTabComplete()
     let has_slash = match(substr, '\/') != -1       " position of slash, if any
 
     "if (&dictionary != '' && !has_slash)
-        "return "\<C-X>\<C-K>"
+    "return "\<C-X>\<C-K>"
     "endif
     "if (&filetype == 'objc')
-        "return "\<C-X>\<C-O>"
+    "return "\<C-X>\<C-O>"
     "endif
     if (!has_period && !has_slash)
         let b:complType=1
@@ -630,7 +640,7 @@ function! MyTabComplete()
         if (&filetype == 'java')
             return "\<C-P>"
             "return "\<C-X>\<C-U>"                   " ECLIM completion
-        "elseif (&omnifunc != '')
+            "elseif (&omnifunc != '')
             "return "\<C-X>\<C-O>"                  " plugin matching
         else
             let b:complType=1
