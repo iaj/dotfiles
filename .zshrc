@@ -44,7 +44,7 @@ if [ -d ~/bin ]; then
     INFOPATH=~/info:$INFOPATH
 fi
 # Pathselector...
-if [ -f ~/bin/path-selector.sh ]
+if [ -f ~/bin/path-selector.sh ]; then
     C()   { cd       $(path-selector.sh "$@"); }
     E()   { $EDITOR  $(path-selector.sh "$@"); }
     MDC() { mdc      $(path-selector.sh "$@"); }
