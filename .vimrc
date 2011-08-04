@@ -31,7 +31,7 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
 
-    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'syntastic2'], {'auto_install' : 2})
+    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'syntastic2', 'sparkup', 'vim-peepopen', 'lodgeit', 'Solarized'], {'auto_install' : 2})
 endf
 call SetupVAM()
 "set cpoptions+=$                       " not directly change a word-mark a $
@@ -165,7 +165,7 @@ if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
 endif
 
 set confirm                     " Y-N-C prompt if closing with unsaved changes.
-"set cmdheight=2                " Prevent "Press Enter" message after most commands
+set cmdheight=2                 " Prevent "Press Enter" message after most commands
 set showcmd                     " Show incomplete normal mode commands as I type.
 set report=0                    " :commands always print changed line count.
 set shortmess+=a                " Use [+]/[RO]/[w] for modified/readonly/written.
@@ -403,7 +403,7 @@ if has('gui_running')
     colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
-    " colorscheme solarized
+    colorscheme solarized
     " colorscheme grb3
 
     " +--------------+
@@ -450,10 +450,11 @@ else
     set background=dark
 
     " Molokai Settings
-    colorscheme sjl
+    " colorscheme sjl
     " colo grb3
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
+    colorscheme solarized
 endif
 
 """ Statusline

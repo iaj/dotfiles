@@ -43,12 +43,6 @@ if [ -d ~/bin ]; then
     MANPATH=~/man:$MANPATH
     INFOPATH=~/info:$INFOPATH
 fi
-# Pathselector...
-if [ -f ~/bin/path-selector.sh ]; then
-    C()   { cd       $(path-selector.sh "$@"); }
-    E()   { $EDITOR  $(path-selector.sh "$@"); }
-    MDC() { mdc      $(path-selector.sh "$@"); }
-fi
 
 ### Colors
 # Use colorized output, necessary for prompts and completions.
@@ -138,6 +132,13 @@ setopt AUTO_CD             2>/dev/null
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
 booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
 
+# Pathselector...
+if [ -f ~/bin/path-selector.sh ]; then
+    C()   { cd       $(path-selector.sh "$@"); }
+    E()   { $EDITOR  $(path-selector.sh "$@"); }
+    MDC() { mdc      $(path-selector.sh "$@"); }
+fi
+
 #### Environment variables
 export PAGER=less
 if [[ $OSTYPE == darwin* ]]; then
@@ -215,10 +216,10 @@ fi
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
-if [ -d $HOME/Documents/jobs/marcgalal ]; then 
+if [ -d $HOME/Documents/jobs/marcgalal ]; then
     w() { cd $HOME/Documents/jobs/marcgalal }
 fi
-if [ -d $HOME/Documents/work ]; then 
+if [ -d $HOME/Documents/work ]; then
     ba() {
         if [[ $1 -eq 1 ]]; then
             cd $HOME/Documents/workspace/Animal
@@ -229,7 +230,7 @@ if [ -d $HOME/Documents/work ]; then
         fi
     }
 fi
-if [ -d $HOME/Dropbox ]; then 
+if [ -d $HOME/Dropbox ]; then
     db() { cd $HOME/Dropbox/ }
 fi
 leo() { elinks "http://dict.leo.org/?search=$1"; }
@@ -346,7 +347,7 @@ alias vi=vim
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
-alias -g C='|pbcopy'
+alias -g X='|pbcopy'
 alias -g E='2>&1'
 alias -g N='>/dev/null'
 alias -g L='E | less'
@@ -464,7 +465,7 @@ paste-xclip() {
     BUFFER=$BUFFER"`pbpaste`"
     zle end-of-line
 }
-yank-pb() { 
+yank-pb() {
     zle copy-region-as-kill $BUFFER
     echo $BUFFER | pbcopy
 }
@@ -586,6 +587,15 @@ if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
             program_name=${program_name#sudo }
             program_sudo=yes
         fi
+
+        # Replace fg with the job name.
+        if [[ $program_name == fg ]]; then
+            program_name=${jobtexts[%+]}
+        elif [[ $program_name == fg* ]]; then
+            program_name=${jobtexts[${program_name#fg }]}
+        fi
+
+
         # Remove all arguments from the program name.
         program_name=${program_name%% *}
 
@@ -605,7 +615,10 @@ if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
             m)
                 program_name=mutt
                 ;;
-            v)
+            vi)
+                program_name=vim
+                ;;
+            /Applications/MacVim.app/Contents/MacOS/Vim)
                 program_name=vim
                 ;;
         esac
@@ -806,7 +819,7 @@ if autoloadable compinit; then
     # vice-versa), and allow ".t<TAB>" to list all files containing the text ".t"
     #zstyle ':completion:*' matcher-list 'm:{a-z-}={A-Z_}' 'r:|.=** r:|=*'
     #07:57:16   Patplu: iaj: you need to tweak matcher-list zstyle
-    #07:57:28   Patplu: something like : 
+    #07:57:28   Patplu: something like :
     zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z} l:|=*' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
     # Try to use verbose listings when we have more information
     zstyle ':completion:*' verbose true
@@ -929,7 +942,7 @@ prompt-setup() {
 }
 prompt-setup
 # Display the VCS information in the right prompt.
-# NOT anymore - Display the history information instead ;DD 
+# NOT anymore - Display the history information instead ;DD
 #RPROMPT='${vcs_info_msg_0_}'
 RPROMPT="${default}(${white}%!%b)"
 
