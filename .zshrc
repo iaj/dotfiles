@@ -296,6 +296,10 @@ alias sx= "screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
 
+# Now we got mysql here for TYPO-Adminitration purposes
+alias mysqlstart='sudo /opt/local/bin/mysqld_safe5 &'
+alias mysqlstop='/opt/local/bin/mysqladmin5 -u root -p shutdown'
+
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
 # is empty. I open so much windows that I don't know in which I have something
