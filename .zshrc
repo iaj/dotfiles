@@ -759,6 +759,10 @@ whodoneit() {
 bash() { command bash E }
 collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
 
+# send last command to Quicksilver
+export HISTCONTROL=erasedups:ignorespace
+alias cpc=" history | cut -c 8- | tail -n 2 | head -n 1 | qs"
+
 mkcd() {
     [[ -z $1 ]] && printf "usage: mkcd NEW-DIRECTORY" && return 1
     [[ -d $1 ]] && printf "mkcd: Directory %s already exists; cd-ing" $1

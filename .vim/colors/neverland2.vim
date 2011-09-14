@@ -75,6 +75,11 @@ hi SpecialComment  guifg=#8a8a8a               gui=bold
 hi Special         guifg=#5fd7ff guibg=#080808
 hi SpecialKey      guifg=#8a8a8a
 
+hi SpellBad        guifg=#ff0000 guibg=#080808  gui=bold
+hi SpellCap        guifg=#ff0000 guibg=#080808  gui=bold
+hi SpellRare       guifg=#ff0000 guibg=#080808  gui=bold
+hi SpellLocal      guifg=#ff0000 guibg=#141414  gui=bold
+
 hi Statement       guifg=#ffff87               gui=bold " my...
 hi StatusLine      guifg=#1c1c1c guibg=#af8700
 hi StatusLineNC    guifg=#1c1c1c guibg=#878700
@@ -95,6 +100,7 @@ hi WarningMsg      guifg=#0000ff guibg=#444444 gui=bold
 hi WildMenu        guifg=#5fd7ff guibg=#000000
 
 hi Comment         guifg=#87875f
+hi ColorColumn                   guibg=#202020
 hi CursorLine                    guibg=#1c1c1c gui=none
 hi CursorColumn                  guibg=#1c1c1c
 hi LineNr          guifg=#626262 guibg=#121212
@@ -130,8 +136,8 @@ if &t_Co > 255
    hi ErrorMsg        ctermfg=199 ctermbg=233    cterm=bold
    hi Exception       ctermfg=118               cterm=bold
    hi Float           ctermfg=135
-   hi FoldColumn      ctermfg=67  ctermbg=16
-   hi Folded          ctermfg=67  ctermbg=16
+   hi FoldColumn      ctermfg=67   ctermbg=233 cterm=none
+   hi Folded          ctermfg=240  ctermbg=235 cterm=bold
    hi Function        ctermfg=197 " sub..
    hi Identifier      ctermfg=166 " ..foo
    hi Ignore          ctermfg=244 ctermbg=232
@@ -148,10 +154,10 @@ if &t_Co > 255
    hi Operator        ctermfg=46
 
    " complete menu
-   hi Pmenu           ctermfg=81  ctermbg=233
-   hi PmenuSel                    ctermbg=235
-   hi PmenuSbar                   ctermbg=232
-   hi PmenuThumb      ctermfg=81
+   hi Pmenu           ctermfg=137 ctermbg=000 cterm=none
+   hi PmenuSel        ctermfg=196 ctermbg=235 cterm=bold
+   hi PmenuSbar       ctermfg=000 ctermbg=233 cterm=none
+   hi PmenuThumb      ctermfg=137 ctermbg=000 cterm=none
 
    hi PreCondit       ctermfg=118               cterm=bold
    hi PreProc         ctermfg=218
@@ -165,6 +171,11 @@ if &t_Co > 255
    hi SpecialComment  ctermfg=245               cterm=bold
    hi Special         ctermfg=81  ctermbg=232
    hi SpecialKey      ctermfg=245
+
+   hi SpellBad        ctermfg=196 ctermbg=233  cterm=bold
+   hi SpellCap        ctermfg=196 ctermbg=233  cterm=bold
+   hi SpellRare       ctermfg=196 ctermbg=233  cterm=bold
+   hi SpellLocal      ctermfg=196 ctermbg=235  cterm=bold
 
    hi Statement       ctermfg=228               cterm=bold " my...
    hi StatusLine      ctermfg=234 ctermbg=136
@@ -182,10 +193,11 @@ if &t_Co > 255
    hi VertSplit       ctermfg=244 ctermbg=232   cterm=bold
    hi VisualNOS                   ctermbg=238
    hi Visual                      ctermbg=235
-   hi WarningMsg      ctermfg=21 ctermbg=238   cterm=bold
+   hi WarningMsg      ctermfg=21  ctermbg=238   cterm=bold
    hi WildMenu        ctermfg=81  ctermbg=16
 
    hi Comment         ctermfg=101
+   hi ColorColumn                 ctermbg=235
    hi CursorLine                  ctermbg=234   cterm=none
    hi CursorColumn                ctermbg=234
    hi LineNr          ctermfg=241 ctermbg=233

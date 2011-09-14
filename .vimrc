@@ -19,8 +19,17 @@ endif
 " call pathogen#runtime_append_all_bundles()
 " call pathogen#helptags()
 set nocompatible
-filetype indent plugin on | syn on
 set hidden
+
+" Switch syntax highlighting on, when the terminal has colors
+" Also switch on highlighting the last used search pattern.
+if &t_Co > 2 || has("gui_running")
+  syntax on
+  set hlsearch
+  " set guifont=Monaco:h14
+  set guifont=Inconsolata-dz:h14
+endif
+filetype plugin indent on
 
 " let's copy paste some lines from documentation
 fun SetupVAM()
@@ -233,10 +242,6 @@ set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 " Per-Filetype Scripts
 " NOTE: These define autocmds, so they should come before any other autocmds.
 "       That way, a later autocmd can override the result of one defined here.
-"filetype on                    " Enable filetype detection,
-"filetype indent on             " use filetype-specific indenting where available,
-filetype plugin indent on       " also allow for filetype-specific plugins,
-syntax on                       " and turn on per-filetype syntax highlighting.
 set grepprg=grep\ -nH\ $*
 """ Plugin Settings
 """" Eclim settings
@@ -395,16 +400,18 @@ if has('gui_running')
     let g:solarized_termcolors = 256 " use degraded colors in terminal
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
+    " set background=light
+    colorscheme solarized
 
     "Molokai Settings
     " colorscheme sjl
     " colorscheme vitamins "IMPROVED!
     " colorscheme herald_modded
-    colorscheme lucius
+    " colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
-    colorscheme solarized
     " colorscheme grb3
+    " colorscheme vincent
 
     " +--------------+
     " |    neverland!|
@@ -460,7 +467,7 @@ endif
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb'
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang'
         let fg_bg = 2
     else
         let fg_bg = 1
