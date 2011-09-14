@@ -70,9 +70,9 @@ exec 2>>(while read -r -k -u 0 line; do
 printf '\e[91m%s\e[0m' "$line";
 print -n $'\0';
 done &)
+
 # Customize the colors used by ls, if we have the right tools
 # Also changes colors for completion, if initialized first
-
 if [ -f $HOME/.dircolors ]; then
     which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
 fi
@@ -149,8 +149,8 @@ if [[ $OSTYPE == darwin* ]]; then
 else
     export EDITOR="vim"
 fi
-export SHELL=$(whence -p zsh)             # Let apps know the full path to zsh
-export DIRSTACKSIZE=10                    # Max number of dirs on the dir stack
+export SHELL=$(whence -p zsh)               # Let apps know the full path to zsh
+export DIRSTACKSIZE=10                      # Max number of dirs on the dir stack
 if booleancheck "$shellopts[utf8]" ; then
     export LANG=en_US.UTF-8                 # Use a unicode english locale
     #export LC_CTYPE=C                      # but fix stupid not-unicode man pages
@@ -299,15 +299,6 @@ alias rbgrep="grep --include='*.rb' $*"
 # Now we got mysql here for TYPO-Adminitration purposes
 alias mysqlstart='sudo /opt/local/bin/mysqld_safe5 &'
 alias mysqlstop='/opt/local/bin/mysqladmin5 -u root -p shutdown'
-
-# If the window naming feature is used (see above) then use ".zsh" (leading
-# dot) as title name after running clear so it's clear to me that the window
-# is empty. I open so much windows that I don't know in which I have something
-# important. This helps me to remember which windows are empty (I run clear
-# after I finished my work in a window).
-if [[ -n $window_reset ]]; then
-    alias clear='clear; window_reset=yes; window_precmd reset'
-fi
 
 # on mac the gnutls are wicked...
 # hidden in the clouds!
@@ -573,6 +564,7 @@ zle -N edit-command-line
 #}
 #zle -N zle-line-init
 #zle -N zle-keymap-select
+
 #### Setting the window title
 if [[ $TERM == screen* || $TERM == xterm* || $TERM == rxvt* ]]; then
     # Is set to a non empty value to reset the window name in the next
@@ -701,6 +693,15 @@ else
     # "RUN COMMANDS").
     window_preexec() { }
 fi
+# If the window naming feature is used (see above) then use ".zsh" (leading
+# dot) as title name after running clear so it's clear to me that the window
+# is empty. I open so much windows that I don't know in which I have something
+# important. This helps me to remember which windows are empty (I run clear
+# after I finished my work in a window).
+if [[ -n $window_reset ]]; then
+    alias clear='clear; window_reset=yes; window_precmd reset'
+fi
+
 ### vcs_INFO - SCM in Prompt
 # Allow substitutions and expansions in the prompt, necessary for vcs_info.
 setopt promptsubst
