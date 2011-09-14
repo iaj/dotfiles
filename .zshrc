@@ -72,7 +72,10 @@ print -n $'\0';
 done &)
 # Customize the colors used by ls, if we have the right tools
 # Also changes colors for completion, if initialized first
-which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
+
+if [ -f $HOME/.dircolors ]; then
+    which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
+fi
 
 ### Options
 #### Shell Options
