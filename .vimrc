@@ -31,6 +31,7 @@ if &t_Co > 2 || has("gui_running")
 endif
 filetype plugin indent on
 
+" Vim Addon Manager
 " let's copy paste some lines from documentation
 fun SetupVAM()
     let addons_base = expand('$HOME') . '/vim-addons'
@@ -40,9 +41,10 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
 
-    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'syntastic2', 'sparkup', 'vim-peepopen', 'lodgeit', 'Solarized'], {'auto_install' : 2})
+    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'vim-peepopen', 'lodgeit', 'Solarized'], {'auto_install' : 2})
 endf
 call SetupVAM()
+
 "set cpoptions+=$                       " not directly change a word-mark a $
 "set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
@@ -397,21 +399,21 @@ if has('gui_running')
     "colorscheme twilight2
 
     let g:molokai_original = 1 " lighter background in gVim
-    let g:solarized_termcolors = 256 " use degraded colors in terminal
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    colorscheme solarized
+    " colorscheme solarized
 
     "Molokai Settings
     " colorscheme sjl
     " colorscheme vitamins "IMPROVED!
     " colorscheme herald_modded
-    " colorscheme lucius
+    colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
     " colorscheme grb3
     " colorscheme vincent
+    " colorscheme kellys
 
     " +--------------+
     " |    neverland!|

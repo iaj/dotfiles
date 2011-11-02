@@ -693,6 +693,7 @@ else
     # "RUN COMMANDS").
     window_preexec() { }
 fi
+
 # If the window naming feature is used (see above) then use ".zsh" (leading
 # dot) as title name after running clear so it's clear to me that the window
 # is empty. I open so much windows that I don't know in which I have something
