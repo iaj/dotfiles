@@ -342,6 +342,7 @@ alias cd/='cd /'
 
 #alias pl='pdflatex'
 alias vi=vim
+#global aliases
 alias -g L='|less'
 alias -g T='|tail'
 alias -g H='|head'
@@ -354,6 +355,14 @@ alias -g D='E | colordiff L'
 alias -g S='| sort'
 alias -g B='&>/dev/null &'
 alias -g D='&>/dev/null &|'
+
+#TODO: check those out!
+alias -g NF='*(.om[1])'
+alias -g ND='*(/om[1])'
+alias -g NN='*(om[1])'
+alias -g VIDEO="(#i)*.(mpg|avi|vob|mpeg|wmv|mov|asf)"
+alias -g SEDQUOTE='sed -e "s/'\''/'\''\\\\'\'\''/g" -e "s/\(.*\)/'\''\1'\''/g"'
+
 booleancheck "$shellopts[utf8]" && alias screen="screen -U"
 #alias m='mplayer -fs'
 alias history='history -EfdD'

@@ -41,7 +41,7 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
 
-    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'vim-peepopen', 'lodgeit', 'Solarized'], {'auto_install' : 2})
+    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'lodgeit', 'Solarized', 'Command-T' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
@@ -51,7 +51,7 @@ set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
 let maplocalleader = "\\"
-set guioptions=Aci
+" set guioptions=Aci
 set antialias
 set guifont=Monaco:h12.00
 "set guifont=Menlo:h12.00
@@ -60,12 +60,25 @@ set title
 set isfname-=\=
 "set macmeta
 "set iskeyword+=äöüÄÖÜ
+"
+set switchbuf=useopen
+set numberwidth=5
+
+" Always show tab bar
+set showtabline=2
+set winwidth=84
+" We have to have a winheight bigger than we want to set winminheight. But if
+" we set winheight to be huge before winminheight, the winminheight set will
+" fail.
+" set winheight=5
+" set winminheight=5
+" set winheight=999
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
 " (http://www.derekwyatt.org/vim/the-vimrc-file/).
 if has('syntax')
-    set synmaxcol=2000
+    set synmaxcol=200
     " Highlight lines longer than 85 characters. Thanks to Tony Mechelynck
     " <antoine.mechelynck@gmail.com> from the Vim mailing list. It can easily be
     " disabled when necessary with :2match (in Vim >= 700).
@@ -157,7 +170,7 @@ else
     set number
 endif
 
-set numberwidth=1               " using only 1 column (and 1 space) while possible
+" set numberwidth=1               " using only 1 column (and 1 space) while possible
 set nowrap
 
 if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
@@ -237,7 +250,9 @@ set backupext=~                 " Backup for "file" is "file~"
 """" Command Line
 set wildmenu                    " Menu completion in command mode on <Tab>
 "set wildmode=longest,list      " <Tab> cycles between all matching choices.
-set wildmode=list:longest,full
+" set wildmode=list:longest,full
+" GRB: use emacs-style tab completion when selecting files, etc
+set wildmode=longest,list
 set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 "set timeoutlen=100
 
@@ -258,6 +273,22 @@ let g:EclimBrowser='open'
 let g:EclimJavaSearchSingleResult='edit'
 " Let <CR> search for the single class/method directly
 let g:EclimJavaSearchMapping = 1
+" Disable HTML & PHP validation
+let g:EclimHtmlValidate = 0
+let g:EclimPhpValidate = 0
+" ,i imports whatever is needed for current line
+" nnoremap <silent> <LocalLeader>i :JavaImport<cr>
+" ,d opens javadoc for statement in browser
+" nnoremap <silent> <LocalLeader>d :JavaDocSearch -x declarations<cr>
+" ,<enter> searches context for statement
+" nnoremap <silent> <LocalLeader><cr> :JavaSearchContext<cr>
+" ,jv validates current java file
+" nnoremap <silent> <LocalLeader>jv :Validate<cr>
+" ,jc shows corrections for the current line of java
+" nnoremap <silent> <LocalLeader>jc :JavaCorrect<cr>
+" Disable Eclim's taglisttoo because I use the regular taglist plugin
+"let g:taglisttoo_disabled = 1
+
 
 """" Gundo - Graphical UNDO - pretty awesome imo
 let g:gundo_width = 60
@@ -385,12 +416,16 @@ if has('gui_running')
     "colorscheme xoria256
     "colorscheme darktango
     "set columns=153
-    set lines=100
-    set columns=300
+    :set lines=100
+    :set columns=171
     "colorscheme darktango
     "colorscheme slate
     set fuoptions=maxvert,maxhorz
-    "colorscheme clouds_jay "IMPROVED!
+    " dont show the toolbar in gui mode
+    set go-=T
+    " Don't show scroll bars in the GUI
+    set guioptions-=L
+    set guioptions-=r
 
     " this one is actually decent too!!(herald)
     "colorscheme herald
@@ -398,22 +433,25 @@ if has('gui_running')
     "colorscheme twilight
     "colorscheme twilight2
 
-    let g:molokai_original = 1 " lighter background in gVim
+    " let g:molokai_original = 1 " lighter background in gVim
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
+    " custom modification ;)
+    colorscheme solarized
     " set background=light
-    " colorscheme solarized
+    " :hi Normal guibg=#252626
 
     "Molokai Settings
     " colorscheme sjl
     " colorscheme vitamins "IMPROVED!
     " colorscheme herald_modded
-    colorscheme lucius
+    " colorscheme lucius
     " colorscheme muse
     " colorscheme ir_black
     " colorscheme grb3
     " colorscheme vincent
     " colorscheme kellys
+    " colorscheme molokai2
 
     " +--------------+
     " |    neverland!|
@@ -422,7 +460,6 @@ if has('gui_running')
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
     " colorscheme neverland
-
 
     " colorscheme clouds_jay
     " colorscheme molokai2
@@ -453,23 +490,24 @@ else
     " colorscheme lucius
     " colorscheme sjl
     " colorscheme ir_black
-    let g:molokai_original = 1 " lighter background in gVim
-    let g:solarized_termcolors = 256 " use degraded colors in terminal
-    let g:zenburn_high_Contrast = 1 " darker colors
+    " let g:molokai_original = 1 " lighter background in gVim
+    " let g:zenburn_high_Contrast = 1 " darker colors
+
+    " let g:solarized_termcolors = 256 " use degraded colors in terminal
     set background=dark
+    colorscheme solarized
 
     " Molokai Settings
     " colorscheme sjl
     " colo grb3
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
     "colorscheme ir_black_dunolie
-    colorscheme solarized
 endif
 
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang'
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight'
         let fg_bg = 2
     else
         let fg_bg = 1

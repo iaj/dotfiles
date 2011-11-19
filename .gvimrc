@@ -15,8 +15,8 @@ if has("gui_macvim")
 
     "map <silent> <D-F> :call PeepMeAround()<CR>
     "map <silent> <D-F> :lcd %:h<cr>:pwd<cr><Plug>PeepOpen
-    map <silent><leader>f <Plug>PeepOpen
-    map <silent><leader>gf :lcd %:h<cr>:pwd<cr><Plug>PeepOpen
+    " map <silent><leader>f <Plug>PeepOpen
+    " map <silent><leader>gf :lcd %:h<cr>:pwd<cr><Plug>PeepOpen
 
     macm Window.Select\ Previous\ Tab  key=<D-S-Left>
     macm Window.Select\ Next\ Tab	   key=<D-S-Right>

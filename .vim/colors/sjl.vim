@@ -9,22 +9,9 @@
 "
 
 hi clear
-set background=dark
-if version > 580
-    " no guarantees for version 5.8 and below, but this makes it stop
-    " complaining
-    hi clear
-    if exists("syntax_on")
-        syntax reset
-    endif
-endif
-let g:colors_name="molokai"
 
-if exists("g:molokai_original")
-    let s:molokai_original = g:molokai_original
-else
-    let s:molokai_original = 0
-endif
+set background=dark
+let g:colors_name="molokai"
 
 " Basic Layout {{{
 hi Normal          guifg=#F8F8F2 guibg=#1B1E1F
@@ -65,6 +52,11 @@ hi iCursor         guifg=#000000 guibg=#FDFF00
 hi vCursor         guifg=#000000 guibg=#AAF412
 " }}}
 
+hi GreenBar term=reverse ctermfg=white ctermbg=green guifg=#FFFFFF guibg=#604A8C
+hi RedBar   term=reverse ctermfg=white ctermbg=red guifg=#FFFFFF guibg=#C50048
+
+hi EasyMotionTarget guifg=#E4E500 guibg=bg gui=bold
+hi EasyMotionShade guifg=#444444 guibg=bg gui=bold
 hi Directory       guifg=#A6E22E               gui=bold
 hi Error           guifg=#960050 guibg=#1E0010
 hi ErrorMsg        guifg=#F92672 guibg=#232526 gui=bold
@@ -87,7 +79,6 @@ hi PmenuSel        guifg=#000000 guibg=#AAF412
 hi PmenuSbar                     guibg=#131414
 hi PmenuThumb      guifg=#777777
 " }}}
-"
 
 hi PreCondit       guifg=#A6E22E               gui=bold
 hi PreProc         guifg=#A6E22E
@@ -101,9 +92,7 @@ hi SpecialComment  guifg=#465457               gui=bold
 hi Special         guifg=#66D9EF guibg=bg      gui=italic
 hi SpecialKey      guifg=#888A85               gui=italic
 hi Statement       guifg=#F92672               gui=bold
-
-hi StatusLine      guifg=#455354 guibg=fg
-"hi StatusLine      guifg=#CD5907 guibg=fg
+hi StatusLine      guifg=#CD5907 guibg=fg
 hi StatusLineNC    guifg=#808080 guibg=#080808
 hi StorageClass    guifg=#FD971F               gui=italic
 hi Structure       guifg=#66D9EF
@@ -119,30 +108,6 @@ hi WarningMsg      guifg=#FFFFFF guibg=#333333 gui=bold
 hi WildMenu        guifg=#66D9EF guibg=#000000
 
 hi MyTagListFileName guifg=#F92672 guibg=bg gui=bold
-
-if s:molokai_original == 1
-   hi Normal          guifg=#F8F8F2 guibg=#272822
-   hi Comment         guifg=#75715E
-   hi CursorLine                    guibg=#3E3D32
-   hi CursorColumn                  guibg=#3E3D32
-   hi ColorColumn                   guibg=#3E3D32
-   hi LineNr          guifg=#AAAAAA guibg=#3B3A32
-   hi FoldColumn      guifg=#AAAAAA guibg=#3B3A32
-   hi NonText         guifg=#BCBCBC guibg=#3B3A32
-else
-   hi Normal          guifg=#F8F8F2 guibg=#1B1D1E
-   hi Folded          guifg=#666666 guibg=#1B1D1E
-   hi Comment         guifg=#5c7176
-   hi CursorLine                    guibg=#232728
-   hi CursorColumn                  guibg=#232728
-   hi ColorColumn                   guibg=#232728
-   hi LineNr          guifg=#AAAAAA guibg=#1B1D1E
-   hi FoldColumn      guifg=#AAAAAA guibg=#1B1D1E
-   
-   " Invisible character colors
-   highlight NonText    guifg=#444444 guibg=#1a1c1d
-   highlight SpecialKey guifg=#444444 guibg=#1a1c1d
-end
 
 " Spelling {{{
 if has("spell")
@@ -160,12 +125,6 @@ hi Visual     guibg=#403D3D
 highlight NonText    guifg=#444444 guibg=bg
 highlight SpecialKey guifg=#444444 guibg=bg
 " }}}
-" USER SECTION
-
-"hi cssClassName guifg=#af5f5f
-"hi cssClassName guifg=#5d90cd
-"hi cssClassName guifg=#ffff87
-"hi cssClassName guifg=#0087ff
 
 " Support for 256-color terminals {{{
 if &t_Co > 255
@@ -190,8 +149,8 @@ if &t_Co > 255
    hi ErrorMsg        ctermfg=199 ctermbg=16    cterm=bold
    hi Exception       ctermfg=118               cterm=bold
    hi Float           ctermfg=135
-   hi FoldColumn      ctermfg=67  ctermbg=16
-   hi Folded          ctermfg=67  ctermbg=16
+   hi FoldColumn      ctermfg=67  ctermbg=233
+   hi Folded          ctermfg=67  ctermbg=233
    hi Function        ctermfg=118
    hi Identifier      ctermfg=208
    hi Ignore          ctermfg=244 ctermbg=232
@@ -201,31 +160,19 @@ if &t_Co > 255
    hi Label           ctermfg=229               cterm=none
    hi Macro           ctermfg=193
    hi SpecialKey      ctermfg=81
+   hi MailHeaderEmail ctermfg=3  ctermbg=233
+   hi MailEmail       ctermfg=3  ctermbg=233
 
    hi MatchParen      ctermfg=16  ctermbg=208 cterm=bold
    hi ModeMsg         ctermfg=229
    hi MoreMsg         ctermfg=229
    hi Operator        ctermfg=161
 
-   " Popup Menu
-   " ----------
-   " normal item in popup
-   hi Pmenu            guifg=#e0e0e0           guibg=#303840           gui=none
-   hi Pmenu            ctermfg=253             ctermbg=233             cterm=none
-   " selected item in popup
-   hi PmenuSel         guifg=#cae682           guibg=#505860           gui=none
-   hi PmenuSel         ctermfg=186             ctermbg=237             cterm=none
-   " scrollbar in popup
-   hi PMenuSbar                                guibg=#505860           gui=none
-   hi PMenuSbar                                ctermbg=59              cterm=none
-   " thumb of the scrollbar in the popup
-   hi PMenuThumb                               guibg=#808890           gui=none
-   hi PMenuThumb                               ctermbg=102             cterm=none
    " complete menu
-   "hi Pmenu           ctermfg=81  ctermbg=16
-   "hi PmenuSel                    ctermbg=244
-   "hi PmenuSbar                   ctermbg=232
-   "hi PmenuThumb      ctermfg=81
+   hi Pmenu           ctermfg=81  ctermbg=16
+   hi PmenuSel                    ctermbg=244
+   hi PmenuSbar                   ctermbg=232
+   hi PmenuThumb      ctermfg=81
 
    hi PreCondit       ctermfg=118               cterm=bold
    hi PreProc         ctermfg=118
