@@ -221,3 +221,7 @@ if &t_Co > 255
    hi LineNr          ctermfg=250 ctermbg=234
    hi NonText         ctermfg=250 ctermbg=234
 end
+
+hi TabLine guifg=#85816E guibg=#20211B gui=none
+hi TabLineFill guifg=#85816E guibg=#171812 gui=none
+hi TabLineSel guifg=#A6E22E guibg=#3B3A32 gui=none

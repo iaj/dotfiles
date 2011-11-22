@@ -233,9 +233,13 @@ if [ -d $HOME/Documents/work ]; then
         fi
     }
 fi
+
+
 if [ -d $HOME/Dropbox ]; then
     db() { cd $HOME/Dropbox/ }
 fi
+website=/mnt/mg/var/www/virtual/marcgalal.com/htdocs; : ~website
+
 leo() { elinks "http://dict.leo.org/?search=$1"; }
 dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
 # using a perlre lookahead 'trick' to prevent grep from

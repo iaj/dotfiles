@@ -38,6 +38,7 @@ endfunction
 "   put='}'
 "   normal gg=G2jo
 " endfunction
+"
 " 
 " command! -buffer SetJavaCompiler call Exec('setlocal aw','setlocal makeprg=javac','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')
 " command! -buffer SetJikesCompiler call Exec('setlocal aw','setlocal makeprg=jikes','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')

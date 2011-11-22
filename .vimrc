@@ -1,6 +1,4 @@
 " Author:  iaj (tyberion@googlemail.com)
-" Feel free to do whatever you would like with this file as long as you give
-" credit where credit is due.
 "
 " NOTE:
 " If you're editing this in Vim and don't know how folding works, type zR to
@@ -11,13 +9,11 @@
 
 """ Settings
 
-"dont load csapprox if no gui support - silences an annoying warning
+" Don't load csapprox if no gui support - silences an annoying warning
 set t_Co=256
 if !has("gui")
     let g:CSApprox_verbose_level = 0
 endif
-" call pathogen#runtime_append_all_bundles()
-" call pathogen#helptags()
 set nocompatible
 set hidden
 
@@ -26,35 +22,27 @@ set hidden
 if &t_Co > 2 || has("gui_running")
   syntax on
   set hlsearch
-  " set guifont=Monaco:h14
-  set guifont=Inconsolata-dz:h14
 endif
 filetype plugin indent on
 
 " Vim Addon Manager
-" let's copy paste some lines from documentation
 fun SetupVAM()
     let addons_base = expand('$HOME') . '/vim-addons'
     exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
-
     if !isdirectory(addons_base)
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
-
-    call vam#ActivateAddons(['matchit.zip', 'FuzzyFinder', 'L9', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'lodgeit', 'Solarized', 'Command-T' ], {'auto_install' : 2})
+    call vam#ActivateAddons(['ctrlp', 'markdown', 'matchit.zip', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
-"set cpoptions+=$                       " not directly change a word-mark a $
-"set lazyredraw                         " Avoid redrawing the screen mid-command.
+" set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
 let maplocalleader = "\\"
-" set guioptions=Aci
 set antialias
 set guifont=Monaco:h12.00
-"set guifont=Menlo:h12.00
 "set guifont=Inconsolata-g:h14
 set title
 set isfname-=\=
@@ -62,17 +50,11 @@ set isfname-=\=
 "set iskeyword+=äöüÄÖÜ
 "
 set switchbuf=useopen
-set numberwidth=5
+" set numberwidth=5
 
 " Always show tab bar
 set showtabline=2
-set winwidth=84
-" We have to have a winheight bigger than we want to set winminheight. But if
-" we set winheight to be huge before winminheight, the winminheight set will
-" fail.
-" set winheight=5
-" set winminheight=5
-" set winheight=999
+" set winwidth=84
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -110,12 +92,17 @@ endif
 "  Titlebar string: hostname> ${PWD:s/^$HOME/~} || (view|vim) filename ([+]|)
 let &titlestring  = hostname() . '> ' . '%{expand("%:p:~:h")}'
             \ . ' || %{&ft=~"^man"?"man":&ro?"view":"vim"} %f %m'
-
 set nocursorcolumn
 set magic
 set cursorline
+
 " Files that should be ignored by default - in completition as well as in Command-T
-set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.git,.o,.svn,.toc,.obj,.bmp,.jp*g,.png
+set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.o,.toc,.obj
+set wildignore+=
+    \*.png,*.jp*g,*.pdf,*.bmp,
+    \*/.git/*,*/.hg/*,*/.svn/*,
+    \CVS,SVN,
+    \*/undo/*
 
 " Moving Around/Editing
 set whichwrap=b,s,h,l,<,>       " <BS> <Space> h l <Left> <Right> can change lines
@@ -160,8 +147,6 @@ set formatoptions+=1            " break before, not after, a 1 letter word
 "sjl: set formatoptions=qrn1
 
 " Display
-"set number                     " Display line numbers
-" features only up since 7.03
 if (v:version == 703) 
     set relativenumber
     set undofile
@@ -185,7 +170,7 @@ if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
     " Also show an arrow+space (↪ ) at the beginning of any wrapped long lines?
     " I don't like this, but I probably would if I didn't use line numbers.
     let &sbr=nr2char(8618).' '
-    set listchars+=eol:¬
+    " set listchars+=eol:¬
 endif
 
 set confirm                     " Y-N-C prompt if closing with unsaved changes.
@@ -195,8 +180,8 @@ set report=0                    " :commands always print changed line count.
 set shortmess+=a                " Use [+]/[RO]/[w] for modified/readonly/written.
 set shortmess+=A                " Don't show message on existing swapfile
 set ruler                       " Show some info, even without statuslines.
-"set laststatus=2               " Always show statusline, even if only 1 window.
 set autoindent
+
 "typoscript indent fix?
 set cink-=0#
 set cino=(0                     " line up sublines with first (
@@ -222,7 +207,6 @@ set printoptions+=header:0      " Don't print that annoying file info
 " Tags
 set tags=./tags;$HOME
 "set tags=./tags,../tags,../../tags,../../../tags,../../../../tags,../../../../../tags,/Users/tags
-"set tags+=tags;/
 set showfulltag                 " Show more information while completing tags.
 
 " Reading/Writing
@@ -249,10 +233,10 @@ set backupext=~                 " Backup for "file" is "file~"
 
 """" Command Line
 set wildmenu                    " Menu completion in command mode on <Tab>
-"set wildmode=longest,list      " <Tab> cycles between all matching choices.
-" set wildmode=list:longest,full
+set wildmode=list:longest,full
+
 " GRB: use emacs-style tab completion when selecting files, etc
-set wildmode=longest,list
+" set wildmode=longest,list
 set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 "set timeoutlen=100
 
@@ -260,8 +244,9 @@ set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 " NOTE: These define autocmds, so they should come before any other autocmds.
 "       That way, a later autocmd can override the result of one defined here.
 set grepprg=grep\ -nH\ $*
+
 """ Plugin Settings
-"""" Eclim settings
+"""" eclim settings
 " 'open' on OSX will open the url in the default browser without issue
 let g:EclimBrowser='open'
 " Determines what action to take when a only a single result is found.
@@ -290,33 +275,11 @@ let g:EclimPhpValidate = 0
 "let g:taglisttoo_disabled = 1
 
 
-"""" Gundo - Graphical UNDO - pretty awesome imo
+"""" gundo - Graphical UNDO - pretty awesome imo
 let g:gundo_width = 60
 "let g:gundo_preview_height = 40
 "let g:gundo_right = 1
 
-"""" Gist settings - broken ... :-(
-let g:github_user = 'iaj'
-let g:github_token = 'tyberion@gmail.com'
-let g:gist_clip_command = 'pbcopy'
-let g:gist_detect_filetype = 1
-
-"""" Supertab settings
-" supertab + eclim == java win
-" however it was pretty annoying so I wrote my own tabby
-let g:SuperTabDefaultCompletionType = "context"
-"let g:SuperTabDefaultCompletionType = "<c-x><c-u>"
-"let g:SuperTabDefaultCompletionTypeDiscovery = [
-"\ "&completefunc:<c-x><c-u>",
-"\ "&omnifunc:<c-x><c-o>",
-"\ ]
-let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
-let g:SuperTabContextTextOmniPrecedence = ['&omnifunc', '&completefunc']
-let g:SuperTabContextDiscoverDiscovery =
-            \ ["&completefunc:<c-x><c-u>", "&omnifunc:<c-x><c-o>"]
-" dunno what the heck this one is doing actually
-let g:SuperTabLongestEnhanced = 1
-"let g:SuperTabLongestHighlight = 1
 """" Taglist Settings (eg. show tags only for the current file)
 let g:Tlist_Show_One_File = 1
 "let Tlist_Max_Tag_Length = 200
@@ -338,23 +301,6 @@ let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@
 """" Sparkup Settings
 let g:sparkupExecuteMapping = '<D-e>'
 
-"""" NERDCommenter Settings
-" disable warnings from NERDCommenter:
-let g:NERDShutUp = 1
-let NERDTreeIgnore = ['\.pyc$', '\.pyo$']
-let NERDChristmasTree=1
-let NERDTreeWinSize=50
-let NERDTreeChDirMode=2
-
-"""" delimitMate Settings
-let g:loaded_delimitMate = 0
-let g:delimitMate_expand_space = 1
-let g:delimitMate_expand_cr = 1
-let g:delimitMate_smart_quotes = 0
-let delimitMate_excluded_ft = "mail html"
-let g:yankring_history_dir = '~/.vim/'
-let g:tex_flavor='latex'
-
 """" Command-T Settings
 let g:CommandTMaxHeight = 20
 let g:CommandTMaxFiles=3000
@@ -363,7 +309,7 @@ let g:CommandTScanDotDirectories=1
 "let g:CommandTAlwaysShowDotFiles=1
 "let g:CommandTMatchWindowAtTop=1
 
-"""" Netrw Settings
+"""" netrw Settings
 let g:netrw_altv          = 1
 let g:netrw_fastbrowse    = 2
 let g:netrw_keepdir       = 0
@@ -371,143 +317,72 @@ let g:netrw_liststyle     = 2
 let g:netrw_retmap        = 1
 let g:netrw_silent        = 1
 let g:netrw_special_syntax= 1
+if has("eval")
+    let g:netrw_keepdir = 1                       " does not work!
+    let g:netrw_list_hide = '.*\.swp\($\|\t\),.*\.py[co]\($\|\t\)'
+    let g:netrw_sort_sequence = '[\/]$,*,\.bak$,\.o$,\.h$,\.info$,\.swp$,\.obj$,\.py[co]$'
+    let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
+    let g:netrw_use_noswf = 1
+endif
 
 """" FuzzyFinder Settings
-" Fix for the foldopen=search setting
 let g:returning_from_fuzzy = 0
 let g:fuf_modesDisable = [ 'mrucmd' ]
 let g:fuf_mrufile_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:fuf_mrufile_maxItem = 300
 "let g:fuf_mrucmd_maxItem = 400
-"shuddid lusty - for now that is
-let g:loaded_lustyexplorer = 1
-let g:loaded_lustyjuggler = 1
-let g:space_loaded = 1
-"let g:fuf_dir_exclude = '\v\-Tmp\-|\.svn/$|\.git/$|((^|[/\\])\.{1,2}[/\\]$)'
-"let g:fuf_mrucmd_maxItem = 2000
 
-"""" easymotion
-" for now we won't bug our keys !! <leader> is ',' as well...
-let g:EasyMotion_do_mapping = 0
-let g:EasyMotion_leader_key = '\'
-" nnoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
-" onoremap <silent> <Leader>f      :call EasyMotionF(0, 0)<CR>
-" vnoremap <silent> <Leader>f :<C-U>call EasyMotionF(1, 0)<CR>
-" nnoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
-" onoremap <silent> <Leader>F      :call EasyMotionF(0, 1)<CR>
-" vnoremap <silent> <Leader>F :<C-U>call EasyMotionF(1, 1)<CR>
-" onoremap <silent> <Leader>t      :call EasyMotionT(0, 0)<CR>
-" onoremap <silent> <Leader>T      :call EasyMotionT(0, 1)<CR>
-
-" set this if you prefer activating the checkers manually
-" call syntastic#Setup()
-" let g:syntastic['auto_setup'] = 0 
-" let g:syntastic.file_types['new_type'] = Examples see plugin/syntastic.vim
-" let g:syntastic.file_types['xml'] = 'disabled'
-
-" overwrite error format
-" let g:syntastic.file_types['js'].cmd.efm = "overwrite error fromat here"
-" for html tidy set ignore regex
-" let g:syntastic.file_types.html.ignore_regex = 'lacks "alt" attribute\|proprietary attribute'
+"""" ctrlp settings
+let g:ctrlp_working_path_mode = 2
+let g:ctrlp_mruf_max = 300
+let g:ctrlp_match_window_reversed = 0
+" let g:ctrlp_match_window_bottom = 0
+let g:ctrlp_prompt_mappings = {
+            \ 'PrtDelete()':          ['<c-h>']
+            \ }
 
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
-    "colorscheme zenburn
-    "colorscheme xoria256
-    "colorscheme darktango
     "set columns=153
+    :set guioptions=Aci
     :set lines=100
-    :set columns=171
-    "colorscheme darktango
-    "colorscheme slate
-    set fuoptions=maxvert,maxhorz
-    " dont show the toolbar in gui mode
-    set go-=T
+    :set columns=200
+    :set fuoptions=maxvert,maxhorz
+
+    " set go-=T
     " Don't show scroll bars in the GUI
-    set guioptions-=L
-    set guioptions-=r
+    :set guioptions-=L
+    :set guioptions-=r
 
-    " this one is actually decent too!!(herald)
-    "colorscheme herald
-    "colorscheme cloudsmidnight         "pretty dark but nice theme
-    "colorscheme twilight
-    "colorscheme twilight2
-
-    " let g:molokai_original = 1 " lighter background in gVim
-    let g:zenburn_high_Contrast = 1 " darker colors
-    set background=dark
-    " custom modification ;)
-    colorscheme solarized
+    let g:molokai_original = 1 " lighter background in gVim
+    :let g:zenburn_high_Contrast = 1 " darker colors
+    :set background=dark
     " set background=light
-    " :hi Normal guibg=#252626
-
-    "Molokai Settings
-    " colorscheme sjl
-    " colorscheme vitamins "IMPROVED!
-    " colorscheme herald_modded
-    " colorscheme lucius
-    " colorscheme muse
-    " colorscheme ir_black
-    " colorscheme grb3
-    " colorscheme vincent
-    " colorscheme kellys
-    " colorscheme molokai2
-
-    " +--------------+
-    " |    neverland!|
-    " +--------------+
-    " colorscheme neverland2
+    " colorscheme solarized
+    " :hi Normal guib=#252626
+    " :colorscheme molokai_jay
+    " :colorscheme sjl
+    :colorscheme grb256
+    " :colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
-    " colorscheme neverland
-
-    " colorscheme clouds_jay
-    " colorscheme molokai2
-    " colorscheme molokai_jay
-    " colorscheme neverland
-    " colorscheme twilight256
-    " colorscheme mustang
-    " hi Visual guibg=#999999
-    " let g:obviousModeInsertHi = "guibg=Black guifg=White"
-    " hi Visual term=reverse cterm=reverse guifg=#ce5c00 guibg=#fcaf3e
-
-    " set guicursor=n-c:block-Cursor-blinkon0
-    " set guicursor+=v:block-vCursor-blinkon0
-    " set guicursor+=i-ci:ver20-iCursor
-
     highlight SpellBad term=underline gui=undercurl guisp=Orange
-    " a little tweaking to get that zenburn better for my lazy eyes ;)
-    " Zenburn Settings
-    " let g:zenburn_high_Contrast = 1
-    " colorscheme zenburn
-    " hi incsearch ctermbg=216 ctermfg=242
-    " hi search ctermbg=223 ctermfg=238
+    hi TabLine guifg=#85816E guibg=#20211B gui=none
+    hi TabLineFill guifg=#85816E guibg=#171812 gui=none
+    hi TabLineSel guifg=#A6E22E guibg=#3B3A32 gui=none
 else
-    " colorscheme molokai
-    " for now we use that fricken sjl everywhere possible
-    " let g:molokai_original = 1
-    " set cursorline
-    " colorscheme lucius
-    " colorscheme sjl
-    " colorscheme ir_black
-    " let g:molokai_original = 1 " lighter background in gVim
-    " let g:zenburn_high_Contrast = 1 " darker colors
-
-    " let g:solarized_termcolors = 256 " use degraded colors in terminal
     set background=dark
     colorscheme solarized
-
-    " Molokai Settings
-    " colorscheme sjl
-    " colo grb3
+    " :colorscheme ir_black
+    " colorscheme molokai_kien
     "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
-    "colorscheme ir_black_dunolie
 endif
 
 """ Statusline
 set ls=2
 if has('statusline') && has('gui_running')
-    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight'
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight' || g:colors_name == 'tir_black'
+                \|| g:colors_name=='grb256'
         let fg_bg = 2
     else
         let fg_bg = 1
@@ -632,7 +507,8 @@ else
     set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
 endif
 
-""" Remapping the <TAB> key to something useful
+" Remap the tab key to do autocompletion or indentation depending on the
+" context (from http://www.vim.org/tips/tip.php?tip_id=102)
 function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
     if pumvisible()
@@ -704,32 +580,7 @@ function! MyShiftTabComplete()
         return "\<C-P>"
     endif
 endfunction
-" inoremap <tab> <c-r>=MyTabComplete()<cr>
-" inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
-
-""" Miscellaneous - to check out
-" Netrw explorer
-if has("eval")
-    let g:netrw_keepdir = 1                       " does not work!
-    let g:netrw_list_hide = '.*\.swp\($\|\t\),.*\.py[co]\($\|\t\)'
-    let g:netrw_sort_sequence = '[\/]$,*,\.bak$,\.o$,\.h$,\.info$,\.swp$,\.obj$,\.py[co]$'
-    let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
-    let g:netrw_use_noswf = 1
-endif
-
-" Remap the tab key to do autocompletion or indentation depending on the
-" context (from http://www.vim.org/tips/tip.php?tip_id=102)
-" by Gary Bernard
-function! InsertTabWrapper()
-    let col = col('.') - 1
-    if !col || getline('.')[col - 1] !~ '\k'
-        return "\<tab>"
-    else
-        return "\<c-p>"
-    endif
-endfunction
-"inoremap <tab> <c-r>=InsertTabWrapper()<cr>
-"inoremap <s-tab> <c-n>
-
+inoremap <tab> <c-r>=MyTabComplete()<cr>
+inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='
