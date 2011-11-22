@@ -145,7 +145,8 @@ fi
 #### Environment variables
 export PAGER=less
 if [[ $OSTYPE == darwin* ]]; then
-    export EDITOR="mvim -f --remote-wait-silent"
+    # export EDITOR="mvim -f --remote-wait-silent"
+    export EDITOR="vim"
 else
     export EDITOR="vim"
 fi
