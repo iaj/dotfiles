@@ -102,7 +102,8 @@ set wildignore+=
     \*.png,*.jp*g,*.pdf,*.bmp,
     \*/.git/*,*/.hg/*,*/.svn/*,
     \CVS,SVN,
-    \*/undo/*
+    \*/undo/*,
+    \*/typo3temp/*,*/uploads/*,*/t3lib/*,*/typo3/*,*/typo3_src*/*
 
 " Moving Around/Editing
 set whichwrap=b,s,h,l,<,>       " <BS> <Space> h l <Left> <Right> can change lines
