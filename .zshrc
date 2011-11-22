@@ -145,6 +145,7 @@ fi
 #### Environment variables
 export PAGER=less
 if [[ $OSTYPE == darwin* ]]; then
+    # this one causes me some headaches lately
     # export EDITOR="mvim -f --remote-wait-silent"
     export EDITOR="vim"
 else
@@ -239,7 +240,7 @@ fi
 if [ -d $HOME/Dropbox ]; then
     db() { cd $HOME/Dropbox/ }
 fi
-website=/mnt/mg/var/www/virtual/marcgalal.com/htdocs; : ~website
+# website=/mnt/mg/var/www/virtual/marcgalal.com/htdocs; : ~website
 
 leo() { elinks "http://dict.leo.org/?search=$1"; }
 dict() { elinks "http://dict.tu-chemnitz.de/?query=$1"; }
