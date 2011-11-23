@@ -474,15 +474,21 @@ yank-pb() {
     zle copy-region-as-kill $BUFFER
     echo $BUFFER | pbcopy
 }
+finder_position() {
+    BUFFER=$BUFFER"`posd`"
+    zle end-of-line
+}
 # Declare these as custom widget functions
 #zle -N reset-prompt
 zle -N search-backwords
 zle -N paste-xclip
+zle -N finder_position
 zle -N yank-pb
 #zle -N shortpath
 #zle -N fullpath
 
 #bindkey -M viins "^R\*" yank-pb
+bindkey -M viins '^K' finder_position
 bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 bindkey -M viins "^[^M" self-insert-unmeta
