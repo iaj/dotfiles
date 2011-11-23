@@ -32,7 +32,7 @@ fun SetupVAM()
     if !isdirectory(addons_base)
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
-    call vam#ActivateAddons(['ctrlp', 'markdown', 'matchit.zip', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'CSApprox', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview' ], {'auto_install' : 2})
+    call vam#ActivateAddons(['ctrlp', 'markdown', 'matchit.zip', 'surround', 'tcomment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
@@ -361,9 +361,9 @@ if has('gui_running')
     " set background=light
     " colorscheme solarized
     " :hi Normal guib=#252626
-    " :colorscheme molokai_jay
+    :colorscheme molokai_jay
     " :colorscheme sjl
-    :colorscheme grb256
+    " :colorscheme grb256
     " :colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242

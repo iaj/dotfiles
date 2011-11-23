@@ -60,17 +60,6 @@ local boldyellow="%B%{${fg[yellow]}%}"
 local default="%{${fg[default]}%}"
 local white="%B%{${fg[white]}%}"
 
-# Colorize stderr in red. Very useful when looking for errors. Thanks to
-# http://gentoo-wiki.com/wiki/Zsh for the basic script and Mikachu in #zsh on
-# Freenode (2010-03-07 04:03) for some improvements (-r, printf). It's not yet
-# perfect and doesn't work with su and git for example, but it can handle most
-# interactive output quite well (even with no trailing new line) and in cases
-# it doesn't work, the E alias can be used as workaround.
-exec 2>>(while read -r -k -u 0 line; do
-printf '\e[91m%s\e[0m' "$line";
-print -n $'\0';
-done &)
-
 # Customize the colors used by ls, if we have the right tools
 # Also changes colors for completion, if initialized first
 if [ -f $HOME/.dircolors ]; then
@@ -176,7 +165,7 @@ if [ -d ~/git/zsh/Completion ]; then
 fi
 # Load the VCS Infobar
 if [ -d ~/git/zsh/Functions/VCS_Info/ ]; then
-    fpath=(~/git/zsh/Functions/VCS_Info/ ~/git/zsh/Functions/VCS_Info/Backends $fpath)
+    fpath=(~/git/zsh/Functions/VCS_Info/ ~/git/zsh/Functions/VCS_Info/Backends ~/git/zsh/Functions/Misc $fpath)
 fi
 # Set correct fpath to allow loading my functions (including completion
 # functions).
@@ -186,6 +175,7 @@ fi
 #if [[ -d ~/.zsh/functions ]]; then
     #autoload -Uz ${fpath[1]}/^_*(^/:t)
 #fi
+
 # Autoload add-zsh-hook to add/remove zsh hook functions easily.
 autoload -Uz add-zsh-hook
 
@@ -280,6 +270,8 @@ typeset -T CLASSPATH          classpath
 typeset -T LS_COLORS          ls_colors
 . $HOME/.zsh/functions/vcs_hooks.zsh
 . $HOME/.zsh/customized.zsh
+# colorize stderr in red...
+# . $HOME/.zsh/colorizestderr.zsh
 #. $HOME/.zsh/functions/git.zsh
 #. $HOME/.zsh/vi-mode.zsh
 
@@ -331,7 +323,7 @@ if [[ $OSTYPE == darwin* ]]; then
         $EDITOR -w ${1}
         plutil -convert binary1 ${1}
     }
-    function pn() { open "peepopen://$1?editor=MacVim" }
+    # function pn() { open "peepopen://$1?editor=MacVim" }
 else
     alias ls='ls --color=auto -B'
     alias g='vim'
@@ -512,11 +504,11 @@ bindkey "\eOc"    forward-word                   # Another possible ctrl-right
 bindkey "\eOd"    backward-word                  # Another possible ctrl-left
 bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
 bindkey " "       magic-space                    # Space expands history subst's
-bindkey "^@"	  _history-complete-older        # C-Space to complete from hist
-bindkey "^]."	  insert-last-word
+bindkey "^@"      _history-complete-older        # C-Space to complete from hist
+bindkey "^]."     insert-last-word
 # TODO: check this one out...
-bindkey "^],"	  copy-earlier-word
-bindkey 'jk'	  vi-cmd-mode
+bindkey "^],"     copy-earlier-word
+bindkey 'jk'      vi-cmd-mode
 bindkey '^T' _most_recent_file
 # No Delays please, we want flashy SPEEDZ
 KEYTIMEOUT=50
@@ -806,14 +798,15 @@ mkmaildir() {
     subdir=${1}
     mkdir -p ${root}/${subdir}/{cur,new,tmp}
 }
-function fullpath() {
-PS1="$PS1:s/\%~/%d/:s/40</400</"
-zle reset-prompt
+fullpath() {
+    PS1="$PS1:s/\%~/%d/:s/40</400</"
+    zle reset-prompt
 }
-function shortpath() {
-PS1="$PS1:s/\%d/%~/:s/400</40</"
-zle reset-prompt
+shortpath() {
+    PS1="$PS1:s/\%d/%~/:s/400</40</"
+    zle reset-prompt
 }
+
 ### Completion
 if autoloadable compinit; then
     # Load the complist module which provides additions to completion lists
