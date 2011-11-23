@@ -359,9 +359,9 @@ if has('gui_running')
     :let g:zenburn_high_Contrast = 1 " darker colors
     :set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
     " :hi Normal guib=#252626
-    :colorscheme molokai_jay
+    " :colorscheme molokai_jay
     " :colorscheme sjl
     " :colorscheme grb256
     " :colo tir_black
