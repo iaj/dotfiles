@@ -32,7 +32,7 @@ fun SetupVAM()
     if !isdirectory(addons_base)
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
-    call vam#ActivateAddons(['ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview' ], {'auto_install' : 2})
+    call vam#ActivateAddons(['vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'cocoa', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 

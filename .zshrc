@@ -887,6 +887,13 @@ if autoloadable compinit; then
     # Page long completion lists, using this prompt.
     zstyle ':completion:*' list-prompt %S%L -- More --%s
 
+    zstyle ':completion:*:processes' command 'ps aux --sort=-%cpu'
+    () {
+        local arr
+        arr=( '' 88 2 64 32 54 55 7 8 22 23 )
+        zstyle ':completion:*:processes' list-colors "=(#b) #[^ ]#${(l:9*9:: #([^ ]#):)}*${(j:=38;5;:)arr}"
+    }
+    
     # Show a warning when no completions were found
     zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
 
