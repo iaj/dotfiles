@@ -755,22 +755,6 @@ if autoloadable edit-command-line; then
 fi
 
 ### Functions
-if [[ -f $HOME/.vim/plugin/manpageviewPlugin.vim ]]; then
-    man() {
-        [[ $# -eq 0 ]] && return 1
-        #vim -R -c "Man $*" -c "silent! only"
-        mvim --remote-send "<ESC>:Man $*<CR>" ; osascript -e 'tell application "MacVim" to activate'
-        #g -R -c "Man $*" -c "silent! only"
-    }
-    info() {
-        [[ $# -eq 1 ]] || return 1
-        vim -R -c "Man $1.i" -c "silent! only"
-    }
-    perldoc() {
-        [[ $# -eq 1 ]] || return 1
-        vim -R -c "Man $1.pl" -c "silent! only"
-    }
-fi
 # Originally from Jonathan Penn, with modifications by Gary Bernhardt
 whodoneit() {
     (set -e &&
