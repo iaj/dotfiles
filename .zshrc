@@ -488,6 +488,7 @@ zle -N yank-pb
 #zle -N fullpath
 
 #bindkey -M viins "^R\*" yank-pb
+# returns the current finder position
 bindkey -M viins '^K' finder_position
 bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
@@ -512,6 +513,7 @@ bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
 bindkey " "       magic-space                    # Space expands history subst's
 bindkey "^@"      _history-complete-older        # C-Space to complete from hist
 bindkey "^]."     insert-last-word
+
 # TODO: check this one out...
 bindkey "^],"     copy-earlier-word
 bindkey 'jk'      vi-cmd-mode
@@ -544,6 +546,7 @@ bindkey '^P' my-vi-history-beginning-search-backward
 bindkey -a '^P' history-beginning-search-backward # binding for Vi-mode
 # Here only Vi-mode is necessary as ^P enters Vi-mode and ^N only makes sense
 # after calling ^P.
+
 bindkey -a '^N' history-beginning-search-forward
 
 # I don't need the arrow keys, I use ^N and ^P for this (see below).
@@ -566,8 +569,8 @@ zle -N edit-command-line
 #autoload edit-command-line
 #zle -N edit-command-line
 #bindkey -M vicmd v edit-command-line
-#will give ksh-like behaviour for that key,
-#except that it will handle multi-line buffers properly.
+# will give ksh-like behaviour for that key,
+# except that it will handle multi-line buffers properly.
 
 # Prompt to <<insert>> <<normal>> Modes on the right
 #function zle-line-init zle-keymap-select {
