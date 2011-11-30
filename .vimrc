@@ -60,7 +60,7 @@ set showtabline=2
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
 " (http://www.derekwyatt.org/vim/the-vimrc-file/).
 if has('syntax')
-    set synmaxcol=200
+    set synmaxcol=0
     " Highlight lines longer than 85 characters. Thanks to Tony Mechelynck
     " <antoine.mechelynck@gmail.com> from the Vim mailing list. It can easily be
     " disabled when necessary with :2match (in Vim >= 700).
@@ -164,8 +164,9 @@ if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
     let s:arr = nr2char(9655) " using U+25B7 (▷) for an arrow, and
     let s:dot = nr2char(8901) " using U+22C5 (⋅) for a very light dot,
     " display tabs as an arrow followed by some dots (▷⋅⋅⋅⋅⋅⋅⋅),
-    exe "set listchars=tab:" . s:arr . s:dot
     " and display trailing and non-breaking spaces as U+22C5 (⋅).
+    " removed on 12/01/2011
+    exe "set listchars=tab:" . s:arr . s:dot
     exe "set listchars+=trail:" . s:dot
     exe "set listchars+=nbsp:"  . s:dot
     " Also show an arrow+space (↪ ) at the beginning of any wrapped long lines?
@@ -238,7 +239,7 @@ set wildmode=list:longest,full
 
 " GRB: use emacs-style tab completion when selecting files, etc
 " set wildmode=longest,list
-set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
+" set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 "set timeoutlen=100
 
 " Per-Filetype Scripts
@@ -359,9 +360,9 @@ if has('gui_running')
     :let g:zenburn_high_Contrast = 1 " darker colors
     :set background=dark
     " set background=light
-    colorscheme solarized
+    " colorscheme solarized
     " :hi Normal guib=#252626
-    " :colorscheme molokai_jay
+    :colorscheme molokai_jay
     " :colorscheme sjl
     " :colorscheme grb256
     " :colo tir_black

@@ -268,9 +268,10 @@ typeset -T LD_LIBRARY_PATH_32 ld_library_path_32
 typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
 typeset -T CLASSPATH          classpath
 typeset -T LS_COLORS          ls_colors
+# File with git-time-function since last commit
 . $HOME/.zsh/functions/vcs_hooks.zsh
 . $HOME/.zsh/customized.zsh
-# colorize stderr in red...
+# colorize stderr in red...  TODO: fix for ls /usr/bin | vi -
 # . $HOME/.zsh/colorizestderr.zsh
 #. $HOME/.zsh/functions/git.zsh
 #. $HOME/.zsh/vi-mode.zsh
