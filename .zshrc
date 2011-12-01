@@ -468,10 +468,14 @@ bindkey -M vicmd "^R" search-backwords
 bindkey "^Y" yank
 bindkey -M viins '^r' search-backwords
 bindkey -M vicmd '^r' search-backwords
+
 paste-xclip() {
-    BUFFER=$BUFFER"`pbpaste`"
+    BUFFER=$LBUFFER"`pbpaste`"
     zle end-of-line
 }
+zle -N paste-xclip
+bindkey -M viins "^R\*" paste-xclip
+
 yank-pb() {
     zle copy-region-as-kill $BUFFER
     echo $BUFFER | pbcopy
@@ -483,11 +487,11 @@ finder_position() {
 # Declare these as custom widget functions
 #zle -N reset-prompt
 zle -N search-backwords
-zle -N paste-xclip
 zle -N finder_position
 zle -N yank-pb
 #zle -N shortpath
 #zle -N fullpath
+zle -N getlastpath
 
 #bindkey -M viins "^R\*" yank-pb
 # returns the current finder position
@@ -496,7 +500,6 @@ bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 bindkey -M viins "^[^M" self-insert-unmeta
 bindkey -M viins "^[x" execute-named-cmd
-bindkey -M viins "^R\*" paste-xclip
 bindkey -M viins "^O" accept-line-and-down-history
 bindkey -M viins "^[u" undo
 #bindkey -M viins "^[h" run-help
@@ -521,6 +524,10 @@ bindkey "^]."     insert-last-word
 bindkey "^],"     copy-earlier-word
 bindkey 'jk'      vi-cmd-mode
 bindkey '^T' _most_recent_file
+lastpath() {
+     LBUFFER+="${${(z)history[$#history]}[-1]:h}"
+}
+bindkey '^_/' lastpath; zle -N lastpath;
 # No Delays please, we want flashy SPEEDZ
 KEYTIMEOUT=50
 
