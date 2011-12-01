@@ -970,30 +970,12 @@ prompt-setup
 #RPROMPT='${vcs_info_msg_0_}'
 RPROMPT="${default}(${white}%!%b)"
 
-
 # Prompt for spelling corrections.
 # %R is word to change, %r is suggestion, and Y and N are colored green and red.
 SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]o/[E]dit/[A]bort) '
 
-### Attaching to a possibly running screen session
-# If not already in screen reattach to a running session or create a new one.
-# This also starts screen one a remote server when connecting through ssh.
-if [[ $TERM != dumb && -z $STY ]]; then
-    # Get running detached sessions.
-    session=$(screen -list | grep 'Detached' | awk '{ print $1; exit }')
-    # As we exec later we have to set the title here.
-    #window_preexec "screen"
-    # Create a new session if none is running.
-    if [[ -z $session ]]; then
-        # exec screen
-        # Reattach to a running session.
-    else
-        exec screen -r $session
-    fi
-fi
+# autoload -Uz attach_to_running_screen
+# attach_to_running_screen
 
-if [ -d $HOME/perl5/lib/perl5 ]; then
-    eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
-fi
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
