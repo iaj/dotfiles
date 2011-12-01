@@ -974,8 +974,8 @@ RPROMPT="${default}(${white}%!%b)"
 # %R is word to change, %r is suggestion, and Y and N are colored green and red.
 SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]o/[E]dit/[A]bort) '
 
-# autoload -Uz attach_to_running_screen
-# attach_to_running_screen
+autoload -Uz attach_to_running_screen
+attach_to_running_screen
 
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
