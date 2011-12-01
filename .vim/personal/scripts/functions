@@ -336,6 +336,61 @@ endfunction
 nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
 nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>
 
+
+function! RenameFile()
+    let old_name = expand('%')
+    let new_name = input('New file name: ', expand('%'))
+    if new_name != '' && new_name != old_name
+        exec ':saveas ' . new_name
+        exec ':silent !rm ' . old_name
+        redraw!
+    endif
+endfunction
+map <leader>n :call RenameFile()<cr>
+
+function! OpenChangedFiles()
+    only " Close all windows, unless they're modified
+    let status = system('git status -s | grep "^ \?\(M\|A\)" | cut -d " " -f 3')
+    let filenames = split(status, "\n")
+    exec "edit " . filenames[0]
+    for filename in filenames[1:]
+        exec "sp " . filename
+    endfor
+endfunction
+command! OpenChangedFiles :call OpenChangedFiles()
+
+" In these functions, we don't use the count argument, but the map referencing
+" v:count seems to make it work. I don't know why.
+function! ScrollOtherWindowDown(count)
+    normal! 
+    normal! 
+    normal! 
+endfunction
+function! ScrollOtherWindowUp(count)
+    normal! 
+    normal! 
+    normal! 
+endfunction
+nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
+nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>
+au BufWrite *.java let b:error_jump_counter=0
+
+fun! My_Java_Error_Jumping() "{{{
+    "let g:tlist=map(getloclist(0), 'get(v:val, ''bufnr'')')
+    if (b:error_jump_counter == 0)
+        let b:error_jump_counter += 1
+        ll
+    else
+        if (len(getloclist(0)) == b:error_jump_counter)
+            let b:error_jump_counter = 1
+            lr
+        else
+            let b:error_jump_counter += 1
+            lne
+        endif
+    endif
+endfunction
+
 " Search for lookFor... e.g. find the occurence of a certain filename in
 " parent directory: e.g. FindProjectRoot(*.xcodeproj)
 function! FindProjectRoot(lookFor)
