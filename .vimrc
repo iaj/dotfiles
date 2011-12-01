@@ -336,12 +336,14 @@ let g:fuf_mrufile_maxItem = 300
 
 """" ctrlp settings
 let g:ctrlp_working_path_mode = 2
-let g:ctrlp_mruf_max = 300
+let g:ctrlp_mruf_max = 500
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
 let g:ctrlp_prompt_mappings = {
             \ 'PrtDelete()':          ['<c-h>']
             \ }
+" let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
+let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG'
 
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
