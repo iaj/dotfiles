@@ -13,11 +13,12 @@ set isk+=58
 " au FileType objc set makeprg=gcc\ -framework\ Foundation\ %\ -o %:p:h
 "
 setlocal makeprg=xcodebuild
-" remove tab-spaces :S
+" setlocal makeprg=xcodebuild -configuration Debug clean build
 
 " let s:arr = nr2char(9655) " using U+25B7 (▷) for an arrow, and
 " let s:dot = nr2char(8901) " using U+22C5 (⋅) for a very light dot,
 " exe "setlocal listchars-=tab:" . s:arr . s:dot
+" remove tab-spaces :S
 setlocal nolist
 " example mapping for building.. needs to get improved though
 " map ,t :w|:!xcodebuild -project ~/git/Quicksilver/Quicksilver/Quicksilver.xcodeproj<CR>

@@ -332,22 +332,6 @@ nnoremap <silent> \jc :JavaCorrect<cr>
 nnoremap <silent> \jm :JavaImportMissing<CR>
 nnoremap <silent> \\ :call My_Java_Error_Jumping()<CR>
 
-au BufWrite *.java let b:error_jump_counter=0
-fun! My_Java_Error_Jumping() "{{{
-    "let g:tlist=map(getloclist(0), 'get(v:val, ''bufnr'')')
-    if (b:error_jump_counter == 0)
-        let b:error_jump_counter += 1
-        ll
-    else
-        if (len(getloclist(0)) == b:error_jump_counter)
-            let b:error_jump_counter = 1
-            lr
-        else
-            let b:error_jump_counter += 1
-            lne
-        endif
-    endif
-endfunction
 noremap <leader>E :e <C-R>=substitute(expand("%:h"), '.\zs$', '/', '')<CR>
 
 " map <C-\> :e<CR>:exec("tag ".expand("<cword>"))<CR>
@@ -452,44 +436,8 @@ map \L :g/^\s*\n\s*$/d<CR>
 cnoremap %% <C-R>=expand('%:h').'/'<cr>
 map <leader>e :edit %%
 "map <leader>v :view %%
-function! RenameFile()
-    let old_name = expand('%')
-    let new_name = input('New file name: ', expand('%'))
-    if new_name != '' && new_name != old_name
-        exec ':saveas ' . new_name
-        exec ':silent !rm ' . old_name
-        redraw!
-    endif
-endfunction
-map <leader>n :call RenameFile()<cr>
 
 command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
-
-function! OpenChangedFiles()
-    only " Close all windows, unless they're modified
-    let status = system('git status -s | grep "^ \?\(M\|A\)" | cut -d " " -f 3')
-    let filenames = split(status, "\n")
-    exec "edit " . filenames[0]
-    for filename in filenames[1:]
-        exec "sp " . filename
-    endfor
-endfunction
-command! OpenChangedFiles :call OpenChangedFiles()
-
-" In these functions, we don't use the count argument, but the map referencing
-" v:count seems to make it work. I don't know why.
-function! ScrollOtherWindowDown(count)
-    normal! 
-    normal! 
-    normal! 
-endfunction
-function! ScrollOtherWindowUp(count)
-    normal! 
-    normal! 
-    normal! 
-endfunction
-nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
-nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>
 
 " GRB: clear the search buffer when hitting return
 nnoremap <CR> :nohlsearch<cr>
