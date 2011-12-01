@@ -497,6 +497,7 @@ bindkey -M viins "^[^M" self-insert-unmeta
 bindkey -M viins "^[x" execute-named-cmd
 bindkey -M viins "^R\*" paste-xclip
 bindkey -M viins "^O" accept-line-and-down-history
+bindkey -M viins "^[u" undo
 #bindkey -M viins "^[h" run-help
 bindkey -M vicmd 'yy' yank-pb
 bindkey "\e[1~"   beginning-of-line              # Another Home
