@@ -175,6 +175,7 @@ fi
 #if [[ -d ~/.zsh/functions ]]; then
     #autoload -Uz ${fpath[1]}/^_*(^/:t)
 #fi
+autoload -Uz cdm
 
 # Autoload add-zsh-hook to add/remove zsh hook functions easily.
 autoload -Uz add-zsh-hook
