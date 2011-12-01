@@ -14,6 +14,7 @@ set isk+=58
 "
 setlocal makeprg=xcodebuild
 " setlocal makeprg=xcodebuild -configuration Debug clean build
+command! A :Alternate
 
 " let s:arr = nr2char(9655) " using U+25B7 (▷) for an arrow, and
 " let s:dot = nr2char(8901) " using U+22C5 (⋅) for a very light dot,
