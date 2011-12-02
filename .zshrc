@@ -133,6 +133,7 @@ fi
 
 #### Environment variables
 export PAGER=less
+export ACK_COLOR_MATCH='red'
 if [[ $OSTYPE == darwin* ]]; then
     # this one causes me some headaches lately
     # export EDITOR="mvim -f --remote-wait-silent"
