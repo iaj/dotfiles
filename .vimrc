@@ -364,9 +364,9 @@ if has('gui_running')
     " set background=light
     " colorscheme solarized
     " :hi Normal guib=#252626
-    :colorscheme molokai_jay
+    " :colorscheme molokai_jay
     " :colorscheme sjl
-    " :colorscheme grb256
+    :colorscheme grb256
     " :colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
@@ -535,7 +535,7 @@ function! MyTabComplete()
     let col = col('.')
     let current = col - 1
 
-    while current > 0 && line[current - 1] =~ '\S'
+    while current > 0 && line[current] =~ '\S'
         let current -= 1
     endwhile
     "return substr
@@ -543,15 +543,16 @@ function! MyTabComplete()
     " debugging...
     "echom 'Indexes: '.current.':'.col
     let substr = substitute(line[(current-1):(col-2)], '^\s*', '', '')
-    "echom 'Substring before the cursor: '.string(substr)
+    " echom 'Substring before the cursor: '.string(substr)
 
-    "echom 'current: '.current.', '.'line: '.string(line[: current - 1])
+    " echom 'current: '.current.', '.'line: '.string(line[: current - 1])
     if col == 1 || substr =~ '^\s*$'
         return "\<tab>"
     endif
 
     let has_period = match(substr, '\.') != -1      " position of period, if any
     let has_slash = match(substr, '\/') != -1       " position of slash, if any
+
 
     "if (&dictionary != '' && !has_slash)
     "return "\<C-X>\<C-K>"
