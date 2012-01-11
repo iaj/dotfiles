@@ -33,8 +33,6 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     call vam#ActivateAddons(['vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
-    "with eclim
-    "call vam#ActivateAddons(['eclim', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
@@ -380,10 +378,10 @@ if has('gui_running')
     hi TabLineSel guifg=#A6E22E guibg=#3B3A32 gui=none
 else
     set background=dark
-    colorscheme solarized
+    :colorscheme solarized
     " :colorscheme ir_black
-    " colorscheme molokai_kien
-    "colorscheme molokai           "one hell of a amazing great-magenta colorscheme
+    " :colorscheme molokai_kien
+    " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
 endif
 
 """ Statusline
@@ -599,5 +597,6 @@ function! MyShiftTabComplete()
 endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='
