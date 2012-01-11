@@ -33,6 +33,8 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     call vam#ActivateAddons(['vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    "with eclim
+    "call vam#ActivateAddons(['eclim', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
@@ -99,11 +101,11 @@ set cursorline
 " Files that should be ignored by default - in completition as well as in Command-T
 set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.class,.o,.toc,.obj
 set wildignore+=
-    \*.png,*.jp*g,*.pdf,*.bmp,
     \*/.git/*,*/.hg/*,*/.svn/*,
     \CVS,SVN,
     \*/undo/*,
     \*/typo3temp/*,*/uploads/*,*/t3lib/*,*/typo3/*,*/typo3_src*/*
+    " \*.png,*.jp*g,*.pdf,*.bmp,
 
 " Moving Around/Editing
 set whichwrap=b,s,h,l,<,>       " <BS> <Space> h l <Left> <Right> can change lines
@@ -263,6 +265,7 @@ let g:EclimJavaSearchMapping = 1
 " Disable HTML & PHP validation
 let g:EclimHtmlValidate = 0
 let g:EclimPhpValidate = 0
+let g:EclimJavaCompleteTmpFile = 1
 " ,i imports whatever is needed for current line
 " nnoremap <silent> <LocalLeader>i :JavaImport<cr>
 " ,d opens javadoc for statement in browser
@@ -274,7 +277,6 @@ let g:EclimPhpValidate = 0
 " ,jc shows corrections for the current line of java
 " nnoremap <silent> <LocalLeader>jc :JavaCorrect<cr>
 " Disable Eclim's taglisttoo because I use the regular taglist plugin
-"let g:taglisttoo_disabled = 1
 
 
 """" gundo - Graphical UNDO - pretty awesome imo
@@ -297,8 +299,8 @@ let Tlist_Use_Right_Window = 1
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 "let g:xptemplate_key = '<Tab>'
-" let g:xptemplate_nav_next = '<C-j>'
-" let g:xptemplate_nav_prev = '<C-k>'
+let g:xptemplate_nav_next = '<C-n>'
+let g:xptemplate_nav_prev = '<C-p>'
 
 """" Sparkup Settings
 let g:sparkupExecuteMapping = '<D-e>'
@@ -336,7 +338,7 @@ let g:fuf_mrufile_maxItem = 300
 
 """" ctrlp settings
 let g:ctrlp_working_path_mode = 2
-let g:ctrlp_mruf_max = 500
+let g:ctrlp_mruf_max = 1000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
 let g:ctrlp_prompt_mappings = {
@@ -344,6 +346,7 @@ let g:ctrlp_prompt_mappings = {
             \ }
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG'
+let g:tex_flavour = "latex"
 
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
@@ -362,11 +365,12 @@ if has('gui_running')
     :let g:zenburn_high_Contrast = 1 " darker colors
     :set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
     " :hi Normal guib=#252626
     " :colorscheme molokai_jay
+    " :colorscheme jellybeans
     " :colorscheme sjl
-    :colorscheme grb256
+    " :colorscheme grb256
     " :colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
@@ -517,7 +521,7 @@ function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
     if pumvisible()
         " keyword completion - invokes a 1
-        if (b:complType==1)
+        if (b:complType==1) || !exists(b:complType)
             return "\<C-P>"
         else
             " else just crawl normally
@@ -532,21 +536,29 @@ function! MyTabComplete()
 
     " locate the start of the word
     let line = getline('.')
-    let col = col('.')
-    let current = col - 1
+    let column = col('.')
+
+    let current = column - 2  " fange beim zeichen eins links vom aktuellem an
+
+    echom 'aktuelles zeichen links vom cursor: '. line[current]
 
     while current > 0 && line[current] =~ '\S'
         let current -= 1
     endwhile
-    "return substr
+
+    echom 'column des beginn des aktuellen wortes: '.current
+    echom 'aktuelle column(bis zu column): ' . column
 
     " debugging...
-    "echom 'Indexes: '.current.':'.col
-    let substr = substitute(line[(current-1):(col-2)], '^\s*', '', '')
+    "echom 'Indexes: '.current.':'.column
+    let substr = substitute(line[(current):(column-2)], '^\s*', '', '')
+    " let substr = substitute(line[(current-1):(column-2)], '^\s*', '', '')
+
+    echom 'substring: ' . substr
     " echom 'Substring before the cursor: '.string(substr)
 
     " echom 'current: '.current.', '.'line: '.string(line[: current - 1])
-    if col == 1 || substr =~ '^\s*$'
+    if column == 1 || substr =~ '^\s*$'
         return "\<tab>"
     endif
 

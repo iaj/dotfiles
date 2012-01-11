@@ -46,6 +46,15 @@ XPT description hint=\\begin{description}...\\end{description}
 XPT i hint=\\item
 \item `cursor^
 
+XPT fig hint=\\begin{figure}...\\end{figure}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=.8\hsize]{`filename^}
+    \end{center}
+    \caption{\label{`mark^}%
+    `caption^}
+\end{figure}
+
 XPT main
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -62,9 +71,9 @@ XPT dinb hint=letter
 \usepackage{ngerman}
 \signature{Jörg Schmalfuß}
 \address{Jörg Schmalfuß\\ 
-         Grafenstraße 33\\
-         64283 Darmstadt}
-\backaddress{J.Schmalfuß, Grafenstr. 33, 64283 Darmstadt}
+         Alt-Höchst 2\\
+         65929 Frankfurt}
+\backaddress{J.Schmalfuß, Alt-Höchst 2, 65929 Frankfurt}
 
 \begin{document}
 

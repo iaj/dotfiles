@@ -1,57 +1,32 @@
 XPTemplate priority=personal
 XPTinclude
     \ _common/personal
+    \ _common/common
 
-XPT tt wrap=text hint=\\texttt{...}
-\texttt{`text^}`cursor^
+XPT sq hint=squat-te
+`date()^
+squats			(`sqset1^)	(`sqset2?^)	(`sqset3?^)
+bench presses		(`bpset1^)	(`bpset2?^)	(`bpset3?^)
+barbell rows		(`rwset1^)	(`rwset2?^)	(`rwset3?^)
+comments		(`comment?^)
+..XPT
 
-XPT ss hint=\\subsection{...}
-\subsection{`^}`cursor^
+XPT dl hint=deadlift-te
+`date()^
+deadlifts		(`dlset1^)	(`dlset2?^)	(`dlset3?^)
+chinups			(`cuset1^)	(`cuset2?^)	(`cuset3?^)
+militaries		(`mpset1^)	(`mpset2?^)	(`mpset3?^)
+comments		(`comment?^)
+..XPT
 
-XPT sss hint=\\subsubsection{...}
-\subsubsection{`^}`cursor^
+XPT if hint=another\ fasted\ session
+<intermittent fasted on `date() for `time^ hours.>
+..XPT
 
-XPT s hint=\\section{...}
-\section{`^}`cursor^
+XPT w hint=weight\ loggage
+<weight on `date(): `weight^ kilogram>
+..XPT
 
-XPT code hint=\\begin{lstlisting}...\\end{lstlisting}
-\begin{lstlisting}
-`cursor^
-\end{lstlisting}
-
-XPT fn hint=\\footnote{...}
-\footnote{`^}`cursor^
-
-XPT e wrap=text hint=\\emph
-\emph{`text^}`cursor^
-
-XPT b wrap=text hint=\\emph
-\textbf{`text^}`cursor^
-
-XPT enumerate hint=\\begin{enumerate}...\\end{enumerate}
-\begin{enumerate}
-\item `cursor^
-\end{enumerate}
-
-XPT itemize hint=\\begin{itemize}...\\end{itemize}
-\begin{itemize}
-\item `cursor^
-\end{itemize}
-
-XPT description hint=\\begin{description}...\\end{description}
-\begin{description}
-\item [`description^] `cursor^
-\end{description}
-
-XPT i hint=\\item
-\item `cursor^
-
-XPT main
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{graphicx}
-\usepackage[ngerman]{babel}
-`cursor^
+XPT i hint=insert\ an\ image
+`date()^ pics/`filename^
+..XPT

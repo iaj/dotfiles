@@ -904,7 +904,7 @@ if autoloadable compinit; then
         arr=( '' 88 2 64 32 54 55 7 8 22 23 )
         zstyle ':completion:*:processes' list-colors "=(#b) #[^ ]#${(l:9*9:: #([^ ]#):)}*${(j:=38;5;:)arr}"
     }
-    
+
     # Show a warning when no completions were found
     zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
 
@@ -985,5 +985,8 @@ SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]
 autoload -Uz attach_to_running_screen
 attach_to_running_screen
 
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
+
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
+
