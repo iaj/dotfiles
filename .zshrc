@@ -204,12 +204,10 @@ autoloadable() { ( unfunction $1 ; autoload -U +X $1 ) &>/dev/null }
 cdf() { cd *$1*/ } # stolen from @topfunky
 
 # Access often used paths quickly
-if [ -d $HOME/dev/qs ]; then
-    qs=~/dev/qs/Quicksilver/Quicksilver; : ~qs
-fi
-if [ -d $HOME/hg/dactyl ]; then
-    dactyl=~/hg/dactyl; : ~dactyl
-fi
+if [ -d $HOME/dev/qs ]; then qs=~/dev/qs/Quicksilver/Quicksilver; : ~qs ; fi
+if [ -d $HOME/hg/dactyl ]; then dactyl=~/hg/dactyl; : ~dactyl ; fi
+if [ -d $HOME/Library/Application\ Support ]; then asu=$HOME/Library/Application\ Support; : ~asu ; fi
+
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
 fi
@@ -496,30 +494,30 @@ zle -N getlastpath
 
 #bindkey -M viins "^R\*" yank-pb
 # returns the current finder position
-bindkey -M viins '^K' finder_position
-bindkey -M viins '^A' beginning-of-line
-bindkey -M viins '^E' end-of-line
+bindkey -M viins '^K'   finder_position
+bindkey -M viins '^A'   beginning-of-line
+bindkey -M viins '^E'   end-of-line
 bindkey -M viins "^[^M" self-insert-unmeta
-bindkey -M viins "^[x" execute-named-cmd
-bindkey -M viins "^O" accept-line-and-down-history
-bindkey -M viins "^[u" undo
-#bindkey -M viins "^[h" run-help
-bindkey -M vicmd 'yy' yank-pb
-bindkey "\e[1~"   beginning-of-line              # Another Home
-bindkey "\e[4~"   end-of-line                    # Another End
-bindkey "\e[3~"   delete-char                    # Another Delete
-bindkey "\e[1;5A" up-line-or-search              # Ctrl - Up in xterm
-bindkey "\e[1;5B" down-line-or-search            # Ctrl - Down in xterm
-bindkey "\e[1;5C" forward-word                   # Ctrl - Righ~/bin/ba
-bindkey "\e[1;5D" backward-word                  # Ctrl - Left in xterm
-bindkey "\eOa"    up-line-or-search              # Another ctrl-up
-bindkey "\eOb"    down-line-or-search            # Another ctrl-down
-bindkey "\eOc"    forward-word                   # Another possible ctrl-right
-bindkey "\eOd"    backward-word                  # Another possible ctrl-left
-bindkey "\e[Z"    reverse-menu-complete          # S-Tab menu completes backward
-bindkey " "       magic-space                    # Space expands history subst's
-bindkey "^@"      _history-complete-older        # C-Space to complete from hist
-bindkey "^]."     insert-last-word
+bindkey -M viins "^[x"  execute-named-cmd
+bindkey -M viins "^O"   accept-line-and-down-history
+bindkey -M viins "^[u"  undo
+#bindkey -M viins   "^[h" run-help
+bindkey -M vicmd        'yy' yank-pb
+bindkey "\e[1~"         beginning-of-line              # Another Home
+bindkey "\e[4~"         end-of-line                    # Another End
+bindkey "\e[3~"         delete-char                    # Another Delete
+bindkey "\e[1;5A"       up-line-or-search              # Ctrl - Up in xterm
+bindkey "\e[1;5B"       down-line-or-search            # Ctrl - Down in xterm
+bindkey "\e[1;5C"       forward-word                   # Ctrl - Righ~/bin/ba
+bindkey "\e[1;5D"       backward-word                  # Ctrl - Left in xterm
+bindkey "\eOa"          up-line-or-search              # Another ctrl-up
+bindkey "\eOb"          down-line-or-search            # Another ctrl-down
+bindkey "\eOc"          forward-word                   # Another possible ctrl-right
+bindkey "\eOd"          backward-word                  # Another possible ctrl-left
+bindkey "\e[Z"          reverse-menu-complete          # S-Tab menu completes backward
+bindkey "   "           magic-space                    # Space expands history subst's
+bindkey "^@"            _history-complete-older        # C-Space to complete from hist
+bindkey "^]."           insert-last-word
 
 # TODO: check this one out...
 bindkey "^],"     copy-earlier-word
@@ -989,4 +987,3 @@ attach_to_running_screen
 
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
-

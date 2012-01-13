@@ -1,4 +1,4 @@
-" Custom Java settings
+" Java-related plugin settings
 "function! Num2S(num, len)
     "let filler = "                                                            "
     "let text = '' . a:num
@@ -29,44 +29,84 @@ function! MyFoldText()
     return line . '…' . repeat(" ",fillcharcount) . foldedlinecount . '…' . ' '
 endfunction
 set foldtext=MyFoldText()
+" Enable java function folding with \f
+nnoremap \fo VaBzf
 
-" java-related plugin settings
-" support for java omnicomplete using javacomplete plugin
-" setlocal omnifunc=javacomplete#Complete
-
-" quick compile/run functions
-nmap <buffer> <F3> :call CompileJava()<CR>
-
+" Quick compile/run functions
 function! CompileJava()
     write
     setlocal makeprg=javac\ -cp\ \"%:p:h\"\ %\ $*
     make
 endfunction
-
-nmap <buffer> <F4> :call RunClass()<CR>
-
+nmap <buffer> <F3> :call CompileJava()<CR>
 function! RunClass()
     if !exists("b:class")
         let b:class = expand("%:t:r")
     endif
     execute '!java -cp "%:p:h" ' . b:class
 endfunction
-" compiler javac
-" setlocal aw
-" map <F2> :make %<CR>
-" map <F3> :!java %:r<CR>
-
-" exec vl#lib#vimscript#dontloadtwice#DontLoadTwice('b:ftpjava')
-" function! InsertMainClass()
-"   exe "put='public class ".expand('%:t:r')."{'"
-"   put='public static void Main(String args()){'
-"   put='}'
-"   put='}'
-"   normal gg=G2jo
-" endfunction
+nmap <buffer> <F4> :call RunClass()<CR>
+function! InsertMainClass()
+    exe "put='public class ".expand('%:t:r')."{'"
+    put='public static void Main(String args()){'
+    put='}'
+    put='}'
+    normal gg=G2jo
+endfunction
+command InsertMain call InsertMainClass()<CR>
 
 " command! -buffer SetJavaCompiler call Exec('setlocal aw','setlocal makeprg=javac','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')
 " command! -buffer SetJikesCompiler call Exec('setlocal aw','setlocal makeprg=jikes','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')
-" "command :InsertMC call InsertMainClass()<CR>
-" map \mc :call InsertMainClass()<CR>
 " command! SetEFMToJAva :set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,\%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#<CR>
+
+function! MyControlSpace()
+    " setzen des b:complType damit man einsehen kann, ob keyword oder
+    " omnicompl
+    let b:complType=0
+    " TODO: abfrage ob java oder andere rat files <C-X><C-O>
+    " if (&filetype == 'java')
+    return "\<C-X>\<C-U>"
+    " else
+        " return "\<C-X>\<C-O>"
+    " endif
+endfunction
+
+if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
+"
+" Try to use eclim's <C-]> instead of the tags-buitlin one - will I regret
+noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
+set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
+noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
+inoremap <C-Space> <C-X><C-U>
+inoremap <C-@> <C-X><C-U>
+"autocmd BufWinEnter *.java silent loadview
+"autocmd BufWinLeave *.java mkview
+" Eclim Settings
+
+" _i imports whatever is needed for current line
+nnoremap <silent> _i :JavaImport<cr>
+" ,d opens javadoc for statement in browser
+nnoremap <silent> _jd :JavaDocSearch -x declarations<cr>
+" ,<enter> searches context for statement
+nnoremap <silent> <Leader><cr> :JavaSearchContext<cr>
+" ,jv validates current java file
+nnoremap <silent> _jv :Validate<cr>
+" ,jc shows corrections for the current line of java
+nnoremap <silent> _jc :JavaCorrect<cr>
+nnoremap <silent> _jm :JavaImportMissing<CR>
+" ,i imports whatever is needed for current line
+nnoremap <silent> <LocalLeader>i :JavaImport<cr>
+" ,d opens javadoc for statement in browser
+nnoremap <silent> <F3> :JavaDocSearch -x declarations<cr>
+" map <C-[> :JavaSearchContext<CR>
+" noremap \pl :ProjectList<CR>
+" noremap \pc :ProjectClose
+" noremap \po :ProjectOpen
+" map <C-\> :e<CR>:exec("tag ".expand("<cword>"))<CR>
+" set tags=./tags;$HOME
+" for current word search for eclim
+" nmap <f9> :exec 'vimgrep /\<'.expand(’<cword>’).'\>/g **/*.xml **/*.java'<CR>
+" for vimgrep next and previous result
+" Bracket completion
+inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
+command! JGS JavaGetSet | normal gg=G

@@ -32,7 +32,7 @@ fun SetupVAM()
     if !isdirectory(addons_base)
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
-    call vam#ActivateAddons(['vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    call vam#ActivateAddons(['ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
 endf
 call SetupVAM()
 
@@ -43,12 +43,15 @@ let mapleader = ","
 let maplocalleader = "\\"
 set antialias
 set guifont=Monaco:h12.00
-"set guifont=Inconsolata-g:h14
+" set guifont=Menlo\ Regular\ for\ Powerline:h12
+" set guifont=Inconsolata-g:h14
+" set guifont=Mensch\ for\ Powerline:h12
 set title
 set isfname-=\=
 "set macmeta
 "set iskeyword+=äöüÄÖÜ
-"
+set ls=2
+
 set switchbuf=useopen
 " set numberwidth=5
 
@@ -76,7 +79,7 @@ if has('syntax')
 endif
 
 """ Sourcing ~/.vimrc and own scripts
-source $HOME/.vim/personal/scripts/remappings
+" source $HOME/.vim/personal/scripts/remappings
 source $HOME/.vim/personal/scripts/mappings
 source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
@@ -145,7 +148,6 @@ set formatoptions=q             " Format text with gq, but don't format as I typ
 set formatoptions+=n            " gq recognizes numbered lists, and will try to
 set formatoptions+=r            " break before, not after, a 1 letter word
 set formatoptions+=1            " break before, not after, a 1 letter word
-"sjl: set formatoptions=qrn1
 
 " Display
 if (v:version == 703) 
@@ -263,7 +265,7 @@ let g:EclimJavaSearchMapping = 1
 " Disable HTML & PHP validation
 let g:EclimHtmlValidate = 0
 let g:EclimPhpValidate = 0
-let g:EclimJavaCompleteTmpFile = 1
+
 " ,i imports whatever is needed for current line
 " nnoremap <silent> <LocalLeader>i :JavaImport<cr>
 " ,d opens javadoc for statement in browser
@@ -275,7 +277,6 @@ let g:EclimJavaCompleteTmpFile = 1
 " ,jc shows corrections for the current line of java
 " nnoremap <silent> <LocalLeader>jc :JavaCorrect<cr>
 " Disable Eclim's taglisttoo because I use the regular taglist plugin
-
 
 """" gundo - Graphical UNDO - pretty awesome imo
 let g:gundo_width = 60
@@ -336,7 +337,7 @@ let g:fuf_mrufile_maxItem = 300
 
 """" ctrlp settings
 let g:ctrlp_working_path_mode = 2
-let g:ctrlp_mruf_max = 1000
+let g:ctrlp_mruf_max = 2000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
 let g:ctrlp_prompt_mappings = {
@@ -345,6 +346,9 @@ let g:ctrlp_prompt_mappings = {
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG'
 let g:tex_flavour = "latex"
+
+"""" powerline
+let g:Powerline_symbols = 'fancy'
 
 """ Dimensions for MacVim + Colorscheme
 if has('gui_running')
@@ -363,12 +367,14 @@ if has('gui_running')
     :let g:zenburn_high_Contrast = 1 " darker colors
     :set background=dark
     " set background=light
-    colorscheme solarized
+    " :colorscheme solarized
     " :hi Normal guib=#252626
-    " :colorscheme molokai_jay
+    " :colorscheme vitamins
+    :colorscheme mj
     " :colorscheme jellybeans
     " :colorscheme sjl
-    " :colorscheme grb256
+    " :colorscheme grb3
+    " :colorscheme mustang
     " :colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
@@ -379,15 +385,14 @@ if has('gui_running')
 else
     set background=dark
     :colorscheme solarized
+    " :colorscheme molokai_jay
     " :colorscheme ir_black
     " :colorscheme molokai_kien
     " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
 endif
-
 """ Statusline
-set ls=2
-if has('statusline') && has('gui_running')
-    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=='grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight' || g:colors_name == 'tir_black'
+if has('statusline') && has('gui_running') && ('g:Powerline_loaded==0')
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=~'grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight' || g:colors_name == 'tir_black' || g:colors_name == 'jellybeans'
                 \|| g:colors_name=='grb256'
         let fg_bg = 2
     else
@@ -461,7 +466,7 @@ if has('statusline') && has('gui_running')
             set statusline+=%=                                                  " Left-right alignment.
 
             " syntastic error in statusline
-            " set statusline+=%#warningmsg#
+        " set statusline+=%#warningmsg#
             " set statusline+=%{SyntasticStatuslineFlag()}
             " set statusline+=%*
 
@@ -600,3 +605,4 @@ inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
 
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='
+

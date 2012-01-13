@@ -1,7 +1,7 @@
 " Based on
 runtime colors/ir_black.vim
 
-let g:colors_name = "grb"
+let g:colors_name = "grb3"
 
 hi pythonSpaceError ctermbg=red guibg=red
 
