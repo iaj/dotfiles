@@ -4,9 +4,6 @@
 " If you're editing this in Vim and don't know how folding works, type zR to
 " unfold everything.  And then read ":help folding".
 
-" Skip this file unless we have +eval and Vim 7.0 or greater.  With an older
-" Vim, I'd rather just plain ol' vi emulation reminding me to upgrade.
-
 """ Settings
 " Don't load csapprox if no gui support - silences an annoying warning
 set t_Co=256
@@ -34,7 +31,7 @@ fun SetupVAM()
     if has('gui_running')
         call vam#ActivateAddons(['powerline', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
     else
-        call vam#ActivateAddons(['ack', 'repeat', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -322,7 +319,7 @@ let g:CommandTScanDotDirectories=1
 "let g:CommandTAlwaysShowDotFiles=1
 "let g:CommandTMatchWindowAtTop=1
 
-"""" netrw Settings
+"""" NetRW Settings
 let g:netrw_altv          = 1
 let g:netrw_fastbrowse    = 2
 let g:netrw_keepdir       = 0
@@ -705,10 +702,10 @@ cnoremap <ESC><C-H> <C-W>
 " Next      |     M-j               M-Down     |
 " Previous  |     M-k                M-Up      |
 "            ----------------------------------
-nnoremap ∆ :lnext<cr>zvzz
-nnoremap ˚ :lprevious<cr>zvzz
-inoremap ∆ <esc>:lnext<cr>zvzz
-inoremap ˚ <esc>:lprevious<cr>zvzz
+nnoremap <M-j> :lnext<cr>zvzz
+nnoremap <M-k> :lprevious<cr>zvzz
+inoremap <M-j> <esc>:lnext<cr>zvzz
+inoremap <M-k> <esc>:lprevious<cr>zvzz
 nnoremap <m-Down> :cnext<cr>zvzz
 nnoremap <m-Up> :cprevious<cr>zvzz
 """" Split line (sister to [J]oin lines)

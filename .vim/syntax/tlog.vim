@@ -1,5 +1,5 @@
 " Vim syntax file
-" Language:     trainignslog
+" Language:     trainingslog
 " Maintainer:   iaj (tyberion@googlemail.com)
 " Last Change:  2011 Dec 21
 

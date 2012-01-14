@@ -1,12 +1,4 @@
-# Author:  iaj (tyberion@gmail.com)
-#
-# Feel free to do whatever you would like with this file as long as you give
-# credit where credit is due.
-#
-# If nothing else, you should at least look at the Behavior Overrides section
-# to see if there's anything that you want to disable.  (Most people probably
-# won't like that it changes their terminals' colors, but, who cares, I like
-# it, and they can disable it. :-D )
+# Author:  iaj (tyberion@googlemail.com)
 #
 # NOTE:
 # This .zshrc does define LANG and LC_CTYPE.  If you don't want en_US.UTF-8 and
