@@ -57,17 +57,6 @@ augroup END
 
 autocmd BufRead *.log if expand('%:p') =~ expand('~/Dropbox/training/')|set filetype=tlog
 
-" Toggle Statuslines (Active/Inactive) when working in Splitwindows
-"au WinEnter * echo "entering window".winnr()
-"au BufWinEnter * echo "entering window".winnr()
-"au BufReadPre * echo "entering window".winnr()
-
-if has('statusline') && has('gui_running') && (g:Powerline_loaded != 1)
-    au WinEnter * call UpStatusLineAndSwitchToCorrectWindow()
-    "au WinEnter * let &l:statusline = g:c_statusline
-    au WinLeave * let &l:statusline = g:nc_statusline
-endif
-
 fun! UpStatusLineAndSwitchToCorrectWindow() "{{{
     if (g:returning_from_fuzzy==1)
         wincmd p
@@ -82,7 +71,7 @@ endfunction "}}}
 
 "autocmd BufWinEnter .vimrc silent loadview
 "autocmd BufWinLeave .vimrc mkview
-
+"
 " Switch the CWD to the current buffer.
 "autocmd BufEnter * lcd %:p:h
 
@@ -90,8 +79,9 @@ endfunction "}}}
 " Note: The | character is used in Vim as a command separator (like ; in C)
 autocmd BufWinEnter *
             \ if line("'\"") > 0 && line("'\"") <= line("$") |
-            \   exe "normal g`\"" |
+            \ execute 'normal! g`"zvzz' |
             \ endif
+            " \   exe "normal g`\"" |
 
 "au BufRead *.js set makeprg=jslint\ %
 " Google's JSLint
@@ -135,6 +125,7 @@ augroup nv
 augroup end
 
 "TODO fix this babey
+" just for testing purposes
 augroup xpt
     autocmd FileType tex if expand('%:p') =~ expand('/rechnungen/')|normal ggihithare!<ESC>|endif
 augroup end
@@ -189,19 +180,13 @@ augroup END
 "     autocmd FileType tex map <buffer> <leader>t :!pdflatex % expand('%:p')
 " augroup END
 
-"autocmd Filetype java set foldmethod=manual
-"au! Syntax java source ~/.vim/syntax/python.vim
-" pentadactyl stuff
-"autocmd BufDelete *pentadactyl* silent :!echo 'tell application "Firefox" to activate' | osascript
-"au! BufRead pentadactyl-* nnoremap <buffer> ,d :silent write \| :bd<CR>
-
 " QuickCursor using /var/folders/.../ for its files - so we
 " au! BufRead /var/folders/*/*,pentadactyl-* nnoremap <buffer> ,d :silent write \| :bd<CR>
 " Specific for Mail.app called ones...
 au! BufRead /var/folders/*/Mail* set ft=mail
+
 " Force activation of Firefox after we edited a *pentadactyl file
 "10:55:30   Axioplase_: iaj: hum. :exe ":autocmd BufDelete foo bar" . g:firefox . "to activate qux lol kthxbye"
-
 autocmd FileType pentadactyl setlocal commentstring=\"%s
 autocmd FileType vimperator setlocal commentstring=\"%s
 autocmd BufDelete *pentadactyl* silent :!echo 'tell application "Firefox" to activate' | osascript
@@ -209,7 +194,7 @@ autocmd BufDelete *vimperator-* silent :!echo 'tell application "Firefox" to act
 
 "Surround options for mailingwork stuff
 "Surround word by TRACKING STUFF with '-'
-autocmd FileType mw let b:surround_45 = "[URL-TRACKING \"\r\"] [/URL-TRACKING]"
+autocmd FileType mw let b:surround_45 = "[LINK \'\r\'] [/LINK]"
 "Surround word by LIS with 'L'
 autocmd FileType mw let b:surround_76 = "[LI][B]\r[/B][/LI]"
 
@@ -228,6 +213,11 @@ endfunction "}}}
 "     autocmd BufRead,BufNewFile *.sql,*.php call vim_addon_sql#UI()
 " augroup end
 
+" TODO - fix when theres time
+" Statusline stuff if not using Powerline
+" au VimEnter * call UpdateStatuslineColorCodes()
+" au VimEnter * source $HOME/.vim/personal/scripts/statusline
+
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE
-  autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
+    autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
 augroup end

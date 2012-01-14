@@ -1,0 +1,138 @@
+"" vim: set filetype=vim : ""
+" Toggle Statuslines (Active/Inactive) when working in Splitwindows
+"au WinEnter * echo "entering window".winnr()
+"au BufWinEnter * echo "entering window".winnr()
+"au BufReadPre * echo "entering window".winnr()
+
+if has('statusline') && has('gui_running')
+    au WinEnter * call UpStatusLineAndSwitchToCorrectWindow()
+    "au WinEnter * let &l:statusline = g:c_statusline
+    au WinLeave * let &l:statusline = g:nc_statusline
+endif
+
+if has('statusline') && has('gui_running')
+    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=~'grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight' || g:colors_name == 'tir_black' || g:colors_name == 'jellybeans'
+                \|| g:colors_name=='grb256'
+        let fg_bg = 2
+    else
+        let fg_bg = 1
+    endif
+    " Function used to display syntax group.
+    function! SyntaxItem()
+        return synIDattr(synID(line("."),col("."),1),"name")
+    endfunction 
+    " function! BA_StatusLine()
+    "     if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')
+    "         return "[AnimalScript2] "
+    "     elseif expand('%:p') =~ expand('~/Documents/workspace/Animal/')
+    "         return "[Animal] "
+    "     else
+    "         return ""
+    "     endif
+    " endfunction
+
+    "on some colorschemes (kw: reversing) its necessary to s/fg/bg
+    fun! UpdateStatuslineColorCodes() "{{{
+        " themes differ here - replace bg with fg or the other way around ;)
+        if (g:fg_bg == 1)
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
+        else
+            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
+            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
+        endif
+    endfunction "}}}
+    function! SetMyStatusLine()
+        " TODO fix that stuff
+        if (!has('gui_running'))
+            return
+        endif
+        call UpdateStatuslineColorCodes()
+        " First of all, my USER defined Colors
+        "buffnum
+        exec 'hi User1 guifg=#A6E22E guibg=' . g:status_active_bg
+        "filetype      (currently magenta - too bright = not used)
+        exec 'hi User2 guifg=#66D9EF guibg=' . g:status_active_bg
+        "highlighting group
+        exec 'hi User3 guifg=orange guibg=' . g:status_active_bg
+        "git
+        exec 'hi User4 guifg=green guibg=' . g:status_active_bg
+        "magenta
+        exec 'hi User9 guifg=#F92672 guibg=' . g:status_active_bg
+        "exec 'hi User4 guifg=#F92672 guibg=' . g:status_active_bg
+        "hi link User5 StatusLineNC
+        " INAKTIVE STATUSBARSETTING
+        exec 'hi User5 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User6 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User7 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User8 guifg=#111111 guibg=' . g:status_inactive_bg
+        exec 'hi User10 guifg=#111111 guibg=' . g:status_inactive_bg
+
+        "if (&stl =~ 'SyntaxItem')
+        " only if Powerline ain't running
+        if (g:Powerline_loaded == 0)
+            " Here comes the status line
+            set laststatus=2                                                    " Always show status.
+            "sjl set statusline=%F%m%r%h%w%=(%{&ff}/%Y)\ (line\ %l\/%L,\ col\ %c)
+            set statusline=%1*%-2.2n%*                                          " Buffer number.
+            set statusline+=\ %f                                                " Filename.%F  orig:%t
+            set statusline+=\ (%9*%{strlen(&ft)?&ft:'none'}%*::
+            "set statusline+=\ (%9*%{(&ft==\"\"?&"":&ft)}%*)                    " Encoding.
+            set statusline+=\%2*%{(&fenc==\"\"?&enc:&fenc)}%*)                  " Encoding.
+            set statusline+=%(\ [%4*%H%R%M%*]%)                                 " Flags.
+
+            "set statusline+=\ %{exists('actual_curbuf')&&bufnr('%%')==actual_curbuf?CountMatches(1):''}
+            set statusline+=%=                                                  " Left-right alignment.
+
+            " syntastic error in statusline
+        " set statusline+=%#warningmsg#
+            " set statusline+=%{SyntasticStatuslineFlag()}
+            " set statusline+=%*
+
+            set statusline+=\ %(%3*%{SyntaxItem()}%*%)                          " Highlighting group.
+            set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
+            set statusline+=\ %P                                                " % through file.
+            set statusline+=\ %4*%{fugitive#statusline()}%*
+
+            "" This trick is so I can better control the colors of the non-current
+            "" statusline. By default it flips the bold attribute flag in all cases,
+            "" which I don't like. See the %* field in :help 'statusline'
+            "%5*%-2.2n%* %t (%10*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%=%(%7*%{SyntaxItem()}%*%) %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*
+            let g:c_statusline = &g:statusline
+            " Quadro Substitution in a strange manner
+            let g:nc_statusline =
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(
+                        \ substitute(g:c_statusline, '%1', '%5', 'g'),
+                        \ '%2', '%6', 'g'),
+                        \ '%3', '%7', 'g'),
+                        \ '%4', '%8', 'g'),
+                        \ '%9', '%8', 'g')
+        else
+            let g:c_statusline="%1*%-2.2n%* %t (%9*%{strlen(&ft)?&ft:'none'}%*::%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %4*%{fugitive#statusline()}%*"
+            let g:nc_statusline="%5*%-2.2n%* %t (%8*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*"
+            "set statusline="%1*%-2.2n%* %t (%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%=%(%3*%{SyntaxItem()}%*%) %-14.(/,%v%) %4*%{fugitive#statusline()}%*%{XPMautoUpdate("statusline")}"
+        endif
+    endfunction
+    nmap <silent> \ds :call SetMyStatusLine()<CR>
+    UpdateStatuslineColorCodes()
+    SetMyStatusLine()
+    " Window title
+    if has('title')
+        "set titlestring=%f%(\ [%R%M]%)
+        let &titlestring=expand("%:p:h")
+        let &titlestring=$PWD
+    endif
+else
+    " GRB: Put useful info in status line
+    " green
+    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
+    " magenta
+    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
+    " cyan
+    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
+    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
+    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
+endif

@@ -32,11 +32,15 @@ fun SetupVAM()
     if !isdirectory(addons_base)
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
-    call vam#ActivateAddons(['ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    if has('gui_running')
+        call vam#ActivateAddons(['powerline', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    else
+        call vam#ActivateAddons(['ack', 'repeat', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    endif
 endf
 call SetupVAM()
 
-" set lazyredraw                         " Avoid redrawing the screen mid-command.
+set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
 set encoding=utf-8
 let mapleader = ","
@@ -85,9 +89,11 @@ source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
 source $HOME/.vim/personal/scripts/galal
 source $HOME/.vim/personal/scripts/objctagjump
+" au VimEnter * source $HOME/.vim/personal/scripts/statusline
+"TODO fix those bars and have them run in your develop-environment
 "source $HOME/.vim/personal/scripts/error_handling
 
-" Add xptemplate global personal directory value
+" Add XPtemplate global personal directory value
 if has("unix")
     set runtimepath+=~/.vim/xpt-personal
 endif
@@ -176,6 +182,8 @@ if &enc =~ '^u\(tf\|cs\)' " When running in a Unicode environment,
     let &sbr=nr2char(8618).' '
     " set listchars+=eol:¬
 endif
+set listchars+=extends:❯,precedes:❮
+set fillchars=diff:⣿
 
 set confirm                     " Y-N-C prompt if closing with unsaved changes.
 set cmdheight=2                 " Prevent "Press Enter" message after most commands
@@ -297,12 +305,12 @@ let Tlist_Use_Right_Window = 1
 """" XPTemplate Settings
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
-"let g:xptemplate_key = '<Tab>'
-let g:xptemplate_nav_next = '<C-n>'
-let g:xptemplate_nav_prev = '<C-p>'
+" let g:xptemplate_key = '<Tab>'
+let g:xptemplate_nav_next = '<C-j>'
+let g:xptemplate_nav_prev = '<C-k>'
 
 """" Sparkup Settings
-let g:sparkupExecuteMapping = '<D-e>'
+" let g:sparkupExecuteMapping = '<D-e>'
 
 """" Command-T Settings
 let g:CommandTMaxHeight = 20
@@ -335,19 +343,32 @@ let g:fuf_mrufile_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mn
 let g:fuf_mrufile_maxItem = 300
 "let g:fuf_mrucmd_maxItem = 400
 
-"""" ctrlp settings
+"""" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 2
 let g:ctrlp_mruf_max = 2000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
 let g:ctrlp_prompt_mappings = {
-            \ 'PrtDelete()':          ['<c-h>']
+            \ 'PrtSelectMove("j")':   ['<c-j>', '<down>', '<s-tab>'],
+            \ 'PrtSelectMove("k")':   ['<c-k>', '<up>', '<tab>'],
+            \ 'PrtDelete()':          ['<c-h>'],
+            \ 'PrtHistory(-1)':       ['<c-n>'],
+            \ 'PrtHistory(1)':        ['<c-p>'],
+            \ 'ToggleFocus()':        ['<c-tab>'],
             \ }
+let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG'
-let g:tex_flavour = "latex"
+nnoremap <leader>. :CtrlPTag<cr>
+map <silent> <leader>b :CtrlPBuffer<CR>
+map <silent> <leader>r :CtrlPMRUFiles<CR>
+map <silent> <leader>f :CtrlP<CR>
+map <silent> <leader>gf :CtrlPCurFile<CR>
+map <silent> <leader>F :ClearCtrlPCache<CR>
+map <silent> <leader>gd :CtrlPCurWD<CR>
+map <silent> \a :CtrlP 
 
-"""" powerline
+"""" Powerline
 let g:Powerline_symbols = 'fancy'
 
 """ Dimensions for MacVim + Colorscheme
@@ -390,134 +411,8 @@ else
     " :colorscheme molokai_kien
     " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
 endif
-""" Statusline
-if has('statusline') && has('gui_running') && ('g:Powerline_loaded==0')
-    if g:colors_name=='lucius' || g:colors_name=='vitamins' || g:colors_name=='ir_black' || g:colors_name=~'grb' || g:colors_name=='vincent' || g:colors_name=='mustang' || g:colors_name=='herald' || g:colors_name=='CloudsMidnight' || g:colors_name == 'tir_black' || g:colors_name == 'jellybeans'
-                \|| g:colors_name=='grb256'
-        let fg_bg = 2
-    else
-        let fg_bg = 1
-    endif
-    " Function used to display syntax group.
-    function! SyntaxItem()
-        return synIDattr(synID(line("."),col("."),1),"name")
-    endfunction 
-    "set statusline=......%{FileSize()}.....
-    function! BA_StatusLine()
-        if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')
-            return "[AnimalScript2] "
-        elseif expand('%:p') =~ expand('~/Documents/workspace/Animal/')
-            return "[Animal] "
-        else
-            return ""
-        endif
-    endfunction
 
-    "on some colorschemes (kw: reversing) its necessary to s/fg/bg
-    fun! UpdateStatuslineColorCodes() "{{{
-        " themes differ here - replace bg with fg or the other way around ;)
-        if (g:fg_bg == 1)
-            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "fg")
-            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "fg") 
-        else
-            let g:status_active_bg=synIDattr(synIDtrans(hlID("StatusLine")), "bg")
-            let g:status_inactive_bg=synIDattr(synIDtrans(hlID("StatusLineNC")), "bg") 
-        endif
-    endfunction "}}}
-    function! SetMyStatusLine()
-        " TODO fix that stuff
-        if (!has('gui_running'))
-            return
-        endif
-        call UpdateStatuslineColorCodes()
-        " First of all, my USER defined Colors
-        "buffnum
-        exec 'hi User1 guifg=#A6E22E guibg=' . g:status_active_bg
-        "filetype      (currently magenta - too bright = not used)
-        exec 'hi User2 guifg=#66D9EF guibg=' . g:status_active_bg
-        "highlighting group
-        exec 'hi User3 guifg=orange guibg=' . g:status_active_bg
-        "git
-        exec 'hi User4 guifg=green guibg=' . g:status_active_bg
-        "magenta
-        exec 'hi User9 guifg=#F92672 guibg=' . g:status_active_bg
-        "exec 'hi User4 guifg=#F92672 guibg=' . g:status_active_bg
-        "hi link User5 StatusLineNC
-        " INAKTIVE STATUSBARSETTING
-        exec 'hi User5 guifg=#111111 guibg=' . g:status_inactive_bg
-        exec 'hi User6 guifg=#111111 guibg=' . g:status_inactive_bg
-        exec 'hi User7 guifg=#111111 guibg=' . g:status_inactive_bg
-        exec 'hi User8 guifg=#111111 guibg=' . g:status_inactive_bg
-        exec 'hi User10 guifg=#111111 guibg=' . g:status_inactive_bg
-
-        "if (&stl =~ 'SyntaxItem')
-        if (1 == 1) "crazed uh?
-            " Here comes the status line
-            set laststatus=2                                                    " Always show status.
-            "sjl set statusline=%F%m%r%h%w%=(%{&ff}/%Y)\ (line\ %l\/%L,\ col\ %c)
-            set statusline=%1*%-2.2n%*                                          " Buffer number.
-            set statusline+=\ %f                                                " Filename.%F  orig:%t
-            set statusline+=\ (%9*%{strlen(&ft)?&ft:'none'}%*::
-            "set statusline+=\ (%9*%{(&ft==\"\"?&"":&ft)}%*)                    " Encoding.
-            set statusline+=\%2*%{(&fenc==\"\"?&enc:&fenc)}%*)                  " Encoding.
-            set statusline+=%(\ [%4*%H%R%M%*]%)                                 " Flags.
-
-            "set statusline+=\ %{exists('actual_curbuf')&&bufnr('%%')==actual_curbuf?CountMatches(1):''}
-            set statusline+=%=                                                  " Left-right alignment.
-
-            " syntastic error in statusline
-        " set statusline+=%#warningmsg#
-            " set statusline+=%{SyntasticStatuslineFlag()}
-            " set statusline+=%*
-
-            set statusline+=\ %(%3*%{SyntaxItem()}%*%)                          " Highlighting group.
-            set statusline+=\ %-14.(%l/%L,%v%)                                  " Line/column number.
-            set statusline+=\ %P                                                " % through file.
-            set statusline+=\ %4*%{fugitive#statusline()}%*
-
-            "" This trick is so I can better control the colors of the non-current
-            "" statusline. By default it flips the bold attribute flag in all cases,
-            "" which I don't like. See the %* field in :help 'statusline'
-            "%5*%-2.2n%* %t (%10*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%=%(%7*%{SyntaxItem()}%*%) %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*
-            let g:c_statusline = &g:statusline
-            " Quadro Substitution in a strange manner
-            let g:nc_statusline =
-                        \ substitute(
-                        \ substitute(
-                        \ substitute(
-                        \ substitute(
-                        \ substitute(g:c_statusline, '%1', '%5', 'g'),
-                        \ '%2', '%6', 'g'),
-                        \ '%3', '%7', 'g'),
-                        \ '%4', '%8', 'g'),
-                        \ '%9', '%8', 'g')
-        else
-            let g:c_statusline="%1*%-2.2n%* %t (%9*%{strlen(&ft)?&ft:'none'}%*::%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %4*%{fugitive#statusline()}%*"
-            let g:nc_statusline="%5*%-2.2n%* %t (%8*%{strlen(&ft)?&ft:'none'}%*::%6*%{(&fenc==""?&enc:&fenc)}%*)%( [%8*%H%R%M%*]%)%= %-14.(%l/%L,%v%) %P %8*%{fugitive#statusline()}%*"
-            "set statusline="%1*%-2.2n%* %t (%2*%{(&fenc==""?&enc:&fenc)}%*)%( [%4*%H%R%M%*]%)%=%(%3*%{SyntaxItem()}%*%) %-14.(/,%v%) %4*%{fugitive#statusline()}%*%{XPMautoUpdate("statusline")}"
-        endif
-    endfunction
-    nmap <silent> \ds :call SetMyStatusLine()<CR>
-    au VimEnter * call UpdateStatuslineColorCodes()
-    au VimEnter * call SetMyStatusLine()
-    " Window title
-    if has('title')
-        "set titlestring=%f%(\ [%R%M]%)
-        let &titlestring=expand("%:p:h")
-        let &titlestring=$PWD
-    endif
-else
-    " GRB: Put useful info in status line
-    " green
-    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
-    " magenta
-    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
-    " cyan
-    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
-    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
-    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
-endif
-
+""" my own Supertab
 " Remap the tab key to do autocompletion or indentation depending on the
 " context (from http://www.vim.org/tips/tip.php?tip_id=102)
 function! MyTabComplete()
@@ -543,21 +438,21 @@ function! MyTabComplete()
 
     let current = column - 2  " fange beim zeichen eins links vom aktuellem an
 
-    echom 'aktuelles zeichen links vom cursor: '. line[current]
+    " echom 'aktuelles zeichen links vom cursor: '. line[current]
 
     while current > 0 && line[current] =~ '\S'
         let current -= 1
     endwhile
 
-    echom 'column des beginn des aktuellen wortes: '.current
-    echom 'aktuelle column(bis zu column): ' . column
+    " echom 'column des beginn des aktuellen wortes: '.current
+    " echom 'aktuelle column(bis zu column): ' . column
 
     " debugging...
     "echom 'Indexes: '.current.':'.column
     let substr = substitute(line[(current):(column-2)], '^\s*', '', '')
     " let substr = substitute(line[(current-1):(column-2)], '^\s*', '', '')
 
-    echom 'substring: ' . substr
+    " echom 'substring: ' . substr
     " echom 'Substring before the cursor: '.string(substr)
 
     " echom 'current: '.current.', '.'line: '.string(line[: current - 1])
@@ -603,6 +498,65 @@ endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
 
+""" Abbreviations
+function! EatChar(pat)
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
+endfunction
+
+function! MakeSpacelessIabbrev(from, to)
+    execute "iabbrev <silent> ".a:from." ".a:to."<C-R>=EatChar('\\s')<CR>"
+endfunction
+
+call MakeSpacelessIabbrev('gh/',  'http://github.com/')
+
+""" Statusline
+if !(has('gui_running'))
+    " GRB: Put useful info in status line
+    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
+    " magenta
+    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
+    " cyan
+    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
+    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
+    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
+endif
+""" Error navigation
+"
+"             Location List     QuickFix Window
+"            (e.g. Syntastic)     (e.g. Ack)
+"            ----------------------------------
+" Next      |     M-j               M-Down     |
+" Previous  |     M-k                M-Up      |
+"            ----------------------------------
+nnoremap ∆ :lnext<cr>zvzz
+nnoremap ˚ :lprevious<cr>zvzz
+inoremap ∆ <esc>:lnext<cr>zvzz
+inoremap ˚ <esc>:lprevious<cr>zvzz
+nnoremap <m-Down> :cnext<cr>zvzz
+nnoremap <m-Up> :cprevious<cr>zvzz
+""" Mappings
+"""" Split line (sister to [J]oin lines)
+" The normal use of S is covered by cc, so don't worry about shadowing it.
+nnoremap S i<cr><esc><right>
+"""" Split/Join
+"
+" Basically this splits the current line into two new ones at the cursor position,
+" then joins the second one with whatever comes next.
+"
+" Example:                      Cursor Here
+"                                    |
+"                                    V
+" foo = ('hello', 'world', 'a', 'b', 'c',
+"        'd', 'e')
+"
+"            becomes
+"
+" foo = ('hello', 'world', 'a', 'b',
+"        'c', 'd', 'e')
+"
+" Especially useful for adding items in the middle of long lists/tuples in Python
+" while maintaining a sane text width.
+nnoremap K h/[^ ]<cr>"zd$jyyP^v$h"zpJk:s/\v +$//<cr>:noh<cr>j^
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='
-

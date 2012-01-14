@@ -124,13 +124,6 @@ setopt AUTO_CD             2>/dev/null
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
 booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }
 
-# Pathselector...
-if [ -f ~/bin/path-selector.sh ]; then
-    C()   { cd       $(path-selector.sh "$@"); }
-    E()   { $EDITOR  $(path-selector.sh "$@"); }
-    MDC() { mdc      $(path-selector.sh "$@"); }
-fi
-
 #### Environment variables
 export PAGER=less
 export ACK_COLOR_MATCH='red'
@@ -324,7 +317,6 @@ if [[ $OSTYPE == darwin* ]]; then
         $EDITOR -w ${1}
         plutil -convert binary1 ${1}
     }
-    # function pn() { open "peepopen://$1?editor=MacVim" }
 else
     alias ls='ls --color=auto -B'
     alias g='vim'
@@ -339,7 +331,6 @@ alias ...='cd ../..'
 alias cd..='cd ..'
 alias cd/='cd /'
 
-#alias pl='pdflatex'
 alias vi=vim
 #global aliases
 alias -g L='|less'
@@ -526,7 +517,7 @@ bindkey '^T' _most_recent_file
 lastpath() {
      LBUFFER+="${${(z)history[$#history]}[-1]:h}"
 }
-bindkey '^_/' lastpath; zle -N lastpath;
+# bindkey '^_/' lastpath; zle -N lastpath;
 # No Delays please, we want flashy SPEEDZ
 KEYTIMEOUT=50
 

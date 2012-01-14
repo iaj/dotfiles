@@ -225,3 +225,7 @@ end
 hi TabLine guifg=#85816E guibg=#20211B gui=none
 hi TabLineFill guifg=#85816E guibg=#171812 gui=none
 hi TabLineSel guifg=#A6E22E guibg=#3B3A32 gui=none
+
+hi InterestingWord1 guifg=#000000 guibg=#FFA700
+hi InterestingWord2 guifg=#000000 guibg=#53FF00
+hi InterestingWord3 guifg=#000000 guibg=#FF74F8
