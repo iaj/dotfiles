@@ -8,7 +8,6 @@
 " Vim, I'd rather just plain ol' vi emulation reminding me to upgrade.
 
 """ Settings
-
 " Don't load csapprox if no gui support - silences an annoying warning
 set t_Co=256
 if !has("gui")
@@ -52,7 +51,6 @@ set guifont=Monaco:h12.00
 " set guifont=Mensch\ for\ Powerline:h12
 set title
 set isfname-=\=
-"set macmeta
 "set iskeyword+=äöüÄÖÜ
 set ls=2
 
@@ -62,6 +60,7 @@ set switchbuf=useopen
 " Always show tab bar
 set showtabline=2
 " set winwidth=84
+set pastetoggle=<F11>
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -84,13 +83,13 @@ endif
 
 """ Sourcing ~/.vimrc and own scripts
 " source $HOME/.vim/personal/scripts/remappings
-source $HOME/.vim/personal/scripts/mappings
 source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
 source $HOME/.vim/personal/scripts/galal
-source $HOME/.vim/personal/scripts/objctagjump
+" TODO: only do this when in OBJC files, obviously
+" source $HOME/.vim/personal/scripts/objctagjump
 " au VimEnter * source $HOME/.vim/personal/scripts/statusline
-"TODO fix those bars and have them run in your develop-environment
+" TODO fix those bars and have them run in your develop-environment
 "source $HOME/.vim/personal/scripts/error_handling
 
 " Add XPtemplate global personal directory value
@@ -286,7 +285,7 @@ let g:EclimPhpValidate = 0
 " nnoremap <silent> <LocalLeader>jc :JavaCorrect<cr>
 " Disable Eclim's taglisttoo because I use the regular taglist plugin
 
-"""" gundo - Graphical UNDO - pretty awesome imo
+"""" gundo - Graphical UNDO
 let g:gundo_width = 60
 "let g:gundo_preview_height = 40
 "let g:gundo_right = 1
@@ -301,8 +300,11 @@ let tlist_objc_settings = 'objc;i:interface;c:class;m:method;p:property'
 let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
 let Tlist_Use_Right_Window = 1
+nnoremap <silent> <F2> :TlistToggle<CR>
 
 """" XPTemplate Settings
+nnoremap <leader><space> :XPTreload<cr>
+map ,X :he XPTemplate<CR>
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 " let g:xptemplate_key = '<Tab>'
@@ -342,7 +344,6 @@ let g:fuf_modesDisable = [ 'mrucmd' ]
 let g:fuf_mrufile_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:fuf_mrufile_maxItem = 300
 "let g:fuf_mrucmd_maxItem = 400
-
 """" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 2
 let g:ctrlp_mruf_max = 2000
@@ -370,14 +371,29 @@ map <silent> \a :CtrlP
 
 """" Powerline
 let g:Powerline_symbols = 'fancy'
-
-""" Dimensions for MacVim + Colorscheme
+"""" Exhuberant ctags Settings
+map <F9> :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
+map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
+"""" Ack Settings
+" Search recursively in {directory} (which defaults to the current
+" directory) for the {pattern}.  Behaves just like the |:grep| command, but
+" will open the |Quickfix| window for you. If [!] is not given the first
+" error is jumped to.
+map <leader>a :Ack! 
+"""" Fugitive
+nmap \gs :Gstatus<cr>
+nmap \gc :Gcommit<cr>
+nmap \ga :Gwrite<cr>
+nmap \gl :Glog<cr>
+nmap \gd :Gdiff<cr>
+""" Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
     :set guioptions=Aci
     :set lines=100
     :set columns=200
     :set fuoptions=maxvert,maxhorz
+    set macmeta
 
     " set go-=T
     " Don't show scroll bars in the GUI
@@ -412,9 +428,40 @@ else
     " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
 endif
 
-""" my own Supertab
+""" Abbreviations
+function! EatChar(pat)
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
+endfunction
+
+function! MakeSpacelessIabbrev(from, to)
+    execute "iabbrev <silent> ".a:from." ".a:to."<C-R>=EatChar('\\s')<CR>"
+endfunction
+
+call MakeSpacelessIabbrev('gh/',  'http://github.com/')
+
+cabbr %% <C-R>=expand('%:p:h')<CR>
+map <leader>e :edit %%
+" cnoremap %% <C-R>=expand('%:h').'/'<cr>
+cabbr jobs /Users/iaj/Documents/jobs/
+cabbr stud /Users/iaj/Documents/studying/
+" Expand abbreviations in command mode...
+cmap <C-\> <C-]>
+
+""" Statusline
+if !(has('gui_running'))
+    " GRB: Put useful info in status line
+    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
+    " magenta
+    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
+    " cyan
+    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
+    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
+    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
+endif
+""" my own Supertab TODO
 " Remap the tab key to do autocompletion or indentation depending on the
-" context (from http://www.vim.org/tips/tip.php?tip_id=102)
+" context
 function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
     if pumvisible()
@@ -439,11 +486,9 @@ function! MyTabComplete()
     let current = column - 2  " fange beim zeichen eins links vom aktuellem an
 
     " echom 'aktuelles zeichen links vom cursor: '. line[current]
-
     while current > 0 && line[current] =~ '\S'
         let current -= 1
     endwhile
-
     " echom 'column des beginn des aktuellen wortes: '.current
     " echom 'aktuelle column(bis zu column): ' . column
 
@@ -463,12 +508,8 @@ function! MyTabComplete()
     let has_period = match(substr, '\.') != -1      " position of period, if any
     let has_slash = match(substr, '\/') != -1       " position of slash, if any
 
-
     "if (&dictionary != '' && !has_slash)
     "return "\<C-X>\<C-K>"
-    "endif
-    "if (&filetype == 'objc')
-    "return "\<C-X>\<C-O>"
     "endif
     if (!has_period && !has_slash)
         let b:complType=1
@@ -497,31 +538,166 @@ function! MyShiftTabComplete()
 endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
+""" Functions
+"""" Shell
+function! s:ExecuteInShell(command) " {{{
+    let command = join(map(split(a:command), 'expand(v:val)'))
+    let winnr = bufwinnr('^' . command . '$')
+    silent! execute  winnr < 0 ? 'botright vnew ' . fnameescape(command) : winnr . 'wincmd w'
+    setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap nonumber
+    echo 'Execute ' . command . '...'
+    silent! execute 'silent %!'. command
+    silent! redraw
+    silent! execute 'au BufUnload <buffer> execute bufwinnr(' . bufnr('#') . ') . ''wincmd w'''
+    silent! execute 'nnoremap <silent> <buffer> <LocalLeader>r :call <SID>ExecuteInShell(''' . command . ''')<CR>:AnsiEsc<CR>'
+    silent! execute 'nnoremap <silent> <buffer> q :q<CR>'
+    silent! execute 'AnsiEsc'
+    echo 'Shell command ' . command . ' executed.'
+endfunction " }}}
+command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
+nnoremap <leader>! :Shell 
+"""" Gist
+" Send visual selection to gist.github.com as a private, filetyped Gist
+" Requires the gist command line too (brew install gist)
+vnoremap <leader>G :w !gist -p -t %:e \| pbcopy<cr>
+""" Mappings
+"""" Ease of use
+" Most important things first
+cnoremap jk <C-c>
+imap jk <Esc>
 
-""" Abbreviations
-function! EatChar(pat)
-    let c = nr2char(getchar(0))
-    return (c =~ a:pat) ? '' : c
-endfunction
+" Clear the search buffer when hitting return
+" ... or <C-L> in insert mode
+nnoremap <CR> :nohlsearch<cr>
+inoremap <C-L> <C-O>:nohls<CR>
 
-function! MakeSpacelessIabbrev(from, to)
-    execute "iabbrev <silent> ".a:from." ".a:to."<C-R>=EatChar('\\s')<CR>"
-endfunction
+" Unfortunately this baby only works on MacVim
+" No matter where the cursor insert and edit a new line below.
+inoremap <c-cr> <esc>A<cr>
 
-call MakeSpacelessIabbrev('gh/',  'http://github.com/')
+" Toggle absolute/relative linenumbering
+nnoremap <silent> ,A :if &l:nu \| setl rnu \| else \| setl nu \| endif<CR>
 
-""" Statusline
-if !(has('gui_running'))
-    " GRB: Put useful info in status line
-    hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
-    " magenta
-    hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
-    " cyan
-    hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
-    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
-    set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
-endif
-""" Error navigation
+nnoremap <leader><leader> <c-^>
+
+" Y behaves like D rather than like dd
+nnoremap Y y$
+" Backspace should delete to the black hole register, not move left
+nnoremap <BS> "_X
+
+" Hilight everything in visual mode that was just pasted!
+nnoremap <Leader>V '[V']
+
+" Toggle wrapping with <leader>w
+map <leader>w :set invwrap<cr>:set wrap?<cr>
+map <silent> <leader>d :bd<CR>
+map <leader>e :e <C-R>=expand("%:h")<cr>/
+
+runtime $HOME/vim-addons/matchit.zip/plugin/matchit.vim
+map <tab> %
+" Delete all buffers
+" nmap <silent> ,da :exec "1," . bufnr('$') . "bd"<cr>
+" Don't pollute my registers plz
+nnoremap <C-w><C-w> <C-w>p
+nmap dD "_dd
+
+" Global substitution
+nnoremap <leader>s<Space> :%s//g<left><left>
+
+" Change directory to the current file dir
+nnoremap <leader>D :lcd %:h<cr>:pwd<cr>
+
+cnoremap <C-p> <Up>
+cnoremap <C-n> <Down>
+
+" Fuck you 2 manual key
+nnoremap K <nop>
+
+" Awesome, inserts new line without going into insert mode
+map <S-Enter> O<ESC>D
+
+" No comment lines - we just don't want them sumtimes
+nmap go o<Esc>S
+nmap gO O<Esc>S
+
+" Heresy
+inoremap <c-a> <esc>I
+inoremap <c-e> <esc>A
+
+" Return to visual mode after indenting
+xmap < <gv
+xmap > >gv
+" Pressing an 'enter visual mode' key while in visual mode changes mode.
+vmap <C-V> <ESC>`<<C-v>`>
+vmap V     <ESC>`<V`>
+"vmap v     <ESC>`<v`>
+vnoremap v <ESC>
+
+" Highlights the current typed word (all occasions)
+imap <F2> <esc>:let @/=expand("<cword>") \| set hls<cr>a
+
+" Extra functionality for some existing commands:
+" <C-6> switches back to the alternate file and the correct column in the line.
+nnoremap <C-6> <C-6>`"
+" CTRL-g shows filename and buffer number, too.
+nnoremap <C-g> 2<C-g>
+
+" Make [[ and ]] work even if the { is not in the first column
+nnoremap <silent> [[ :call search('^\S\@=.*{$', 'besW')<CR>
+nnoremap <silent> ]] :call search('^\S\@=.*{$', 'esW')<CR>
+onoremap <expr> [[ (search('^\S\@=.*{$', 'ebsW') && (setpos("''", getpos('.'))
+            \ <bar><bar> 1) ? "''" : "\<ESC>")
+onoremap <expr> ]] (search('^\S\@=.*{$', 'esW') && (setpos("''", getpos('.'))
+            \ <bar><bar> 1) ? "''" : "\<ESC>")
+
+" It's 2012
+nnoremap j gj
+nnoremap k gk
+command! W :w
+
+" Swap 2 words
+nmap <silent> gw "_yiw:s/\(\%#\w\+\)\(\W\+\)\(\w\+\)/\3\2\1/<cr><c-o><c-l>
+
+" Omnicompletion like in several IDEs
+inoremap <C-Space> <C-X><C-O>
+
+" Add semicolon to the end of the line.
+nnoremap <silent> <leader>; :call setline(line('.'), getline('.') . ';')<CR>
+nnoremap <silent> <leader>; :call setline(line('.'), getline('.') . ';')<CR>
+
+" Removes superfluous blank lines..
+map \L :g/^\s*\n\s*$/d<CR>
+command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
+command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+            \ | wincmd p | diffthis
+" Undo in insert mode
+" make it so that if I accidentally press ^W or ^U in insert mode,
+" then <ESC>u will undo just the ^W/^U, and not the whole insert
+" This is documented in :help ins-special-special, a few pages down
+inoremap <C-W> <C-G>u<C-W>
+inoremap <C-U> <C-G>u<C-U>
+
+" Write to file with sudo
+cmap w!! w !sudo tee % >/dev/null
+
+imap <C-J> <Down>
+imap <C-K> <Up>
+"""" Remap command-line-editing keys
+cnoremap <C-A>     <Home>
+cnoremap <ESC>b    <S-Left>
+cnoremap <ESC>f    <S-Right>
+cnoremap <ESC><BS> <C-W>
+cnoremap <C-E>      <End>
+" cnoremap <C-F>      <Right>
+cnoremap <C-N>      <End>
+cnoremap <C-P>      <Up>
+cnoremap <ESC>b     <S-Left>
+cnoremap <ESC><C-B> <S-Left>
+cnoremap <ESC>f     <S-Right>
+cnoremap <ESC><C-F> <S-Right>
+cnoremap <ESC><C-H> <C-W>
+"cnoremap <C-B>      <Left>
+"""" Error navigation
 "
 "             Location List     QuickFix Window
 "            (e.g. Syntastic)     (e.g. Ack)
@@ -535,7 +711,6 @@ inoremap ∆ <esc>:lnext<cr>zvzz
 inoremap ˚ <esc>:lprevious<cr>zvzz
 nnoremap <m-Down> :cnext<cr>zvzz
 nnoremap <m-Up> :cprevious<cr>zvzz
-""" Mappings
 """" Split line (sister to [J]oin lines)
 " The normal use of S is covered by cc, so don't worry about shadowing it.
 nnoremap S i<cr><esc><right>
@@ -558,5 +733,148 @@ nnoremap S i<cr><esc><right>
 " Especially useful for adding items in the middle of long lists/tuples in Python
 " while maintaining a sane text width.
 nnoremap K h/[^ ]<cr>"zd$jyyP^v$h"zpJk:s/\v +$//<cr>:noh<cr>j^
+"""" Execute current line
+function! ExecuteLine()
+    let save_reg = @@
+    normal ^y$
+    exe @@
+    let @@ = save_reg
+endfunction
+nnoremap <silent> <leader>i :call ExecuteLine()<CR>
+"""" Window movement/resizing enhancements
+" create a new vertical split window and switch over to it
+nnoremap <leader>W <C-w>v<C-w>l
+nnoremap <leader>H <C-w>s<C-w>j
+" Close the window below this one
+noremap <silent> <leader>cj :wincmd j<cr>:close<cr>
+" Close the window above this one
+noremap <silent> <leader>ck :wincmd k<cr>:close<cr>
+" Close the window to the left of this one
+noremap <silent> <leader>ch :wincmd h<cr>:close<cr>
+" Close the window to the right of this one
+noremap <silent> <leader>cl :wincmd l<cr>:close<cr>
+" Close the current window
+noremap <silent> <leader>cd :close<cr>
+" Move the current window to the right of the main Vim window
+noremap <silent> <leader>ml <C-W>L
+" Move the current window to the top of the main Vim window
+noremap <silent> <leader>mk <C-W>K
+" Move the current window to the left of the main Vim window
+noremap <silent> <leader>mh <C-W>H
+" Move the current window to the bottom of the main Vim window
+noremap <silent> <leader>mj <C-W>J
+
+noremap <silent> <C-7> <C-W>>
+noremap <silent> <C-8> <C-W>+
+noremap <silent> <C-9> <C-W>+
+noremap <silent> <C-0> <C-W>>
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+" Mappings for fast resizing windows
+" Use - and + to resize horizontal splits
+map - <C-W>-
+map + <C-W>+
+" ...and for vsplits with alt-< or alt->
+map <M-,> 3<C-W><
+map <M-.> 3<C-W>>
+" Shrink the current window to fit the number of lines in the buffer.  Useful
+" for those buffers that are only a few lines
+nmap <silent> ,sw :execute ":resize " . line('$')<cr>
+"""" Folding
+noremap <leader>0 :set fdl=0<CR>
+noremap <leader>1 :set fdl=1<CR>
+noremap <leader>2 :set fdl=2<CR>
+
+" Toggles folds with <Space>
+nnoremap <silent> <Space> @=(foldlevel('.')?'za':'l')<CR>
+
+" Make zO recursively open whatever top level fold we're in, no matter where the
+" cursor happens to be.
+nnoremap zO zCzO
+
+" Use ,z to "focus" the current fold.
+nnoremap <leader>z zMzvzz
+"""" Spellchecking
+nmap <Leader>ss :set nospell<CR>
+nmap <Leader>se :set spell spelllang=en<CR>
+nmap <Leader>sd :set spell spelllang=de<CR>
+
+" Quickly add a new spelling abbreviation for the word under cursor to this file.
+nmap <C-F6> :let tmp=@f<CR>"fyaw<Esc>:bot split ~/.vimrc<CR>G?LAST_SPELL<CR>zRkoiab<Space><Esc>"fp<Esc>:let @f=tmp<CR>a
+"""" Quick editing
+nnoremap \v <C-w><C-v><C-l>:e $MYVIMRC<cr>
+nnoremap \z <C-w><C-v><C-l>:e ~/dotfiles/.zshrc<cr>
+nnoremap \p <C-w><C-v><C-l>:e ~/.pentadactylrc<cr>
+noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'.vim'<cr>
+noremap \fs :exec 'e ~/.vim/syntax/'.&filetype.'.vim'<cr>
+noremap \fx :exec 'e ~/.vim/xpt-personal/ftplugin/'.&filetype.'/'.&filetype.'.xpt.vim'<cr>
+"""" Quick sourcing
+map <silent> <leader>ms :messages<CR>
+map <silent> <leader>sv :source $HOME/dotfiles/.vimrc<CR>
+map <silent> <leader>sf :source %<CR>
+"""" Quick filetype switching
+nnoremap \st :set ft=typoscript<CR>
+nnoremap \sl :set ft=tex<CR>
+nnoremap \sh :set ft=html<CR>
+nnoremap \sc :set ft=css<CR>
+nnoremap \sj :set ft=javascript<CR>
+nnoremap \sp :set ft=php<CR>
+nnoremap \sw :set ft=mail<CR>
+nnoremap \sx :set ft=xml<CR>
+"""" Get syntax highlighting group
+" The following beast is something i didn't write... it will return the
+" syntax highlighting group that the current "thing" under the cursor
+" belongs to -- very useful for figuring out what to change as far as
+" syntax highlighting goes.
+nmap <silent> <leader>y :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+            \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
+            \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
+            \ . ">"<CR>
+"""" Highlight words
+nnoremap <silent> <leader>hh :execute 'match InterestingWord1 /\<<c-r><c-w>\>/'<cr>
+nnoremap <silent> <leader>h1 :execute 'match InterestingWord1 /\<<c-r><c-w>\>/'<cr>
+nnoremap <silent> <leader>h2 :execute '2match InterestingWord2 /\<<c-r><c-w>\>/'<cr>
+nnoremap <silent> <leader>h3 :execute '3match InterestingWord3 /\<<c-r><c-w>\>/'<cr>
+"""" Warnings - learn your VIM
+inoremap <Esc> <Esc>:echo "You should use Ctrl-[, or rather 'jk'"<CR>
+"inoremap <BS> <Esc>:echo "You should use Ctrl-H"<CR>
+
+" Learn your hjkl!
+nmap <Left>     <Esc>:echo "You should have typed h instead"<CR>
+nmap <Right>    <Esc>:echo "You should have typed l instead"<CR>
+nmap <Up>       <Esc>:echo "You should have typed k instead"<CR>
+nmap <Down>     <Esc>:echo "You should have typed j instead"<CR>
+"""" Faster scrolling
+" nnoremap <C-e> 3<C-e>
+" nnoremap <C-y> 3<C-y>
+"""" Improved Searching
+" Open a Quickfix window for the last search.
+nnoremap <silent> <leader>/ :execute 'vimgrep /'.@/.'/g %'<CR>:copen<CR>
+" Ack for the last search.
+nnoremap <silent> <leader>? :execute "Ack! '" . substitute(substitute(substitute(@/, "\\\\<", "\\\\b", ""), "\\\\>", "\\\\b", ""), "\\\\v", "", "") . "'"<CR>
+" Search the current file for what's currently in the search register and display matches
+nmap <silent> _gs :vimgrep /<C-r>// %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
+" Search the current file for the word under the cursor and display matches
+nmap <silent> _gw :vimgrep /<C-r><C-w>/ %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
+" Search the current file for the WORD under the cursor and display matches
+nmap <silent> _gW :vimgrep /<C-r><C-a>/ %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
+
+" Use very magic mode in order to use () instead of \(\) etc.
+" nnoremap / /\v
+" vnoremap / /\v
+"""" TODO: check those out
+" noremap <F3> :!sed -e (regex) && doxygen yourproject doc && zip -r release.zip doc src
+" Easier to type, and I never use the default behavior.
+" noremap H ^
+" noremap L g_
+"inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+"inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
+"             \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+"inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
+"\ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 "" vim:fdm=expr
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='

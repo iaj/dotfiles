@@ -1,141 +1,58 @@
-"" vim: set filetype=vim : ""
-if has("autocmd")
-    augroup filetype
-        " Remove all autocommands
-        autocmd!
-        autocmd FileType python map <F5> :w<CR>:!python "%"<CR>
-        autocmd FileType python set omnifunc=pythoncomplete#Complete
-        autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-        "autocmd FileType c,cpp,java,javascript,python,xml,xhtml,html set shiftwidth=4
-        "autocmd FileType html set autoread
-        "autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-        autocmd FileType xml set omnifunc=xmlcomplte#CompleteTags
-        "autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-        autocmd FileType c set omnifunc=ccomplete#Complete
-        autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete
-        "autocmd FileType ruby,perl,tex set shiftwidth=2
-        autocmd FileType applescript compiler ruby
-        au FileType text,svn setlocal tw=78 fo+=t
-        au FileType mail,text let b:delimitMate_autoclose = 0
-        " Files to set default textwidth
-        autocmd FileType mail,tex set textwidth=79
-        autocmd FileType mail,tex let g:textwidth=79
-        " Javascript let is a keyword
-        autocmd FileType javascript syn keyword javascriptIdentifier "let"
-        autocmd FileType typoscript setlocal commentstring=#%s
-        "autocmd FileType xhtml,html,xml,sass,tex,plaintex,yaml silent setlocal tabstop=2 softtabstop=2 shiftwidth=2
-        "au FileType html DelimitMateReload | DelimitMateSwitch
-        au Filetype html setlocal foldmethod=manual
-        au Filetype html nnoremap <buffer> \t Vatzf
-        " HTML tag closing
-        "au Filetype html inoremap <buffer> <C-_> <Space><BS><Esc>:call InsertCloseTag()<cr>a
-        au Filetype xhtml,html imap <buffer> ,/ </<C-X><C-O>
-        au Filetype xhtml,html inoremap <buffer> <C-_> </<C-X><C-O>
-        "Recognize folding settings nicely.
-        "autocmd BufWinLeave *.vim,*.html,*.htm,*.etc mkview
-        "autocmd BufWinEnter *.vim,*.html,*.htm,*.etc silent loadview
-        " Remove ALL autocommands for the current group.
-        au! BufNewFile,BufRead *.ch setf cheat
-        au BufNewFile,BufRead *.liquid setf liquid
-        au! BufRead,BufNewFile *.haml setfiletype haml
-        autocmd BufNewFile,BufRead *.yml setf eruby
-        autocmd BufRead,BufNewFile *.prawn set filetype=ruby
-        autocmd BufRead,BufNewFile *.rsel set filetype=ruby
-        autocmd BufNewFile,BufRead *.mxml compiler flex
-        au BufNewFile,BufRead *.mxml set filetype=mxml
-        au BufNewFile,BufRead *.as set filetype=actionscript
-        au! BufNewFile,BufRead *.scpt setf applescript
-        au! BufNewFile,BufRead *.applescript setf applescript
-        au! BufNewFile,BufRead bash-fc-* setf sh
-    augroup END
-endif
-
-augroup mkd
-    autocmd BufRead *.mkd  set ai formatoptions=tcroqn2 comments=n:&gt;
-    autocmd BufRead *.markdown  set ai formatoptions=tcroqn2 comments=n:&gt;
+""" LEAD OFF
+augroup filetype
+    " Remove all autocommands
+    autocmd!
+    autocmd FileType xml set omnifunc=xmlcomplte#CompleteTags
+    autocmd FileType c set omnifunc=ccomplete#Complete
+    au FileType text,svn setlocal tw=78 fo+=t
+    au FileType mail,text let b:delimitMate_autoclose = 0
+    autocmd FileType mail,tex set textwidth=79
+    autocmd FileType mail,tex let g:textwidth=79
+    autocmd BufNewFile,BufRead *.yml setf eruby
+    autocmd BufRead,BufNewFile *.prawn set filetype=ruby
+    autocmd BufRead,BufNewFile *.rsel set filetype=ruby
+    autocmd BufNewFile,BufRead *.mxml compiler flex
+    au BufNewFile,BufRead *.mxml set filetype=mxml
+    au BufNewFile,BufRead *.as set filetype=actionscript
 augroup END
-
+""" GENERAL
 autocmd BufRead *.log if expand('%:p') =~ expand('~/Dropbox/training/')|set filetype=tlog
-
-fun! UpStatusLineAndSwitchToCorrectWindow() "{{{
-    if (g:returning_from_fuzzy==1)
-        wincmd p
-        let g:returning_from_fuzzy = 0
-    endif
-    let &l:statusline = g:c_statusline
-endfunction "}}}
-
-"au BufEnter * let &l:statusline = g:c_statusline
-"autocmd BufEnter,BufFilePost \[fuf\] imap <buffer> <Tab> <C-n>
-"autocmd BufEnter,BufFilePost \[fuf\] imap <buffer> <S-Tab> <C-p>
-
-"autocmd BufWinEnter .vimrc silent loadview
-"autocmd BufWinLeave .vimrc mkview
-"
-" Switch the CWD to the current buffer.
-"autocmd BufEnter * lcd %:p:h
-
+"""" JUMP TO LAST POS IN FILE
 " Jump to last-known-position when editing files
 " Note: The | character is used in Vim as a command separator (like ; in C)
 autocmd BufWinEnter *
             \ if line("'\"") > 0 && line("'\"") <= line("$") |
             \ execute 'normal! g`"zvzz' |
             \ endif
-            " \   exe "normal g`\"" |
-
-"au BufRead *.js set makeprg=jslint\ %
-" Google's JSLint
-au BufNewFile,BufRead *.js set makeprg=gjslint\ %
-au BufNewFile,BufRead *.js set errorformat=%-P-----\ FILE\ \ :\ \ %f\ -----,Line\ %l\\,\ E:%n:\ %m,%-Q,%-GFound\ %s,%-GSome\ %s,%-Gfixjsstyle%s,%-Gscript\ can\ %s,%-G
-
-" bachelor arbeit - alle tags neusetzen projektspezifisch - für Animal als
-" auch AnimalScript2
-fun! MyTest() "{{{
-    let foo = call JavaSearchContext()<CR>
+" \   exe "normal g`\"" |
+"au BufEnter * let &l:statusline = g:c_statusline
+"Recognize folding settings nicely.
+"autocmd BufWinLeave *.vim,*.html,*.htm,*.etc mkview
+"autocmd BufWinEnter *.vim,*.html,*.htm,*.etc silent loadview
+"""" TITLESTRING
+" Set the title according to the current $PATH
+au BufEnter * let &titlestring = Title()
+fun! Title() "{{{
+    return expand('%:p:h')
 endfunction "}}}
-
-function! MyControlSpace()
-    " setzen des b:complType damit man einsehen kann, ob keyword oder
-    " omnicompl
-    let b:complType=0
-    " TODO: abfrage ob java oder andere rat files <C-X><C-O>
-    " if (&filetype == 'java')
-    return "\<C-X>\<C-U>"
-    " else
-        " return "\<C-X>\<C-O>"
-    " endif
-endfunction
-
-augroup java
-    autocmd Filetype java if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
-    " make c-] work as f3 in eclipse
-    "autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
-    autocmd Filetype java set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
-    " autocmd Filetype java map <buffer> <F3> :execute 'NERDTree ' . expand('%:p:h')<CR>
-    "autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
-    autocmd Filetype java inoremap <C-Space> <C-X><C-U>
-    autocmd Filetype java inoremap <C-@> <C-X><C-U>
-    "autocmd BufWinEnter *.java silent loadview
-    "autocmd BufWinLeave *.java mkview
-    au Filetype java inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
-augroup end
-
+"""" AUTOSET DIR TO WORKING FILE
+" Switch the CWD to the current buffer.
+" autocmd BufEnter * lcd %:p:h
+""" NOTATIONAL VELOCITY
 augroup nv
     autocmd BufDelete */NVPlainTextEditingSpace/* silent :!echo 'tell application "Notational Velocity" to activate' | osascript
 augroup end
-
-"TODO fix this babey
-" just for testing purposes
+""" XPT
 augroup xpt
     autocmd FileType tex if expand('%:p') =~ expand('/rechnungen/')|normal ggihithare!<ESC>|endif
 augroup end
-
-augroup csv
-    au BufNewFile,BufRead *.csv map <buffer> <silent> \ch :CSVH | setlocal noundofile
-augroup end
-
+""" MARKDOWN
+autocmd BufRead *.mkd  set ai formatoptions=tcroqn2 comments=n:&gt;
+autocmd BufRead *.markdown  set ai formatoptions=tcroqn2 comments=n:&gt;
+""" CSS
 augroup css
     " Make {<cr> insert a pair of brackets in such a way that the cursor is correctly
+    au BufNewFile,BufRead *.csv map <buffer> <silent> \ch :CSVH | setlocal noundofile
     " positioned inside of them AND the following code doesn't get unfolded.
     au BufNewFile,BufRead *.css  inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
     au BufNewFile,BufRead *.less inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
@@ -159,21 +76,24 @@ augroup css
     au BufNewFile,BufRead *.css  nnoremap <buffer> <localleader>S ?{<CR>jV/\v^\s*\}?$<CR>k:sort<CR>:noh<CR>
     au BufNewFile,BufRead *.less nnoremap <buffer> <localleader>S ?{<CR>jV/\v^\s*\}?$<CR>k:sort<CR>:noh<CR>
 augroup END
-
+""" TYPOSCRIPT
 augroup typoscript
     autocmd FileType typoscript inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
+    autocmd FileType typoscript setlocal commentstring=#%s
 augroup END
-
+""" GIT
 augroup git
     autocmd BufEnter COMMIT_EDITMSG exe "normal 1G" | set tw=70 ft=gitcommit
     autocmd BufDelete COMMIT_EDITMSG silent :!echo 'tell application "iTerm2" to activate' | osascript
 augroup end
-
+""" APPLESCRIPT
 augroup applescript
+    au! BufNewFile,BufRead *.scpt setf applescript
+    autocmd FileType applescript compiler ruby
+    au! BufNewFile,BufRead *.applescript setf applescript
     autocmd FileType applescript setl makeprg=osascript\ -e\ 'tell\ application\ \"XCode\"\ to\ build\ transcript\ YES'
     autocmd FileType applescript map <leader>t :!osascript -e 'tell application "XCode" to launch'<cr>
 augroup END
-
 " augroup tex
 "     "autocmd FileType tex setlocal isk+=ä,ü,ö,Ä,Ö,Ü
 "     autocmd BufNewFile,BufRead *.tex setlocal isk+=ä,ü,ö,Ä,Ö,Ü
@@ -181,43 +101,32 @@ augroup END
 " augroup END
 
 " QuickCursor using /var/folders/.../ for its files - so we
-" au! BufRead /var/folders/*/*,pentadactyl-* nnoremap <buffer> ,d :silent write \| :bd<CR>
 " Specific for Mail.app called ones...
 au! BufRead /var/folders/*/Mail* set ft=mail
-
+""" DACTYL/FIREFOX
 " Force activation of Firefox after we edited a *pentadactyl file
 "10:55:30   Axioplase_: iaj: hum. :exe ":autocmd BufDelete foo bar" . g:firefox . "to activate qux lol kthxbye"
 autocmd FileType pentadactyl setlocal commentstring=\"%s
 autocmd FileType vimperator setlocal commentstring=\"%s
 autocmd BufDelete *pentadactyl* silent :!echo 'tell application "Firefox" to activate' | osascript
 autocmd BufDelete *vimperator-* silent :!echo 'tell application "Firefox" to activate' | osascript
-
-"Surround options for mailingwork stuff
-"Surround word by TRACKING STUFF with '-'
+" au! BufRead /var/folders/*/*,pentadactyl-* nnoremap <buffer> ,d :silent write \| :bd<CR>
+""" MAILINGWORK (MW)
+" Surround options for mailingwork stuff
+" Surround word by TRACKING STUFF with '-'
 autocmd FileType mw let b:surround_45 = "[LINK \'\r\'] [/LINK]"
 "Surround word by LIS with 'L'
 autocmd FileType mw let b:surround_76 = "[LI][B]\r[/B][/LI]"
-
-" Read-only pdf through pdftotext
-"autocmd BufReadPre *.pdf silent set ro
-"autocmd BufReadPost *.pdf silent %!pdftotext -nopgbrk -layout -q -eol unix "%" - | fmt -w78
-
-au BufEnter * let &titlestring = Title()
-fun! Title() "{{{
-    return expand('%:p:h')
-endfunction "}}}
-
+""" SQL
 " augroup SQL
 "     autocmd BufRead,BufNewFile *.sql,*.php call vim_addon_sql#Connect('mysql,{'database':'vnc', 'user','vnc', 'password' : 'vnc'})
 "     autocmd BufRead,BufNewFile *.sql,*.php setlocal completefunc=vim_addon_sql#Complete
 "     autocmd BufRead,BufNewFile *.sql,*.php call vim_addon_sql#UI()
 " augroup end
-
-" TODO - fix when theres time
-" Statusline stuff if not using Powerline
-" au VimEnter * call UpdateStatuslineColorCodes()
-" au VimEnter * source $HOME/.vim/personal/scripts/statusline
-
+""" CREATE MISSING DIR ON BUF_WRITE
 augroup CREATE_MISSING_DIR_ON_BUF_WRITE
     autocmd BufWritePre * if !isdirectory(expand('%:h')) | call mkdir(expand('%:h'),'p') | endif
 augroup end
+"" vim: set filetype=vim : ""
+"" vim:fdm=expr
+"" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='

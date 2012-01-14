@@ -39,6 +39,7 @@ function! CompileJava()
     make
 endfunction
 nmap <buffer> <F3> :call CompileJava()<CR>
+
 function! RunClass()
     if !exists("b:class")
         let b:class = expand("%:t:r")
@@ -46,6 +47,7 @@ function! RunClass()
     execute '!java -cp "%:p:h" ' . b:class
 endfunction
 nmap <buffer> <F4> :call RunClass()<CR>
+
 function! InsertMainClass()
     exe "put='public class ".expand('%:t:r')."{'"
     put='public static void Main(String args()){'
@@ -53,8 +55,20 @@ function! InsertMainClass()
     put='}'
     normal gg=G2jo
 endfunction
-command InsertMain call InsertMainClass()<CR>
+command! InsertMain call InsertMainClass()<CR>
 
+" autocmd Filetype java if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
+" make c-] work as f3 in eclipse
+"autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
+set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
+" autocmd Filetype java map <buffer> <F3> :execute 'NERDTree ' . expand('%:p:h')<CR>
+"autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
+inoremap <C-Space> <C-X><C-U>
+inoremap <C-@> <C-X><C-U>
+"autocmd BufWinEnter *.java silent loadview
+"autocmd BufWinLeave *.java mkview
+
+inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
 " command! -buffer SetJavaCompiler call Exec('setlocal aw','setlocal makeprg=javac','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')
 " command! -buffer SetJikesCompiler call Exec('setlocal aw','setlocal makeprg=jikes','map <lt>F2> :make %<CR>','map <lt>F3> :!java '.expand('%:r').'<CR>')
 " command! SetEFMToJAva :set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,\%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#<CR>
@@ -77,7 +91,7 @@ if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> 
 noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
 set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
 noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
-inoremap <C-Space> <C-X><C-U>
+inoremap <C-Space> let b:complType=0 | <C-X><C-U>
 inoremap <C-@> <C-X><C-U>
 "autocmd BufWinEnter *.java silent loadview
 "autocmd BufWinLeave *.java mkview
@@ -107,6 +121,16 @@ nnoremap <silent> <F3> :JavaDocSearch -x declarations<cr>
 " for current word search for eclim
 " nmap <f9> :exec 'vimgrep /\<'.expand(’<cword>’).'\>/g **/*.xml **/*.java'<CR>
 " for vimgrep next and previous result
-" Bracket completion
+" Insert closing bracket after {<CR>
 inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
 command! JGS JavaGetSet | normal gg=G
+"com! Tags '/Users/iaj/bin/ctags -R --language-force=java -f.tags /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Classes'
+
+" bachelor arbeit specific
+"com! Tags '/Users/iaj/bin/ctags -R --language-force=java ~/Documents/workspace'
+" bachelor arbeit - alle tags neusetzen projektspezifisch - für Animal als
+" auch AnimalScript2
+fun! MyTest() "{{{
+    let foo = call JavaSearchContext()<CR>
+endfunction "}}}
+

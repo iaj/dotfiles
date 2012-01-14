@@ -17,3 +17,10 @@ setlocal errorformat=line\ %l\ column\ %v\ -\ %m
 " Make selecting inside an HTML tag less dumb
 "nnoremap Vit vitVkoj
 "nnoremap Vat vatV
+setlocal foldmethod=manual
+nnoremap <buffer> \t Vatzf
+
+imap <buffer> ,/ </<C-X><C-O>
+inoremap <buffer> <C-_> </<C-X><C-O>
+"autocmd FileType html set autoread
+"autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
