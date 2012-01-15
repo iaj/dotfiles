@@ -14,7 +14,8 @@ set background=dark
 let g:colors_name="molokai"
 
 " Basic Layout {{{
-hi Normal          guifg=#F8F8F2 guibg=#1B1E1F
+" hi Normal          guifg=#F8F8F2 guibg=#1B1E1F
+hi Normal          guifg=#F8F8F2 guibg=#272822
 hi Folded          guifg=#666666 guibg=bg
 hi CursorLine                    guibg=#232728
 hi CursorColumn                  guibg=#232728

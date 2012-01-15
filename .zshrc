@@ -87,7 +87,7 @@ setopt ShareHistory        2>/dev/null
 # Complete Mafile to Makefile if cursor is on the f
 setopt ExtendedHistory     2>/dev/null
 # Save History with timestamp
-setopt CompleteInWord      2>/dev/null
+setopt CompleteInWord      3>/dev/null
 # Allow completion list columns to be different sizes
 setopt ListPacked          2>/dev/null
 # cd adds directories to the stack like pushd
@@ -498,7 +498,7 @@ bindkey "\eOb"          down-line-or-search            # Another ctrl-down
 bindkey "\eOc"          forward-word                   # Another possible ctrl-right
 bindkey "\eOd"          backward-word                  # Another possible ctrl-left
 bindkey "\e[Z"          reverse-menu-complete          # S-Tab menu completes backward
-bindkey "   "           magic-space                    # Space expands history subst's
+bindkey " "             magic-space                    # Space expands history subst's
 bindkey "^@"            _history-complete-older        # C-Space to complete from hist
 bindkey "^]."           insert-last-word
 

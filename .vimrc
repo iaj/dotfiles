@@ -3,7 +3,20 @@
 " NOTE:
 " If you're editing this in Vim and don't know how folding works, type zR to
 " unfold everything.  And then read ":help folding".
-
+""" VAM
+fun SetupVAM()
+    let addons_base = expand('$HOME') . '/vim-addons'
+    exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
+    if !isdirectory(addons_base)
+        exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
+    endif
+    if has('gui_running')
+        call vam#ActivateAddons(['xptemplate', 'powerline', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    else
+        call vam#ActivateAddons(['repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
+    endif
+endf
+call SetupVAM()
 """ Settings
 " Don't load csapprox if no gui support - silences an annoying warning
 set t_Co=256
@@ -12,6 +25,8 @@ if !has("gui")
 endif
 set nocompatible
 set hidden
+" Don't want annoying movements
+let macvim_skip_cmd_opt_movement = 1
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -20,21 +35,6 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
 endif
 filetype plugin indent on
-
-" Vim Addon Manager
-fun SetupVAM()
-    let addons_base = expand('$HOME') . '/vim-addons'
-    exec 'set runtimepath+='.addons_base.'/vim-addon-manager'
-    if !isdirectory(addons_base)
-        exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
-    endif
-    if has('gui_running')
-        call vam#ActivateAddons(['powerline', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
-    else
-        call vam#ActivateAddons(['repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
-    endif
-endf
-call SetupVAM()
 
 set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
@@ -224,7 +224,7 @@ set noautoread                  " Don't automatically re-read changed files.
 set modeline                    " Allow vim options to be embedded in files;
 set modelines=5                 " they must be within the first or last 5 lines.
 set ffs=unix,dos,mac            " Try recognizing dos, unix, and mac line endings.
-
+let g:vimsyn_folding = "af"
 " Backups/Swap Files
 " Make sure that the directory where we want to put swap/backup files exists.
 if ! len(glob("~/.backup/"))
@@ -255,6 +255,7 @@ set grepprg=grep\ -nH\ $*
 
 """ Plugin Settings
 """" eclim settings
+" let g:EclimDisabled='1'
 " 'open' on OSX will open the url in the default browser without issue
 let g:EclimBrowser='open'
 " Determines what action to take when a only a single result is found.
@@ -269,7 +270,6 @@ let g:EclimJavaSearchMapping = 1
 " Disable HTML & PHP validation
 let g:EclimHtmlValidate = 0
 let g:EclimPhpValidate = 0
-
 " ,i imports whatever is needed for current line
 " nnoremap <silent> <LocalLeader>i :JavaImport<cr>
 " ,d opens javadoc for statement in browser
@@ -300,14 +300,13 @@ let Tlist_Use_Right_Window = 1
 nnoremap <silent> <F2> :TlistToggle<CR>
 
 """" XPTemplate Settings
-nnoremap <leader><space> :XPTreload<cr>
+" nnoremap <leader><space> :XPTreload<cr>
 map ,X :he XPTemplate<CR>
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 " let g:xptemplate_key = '<Tab>'
 let g:xptemplate_nav_next = '<C-j>'
 let g:xptemplate_nav_prev = '<C-k>'
-
 """" Sparkup Settings
 " let g:sparkupExecuteMapping = '<D-e>'
 
@@ -335,12 +334,6 @@ if has("eval")
     let g:netrw_use_noswf = 1
 endif
 
-"""" FuzzyFinder Settings
-let g:returning_from_fuzzy = 0
-let g:fuf_modesDisable = [ 'mrucmd' ]
-let g:fuf_mrufile_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
-let g:fuf_mrufile_maxItem = 300
-"let g:fuf_mrucmd_maxItem = 400
 """" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 2
 let g:ctrlp_mruf_max = 2000
@@ -364,8 +357,7 @@ map <silent> <leader>f :CtrlP<CR>
 map <silent> <leader>gf :CtrlPCurFile<CR>
 map <silent> <leader>F :ClearCtrlPCache<CR>
 map <silent> <leader>gd :CtrlPCurWD<CR>
-map <silent> \a :CtrlP 
-
+map <silent> \e :CtrlP 
 """" Powerline
 let g:Powerline_symbols = 'fancy'
 """" Exhuberant ctags Settings
@@ -386,25 +378,25 @@ nmap \gd :Gdiff<cr>
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
-    :set guioptions=Aci
-    :set lines=100
-    :set columns=200
-    :set fuoptions=maxvert,maxhorz
+    set guioptions=Aci
+    set lines=100
+    set columns=200
+    set fuoptions=maxvert,maxhorz
     set macmeta
 
     " set go-=T
     " Don't show scroll bars in the GUI
-    :set guioptions-=L
-    :set guioptions-=r
+    set guioptions-=L
+    set guioptions-=r
 
     let g:molokai_original = 1 " lighter background in gVim
-    :let g:zenburn_high_Contrast = 1 " darker colors
-    :set background=dark
+    let g:zenburn_high_Contrast = 1 " darker colors
+    set background=dark
     " set background=light
     " :colorscheme solarized
     " :hi Normal guib=#252626
     " :colorscheme vitamins
-    :colorscheme mj
+    colorscheme mj
     " :colorscheme jellybeans
     " :colorscheme sjl
     " :colorscheme grb3
@@ -418,7 +410,7 @@ if has('gui_running')
     hi TabLineSel guifg=#A6E22E guibg=#3B3A32 gui=none
 else
     set background=dark
-    :colorscheme solarized
+    colorscheme solarized
     " :colorscheme molokai_jay
     " :colorscheme ir_black
     " :colorscheme molokai_kien
@@ -447,13 +439,11 @@ cmap <C-\> <C-]>
 
 """ Statusline
 if !(has('gui_running'))
-    " GRB: Put useful info in status line
     hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
     " magenta
     hi User2 term=bold cterm=bold ctermfg=161 gui=bold guifg=#F92672 guibg=#363946 ctermbg=237
     " cyan
     hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
-    "set statusline=%<%f\ (%2*%{&ft}%*)\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %1*%{fugitive#statusline()}%*"
     set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
 endif
 """ my own Supertab TODO
@@ -557,16 +547,30 @@ nnoremap <leader>! :Shell
 " Send visual selection to gist.github.com as a private, filetyped Gist
 " Requires the gist command line too (brew install gist)
 vnoremap <leader>G :w !gist -p -t %:e \| pbcopy<cr>
+"""" Scratch
+command! ScratchToggle call ScratchToggle()
+function! ScratchToggle() " {{{
+  if exists("w:is_scratch_window")
+    unlet w:is_scratch_window
+    exec "q"
+  else
+    exec "normal! :Sscratch\<cr>\<C-W>J:resize 13\<cr>"
+    let w:is_scratch_window = 1
+  endif
+endfunction " }}}
+nnoremap <silent> <leader><tab> :ScratchToggle<cr>
 """ Mappings
 """" Ease of use
 " Most important things first
 cnoremap jk <C-c>
 imap jk <Esc>
 
-" Clear the search buffer when hitting return
+" Clear the search buffer when hitting return -- <C-L> now
 " ... or <C-L> in insert mode
-nnoremap <CR> :nohlsearch<cr>
+" nnoremap <CR> :nohlsearch<cr>
 inoremap <C-L> <C-O>:nohls<CR>
+" noremap <C-L> :nohlsearch<CR><C-L>
+noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
 " Unfortunately this baby only works on MacVim
 " No matter where the cursor insert and edit a new line below.
@@ -664,6 +668,9 @@ nnoremap <silent> <leader>; :call setline(line('.'), getline('.') . ';')<CR>
 
 " Removes superfluous blank lines..
 map \L :g/^\s*\n\s*$/d<CR>
+
+" Clean trailing whitespace
+nnoremap \W :%s/\s\+$//<cr>:let @/=''<cr>
 command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
 command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
             \ | wincmd p | diffthis
@@ -674,11 +681,18 @@ command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
 inoremap <C-W> <C-G>u<C-W>
 inoremap <C-U> <C-G>u<C-U>
 
+" Format Text-Mate Style
+map Q gqip
+
 " Write to file with sudo
 cmap w!! w !sudo tee % >/dev/null
 
 imap <C-J> <Down>
 imap <C-K> <Up>
+
+" Select (charwise) the contents of the current line, excluding indentation.
+" Great for pasting Python lines into REPLs.
+nnoremap vv ^vg_
 """" Remap command-line-editing keys
 cnoremap <C-A>     <Home>
 cnoremap <ESC>b    <S-Left>
@@ -706,30 +720,11 @@ nnoremap <M-j> :lnext<cr>zvzz
 nnoremap <M-k> :lprevious<cr>zvzz
 inoremap <M-j> <esc>:lnext<cr>zvzz
 inoremap <M-k> <esc>:lprevious<cr>zvzz
-nnoremap <m-Down> :cnext<cr>zvzz
-nnoremap <m-Up> :cprevious<cr>zvzz
+nnoremap <M-Down> :cnext<cr>zvzz
+nnoremap <M-Up> :cprevious<cr>zvzz
 """" Split line (sister to [J]oin lines)
 " The normal use of S is covered by cc, so don't worry about shadowing it.
 nnoremap S i<cr><esc><right>
-"""" Split/Join
-"
-" Basically this splits the current line into two new ones at the cursor position,
-" then joins the second one with whatever comes next.
-"
-" Example:                      Cursor Here
-"                                    |
-"                                    V
-" foo = ('hello', 'world', 'a', 'b', 'c',
-"        'd', 'e')
-"
-"            becomes
-"
-" foo = ('hello', 'world', 'a', 'b',
-"        'c', 'd', 'e')
-"
-" Especially useful for adding items in the middle of long lists/tuples in Python
-" while maintaining a sane text width.
-nnoremap K h/[^ ]<cr>"zd$jyyP^v$h"zpJk:s/\v +$//<cr>:noh<cr>j^
 """" Execute current line
 function! ExecuteLine()
     let save_reg = @@
@@ -802,7 +797,7 @@ nmap <Leader>sd :set spell spelllang=de<CR>
 " Quickly add a new spelling abbreviation for the word under cursor to this file.
 nmap <C-F6> :let tmp=@f<CR>"fyaw<Esc>:bot split ~/.vimrc<CR>G?LAST_SPELL<CR>zRkoiab<Space><Esc>"fp<Esc>:let @f=tmp<CR>a
 """" Quick editing
-nnoremap \v <C-w><C-v><C-l>:e $MYVIMRC<cr>
+nnoremap \v <C-w><C-v><C-l>:e ~/dotfiles/.vimrc<cr>
 nnoremap \z <C-w><C-v><C-l>:e ~/dotfiles/.zshrc<cr>
 nnoremap \p <C-w><C-v><C-l>:e ~/.pentadactylrc<cr>
 noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'.vim'<cr>
@@ -826,7 +821,7 @@ nnoremap \sx :set ft=xml<CR>
 " syntax highlighting group that the current "thing" under the cursor
 " belongs to -- very useful for figuring out what to change as far as
 " syntax highlighting goes.
-nmap <silent> <leader>y :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+nmap <silent> <leader>sa :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
             \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
             \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
             \ . ">"<CR>
@@ -862,6 +857,33 @@ nmap <silent> _gW :vimgrep /<C-r><C-a>/ %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
 " Use very magic mode in order to use () instead of \(\) etc.
 " nnoremap / /\v
 " vnoremap / /\v
+"""" Ack motions
+
+" Motions to Ack for things.  Works with pretty much everything, including:
+"
+"   w, W, e, E, b, B, t*, f*, i*, a*, and custom text objects
+"
+" Awesome.
+"
+" NOTE: If the text covered by a motion contains a newline it won't work.  Ack
+" searches line-by-line.
+nnoremap <silent> \a :set opfunc=<SID>AckMotion<CR>g@
+xnoremap <silent> \a :<C-U>call <SID>AckMotion(visualmode())<CR>
+
+function! s:CopyMotionForType(type)
+    if a:type ==# 'v'
+        silent execute "normal! `<" . a:type . "`>y"
+    elseif a:type ==# 'char'
+        silent execute "normal! `[v`]y"
+    endif
+endfunction
+
+function! s:AckMotion(type) abort
+    let reg_save = @@
+    call s:CopyMotionForType(a:type)
+    execute "normal! :Ack! --literal " . shellescape(@@) . "\<cr>"
+    let @@ = reg_save
+endfunction
 """" TODO: check those out
 " noremap <F3> :!sed -e (regex) && doxygen yourproject doc && zip -r release.zip doc src
 " Easier to type, and I never use the default behavior.
@@ -873,5 +895,5 @@ nmap <silent> _gW :vimgrep /<C-r><C-a>/ %<CR>:ccl<CR>:cwin<CR><C-W>J:nohls<CR>
 "             \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 "inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
 "\ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
-"" vim:fdm=expr
+"" vim:fdm=expr:fdl=0
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='

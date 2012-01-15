@@ -12,6 +12,9 @@
 "endfunction
 "setlocal foldtext=FoldText()
 "setlocal fdm=manual
+set fdl=1
+set fdm=manual
+setlocal cinoptions+=(4j1
 
 function! MyFoldText()
     let line = getline(v:foldstart)
@@ -60,11 +63,10 @@ command! InsertMain call InsertMainClass()<CR>
 " autocmd Filetype java if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
 " make c-] work as f3 in eclipse
 "autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
-set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
 " autocmd Filetype java map <buffer> <F3> :execute 'NERDTree ' . expand('%:p:h')<CR>
 "autocmd Filetype java noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
-inoremap <C-Space> <C-X><C-U>
-inoremap <C-@> <C-X><C-U>
+" inoremap <C-Space> <C-X><C-U>
+" inoremap for commandline vim
 "autocmd BufWinEnter *.java silent loadview
 "autocmd BufWinLeave *.java mkview
 
@@ -84,14 +86,18 @@ function! MyControlSpace()
         " return "\<C-X>\<C-O>"
     " endif
 endfunction
+inoremap <C-Space> <c-r>=MyControlSpace()<CR>
+inoremap <C-@> <c-r>=MyControlSpace()<CR>
 
 if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
 "
 " Try to use eclim's <C-]> instead of the tags-buitlin one - will I regret
 noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
-set fdl=1|set fdm=manual|setlocal cinoptions+=(4j1
+set fdl=1
+set fdm=manual
+setlocal cinoptions+=(4j1
 noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
-inoremap <C-Space> let b:complType=0 | <C-X><C-U>
+" inoremap <C-Space> let b:complType=0<CR>:execute ":normal \<C-X>\<C-U>"
 inoremap <C-@> <C-X><C-U>
 "autocmd BufWinEnter *.java silent loadview
 "autocmd BufWinLeave *.java mkview
@@ -123,6 +129,7 @@ nnoremap <silent> <F3> :JavaDocSearch -x declarations<cr>
 " for vimgrep next and previous result
 " Insert closing bracket after {<CR>
 inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
+
 command! JGS JavaGetSet | normal gg=G
 "com! Tags '/Users/iaj/bin/ctags -R --language-force=java -f.tags /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Classes'
 
