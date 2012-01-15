@@ -1,6 +1,5 @@
 " Author:  iaj (tyberion@googlemail.com)
 "
-" NOTE:
 " If you're editing this in Vim and don't know how folding works, type zR to
 " unfold everything.  And then read ":help folding".
 """ VAM
@@ -11,10 +10,10 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['speeddating', 'powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -401,9 +400,9 @@ if has('gui_running')
     " colorscheme sjl
     " colo solarized
     colo mj
+    " colo grb256
     " colorscheme grb3
     " colorscheme mustang
-    " colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
     highlight SpellBad term=underline gui=undercurl guisp=Orange
@@ -415,8 +414,7 @@ else
     colorscheme solarized
     " :colorscheme molokai_jay
     " :colorscheme ir_black
-    " :colorscheme molokai_kien
-    " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
+    " :colorscheme molokai
 endif
 """ Abbreviations
 function! EatChar(pat)
@@ -427,7 +425,6 @@ endfunction
 function! MakeSpacelessIabbrev(from, to)
     execute "iabbrev <silent> ".a:from." ".a:to."<C-R>=EatChar('\\s')<CR>"
 endfunction
-
 call MakeSpacelessIabbrev('gh/',  'http://github.com/')
 
 cabbr %% <C-R>=expand('%:p:h')<CR>
@@ -437,7 +434,6 @@ cabbr jobs /Users/iaj/Documents/jobs/
 cabbr stud /Users/iaj/Documents/studying/
 " Expand abbreviations in command mode...
 cmap <C-\> <C-]>
-
 """ Statusline
 if !(has('gui_running'))
     hi User1 guifg=green guibg=#363946 ctermfg=green ctermbg=237 gui=bold guifg=#e0e0e0 guibg=#363946
@@ -608,6 +604,8 @@ nnoremap <leader>s<Space> :%s//g<left><left>
 
 " Change directory to the current file dir
 nnoremap <leader>D :lcd %:h<cr>:pwd<cr>
+" Manually invoke setting the path to the project directory
+nnoremap \w :cd <C-r>=FindProjectRoot('root.dir')<CR><CR>:pwd<CR>
 
 cnoremap <C-p> <Up>
 cnoremap <C-n> <Down>
@@ -714,15 +712,15 @@ cnoremap <ESC><C-H> <C-W>
 "             Location List     QuickFix Window
 "            (e.g. Syntastic)     (e.g. Ack)
 "            ----------------------------------
-" Next      |     M-j               M-Down     |
-" Previous  |     M-k                M-Up      |
+" Next      |     M-j               M-n        |
+" Previous  |     M-k               M-p        |
 "            ----------------------------------
 nnoremap <M-j> :lnext<cr>zvzz
 nnoremap <M-k> :lprevious<cr>zvzz
 inoremap <M-j> <esc>:lnext<cr>zvzz
 inoremap <M-k> <esc>:lprevious<cr>zvzz
-nnoremap <M-Down> :cnext<cr>zvzz
-nnoremap <M-Up> :cprevious<cr>zvzz
+nnoremap <M-n> :cnext<cr>zvzz
+nnoremap <M-p> :cprevious<cr>zvzz
 """" Split line (sister to [J]oin lines)
 " The normal use of S is covered by cc, so don't worry about shadowing it.
 nnoremap S i<cr><esc><right>

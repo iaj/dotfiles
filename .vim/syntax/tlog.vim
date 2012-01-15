@@ -13,15 +13,20 @@ syn match tlogDate "\d\d\d\d-\d\d-\d\d"
 syn match tlogEx "\(squats\|deadlifts\|chinups\|bench\ presses\|barbell\ rows\|militaries\)"
 syn match innerBrackets "(\zs[^)]*\ze)"
 syn match tlogPic "pics/\S*"
-syn match tlogComments "^comments\S*(\zs[^)]*\ze)"
-syn match tlogComment "^comments\>"
+syn match tlogUserComments "^comments\S*(\zs[^)]*\ze)"
+syn match tlogUserComment "^comments\>"
+
+syn match tlogComm /#.*/
+syn match key "<\u\d>"
 
 hi def link tlogDate PreProc
 hi def link tlogEx Number
 hi def link tlogPic Number
 hi def link innerBrackets Statement
-hi def link tlogComment PreProc
-hi def link tlogComments String
+hi def link tlogUserComment PreProc
+hi def link tlogUserComments String
+hi def link tlogComm Comment
+hi def link key Special
 
 " call matchadd('Identifier', '\(lemma\|byte\|bit\)')
 " call matchadd('Statement', '\(even\|half\|nat2byte\|dbl\|byte2nat\|byte-add\|byte-inc\|byte-mult\)')

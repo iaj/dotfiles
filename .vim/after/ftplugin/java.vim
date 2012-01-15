@@ -130,7 +130,7 @@ nnoremap <silent> <F3> :JavaDocSearch -x declarations<cr>
 " Insert closing bracket after {<CR>
 inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs><space><space><space><space>
 
-command! JGS JavaGetSet | normal gg=G
+command! JGS :JavaGetSet|:!normal gg=G
 "com! Tags '/Users/iaj/bin/ctags -R --language-force=java -f.tags /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Classes'
 
 " bachelor arbeit specific

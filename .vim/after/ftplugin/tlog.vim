@@ -11,3 +11,4 @@ function! OpenImageInLine() " {{{
     endif
 endfunction
 nmap <silent> <F2> :call OpenImageInLine()<CR>
+setlocal commentstring=#\ %s
