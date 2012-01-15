@@ -396,15 +396,16 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    " :colorscheme solarized
-    " :hi Normal guib=#252626
-    " :colorscheme vitamins
-    colorscheme mj
-    " :colorscheme jellybeans
-    " :colorscheme sjl
-    " :colorscheme grb3
-    " :colorscheme mustang
-    " :colo tir_black
+    " colorscheme solarized
+    " hi Normal guib=#252626
+    " colorscheme vitamins
+    " colorscheme jellybeans
+    " colorscheme sjl
+    " colo solarized
+    colo mj
+    " colorscheme grb3
+    " colorscheme mustang
+    " colo tir_black
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
     highlight SpellBad term=underline gui=undercurl guisp=Orange
@@ -898,5 +899,9 @@ endfunction
 "             \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 "inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
 "\ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+""" Additional colors...
+hi InterestingWord1 guifg=#000000 guibg=#FFA700
+hi InterestingWord2 guifg=#000000 guibg=#53FF00
+hi InterestingWord3 guifg=#000000 guibg=#FF74F8
 "" vim:fdm=expr:fdl=0
 "" vim:fde=getline(v\:lnum)=~'^""'?'>'.(matchend(getline(v\:lnum),'""*')-2)\:'='
