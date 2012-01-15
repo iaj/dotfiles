@@ -7,6 +7,8 @@ nmap <buffer> <silent> <leader>id :silent !xed %<cr>
 " set makeprg=xcodebuild\ -activetarget\ -activeconfiguration
 " set makeprg=xcodebuild\ -activetarget\ -activeconfiguration
 
+" source $HOME/.vim/personal/scripts/objctagjump
+
 setlocal errorformat=%f:%l:\ error:\ %m,%f:%l:\ warning:\ %m
 " :setlocal makeprg=xcodebuild\ -configuration\ Debug
 set isk+=58

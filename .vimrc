@@ -12,11 +12,9 @@ fun SetupVAM()
     endif
     if has('gui_running')
         call vam#ActivateAddons(['powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['fugitive', 'powerline', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
     else
+        " No Powerline on terminals please
         call vam#ActivateAddons(['fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['repeat', 'ack', 'vim-comment-object', 'ctrlp', 'markdown', 'matchit.zip', 'surround', 'tComment', 'fugitive', 'xptemplate', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'vim-markdown-preview', 'cocoa' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -82,12 +80,9 @@ if has('syntax')
 endif
 
 """ Sourcing ~/.vimrc and own scripts
-" source $HOME/.vim/personal/scripts/remappings
 source $HOME/.vim/personal/scripts/functions
 source $HOME/.vim/personal/scripts/autocommands
 source $HOME/.vim/personal/scripts/galal
-" TODO: only do this when in OBJC files, obviously
-" source $HOME/.vim/personal/scripts/objctagjump
 " au VimEnter * source $HOME/.vim/personal/scripts/statusline
 " TODO fix those bars and have them run in your develop-environment
 "source $HOME/.vim/personal/scripts/error_handling
@@ -378,6 +373,9 @@ nmap \gc :Gcommit<cr>
 nmap \ga :Gwrite<cr>
 nmap \gl :Glog<cr>
 nmap \gd :Gdiff<cr>
+"""" ZoomWin
+" Map <C-w><C-O> to the same..
+map <silent> <C-w><C-o> :ZoomWin<CR>
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
@@ -420,7 +418,6 @@ else
     " :colorscheme molokai_kien
     " :colorscheme molokai           "one hell of a amazing great-magenta colorscheme
 endif
-
 """ Abbreviations
 function! EatChar(pat)
     let c = nr2char(getchar(0))
@@ -457,7 +454,7 @@ function! MyTabComplete()
     " complType=1 = invoked by keyword from buffers matching only
     if pumvisible()
         " keyword completion - invokes a 1
-        if (b:complType==1) || !exists(b:complType)
+        if (b:complType==1)
             return "\<C-P>"
         else
             " else just crawl normally
