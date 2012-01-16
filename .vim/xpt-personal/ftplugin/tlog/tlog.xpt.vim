@@ -28,5 +28,5 @@ XPT w hint=weight\ loggage
 ..XPT
 
 XPT i hint=insert\ an\ image
-`date()^ pics/`filename^
+`date()^ ▸ pics/`^
 ..XPT

@@ -10,10 +10,10 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['speeddating', 'powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['speeddating', 'powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -74,7 +74,7 @@ if has('syntax')
     "endif
     " Highlight TODO, FIXME, CHANGED and XXX in all documents.
     if v:version > 701 || (v:version == 701 && has('patch42'))
-        call matchadd('Todo', '\(TODO\|FIXME\|CHANGED\|XXX\)')
+        call matchadd('Todo', '\(TODO\|FIXME\|CHANGED\|XXX\|NOTE\)')
     endif
 endif
 
@@ -373,6 +373,27 @@ nmap \gd :Gdiff<cr>
 """" ZoomWin
 " Map <C-w><C-O> to the same..
 map <silent> <C-w><C-o> :ZoomWin<CR>
+"""" Rainbow Paranthesis
+nnoremap <leader>R :RainbowParenthesesToggle<cr>
+let g:rbpt_colorpairs = [
+    \ ['brown',       'RoyalBlue3'],
+    \ ['Darkblue',    'SeaGreen3'],
+    \ ['darkgray',    'DarkOrchid3'],
+    \ ['darkgreen',   'firebrick3'],
+    \ ['darkcyan',    'RoyalBlue3'],
+    \ ['darkred',     'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['brown',       'firebrick3'],
+    \ ['gray',        'RoyalBlue3'],
+    \ ['black',       'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['Darkblue',    'firebrick3'],
+    \ ['darkgreen',   'RoyalBlue3'],
+    \ ['darkcyan',    'SeaGreen3'],
+    \ ['darkred',     'DarkOrchid3'],
+    \ ['red',         'firebrick3'],
+    \ ]
+let g:rbpt_max = 16
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
@@ -397,8 +418,9 @@ if has('gui_running')
     " colorscheme jellybeans
     " colorscheme sjl
     " colo solarized
+    colo sjl
     " colo mj
-    colo grb256
+    " colo grb256
     " colorscheme grb3
     " colorscheme mustang
     " hi VisualNOS guibg=#444444

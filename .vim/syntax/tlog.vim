@@ -9,6 +9,7 @@ exec 'hi User9 guifg=#F92672'
 exec 'hi Successful_Test guifg=#A8FF60, guibg=#A8FF60'
 
 syn match tlogDate "\d\d\d\d-\d\d-\d\d"
+syn match tlogDate "\d\d\d\d\ \(Jan\|Feb\|Mar\|Apr\|Mai\|Jun\|Jul\|Aug\|Sep\|Oct\|Nov\|Dec\)\ \d\d"
 
 syn match tlogEx "\(squats\|deadlifts\|chinups\|bench\ presses\|barbell\ rows\|militaries\)"
 syn match innerBrackets "(\zs[^)]*\ze)"
