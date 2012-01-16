@@ -306,7 +306,6 @@ let g:xptemplate_nav_next = '<C-j>'
 let g:xptemplate_nav_prev = '<C-k>'
 """" Sparkup Settings
 " let g:sparkupExecuteMapping = '<D-e>'
-
 """" Command-T Settings
 let g:CommandTMaxHeight = 20
 let g:CommandTMaxFiles=3000
@@ -330,7 +329,6 @@ if has("eval")
     let g:netrw_timefmt = '%Y-%m-%d %H:%M:%S'
     let g:netrw_use_noswf = 1
 endif
-
 """" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 2
 let g:ctrlp_mruf_max = 2000
@@ -399,8 +397,8 @@ if has('gui_running')
     " colorscheme jellybeans
     " colorscheme sjl
     " colo solarized
-    colo mj
-    " colo grb256
+    " colo mj
+    colo grb256
     " colorscheme grb3
     " colorscheme mustang
     " hi VisualNOS guibg=#444444

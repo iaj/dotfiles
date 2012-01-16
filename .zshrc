@@ -212,9 +212,7 @@ if [ -d $HOME/Documents/work ]; then
 fi
 
 
-if [ -d $HOME/Dropbox ]; then
-    db() { cd $HOME/Dropbox/ }
-fi
+if [ -d $HOME/Dropbox ]; then db() { cd $HOME/Dropbox/ }; fi
 # website=/mnt/mg/var/www/virtual/marcgalal.com/htdocs; : ~website
 
 leo() { elinks "http://dict.leo.org/?search=$1"; }
