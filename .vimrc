@@ -110,7 +110,7 @@ set wildignore+=
 " Moving Around/Editing
 set whichwrap=b,s,h,l,<,>       " <BS> <Space> h l <Left> <Right> can change lines
 set virtualedit=block           " Let cursor move past the last char in <C-v> mode
-set scrolloff=8                 " Keep 3 context lines above and below the cursor
+set scrolloff=3                 " Keep 3 context lines above and below the cursor
 set backspace=indent,eol,start
 
 set showmatch                   " Briefly jump to a paren once it's balanced

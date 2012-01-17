@@ -10,5 +10,5 @@ function! OpenImageInLine() " {{{
         echo "No picpath found in line."
     endif
 endfunction
-nmap <silent> <F2> :call OpenImageInLine()<CR>
+nmap <buffer><silent> <F2> :call OpenImageInLine()<CR>
 setlocal commentstring=#\ %s

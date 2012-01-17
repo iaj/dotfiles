@@ -292,6 +292,7 @@ if [[ $OSTYPE == darwin* ]]; then
     alias ls='gls --color=auto -B'
     alias dircolors='gdircolors'
     alias g='mvim --remote-silent'
+    alias m='mvim --remote-silent'
     alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
     alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
     alias -s pdf='/Applications/Skim.app'
@@ -310,6 +311,7 @@ if [[ $OSTYPE == darwin* ]]; then
 else
     alias ls='ls --color=auto -B'
     alias g='vim'
+    alias m='vim'
 fi
 alias pnc='pn `pwd`'
 alias ltree=find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
