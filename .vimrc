@@ -10,10 +10,10 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['speeddating', 'powerline', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['powerline', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -57,7 +57,7 @@ set switchbuf=useopen
 " Always show tab bar
 set showtabline=2
 " set winwidth=84
-set pastetoggle=<F11>
+set pastetoggle=,p
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -302,8 +302,9 @@ map ,X :he XPTemplate<CR>
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 " let g:xptemplate_key = '<Tab>'
-let g:xptemplate_nav_next = '<C-j>'
-let g:xptemplate_nav_prev = '<C-k>'
+let g:xptemplate_nav_next = '<C-J>' " next location
+let g:xptemplate_nav_prev = '<C-K>' " previous location
+let g:xptemplate_to_right = '<C-L>' " Exit key
 """" Sparkup Settings
 " let g:sparkupExecuteMapping = '<D-e>'
 """" Command-T Settings
@@ -355,6 +356,7 @@ map <silent> <leader>gd :CtrlPCurWD<CR>
 map <silent> \e :CtrlP 
 """" Powerline
 let g:Powerline_symbols = 'fancy'
+let g:Powerline_theme = 'neverland'
 """" Exhuberant ctags Settings
 map <F9> :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
 map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
@@ -368,8 +370,10 @@ map <leader>a :Ack!
 nmap \gs :Gstatus<cr>
 nmap \gc :Gcommit<cr>
 nmap \ga :Gwrite<cr>
-nmap \gl :Glog<cr>
+nmap \gL :Glog<cr>
 nmap \gd :Gdiff<cr>
+nmap \gl :Shell git gl -18<cr>:wincmd \|<cr>
+
 """" ZoomWin
 " Map <C-w><C-O> to the same..
 map <silent> <C-w><C-o> :ZoomWin<CR>
@@ -394,6 +398,9 @@ let g:rbpt_colorpairs = [
     \ ['red',         'firebrick3'],
     \ ]
 let g:rbpt_max = 16
+"""" syntastic
+call syntastic#Setup()
+let g:syntastic.file_types['html'] = 'disabled'
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
@@ -417,8 +424,8 @@ if has('gui_running')
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
-    " colo solarized
-    colo sjl
+    colo solarized
+    " colo sjl
     " colo mj
     " colo grb256
     " colorscheme grb3
@@ -580,6 +587,7 @@ nnoremap <silent> <leader><tab> :ScratchToggle<cr>
 """" Ease of use
 " Most important things first
 cnoremap jk <C-c>
+" cnoremap jk <Esc>
 imap jk <Esc>
 
 " Clear the search buffer when hitting return -- <C-L> now
@@ -719,7 +727,7 @@ cnoremap <ESC>f    <S-Right>
 cnoremap <ESC><BS> <C-W>
 cnoremap <C-E>      <End>
 " cnoremap <C-F>      <Right>
-cnoremap <C-N>      <End>
+cnoremap <C-N>      <Down>
 cnoremap <C-P>      <Up>
 cnoremap <ESC>b     <S-Left>
 cnoremap <ESC><C-B> <S-Left>

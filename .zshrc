@@ -423,6 +423,7 @@ gitSvnDcommit(){
     echo '(gsh apply)' && \
     git stash apply
 }
+alias adoc="asciidoc -b html5 -a icons -a iconsdir=/opt/local/etc/asciidoc/images/icons/ -a toc2 -a theme=flask"
 
 ### Keybindings
 bindkey -v                                         # Use vi keybindings
