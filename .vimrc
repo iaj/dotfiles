@@ -10,7 +10,9 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['powerline', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
         call vam#ActivateAddons(['syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
@@ -36,6 +38,7 @@ if &t_Co > 2 || has("gui_running")
 endif
 filetype plugin indent on
 
+" set showmode
 set lazyredraw                         " Avoid redrawing the screen mid-command.
 set undolevels=1000
 set encoding=utf-8
@@ -43,6 +46,8 @@ let mapleader = ","
 let maplocalleader = "\\"
 set antialias
 set guifont=Monaco:h12.00
+set clipboard+=autoselect
+
 " set guifont=Menlo\ Regular\ for\ Powerline:h12
 " set guifont=Inconsolata-g:h14
 " set guifont=Mensch\ for\ Powerline:h12
@@ -57,7 +62,15 @@ set switchbuf=useopen
 " Always show tab bar
 set showtabline=2
 " set winwidth=84
-set pastetoggle=,p
+
+" Paste Toggle
+function! PasteToggle()
+  set invpaste
+  set paste?
+endfunction
+map ,p :call PasteToggle()<CR>
+imap <F11> <c-o>:call PasteToggle()<CR>
+set pastetoggle=<f11>
 
 " Don't highlight more than 200 columns as I normally don't have that long
 " lines and they slow down syntax coloring. Thanks to Derek Wyatt
@@ -240,7 +253,6 @@ set backupext=~                 " Backup for "file" is "file~"
 set wildmenu                    " Menu completion in command mode on <Tab>
 set wildmode=list:longest,full
 
-" GRB: use emacs-style tab completion when selecting files, etc
 " set wildmode=longest,list
 " set wcm=<C-Z>                   " Ctrl-Z in a mapping acts like <Tab> on cmdline
 "set timeoutlen=100
@@ -278,12 +290,10 @@ let g:EclimPhpValidate = 0
 " ,jc shows corrections for the current line of java
 " nnoremap <silent> <LocalLeader>jc :JavaCorrect<cr>
 " Disable Eclim's taglisttoo because I use the regular taglist plugin
-
 """" gundo - Graphical UNDO
 let g:gundo_width = 60
 "let g:gundo_preview_height = 40
 "let g:gundo_right = 1
-
 """" Taglist Settings (eg. show tags only for the current file)
 let g:Tlist_Show_One_File = 1
 "let Tlist_Max_Tag_Length = 200
@@ -295,7 +305,6 @@ let Tlist_Close_On_Select=1
 let Tlist_Compact_Format=1
 let Tlist_Use_Right_Window = 1
 nnoremap <silent> <F2> :TlistToggle<CR>
-
 """" XPTemplate Settings
 " nnoremap <leader><space> :XPTreload<cr>
 map ,X :he XPTemplate<CR>
@@ -314,7 +323,6 @@ let g:CommandTScanDotDirectories=1
 "let g:CommandTCancelMap = ['<C-c>']
 "let g:CommandTAlwaysShowDotFiles=1
 "let g:CommandTMatchWindowAtTop=1
-
 """" NetRW Settings
 let g:netrw_altv          = 1
 let g:netrw_fastbrowse    = 2
@@ -345,7 +353,7 @@ let g:ctrlp_prompt_mappings = {
             \ }
 let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
-let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG'
+let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG\|temp/*'
 nnoremap <leader>. :CtrlPTag<cr>
 map <silent> <leader>b :CtrlPBuffer<CR>
 map <silent> <leader>r :CtrlPMRUFiles<CR>
@@ -356,7 +364,8 @@ map <silent> <leader>gd :CtrlPCurWD<CR>
 map <silent> \e :CtrlP 
 """" Powerline
 let g:Powerline_symbols = 'fancy'
-let g:Powerline_theme = 'neverland'
+" never use that when that theme is non-existent - lesson learned
+" let g:Powerline_theme = 'neverland'
 """" Exhuberant ctags Settings
 map <F9> :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
 map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
@@ -424,7 +433,8 @@ if has('gui_running')
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
-    colo solarized
+    colorscheme Tomorrow-Night
+    " colo solarized
     " colo sjl
     " colo mj
     " colo grb256
@@ -858,7 +868,7 @@ nnoremap <silent> <leader>h1 :execute 'match InterestingWord1 /\<<c-r><c-w>\>/'<
 nnoremap <silent> <leader>h2 :execute '2match InterestingWord2 /\<<c-r><c-w>\>/'<cr>
 nnoremap <silent> <leader>h3 :execute '3match InterestingWord3 /\<<c-r><c-w>\>/'<cr>
 """" Warnings - learn your VIM
-inoremap <Esc> <Esc>:echo "You should use Ctrl-[, or rather 'jk'"<CR>
+" inoremap <Esc> <Esc>:echo "You should use Ctrl-[, or rather 'jk'"<CR>
 "inoremap <BS> <Esc>:echo "You should use Ctrl-H"<CR>
 
 " Learn your hjkl!

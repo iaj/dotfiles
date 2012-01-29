@@ -1,4 +1,3 @@
-set autochdir
 function! OpenImageInLine() " {{{
     let l:picpath = expand('%:h') . "/" . matchstr(getline("."), 'pics\S*')
     " echom l:picpath
@@ -11,4 +10,10 @@ function! OpenImageInLine() " {{{
     endif
 endfunction
 nmap <buffer><silent> <F2> :call OpenImageInLine()<CR>
+" This goodie is needed for the pic viewing
+set autochdir
 setlocal commentstring=#\ %s
+set textwidth=81
+" Indent automatically according to the line before
+set ai
+" set linebreak

@@ -273,10 +273,11 @@ alias la='ls -A'
 alias ll='ls -l'
 # only on mac osx tho
 alias :q="echo YOU FAIL"
-alias sr= "screen -r"
-alias sx= "screen -x"
+alias sr="screen -r"
+alias sx="screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
+alias awk="/opt/local/bin/gawk"
 
 # Now we got mysql here for TYPO-Adminitration purposes
 alias mysqlstart='sudo /opt/local/bin/mysqld_safe5 &'
@@ -293,6 +294,7 @@ if [[ $OSTYPE == darwin* ]]; then
     alias dircolors='gdircolors'
     alias g='mvim --remote-silent'
     alias m='mvim --remote-silent'
+    alias mn='mvim'
     alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
     alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
     alias -s pdf='/Applications/Skim.app'
