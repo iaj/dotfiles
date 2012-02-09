@@ -508,9 +508,9 @@ bindkey "^@"            _history-complete-older        # C-Space to complete fro
 bindkey "^]."           insert-last-word
 
 # TODO: check this one out...
-bindkey "^],"     copy-earlier-word
-bindkey 'jk'      vi-cmd-mode
-bindkey '^T' _most_recent_file
+bindkey "^],"           copy-earlier-word
+bindkey 'jk'            vi-cmd-mode
+bindkey '^T'            _most_recent_file
 lastpath() {
      LBUFFER+="${${(z)history[$#history]}[-1]:h}"
 }
