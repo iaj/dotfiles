@@ -353,7 +353,7 @@ let g:ctrlp_prompt_mappings = {
             \ }
 let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
-let g:ctrlp_mruf_exclude = '*.xib\|/undo/*\|COMMIT_EDITMSG\|temp/*'
+let g:ctrlp_mruf_exclude = '*.xib\|/var/folders/.*\|/undo/*\|COMMIT_EDITMSG\|temp/*'
 nnoremap <leader>. :CtrlPTag<cr>
 map <silent> <leader>b :CtrlPBuffer<CR>
 map <silent> <leader>r :CtrlPMRUFiles<CR>
@@ -433,7 +433,8 @@ if has('gui_running')
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
-    colorscheme Tomorrow-Night
+    colorscheme badwolf
+    " colorscheme Tomorrow-Night
     " colo solarized
     " colo sjl
     " colo mj

@@ -192,6 +192,8 @@ cdf() { cd *$1*/ } # stolen from @topfunky
 if [ -d $HOME/dev/qs ]; then qs=~/dev/qs/Quicksilver/Quicksilver; : ~qs ; fi
 if [ -d $HOME/hg/dactyl ]; then dactyl=~/hg/dactyl; : ~dactyl ; fi
 if [ -d $HOME/Library/Application\ Support ]; then asu=$HOME/Library/Application\ Support; : ~asu ; fi
+if [ -d $HOME/Library/Application\ Support/Launchbar/Actions ]; then actions=$HOME/Library/Application\ Support/Launchbar/Actions; : ~actions ; fi
+if [ -d $HOME/Library/Scripts/my\ AppleScripts ]; then myas=$HOME/Library/Scripts/my\ AppleScripts; : ~myas ; fi
 
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
