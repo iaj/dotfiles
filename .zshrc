@@ -111,7 +111,8 @@ setopt Correct             2>/dev/null
 # Attempt to spell-check command names - I mistype a lot.
 setopt AUTO_CD             2>/dev/null
 #setopt NoAutoMenu
-
+# Don't have file<tab>| remove the whitspace
+ZLE_REMOVE_SUFFIX_CHARS=''
 # Returns whether its argument should be considered "true"
 # Succeeds with "1", "y", "yes", "t", and "true", case insensitive
 booleancheck() { [[ -n "$1" && "$1" == (1|[Yy]([Ee][Ss]|)|[Tt]([Rr][Uu][Ee]|)) ]] }

@@ -725,8 +725,9 @@ map Q gqip
 " Write to file with sudo
 cmap w!! w !sudo tee % >/dev/null
 
-imap <C-J> <Down>
-imap <C-K> <Up>
+" TODO: let this NOT break C-K dic
+" imap <C-J> <Down>
+" imap <C-K> <Up>
 
 " Select (charwise) the contents of the current line, excluding indentation.
 " Great for pasting Python lines into REPLs.
