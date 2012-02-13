@@ -29,12 +29,9 @@
 " }}}
 
 " Supporting code -------------------------------------------------------------
-
 " Preamble {{{
 
 set background=dark
-
-" hi clear
 
 if exists("syntax_on")
     syntax reset
@@ -56,14 +53,14 @@ let s:bwc.snow = ['ffffff', 15]
 let s:bwc.coal = ['000000', 0]
 
 " All of the Gravel colors are based on a brown from Clouds Midnight.
-let s:bwc.brightgravel = ['d9cec3', 252]
-let s:bwc.lightgravel  = ['998f84', 245]
-let s:bwc.gravel       = ['857f78', 243]
-let s:bwc.mediumgravel = ['666462', 241]
-let s:bwc.deepgravel   = ['45413b', 238]
-let s:bwc.deepergravel = ['35322d', 236]
-let s:bwc.darkgravel   = ['242321', 235]
-let s:bwc.blackgravel  = ['1c1b1a', 233]
+let s:bwc.brightgravel   = ['d9cec3', 252]
+let s:bwc.lightgravel    = ['998f84', 245]
+let s:bwc.gravel         = ['857f78', 243]
+let s:bwc.mediumgravel   = ['666462', 241]
+let s:bwc.deepgravel     = ['45413b', 238]
+let s:bwc.deepergravel   = ['35322d', 236]
+let s:bwc.darkgravel     = ['242321', 235]
+let s:bwc.blackgravel    = ['1c1b1a', 233]
 let s:bwc.blackestgravel = ['141413', 232]
 
 " A color sampled from a highlight in a photo of a glass of Dale's Pale Ale on
@@ -82,21 +79,18 @@ let s:bwc.tardis = ['0a9dff', 39]
 " This one's from Mustang, not Florida!
 let s:bwc.orange = ['ffa724', 214]
 
-" A limier version of Mustang's horsefood, to ward off scurvy.
-" It actually turned out pretty close to Molokai's green.  Huh.
-let s:bwc.lime = ['a1e022', 148]
-" Or maybe Getafe's
+" A limier green from Getafe.
 let s:bwc.lime = ['aeee00', 148]
 
 " Rose's dress in The Idiot's Lantern.
 let s:bwc.dress = ['ff9eb8', 211]
 
-" Saturated gravel (originally from Clouds Midnight).
-let s:bwc.mud = ['b88853', 137]
+" Another play on the brown from Clouds Midnight.  I love that color.
+let s:bwc.toffee = ['b88853', 137]
 
 " Also based on that Clouds Midnight brown.
-let s:bwc.coffee = ['c7915b', 137]
-let s:bwc.darkroast = ['88633f', 137]
+let s:bwc.coffee    = ['c7915b', 173]
+let s:bwc.darkroast = ['88633f', 95]
 
 " }}}
 " Highlighting Function {{{
@@ -148,7 +142,6 @@ endif
 " }}}
 
 " Actual colorscheme ----------------------------------------------------------
-
 " Vanilla Vim {{{
 
 " General/UI {{{
@@ -248,12 +241,12 @@ call HL('PreCondit', 'lime', '', 'bold')
 
 " Constants of all kinds are colored together.
 " I'm not really happy with the color yet...
-call HL('Constant',  'mud', '', 'bold')
-call HL('Character', 'mud', '', 'bold')
-call HL('Boolean',   'mud', '', 'bold')
+call HL('Constant',  'toffee', '', 'bold')
+call HL('Character', 'toffee', '', 'bold')
+call HL('Boolean',   'toffee', '', 'bold')
 
-call HL('Number', 'mud', '', 'bold')
-call HL('Float',  'mud', '', 'bold')
+call HL('Number', 'toffee', '', 'bold')
+call HL('Float',  'toffee', '', 'bold')
 
 " Not sure what 'special character in a constant' means, but let's make it pop.
 call HL('SpecialChar', 'dress', '', 'bold')
@@ -302,6 +295,43 @@ endif
 " }}}
 " Plugins {{{
 
+" CtrlP {{{
+
+    " the message when no match is found
+    call HL('CtrlPNoEntries', 'snow', 'taffy', 'bold')
+
+    " the matched pattern
+    call HL('CtrlPMatch', 'orange', 'bg', 'none')
+
+    " the line prefix '>' in the match window
+    call HL('CtrlPLinePre', 'deepgravel', 'bg', 'none')
+
+    " the prompt’s base
+    call HL('CtrlPPrtBase', 'deepgravel', 'bg', 'none')
+
+    " the prompt’s text
+    call HL('CtrlPPrtText', 'plain', 'bg', 'none')
+
+    " the prompt’s cursor when moving over the text
+    call HL('CtrlPPrtCursor', 'coal', 'tardis', 'bold')
+
+    " 'prt' or 'win', also for 'regex'
+    call HL('CtrlPMode1', 'coal', 'tardis', 'bold')
+
+    " 'file' or 'path', also for the local working dir
+    call HL('CtrlPMode2', 'coal', 'tardis', 'bold')
+
+    " the scanning status
+    call HL('CtrlPStats', 'coal', 'tardis', 'bold')
+
+    " TODO: CtrlP extensions.
+    " CtrlPTabExtra  : the part of each line that’s not matched against (Comment)
+    " CtrlPqfLineCol : the line and column numbers in quickfix mode (|hl-Search|)
+    " CtrlPUndoT     : the elapsed time in undo mode (|hl-Directory|)
+    " CtrlPUndoBr    : the square brackets [] in undo mode (Comment)
+    " CtrlPUndoNr    : the undo number inside [] in undo mode (String)
+
+" }}}
 " EasyMotion {{{
 
 call HL('EasyMotionTarget', 'tardis',     'bg', 'bold')
@@ -337,11 +367,12 @@ call HL('ShowMarksHLm', 'tardis', 'blackgravel')
 
 " Clojure {{{
 
-call HL('clojureSpecial', 'taffy', '', '')
-call HL('clojureDefn',    'taffy', '', '')
-call HL('clojureDefine',  'taffy', '', '')
-call HL('clojureMacro',   'taffy', '', '')
-call HL('clojureCond',    'taffy', '', '')
+call HL('clojureSpecial',  'taffy', '', '')
+call HL('clojureDefn',     'taffy', '', '')
+call HL('clojureDefMacro', 'taffy', '', '')
+call HL('clojureDefine',   'taffy', '', '')
+call HL('clojureMacro',    'taffy', '', '')
+call HL('clojureCond',     'taffy', '', '')
 
 call HL('clojureKeyword', 'orange', '', 'none')
 
@@ -361,8 +392,8 @@ call HL('cssTextProp', 'fg', '', 'none')
 call HL('cssRenderProp', 'fg', '', 'none')
 call HL('cssGeneratedContentProp', 'fg', '', 'none')
 
-call HL('cssValueLength', 'mud', '', 'bold')
-call HL('cssColor', 'mud', '', 'bold')
+call HL('cssValueLength', 'toffee', '', 'bold')
+call HL('cssColor', 'toffee', '', 'bold')
 call HL('cssBraces', 'lightgravel', '', 'none')
 call HL('cssIdentifier', 'orange', '', 'bold')
 call HL('cssClassName', 'orange', '', 'none')
@@ -379,16 +410,19 @@ call HL('djangoVarBlock', 'orange', '')
 " }}}
 " HTML {{{
 
-call HL('htmlTag', 'darkroast', 'bg', 'none')
+" Punctuation
+call HL('htmlTag',    'darkroast', 'bg', 'none')
 call HL('htmlEndTag', 'darkroast', 'bg', 'none')
 
-call HL('htmlTagName', 'coffee', '', 'bold')
+" Tag names
+call HL('htmlTagName',        'coffee', '', 'bold')
 call HL('htmlSpecialTagName', 'coffee', '', 'bold')
 
+" Attributes
 call HL('htmlArg', 'coffee', '', 'none')
 
+" Stuff inside an <a> tag
 call HL('htmlLink', 'lightgravel', '', 'underline')
-" hi htmlString guifg=#e6db74
 
 " }}}
 " Java {{{
@@ -411,7 +445,7 @@ call HL('mailSubject', 'orange', '', 'bold')
 call HL('mailHeader', 'lightgravel', '', '')
 call HL('mailHeaderKey', 'lightgravel', '', '')
 call HL('mailHeaderEmail', 'snow', '', '')
-call HL('mailURL', 'mud', '', 'underline')
+call HL('mailURL', 'toffee', '', 'underline')
 call HL('mailSignature', 'gravel', '', 'none')
 
 call HL('mailQuoted1', 'gravel', '', 'none')
@@ -433,10 +467,10 @@ call HL('markdownH3', 'lime', '', 'none')
 call HL('markdownH4', 'lime', '', 'none')
 call HL('markdownH5', 'lime', '', 'none')
 call HL('markdownH6', 'lime', '', 'none')
-call HL('markdownLinkText', 'mud', '', 'underline')
-call HL('markdownIdDeclaration', 'mud')
-call HL('markdownAutomaticLink', 'mud', '', 'bold')
-call HL('markdownUrl', 'mud', '', 'bold')
+call HL('markdownLinkText', 'toffee', '', 'underline')
+call HL('markdownIdDeclaration', 'toffee')
+call HL('markdownAutomaticLink', 'toffee', '', 'bold')
+call HL('markdownUrl', 'toffee', '', 'bold')
 call HL('markdownUrldelimiter', 'lightgravel', '', 'bold')
 call HL('markdownLinkDelimiter', 'lightgravel', '', 'bold')
 call HL('markdownLinkTextDelimiter', 'lightgravel', '', 'bold')
