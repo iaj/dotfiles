@@ -16,4 +16,5 @@ setlocal commentstring=#\ %s
 set textwidth=81
 " Indent automatically according to the line before
 set ai
-" set linebreak
+" set wrap
+set linebreak

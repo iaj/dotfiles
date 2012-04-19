@@ -354,6 +354,7 @@ let g:ctrlp_prompt_mappings = {
 let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:ctrlp_mruf_exclude = '*.xib\|/var/folders/.*\|/undo/*\|COMMIT_EDITMSG\|temp/*'
+let g:ctrlp_open_multiple_files = '2v'
 nnoremap <leader>. :CtrlPTag<cr>
 map <silent> <leader>b :CtrlPBuffer<CR>
 map <silent> <leader>r :CtrlPMRUFiles<CR>
@@ -839,6 +840,7 @@ nmap <C-F6> :let tmp=@f<CR>"fyaw<Esc>:bot split ~/.vimrc<CR>G?LAST_SPELL<CR>zRko
 nnoremap \v <C-w><C-v><C-l>:e ~/dotfiles/.vimrc<cr>
 nnoremap \z <C-w><C-v><C-l>:e ~/dotfiles/.zshrc<cr>
 nnoremap \p <C-w><C-v><C-l>:e ~/.pentadactylrc<cr>
+nnoremap \t <C-w><C-v><C-l>:e ~/Dropbox/training/training.txt<cr>
 noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'.vim'<cr>
 noremap \fs :exec 'e ~/.vim/syntax/'.&filetype.'.vim'<cr>
 noremap \fx :exec 'e ~/.vim/xpt-personal/ftplugin/'.&filetype.'/'.&filetype.'.xpt.vim'<cr>
