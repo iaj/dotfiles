@@ -19,15 +19,16 @@ syn match tlogPic "pics/\S*"
 syn region innerBrackets start=/(/hs=s+1 end=/)/he=e-1
 " \@<= doesn't add stuff to the matching
 " syn match tlogUserComments "\(^comments (\)\@<=[^)]*\ze)"
-syn match tlogUserHWords "^\(comments\|formula\|trails\|[Ll]eangains\|[gG][oO][aA][lL][sSzZ]*\)\>"
-syn match tlogDaytimeWords "\(@noon\|@eve\|@morning\)\>"
+syn match tlogUserHWords "^\(comments\|formula\|trails\|Vascularity\|[Ll]eangains\|[gG][oO][aA][lL][sSzZ]*\)\>"
+syn match tlogDaytimeWords "\(@noon\|@eve\|@morning\|@\d\+:\d\+\(am\|pm\)\)"
 syn match tlogWeight "weight"
 syn match tlogWeightUnits "\(pd\|kg\|pounds\|kilograms\|grams\?\|calories\|kcals\?\)\>"
 syn match tlogMasses "\(\(f\|l\|t\)bm\|kf\)"
 
 " syntax region Comment   start=+comments (+  skip=+comments (+  end=+)+
 syntax region tlogUserComments start="\(^comments \)\@<=("hs=s+1 end=/)/he=e-1
-syn match tlogDate "\d\d\d\d\ \(Jan\|Feb\|Mar\|Apr\|Mai\|Jun\|Jul\|Aug\|Sep\|Oct\|Nov\|Dec\)\ \d\d"
+syn match tlogDate "\d\d\d\d\ \(Jan\|Feb\|Mar\|Apr\|May\|Jun\|Jul\|Aug\|Sep\|Oct\|Nov\|Dec\)\ \d\d"
+syn match tlogDay "\<\(Sat\|Sun\|Mon\|Tue\|Wed\|Thu\|Fri\)\>"
 
 syn match tlogMeasure "\<\(brustfalte\|beinfalte\|bauchfalte\|bauchumfang\|kf\/lbm\/fat\|bmr\)\>"
 
@@ -35,6 +36,9 @@ syn match tlogComm /#.*/
 syn match key "<\u\d>"
 
 hi tlogDate guifg=#268bd2
+" hi def link tlogDay tlogDate
+hi def link tlogDay PreProc
+
 hi Successful_Test guifg=#A8FF60, guibg=#A8FF60
 
 hi tlogMeasure guifg=#cb4b16

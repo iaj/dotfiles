@@ -307,7 +307,6 @@ let Tlist_Use_Right_Window = 1
 nnoremap <silent> <F2> :TlistToggle<CR>
 """" XPTemplate Settings
 " nnoremap <leader><space> :XPTreload<cr>
-map ,X :he XPTemplate<CR>
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 " let g:xptemplate_key = '<Tab>'
@@ -434,7 +433,10 @@ if has('gui_running')
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
+
     colorscheme badwolf
+    hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
+
     " colorscheme Tomorrow-Night
     " colo solarized
     " colo sjl
@@ -840,10 +842,12 @@ nmap <C-F6> :let tmp=@f<CR>"fyaw<Esc>:bot split ~/.vimrc<CR>G?LAST_SPELL<CR>zRko
 nnoremap \v <C-w><C-v><C-l>:e ~/dotfiles/.vimrc<cr>
 nnoremap \z <C-w><C-v><C-l>:e ~/dotfiles/.zshrc<cr>
 nnoremap \p <C-w><C-v><C-l>:e ~/.pentadactylrc<cr>
-nnoremap \t <C-w><C-v><C-l>:e ~/Dropbox/training/training.txt<cr>
+" nnoremap \t <C-w><C-v><C-l>:e ~/Dropbox/training/training.txt<cr>
+nnoremap \t :e ~/Dropbox/training/training.txt<cr>
 noremap \ft :exec 'e ~/.vim/after/ftplugin/'.&filetype.'.vim'<cr>
 noremap \fs :exec 'e ~/.vim/syntax/'.&filetype.'.vim'<cr>
 noremap \fx :exec 'e ~/.vim/xpt-personal/ftplugin/'.&filetype.'/'.&filetype.'.xpt.vim'<cr>
+noremap \x :e ~/.vim/ftplugin/_common/personal.xpt.vim<cr>
 """" Quick sourcing
 map <silent> <leader>ms :messages<CR>
 map <silent> <leader>sv :source $HOME/dotfiles/.vimrc<CR>

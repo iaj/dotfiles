@@ -2,6 +2,7 @@ XPTemplate priority=personal
 XPTinclude
     \ _common/personal
     \ _common/common
+XPTvar $DATE_FMT     '%Y %b %d, %a'
 
 "whole workouts go below here
 XPT sq hint=squat-te
@@ -80,6 +81,7 @@ XPT bmr hint=basal\ metabolic\ rate\ with\ formula
 `date()^ `leanbodymass^pd lbm*17=`basal metabolic rate^ bmr
 ..XPT
 
-XPT > hint=▸
-▸ 
+
+XPT sleep hint=sleep\ tracking
+`date()^ sleep: `^ hrs
 ..XPT
