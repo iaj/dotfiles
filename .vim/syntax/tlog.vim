@@ -13,13 +13,13 @@ syn match Arrow "▸"
 
 syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
 syn match tlogSpecial "\<\(workout\|meal\|progresspic\|measurements\S*\)\>"
-syn match tlogFeast "\<\(feast\|fast\)\>"
+syn match tlogFeast "\<\(refeed\|feast\|fast\)\>"
 syn match tlogPic "pics/\S*"
 " syn match innerBrackets "(\zs[^)]*\ze)"
 syn region innerBrackets start=/(/hs=s+1 end=/)/he=e-1
 " \@<= doesn't add stuff to the matching
 " syn match tlogUserComments "\(^comments (\)\@<=[^)]*\ze)"
-syn match tlogUserHWords "^\(comments\|formula\|trails\|Vascularity\|[Ll]eangains\|[gG][oO][aA][lL][sSzZ]*\)\>"
+syn match tlogUserHWords "^\(comments\|formula\|trails\|Vascularity\|[Ll]eangains\|[cC]heckpoint[sS]*\|[gG][oO][aA][lL][sSzZ]*\)\>"
 syn match tlogDaytimeWords "\(@noon\|@eve\|@morning\|@\d\+:\d\+\(am\|pm\)\)"
 syn match tlogWeight "weight"
 syn match tlogWeightUnits "\(pd\|kg\|pounds\|kilograms\|grams\?\|calories\|kcals\?\)\>"
