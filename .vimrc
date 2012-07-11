@@ -824,6 +824,7 @@ nmap <silent> ,sw :execute ":resize " . line('$')<cr>
 noremap <leader>0 :set fdl=0<CR>
 noremap <leader>1 :set fdl=1<CR>
 noremap <leader>2 :set fdl=2<CR>
+noremap <leader>3 :set fdl=3<CR>
 
 " Toggles folds with <Space>
 nnoremap <silent> <Space> @=(foldlevel('.')?'za':'l')<CR>
