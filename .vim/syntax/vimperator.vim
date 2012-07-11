@@ -1,1 +1,0 @@
-/Users/iaj/hg/vimperator-labs/vimperator/contrib/vim/syntax/vimperator.vim
