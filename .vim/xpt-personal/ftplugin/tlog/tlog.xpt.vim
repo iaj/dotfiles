@@ -5,18 +5,35 @@ XPTinclude
 XPTvar $DATE_FMT     '%Y %b %d, %a'
 
 "whole workouts go below here
-XPT sq hint=squat-te
+"XPT sq hint=squat-te
+"`date()^ squats		(`squats^kg*`^)`...1^ (`squats^kg*`^)`...1^
+"`date()^ bench presses	(`benches^kg*`^)`...2^ (`benches^kg*`^)`...2^
+"`date()^ barbell rows	(`rows^kg*`^)`...3^ (`rows^kg*`^)`...3^
+"..XPT
+
+XPT sq hint=squats\ 6-8/8-10/10-12
 `date()^ squats		(`squats^kg*`^)`...1^ (`squats^kg*`^)`...1^
-`date()^ bench presses	(`benches^kg*`^)`...2^ (`benches^kg*`^)`...2^
-`date()^ barbell rows	(`rows^kg*`^)`...3^ (`rows^kg*`^)`...3^
+`date()^ calf raises    (`calfr^kg*`^)`...2^ (`calfr^kg*`^)`...2^
 ..XPT
 
-XPT dl hint=deadlift-te
+XPT bp hint=benchpresses\ 6-8/8-10/10-12
+`date()^ bench presses	(`benches^kg*`^)`...1^ (`benches^kg*`^)`...1^
+`date()^ pushups	(`pushs^`^)`...2^ (`pushs^)`...2^
+..XPT
+
+"XPT dl hint=deadlift-te
+"`date()^ deadlifts		(`deads^kg*`^)`...1^ (`deads^kg*`^)`...1^
+"`date()^ chinups		(`chins^)`...2^ (`chins^)`...2^
+"`date()^ pulldowns		(`pulls^kg*`^)`...3^ (`pulls^kg*`^)`...3^
+"`date()^ military presses	(`militaries^kg*`^)`...4^ (`militaries^kg*`^)`...4^
+"..XPT
+
+XPT dl hint=deads\ 4-6/6-8/8-10
 `date()^ deadlifts		(`deads^kg*`^)`...1^ (`deads^kg*`^)`...1^
 `date()^ chinups		(`chins^)`...2^ (`chins^)`...2^
-`date()^ pulldowns		(`pulls^kg*`^)`...3^ (`pulls^kg*`^)`...3^
-`date()^ military presses	(`militaries^kg*`^)`...4^ (`militaries^kg*`^)`...4^
 ..XPT
+"`date()^ pulldowns		(`pulls^kg*`^)`...3^ (`pulls^kg*`^)`...3^
+"`date()^ military presses	(`militaries^kg*`^)`...4^ (`militaries^kg*`^)`...4^
 
 XPT armpwo hint=arm\ workout\ ng\ means\ palms\ facing\ each\ other
 `date()^ ng chinups		(`chins^)`...1^ (`chins^)`...1^

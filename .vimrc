@@ -10,7 +10,7 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
@@ -410,6 +410,8 @@ let g:rbpt_max = 16
 """" syntastic
 call syntastic#Setup()
 let g:syntastic.file_types['html'] = 'disabled'
+"""" bugsummary
+let g:loaded_bugsummary=1
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
@@ -433,14 +435,15 @@ if has('gui_running')
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
+    " colorscheme molokai
 
-    colorscheme badwolf
+    " colorscheme badwolf
     hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
 
     " colorscheme Tomorrow-Night
     " colo solarized
     " colo sjl
-    " colo mj
+    colo mj
     " colo grb256
     " colorscheme grb3
     " colorscheme mustang

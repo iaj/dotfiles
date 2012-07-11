@@ -343,7 +343,7 @@ alias -g S='| sort'
 alias -g B='&>/dev/null &'
 alias -g D='&>/dev/null &|'
 
-#TODO: check those out!
+# TODO: check those out!
 alias -g NF='*(.om[1])'
 alias -g ND='*(/om[1])'
 alias -g NN='*(om[1])'

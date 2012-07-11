@@ -24,6 +24,7 @@ imap <buffer> ,/ </<C-X><C-O>
 inoremap <buffer> <C-_> </<C-X><C-O>
 "autocmd FileType html set autoread
 "autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+map <buffer> <F10> V <bar> :!tidy -config ~/.vim/personal/simple_tidy.cfg<cr><cr>vat>
 
 nnoremap <buffer> <s-cr> vit<esc>a<cr><esc>vito<esc>i<cr><esc>
 " if g:html_indent_tags !~ '\\|p\>' | let g:html_indent_tags .= '\|p\|li\|dt\|dd' | endif
