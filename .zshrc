@@ -280,8 +280,9 @@ alias sr="screen -r"
 alias sx="screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
-alias awk="/opt/local/bin/gawk"
+# alias awk="/opt/local/bin/gawk"
 
+alias busy='my_file=$(find /usr/include -type f | sort -R | head -n 1); my_len=$(wc -l $my_file | awk "{print $1}"); let "r = $RANDOM % $my_len" 2>/dev/null; vim +$r $my_file'
 # Now we got mysql here for TYPO-Adminitration purposes
 alias mysqlstart='sudo /opt/local/bin/mysqld_safe5 &'
 alias mysqlstop='/opt/local/bin/mysqladmin5 -u root -p shutdown'

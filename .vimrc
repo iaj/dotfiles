@@ -430,12 +430,14 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
+    " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
     " colorscheme jellybeans
     " colorscheme sjl
     " colorscheme molokai
+    " colorscheme mj
 
     " colorscheme badwolf
     hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
@@ -443,7 +445,7 @@ if has('gui_running')
     " colorscheme Tomorrow-Night
     " colo solarized
     " colo sjl
-    colo mj
+    " colo mj
     " colo grb256
     " colorscheme grb3
     " colorscheme mustang
