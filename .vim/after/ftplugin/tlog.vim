@@ -19,4 +19,9 @@ set ai
 " set wrap
 " set linebreak
 
+" folding!
+set fdm=expr
+set fdl=0
+set fde=getline(v\:lnum)=~'^\"\"'?'>'.(matchend(getline(v\:lnum),'\"\"*')-2)\:'='
+
 set fo+=t

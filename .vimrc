@@ -1,4 +1,4 @@
-" Author:  iaj (tyberion@googlemail.com)
+" Author:  iaj (tyberion@gmail.com)
 "
 " If you're editing this in Vim and don't know how folding works, type zR to
 " unfold everything.  And then read ":help folding".
@@ -430,7 +430,7 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    colorscheme solarized
+    " colorscheme solarized
     " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
@@ -443,7 +443,7 @@ if has('gui_running')
     hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
 
     " colorscheme Tomorrow-Night
-    " colo solarized
+    colo solarized
     " colo sjl
     " colo mj
     " colo grb256
@@ -478,6 +478,8 @@ map <leader>e :edit %%
 " cnoremap %% <C-R>=expand('%:h').'/'<cr>
 cabbr jobs /Users/iaj/Documents/jobs/
 cabbr stud /Users/iaj/Documents/studying/
+cabbr my /Users/iaj/Library/Scripts/my AppleScripts/
+cabbr asu /Users/iaj/Library/Application Support/
 " Expand abbreviations in command mode...
 cmap <C-\> <C-]>
 """ Statusline

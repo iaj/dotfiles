@@ -972,6 +972,12 @@ SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]
 
 # autoload -Uz attach_to_running_screen
 # attach_to_running_screen
+# Attach syntax highlighting
+if [[ -d $HOME/git/zsh-syntax-highlighting ]];
+then
+    source $HOME/git/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+[[ -d $HOME/git/z ]] && . "$HOME/git/z/z.sh"
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
 

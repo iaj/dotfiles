@@ -11,8 +11,10 @@ exec 'hi User9 guifg=#F92672'
 syn match Number "\d\+\(\d\|\.\|,\|%\|\~\)*"
 syn match Arrow "▸"
 
+syn match tlogWeight "weight"
 syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
 syn match tlogSpecial "\<\(workout\|meal\|progresspic\|measurements\S*\)\>"
+syn match tlogSpecial "\(\(last\|former\)\ workouts\|weights\|etc\|progress\ images\|motivational\ pics\|formulas\|goals\)"
 syn match tlogFeast "\<\(refeed\|feast\|fast\)\>"
 syn match tlogPic "pics/\S*"
 " syn match innerBrackets "(\zs[^)]*\ze)"
@@ -21,7 +23,6 @@ syn region innerBrackets start=/(/hs=s+1 end=/)/he=e-1
 " syn match tlogUserComments "\(^comments (\)\@<=[^)]*\ze)"
 syn match tlogUserHWords "^\(comments\|formula\|trails\|Vascularity\|[Ll]eangains\|[cC]heckpoint[sS]*\|[gG][oO][aA][lL][sSzZ]*\)\>"
 syn match tlogDaytimeWords "\(@noon\|@eve\|@morning\|@\d\+:\d\+\(am\|pm\)\)"
-syn match tlogWeight "weight"
 syn match tlogWeightUnits "\(pd\|kg\|pounds\|kilograms\|grams\?\|calories\|kcals\?\)\>"
 syn match tlogMasses "\(\(f\|l\|t\)bm\|kf\)"
 
@@ -32,6 +33,7 @@ syn match tlogDay "\<\(Sat\|Sun\|Mon\|Tue\|Wed\|Thu\|Fri\)\>"
 
 syn match tlogMeasure "\<\(brustfalte\|beinfalte\|bauchfalte\|bauchumfang\|kf\/lbm\/fat\|bmr\)\>"
 
+call matchadd('Todo', '\(Author\)')
 syn match tlogComm /#.*/
 syn match key "<\u\d>"
 
