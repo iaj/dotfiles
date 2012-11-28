@@ -10,12 +10,12 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['TagHighlight', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -116,6 +116,7 @@ set wildignore=.backup,.dropbox,.gem,.cheat,.DS_Store,.fontconfig,.hamachi,.clas
 set wildignore+=
     \*/.git/*,*/.hg/*,*/.svn/*,
     \CVS,SVN,
+    \*\.class,
     \*/undo/*,
     \*/typo3temp/*,*/uploads/*,*/t3lib/*,*/typo3/*,*/typo3_src*/*
     " \*.png,*.jp*g,*.pdf,*.bmp,
@@ -439,11 +440,11 @@ if has('gui_running')
     " colorscheme molokai
     " colorscheme mj
 
-    " colorscheme badwolf
+    colorscheme badwolf
     hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
 
     " colorscheme Tomorrow-Night
-    colo solarized
+    " colo solarized
     " colo sjl
     " colo mj
     " colo grb256
@@ -479,7 +480,7 @@ map <leader>e :edit %%
 cabbr jobs /Users/iaj/Documents/jobs/
 cabbr stud /Users/iaj/Documents/studying/
 cabbr my /Users/iaj/Library/Scripts/my AppleScripts/
-cabbr asu /Users/iaj/Library/Application Support/
+" cabbr -asu /Users/iaj/Library/Application Support/
 " Expand abbreviations in command mode...
 cmap <C-\> <C-]>
 """ Statusline
@@ -719,7 +720,7 @@ map \L :g/^\s*\n\s*$/d<CR>
 
 " Clean trailing whitespace
 nnoremap \W :%s/\s\+$//<cr>:let @/=''<cr>
-command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
+command! KillWhitespace :%s/ *$//g<CR> | :nohls<CR>
 command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
             \ | wincmd p | diffthis
 " Undo in insert mode
@@ -730,7 +731,7 @@ inoremap <C-W> <C-G>u<C-W>
 inoremap <C-U> <C-G>u<C-U>
 
 " Format Text-Mate Style
-map Q gqip
+map Q gqip 
 
 " Write to file with sudo
 cmap w!! w !sudo tee % >/dev/null
@@ -943,10 +944,11 @@ endfunction
 " noremap H ^
 " noremap L g_
 "inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-"inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 " inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
 "             \ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 "inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
+inoremap <expr><C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+inoremap <expr><C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
 "\ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 """ Additional colors...
 hi InterestingWord1 guifg=#000000 guibg=#FFA700

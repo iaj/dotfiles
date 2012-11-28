@@ -16,3 +16,22 @@ on open(theseItems)
     `action_for_files^
 end open
 ..XPT
+
+XPT dd hint=display\ dialog
+display dialog `dialogintro^
+..XPT
+
+
+XPT if hint=if\ construct
+if `condition^ then
+    `then^
+end if
+..XPT
+
+XPT ifelse hint=if\ construct
+if `condition^ then
+    `thenpart^
+else
+    `elsepart^
+end if
+..XPT

@@ -13,8 +13,8 @@
 "setlocal foldtext=FoldText()
 "setlocal fdm=manual
 " set fdl=1
-set fdm=manual
-setlocal cinoptions+=(4j1
+" see below :D
+" setlocal cinoptions+=(4j1
 
 function! MyFoldText()
     let line = getline(v:foldstart)
@@ -41,7 +41,8 @@ function! CompileJava()
     setlocal makeprg=javac\ -cp\ \"%:p:h\"\ %\ $*
     make
 endfunction
-nmap <buffer> <F3> :call CompileJava()<CR>
+" nmap <buffer> <F3> :call CompileJava()<CR>
+map <buffer><leader>t :Java<CR>
 
 function! RunClass()
     if !exists("b:class")
@@ -49,7 +50,7 @@ function! RunClass()
     endif
     execute '!java -cp "%:p:h" ' . b:class
 endfunction
-nmap <buffer> <F4> :call RunClass()<CR>
+" nmap <buffer> <F4> :call RunClass()<CR>
 
 function! InsertMainClass()
     exe "put='public class ".expand('%:t:r')."{'"
@@ -88,6 +89,7 @@ function! MyControlSpace()
 endfunction
 inoremap <C-Space> <c-r>=MyControlSpace()<CR>
 inoremap <C-@> <c-r>=MyControlSpace()<CR>
+inoremap <C-@> <C-X><C-U>
 
 if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> <buffer> <F9> :!/opt/local/bin/ctags -R --links=yes --java-types=cimp -f ~/Documents/workspace/tags ~/Documents/workspace<CR>:!echo 'tags generated!'<CR>|endif
 "
@@ -98,7 +100,6 @@ set fdm=manual
 setlocal cinoptions+=(4j1
 " noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
 " inoremap <C-Space> let b:complType=0<CR>:execute ":normal \<C-X>\<C-U>"
-inoremap <C-@> <C-X><C-U>
 "autocmd BufWinEnter *.java silent loadview
 "autocmd BufWinLeave *.java mkview
 " Eclim Settings
@@ -118,6 +119,8 @@ nnoremap <silent> _jm :JavaImportMissing<CR>
 nnoremap <silent> <LocalLeader>i :JavaImport<cr>
 " ,d opens javadoc for statement in browser
 nnoremap <silent> <F3> :JavaDocSearch -x declarations<cr>
+" quick editing of testfile in animalscript2
+nnoremap <buffer><silent> \t :e /Users/iaj/Documents/workspace/AnimalScript2/Testsuite2/animal2test.asu<CR>
 " map <C-[> :JavaSearchContext<CR>
 " noremap \pl :ProjectList<CR>
 " noremap \pc :ProjectClose
@@ -141,3 +144,9 @@ fun! MyTest() "{{{
     let foo = call JavaSearchContext()<CR>
 endfunction "}}}
 
+
+" Specific highlighting
+highlight link CTagsClass Special
+highlight link CTagsField PreProc
+
+set shiftwidth=2

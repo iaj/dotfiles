@@ -195,6 +195,7 @@ if [ -d $HOME/hg/dactyl ]; then dactyl=~/hg/dactyl; : ~dactyl ; fi
 if [ -d $HOME/Library/Application\ Support ]; then asu=$HOME/Library/Application\ Support; : ~asu ; fi
 if [ -d $HOME/Library/Application\ Support/Launchbar/Actions ]; then actions=$HOME/Library/Application\ Support/Launchbar/Actions; : ~actions ; fi
 if [ -d $HOME/Library/Scripts/my\ AppleScripts ]; then myas=$HOME/Library/Scripts/my\ AppleScripts; : ~myas ; fi
+if [ -d /Users/iaj/Documents/workspace/AnimalScript2/ ]; then ba=~/Documents/workspace/AnimalScript2; : ~ba ; fi
 
 if [ -d $HOME/Downloads ]; then
     dl() { cd $HOME/Downloads }
@@ -453,10 +454,15 @@ fi
 zmodload zsh/stat
 search-backwords() { zle history-incremental-search-backward $BUFFER }
 
-bindkey -M vicmd "^R" search-backwords
+# bindkey -M vicmd "^R" search-backwords
 bindkey "^Y" yank
-bindkey -M viins '^r' search-backwords
-bindkey -M vicmd '^r' search-backwords
+# bindkey -M viins '^r' search-backwords
+# bindkey -M vicmd '^r' search-backwords
+bindkey -M viins '^r' history-incremental-search-backward
+bindkey -M vicmd '^r' history-incremental-search-backward
+bindkey -M viins '^s' history-incremental-search-forward
+bindkey -M vicmd '^s' history-incremental-search-forward
+
 
 paste-xclip() {
     BUFFER=$LBUFFER"`pbpaste`"
@@ -722,6 +728,7 @@ fi
 # Allow substitutions and expansions in the prompt, necessary for vcs_info.
 setopt promptsubst
 autoload -U promptinit
+setopt no_flowcontrol
 
 # Load vcs_info to display information about version control repositories.
 autoload -Uz vcs_info
@@ -766,6 +773,17 @@ whodoneit() {
 }
 bash() { command bash E }
 collapse_pwd() { echo $(pwd | sed -e "s,^$HOME,~,") }
+
+# Quickmovearound
+ba() {
+    if [[ -z $1 ]]; then
+        cd /Users/iaj/Documents/workspace/AnimalScript2/
+    elif [[ $1 -eq 1 ]]; then
+        cd /Users/iaj/Documents/workspace/Animal/
+    else
+        cd /Users/iaj/ba/tex
+    fi
+}
 
 # send last command to Quicksilver
 export HISTCONTROL=erasedups:ignorespace
@@ -888,16 +906,16 @@ if autoloadable compinit; then
 
     zstyle ':completion:*:processes' command 'ps aux --sort=-%cpu'
     () {
-        local arr
-        arr=( '' 88 2 64 32 54 55 7 8 22 23 )
-        zstyle ':completion:*:processes' list-colors "=(#b) #[^ ]#${(l:9*9:: #([^ ]#):)}*${(j:=38;5;:)arr}"
-    }
+    local arr
+    arr=( '' 88 2 64 32 54 55 7 8 22 23 )
+    zstyle ':completion:*:processes' list-colors "=(#b) #[^ ]#${(l:9*9:: #([^ ]#):)}*${(j:=38;5;:)arr}"
+}
 
-    # Show a warning when no completions were found
-    zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
+# Show a warning when no completions were found
+zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
 
-    # Autocomplete to ./configure in the most cases
-    zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
+# Autocomplete to ./configure in the most cases
+zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
 fi
 
 ### Prompt
