@@ -10,12 +10,13 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['TagHighlight', 'Powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['fanfingtastic', 'clang_complete', 'TagHighlight', 'Powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['TagHighlight', 'Powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -163,7 +164,7 @@ set formatoptions+=r            " break before, not after, a 1 letter word
 set formatoptions+=1            " break before, not after, a 1 letter word
 
 " Display
-if (v:version == 703) 
+if (v:version == 703)
     set relativenumber
     set undofile
     set undodir=~/.vim/undo
@@ -362,7 +363,7 @@ map <silent> <leader>f :CtrlP<CR>
 map <silent> <leader>gf :CtrlPCurFile<CR>
 map <silent> <leader>F :ClearCtrlPCache<CR>
 map <silent> <leader>gd :CtrlPCurWD<CR>
-map <silent> \e :CtrlP 
+map <silent> \e :CtrlP
 """" Powerline
 let g:Powerline_symbols = 'fancy'
 " never use that when that theme is non-existent - lesson learned
@@ -375,7 +376,7 @@ map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
 " directory) for the {pattern}.  Behaves just like the |:grep| command, but
 " will open the |Quickfix| window for you. If [!] is not given the first
 " error is jumped to.
-map <leader>a :Ack! 
+map <leader>a :Ack!
 """" Fugitive
 nmap \gs :Gstatus<cr>
 nmap \gc :Gcommit<cr>
@@ -413,6 +414,8 @@ call syntastic#Setup()
 let g:syntastic.file_types['html'] = 'disabled'
 """" bugsummary
 let g:loaded_bugsummary=1
+"""" clang
+let g:clang_library_path = '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib'
 """ Colorscheme & dimensions for GUI
 if has('gui_running')
     "set columns=153
@@ -588,7 +591,7 @@ function! s:ExecuteInShell(command) " {{{
     echo 'Shell command ' . command . ' executed.'
 endfunction " }}}
 command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
-nnoremap <leader>! :Shell 
+nnoremap <leader>! :Shell
 """" Gist
 " Send visual selection to gist.github.com as a private, filetyped Gist
 " Requires the gist command line too (brew install gist)
@@ -720,7 +723,8 @@ map \L :g/^\s*\n\s*$/d<CR>
 
 " Clean trailing whitespace
 nnoremap \W :%s/\s\+$//<cr>:let @/=''<cr>
-command! KillWhitespace :%s/ *$//g<CR> | :nohls<CR>
+" command! KillWhitespace  :%s/\s\+$//<cr>:let @/=''<cr>
+command! KillWhitespace :%s/ *$// | nohls<CR>
 command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
             \ | wincmd p | diffthis
 " Undo in insert mode
@@ -731,7 +735,7 @@ inoremap <C-W> <C-G>u<C-W>
 inoremap <C-U> <C-G>u<C-U>
 
 " Format Text-Mate Style
-map Q gqip 
+map Q gqip
 
 " Write to file with sudo
 cmap w!! w !sudo tee % >/dev/null
