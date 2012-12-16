@@ -281,6 +281,7 @@ let g:EclimJavaSearchMapping = 1
 " Disable HTML & PHP validation
 let g:EclimHtmlValidate = 0
 let g:EclimPhpValidate = 0
+" TODO check whether successfully moved to java filetype specific file
 " ,i imports whatever is needed for current line
 " nnoremap <silent> <LocalLeader>i :JavaImport<cr>
 " ,d opens javadoc for statement in browser
@@ -340,7 +341,7 @@ if has("eval")
     let g:netrw_use_noswf = 1
 endif
 """" Ctrl-P Settings
-let g:ctrlp_working_path_mode = 2
+let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_mruf_max = 2000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
@@ -354,7 +355,7 @@ let g:ctrlp_prompt_mappings = {
             \ }
 let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
-let g:ctrlp_mruf_exclude = '*.xib\|/var/folders/.*\|/undo/*\|COMMIT_EDITMSG\|temp/*'
+let g:ctrlp_mruf_exclude = '*.xib\|/var/folders/.*\|/undo/*\|COMMIT_EDITMSG'
 let g:ctrlp_open_multiple_files = '2v'
 nnoremap <leader>. :CtrlPTag<cr>
 map <silent> <leader>b :CtrlPBuffer<CR>
@@ -495,7 +496,8 @@ if !(has('gui_running'))
     hi User3 term=bold cterm=bold ctermfg=81 gui=bold guifg=#66d9ef guibg=#363946 ctermbg=237
     set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)%P\ %{fugitive#statusline()}%*"
 endif
-""" my own Supertab TODO
+""" Functions
+"""" my own Supertab TODO
 " Remap the tab key to do autocompletion or indentation depending on the
 " context
 function! MyTabComplete()
@@ -574,7 +576,7 @@ function! MyShiftTabComplete()
 endfunction
 inoremap <tab> <c-r>=MyTabComplete()<cr>
 inoremap <s-tab> <c-r>=MyShiftTabComplete()<cr>
-""" Functions
+
 """" Shell
 function! s:ExecuteInShell(command) " {{{
     let command = join(map(split(a:command), 'expand(v:val)'))

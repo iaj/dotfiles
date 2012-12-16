@@ -513,12 +513,17 @@ bindkey "\eOd"          backward-word                  # Another possible ctrl-l
 bindkey "\e[Z"          reverse-menu-complete          # S-Tab menu completes backward
 bindkey " "             magic-space                    # Space expands history subst's
 bindkey "^@"            _history-complete-older        # C-Space to complete from hist
-bindkey "^]."           insert-last-word
+# bindkey "^]."           insert-last-word
 
 # TODO: check this one out...
 bindkey "^],"           copy-earlier-word
 bindkey 'jk'            vi-cmd-mode
 bindkey '^T'            _most_recent_file
+bindkey -M viins "^[."  insert-last-word
+bindkey -M viins "^[_"  insert-last-word
+# TODO: bind insert-next-word to something?
+# like bindkey -M viins "^[,"   insert-next-word
+
 lastpath() {
      LBUFFER+="${${(z)history[$#history]}[-1]:h}"
 }
