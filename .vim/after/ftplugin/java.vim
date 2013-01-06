@@ -96,7 +96,8 @@ if expand('%:p') =~ expand('~/Documents/workspace/AnimalScript2/')|map <silent> 
 " Try to use eclim's <C-]> instead of the tags-buitlin one - will I regret
 " noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1|set fdm=manual
 " set fdl=1
-set fdm=manual
+" set fdm=manual
+set fdm=indent
 setlocal cinoptions+=(4j1
 " noremap <buffer> <C-]> :JavaSearchContext<cr>|set fdl=1
 " inoremap <C-Space> let b:complType=0<CR>:execute ":normal \<C-X>\<C-U>"
@@ -146,7 +147,10 @@ endfunction "}}}
 
 
 " Specific highlighting
-highlight link CTagsClass Special
+" highlight link CTagsClass Special
+" highlight link CTagsClass Identifier
+
+hi CTagsClass guifg=#268bd2
 highlight link CTagsField PreProc
 
 set shiftwidth=2

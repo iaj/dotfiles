@@ -1,1 +1,0 @@
-/Users/iaj/hg/dactyl/pentadactyl/contrib/vim/ftdetect/pentadactyl.vim

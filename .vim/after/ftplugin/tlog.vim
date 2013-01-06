@@ -25,3 +25,5 @@ set fdl=0
 set fde=getline(v\:lnum)=~'^\"\"'?'>'.(matchend(getline(v\:lnum),'\"\"*')-2)\:'='
 
 set fo+=t
+
+" TODO: specify function for grepping the main lifts with g:/<liftname>/

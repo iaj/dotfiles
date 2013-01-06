@@ -203,8 +203,8 @@ set ruler                       " Show some info, even without statuslines.
 set autoindent
 
 "typoscript indent fix?
-set cink-=0#
-set cino=(0                     " line up sublines with first (
+" set cink-=0#
+" set cino=(0                     " line up sublines with first (
 "set cindent
 "set smartindent
 set notimeout ttimeout ttimeoutlen=200
@@ -313,9 +313,9 @@ nnoremap <silent> <F2> :TlistToggle<CR>
 let g:xptemplate_brace_complete = 0
 let g:xptemplate_vars = "$author=iaj\ (tyberion@googlemail.com)&$email=tyberion@gmail.com&"
 " let g:xptemplate_key = '<Tab>'
-let g:xptemplate_nav_next = '<C-J>' " next location
-let g:xptemplate_nav_prev = '<C-K>' " previous location
-let g:xptemplate_to_right = '<C-L>' " Exit key
+let g:xptemplate_nav_next = '<C-J>'     " next location
+let g:xptemplate_nav_prev = '<C-K>'     " previous location
+let g:xptemplate_to_right = '<C-L>'     " Exit key
 """" Sparkup Settings
 " let g:sparkupExecuteMapping = '<D-e>'
 """" Command-T Settings
@@ -377,7 +377,7 @@ map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
 " directory) for the {pattern}.  Behaves just like the |:grep| command, but
 " will open the |Quickfix| window for you. If [!] is not given the first
 " error is jumped to.
-map <leader>a :Ack!
+map <leader>a :Ack! 
 """" Fugitive
 nmap \gs :Gstatus<cr>
 nmap \gc :Gcommit<cr>
@@ -435,7 +435,7 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
     " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
@@ -444,7 +444,7 @@ if has('gui_running')
     " colorscheme molokai
     " colorscheme mj
 
-    colorscheme badwolf
+    " colorscheme badwolf
     hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
 
     " colorscheme Tomorrow-Night
