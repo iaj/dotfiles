@@ -1,4 +1,4 @@
-function! TestIndent()
+function! TypoScriptIndent()
     let previous = getline(v:lnum-1)
     let current = getline(v:lnum)
 
@@ -10,6 +10,9 @@ function! TestIndent()
         return -1
     endif
 endfunction
-set indentexpr=TestIndent()
+set indentexpr=TypoScriptIndent()
 
 set indentkeys+=(,)
+inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs>
+
+setlocal commentstring=#%s
