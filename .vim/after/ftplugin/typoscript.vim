@@ -1,3 +1,4 @@
+" Special indent-function
 function! TypoScriptIndent()
     let previous = getline(v:lnum-1)
     let current = getline(v:lnum)
@@ -13,6 +14,9 @@ endfunction
 set indentexpr=TypoScriptIndent()
 
 set indentkeys+=(,)
+
+" Automatically close brackets {, and (
 inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs>
+inoremap <buffer> (<cr> ()<left><cr>.<cr><esc>kA<bs>
 
 setlocal commentstring=#%s

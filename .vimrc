@@ -342,6 +342,7 @@ if has("eval")
 endif
 """" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_root_markers = ['root.dir']
 let g:ctrlp_mruf_max = 2000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
