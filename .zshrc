@@ -460,8 +460,8 @@ bindkey "^Y" yank
 # bindkey -M vicmd '^r' search-backwords
 bindkey -M viins '^r' history-incremental-search-backward
 bindkey -M vicmd '^r' history-incremental-search-backward
-bindkey -M viins '^s' history-incremental-search-forward
-bindkey -M vicmd '^s' history-incremental-search-forward
+# bindkey -M viins '^s' history-incremental-search-forward
+# bindkey -M vicmd '^s' history-incremental-search-forward
 
 
 paste-xclip() {

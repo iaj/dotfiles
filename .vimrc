@@ -89,6 +89,7 @@ if has('syntax')
     " Highlight TODO, FIXME, CHANGED and XXX in all documents.
     if v:version > 701 || (v:version == 701 && has('patch42'))
         call matchadd('Todo', '\(TODO\|FIXME\|CHANGED\|XXX\|NOTE\)')
+        hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
     endif
 endif
 
@@ -446,7 +447,6 @@ if has('gui_running')
     " colorscheme mj
 
     " colorscheme badwolf
-    hi Todo term=bold ctermfg=0 ctermbg=14 gui=bold guifg=#d33682
 
     " colorscheme Tomorrow-Night
     " colo solarized
@@ -468,6 +468,7 @@ else
     " :colorscheme ir_black
     " :colorscheme molokai
 endif
+
 """ Abbreviations
 function! EatChar(pat)
     let c = nr2char(getchar(0))
@@ -706,7 +707,7 @@ onoremap <expr> [[ (search('^\S\@=.*{$', 'ebsW') && (setpos("''", getpos('.'))
 onoremap <expr> ]] (search('^\S\@=.*{$', 'esW') && (setpos("''", getpos('.'))
             \ <bar><bar> 1) ? "''" : "\<ESC>")
 
-" It's 2012
+" It's 2013
 nnoremap j gj
 nnoremap k gk
 command! W :w
