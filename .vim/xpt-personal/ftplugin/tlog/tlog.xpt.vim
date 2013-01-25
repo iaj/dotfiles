@@ -53,6 +53,10 @@ XPT chins hint=superior\ ex
 `date()^ chinups        (`chins^)`...^ (`chins^)`...^
 ..XPT
 
+XPT pull hint=superior\ ex
+`date()^ pullups        (`pullups^)`...^ (`pullups^)`...^
+..XPT
+
 XPT crunches hint=not\ needed\ but\ mb\ has\ some\ merit
 `date()^ crunches       (`crunches^)`...^ (`crunches^)`...^
 ..XPT

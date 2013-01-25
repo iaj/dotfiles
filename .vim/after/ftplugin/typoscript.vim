@@ -20,3 +20,5 @@ inoremap <buffer> {<cr> {}<left><cr>.<cr><esc>kA<bs>
 inoremap <buffer> (<cr> ()<left><cr>.<cr><esc>kA<bs>
 
 setlocal commentstring=#%s
+set fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='
+set fdm=expr

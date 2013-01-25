@@ -12,7 +12,7 @@ syn match Number "\d\+\(\d\|\.\|,\|%\|\~\)*"
 syn match Arrow "▸"
 
 syn match tlogWeight "weight"
-syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
+syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|pullups\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
 syn match tlogSpecial "\<\(workout\|meal\|progresspic\|measurements\S*\)\>"
 syn match tlogSpecial "\(\(last\|former\)\ workouts\|weights\|etc\|progress\ images\|motivational\ pics\|formulas\|goals\)"
 syn match tlogFeast "\<\(refeed\|feast\|fast\)\>"
