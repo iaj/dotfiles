@@ -10,14 +10,23 @@ XPTvar $DATE_FMT     '%Y %b %d, %a'
 "`date()^ bench presses (`benches^kg*`^)`...2^ (`benches^kg*`^)`...2^
 "`date()^ barbell rows  (`rows^kg*`^)`...3^ (`rows^kg*`^)`...3^
 "..XPT
+"
+
+XPT d hint=print\ date\ simply
+`date()^
+..XPT
 
 XPT sq hint=squats\ 6-8/8-10/10-12
 `date()^ squats         (`squats^kg*`^)`...1^ (`squats^kg*`^)`...1^
 ..XPT
 "`date()^ calf raises       (`calfr^kg*`^)`...2^ (`calfr^kg*`^)`...2^
 
-XPT bp hint=benchpresses\ 6-8/8-10/10-12
-`date()^ bench presses  (`benches^kg*`^)`...1^ (`benches^kg*`^)`...1^
+XPT bp hint=barbell\ benchpresses\ 6-8/8-10/10-12
+`date()^ bb bench       (`benches^kg*`^)`...1^ (`benches^kg*`^)`...1^
+..XPT
+
+XPT dbp hint=dumbbell\ benchpresses\ 6-8/8-10/10-12
+`date()^ db bench       (`benches^kg*`^)`...1^ (`benches^kg*`^)`...1^
 ..XPT
 "`date()^ pushups           (`pushs^`^)`...2^ (`pushs^)`...2^
 

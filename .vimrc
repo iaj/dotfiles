@@ -16,7 +16,8 @@ fun SetupVAM()
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -413,8 +414,8 @@ let g:rbpt_colorpairs = [
     \ ]
 let g:rbpt_max = 16
 """" syntastic
-call syntastic#Setup()
-let g:syntastic.file_types['html'] = 'disabled'
+" call syntastic#Setup()
+" let g:syntastic.file_types['html'] = 'disabled'
 """" bugsummary
 let g:loaded_bugsummary=1
 """" clang
@@ -437,7 +438,7 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    colorscheme solarized
+    " colorscheme solarized
     " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
@@ -446,7 +447,7 @@ if has('gui_running')
     " colorscheme molokai
     " colorscheme mj
 
-    " colorscheme badwolf
+    colorscheme badwolf
 
     " colorscheme Tomorrow-Night
     " colo solarized
@@ -632,6 +633,8 @@ inoremap <c-cr> <esc>A<cr>
 
 " Toggle absolute/relative linenumbering
 nnoremap <silent> ,A :if &l:nu \| setl rnu \| else \| setl nu \| endif<CR>
+" TODO
+" nnoremap <silent> \A :if &l:relativenumber \| setl norelativenumber | setl nonumber \| else \| setl rnu \| endif<CR>
 
 nnoremap <leader><leader> <c-^>
 

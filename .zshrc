@@ -282,6 +282,7 @@ alias sx="screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
 # alias awk="/opt/local/bin/gawk"
+# compdef awk=gawk
 
 alias busy='my_file=$(find /usr/include -type f | sort -R | head -n 1); my_len=$(wc -l $my_file | awk "{print $1}"); let "r = $RANDOM % $my_len" 2>/dev/null; vim +$r $my_file'
 # Now we got mysql here for TYPO-Adminitration purposes
@@ -1003,6 +1004,8 @@ fi
 [[ -d $HOME/git/z ]] && . "$HOME/git/z/z.sh"
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
+
+# compdef -d awk
 
 ## vim:fdm=expr
 ## vim:fde=getline(v\:lnum)=~'^##'?'>'.(matchend(getline(v\:lnum),'##*')-2)\:'='

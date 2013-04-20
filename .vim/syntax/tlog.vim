@@ -12,7 +12,7 @@ syn match Number "\d\+\(\d\|\.\|,\|%\|\~\)*"
 syn match Arrow "▸"
 
 syn match tlogWeight "weight"
-syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|pullups\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
+syn match tlogEx "\<\(squats\|dips\|deadlifts\|chinups\|pullups\|\(db\|bb\)\ bench\|bench\ presses\|barbell\ rows\|military\ presses\|pulldowns\|ng\ dumbell\ presses\|ng\ chinups\|barbell\ drag\ curls\|zottmann\ curls\|overhead\ extensions\|calv\ raises\|crunches\|walkouts\|pushups\|bulgarian\ split\ squats\?\)\>"
 syn match tlogSpecial "\<\(workout\|meal\|progresspic\|measurements\S*\)\>"
 syn match tlogSpecial "\(\(last\|former\)\ workouts\|weights\|etc\|progress\ images\|motivational\ pics\|formulas\|goals\)"
 syn match tlogFeast "\<\(refeed\|feast\|fast\)\>"
@@ -25,6 +25,7 @@ syn match tlogUserHWords "^\(comments\|formula\|trails\|Vascularity\|[Ll]eangain
 syn match tlogDaytimeWords "\(@noon\|@eve\|@morning\|@\d\+:\d\+\(am\|pm\)\)"
 syn match tlogWeightUnits "\(pd\|kg\|pounds\|kilograms\|grams\?\|calories\|kcals\?\)\>"
 syn match tlogMasses "\(\(f\|l\|t\)bm\|kf\)"
+syn match tlogFasting "\(intermittent\ fasted\ for\ \d\+\ hours\|fasted$\)"
 
 " syntax region Comment   start=+comments (+  skip=+comments (+  end=+)+
 syntax region tlogUserComments start="\(^comments \)\@<=("hs=s+1 end=/)/he=e-1
@@ -64,6 +65,7 @@ hi def link key Special
 
 hi def link tlogWeight Function
 hi def link tlogWeightUnits tlogWeight
+hi def link tlogFasting tlogWeight
 
 " call matchadd('Identifier', '\(lemma\|byte\|bit\)')
 " call matchadd('Statement', '\(even\|half\|nat2byte\|dbl\|byte2nat\|byte-add\|byte-inc\|byte-mult\)')
