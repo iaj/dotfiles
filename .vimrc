@@ -12,12 +12,12 @@ fun SetupVAM()
     if has('gui_running')
         call vam#ActivateAddons(['fanfingtastic', 'clang_complete', 'TagHighlight', 'Powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['TagHighlight', 'Powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
-        " call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'lodgeit', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        " call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
 call SetupVAM()
@@ -202,7 +202,6 @@ set report=0                    " :commands always print changed line count.
 set shortmess+=a                " Use [+]/[RO]/[w] for modified/readonly/written.
 set shortmess+=A                " Don't show message on existing swapfile
 set ruler                       " Show some info, even without statuslines.
-set autoindent
 
 "typoscript indent fix?
 " set cink-=0#
@@ -215,6 +214,8 @@ set notimeout ttimeout ttimeoutlen=200
 set tabstop=8                   " keep tabspaces at 8 by default if there
 set shiftwidth=4                " shiftwidth ~ indentaion to the right
 set softtabstop=4               " indendation to the left (bs key)
+set copyindent
+set autoindent
 set expandtab                   " Use spaces, not tabs, for autoindent/tab key.
 set smarttab
 "set noexpandtab
@@ -264,7 +265,8 @@ set wildmode=list:longest,full
 " Per-Filetype Scripts
 " NOTE: These define autocmds, so they should come before any other autocmds.
 "       That way, a later autocmd can override the result of one defined here.
-set grepprg=grep\ -nH\ $*
+" set grepprg=grep\ -nH\ $*
+set grepprg=grep\ -ir\ -nH\ $*
 
 """ Plugin Settings
 """" eclim settings
@@ -283,6 +285,7 @@ let g:EclimJavaSearchMapping = 1
 " Disable HTML & PHP validation
 let g:EclimHtmlValidate = 0
 let g:EclimPhpValidate = 0
+let g:EclimSignLevel = 0
 " TODO check whether successfully moved to java filetype specific file
 " ,i imports whatever is needed for current line
 " nnoremap <silent> <LocalLeader>i :JavaImport<cr>
@@ -438,7 +441,7 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
     " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
@@ -447,7 +450,7 @@ if has('gui_running')
     " colorscheme molokai
     " colorscheme mj
 
-    colorscheme badwolf
+    " colorscheme badwolf
 
     " colorscheme Tomorrow-Night
     " colo solarized
@@ -456,6 +459,7 @@ if has('gui_running')
     " colo grb256
     " colorscheme grb3
     " colorscheme mustang
+    " colorscheme zenburn
     " hi VisualNOS guibg=#444444
     " hi Visual guibg=#424242
     highlight SpellBad term=underline gui=undercurl guisp=Orange
@@ -486,7 +490,7 @@ map <leader>e :edit %%
 " cnoremap %% <C-R>=expand('%:h').'/'<cr>
 cabbr jobs /Users/iaj/Documents/jobs/
 cabbr stud /Users/iaj/Documents/studying/
-cabbr my /Users/iaj/Library/Scripts/my AppleScripts/
+" cabbr my /Users/iaj/Library/Scripts/my AppleScripts/
 " cabbr -asu /Users/iaj/Library/Application Support/
 " Expand abbreviations in command mode...
 cmap <C-\> <C-]>
@@ -652,7 +656,7 @@ map <silent> <leader>d :bd<CR>
 map <leader>e :e <C-R>=expand("%:h")<cr>/
 
 runtime $HOME/vim-addons/matchit.zip/plugin/matchit.vim
-map <tab> %
+" map <tab> %
 " Delete all buffers
 " nmap <silent> ,da :exec "1," . bufnr('$') . "bd"<cr>
 " Don't pollute my registers plz

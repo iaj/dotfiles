@@ -182,6 +182,11 @@ shellopts[screen_names]=1 # Dynamically change window names in GNU screen
 shellopts[preexec]=1      # Run preexec to update screen title and titlebar
 shellopts[precmd]=1       # Run precmd to show job count and retval in RPROMPT
 shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
+# Do not consider "/" a word character.  One benefit of this is that when
+# hitting ctrl-w in insert mode (which deletes the word before the cursor) just
+# before a filesystem path, it only removes the last item of the path and not
+# the entire thing.
+WORDCHARS=${WORDCHARS//\/}
 
 #### Helper Functions
 # Checks if a file can be autoloaded by trying to load it in a subshell.
@@ -232,6 +237,191 @@ set-screen-title() { echo -n "\ek$*\e\\" }
 set-window-title() { echo -n "\e]2;"${${(pj: :)*}[1,254]}"\a" }
 # Replaces the current terminal icon text with its positional parameters.
 set-icon-title() { echo -n "\e]1;"${${(pj: :)*}[1,254]}"\a" }
+
+# Prepend "vim" to the command line if it is not already there.
+prepend-vim() {
+    if ! echo "$BUFFER" | grep -q "^vim "
+    then
+        BUFFER="vim $BUFFER"
+        CURSOR+=5
+    fi
+}
+zle -N prepend-vim
+# Prepend "sudo" to the command line if it is not already there.
+prepend-sudo() {
+    if ! echo "$BUFFER" | grep -q "^sudo "
+    then
+        BUFFER="sudo $BUFFER"
+        CURSOR+=5
+    fi
+}
+zle -N prepend-sudo
+#
+#### Adding vim functionality
+# Delete all characters between a pair of characters.  Mimics Vim's "di" text
+# object functionality.
+delete-in() {
+    # Create locally-scoped variables we'll need
+    local CHAR LCHAR RCHAR LSEARCH RSEARCH COUNT
+    # Read the character to indicate which text object we're deleting.
+    read -k CHAR
+    if [ "$CHAR" = "w" ]
+    then # diw, delete the word.
+        # find the beginning of the word under the cursor
+        zle vi-backward-word
+        # set the left side of the delete region at this point
+        LSEARCH=$CURSOR
+        # find the end of the word under the cursor
+        zle vi-forward-word
+        # set the right side of the delete region at this point
+        RSEARCH=$CURSOR
+        # Set the BUFFER to everything except the word we are removing.
+        RBUFFER="$BUFFER[$RSEARCH+1,${#BUFFER}]"
+        LBUFFER="$LBUFFER[1,$LSEARCH]"
+        return
+        # diw was unique.  For everything else, we just have to define the
+        # characters to the left and right of the cursor to be removed
+    elif [ "$CHAR" = "(" ] || [ "$CHAR" = ")" ]
+    then # di), delete inside of a pair of parenthesis
+        LCHAR="("
+        RCHAR=")"
+    elif [ "$CHAR" = "[" ] || [ "$CHAR" = "]" ]
+    then # di], delete inside of a pair of square brackets
+        LCHAR="["
+        RCHAR="]"
+    elif [ $CHAR = "{" ] || [ $CHAR = "}" ]
+    then # di], delete inside of a pair of braces
+        LCHAR="{"
+        RCHAR="}"
+    else
+        # The character entered does not have a special definition.
+        # Simply find the first instance to the left and right of the
+        # cursor.
+        LCHAR="$CHAR"
+        RCHAR="$CHAR"
+    fi
+    # Find the first instance of LCHAR to the left of the cursor and the
+    # first instance of RCHAR to the right of the cursor, and remove
+    # everything in between.
+    # Begin the search for the left-sided character directly the left of the cursor.
+    LSEARCH=${#LBUFFER}
+    # Keep going left until we find the character or hit the beginning of the buffer.
+    while [ "$LSEARCH" -gt 0 ] && [ "$LBUFFER[$LSEARCH]" != "$LCHAR" ]
+    do
+        LSEARCH=$(expr $LSEARCH - 1)
+    done
+    # If we hit the beginning of the command line without finding the character, abort.
+    if [ "$LBUFFER[$LSEARCH]" != "$LCHAR" ]
+    then
+        return
+    fi
+    # start the search directly to the right of the cursor
+    RSEARCH=0
+    # Keep going right until we find the character or hit the end of the buffer.
+    while [ "$RSEARCH" -lt $(expr ${#RBUFFER} + 1 ) ] && [ "$RBUFFER[$RSEARCH]" != "$RCHAR" ]
+    do
+        RSEARCH=$(expr $RSEARCH + 1)
+    done
+    # If we hit the end of the command line without finding the character, abort.
+    if [ "$RBUFFER[$RSEARCH]" != "$RCHAR" ]
+    then
+        return
+    fi
+    # Set the BUFFER to everything except the text we are removing.
+    RBUFFER="$RBUFFER[$RSEARCH,${#RBUFFER}]"
+    LBUFFER="$LBUFFER[1,$LSEARCH]"
+}
+zle -N delete-in
+
+# Delete all characters between a pair of characters and then go to insert mode.
+# Mimics Vim's "ci" text object functionality.
+change-in() {
+    zle delete-in
+    zle vi-insert
+}
+zle -N change-in
+
+# Delete all characters between a pair of characters as well as the surrounding
+# characters themselves.  Mimics Vim's "da" text object functionality.
+delete-around() {
+    zle delete-in
+    zle vi-backward-char
+    zle vi-delete-char
+    zle vi-delete-char
+}
+zle -N delete-around
+
+# Delete all characters between a pair of characters as well as the surrounding
+# characters themselves and then go into insert mode  Mimics Vim's "ca" text
+# object functionality.
+change-around() {
+    zle delete-in
+    zle vi-backward-char
+    zle vi-delete-char
+    zle vi-delete-char
+    zle vi-insert
+}
+zle -N change-around
+
+# Increment the number under the cursor, or find the next number to the right
+# of the cursor and increment that number.  Emulate vim's ctrl-a functionality.
+# This code is not my style at all; presumably I found it somewhere online, but
+# I no longer remember the source to cite or credit.
+increment-number() {
+    emulate -L zsh
+    setopt extendedglob
+    local pos num newnum sign buf
+    if [[ $BUFFER[$((CURSOR + 1))] = [0-9] ]]; then
+        pos=$((${#LBUFFER%%[0-9]##} + 1))
+    else
+        pos=$(($CURSOR + ${#RBUFFER%%[0-9]*} + 1))
+    fi
+    (($pos <= ${#BUFFER})) || return
+    num=${${BUFFER[$pos,-1]}%%[^0-9]*}
+    if ((pos > 0)) && [[ $BUFFER[$((pos - 1))] = '-' ]]; then
+        num=$((0 - num))
+        ((pos--))
+    fi
+    newnum=$((num + ${NUMERIC:-${incarg:-1}}))
+    if ((pos > 1)); then
+        buf=${BUFFER[0,$((pos - 1))]}${BUFFER[$pos,-1]/$num/$newnum}
+    else
+        buf=${BUFFER/$num/$newnum}
+    fi
+    BUFFER=$buf
+    CURSOR=$((pos + $#newnum - 2))
+}
+zle -N increment-number
+
+# Decrement the number under the cursor, or find the next number to the right
+# of the cursor and increment that number.  Emulate vim's ctrl-x functionality.
+# This code is not my style at all; presumably I found it somewhere online, but
+# I no longer remember the source to cite or credit.
+decrement-number() {
+    emulate -L zsh
+    setopt extendedglob
+    local pos num newnum sign buf
+    if [[ $BUFFER[$((CURSOR + 1))] = [0-9] ]]; then
+        pos=$((${#LBUFFER%%[0-9]##} + 1))
+    else
+        pos=$(($CURSOR + ${#RBUFFER%%[0-9]*} + 1))
+    fi
+    (($pos <= ${#BUFFER})) || return
+    num=${${BUFFER[$pos,-1]}%%[^0-9]*}
+    if ((pos > 0)) && [[ $BUFFER[$((pos - 1))] = '-' ]]; then
+        num=$((0 - num))
+        ((pos--))
+    fi
+    newnum=$((num - ${NUMERIC:-${incarg:-1}}))
+    if ((pos > 1)); then
+        buf=${BUFFER[0,$((pos - 1))]}${BUFFER[$pos,-1]/$num/$newnum}
+    else
+        buf=${BUFFER/$num/$newnum}
+    fi
+    BUFFER=$buf
+    CURSOR=$((pos + $#newnum - 2))
+}
+zle -N decrement-number
 
 #### Capability checks
 # Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
@@ -358,6 +548,7 @@ booleancheck "$shellopts[utf8]" && alias screen="screen -U"
 alias history='history -EfdD'
 alias h='history'
 alias gh='h 1 | grep'
+alias pbgist='jist -Ppo'
 #### Git Aliases
 # Display all branches (except stash) in gitk but only 200 commits as this is
 # much faster. Also put in the background and disown. Thanks to sitaram in
@@ -422,26 +613,31 @@ gdc() { gd --cached $*; }
 # git svn
 alias gsfr="git svn fetch && git-svn rebase"
 gitSvnDcommit(){
-  echo 'updating (git svn rebase)'  && \
-    git svn rebase && \
-    echo '(git stash)'  && \
-    git stash && \
-    echo comitting ..  && \
-    git svn dcommit && \
-    echo '(gsh apply)' && \
-    git stash apply
+    echo 'updating (git svn rebase)'  && \
+        git svn rebase && \
+        echo '(git stash)'  && \
+        git stash && \
+        echo comitting ..  && \
+        git svn dcommit && \
+        echo '(gsh apply)' && \
+        git stash apply
 }
 alias adoc="asciidoc -b html5 -a icons -a iconsdir=/opt/local/etc/asciidoc/images/icons/ -a toc2 -a theme=flask"
 
 ### Keybindings
 bindkey -v                                         # Use vi keybindings
+# Remove escape timeout in insert mode
+bindkey -rpM viins '^['
+# Remove escape timeout in normal mode
+bindkey -rpM vicmd '^['
+#
 # Helper function for using zkbd definitions with less clutter
-function zbindkey() {
-  [[ "$1" = "-s" ]] && {
-    s=-s
-    shift
-  }
-  [[ -n ${key[$1]} ]] && builtin bindkey $s "${key[$1]}" "$2"
+zbindkey() {
+    [[ "$1" = "-s" ]] && {
+        s=-s
+        shift
+    }
+    [[ -n ${key[$1]} ]] && builtin bindkey $s "${key[$1]}" "$2"
 }
 TRAPINT() { zle && print -s -r -- $BUFFER; return $1 }
 if zmodload -i zsh/terminfo; then
@@ -463,7 +659,6 @@ bindkey -M viins '^r' history-incremental-search-backward
 bindkey -M vicmd '^r' history-incremental-search-backward
 # bindkey -M viins '^s' history-incremental-search-forward
 # bindkey -M vicmd '^s' history-incremental-search-forward
-
 
 paste-xclip() {
     BUFFER=$LBUFFER"`pbpaste`"
@@ -524,9 +719,48 @@ bindkey -M viins "^[."  insert-last-word
 bindkey -M viins "^[_"  insert-last-word
 # TODO: bind insert-next-word to something?
 # like bindkey -M viins "^[,"   insert-next-word
+# Have i_backspace work as it does in Vim.
+bindkey -M viins "^?" backward-delete-char
+# Have i_ctrl-h work as it does in Vim.
+bindkey -M viins "^H" backward-delete-char
+# Have i_ctrl-u work as it does in Vim.
+bindkey -M viins "^U" backward-kill-line
+# Have i_ctrl-w work as it does in Vim.
+bindkey -M viins "^W" backward-kill-word
+
+# normal_mode_(key_bindings)
+# --------------------------
+# Have ctrl-a work as it does in Vim.
+bindkey -M vicmd "^A" increment-number
+bindkey -M vicmd "^X" decrement-number
+# Mimics Vim's "ca" text object functionality.
+bindkey -M vicmd "ca" change-around
+# Mimics Vim's "ci" text object functionality.
+bindkey -M vicmd "ci" change-in
+# Mimic Vim's da text-object functionality.
+bindkey -M vicmd "da" delete-around
+# Mimic Vim's di text-object functionality.
+bindkey -M vicmd "di" delete-in
+# Have ctrl-e work as it does in Vim.
+bindkey -M vicmd "^E" vi-add-eol
+# Have g~ work as it does in Vim.
+bindkey -M vicmd "g~" vi-oper-swap-case
+# Have ga work as it does in Vim.
+bindkey -M vicmd "ga" what-cursor-position
+# Have gg work as it does in Vim.
+bindkey -M vicmd "gg" beginning-of-history
+# Have G work as it does in Vim.
+bindkey -M vicmd "G" end-of-history
+# Have ctrl-r work as it does in Vim.
+bindkey -M vicmd "^R" redo
+
+# Prepend "sudo ".  This does not have a Vim parallel.
+bindkey "^S" prepend-sudo
+# Prepend "vim ".  This does not have a Vim parallel.
+bindkey "^V" prepend-vim
 
 lastpath() {
-     LBUFFER+="${${(z)history[$#history]}[-1]:h}"
+    LBUFFER+="${${(z)history[$#history]}[-1]:h}"
 }
 # bindkey '^_/' lastpath; zle -N lastpath;
 # No Delays please, we want flashy SPEEDZ
@@ -751,6 +985,9 @@ zstyle ':vcs_info:*' unstagedstr '?'
 zstyle ':vcs_info:*' stagedstr   '!'
 zstyle ':completion:*' special-dirs ..
 
+# Disable for mounted sshfs volumes etc. please
+zstyle ':vcs_info:*' disable-patterns "$HOME/mnt"
+
 # Call vcs_info as precmd before every prompt.
 prompt_precmd() { vcs_info }
 add-zsh-hook precmd prompt_precmd
@@ -821,6 +1058,40 @@ fullpath() {
 shortpath() {
     PS1="$PS1:s/\%d/%~/:s/400</40</"
     zle reset-prompt
+}
+
+# Remote Mount (sshfs)
+# creates mount folder and mounts the remote filesystem
+rmount() {
+    host="${1%%:*}:"
+    [[ ${1%:} == ${host%%:*} ]] && folder='' || folder=${1##*:}
+    if [[ -n $2 ]]; then
+        mname=$2
+    else
+        mname=${folder##*/}
+        [[ "$mname" == "" ]] && mname=${host%%:*}
+    fi
+    if [[ $(grep -i "host ${host%%:*}" ~/.ssh/config) != '' ]]; then
+        mkdir -p ~/mnt/$mname > /dev/null
+        sshfs $host$folder ~/mnt/$mname -oauto_cache,reconnect,defer_permissions,negative_vncache,volname=$mname,noappledouble && echo "mounted ~/mnt/$mname"
+    else
+        echo "No entry found for ${host%%:*}"
+        return 1
+    fi
+}
+
+# Remote Umount, unmounts and deletes local folder (experimental, watch you step)
+rumount() {
+    if [[ $1 == "-a" ]]; then
+        ls -1 ~/mnt/|while read dir
+    do
+        [[ -n $(mount | grep "mnt/$dir") ]] && umount ~/mnt/$dir
+        [[ -n $(ls ~/mnt/$dir) ]] || rm -rf ~/mnt/$dir
+    done
+else
+    [[ -n $(mount | grep "mnt/$1") ]] && umount ~/mnt/$1
+    [[ -n $(ls ~/mnt/$1) ]] || rm -rf ~/mnt/$1
+fi
 }
 
 ### Completion
