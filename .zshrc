@@ -281,7 +281,8 @@ delete-in() {
         return
         # diw was unique.  For everything else, we just have to define the
         # characters to the left and right of the cursor to be removed
-    elif [ "$CHAR" = "(" ] || [ "$CHAR" = ")" ]
+    # elif [ "$CHAR" = "(" ] || [ "$CHAR" = ")" ]
+    elif [ "$CHAR" = "(" ] || [ "$CHAR" = ")" ] || [ "$CHAR" = "b" ]
     then # di), delete inside of a pair of parenthesis
         LCHAR="("
         RCHAR=")"
@@ -289,7 +290,7 @@ delete-in() {
     then # di], delete inside of a pair of square brackets
         LCHAR="["
         RCHAR="]"
-    elif [ $CHAR = "{" ] || [ $CHAR = "}" ]
+    elif [ $CHAR = "{" ] || [ $CHAR = "}" ] || [ $CHAR = "B" ]
     then # di], delete inside of a pair of braces
         LCHAR="{"
         RCHAR="}"
@@ -727,6 +728,9 @@ bindkey -M viins "^H" backward-delete-char
 bindkey -M viins "^U" backward-kill-line
 # Have i_ctrl-w work as it does in Vim.
 bindkey -M viins "^W" backward-kill-word
+# Fix lags
+bindkey -M vicmd "cc" vi-change-whole-line
+bindkey -M vicmd "dd" kill-whole-line
 
 # normal_mode_(key_bindings)
 # --------------------------
@@ -1060,39 +1064,6 @@ shortpath() {
     zle reset-prompt
 }
 
-# Remote Mount (sshfs)
-# creates mount folder and mounts the remote filesystem
-rmount() {
-    host="${1%%:*}:"
-    [[ ${1%:} == ${host%%:*} ]] && folder='' || folder=${1##*:}
-    if [[ -n $2 ]]; then
-        mname=$2
-    else
-        mname=${folder##*/}
-        [[ "$mname" == "" ]] && mname=${host%%:*}
-    fi
-    if [[ $(grep -i "host ${host%%:*}" ~/.ssh/config) != '' ]]; then
-        mkdir -p ~/mnt/$mname > /dev/null
-        sshfs $host$folder ~/mnt/$mname -oauto_cache,reconnect,defer_permissions,negative_vncache,volname=$mname,noappledouble && echo "mounted ~/mnt/$mname"
-    else
-        echo "No entry found for ${host%%:*}"
-        return 1
-    fi
-}
-
-# Remote Umount, unmounts and deletes local folder (experimental, watch you step)
-rumount() {
-    if [[ $1 == "-a" ]]; then
-        ls -1 ~/mnt/|while read dir
-    do
-        [[ -n $(mount | grep "mnt/$dir") ]] && umount ~/mnt/$dir
-        [[ -n $(ls ~/mnt/$dir) ]] || rm -rf ~/mnt/$dir
-    done
-else
-    [[ -n $(mount | grep "mnt/$1") ]] && umount ~/mnt/$1
-    [[ -n $(ls ~/mnt/$1) ]] || rm -rf ~/mnt/$1
-fi
-}
 
 ### Completion
 if autoloadable compinit; then
@@ -1194,6 +1165,8 @@ zstyle ':completion:*:warnings' format '%BNo matches for: %d%b'
 # Autocomplete to ./configure in the most cases
 zstyle ':completion:*:*:-command-:*' ignored-patterns './config.*'
 fi
+# compdef rmount=ssh
+zstyle ':completion:*:rmount:*' hosts
 
 ### Prompt
 #### Function to hide prompts on the line - Will be replaced eventually

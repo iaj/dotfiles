@@ -10,13 +10,13 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['fanfingtastic', 'clang_complete', 'TagHighlight', 'Powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['ctrlp-funky', 'fanfingtastic', 'clang_complete', 'TagHighlight', 'Powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['TagHighlight', 'Powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['ctrlp-funky', 'fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
@@ -166,7 +166,7 @@ set formatoptions+=r            " break before, not after, a 1 letter word
 set formatoptions+=1            " break before, not after, a 1 letter word
 
 " Display
-if (v:version == 703)
+if (v:version > 703)
     set relativenumber
     set undofile
     set undodir=~/.vim/undo
@@ -348,7 +348,7 @@ endif
 """" Ctrl-P Settings
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_root_markers = ['root.dir']
-let g:ctrlp_mruf_max = 2000
+let g:ctrlp_mruf_max = 20000
 let g:ctrlp_match_window_reversed = 0
 " let g:ctrlp_match_window_bottom = 0
 let g:ctrlp_prompt_mappings = {
@@ -363,6 +363,7 @@ let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_mruf_exclude = '\v\~$|\.(bak|sw[po]|mail|sparrow)$|^(\/\/|\\\\|\/mnt\/|\/media\/|\/var\/folders\/)'
 let g:ctrlp_mruf_exclude = '*.xib\|/var/folders/.*\|/undo/*\|COMMIT_EDITMSG'
 let g:ctrlp_open_multiple_files = '2v'
+let g:ctrlp_extensions = ['funky']
 nnoremap <leader>. :CtrlPTag<cr>
 map <silent> <leader>b :CtrlPBuffer<CR>
 map <silent> <leader>r :CtrlPMRUFiles<CR>
@@ -371,6 +372,8 @@ map <silent> <leader>gf :CtrlPCurFile<CR>
 map <silent> <leader>F :ClearCtrlPCache<CR>
 map <silent> <leader>gd :CtrlPCurWD<CR>
 map <silent> \e :CtrlP
+nnoremap <Leader>j :CtrlPFunky<Cr>
+nnoremap <Leader>J :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 """" Powerline
 let g:Powerline_symbols = 'fancy'
 " never use that when that theme is non-existent - lesson learned
@@ -383,6 +386,8 @@ map <Leader>ct :!/opt/local/bin/ctags --exclude=.svn --exclude=target -R .<CR>
 " directory) for the {pattern}.  Behaves just like the |:grep| command, but
 " will open the |Quickfix| window for you. If [!] is not given the first
 " error is jumped to.
+" Use silver_searcher instead of ack 2013-09-18 (3x faster)
+let g:ackprg = 'ag --nogroup --nocolor --column'
 map <leader>a :Ack! 
 """" Fugitive
 nmap \gs :Gstatus<cr>
@@ -441,8 +446,8 @@ if has('gui_running')
     let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
-    colorscheme solarized
-    " colorscheme hybrid
+    " colorscheme solarized
+    colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
     " colorscheme jellybeans
@@ -629,7 +634,9 @@ imap jk <Esc>
 " nnoremap <CR> :nohlsearch<cr>
 inoremap <C-L> <C-O>:nohls<CR>
 " noremap <C-L> :nohlsearch<CR><C-L>
-noremap <leader><space> :noh<cr>:call clearmatches()<cr>
+" noremap <leader><space> :noh<cr>:call clearmatches()<cr>
+" nnoremap <silent> <leader><space> :nohlsearch<CR>:diffupdate<CR>:syntax sync fromstart<CR><C-L>
+noremap <silent> <leader><space> :nohlsearch<CR>
 
 " Unfortunately this baby only works on MacVim
 " No matter where the cursor insert and edit a new line below.
@@ -640,6 +647,10 @@ nnoremap <silent> ,A :if &l:nu \| setl rnu \| else \| setl nu \| endif<CR>
 " TODO
 " nnoremap <silent> \A :if &l:relativenumber \| setl norelativenumber | setl nonumber \| else \| setl rnu \| endif<CR>
 
+" Quote a word
+nmap yq ysiw"
+
+" Toggle two buffers
 nnoremap <leader><leader> <c-^>
 
 " Y behaves like D rather than like dd
@@ -864,6 +875,7 @@ nmap <Leader>sd :set spell spelllang=de<CR>
 nmap <C-F6> :let tmp=@f<CR>"fyaw<Esc>:bot split ~/.vimrc<CR>G?LAST_SPELL<CR>zRkoiab<Space><Esc>"fp<Esc>:let @f=tmp<CR>a
 """" Quick editing
 nnoremap \v <C-w><C-v><C-l>:e ~/dotfiles/.vimrc<cr>
+nnoremap \V <C-w><C-v><C-l>:e ~/.vimperatorrc<cr>
 nnoremap \z <C-w><C-v><C-l>:e ~/dotfiles/.zshrc<cr>
 nnoremap \p <C-w><C-v><C-l>:e ~/.pentadactylrc<cr>
 " nnoremap \t <C-w><C-v><C-l>:e ~/Dropbox/training/training.txt<cr>

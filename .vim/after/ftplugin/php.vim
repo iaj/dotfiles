@@ -1,2 +1,2 @@
 setlocal foldmethod=indent
-setlocal fdl=3
+" setlocal fdl=3

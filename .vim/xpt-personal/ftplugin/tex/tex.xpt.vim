@@ -19,13 +19,25 @@ XPT code hint=\\begin{lstlisting}...\\end{lstlisting}
 `cursor^
 \end{lstlisting}
 
+XPT '' hint="rhs
+\grqq{}
+
+XPT todo hint=\\colorbox{red}{...}
+\colorbox{red}{TODO: `^}
+
+XPT `` hint="lhs
+\glqq{}
+
 XPT fn hint=\\footnote{...}
 \footnote{`^}`cursor^
+
+XPT l hint=\\label{...}
+\label{`^}`cursor^
 
 XPT e wrap=text hint=\\emph
 \emph{`text^}`cursor^
 
-XPT b wrap=text hint=\\emph
+XPT b wrap=text hint=\\textbf
 \textbf{`text^}`cursor^
 
 XPT enumerate hint=\\begin{enumerate}...\\end{enumerate}
