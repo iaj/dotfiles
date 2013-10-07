@@ -166,7 +166,7 @@ set formatoptions+=r            " break before, not after, a 1 letter word
 set formatoptions+=1            " break before, not after, a 1 letter word
 
 " Display
-if (v:version > 703)
+if (v:version >= 703)
     set relativenumber
     set undofile
     set undodir=~/.vim/undo
@@ -442,31 +442,33 @@ if has('gui_running')
     set guioptions-=L
     set guioptions-=r
 
-    let g:molokai_original = 1 " lighter background in gVim
-    let g:zenburn_high_Contrast = 1 " darker colors
     set background=dark
     " set background=light
     " colorscheme solarized
-    colorscheme hybrid
+    " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
     " colorscheme jellybeans
+    " colorscheme lucius
+    " colorscheme twilight
+    let g:molokai_original = 1 " lighter background in gVim
     " colorscheme sjl
+    colorscheme BusyBee
     " colorscheme molokai
     " colorscheme mj
 
+    let g:badwolf_tabline = 2
+    let g:badwolf_html_link_underline = 0
     " colorscheme badwolf
 
     " colorscheme Tomorrow-Night
-    " colo solarized
     " colo sjl
     " colo mj
     " colo grb256
     " colorscheme grb3
     " colorscheme mustang
+    " let g:zenburn_high_Contrast = 1 " darker colors
     " colorscheme zenburn
-    " hi VisualNOS guibg=#444444
-    " hi Visual guibg=#424242
     highlight SpellBad term=underline gui=undercurl guisp=Orange
     hi TabLine guifg=#85816E guibg=#20211B gui=none
     hi TabLineFill guifg=#85816E guibg=#171812 gui=none
