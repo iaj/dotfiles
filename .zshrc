@@ -468,7 +468,7 @@ alias la='ls -A'
 alias ll='ls -l'
 # only on mac osx tho
 alias :q="echo YOU FAIL"
-alias s="screen -dr"
+# alias s="screen -dr"
 alias sx="screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
