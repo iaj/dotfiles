@@ -462,13 +462,13 @@ alias sudo="sudo "
 alias l='ls -CF'
 alias c=clear
 alias d=cd
-alias s="sudo "
+# alias s="sudo "
 alias lN='l -lt | head'
 alias la='ls -A'
 alias ll='ls -l'
 # only on mac osx tho
 alias :q="echo YOU FAIL"
-alias sr="screen -r"
+alias s="screen -dr"
 alias sx="screen -x"
 alias pygrep="grep --include='*.py' $*"
 alias rbgrep="grep --include='*.rb' $*"
@@ -1210,6 +1210,7 @@ prompt_char() {
 if [[ -n $SSH_CONNECTION ]]; then
     COLOR="${magenta}"
     export SHORTHOST=`hostname | tr '[:upper:]' '[:lower:]'`
+    alias s="screen -dr"
 else
     COLOR="${boldgreen}"
     export SHORTHOST=`hostname -s | tr '[:upper:]' '[:lower:]'`
