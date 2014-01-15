@@ -453,13 +453,13 @@ if has('gui_running')
     " colorscheme twilight
     let g:molokai_original = 1 " lighter background in gVim
     " colorscheme sjl
-    colorscheme BusyBee
+    " colorscheme BusyBee
     " colorscheme molokai
     " colorscheme mj
 
     let g:badwolf_tabline = 2
     let g:badwolf_html_link_underline = 0
-    " colorscheme badwolf
+    colorscheme badwolf
 
     " colorscheme Tomorrow-Night
     " colo sjl
