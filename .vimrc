@@ -646,6 +646,7 @@ inoremap <c-cr> <esc>A<cr>
 
 " Toggle absolute/relative linenumbering
 nnoremap <silent> ,A :if &l:nu \| setl rnu \| else \| setl nu \| endif<CR>
+nnoremap <silent> \n :set nonu nornu<CR>
 " TODO
 " nnoremap <silent> \A :if &l:relativenumber \| setl norelativenumber | setl nonumber \| else \| setl rnu \| endif<CR>
 
