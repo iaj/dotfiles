@@ -444,7 +444,7 @@ if has('gui_running')
 
     set background=dark
     " set background=light
-    " colorscheme solarized
+    colorscheme solarized
     " colorscheme hybrid
     " hi Normal guib=#252626
     " colorscheme vitamins
@@ -457,9 +457,9 @@ if has('gui_running')
     " colorscheme molokai
     " colorscheme mj
 
-    let g:badwolf_tabline = 2
-    let g:badwolf_html_link_underline = 0
-    colorscheme badwolf
+    " let g:badwolf_tabline = 2
+    " let g:badwolf_html_link_underline = 0
+    " colorscheme badwolf
 
     " colorscheme Tomorrow-Night
     " colo sjl

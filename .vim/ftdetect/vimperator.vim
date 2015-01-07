@@ -1,1 +1,1 @@
-/Users/iaj/hg/vimperator-labs/vimperator/contrib/vim/ftdetect/vimperator.vim
+au BufNewFile,BufRead *vimperatorrc*,*.vimp set filetype=vimperator
