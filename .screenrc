@@ -1,0 +1,133 @@
+# Screen configuration file.
+#
+# Features which are only available in (very) recent screen releases or in
+# current Git are marked with "(GIT)" so they can be removed by the setup
+# script on machines with older versions.
+# Don't display startup message.
+#startup_message off
+maptimeout 10
+# Use visual bell instead of audible bell.
+vbell on
+# Increase the scrollback buffer.
+defscrollback 10000
+# Ignore case when searching.
+ignorecase on
+
+# TERMINAL
+# Enable 256 color mode.
+
+term screen-256color
+
+# Allow bold colors in XTerm (not necessary for Rxvt), not sure why this is
+# necessary. Otherwise normal and bold colors are switched. Thanks to
+# http://www.frexx.de/xterm-256-notes/.
+attrcolor b ".I"
+termcapinfo xterm*|rxvt*|kterm*|Eterm*|putty*|dtterm* ti@:te@
+#termcapinfo xterm* ti@:te@
+# tell screen how to set colors. AB = background, AF=foreground
+termcapinfo xterm "Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm"
+termcapinfo xterm-color "Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm"
+# erase background with current bg color
+defbce "on"
+#
+#
+# CAPTION AND HARDSTATUS
+# Use white on light blue background for highlighting and text messages (and
+# for window borders in split mode).
+#
+sorendition = Bw
+
+#If you don't want to hit C-a ESC PGUP everytime to page up, you can create keyboard shortcuts. 
+#I use CTRL+K to scroll up one line and META+K to scroll up one page (I know these are kind of weird key combinations). 
+#To create these shortcuts, I put the following in my .screenrc.
+#bindkey "^[k" eval "copy" "stuff ^b"  # enter copy mode and move up one page
+#bindkey "^k" eval "copy" "stuff k"    # enter copy mode and move up one line
+#bindkey -m "^[k" stuff ^b             # move up one page
+#bindkey -m "^k" stuff k               # move up one line
+
+# Make sure the temporary variable we use is empty. Thanks to
+# http://gist.github.com/133000 for the idea to use setenv and to TauPan in
+# #screen on Freenode (2010-03-10 16:11) for reminding me of it and searching
+# it again.
+unsetenv s
+# Always display the caption.
+setenv s "$s%{= Bw}" # - white on light blue background, also reset all
+                     #   attributes (necessary so everything is displayed
+                     #   correctly)
+setenv s "$s%?%P"    # - is copy mode enabled? (GIT)
+setenv s "$s%{= wB}" #   - if so change colors to light blue on white (GIT)
+setenv s "$s%?"      # - end if (GIT)
+setenv s "$s%3n"     # - window number
+setenv s "$s "       # - space
+setenv s "$s%t"      # - window name
+caption always "$s"
+unsetenv s
+# Always display the status line with open windows and the hostname.
+setenv s "$s%w" # - number and names of windows
+setenv s "$s%=" # - right align the following text
+setenv s "$s%l" # - load average
+setenv s "$s "  # - space
+setenv s "$s%H" # - hostname
+
+#hardstatus alwayslastline "$s"
+
+# BINDINGS
+# Remove some bindings I don't use to prevent using them accidentally. You
+# probably don't want to copy this.
+#bind K  # kill
+bind k  # kill
+bind \\ # quit
+bind ^Z # suspend
+bind z  # suspend
+bind ^S # xoff
+bind s  # xoff
+bind ^Q # xon
+bind q  # xon
+bind ^G # visual bell
+bind D  # power detach
+
+# Run urlview on current screen content. Very useful to follow links. Make
+# sure hardcopy_append is off before using this command.
+bind ^B eval "hardcopy $HOME/.screen-urlview" "screen purlview $HOME/.screen-urlview"
+# bind ^B eval "hardcopy $HOME/.screen-urlview" "screen urlview $HOME/.screen-urlview"
+bind e eval "writebuf" "exec sh -c 'pbcopy < /tmp/screen-exchange'"
+
+# set the second mark, write to the screen-exchange
+# file, and use pbcopy to synchronize the paste buffer
+# with the X selection.
+bindkey -m > eval "stuff ' '" writebuf "exec sh -c 'pbcopy -n < /tmp/screen-exchange'"
+
+# C-a t
+time "%c:%s %D %Y-%m-%d, %H%?, Load: %l%?"
+## default names
+windowlist title 'Number Name%=Status'
+windowlist string '%6n %t%=[%h]'
+## for screen versions that do not support backtick
+#caption string '%?%F%{.B}%{+b W}%? LOCALHOST %?%{-b W}%?%{.k}%?%3n %t [%h]'
+## for screen versions that support backtick
+## FYI: .bashrc contains 'export SHORTHOST=`hostname -s | tr [:lower:] [:upper:]`'
+backtick 1 0 0 echo ${SHORTHOST}
+
+# Bindings for fast switching to windows 10 to 19. Thanks to skizzhg in
+# #screen on Freenode (2010-10-31 21:49 CET) for the suggestion.
+bind -c window 0 select 10
+bind -c window 1 select 11
+bind -c window 2 select 12
+bind -c window 3 select 13
+bind -c window 4 select 14
+bind -c window 5 select 15
+bind -c window 6 select 16
+bind -c window 7 select 17
+bind -c window 8 select 18
+bind -c window 9 select 19
+bind ; command -c window
+
+## yellow: %{= Yk}  blue: %{= bW}  red: %{= rW}  green: %{= gW} 
+#%{= d} restores default color so there are no artifacts
+caption string '%?%F%{= gW}%:%{= KK}%?%?%F %1` %?%?%F%{= kW}%?%?%F [%h] %? %-Lw%50>%3>%n%2f %?%F%{g}(%{-}%?%t%?%F%{g})%{-}%?%+Lw%< %=%D, %Y-%m-%d, %c:%s%{= d}'
+#caption string '%?%F%{= gW}%:%{= KK}%?%?%F %-Lw%50>%3>%n%2f %?%F%{g}(%{-}%?%t%?%F%{g})%{-}%?%+Lw%< %=%D, %Y-%m-%d, %c:%s%{= d}'
+caption always
+
+#hardstatus string '%{= kg}[ %{G} stevelosh.com %{g}][%= %{= kw}%?%-Lw%?%{r} (%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %m/%d %{W}%c %{g}]'
+#screen ssh failbowl
+# zombie qy
