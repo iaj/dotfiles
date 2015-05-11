@@ -10,13 +10,13 @@ fun SetupVAM()
         exec '!p='.shellescape(addons_base).'; mkdir -p "$p" && cd "$p" && git clone git://github.com/MarcWeber/vim-addon-manager.git'
     endif
     if has('gui_running')
-        call vam#ActivateAddons(['ctrlp-funky', 'fanfingtastic', 'clang_complete', 'TagHighlight', 'vim-powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['vim-less@groenwege', 'ctrlp-funky', 'fanfingtastic', 'clang_complete', 'TagHighlight', 'vim-powerline', 'fugitive', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['TagHighlight', 'Powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['EasyMotion', 'powerline', 'fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fugitive', 'syntastic2', 'speeddating', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     else
         " No Powerline on terminals please
-        call vam#ActivateAddons(['ctrlp-funky', 'fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
+        call vam#ActivateAddons(['vim-less@groenwege', 'ctrlp-funky', 'fanfingtastic', 'TagHighlight', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
         " call vam#ActivateAddons(['fanfingtastic', 'TagHighlight', 'syntastic2', 'speeddating', 'fugitive', 'xptemplate', 'repeat', 'ack', 'vim-comment-object', 'ctrlp', 'matchit.zip', 'surround', 'tComment', 'netrw', 'taglist', 'ZoomWin', 'sparkup', 'Solarized', 'cocoa', 'rainbow_parentheses' ], {'auto_install' : 2})
     endif
 endf
